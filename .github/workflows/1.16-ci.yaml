@@ -11,6 +11,7 @@ jobs:
         container:
             image: gradle:6.8.1
         steps:
+            - uses: actions/checkout@v2
             - uses: actions/setup-java@v2
               with:
                   java-version: '8'
