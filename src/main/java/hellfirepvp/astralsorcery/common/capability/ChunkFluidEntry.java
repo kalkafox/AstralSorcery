@@ -11,12 +11,12 @@ package hellfirepvp.astralsorcery.common.capability;
 import hellfirepvp.astralsorcery.common.data.config.registry.FluidRarityRegistry;
 import hellfirepvp.astralsorcery.common.data.config.registry.sets.FluidRarityEntry;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.nbt.CompoundTag;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import java.util.Random;
@@ -28,7 +28,7 @@ import java.util.Random;
  * Created by HellFirePvP
  * Date: 25.04.2020 / 10:26
  */
-public class ChunkFluidEntry implements INBTSerializable<CompoundNBT> {
+public class ChunkFluidEntry implements INBTSerializable<CompoundTag> {
 
     private FluidStack chunkFluid = FluidStack.EMPTY;
     private int mbAmount = 0;
@@ -83,8 +83,8 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         NBTHelper.setFluid(nbt, "chunkFluid", this.chunkFluid);
         nbt.putInt("mbAmount", this.mbAmount);
         nbt.putBoolean("initialized", this.initialized);
@@ -92,7 +92,7 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundNBT> {
     }
 
     @Override
-    public void deserializeNBT(CompoundNBT nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         this.chunkFluid = NBTHelper.getFluid(nbt, "chunkFluid");
         this.mbAmount = nbt.getInt("mbAmount");
         this.initialized = nbt.getBoolean("initialized");

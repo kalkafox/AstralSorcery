@@ -16,9 +16,9 @@ import com.blamejared.crafttweaker.impl.actions.recipes.*;
 import com.blamejared.crafttweaker.impl_native.fluid.ExpandFluid;
 import hellfirepvp.astralsorcery.common.crafting.recipe.WellLiquefaction;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.resources.ResourceLocation;
 import org.openzen.zencode.java.ZenCodeType;
 
 import java.awt.*;
@@ -63,7 +63,7 @@ public class WellManager implements IRecipeManager {
     }
     
     @Override
-    public IRecipeType<WellLiquefaction> getRecipeType() {
+    public RecipeType<WellLiquefaction> getRecipeType() {
         
         return RecipeTypesAS.TYPE_WELL.getType();
     }

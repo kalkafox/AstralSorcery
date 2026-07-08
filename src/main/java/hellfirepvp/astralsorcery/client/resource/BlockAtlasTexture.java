@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.client.resource;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderState;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 
 /**
@@ -40,7 +40,7 @@ public class BlockAtlasTexture extends AbstractRenderableTexture.Full {
     }
 
     @Override
-    public RenderState.TextureState asState() {
-        return new RenderState.TextureState(AtlasTexture.LOCATION_BLOCKS_TEXTURE, false, false);
+    public RenderStateShard.TextureStateShard asState() {
+        return new RenderStateShard.TextureStateShard(AtlasTexture.LOCATION_BLOCKS_TEXTURE, false, false);
     }
 }

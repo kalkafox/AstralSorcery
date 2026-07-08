@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.container;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
@@ -24,10 +24,10 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipe;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
@@ -43,7 +43,7 @@ public class ScreenContainerAltarRadiance extends ScreenContainerAltar<Container
 
     private static final Random rand = new Random();
 
-    public ScreenContainerAltarRadiance(ContainerAltarTrait screenContainer, PlayerInventory inv, ITextComponent name) {
+    public ScreenContainerAltarRadiance(ContainerAltarTrait screenContainer, Inventory inv, Component name) {
         super(screenContainer, inv, name, 255, 202);
     }
 
@@ -53,7 +53,7 @@ public class ScreenContainerAltarRadiance extends ScreenContainerAltar<Container
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(MatrixStack renderStack, int mouseX, int mouse) {
+    protected void drawGuiContainerForegroundLayer(PoseStack renderStack, int mouseX, int mouse) {
         SimpleAltarRecipe recipe = this.findRecipe(false);
         if (recipe != null) {
             ItemStack out = recipe.getOutputForRender(this.getContainer().getTileEntity().getInventory());
@@ -104,7 +104,7 @@ public class ScreenContainerAltarRadiance extends ScreenContainerAltar<Container
     }
 
     @Override
-    public void renderGuiBackground(MatrixStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    public void renderGuiBackground(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
         this.renderStarlightBar(renderStack, 11, 104, 232, 10);
     }
 }

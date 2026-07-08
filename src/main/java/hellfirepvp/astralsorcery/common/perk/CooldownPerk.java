@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -19,6 +19,6 @@ import net.minecraft.entity.player.PlayerEntity;
  */
 public interface CooldownPerk {
 
-    void onCooldownTimeout(PlayerEntity player);
+    void onCooldownTimeout(Player player);
 
 }

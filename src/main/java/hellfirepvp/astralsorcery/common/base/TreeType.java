@@ -10,16 +10,16 @@ package hellfirepvp.astralsorcery.common.base;
 
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.TriFunction;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SaplingBlock;
-import net.minecraft.block.VineBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.block.trees.Tree;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -41,26 +41,26 @@ public class TreeType {
 
     private static final List<TreeType> TYPES = new ArrayList<>();
 
-    private final BiPredicate<World, BlockPos> treeTest;
-    private final TriFunction<ServerWorld, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator;
+    private final BiPredicate<Level, BlockPos> treeTest;
+    private final TriFunction<ServerLevel, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator;
 
-    private TreeType(BiPredicate<World, BlockPos> treeTest, TriFunction<ServerWorld, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator) {
+    private TreeType(BiPredicate<Level, BlockPos> treeTest, TriFunction<ServerLevel, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator) {
         this.treeTest = treeTest;
         this.treeGenerator = treeGenerator;
     }
 
-    public static TreeType register(BiPredicate<World, BlockPos> treeTest, TriFunction<ServerWorld, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator) {
+    public static TreeType register(BiPredicate<Level, BlockPos> treeTest, TriFunction<ServerLevel, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator) {
         TreeType type = new TreeType(treeTest, treeGenerator);
         TYPES.add(type);
         return type;
     }
 
-    public Supplier<List<BlockPos>> getTreeGenerator(ServerWorld world, BlockPos pos, Random rand) {
+    public Supplier<List<BlockPos>> getTreeGenerator(ServerLevel world, BlockPos pos, Random rand) {
         return this.treeGenerator.apply(world, pos, rand);
     }
 
     @Nullable
-    public static TreeType isTree(World world, BlockPos pos) {
+    public static TreeType isTree(Level world, BlockPos pos) {
         for (TreeType type : TYPES) {
             if (type.treeTest.test(world, pos)) {
                 return type;

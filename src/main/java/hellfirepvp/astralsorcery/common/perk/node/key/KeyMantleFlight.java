@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.perk.node.key;
 
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod

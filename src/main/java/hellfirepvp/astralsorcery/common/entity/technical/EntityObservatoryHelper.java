@@ -15,19 +15,19 @@ import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.tile.TileObservatory;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -41,9 +41,9 @@ import java.util.UUID;
  */
 public class EntityObservatoryHelper extends Entity {
 
-    private static final DataParameter<BlockPos> FIXED = EntityDataManager.createKey(EntityObservatoryHelper.class, DataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<BlockPos> FIXED = EntityDataManager.createKey(EntityObservatoryHelper.class, DataSerializers.BLOCK_POS);
 
-    public EntityObservatoryHelper(World worldIn) {
+    public EntityObservatoryHelper(Level worldIn) {
         super(EntityTypesAS.OBSERVATORY_HELPER, worldIn);
     }
 
@@ -93,8 +93,8 @@ public class EntityObservatoryHelper extends Entity {
         }
 
         Entity riding = Iterables.getFirst(this.getPassengers(), null);
-        if (riding instanceof PlayerEntity) {
-            this.applyObservatoryRotationsFrom(observatory, (PlayerEntity) riding, true);
+        if (riding instanceof Player) {
+            this.applyObservatoryRotationsFrom(observatory, (Player) riding, true);
         } else {
             this.prevRotationYaw = this.rotationYaw;
             this.prevRotationPitch = this.rotationPitch;
@@ -104,7 +104,7 @@ public class EntityObservatoryHelper extends Entity {
         }
     }
 
-    public void applyObservatoryRotationsFrom(TileObservatory to, PlayerEntity riding, boolean updateTile) {
+    public void applyObservatoryRotationsFrom(TileObservatory to, Player riding, boolean updateTile) {
         if (riding.openContainer instanceof ContainerObservatory) {
             //Adjust observatory pitch and jaw to player head
             this.rotationYaw = riding.rotationYawHead;
@@ -176,18 +176,18 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    public ItemStack getPickedResult(RayTraceResult target) {
+    public ItemStack getPickedResult(HitResult target) {
         return new ItemStack(BlocksAS.OBSERVATORY);
     }
 
     @Override
-    protected void readAdditional(CompoundNBT compound) {}
+    protected void readAdditional(CompoundTag compound) {}
 
     @Override
-    protected void writeAdditional(CompoundNBT compound) {}
+    protected void writeAdditional(CompoundTag compound) {}
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.integration.jei;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.util.Blending;
@@ -27,9 +27,9 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 import java.awt.*;
 import java.util.Collections;
@@ -79,7 +79,7 @@ public class CategoryAltar extends JEICategory<SimpleAltarRecipe> {
     }
 
     @Override
-    public void draw(SimpleAltarRecipe recipe, MatrixStack matrixStack, double mouseX, double mouseY) {
+    public void draw(SimpleAltarRecipe recipe, PoseStack matrixStack, double mouseX, double mouseY) {
         if (recipe.getFocusConstellation() != null) {
             RenderSystem.enableBlend();
             Blending.DEFAULT.apply();

@@ -19,15 +19,15 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeGrid;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -96,7 +96,7 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
     public List<ItemStack> getOutputs(TileAltar altar) {
         List<ItemStack> outputs = super.getOutputs(altar);
 
-        List<CompoundNBT> foundTags = Lists.newArrayList();
+        List<CompoundTag> foundTags = Lists.newArrayList();
         for (ItemStack existing : altar.getInventory()) {
             for (Ingredient match : this.searchIngredients) {
                 if (match.test(existing) && existing.hasTag()) {
@@ -105,8 +105,8 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
             }
         }
         for (ItemStack output : outputs) {
-            CompoundNBT tag = output.getOrCreateTag();
-            for (CompoundNBT foundTag : foundTags) {
+            CompoundTag tag = output.getOrCreateTag();
+            for (CompoundTag foundTag : foundTags) {
                 NBTHelper.deepMerge(tag, foundTag, true);
             }
         }
@@ -114,14 +114,14 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public void readRecipeSync(PacketBuffer buf) {
+    public void readRecipeSync(FriendlyByteBuf buf) {
         super.readRecipeSync(buf);
 
         this.searchIngredients = ByteBufUtils.readList(buf, Ingredient::read);
     }
 
     @Override
-    public void writeRecipeSync(PacketBuffer buf) {
+    public void writeRecipeSync(FriendlyByteBuf buf) {
         super.writeRecipeSync(buf);
 
         ByteBufUtils.writeCollection(buf, this.searchIngredients, (buffer, ingredient) -> ingredient.write(buffer));

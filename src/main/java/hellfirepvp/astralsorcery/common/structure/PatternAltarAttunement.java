@@ -14,7 +14,7 @@ import hellfirepvp.astralsorcery.common.lib.StructureTypesAS;
 import hellfirepvp.observerlib.api.block.MatchableState;
 import hellfirepvp.observerlib.api.block.SimpleMatchableBlock;
 import hellfirepvp.observerlib.api.util.PatternBlockArray;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nonnull;
 

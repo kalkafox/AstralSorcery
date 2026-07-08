@@ -15,14 +15,14 @@ import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
 import hellfirepvp.astralsorcery.common.crafting.recipe.BlockTransmutation;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.util.block.BlockMatchInformation;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -80,7 +80,7 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
         return this.addInputCheck(matchState, false);
     }
 
-    public BlockTransmutationBuilder addInputCheck(ITag<Block> matchTag, ItemStack display) {
+    public BlockTransmutationBuilder addInputCheck(Tag<Block> matchTag, ItemStack display) {
         this.stateCheck.add(new BlockMatchInformation(matchTag, display));
         return this;
     }
@@ -89,7 +89,7 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
         return this.addInputCheck(matchState, new ItemStack(matchState.getBlock()), matchExact);
     }
 
-    public BlockTransmutationBuilder addInputCheck(BlockState matchState, IItemProvider display, boolean matchExact) {
+    public BlockTransmutationBuilder addInputCheck(BlockState matchState, ItemLike display, boolean matchExact) {
         return this.addInputCheck(matchState, new ItemStack(display), matchExact);
     }
 
@@ -108,7 +108,7 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
         return this;
     }
 
-    public BlockTransmutationBuilder setOutputDisplay(IItemProvider item) {
+    public BlockTransmutationBuilder setOutputDisplay(ItemLike item) {
         return this.setOutputDisplay(new ItemStack(item));
     }
 

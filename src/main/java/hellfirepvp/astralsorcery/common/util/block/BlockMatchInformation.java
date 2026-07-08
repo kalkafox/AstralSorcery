@@ -14,14 +14,14 @@ import com.google.gson.JsonSyntaxException;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tags.ITag;
+import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.function.Predicate;
@@ -40,14 +40,14 @@ public class BlockMatchInformation implements Predicate<BlockState> {
     private BlockState matchState;
     private boolean matchExact;
 
-    private ITag<Block> matchTag;
+    private Tag<Block> matchTag;
     private ResourceLocation matchTagKey;
 
-    public BlockMatchInformation(ITag<Block> matchTag) {
+    public BlockMatchInformation(Tag<Block> matchTag) {
         this(matchTag, createDisplayStack(matchTag));
     }
 
-    public BlockMatchInformation(ITag<Block> matchTag, ItemStack display) {
+    public BlockMatchInformation(Tag<Block> matchTag, ItemStack display) {
         this.matchTag = matchTag;
         this.matchTagKey = TagCollectionManager.getManager().getBlockTags().getDirectIdFromTag(matchTag);
         this.display = display;
@@ -74,7 +74,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
         }
     }
 
-    private static ItemStack createDisplayStack(ITag<Block> blockTag) {
+    private static ItemStack createDisplayStack(Tag<Block> blockTag) {
         for (Block block : blockTag.getAllElements()) {
             ItemStack blockStack = ItemUtils.createBlockStack(block.getDefaultState());
             if (!blockStack.isEmpty()) {
@@ -117,7 +117,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
             }
             return new BlockMatchInformation(state, display, fullyDefined);
         } else if (object.has("tag")) {
-            ITag<Block> blockTag = TagCollectionManager.getManager().getBlockTags().get(new ResourceLocation(object.get("tag").getAsString()));
+            Tag<Block> blockTag = TagCollectionManager.getManager().getBlockTags().get(new ResourceLocation(object.get("tag").getAsString()));
             if (object.has("display")) {
                 ItemStack display = JsonHelper.getItemStack(object, "display");
                 return new BlockMatchInformation(blockTag, display);
@@ -138,7 +138,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
         return out;
     }
 
-    public static BlockMatchInformation read(PacketBuffer buf) {
+    public static BlockMatchInformation read(FriendlyByteBuf buf) {
         int type = buf.readInt();
         ItemStack display = ByteBufUtils.readItemStack(buf);
         switch (type) {
@@ -148,13 +148,13 @@ public class BlockMatchInformation implements Predicate<BlockState> {
                 return new BlockMatchInformation(state, display, exactMatch);
             case 1:
                 String tagName = ByteBufUtils.readString(buf);
-                ITag<Block> blockTag = TagCollectionManager.getManager().getBlockTags().get(new ResourceLocation(tagName));
+                Tag<Block> blockTag = TagCollectionManager.getManager().getBlockTags().get(new ResourceLocation(tagName));
                 return new BlockMatchInformation(blockTag, display);
         }
         throw new IllegalArgumentException("Unknown block transmutation match type: " + type);
     }
 
-    public void serialize(PacketBuffer buf) {
+    public void serialize(FriendlyByteBuf buf) {
         int type = this.matchState != null ? 0 /*state*/ : 1 /*type*/;
         buf.writeInt(type);
         ByteBufUtils.writeItemStack(buf, this.display);

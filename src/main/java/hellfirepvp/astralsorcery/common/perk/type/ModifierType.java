@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.perk.type;
 
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 import java.text.DecimalFormat;
 import java.util.Locale;

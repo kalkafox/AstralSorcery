@@ -14,11 +14,11 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,13 +39,13 @@ public abstract class InteractionResult {
         return id;
     }
 
-    public abstract void doResult(World world, Vector3 at);
+    public abstract void doResult(Level world, Vector3 at);
 
     public abstract void read(JsonObject json) throws JsonParseException;
 
     public abstract void write(JsonObject json);
 
-    public abstract void read(PacketBuffer buf);
+    public abstract void read(FriendlyByteBuf buf);
 
-    public abstract void write(PacketBuffer buf);
+    public abstract void write(FriendlyByteBuf buf);
 }

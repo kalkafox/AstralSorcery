@@ -8,10 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.item.wand;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,6 +22,6 @@ import net.minecraft.world.World;
  */
 public interface WandInteractable {
 
-    boolean onInteract(World world, BlockPos pos, PlayerEntity player, Direction side, boolean sneak);
+    boolean onInteract(Level world, BlockPos pos, Player player, Direction side, boolean sneak);
 
 }

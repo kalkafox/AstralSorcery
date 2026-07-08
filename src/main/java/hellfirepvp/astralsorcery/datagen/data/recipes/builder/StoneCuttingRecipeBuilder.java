@@ -11,12 +11,12 @@ package hellfirepvp.astralsorcery.datagen.data.recipes.builder;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -31,20 +31,20 @@ import java.util.function.Consumer;
 public class StoneCuttingRecipeBuilder {
 
     private final Ingredient input;
-    private final IItemProvider output;
+    private final ItemLike output;
     private final int count;
 
-    private StoneCuttingRecipeBuilder(Ingredient input, IItemProvider output, int count) {
+    private StoneCuttingRecipeBuilder(Ingredient input, ItemLike output, int count) {
         this.input = input;
         this.output = output;
         this.count = count;
     }
 
-    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient input, IItemProvider output) {
+    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient input, ItemLike output) {
         return stoneCuttingRecipe(input, output, 1);
     }
 
-    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient input, IItemProvider output, int count) {
+    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient input, ItemLike output, int count) {
         return new StoneCuttingRecipeBuilder(input, output, count);
     }
 
@@ -84,7 +84,7 @@ public class StoneCuttingRecipeBuilder {
         }
 
         @Override
-        public IRecipeSerializer<?> getSerializer() {
+        public RecipeSerializer<?> getSerializer() {
             return IRecipeSerializer.STONECUTTING;
         }
 

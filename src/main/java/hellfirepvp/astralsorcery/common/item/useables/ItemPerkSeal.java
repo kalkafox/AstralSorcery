@@ -11,13 +11,13 @@ package hellfirepvp.astralsorcery.common.item.useables;
 import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.items.CapabilityItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,7 +35,7 @@ public class ItemPerkSeal extends Item {
                 .group(CommonProxy.ITEM_GROUP_AS));
     }
 
-    public static int getPlayerSealCount(PlayerEntity player) {
+    public static int getPlayerSealCount(Player player) {
         LazyOptional<IItemHandler> cap = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         return getPlayerSealCount(cap.orElse(null));
     }
@@ -48,7 +48,7 @@ public class ItemPerkSeal extends Item {
                 .stream().mapToInt(ItemStack::getCount).sum();
     }
 
-    public static boolean useSeal(PlayerEntity player, boolean simulate) {
+    public static boolean useSeal(Player player, boolean simulate) {
         return useSeal((IItemHandlerModifiable) player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElse(null), simulate);
     }
 

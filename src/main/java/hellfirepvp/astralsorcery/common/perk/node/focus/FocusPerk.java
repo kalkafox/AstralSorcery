@@ -11,8 +11,8 @@ package hellfirepvp.astralsorcery.common.perk.node.focus;
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.perk.node.ConstellationPerk;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,7 +29,7 @@ public abstract class FocusPerk extends ConstellationPerk {
     }
 
     @Override
-    public boolean mayUnlockPerk(PlayerProgress progress, PlayerEntity player) {
+    public boolean mayUnlockPerk(PlayerProgress progress, Player player) {
         return super.mayUnlockPerk(progress, player) &&
                 !progress.getPerkData().hasPerkEffect(perk -> perk.getCategory().equals(CATEGORY_FOCUS));
     }

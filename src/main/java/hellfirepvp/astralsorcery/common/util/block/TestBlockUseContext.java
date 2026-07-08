@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.util.block;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
@@ -27,20 +27,20 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 29.02.2020 / 12:07
  */
-public class TestBlockUseContext extends BlockItemUseContext {
+public class TestBlockUseContext extends BlockPlaceContext {
 
     private final Entity entity;
 
-    private TestBlockUseContext(World worldIn, @Nullable Entity usingEntity, Hand hand, ItemStack stack, BlockPos at, Direction side) {
-        super(worldIn, null, hand, stack, new BlockRayTraceResult(Vector3d.copyCentered(at), side, at, false));
+    private TestBlockUseContext(Level worldIn, @Nullable Entity usingEntity, InteractionHand hand, ItemStack stack, BlockPos at, Direction side) {
+        super(worldIn, null, hand, stack, new BlockHitResult(Vector3d.copyCentered(at), side, at, false));
         this.entity = usingEntity;
     }
 
-    public static BlockItemUseContext getHandContext(World worldIn, @Nullable Entity usingEntity, Hand usedHand, BlockPos at, Direction side) {
+    public static BlockPlaceContext getHandContext(Level worldIn, @Nullable Entity usingEntity, InteractionHand usedHand, BlockPos at, Direction side) {
         return getHandContextWithItem(worldIn, usingEntity, usedHand, ItemStack.EMPTY, at, side);
     }
 
-    public static BlockItemUseContext getHandContextWithItem(World worldIn, @Nullable Entity usingEntity, Hand usedHand, ItemStack stack, BlockPos at, Direction side) {
+    public static BlockPlaceContext getHandContextWithItem(Level worldIn, @Nullable Entity usingEntity, InteractionHand usedHand, ItemStack stack, BlockPos at, Direction side) {
         return new TestBlockUseContext(worldIn, usingEntity, usedHand, stack, at, side);
     }
 

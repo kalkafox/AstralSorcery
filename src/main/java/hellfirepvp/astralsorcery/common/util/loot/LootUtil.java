@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.util.loot;
 
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameter;
-import net.minecraft.loot.LootParameterSet;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,8 +23,8 @@ public class LootUtil {
 
     private LootUtil() {}
 
-    public static boolean doesContextFulfillSet(LootContext ctx, LootParameterSet set) {
-        for (LootParameter<?> required : set.getRequiredParameters()) {
+    public static boolean doesContextFulfillSet(LootContext ctx, LootContextParamSet set) {
+        for (LootContextParam<?> required : set.getRequiredParameters()) {
             if (!ctx.has(required)) {
                 return false;
             }

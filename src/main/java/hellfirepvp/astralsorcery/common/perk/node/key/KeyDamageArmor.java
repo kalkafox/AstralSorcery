@@ -14,17 +14,17 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,8 +52,8 @@ public class KeyDamageArmor extends KeyPerk {
 
     private void onDamage(LivingHurtEvent event) {
         LivingEntity attacked = event.getEntityLiving();
-        if (attacked instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) attacked;
+        if (attacked instanceof Player) {
+            Player player = (Player) attacked;
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (prog.getPerkData().hasPerkEffect(this)) {
@@ -83,14 +83,14 @@ public class KeyDamageArmor extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue damagePerArmor;
+        private ModConfigSpec.DoubleValue damagePerArmor;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.damagePerArmor = cfgBuilder
                     .comment("Defines how much damage is dealt additionally to armor. This value gets multiplied by the amount of armorpieces the entity you're attacking wears.")
                     .translation(translationKey("damagePerArmor"))

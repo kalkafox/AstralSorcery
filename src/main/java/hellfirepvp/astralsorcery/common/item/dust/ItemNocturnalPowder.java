@@ -9,14 +9,14 @@
 package hellfirepvp.astralsorcery.common.item.dust;
 
 import hellfirepvp.astralsorcery.common.entity.EntityNocturnalSpark;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 public class ItemNocturnalPowder extends ItemUsableDust {
 
     @Override
-    boolean dispense(IBlockSource dispenser) {
+    boolean dispense(BlockSource dispenser) {
         BlockPos at = dispenser.getBlockPos();
         Direction face = dispenser.getBlockState().get(DispenserBlock.FACING);
         EntityNocturnalSpark nocSpark = new EntityNocturnalSpark(at.getX(), at.getY(), at.getZ(), dispenser.getWorld());
@@ -37,12 +37,12 @@ public class ItemNocturnalPowder extends ItemUsableDust {
     }
 
     @Override
-    boolean rightClickAir(World world, PlayerEntity player, ItemStack dust) {
+    boolean rightClickAir(Level world, Player player, ItemStack dust) {
         return world.addEntity(new EntityNocturnalSpark(player, world));
     }
 
     @Override
-    boolean rightClickBlock(ItemUseContext ctx) {
+    boolean rightClickBlock(UseOnContext ctx) {
         BlockPos pos = ctx.getPos().offset(ctx.getFace());
         EntityNocturnalSpark noc = new EntityNocturnalSpark(ctx.getPlayer(), ctx.getWorld());
         noc.setPosition(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);

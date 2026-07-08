@@ -24,11 +24,11 @@ import hellfirepvp.astralsorcery.common.item.ItemResonator;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraftforge.common.Tags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
 import java.util.function.Consumer;

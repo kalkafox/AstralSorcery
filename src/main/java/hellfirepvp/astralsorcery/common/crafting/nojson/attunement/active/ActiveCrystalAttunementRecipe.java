@@ -34,19 +34,19 @@ import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -78,7 +78,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         this.entityId = crystalEntityId;
     }
 
-    public ActiveCrystalAttunementRecipe(AttuneCrystalRecipe recipe, CompoundNBT nbt) {
+    public ActiveCrystalAttunementRecipe(AttuneCrystalRecipe recipe, CompoundTag nbt) {
         super(recipe);
         this.readFromNBT(nbt);
     }
@@ -112,7 +112,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         if (crystal != null) {
             ItemStack stack = crystal.getItem();
             if (!(stack.getItem() instanceof ConstellationItem) && stack.getItem() instanceof ItemCrystalBase) {
-                CompoundNBT tag = stack.getTag();
+                CompoundTag tag = stack.getTag();
                 stack = new ItemStack(((ItemCrystalBase) stack.getItem()).getTunedItemVariant(), stack.getCount());
                 stack.setTag(tag);
             }
@@ -132,9 +132,9 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
 
                 UUID throwerUUID = crystal.getThrowerId();
                 if (throwerUUID != null) {
-                    PlayerEntity thrower = altar.getWorld().getPlayerByUuid(throwerUUID);
-                    if (thrower instanceof ServerPlayerEntity) {
-                        AdvancementsAS.ATTUNE_CRYSTAL.trigger((ServerPlayerEntity) thrower, altar.getActiveConstellation());
+                    Player thrower = altar.getWorld().getPlayerByUuid(throwerUUID);
+                    if (thrower instanceof ServerPlayer) {
+                        AdvancementsAS.ATTUNE_CRYSTAL.trigger((ServerPlayer) thrower, altar.getActiveConstellation());
                     }
                 }
             }
@@ -348,7 +348,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     }
 
     @Nullable
-    private ItemEntity getEntity(World world) {
+    private ItemEntity getEntity(Level world) {
         Entity entity = world.getEntityByID(this.entityId);
         if (entity != null && entity.isAlive() && entity instanceof ItemEntity) {
             return (ItemEntity) entity;
@@ -357,7 +357,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     }
 
     @Override
-    public void writeToNBT(CompoundNBT nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         super.writeToNBT(nbt);
 
         nbt.putString("constellation", this.constellation.getRegistryName().toString());
@@ -365,7 +365,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     }
 
     @Override
-    protected void readFromNBT(CompoundNBT nbt) {
+    protected void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
         this.constellation = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(new ResourceLocation(nbt.getString("constellation")));

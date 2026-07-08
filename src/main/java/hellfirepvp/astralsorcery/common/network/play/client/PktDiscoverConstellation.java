@@ -14,8 +14,8 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.data.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
@@ -56,7 +56,7 @@ public class PktDiscoverConstellation extends ASPacket<PktDiscoverConstellation>
         return (packet, context, side) -> {
             context.enqueueWork(() -> {
                 if (side == LogicalSide.SERVER) {
-                    PlayerEntity player = context.getSender();
+                    Player player = context.getSender();
                     PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
                     if (prog.isValid() &&
                             packet.constellation.canDiscover(player, prog) &&

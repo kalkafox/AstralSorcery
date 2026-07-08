@@ -22,11 +22,11 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.BlockTransmutation;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.util.block.BlockMatchInformation;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import org.openzen.zencode.java.ZenCodeType;
 
 import java.util.function.Consumer;
@@ -45,7 +45,7 @@ public class BlockTransmutationManager implements IRecipeManager {
     @ZenCodeType.Method
     public void addRecipe(String name, BlockState outState, MCTag<Block> input, double starlight, @ZenCodeType.Optional("null") ResourceLocation constellationKey) {
         addTransmutation(name, outState, starlight, constellationKey, transmutation -> {
-            transmutation.addInputOption(new BlockMatchInformation((ITag<Block>) input.getInternal()));
+            transmutation.addInputOption(new BlockMatchInformation((Tag<Block>) input.getInternal()));
         });
     }
     
@@ -99,7 +99,7 @@ public class BlockTransmutationManager implements IRecipeManager {
     }
     
     @Override
-    public IRecipeType<BlockTransmutation> getRecipeType() {
+    public RecipeType<BlockTransmutation> getRecipeType() {
         return RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.getType();
     }
 }

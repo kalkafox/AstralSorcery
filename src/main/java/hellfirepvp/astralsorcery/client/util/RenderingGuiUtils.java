@@ -8,16 +8,16 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.screen.base.WidthHeightScreen;
-import net.minecraft.client.renderer.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.vector.Matrix4f;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -31,7 +31,7 @@ import java.awt.*;
  */
 public class RenderingGuiUtils {
 
-    private static final MatrixStack EMPTY = new MatrixStack();
+    private static final PoseStack EMPTY = new PoseStack();
 
     @Deprecated
     public static void drawTexturedRectAtCurrentPos(float width, float height, float zLevel, float uFrom, float vFrom, float uWidth, float vWidth) {
@@ -49,17 +49,17 @@ public class RenderingGuiUtils {
 
     @Deprecated
     public static void drawRect(float offsetX, float offsetY, float zLevel, float width, float height) {
-        drawRect(new MatrixStack(), offsetX, offsetY, zLevel, width, height);
+        drawRect(new PoseStack(), offsetX, offsetY, zLevel, width, height);
     }
 
-    public static void drawRect(MatrixStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height) {
+    public static void drawRect(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height) {
         RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
             rect(buf, renderStack, offsetX, offsetY, zLevel, width, height)
                     .draw();
         });
     }
 
-    public static void drawTexturedRect(MatrixStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height, AbstractRenderableTexture tex) {
+    public static void drawTexturedRect(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height, AbstractRenderableTexture tex) {
         Tuple<Float, Float> uv = tex.getUVOffset();
         drawTexturedRect(renderStack, offsetX, offsetY, zLevel, width, height, uv.getA(), uv.getB(), tex.getUWidth(), tex.getVWidth());
     }
@@ -69,11 +69,11 @@ public class RenderingGuiUtils {
         drawTexturedRect(EMPTY, offsetX, offsetY, zLevel, width, height, uFrom, vFrom, uWidth, vWidth);
     }
 
-    public static void drawTexturedRect(MatrixStack renderStack, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
+    public static void drawTexturedRect(PoseStack renderStack, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
         drawTexturedRect(renderStack, 0, 0, 0, width, height, uFrom, vFrom, uWidth, vWidth);
     }
 
-    public static void drawTexturedRect(MatrixStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
+    public static void drawTexturedRect(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
         RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
             rect(buf, renderStack, offsetX, offsetY, zLevel, width, height)
                     .tex(uFrom, vFrom, uWidth, vWidth)
@@ -82,33 +82,33 @@ public class RenderingGuiUtils {
     }
 
     @Deprecated
-    public static DrawBuilder rect(IVertexBuilder buf, WidthHeightScreen screen) {
+    public static DrawBuilder rect(VertexConsumer buf, WidthHeightScreen screen) {
         return rect(buf, screen.getGuiLeft(), screen.getGuiTop(), screen.getGuiZLevel(), screen.getGuiWidth(), screen.getGuiHeight());
     }
 
-    public static DrawBuilder rect(IVertexBuilder buf, MatrixStack renderStack, WidthHeightScreen screen) {
+    public static DrawBuilder rect(VertexConsumer buf, PoseStack renderStack, WidthHeightScreen screen) {
         return rect(buf, renderStack, screen.getGuiLeft(), screen.getGuiTop(), screen.getGuiZLevel(), screen.getGuiWidth(), screen.getGuiHeight());
     }
 
     @Deprecated
-    public static DrawBuilder rect(IVertexBuilder buf, float offsetX, float offsetY, float offsetZ, float width, float height) {
+    public static DrawBuilder rect(VertexConsumer buf, float offsetX, float offsetY, float offsetZ, float width, float height) {
         return rect(buf, EMPTY, offsetX, offsetY, offsetZ, width, height);
     }
 
-    public static DrawBuilder rect(IVertexBuilder buf, MatrixStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height) {
+    public static DrawBuilder rect(VertexConsumer buf, PoseStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height) {
         return new DrawBuilder(buf, renderStack, offsetX, offsetY, offsetZ, width, height);
     }
 
     public static class DrawBuilder {
 
-        private final IVertexBuilder buf;
-        private final MatrixStack renderStack;
+        private final VertexConsumer buf;
+        private final PoseStack renderStack;
         private float offsetX, offsetY, offsetZ;
         private float width, height;
         private float u = 0F, v = 0F, uWidth = 1F, vWidth = 1F;
         private Color color = Color.WHITE;
 
-        private DrawBuilder(IVertexBuilder buf, MatrixStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height) {
+        private DrawBuilder(VertexConsumer buf, PoseStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height) {
             this.buf = buf;
             this.renderStack = renderStack;
             this.offsetX = offsetX;

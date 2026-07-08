@@ -15,14 +15,14 @@ import hellfirepvp.astralsorcery.common.constellation.IMajorConstellation;
 import hellfirepvp.astralsorcery.common.network.play.server.PktSyncKnowledge;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.*;
 
@@ -50,7 +50,7 @@ public class PlayerProgress {
     private boolean usePerkAbilities = true; //Move this out of this class at some point.. this doesn't actually belong here
 
     //Loading from flat-file, persistent data
-    public void load(CompoundNBT compound) {
+    public void load(CompoundTag compound) {
         knownConstellations.clear();
         seenConstellations.clear();
         researchProgression.clear();
@@ -62,13 +62,13 @@ public class PlayerProgress {
         usePerkAbilities = true;
 
         if (compound.contains("seenConstellations")) {
-            ListNBT list = compound.getList("seenConstellations", Constants.NBT.TAG_STRING);
+            ListTag list = compound.getList("seenConstellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
                 seenConstellations.add(new ResourceLocation(list.getString(i)));
             }
         }
         if (compound.contains("constellations")) {
-            ListNBT list = compound.getList("constellations", Constants.NBT.TAG_STRING);
+            ListTag list = compound.getList("constellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
                 ResourceLocation s = new ResourceLocation(list.getString(i));
                 knownConstellations.add(s);
@@ -78,7 +78,7 @@ public class PlayerProgress {
             }
         }
         if (compound.contains("storedConstellationPapers")) {
-            ListNBT list = compound.getList("storedConstellationPapers", Constants.NBT.TAG_STRING);
+            ListTag list = compound.getList("storedConstellationPapers", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
                 ResourceLocation s = new ResourceLocation(list.getString(i));
                 storedConstellationPapers.add(s);
@@ -127,16 +127,16 @@ public class PlayerProgress {
     }
 
     //For file saving, persistent saving.
-    public void store(CompoundNBT cmp) {
-        ListNBT known = new ListNBT();
+    public void store(CompoundTag cmp) {
+        ListTag known = new ListTag();
         for (ResourceLocation s : knownConstellations) {
             known.add(StringNBT.valueOf(s.toString()));
         }
-        ListNBT seen = new ListNBT();
+        ListTag seen = new ListTag();
         for (ResourceLocation s : seenConstellations) {
             seen.add(StringNBT.valueOf(s.toString()));
         }
-        ListNBT storedPapers = new ListNBT();
+        ListTag storedPapers = new ListTag();
         for (ResourceLocation s : storedConstellationPapers) {
             storedPapers.add(StringNBT.valueOf(s.toString()));
         }
@@ -161,12 +161,12 @@ public class PlayerProgress {
     }
 
     //For knowledge sharing; some information is not important to be shared.
-    public void storeKnowledge(CompoundNBT cmp) {
-        ListNBT list = new ListNBT();
+    public void storeKnowledge(CompoundTag cmp) {
+        ListTag list = new ListTag();
         for (ResourceLocation s : knownConstellations) {
             list.add(StringNBT.valueOf(s.toString()));
         }
-        ListNBT l = new ListNBT();
+        ListTag l = new ListTag();
         for (ResourceLocation s : seenConstellations) {
             l.add(StringNBT.valueOf(s.toString()));
         }
@@ -181,9 +181,9 @@ public class PlayerProgress {
     }
 
     //For knowledge sharing; some information is not important to be shared.
-    public void loadKnowledge(CompoundNBT compound) {
+    public void loadKnowledge(CompoundTag compound) {
         if (compound.contains("seenConstellations")) {
-            ListNBT list = compound.getList("seenConstellations", Constants.NBT.TAG_STRING);
+            ListTag list = compound.getList("seenConstellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
                 ResourceLocation cstName = new ResourceLocation(list.getString(i));
                 if (!seenConstellations.contains(cstName)) {
@@ -192,7 +192,7 @@ public class PlayerProgress {
             }
         }
         if (compound.contains("constellations")) {
-            ListNBT list = compound.getList("constellations", Constants.NBT.TAG_STRING);
+            ListTag list = compound.getList("constellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
                 ResourceLocation cstName = new ResourceLocation(list.getString(i));
 
@@ -343,7 +343,7 @@ public class PlayerProgress {
 
     protected PlayerProgress copy() {
         PlayerProgress copy = new PlayerProgress();
-        CompoundNBT saveData = new CompoundNBT();
+        CompoundTag saveData = new CompoundTag();
         this.store(saveData);
         copy.load(saveData);
         return copy;

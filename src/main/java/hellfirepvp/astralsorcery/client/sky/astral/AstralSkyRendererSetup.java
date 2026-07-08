@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.sky.astral;
 
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Random;

@@ -17,26 +17,26 @@ import hellfirepvp.astralsorcery.common.data.config.entry.CraftingConfig;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.fluid.EmptyFluid;
-import net.minecraft.fluid.FlowingFluid;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.material.EmptyFluid;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.event.ForgeEventFactory;
 
 import java.util.Random;
 import java.util.function.Supplier;
@@ -48,7 +48,7 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 20.09.2019 / 21:21
  */
-public class BlockLiquidStarlight extends FlowingFluidBlock {
+public class BlockLiquidStarlight extends LiquidBlock {
 
     public BlockLiquidStarlight(Supplier<? extends FlowingFluid> fluidSupplier) {
         super(fluidSupplier, Block.Properties.create(Material.WATER)
@@ -59,7 +59,7 @@ public class BlockLiquidStarlight extends FlowingFluidBlock {
     }
 
     @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+    public void onEntityCollision(BlockState state, Level world, BlockPos pos, Entity entity) {
         super.onEntityCollision(state, world, pos, entity);
 
         if (state.get(LEVEL) != 0) {
@@ -67,7 +67,7 @@ public class BlockLiquidStarlight extends FlowingFluidBlock {
         }
 
         if (entity instanceof LivingEntity) {
-            ((LivingEntity) entity).addPotionEffect(new EffectInstance(Effects.NIGHT_VISION, 300, 0, true, true));
+            ((LivingEntity) entity).addPotionEffect(new MobEffectInstance(Effects.NIGHT_VISION, 300, 0, true, true));
         } else if (entity instanceof ItemEntity) {
             LiquidStarlightCraftingRegistry.tryCraft((ItemEntity) entity, pos);
 
@@ -77,19 +77,19 @@ public class BlockLiquidStarlight extends FlowingFluidBlock {
         }
     }
 
-    public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
+    public void onBlockAdded(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
             worldIn.getPendingFluidTicks().scheduleTick(pos, state.getFluidState().getFluid(), this.getFluid().getTickRate(worldIn));
         }
     }
 
-    public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
             worldIn.getPendingFluidTicks().scheduleTick(pos, state.getFluidState().getFluid(), this.getFluid().getTickRate(worldIn));
         }
     }
 
-    private boolean reactWithNeighbors(World world, BlockPos pos, BlockState state) {
+    private boolean reactWithNeighbors(Level world, BlockPos pos, BlockState state) {
         for (Direction dir : Direction.values()) {
             FluidState otherState = world.getFluidState(pos.offset(dir));
             Fluid otherFluid = otherState.getFluid();
@@ -126,7 +126,7 @@ public class BlockLiquidStarlight extends FlowingFluidBlock {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
         Integer level = state.get(LEVEL);
         double percHeight = 1D - (((double) level + 1) / 8D);
         playLiquidStarlightBlockEffect(rand, new Vector3(pos).addY(percHeight * rand.nextFloat()), 1F);

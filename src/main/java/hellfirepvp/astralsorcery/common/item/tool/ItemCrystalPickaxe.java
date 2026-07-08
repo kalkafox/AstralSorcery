@@ -8,16 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
-import com.google.common.collect.Sets;
+import hellfirepvp.astralsorcery.common.enchantment.AstralEnchantmentType;
 import hellfirepvp.astralsorcery.common.item.base.TypeEnchantableItem;
-import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
-import net.minecraft.block.material.Material;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentType;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,27 +26,19 @@ import net.minecraftforge.common.ToolType;
 public class ItemCrystalPickaxe extends ItemCrystalTierItem implements TypeEnchantableItem {
 
     public ItemCrystalPickaxe() {
-        super(ToolType.PICKAXE, new Properties(), Sets.newHashSet(Material.ROCK, Material.IRON, Material.ANVIL));
+        super(BlockTags.MINEABLE_WITH_PICKAXE, new Properties(), ItemAbilities.DEFAULT_PICKAXE_ACTIONS);
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> stacks) {
-        if (this.isInGroup(group)) {
-            ItemStack stack = new ItemStack(this);
-            CrystalPropertiesAS.CREATIVE_CRYSTAL_TOOL_ATTRIBUTES.store(stack);
-            stacks.add(stack);
-        }
+    public boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type) {
+        return type == AstralEnchantmentType.BREAKABLE || type == AstralEnchantmentType.DIGGER;
     }
 
     @Override
-    public boolean canEnchantItem(ItemStack stack, EnchantmentType type) {
-        return type == EnchantmentType.BREAKABLE || type == EnchantmentType.DIGGER;
-    }
-
-    @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        EnchantmentType type = enchantment.type;
-        return type == EnchantmentType.DIGGER || type == EnchantmentType.BREAKABLE;
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+        return super.supportsEnchantment(stack, enchantment) ||
+                AstralEnchantmentType.DIGGER.contains(enchantment) ||
+                AstralEnchantmentType.BREAKABLE.contains(enchantment);
     }
 
     @Override

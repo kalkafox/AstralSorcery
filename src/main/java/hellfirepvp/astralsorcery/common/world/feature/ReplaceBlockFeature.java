@@ -9,13 +9,13 @@
 package hellfirepvp.astralsorcery.common.world.feature;
 
 import hellfirepvp.astralsorcery.common.world.feature.config.ReplaceBlockConfig;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.IServerWorld;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.Random;
 
@@ -33,14 +33,14 @@ public class ReplaceBlockFeature extends Feature<ReplaceBlockConfig> {
     }
 
     @Override
-    public boolean generate(ISeedReader reader, ChunkGenerator generator, Random rand, BlockPos pos, ReplaceBlockConfig config) {
+    public boolean generate(WorldGenLevel reader, ChunkGenerator generator, Random rand, BlockPos pos, ReplaceBlockConfig config) {
         if (config.target.test(reader.getBlockState(pos), rand)) {
             return setBlockState(reader, pos, config.state);
         }
         return true;
     }
 
-    protected boolean setBlockState(IServerWorld world, BlockPos pos, BlockState state) {
+    protected boolean setBlockState(ServerLevelAccessor world, BlockPos pos, BlockState state) {
         return world.setBlockState(pos, state, Constants.BlockFlags.BLOCK_UPDATE);
     }
 }

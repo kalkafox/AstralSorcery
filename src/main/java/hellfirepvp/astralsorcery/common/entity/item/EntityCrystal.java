@@ -16,19 +16,19 @@ import hellfirepvp.astralsorcery.common.item.crystal.ItemCrystalBase;
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,15 +39,15 @@ import net.minecraftforge.fml.network.NetworkHooks;
  */
 public class EntityCrystal extends EntityItemExplosionResistant implements InteractableEntity {
 
-    public EntityCrystal(EntityType<? extends ItemEntity> type, World world) {
+    public EntityCrystal(EntityType<? extends ItemEntity> type, Level world) {
         super(type, world);
     }
 
-    public EntityCrystal(EntityType<? extends ItemEntity> type, World world, double x, double y, double z) {
+    public EntityCrystal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
         super(type, world, x, y, z);
     }
 
-    public EntityCrystal(EntityType<? extends ItemEntity> type, World world, double x, double y, double z, ItemStack stack) {
+    public EntityCrystal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
         super(type, world, x, y, z, stack);
     }
 
@@ -67,8 +67,8 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
 
     @Override
     public boolean hitByEntity(Entity entity) {
-        if (!this.getEntityWorld().isRemote() && entity instanceof ServerPlayerEntity) {
-            ItemStack held = ((ServerPlayerEntity) entity).getHeldItem(Hand.MAIN_HAND);
+        if (!this.getEntityWorld().isRemote() && entity instanceof ServerPlayer) {
+            ItemStack held = ((ServerPlayer) entity).getHeldItem(Hand.MAIN_HAND);
             if (!held.isEmpty() && held.getItem() instanceof ItemChisel) {
 
                 ItemStack thisStack = this.getItem();
@@ -84,7 +84,7 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
                             doDamage = this.splitCrystal(thisAttributes, fortuneLevel);
                         }
                         if (doDamage || rand.nextFloat() < 0.35F) {
-                            held.damageItem(1, (PlayerEntity) entity, (player) -> player.sendBreakAnimation(Hand.MAIN_HAND));
+                            held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(Hand.MAIN_HAND));
                         }
                     }
                 }
@@ -146,7 +146,7 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

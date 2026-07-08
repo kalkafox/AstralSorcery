@@ -14,14 +14,14 @@ import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.constellation.star.StarLocation;
 import hellfirepvp.astralsorcery.common.constellation.world.DayTimeHelper;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -47,7 +47,7 @@ public class EngravedStarMap {
         this.drawInformation = drawnConstellations;
     }
 
-    public static EngravedStarMap buildStarMap(World world, List<DrawnConstellation> constellations) {
+    public static EngravedStarMap buildStarMap(Level world, List<DrawnConstellation> constellations) {
         float nightPerc = DayTimeHelper.getCurrentDaytimeDistribution(world);
 
         Map<DrawnConstellation, List<Rectangle.Double>> cstCoordinates = new HashMap<>();
@@ -171,19 +171,19 @@ public class EngravedStarMap {
         return this.distributions.getOrDefault(cst.getRegistryName(), 0F);
     }
 
-    public CompoundNBT serialize() {
-        CompoundNBT tag = new CompoundNBT();
-        ListNBT list = new ListNBT();
+    public CompoundTag serialize() {
+        CompoundTag tag = new CompoundTag();
+        ListTag list = new ListTag();
         distributions.forEach((constellationKey, percent) -> {
-            CompoundNBT cstTag = new CompoundNBT();
+            CompoundTag cstTag = new CompoundTag();
             NBTHelper.setResourceLocation(cstTag, "cst", constellationKey);
             cstTag.putFloat("percent", percent);
             list.add(cstTag);
         });
         tag.put("distributions", list);
-        ListNBT listDrawn = new ListNBT();
+        ListTag listDrawn = new ListTag();
         drawInformation.forEach(drawCst -> {
-            CompoundNBT cstTag = new CompoundNBT();
+            CompoundTag cstTag = new CompoundTag();
             NBTHelper.setResourceLocation(cstTag, "cst", drawCst.getConstellation().getRegistryName());
             cstTag.putInt("x", drawCst.getPoint().x);
             cstTag.putInt("y", drawCst.getPoint().y);
@@ -193,11 +193,11 @@ public class EngravedStarMap {
         return tag;
     }
 
-    public static EngravedStarMap deserialize(CompoundNBT tag) {
+    public static EngravedStarMap deserialize(CompoundTag tag) {
         Map<ResourceLocation, Float> distributionMap = new HashMap<>();
-        ListNBT list = tag.getList("distributions", Constants.NBT.TAG_COMPOUND);
+        ListTag list = tag.getList("distributions", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            CompoundNBT cstTag = list.getCompound(i);
+            CompoundTag cstTag = list.getCompound(i);
             ResourceLocation constellationKey = new ResourceLocation(cstTag.getString("cst"));
             float percent = cstTag.getFloat("percent");
             if (percent > 0) {
@@ -205,9 +205,9 @@ public class EngravedStarMap {
             }
         }
         List<DrawnConstellation> drawnConstellations = new ArrayList<>();
-        ListNBT listDrawn = tag.getList("drawInformation", Constants.NBT.TAG_COMPOUND);
+        ListTag listDrawn = tag.getList("drawInformation", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < listDrawn.size(); i++) {
-            CompoundNBT cstTag = listDrawn.getCompound(i);
+            CompoundTag cstTag = listDrawn.getCompound(i);
             IConstellation cst = ConstellationRegistry.getConstellation(new ResourceLocation(cstTag.getString("cst")));
             Point offset = new Point(cstTag.getInt("x"), cstTag.getInt("y"));
             drawnConstellations.add(new DrawnConstellation(offset, cst));

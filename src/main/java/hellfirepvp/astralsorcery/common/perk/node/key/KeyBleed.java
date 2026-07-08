@@ -15,15 +15,15 @@ import hellfirepvp.astralsorcery.common.lib.EffectsAS;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,8 +51,8 @@ public class KeyBleed extends KeyPerk {
 
     private void onAttack(LivingHurtEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) source.getTrueSource();
+        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
+            Player player = (Player) source.getTrueSource();
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (prog.getPerkData().hasPerkEffect(this)) {
@@ -71,13 +71,13 @@ public class KeyBleed extends KeyPerk {
 
                     int setAmplifier = 0;
                     if (target.isPotionActive(EffectsAS.EFFECT_BLEED)) {
-                        EffectInstance pe = target.getActivePotionEffect(EffectsAS.EFFECT_BLEED);
+                        MobEffectInstance pe = target.getActivePotionEffect(EffectsAS.EFFECT_BLEED);
                         if (pe != null) {
                             setAmplifier = Math.min(pe.getAmplifier() + 1, stackCap - 1);
                         }
                     }
 
-                    target.addPotionEffect(new EffectInstance(EffectsAS.EFFECT_BLEED, duration, setAmplifier, false, true));
+                    target.addPotionEffect(new MobEffectInstance(EffectsAS.EFFECT_BLEED, duration, setAmplifier, false, true));
                 }
             }
         }
@@ -85,15 +85,15 @@ public class KeyBleed extends KeyPerk {
 
     private static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.IntValue bleedDuration;
-        private ForgeConfigSpec.DoubleValue bleedChance;
+        private ModConfigSpec.IntValue bleedDuration;
+        private ModConfigSpec.DoubleValue bleedChance;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             bleedDuration = cfgBuilder
                     .comment("Defines the duration of the bleeding effect when applied. Refreshes this duration when a it is applied again")
                     .translation(translationKey("bleedDuration"))

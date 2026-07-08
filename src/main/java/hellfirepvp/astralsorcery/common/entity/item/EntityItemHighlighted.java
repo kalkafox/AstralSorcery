@@ -10,17 +10,17 @@ package hellfirepvp.astralsorcery.common.entity.item;
 
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -34,23 +34,23 @@ import java.awt.*;
  */
 public class EntityItemHighlighted extends EntityCustomItemReplacement {
 
-    private static final DataParameter<Integer> DATA_COLOR = EntityDataManager.createKey(EntityItemHighlighted.class, DataSerializers.VARINT);
+    private static final EntityDataAccessor<Integer> DATA_COLOR = EntityDataManager.createKey(EntityItemHighlighted.class, DataSerializers.VARINT);
     private static final int NO_COLOR = 0xFF000000;
 
-    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, World world) {
+    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level world) {
         super(type, world);
         ReflectionHelper.setSkipItemPhysicsRender(this);
         recalculateSize();
     }
 
-    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, World world, double x, double y, double z) {
+    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
         this(type, world);
         this.setPosition(x, y, z);
         this.rotationYaw = this.rand.nextFloat() * 360.0F;
         this.setMotion(this.rand.nextDouble() * 0.2D - 0.1D, 0.2D, this.rand.nextDouble() * 0.2D - 0.1D);
     }
 
-    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, World world, double x, double y, double z, ItemStack stack) {
+    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
         this(type, world, x, y, z);
         this.setItem(stack);
         this.lifespan = stack.isEmpty() ? 6000 : stack.getEntityLifespan(world);
@@ -102,7 +102,7 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
     }
 
     @Override
-    public EntitySize getSize(Pose poseIn) {
+    public EntityDimensions getSize(Pose poseIn) {
         if (!this.isOnGround()) {
             return EntityType.ITEM.getSize();
         }
@@ -110,7 +110,7 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

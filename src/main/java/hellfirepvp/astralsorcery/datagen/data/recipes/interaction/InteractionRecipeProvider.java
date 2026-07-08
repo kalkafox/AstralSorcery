@@ -15,11 +15,11 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.ResultSpawnE
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.entity.EntityType;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.function.Consumer;
 

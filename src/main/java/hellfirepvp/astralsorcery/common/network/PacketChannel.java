@@ -1,16 +1,12 @@
 /*******************************************************************************
  * HellFirePvP / Astral Sorcery 2022
- *
- * All rights reserved.
- * The source code is available on github: https://github.com/HellFirePvP/AstralSorcery
- * For further details, see the License file there.
  ******************************************************************************/
 
 package hellfirepvp.astralsorcery.common.network;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import hellfirepvp.astralsorcery.common.network.base.ASLoginPacket;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 import hellfirepvp.astralsorcery.common.network.channel.BufferedReplyChannel;
 import hellfirepvp.astralsorcery.common.network.channel.SimpleSendChannel;
 import hellfirepvp.astralsorcery.common.network.login.client.PktLoginAcknowledge;
@@ -19,113 +15,123 @@ import hellfirepvp.astralsorcery.common.network.login.server.PktLoginSyncGateway
 import hellfirepvp.astralsorcery.common.network.login.server.PktLoginSyncPerkInformation;
 import hellfirepvp.astralsorcery.common.network.play.client.*;
 import hellfirepvp.astralsorcery.common.network.play.server.*;
-import hellfirepvp.observerlib.common.util.RegistryUtil;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.FMLHandshakeHandler;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-import java.util.Collections;
-import java.util.function.BiConsumer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * This class is part of the Astral Sorcery Mod
- * The complete source code for this mod can be found on github.
- * Class: PacketChannel
- * Created by HellFirePvP
- * Date: 21.04.2019 / 19:34
+ * NeoForge payload transport retaining Astral Sorcery's packet codecs.
  */
-public class PacketChannel {
+public final class PacketChannel {
 
-    private static int packetIndex = 0;
-    private static final String NET_COMM_VERSION = "0"; //AS network version
+    private static final String NET_COMM_VERSION = "1";
+    private static final Map<Integer, ASPacket<?>> PACKETS_BY_ID = new LinkedHashMap<>();
+    private static final Map<Class<?>, Integer> IDS_BY_CLASS = new LinkedHashMap<>();
 
-    public static final SimpleSendChannel CHANNEL = new BufferedReplyChannel(NetworkRegistry.newSimpleChannel(
-            AstralSorcery.key("net_channel"),
-            () -> NET_COMM_VERSION,
-            NET_COMM_VERSION::equals,
-            NET_COMM_VERSION::equals));
+    public static final SimpleSendChannel CHANNEL = new BufferedReplyChannel();
+
+    private PacketChannel() {}
 
     public static void registerPackets() {
-        // LOGIN DEDICATED_SERVER -> CLIENT
-        registerLoginMessage(PktLoginSyncDataHolder::new, PktLoginSyncDataHolder::makeLogin);
-        registerLoginMessage(PktLoginSyncGateway::new, PktLoginSyncGateway::makeLogin);
-        registerLoginMessage(PktLoginSyncPerkInformation::new, PktLoginSyncPerkInformation::makeLogin);
+        PACKETS_BY_ID.clear();
+        IDS_BY_CLASS.clear();
 
-        // LOGIN CLIENT -> DEDICATED_SERVER
-        registerLoginMessage(PktLoginAcknowledge::new, PktLoginAcknowledge::new);
+        register(PktLoginSyncDataHolder::new);
+        register(PktLoginSyncGateway::new);
+        register(PktLoginSyncPerkInformation::new);
+        register(PktLoginAcknowledge::new);
 
-        // PLAY DEDICATED_SERVER -> CLIENT
-        registerMessage(PktOreScan::new);
-        registerMessage(PktPlayEffect::new);
-        registerMessage(PktProgressionUpdate::new);
-        registerMessage(PktShootEntity::new);
-        registerMessage(PktSyncCharge::new);
-        registerMessage(PktSyncData::new);
-        registerMessage(PktSyncKnowledge::new);
-        registerMessage(PktSyncModifierSource::new);
-        registerMessage(PktSyncPerkActivity::new);
-        registerMessage(PktSyncStepAssist::new);
-        registerMessage(PktUpdateGateways::new);
-        registerMessage(PktOpenGui::new);
+        register(PktOreScan::new);
+        register(PktPlayEffect::new);
+        register(PktProgressionUpdate::new);
+        register(PktShootEntity::new);
+        register(PktSyncCharge::new);
+        register(PktSyncData::new);
+        register(PktSyncKnowledge::new);
+        register(PktSyncModifierSource::new);
+        register(PktSyncPerkActivity::new);
+        register(PktSyncStepAssist::new);
+        register(PktUpdateGateways::new);
+        register(PktOpenGui::new);
 
-        // PLAY CLIENT -> DEDICATED_SERVER
-        registerMessage(PktAttunePlayerConstellation::new);
-        registerMessage(PktClearBlockStorageStack::new);
-        registerMessage(PktDiscoverConstellation::new);
-        registerMessage(PktEngraveGlass::new);
-        registerMessage(PktPerkGemModification::new);
-        registerMessage(PktRequestPerkSealAction::new);
-        registerMessage(PktRequestSeed::new);
-        registerMessage(PktRequestTeleport::new);
-        registerMessage(PktRotateTelescope::new);
-        registerMessage(PktUnlockPerk::new);
-        registerMessage(PktToggleClientOption::new);
-        registerMessage(PktRevokeGatewayAccess::new);
+        register(PktAttunePlayerConstellation::new);
+        register(PktClearBlockStorageStack::new);
+        register(PktDiscoverConstellation::new);
+        register(PktEngraveGlass::new);
+        register(PktPerkGemModification::new);
+        register(PktRequestPerkSealAction::new);
+        register(PktRequestSeed::new);
+        register(PktRequestTeleport::new);
+        register(PktRotateTelescope::new);
+        register(PktUnlockPerk::new);
+        register(PktToggleClientOption::new);
+        register(PktRevokeGatewayAccess::new);
     }
 
-    private static <T extends ASLoginPacket<T>> void registerLoginMessage(Supplier<T> pktSupplier, Supplier<T> makeLoginPacket) {
-        T packet = pktSupplier.get();
-        int index = packetIndex++;
-        CHANNEL.messageBuilder((Class<T>) packet.getClass(), index)
-                .loginIndex(ASLoginPacket::getLoginIndex, ASLoginPacket::setLoginIndex)
-                .encoder(packet.encoder())
-                .decoder(packet.decoder())
-                .consumer((t, contextSupplier) -> {
-                    BiConsumer<T, Supplier<NetworkEvent.Context>> handler;
-                    if (contextSupplier.get().getDirection().getReceptionSide().isServer()) {
-                        handler = FMLHandshakeHandler.indexFirst((handshakeHandler, pkt, ctxSupplier) -> packet.handler().accept(pkt, ctxSupplier));
-                    } else {
-                        handler = packet.handler();
-                    }
-
-                    handler.accept(t, contextSupplier);
-                })
-                .buildLoginPacketList((local) -> Collections.singletonList(Pair.of(packet.getClass().getName(), makeLoginPacket.get())))
-                .add();
+    public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
+        event.registrar(NET_COMM_VERSION)
+                .playBidirectional(Envelope.TYPE, Envelope.STREAM_CODEC,
+                        (payload, context) -> payload.packet().handler().accept(payload.packet(), new PacketContext(context)));
     }
 
-    private static <T extends ASPacket<T>> void registerMessage(Supplier<T> pktSupplier) {
-        T packet = pktSupplier.get();
-        CHANNEL.messageBuilder((Class<T>) packet.getClass(), packetIndex++)
-                .encoder(packet.encoder())
-                .decoder(packet.decoder())
-                .consumer(packet.handler())
-                .add();
+    private static void register(Supplier<? extends ASPacket<?>> supplier) {
+        ASPacket<?> packet = supplier.get();
+        int id = PACKETS_BY_ID.size();
+        PACKETS_BY_ID.put(id, packet);
+        IDS_BY_CLASS.put(packet.getClass(), id);
     }
 
-    public static PacketDistributor.TargetPoint pointFromPos(World world, Vector3i pos, double range) {
-        return pointFromPos(world.getDimensionKey(), pos, range);
+    public static Envelope envelope(ASPacket<?> packet) {
+        Integer id = IDS_BY_CLASS.get(packet.getClass());
+        if (id == null) {
+            throw new IllegalArgumentException("Unregistered Astral Sorcery packet " + packet.getClass().getName());
+        }
+        return new Envelope(id, packet);
     }
 
-    public static PacketDistributor.TargetPoint pointFromPos(RegistryKey<World> world, Vector3i pos, double range) {
-        return new PacketDistributor.TargetPoint(pos.getX(), pos.getY(), pos.getZ(), range, world);
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void encode(RegistryFriendlyByteBuf buffer, Envelope envelope) {
+        buffer.writeVarInt(envelope.id());
+        ((ASPacket) envelope.packet()).encoder().accept(envelope.packet(), buffer);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static Envelope decode(RegistryFriendlyByteBuf buffer) {
+        int id = buffer.readVarInt();
+        ASPacket prototype = PACKETS_BY_ID.get(id);
+        if (prototype == null) {
+            throw new IllegalArgumentException("Unknown Astral Sorcery packet id " + id);
+        }
+        return new Envelope(id, (ASPacket<?>) prototype.decoder().apply(buffer));
+    }
+
+    public static TargetPoint pointFromPos(Level world, Vec3i pos, double range) {
+        return pointFromPos(world.dimension(), pos, range);
+    }
+
+    public static TargetPoint pointFromPos(ResourceKey<Level> world, Vec3i pos, double range) {
+        return new TargetPoint(pos.getX(), pos.getY(), pos.getZ(), range, world);
+    }
+
+    public record TargetPoint(double x, double y, double z, double range, ResourceKey<Level> dimension) {}
+
+    public record Envelope(int id, ASPacket<?> packet) implements CustomPacketPayload {
+
+        public static final Type<Envelope> TYPE = new Type<>(AstralSorcery.key("packet"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, Envelope> STREAM_CODEC =
+                StreamCodec.of(PacketChannel::encode, PacketChannel::decode);
+
+        @Override
+        public Type<Envelope> type() {
+            return TYPE;
+        }
     }
 }

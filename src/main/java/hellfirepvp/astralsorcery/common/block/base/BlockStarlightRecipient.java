@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.block.base;
 
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.Random;
 
@@ -39,6 +39,6 @@ public interface BlockStarlightRecipient {
      * @param starlightType the constellation type of the starlight received
      * @param amount the amount received
      */
-    public void receiveStarlight(World world, Random rand, BlockPos pos, IWeakConstellation starlightType, double amount);
+    public void receiveStarlight(Level world, Random rand, BlockPos pos, IWeakConstellation starlightType, double amount);
 
 }

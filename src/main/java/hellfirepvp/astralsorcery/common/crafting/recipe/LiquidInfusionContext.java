@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.crafting.recipe;
 
 import hellfirepvp.astralsorcery.common.crafting.helper.RecipeCraftingContext;
 import hellfirepvp.astralsorcery.common.tile.TileInfuser;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,10 +24,10 @@ import net.minecraftforge.items.IItemHandler;
 public class LiquidInfusionContext extends RecipeCraftingContext<LiquidInfusion, IItemHandler> {
 
     private final TileInfuser infuser;
-    private final PlayerEntity crafter;
+    private final Player crafter;
     private final LogicalSide side;
 
-    public LiquidInfusionContext(TileInfuser infuser, PlayerEntity crafter, LogicalSide side) {
+    public LiquidInfusionContext(TileInfuser infuser, Player crafter, LogicalSide side) {
         this.infuser = infuser;
         this.crafter = crafter;
         this.side = side;
@@ -37,7 +37,7 @@ public class LiquidInfusionContext extends RecipeCraftingContext<LiquidInfusion,
         return infuser;
     }
 
-    public PlayerEntity getCrafter() {
+    public Player getCrafter() {
         return crafter;
     }
 

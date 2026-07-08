@@ -23,11 +23,11 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.time.TimeStopEffectHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
@@ -42,9 +42,9 @@ import java.util.function.Consumer;
 public class PktPlayEffect extends ASPacket<PktPlayEffect> {
 
     private Type type;
-    private Consumer<PacketBuffer> encoder = (buf) -> {};
+    private Consumer<FriendlyByteBuf> encoder = (buf) -> {};
 
-    private PacketBuffer data = null;
+    private FriendlyByteBuf data = null;
 
     public PktPlayEffect() {}
 
@@ -52,12 +52,12 @@ public class PktPlayEffect extends ASPacket<PktPlayEffect> {
         this.type = type;
     }
 
-    public PktPlayEffect addData(Consumer<PacketBuffer> encoder) {
+    public PktPlayEffect addData(Consumer<FriendlyByteBuf> encoder) {
         this.encoder = this.encoder.andThen(encoder);
         return this;
     }
 
-    public PacketBuffer getExtraData() {
+    public FriendlyByteBuf getExtraData() {
         return data;
     }
 
@@ -78,7 +78,7 @@ public class PktPlayEffect extends ASPacket<PktPlayEffect> {
             PktPlayEffect pkt = new PktPlayEffect(type);
             ByteBuf buf = Unpooled.buffer(buffer.readableBytes());
             buffer.readBytes(buf);
-            pkt.data = new PacketBuffer(buf);
+            pkt.data = new FriendlyByteBuf(buf);
             return pkt;
         };
     }

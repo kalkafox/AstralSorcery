@@ -9,15 +9,15 @@
 package hellfirepvp.astralsorcery.common.auxiliary.gateway;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.util.Set;
 public class CelestialGatewayFilter {
 
     private final File gatewayFilter;
-    private Set<RegistryKey<World>> cache = new HashSet<>();
+    private Set<ResourceKey<Level>> cache = new HashSet<>();
 
     CelestialGatewayFilter() {
         this.gatewayFilter = this.loadFilter();
@@ -58,13 +58,13 @@ public class CelestialGatewayFilter {
         return this.cache.contains(worldKey);
     }
 
-    void addDim(RegistryKey<World> worldKey) {
+    void addDim(ResourceKey<Level> worldKey) {
         if (cache.add(worldKey)) {
             this.saveCache();
         }
     }
 
-    void removeDim(RegistryKey<World> worldKey) {
+    void removeDim(ResourceKey<Level> worldKey) {
         if (cache.remove(worldKey)) {
             this.saveCache();
         }
@@ -72,8 +72,8 @@ public class CelestialGatewayFilter {
 
     private void loadCache() {
         try {
-            CompoundNBT tag = CompressedStreamTools.read(this.gatewayFilter);
-            ListNBT list = tag.getList("list", Constants.NBT.TAG_STRING);
+            CompoundTag tag = CompressedStreamTools.read(this.gatewayFilter);
+            ListTag list = tag.getList("list", Constants.NBT.TAG_STRING);
             this.cache = new HashSet<>();
             for (int i = 0; i < list.size(); i++) {
                 ResourceLocation location = new ResourceLocation(list.getString(i));
@@ -86,11 +86,11 @@ public class CelestialGatewayFilter {
 
     private void saveCache() {
         try {
-            ListNBT list = new ListNBT();
-            for (RegistryKey<World> dimType : cache) {
+            ListTag list = new ListTag();
+            for (ResourceKey<Level> dimType : cache) {
                 list.add(StringNBT.valueOf(dimType.getLocation().toString()));
             }
-            CompoundNBT cmp = new CompoundNBT();
+            CompoundTag cmp = new CompoundTag();
             cmp.put("list", list);
             CompressedStreamTools.write(cmp, this.gatewayFilter);
         } catch (IOException ignored) {}

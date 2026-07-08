@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.util.tick;
 
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraftforge.event.TickEvent;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import javax.annotation.Nonnull;
 import java.util.EnumSet;

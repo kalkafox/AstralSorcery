@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.util.block.iterator;
 
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,8 +30,8 @@ public class BlockRandomPositionGenerator extends BlockPositionGenerator {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT nbt) {}
+    public void writeToNBT(CompoundTag nbt) {}
 
     @Override
-    public void readFromNBT(CompoundNBT nbt) {}
+    public void readFromNBT(CompoundTag nbt) {}
 }

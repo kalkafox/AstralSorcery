@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.resource;
 
-import net.minecraft.client.renderer.RenderState;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 
 import java.util.Objects;
@@ -35,7 +35,7 @@ public abstract class AbstractRenderableTexture {
 
     public abstract void bindTexture();
 
-    public abstract RenderState.TextureState asState();
+    public abstract RenderStateShard.TextureStateShard asState();
 
     public abstract Tuple<Float, Float> getUVOffset();
 

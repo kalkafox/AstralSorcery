@@ -11,10 +11,10 @@ package hellfirepvp.astralsorcery.common.perk;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
 import hellfirepvp.astralsorcery.common.util.tick.TimeoutListContainer;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -48,7 +48,7 @@ public class PerkCooldownHelper {
         }
     }
 
-    public static void removeAllCooldowns(PlayerEntity player, LogicalSide side) {
+    public static void removeAllCooldowns(Player player, LogicalSide side) {
         UUID playerUUID = player.getUniqueID();
         if (side.isClient()) {
             if (perkCooldownsClient.hasList(playerUUID)) {
@@ -69,7 +69,7 @@ public class PerkCooldownHelper {
         container.removeList(key -> key.equals(perk.getRegistryName()));
     }
 
-    public static boolean isCooldownActiveForPlayer(PlayerEntity player, AbstractPerk perk) {
+    public static boolean isCooldownActiveForPlayer(Player player, AbstractPerk perk) {
         if (!(perk instanceof CooldownPerk)) return false;
 
         TimeoutListContainer<UUID, ResourceLocation> container = player.getEntityWorld().isRemote ?
@@ -79,7 +79,7 @@ public class PerkCooldownHelper {
                 container.getOrCreateList(playerUUID).contains(perk.getRegistryName());
     }
 
-    public static void setCooldownActiveForPlayer(PlayerEntity player, AbstractPerk perk, int cooldownTicks) {
+    public static void setCooldownActiveForPlayer(Player player, AbstractPerk perk, int cooldownTicks) {
         if (!(perk instanceof CooldownPerk)) return;
 
         TimeoutListContainer<UUID, ResourceLocation> container = player.getEntityWorld().isRemote ?
@@ -88,7 +88,7 @@ public class PerkCooldownHelper {
         container.getOrCreateList(playerUUID).setOrAddTimeout(cooldownTicks, perk.getRegistryName());
     }
 
-    public static void forceSetCooldownForPlayer(PlayerEntity player, AbstractPerk perk, int cooldownTicks) {
+    public static void forceSetCooldownForPlayer(Player player, AbstractPerk perk, int cooldownTicks) {
         if (!(perk instanceof CooldownPerk)) return;
 
         TimeoutListContainer<UUID, ResourceLocation> container = player.getEntityWorld().isRemote ?
@@ -99,7 +99,7 @@ public class PerkCooldownHelper {
         }
     }
 
-    public static int getActiveCooldownForPlayer(PlayerEntity player, AbstractPerk perk) {
+    public static int getActiveCooldownForPlayer(Player player, AbstractPerk perk) {
         if (!(perk instanceof CooldownPerk)) return -1;
 
         TimeoutListContainer<UUID, ResourceLocation> container = player.getEntityWorld().isRemote ?
@@ -121,7 +121,7 @@ public class PerkCooldownHelper {
 
         @Override
         public void onContainerTimeout(UUID playerUUID, ResourceLocation key) {
-            PlayerEntity player = EntityUtils.getPlayer(playerUUID, this.side);
+            Player player = EntityUtils.getPlayer(playerUUID, this.side);
             if (player != null) {
                 PerkTree.PERK_TREE.getPerk(this.side, key).ifPresent(perk -> {
                     if (perk instanceof CooldownPerk) {

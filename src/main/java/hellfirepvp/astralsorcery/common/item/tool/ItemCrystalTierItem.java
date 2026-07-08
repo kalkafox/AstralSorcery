@@ -8,30 +8,29 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.crystal.CalculationContext;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributeItem;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
 import hellfirepvp.astralsorcery.common.crystal.CrystalCalculations;
 import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -46,23 +45,18 @@ import java.util.Set;
  */
 public abstract class ItemCrystalTierItem extends Item implements CrystalAttributeItem {
 
-    private final Set<Material> effectiveMaterials;
-    private final ToolType toolType;
+    private final Set<ItemAbility> itemAbilities;
 
-    protected ItemCrystalTierItem(@Nullable ToolType toolType, Properties prop, Set<Material> effectiveMaterials) {
-        super(withTool(toolType, prop
-                .maxDamage(CrystalToolTier.getInstance().getMaxUses())
-                .setNoRepair()
-                .group(CommonProxy.ITEM_GROUP_AS)));
-        this.effectiveMaterials = effectiveMaterials;
-        this.toolType = toolType;
+    protected ItemCrystalTierItem(TagKey<Block> mineableBlocks, Properties prop, Set<ItemAbility> itemAbilities) {
+        super(withTool(mineableBlocks, prop));
+        this.itemAbilities = itemAbilities;
     }
 
-    private static Item.Properties withTool(@Nullable ToolType tool, Item.Properties prop) {
-        if (tool != null) {
-            prop.addToolType(tool, CrystalToolTier.getInstance().getHarvestLevel());
-        }
-        return prop;
+    private static Item.Properties withTool(TagKey<Block> mineableBlocks, Item.Properties prop) {
+        return prop
+                .durability(CrystalToolTier.getInstance().getUses())
+                .setNoRepair()
+                .component(DataComponents.TOOL, CrystalToolTier.getInstance().createToolProperties(mineableBlocks));
     }
 
     abstract double getAttackDamage();
@@ -71,7 +65,7 @@ public abstract class ItemCrystalTierItem extends Item implements CrystalAttribu
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
             attr.addTooltip(tooltip, CalculationContext.Builder.newBuilder()
@@ -79,7 +73,7 @@ public abstract class ItemCrystalTierItem extends Item implements CrystalAttribu
                     .addUsage(CrystalPropertiesAS.Usages.USE_TOOL_EFFECTIVENESS)
                     .build());
         }
-        super.addInformation(stack, world, tooltip, flag);
+        super.appendHoverText(stack, context, tooltip, flag);
     }
 
     @Override
@@ -92,23 +86,16 @@ public abstract class ItemCrystalTierItem extends Item implements CrystalAttribu
     }
 
     @Override
-    public boolean canHarvestBlock(ItemStack stack, BlockState state) {
-        int i = CrystalToolTier.getInstance().getHarvestLevel();
-        if (this.toolType != null && state.getHarvestTool() == this.toolType) {
-            return i >= state.getHarvestLevel();
-        }
-        return this.effectiveMaterials.contains(state.getMaterial());
+    public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
+        return super.isCorrectToolForDrops(stack, state);
     }
 
     @Override
     public float getDestroySpeed(ItemStack stack, BlockState state) {
         float str = super.getDestroySpeed(stack, state);
-        if (getToolTypes(stack).stream().noneMatch(state::isToolEffective) &&
-                !isToolEfficientAgainst(state) &&
-                !this.effectiveMaterials.contains(state.getMaterial())) {
+        if (str <= 1.0F) {
             return str;
         }
-        str *= CrystalToolTier.getInstance().getEfficiency();
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
             return CrystalCalculations.getToolEfficiency(str, stack);
@@ -116,22 +103,27 @@ public abstract class ItemCrystalTierItem extends Item implements CrystalAttribu
         return str;
     }
 
-    protected boolean isToolEfficientAgainst(BlockState state) {
-        return false;
-    }
-
     @Override
-    public boolean hitEntity(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        stack.damageItem(1, attacker, (entity) -> entity.sendBreakAnimation(EquipmentSlotType.MAINHAND));
+    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         return true;
     }
 
     @Override
-    public boolean onBlockDestroyed(ItemStack stack, World worldIn, BlockState state, BlockPos pos, LivingEntity entityLiving) {
-        if (!worldIn.isRemote && state.getBlockHardness(worldIn, pos) != 0.0F) {
-            stack.damageItem(1, entityLiving, (p_220038_0_) -> p_220038_0_.sendBreakAnimation(EquipmentSlotType.MAINHAND));
+    public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        stack.hurtAndBreak(1, attacker, EquipmentSlot.MAINHAND);
+    }
+
+    @Override
+    public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miningEntity) {
+        if (!level.isClientSide && state.getDestroySpeed(level, pos) != 0.0F) {
+            stack.hurtAndBreak(1, miningEntity, EquipmentSlot.MAINHAND);
         }
         return true;
+    }
+
+    @Override
+    public boolean canPerformAction(ItemStack stack, ItemAbility itemAbility) {
+        return this.itemAbilities.contains(itemAbility);
     }
 
     @Nullable
@@ -155,22 +147,29 @@ public abstract class ItemCrystalTierItem extends Item implements CrystalAttribu
     }
 
     @Override
-    public boolean getIsRepairable(ItemStack p_82789_1_, ItemStack p_82789_2_) {
+    public boolean isValidRepairItem(ItemStack stack, ItemStack repairCandidate) {
         return false;
     }
 
     @Override
-    public int getItemEnchantability(ItemStack stack) {
+    public int getEnchantmentValue() {
         return CrystalToolTier.getInstance().getEnchantability();
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
-        Multimap<Attribute, AttributeModifier> multimap = HashMultimap.create();
-        if (slot == EquipmentSlotType.MAINHAND) {
-            multimap.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Tool modifier", this.getAttackDamage(), AttributeModifier.Operation.ADDITION));
-            multimap.put(Attributes.ATTACK_SPEED, new AttributeModifier(ATTACK_SPEED_MODIFIER, "Tool modifier", this.getAttackSpeed(), AttributeModifier.Operation.ADDITION));
-        }
-        return multimap;
+    public int getEnchantmentValue(ItemStack stack) {
+        return CrystalToolTier.getInstance().getEnchantability();
+    }
+
+    @Override
+    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
+        return ItemAttributeModifiers.builder()
+                .add(Attributes.ATTACK_DAMAGE,
+                        new AttributeModifier(BASE_ATTACK_DAMAGE_ID, this.getAttackDamage(), AttributeModifier.Operation.ADD_VALUE),
+                        net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND)
+                .add(Attributes.ATTACK_SPEED,
+                        new AttributeModifier(BASE_ATTACK_SPEED_ID, this.getAttackSpeed(), AttributeModifier.Operation.ADD_VALUE),
+                        net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND)
+                .build();
     }
 }

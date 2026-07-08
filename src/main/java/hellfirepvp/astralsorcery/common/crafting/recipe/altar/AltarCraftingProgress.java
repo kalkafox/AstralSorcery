@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.crafting.recipe.altar;
 
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,6 +20,6 @@ import net.minecraft.nbt.CompoundNBT;
  */
 public interface AltarCraftingProgress {
 
-    boolean tryProcess(TileAltar altar, ActiveSimpleAltarRecipe currentRecipe, CompoundNBT data, int ticksCrafting, int totalCraftingTime);
+    boolean tryProcess(TileAltar altar, ActiveSimpleAltarRecipe currentRecipe, CompoundTag data, int ticksCrafting, int totalCraftingTime);
 
 }

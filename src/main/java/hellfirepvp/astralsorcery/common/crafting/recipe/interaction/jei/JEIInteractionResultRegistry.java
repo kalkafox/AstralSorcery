@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.crafting.recipe.interaction.jei;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.InteractionResultRegistry;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.ResultDropItem;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.ResultSpawnEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.crafting.helper.ResolvingRecipeType;
 import hellfirepvp.astralsorcery.common.crafting.recipe.*;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod

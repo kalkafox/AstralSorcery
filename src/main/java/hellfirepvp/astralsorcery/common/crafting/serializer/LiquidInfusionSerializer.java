@@ -14,15 +14,15 @@ import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInfusion;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -57,7 +57,7 @@ public class LiquidInfusionSerializer extends CustomRecipeSerializer<LiquidInfus
     }
 
     @Override
-    public LiquidInfusion read(ResourceLocation recipeId, PacketBuffer buffer) {
+    public LiquidInfusion read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         return LiquidInfusion.read(recipeId, buffer);
     }
 
@@ -67,7 +67,7 @@ public class LiquidInfusionSerializer extends CustomRecipeSerializer<LiquidInfus
     }
 
     @Override
-    public void write(PacketBuffer buffer, LiquidInfusion recipe) {
+    public void write(FriendlyByteBuf buffer, LiquidInfusion recipe) {
         recipe.write(buffer);
     }
 }

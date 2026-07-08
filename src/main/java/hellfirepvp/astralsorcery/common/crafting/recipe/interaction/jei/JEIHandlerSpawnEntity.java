@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.crafting.recipe.interaction.jei;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.LightmapUtil;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.InteractionResult;
@@ -16,13 +16,13 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.ResultSpawnE
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.Tesselator;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,7 +46,7 @@ public class JEIHandlerSpawnEntity extends JEIInteractionResultHandler {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void drawRecipe(LiquidInteraction recipe, MatrixStack renderStack, double mouseX, double mouseY) {
+    public void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double mouseX, double mouseY) {
         InteractionResult result = recipe.getResult();
         if (!(result instanceof ResultSpawnEntity)) {
             return;

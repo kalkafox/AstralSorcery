@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.perk.source;
 
 import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Collection;
 
@@ -23,6 +23,6 @@ import java.util.Collection;
  */
 public interface AttributeModifierProvider {
 
-    Collection<PerkAttributeModifier> getModifiers(PlayerEntity player, LogicalSide side, boolean ignoreRequirements);
+    Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements);
 
 }

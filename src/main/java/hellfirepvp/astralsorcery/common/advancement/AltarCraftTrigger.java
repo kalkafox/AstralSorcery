@@ -12,10 +12,10 @@ import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.advancement.instance.AltarRecipeInstance;
 import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipe;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.loot.ConditionArrayParser;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,7 +37,7 @@ public class AltarCraftTrigger extends ListenerCriterionTrigger<AltarRecipeInsta
         return AltarRecipeInstance.deserialize(getId(), object);
     }
 
-    public void trigger(ServerPlayerEntity player, SimpleAltarRecipe recipe, ItemStack output) {
+    public void trigger(ServerPlayer player, SimpleAltarRecipe recipe, ItemStack output) {
         Listeners<AltarRecipeInstance> listeners = this.listeners.get(player.getAdvancements());
         if (listeners != null) {
             listeners.trigger((i) -> i.test(recipe, output));

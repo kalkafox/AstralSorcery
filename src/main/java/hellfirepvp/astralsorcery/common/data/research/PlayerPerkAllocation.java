@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.data.research;
 
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 
 import java.util.UUID;
 

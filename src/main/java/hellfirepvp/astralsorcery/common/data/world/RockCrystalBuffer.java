@@ -12,12 +12,12 @@ import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.observerlib.common.data.WorldCacheDomain;
 import hellfirepvp.observerlib.common.data.base.SectionWorldData;
 import hellfirepvp.observerlib.common.data.base.WorldSection;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -71,13 +71,13 @@ public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer.Buffer
     }
 
     @Override
-    public void writeToNBT(CompoundNBT nbt) {}
+    public void writeToNBT(CompoundTag nbt) {}
 
     @Override
-    public void readFromNBT(CompoundNBT nbt) {}
+    public void readFromNBT(CompoundTag nbt) {}
 
     @Override
-    public void updateTick(World world) {}
+    public void updateTick(Level world) {}
 
     public static class BufferSection extends WorldSection {
 
@@ -88,19 +88,19 @@ public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer.Buffer
         }
 
         @Override
-        public void writeToNBT(CompoundNBT tag) {
-            ListNBT posList = new ListNBT();
+        public void writeToNBT(CompoundTag tag) {
+            ListTag posList = new ListTag();
             for (BlockPos exactPos : crystalPositions) {
-                posList.add(NBTHelper.writeBlockPosToNBT(exactPos, new CompoundNBT()));
+                posList.add(NBTHelper.writeBlockPosToNBT(exactPos, new CompoundTag()));
             }
             tag.put("posList", posList);
         }
 
         @Override
-        public void readFromNBT(CompoundNBT tag) {
+        public void readFromNBT(CompoundTag tag) {
             crystalPositions.clear();
 
-            ListNBT entries = tag.getList("posList", Constants.NBT.TAG_COMPOUND);
+            ListTag entries = tag.getList("posList", Constants.NBT.TAG_COMPOUND);
             for (int j = 0; j < entries.size(); j++) {
                 crystalPositions.add(NBTHelper.readBlockPosFromNBT(entries.getCompound(j)));
             }

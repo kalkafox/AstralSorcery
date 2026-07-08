@@ -15,14 +15,13 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.astralsorcery.common.util.tile.NamedInventoryTile;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -47,8 +46,8 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
     }
 
     @Override
-    public ITextComponent getDisplayName() {
-        return new TranslationTextComponent("screen.astralsorcery.observatory");
+    public Component getDisplayName() {
+        return Component.translatable("screen.astralsorcery.observatory");
     }
 
     @Override
@@ -101,7 +100,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         if (entityUUID == null) {
             return null;
         }
-        for (Entity e : world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.add(-3, -1, -3), pos.add(3, 2, 3)))) {
+        for (Entity e : world.getEntitiesWithinAABB(Entity.class, new AABB(pos.add(-3, -1, -3), pos.add(3, 2, 3)))) {
             if (e.getUniqueID().equals(entityUUID)) {
                 this.entityIdServerRef = e.getEntityId();
                 return e;
@@ -137,12 +136,12 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public AxisAlignedBB getRenderBoundingBox() {
+    public AABB getRenderBoundingBox() {
         return TileObservatory.INFINITE_EXTENT_AABB;
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.entityHelperRef = NBTHelper.getUUID(compound, "entity", null);
@@ -153,7 +152,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         if(this.entityHelperRef != null) {

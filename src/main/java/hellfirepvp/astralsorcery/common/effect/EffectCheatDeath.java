@@ -12,14 +12,14 @@ import hellfirepvp.astralsorcery.client.resource.AssetLoader;
 import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.EffectsAS;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
-import net.minecraft.potion.Effects;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffects;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +55,8 @@ public class EffectCheatDeath extends EffectCustomTexture {
 
             int level = le.removeActivePotionEffect(EffectsAS.EFFECT_CHEAT_DEATH).getAmplifier();
             le.setHealth(Math.min(le.getMaxHealth(), 4 + level * 2));
-            le.addPotionEffect(new EffectInstance(Effects.REGENERATION, 200, 2, false, false, true));
-            le.addPotionEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 500, 1, false, false, true));
+            le.addPotionEffect(new MobEffectInstance(Effects.REGENERATION, 200, 2, false, false, true));
+            le.addPotionEffect(new MobEffectInstance(Effects.FIRE_RESISTANCE, 500, 1, false, false, true));
             List<LivingEntity> others = le.getEntityWorld().getEntitiesWithinAABB(LivingEntity.class,
                     le.getBoundingBox().grow(3), (e) -> e.isAlive() && e != le);
             for (LivingEntity lb : others) {

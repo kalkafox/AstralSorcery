@@ -14,8 +14,8 @@ import hellfirepvp.astralsorcery.common.constellation.star.StarConnection;
 import hellfirepvp.astralsorcery.common.constellation.star.StarLocation;
 import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.awt.*;
 import java.util.Collections;
@@ -161,7 +161,7 @@ public class ConstellationGenerator {
         }
 
         @Override
-        public boolean canDiscover(PlayerEntity player, PlayerProgress progress) {
+        public boolean canDiscover(Player player, PlayerProgress progress) {
             return true;
         }
 

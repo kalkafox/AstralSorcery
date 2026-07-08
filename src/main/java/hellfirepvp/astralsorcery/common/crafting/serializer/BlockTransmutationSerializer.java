@@ -21,11 +21,11 @@ import hellfirepvp.astralsorcery.common.util.block.BlockMatchInformation;
 import hellfirepvp.astralsorcery.common.util.block.BlockStateHelper;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
 
     @Nullable
     @Override
-    public BlockTransmutation read(ResourceLocation recipeId, PacketBuffer buffer) {
+    public BlockTransmutation read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         List<BlockMatchInformation> matchInformation = ByteBufUtils.readList(buffer, BlockMatchInformation::read);
         BlockState output = ByteBufUtils.readBlockState(buffer);
         ItemStack display = ByteBufUtils.readItemStack(buffer);
@@ -114,7 +114,7 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
     }
 
     @Override
-    public void write(PacketBuffer buffer, BlockTransmutation recipe) {
+    public void write(FriendlyByteBuf buffer, BlockTransmutation recipe) {
         ByteBufUtils.writeCollection(buffer, recipe.getInputOptions(), (buf, match) -> match.serialize(buf));
         ByteBufUtils.writeBlockState(buffer, recipe.getOutput());
         ByteBufUtils.writeItemStack(buffer, recipe.getOutputDisplay());

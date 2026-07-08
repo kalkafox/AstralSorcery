@@ -14,14 +14,14 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,8 +51,8 @@ public class KeyProjectileDistance extends KeyPerk {
     private void onProjDamage(LivingHurtEvent event) {
         if (event.getSource().isProjectile()) {
             DamageSource source = event.getSource();
-            if (source.getTrueSource() != null && source.getTrueSource() instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) source.getTrueSource();
+            if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
+                Player player = (Player) source.getTrueSource();
                 LogicalSide side = this.getSide(player);
                 PlayerProgress prog = ResearchHelper.getProgress(player, side);
                 if (prog.getPerkData().hasPerkEffect(this)) {
@@ -73,15 +73,15 @@ public class KeyProjectileDistance extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue capDistance;
-        private ForgeConfigSpec.DoubleValue maxAdditionalMultiplier;
+        private ModConfigSpec.DoubleValue capDistance;
+        private ModConfigSpec.DoubleValue maxAdditionalMultiplier;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.capDistance = cfgBuilder
                     .comment("Defines the distance that must be reached to achieve the maximum damage multiplier")
                     .translation(translationKey("capDistance"))

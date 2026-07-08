@@ -10,13 +10,13 @@ package hellfirepvp.astralsorcery.datagen.data.tags;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.data.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.TagsProvider;
+import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraft.nbt.Tag;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Blocks.MARBLE;
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Blocks.ORES;

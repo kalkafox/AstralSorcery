@@ -12,17 +12,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,7 +53,7 @@ public class ResultSpawnEntity extends InteractionResult {
     }
 
     @Override
-    public void doResult(World world, Vector3 at) {
+    public void doResult(Level world, Vector3 at) {
         Entity e = this.entityType.create(world);
         if (!(e instanceof LivingEntity)) {
             return;
@@ -78,12 +78,12 @@ public class ResultSpawnEntity extends InteractionResult {
     }
 
     @Override
-    public void read(PacketBuffer buf) {
+    public void read(FriendlyByteBuf buf) {
         this.entityType = ByteBufUtils.readRegistryEntry(buf);
     }
 
     @Override
-    public void write(PacketBuffer buf) {
+    public void write(FriendlyByteBuf buf) {
         ByteBufUtils.writeRegistryEntry(buf, this.entityType);
     }
 }

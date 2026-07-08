@@ -9,22 +9,22 @@
 package hellfirepvp.astralsorcery.client.util;
 
 import hellfirepvp.observerlib.api.client.StructureRenderLightManager;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.LightType;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.lighting.WorldLightManager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -36,7 +36,7 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 18.07.2019 / 16:35
  */
-public class EmptyRenderWorld implements IBlockDisplayReader {
+public class EmptyRenderWorld implements BlockAndTintGetter {
 
     private final Biome biome;
 
@@ -51,7 +51,7 @@ public class EmptyRenderWorld implements IBlockDisplayReader {
     }
 
     @Override
-    public WorldLightManager getLightManager() {
+    public LevelLightEngine getLightManager() {
         return new StructureRenderLightManager(this.getMaxLightLevel());
     }
 
@@ -61,13 +61,13 @@ public class EmptyRenderWorld implements IBlockDisplayReader {
     }
 
     @Override
-    public int getLightFor(LightType lightType, BlockPos blockPos) {
+    public int getLightFor(LightLayer lightType, BlockPos blockPos) {
         return this.getMaxLightLevel();
     }
 
     @Nullable
     @Override
-    public TileEntity getTileEntity(BlockPos blockPos) {
+    public BlockEntity getTileEntity(BlockPos blockPos) {
         return null;
     }
 

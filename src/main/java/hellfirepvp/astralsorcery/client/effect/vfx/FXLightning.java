@@ -9,15 +9,15 @@
 package hellfirepvp.astralsorcery.client.effect.vfx;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.context.base.BatchRenderContext;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -121,7 +121,7 @@ public class FXLightning extends EntityVisualFX {
     }
 
     @Override
-    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, MatrixStack renderStack, IVertexBuilder vb, float pTicks) {
+    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, PoseStack renderStack, VertexConsumer vb, float pTicks) {
         if (root == null) {
             return;
         }
@@ -132,7 +132,7 @@ public class FXLightning extends EntityVisualFX {
         renderRec(this.root, vb, renderStack, pTicks, c.getRed() / 255F, c.getGreen() / 255F, c.getBlue() / 255F, alpha / 255F);
     }
 
-    private void renderRec(LightningVertex root, IVertexBuilder vb, MatrixStack renderStack, float pTicks, float r, float g, float b, float a) {
+    private void renderRec(LightningVertex root, VertexConsumer vb, PoseStack renderStack, float pTicks, float r, float g, float b, float a) {
         int allDepth = root.followingDepth;
         boolean mayRenderNext = 1F - (((float) root.followingDepth) / ((float) allDepth)) <= bufRenderDepth;
         Vector3 playerOffset = RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks);
@@ -146,12 +146,12 @@ public class FXLightning extends EntityVisualFX {
         }
     }
 
-    private void drawLine(Vector3 from, Vector3 to, IVertexBuilder vb, MatrixStack renderStack, float r, float g, float b, float a) {
+    private void drawLine(Vector3 from, Vector3 to, VertexConsumer vb, PoseStack renderStack, float r, float g, float b, float a) {
         renderCurrentTextureAroundAxis(from, to, Math.toRadians(0F),  0.035F, vb, renderStack, r, g, b, a);
         renderCurrentTextureAroundAxis(from, to, Math.toRadians(90F), 0.035F, vb, renderStack, r, g, b, a);
     }
 
-    private void renderCurrentTextureAroundAxis(Vector3 from, Vector3 to, double angle, double size, IVertexBuilder buf, MatrixStack renderStack, float r, float g, float b, float a) {
+    private void renderCurrentTextureAroundAxis(Vector3 from, Vector3 to, double angle, double size, VertexConsumer buf, PoseStack renderStack, float r, float g, float b, float a) {
         Vector3 aim = to.clone().subtract(from).normalize();
         Vector3 aimPerp = aim.clone().perpendicular().normalize();
         Vector3 perp = aimPerp.clone().rotate(angle, aim).normalize();

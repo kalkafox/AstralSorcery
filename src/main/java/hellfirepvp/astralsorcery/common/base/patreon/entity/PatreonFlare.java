@@ -20,10 +20,10 @@ import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.common.base.patreon.FlareColor;
 import hellfirepvp.astralsorcery.common.base.patreon.PatreonEffect;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -87,7 +87,7 @@ public class PatreonFlare extends PatreonPartialEntity {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void tickEffects(World world) {
+    public void tickEffects(Level world) {
         super.tickEffects(world);
 
         if (!RenderingConfig.CONFIG.patreonEffects.get() || rand.nextBoolean()) {

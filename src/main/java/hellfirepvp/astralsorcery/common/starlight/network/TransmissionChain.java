@@ -20,11 +20,11 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.IPrismTransmissio
 import hellfirepvp.astralsorcery.common.starlight.transmission.ITransmissionReceiver;
 import hellfirepvp.astralsorcery.common.starlight.transmission.NodeConnection;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 
@@ -54,7 +54,7 @@ public class TransmissionChain {
         this.sourceNode = sourceNode;
     }
 
-    public static void buildNetworkChain(World world, TransmissionWorldHandler handle, IIndependentStarlightSource source, WorldNetworkHandler netHandler, BlockPos sourcePos) {
+    public static void buildNetworkChain(Level world, TransmissionWorldHandler handle, IIndependentStarlightSource source, WorldNetworkHandler netHandler, BlockPos sourcePos) {
         TransmissionChain chain = buildFromSource(netHandler, sourcePos);
         handle.updateNetworkChainData(world, chain, source, netHandler, sourcePos);
         SyncDataHolder.executeServer(SyncDataHolder.DATA_LIGHT_CONNECTIONS, DataLightConnections.class, data -> {
@@ -79,7 +79,7 @@ public class TransmissionChain {
         return chain;
     }
 
-    private void resolveLoadedEndpoints(World world) {
+    private void resolveLoadedEndpoints(Level world) {
         for (BlockPos pos : uncheckedEndpointsBlock) {
             MiscUtils.executeWithChunk(world, pos, () -> {
                 BlockState state = world.getBlockState(pos);
@@ -92,7 +92,7 @@ public class TransmissionChain {
         }
     }
 
-    protected void updatePosAsResolved(World world, BlockPos pos) {
+    protected void updatePosAsResolved(Level world, BlockPos pos) {
         if (uncheckedEndpointsBlock.contains(pos) && !resolvedNormalBlockPositions.contains(pos)) {
             resolvedNormalBlockPositions.add(pos);
             SyncDataHolder.executeServer(SyncDataHolder.DATA_LIGHT_BLOCK_ENDPOINTS, DataLightBlockEndpoints.class, data -> {

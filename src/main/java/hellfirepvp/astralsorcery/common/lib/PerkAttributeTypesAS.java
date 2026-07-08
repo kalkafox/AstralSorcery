@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import static hellfirepvp.astralsorcery.AstralSorcery.key;
 

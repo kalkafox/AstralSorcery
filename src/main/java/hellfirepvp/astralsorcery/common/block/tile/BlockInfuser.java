@@ -14,24 +14,24 @@ import hellfirepvp.astralsorcery.common.block.properties.PropertiesMarble;
 import hellfirepvp.astralsorcery.common.tile.TileInfuser;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -53,12 +53,12 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return INFUSER;
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!world.isRemote) {
             ItemStack held = player.getHeldItem(hand);
             TileInfuser ti = MiscUtils.getTileAt(world, pos, TileInfuser.class, true);
@@ -99,7 +99,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) {
+    public int getComparatorInputOverride(BlockState state, Level world, BlockPos pos) {
         TileInfuser ti = MiscUtils.getTileAt(world, pos, TileInfuser.class, false);
         if (ti != null) {
             return ti.getItemInput().isEmpty() ? 0 : 15;
@@ -108,18 +108,18 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public RenderShape getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
         return new TileInfuser();
     }
 }

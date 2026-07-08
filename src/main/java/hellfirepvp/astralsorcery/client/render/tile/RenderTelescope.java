@@ -8,12 +8,12 @@
 
 package hellfirepvp.astralsorcery.client.render.tile;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.model.builtin.ModelTelescope;
 import hellfirepvp.astralsorcery.common.tile.TileTelescope;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,12 +26,12 @@ public class RenderTelescope extends CustomTileEntityRenderer<TileTelescope> {
 
     private static final ModelTelescope MODEL_TELESCOPE = new ModelTelescope();
 
-    public RenderTelescope(TileEntityRendererDispatcher tileRenderer) {
+    public RenderTelescope(BlockEntityRenderDispatcher tileRenderer) {
         super(tileRenderer);
     }
 
     @Override
-    public void render(TileTelescope tile, float pTicks, MatrixStack renderStack, IRenderTypeBuffer renderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void render(TileTelescope tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         renderStack.push();
         renderStack.translate(0.5F, 1.5F, 0.5F);
         renderStack.rotate(Vector3f.XP.rotationDegrees(180F));

@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.util.item;
 
 import com.google.common.collect.Sets;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTComparator;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.Set;

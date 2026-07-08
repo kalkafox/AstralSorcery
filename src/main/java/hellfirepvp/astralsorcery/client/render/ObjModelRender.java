@@ -8,16 +8,16 @@
 
 package hellfirepvp.astralsorcery.client.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.resource.AssetLoader;
 import hellfirepvp.astralsorcery.client.util.obj.WavefrontObject;
 import hellfirepvp.observerlib.client.util.BufferDecoratorBuilder;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,7 +37,7 @@ public class ObjModelRender {
     private static WavefrontObject wraithWingsModel;
     private static VertexBuffer wraithWingsBones, wraithWingsWing;
 
-    public static void renderCrystal(MatrixStack renderStack, IVertexBuilder buf, Runnable drawFn) {
+    public static void renderCrystal(PoseStack renderStack, VertexConsumer buf, Runnable drawFn) {
         if (crystalModel == null) {
             crystalModel = AssetLoader.loadObjModel(AssetLoader.ModelLocation.OBJ, "crystal");
         }
@@ -62,7 +62,7 @@ public class ObjModelRender {
         //VertexBuffer.unbindBuffer();
     }
 
-    public static void renderCelestialWings(MatrixStack renderStack) {
+    public static void renderCelestialWings(PoseStack renderStack) {
         if (celestialWingsModel == null) {
             celestialWingsModel = AssetLoader.loadObjModel(AssetLoader.ModelLocation.OBJ, "celestial_wings");
         }
@@ -79,7 +79,7 @@ public class ObjModelRender {
         VertexBuffer.unbindBuffer();
     }
 
-    public static void renderWraithWings(MatrixStack renderStack) {
+    public static void renderWraithWings(PoseStack renderStack) {
         if (wraithWingsModel == null) {
             wraithWingsModel = AssetLoader.loadObjModel(AssetLoader.ModelLocation.OBJ, "wraith_wings");
         }

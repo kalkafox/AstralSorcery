@@ -11,38 +11,38 @@ package hellfirepvp.astralsorcery.common.util.entity;
 import com.google.common.base.Predicate;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.*;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.LootTable;
-import net.minecraft.potion.EffectInstance;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.MobSpawnInfo;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.gen.feature.structure.StructureManager;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.spawner.WorldEntitySpawner;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.NaturalSpawner;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.bus.api.Event;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,12 +63,12 @@ public class EntityUtils {
     private static final Random rand = new Random();
 
     @Nullable
-    public static PlayerEntity getPlayer(UUID playerUUID, LogicalSide side) {
+    public static Player getPlayer(UUID playerUUID, LogicalSide side) {
         return side.isClient() ? getPlayerClient(playerUUID) : getPlayerServer(playerUUID);
     }
 
     @Nullable
-    public static PlayerEntity getPlayerServer(UUID playerUUID) {
+    public static Player getPlayerServer(UUID playerUUID) {
         MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
         if (server == null) {
             return null;
@@ -78,16 +78,16 @@ public class EntityUtils {
 
     @Nullable
     @OnlyIn(Dist.CLIENT)
-    public static PlayerEntity getPlayerClient(UUID playerUUID) {
-        ClientWorld clWorld = Minecraft.getInstance().world;
+    public static Player getPlayerClient(UUID playerUUID) {
+        ClientLevel clWorld = Minecraft.getInstance().world;
         if (clWorld == null) {
             return null;
         }
         return clWorld.getPlayerByUuid(playerUUID);
     }
 
-    public static void applyPotionEffectAtHalf(LivingEntity entity, EffectInstance effect) {
-        EffectInstance activeEffect = entity.getActivePotionEffect(effect.getPotion());
+    public static void applyPotionEffectAtHalf(LivingEntity entity, MobEffectInstance effect) {
+        MobEffectInstance activeEffect = entity.getActivePotionEffect(effect.getPotion());
         if (activeEffect != null) {
             if (activeEffect.duration <= effect.duration / 2) {
                 entity.addPotionEffect(effect);
@@ -114,7 +114,7 @@ public class EntityUtils {
     }
 
     @Nullable
-    public static LivingEntity performWorldSpawningAt(ServerWorld world, BlockPos pos, EntityClassification category, SpawnReason reason, boolean ignoreWeighting, int ignoreSpawnCheckFlags) {
+    public static LivingEntity performWorldSpawningAt(ServerLevel world, BlockPos pos, MobCategory category, MobSpawnType reason, boolean ignoreWeighting, int ignoreSpawnCheckFlags) {
         Biome b = world.getBiome(pos);
         StructureManager mgr = world.func_241112_a_();
         List<MobSpawnInfo.Spawners> spawnList = world.getChunkProvider().getChunkGenerator().func_230353_a_(b, mgr, EntityClassification.MONSTER, pos);
@@ -134,9 +134,9 @@ public class EntityUtils {
 
             BlockState state = world.getBlockState(pos);
             if (!state.isNormalCube(world, pos) && canEntitySpawnHere(world, pos, entry.type, reason, ignoreSpawnCheckFlags, null)) {
-                MobEntity entity;
+                Mob entity;
                 try {
-                    entity = (MobEntity) entry.type.create(world);
+                    entity = (Mob) entry.type.create(world);
                 } catch (Exception exception) {
                     return null;
                 }
@@ -161,7 +161,7 @@ public class EntityUtils {
         return null;
     }
 
-    public static boolean canEntitySpawnHere(ServerWorld world, BlockPos at, EntityType<? extends Entity> type, SpawnReason spawnReason, int ignoreCheckFlags, @Nullable Consumer<Entity> preCheckEntity) {
+    public static boolean canEntitySpawnHere(ServerLevel world, BlockPos at, EntityType<? extends Entity> type, MobSpawnType spawnReason, int ignoreCheckFlags, @Nullable Consumer<Entity> preCheckEntity) {
         if (type.getClassification() == EntityClassification.MISC || !type.isSummonable() || !world.getWorldBorder().contains(at)) {
             return false;
         }
@@ -190,8 +190,8 @@ public class EntityUtils {
         }
 
         if (entity instanceof LivingEntity) {
-            if (entity instanceof MobEntity) {
-                MobEntity mobEntity = (MobEntity) entity;
+            if (entity instanceof Mob) {
+                Mob mobEntity = (Mob) entity;
                 Event.Result canSpawn = ForgeEventFactory.canEntitySpawn(mobEntity, world, entity.getPosX(), entity.getPosY(), entity.getPosZ(), null, spawnReason);
                 if (canSpawn == Event.Result.DENY) {
                     return false;
@@ -215,7 +215,7 @@ public class EntityUtils {
     @Nonnull
     public static List<ItemStack> generateLoot(LivingEntity entity, Random rand, DamageSource srcDeath, @Nullable LivingEntity lastAttacker) {
         MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-        ServerWorld sw = (ServerWorld) entity.getEntityWorld();
+        ServerLevel sw = (ServerLevel) entity.getEntityWorld();
 
         if (!sw.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
             return Collections.emptyList();
@@ -231,9 +231,9 @@ public class EntityUtils {
                 .withNullableParameter(LootParameters.KILLER_ENTITY, srcDeath.getTrueSource())
                 .withNullableParameter(LootParameters.DIRECT_KILLER_ENTITY, srcDeath.getImmediateSource());
         if (lastAttacker != null) {
-            if (lastAttacker instanceof PlayerEntity) {
-                builder.withParameter(LootParameters.LAST_DAMAGE_PLAYER, (PlayerEntity) lastAttacker)
-                        .withLuck(((PlayerEntity) lastAttacker).getLuck());
+            if (lastAttacker instanceof Player) {
+                builder.withParameter(LootParameters.LAST_DAMAGE_PLAYER, (Player) lastAttacker)
+                        .withLuck(((Player) lastAttacker).getLuck());
             }
         }
 
@@ -241,7 +241,7 @@ public class EntityUtils {
     }
 
     @Nullable
-    public static <T extends Entity> T getClosestEntity(IWorld world, Class<T> type, AxisAlignedBB box, Vector3 closestTo) {
+    public static <T extends Entity> T getClosestEntity(LevelAccessor world, Class<T> type, AABB box, Vector3 closestTo) {
         List<T> entities = world.getEntitiesWithinAABB(type, box, Entity::isAlive);
         return selectClosest(entities, closestTo::distanceSquared);
     }

@@ -30,21 +30,21 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.monster.PhantomEntity;
-import net.minecraft.entity.passive.BatEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -68,7 +68,7 @@ public class EntityFlare extends FlyingEntity {
 
     private Object texClientSprite = null;
 
-    public EntityFlare(World worldIn) {
+    public EntityFlare(Level worldIn) {
         super(EntityTypesAS.FLARE, worldIn);
     }
 
@@ -81,7 +81,7 @@ public class EntityFlare extends FlyingEntity {
                 .createMutableAttribute(Attributes.MAX_HEALTH, 1);
     }
 
-    public static void spawnAmbientFlare(World world, BlockPos at) {
+    public static void spawnAmbientFlare(Level world, BlockPos at) {
         if (world.isRemote() || EntityConfig.CONFIG.flareAmbientSpawnChance.get() <= 0) {
             return;
         }
@@ -139,13 +139,13 @@ public class EntityFlare extends FlyingEntity {
 
             if (this.isAlive()) {
                 if (EntityConfig.CONFIG.flareAttackBats.get() && rand.nextInt(30) == 0) {
-                    BatEntity closest = EntityUtils.getClosestEntity(this.getEntityWorld(), BatEntity.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
+                    Bat closest = EntityUtils.getClosestEntity(this.getEntityWorld(), BatEntity.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
                     if (closest != null) {
                         this.doLightningAttack(closest, 100F);
                     }
                 }
                 if (EntityConfig.CONFIG.flareAttackPhantoms.get() && rand.nextInt(30) == 0) {
-                    PhantomEntity closest = EntityUtils.getClosestEntity(this.getEntityWorld(), PhantomEntity.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
+                    Phantom closest = EntityUtils.getClosestEntity(this.getEntityWorld(), PhantomEntity.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
                     if (closest != null) {
                         this.doLightningAttack(closest, 100F);
                     }
@@ -260,7 +260,7 @@ public class EntityFlare extends FlyingEntity {
 
     private void doMovement() {
         if (this.currentMoveTarget != null) {
-            Vector3d motion = this.getMotion();
+            Vec3 motion = this.getMotion();
             double motionX = (Math.signum(this.currentMoveTarget.getX() - this.getPosX()) * 0.5D - motion.getX()) * (this.isAmbient() ? 0.01D : 0.025D);
             double motionY = (Math.signum(this.currentMoveTarget.getY() - this.getPosY()) * 0.7D - motion.getY()) * (this.isAmbient() ? 0.01D : 0.025D);
             double motionZ = (Math.signum(this.currentMoveTarget.getZ() - this.getPosZ()) * 0.5D - motion.getZ()) * (this.isAmbient() ? 0.01D : 0.025D);
@@ -271,14 +271,14 @@ public class EntityFlare extends FlyingEntity {
 
     @Override
     public void applyEntityCollision(Entity entityIn) {
-        if(!(entityIn instanceof PlayerEntity)) {
+        if(!(entityIn instanceof Player)) {
             super.applyEntityCollision(entityIn);
         }
     }
 
     @Override
     protected void collideWithEntity(Entity entityIn) {
-        if(!(entityIn instanceof PlayerEntity)) {
+        if(!(entityIn instanceof Player)) {
             super.applyEntityCollision(entityIn);
         }
     }
@@ -290,7 +290,7 @@ public class EntityFlare extends FlyingEntity {
     }
 
     @Override
-    public boolean canSpawn(IWorld worldIn, SpawnReason spawnReasonIn) {
+    public boolean canSpawn(LevelAccessor worldIn, MobSpawnType spawnReasonIn) {
         return false;
     }
 
@@ -360,7 +360,7 @@ public class EntityFlare extends FlyingEntity {
     }
 
     @Override
-    public void writeAdditional(CompoundNBT compound) {
+    public void writeAdditional(CompoundTag compound) {
         super.writeAdditional(compound);
 
         compound.putInt("AS_entityAge", this.entityAge);
@@ -368,7 +368,7 @@ public class EntityFlare extends FlyingEntity {
     }
 
     @Override
-    public void readAdditional(CompoundNBT compound) {
+    public void readAdditional(CompoundTag compound) {
         super.readAdditional(compound);
 
         this.entityAge = compound.getInt("AS_entityAge");

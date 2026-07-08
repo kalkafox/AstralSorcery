@@ -8,9 +8,13 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
+import net.minecraft.network.chat.MutableComponent;
+
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -52,19 +56,19 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.client.gui.Font;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.Util;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
 import net.minecraft.util.text.*;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -119,7 +123,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
     private ItemStack foundSeals = ItemStack.EMPTY;
 
     public ScreenJournalPerkTree() {
-        super(new TranslationTextComponent("screen.astralsorcery.tome.perks"), 30);
+        super(Component.translatable("screen.astralsorcery.tome.perks"), 30);
         this.closeWithInventoryKey = false;
         this.searchTextEntry.setChangeCallback(this::updateSearchHighlight);
 
@@ -197,7 +201,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
     }
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         initializeDrawBuffer();
 
         this.thisFramePerks.clear();
@@ -257,7 +261,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         }
     }
 
-    private void drawSealBox(MatrixStack renderStack) {
+    private void drawSealBox(PoseStack renderStack) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         TexturesAS.TEX_GUI_MENU_SLOT.bindTexture();
@@ -272,19 +276,19 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         }
     }
 
-    private void drawHoverTooltips(MatrixStack renderStack, int mouseX, int mouseY) {
-        PlayerEntity player = Minecraft.getInstance().player;
+    private void drawHoverTooltips(PoseStack renderStack, int mouseX, int mouseY) {
+        Player player = Minecraft.getInstance().player;
 
         for (Rectangle.Float r : this.slotsSocketMenu.keySet()) {
             if (r.contains(mouseX, mouseY)) {
                 Integer slot = this.slotsSocketMenu.get(r);
                 ItemStack in = player.inventory.getStackInSlot(slot);
                 if (!in.isEmpty()) {
-                    FontRenderer fr = in.getItem().getFontRenderer(in);
+                    Font fr = in.getItem().getFontRenderer(in);
                     if (fr == null) {
                         fr = Minecraft.getInstance().fontRenderer;
                     }
-                    List<ITextProperties> toolTip = new ArrayList<>();
+                    List<FormattedText> toolTip = new ArrayList<>();
                     toolTip.addAll(this.getTooltipFromItem(in));
                     RenderingDrawUtils.renderBlueTooltipComponents(renderStack, mouseX, mouseY, this.getGuiZLevel(), toolTip, fr, true);
                 }
@@ -294,22 +298,22 @@ public class ScreenJournalPerkTree extends ScreenJournal {
 
         if (rStatStar.contains(mouseX, mouseY)) {
             RenderingDrawUtils.renderBlueTooltipComponents(renderStack, rStatStar.x + rStatStar.width / 2F, rStatStar.y + rStatStar.height, this.getGuiZLevel(),
-                    Lists.newArrayList(new TranslationTextComponent("perk.reader.astralsorcery.infostar")), font, false);
+                    Lists.newArrayList(Component.translatable("perk.reader.astralsorcery.infostar")), font, false);
             return;
         }
 
         if (!this.foundSeals.isEmpty() && rectSealBox.contains(mouseX - guiLeft, mouseY - guiTop)) {
-            List<ITextProperties> toolTip = new ArrayList<>();
+            List<FormattedText> toolTip = new ArrayList<>();
             toolTip.addAll(this.foundSeals.getTooltip(Minecraft.getInstance().player,
                     Minecraft.getInstance().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL));
-            toolTip.add(StringTextComponent.EMPTY);
-            toolTip.add(new TranslationTextComponent("perk.info.astralsorcery.sealed.usage").mergeStyle(TextFormatting.GRAY));
+            toolTip.add(MutableComponent.EMPTY);
+            toolTip.add(Component.translatable("perk.info.astralsorcery.sealed.usage").withStyle(TextFormatting.GRAY));
 
             RenderingDrawUtils.renderBlueTooltipComponents(renderStack, mouseX, mouseY, this.getGuiZLevel(), toolTip, font, false);
         } else {
             for (Map.Entry<AbstractPerk, Rectangle.Float> rctPerk : this.thisFramePerks.entrySet()) {
                 if (rctPerk.getValue().contains(mouseX, mouseY) && this.guiBox.isInBox(mouseX - guiLeft, mouseY - guiTop)) {
-                    List<ITextProperties> toolTip = new LinkedList<>();
+                    List<FormattedText> toolTip = new LinkedList<>();
                     AbstractPerk perk = rctPerk.getKey();
                     PlayerProgress prog = ResearchHelper.getClientProgress();
                     PlayerPerkData perkData = prog.getPerkData();
@@ -317,35 +321,35 @@ public class ScreenJournalPerkTree extends ScreenJournal {
                     perk.getLocalizedTooltip().forEach(line -> {
                         Style style = line.getStyle();
                         if (style.getColor() == null) {
-                            line.mergeStyle(TextFormatting.GRAY).mergeStyle(TextFormatting.ITALIC);
+                            line.withStyle(TextFormatting.GRAY).withStyle(TextFormatting.ITALIC);
                         }
                         toolTip.add(line);
                     });
 
                     if (perkData.isPerkSealed(perk)) {
-                        toolTip.add(new TranslationTextComponent("perk.info.astralsorcery.sealed").mergeStyle(TextFormatting.RED));
-                        toolTip.add(new TranslationTextComponent("perk.info.astralsorcery.sealed.break").mergeStyle(TextFormatting.RED));
+                        toolTip.add(Component.translatable("perk.info.astralsorcery.sealed").withStyle(TextFormatting.RED));
+                        toolTip.add(Component.translatable("perk.info.astralsorcery.sealed.break").withStyle(TextFormatting.RED));
                     } else if (perkData.hasPerkEffect(perk)) {
-                        toolTip.add(new TranslationTextComponent("perk.info.astralsorcery.active").mergeStyle(TextFormatting.GREEN));
+                        toolTip.add(Component.translatable("perk.info.astralsorcery.active").withStyle(TextFormatting.GREEN));
                     } else if (perk.mayUnlockPerk(prog, player)) {
-                        toolTip.add(new TranslationTextComponent("perk.info.astralsorcery.available").mergeStyle(TextFormatting.BLUE));
+                        toolTip.add(Component.translatable("perk.info.astralsorcery.available").withStyle(TextFormatting.BLUE));
                     } else {
-                        toolTip.add(new TranslationTextComponent("perk.info.astralsorcery.locked").mergeStyle(TextFormatting.GRAY));
+                        toolTip.add(Component.translatable("perk.info.astralsorcery.locked").withStyle(TextFormatting.GRAY));
                     }
 
                     if (Minecraft.getInstance().gameSettings.advancedItemTooltips && perk.getCategory() != AbstractPerk.CATEGORY_BASE) {
-                        toolTip.add(perk.getCategory().getName().mergeStyle(TextFormatting.GRAY).mergeStyle(TextFormatting.ITALIC));
+                        toolTip.add(perk.getCategory().getName().withStyle(TextFormatting.GRAY).withStyle(TextFormatting.ITALIC));
                     }
-                    Collection<IFormattableTextComponent> modInfo = perk.getSource();
+                    Collection<MutableComponent> modInfo = perk.getSource();
                     if (modInfo != null) {
-                        for (IFormattableTextComponent cmp : modInfo) {
-                            toolTip.add(cmp.mergeStyle(TextFormatting.BLUE).mergeStyle(TextFormatting.ITALIC));
+                        for (MutableComponent cmp : modInfo) {
+                            toolTip.add(cmp.withStyle(TextFormatting.BLUE).withStyle(TextFormatting.ITALIC));
                         }
                     }
                     if (Minecraft.getInstance().gameSettings.showDebugInfo) {
-                        toolTip.add(StringTextComponent.EMPTY);
-                        toolTip.add(new StringTextComponent(perk.getRegistryName().toString()).mergeStyle(TextFormatting.GRAY));
-                        toolTip.add(new TranslationTextComponent("astralsorcery.misc.ctrlcopy").mergeStyle(TextFormatting.GRAY));
+                        toolTip.add(MutableComponent.EMPTY);
+                        toolTip.add(Component.literal(perk.getRegistryName().toString()).withStyle(TextFormatting.GRAY));
+                        toolTip.add(Component.translatable("astralsorcery.misc.ctrlcopy").withStyle(TextFormatting.GRAY));
                     }
                     RenderingDrawUtils.renderBlueTooltipComponents(renderStack, mouseX, mouseY, this.getGuiZLevel(), toolTip, font, true);
                     break;
@@ -354,7 +358,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         }
     }
 
-    private <T extends AbstractPerk & GemSocketPerk> void drawSocketContextMenu(MatrixStack renderStack) {
+    private <T extends AbstractPerk & GemSocketPerk> void drawSocketContextMenu(PoseStack renderStack) {
         this.rSocketMenu = null;
         this.slotsSocketMenu.clear();
 
@@ -434,15 +438,15 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         }
     }
 
-    private void drawMiscInfo(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    private void drawMiscInfo(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         PlayerProgress prog = ResearchHelper.getClientProgress();
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
 
         int availablePerks;
         if (prog.isAttuned() && (availablePerks = prog.getPerkData().getAvailablePerkPoints(player, LogicalSide.CLIENT)) > 0) {
             renderStack.push();
             renderStack.translate(guiLeft + 50, guiTop + 18, this.getGuiZLevel());
-            ITextProperties points = new TranslationTextComponent("perk.info.astralsorcery.points", availablePerks);
+            FormattedText points = Component.translatable("perk.info.astralsorcery.points", availablePerks);
             RenderingDrawUtils.renderStringAt(points, renderStack, font, 0xCCCCCC, true);
             renderStack.pop();
         }
@@ -454,7 +458,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         renderStack.pop();
     }
 
-    private void drawSearchBox(MatrixStack renderStack) {
+    private void drawSearchBox(PoseStack renderStack) {
         TexturesAS.TEX_GUI_TEXT_FIELD.bindTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -481,12 +485,12 @@ public class ScreenJournalPerkTree extends ScreenJournal {
 
         renderStack.push();
         renderStack.translate(guiLeft + 304, guiTop + 20, this.getGuiZLevel());
-        RenderingDrawUtils.renderStringAt(font, renderStack, new StringTextComponent(text), 0xCCCCCC);
+        RenderingDrawUtils.renderStringAt(font, renderStack, Component.literal(text), 0xCCCCCC);
         renderStack.pop();
     }
 
-    private void drawPerkTree(MatrixStack renderStack, float partialTicks) {
-        PlayerEntity player = Minecraft.getInstance().player;
+    private void drawPerkTree(PoseStack renderStack, float partialTicks) {
+        Player player = Minecraft.getInstance().player;
         PlayerProgress progress = ResearchHelper.getClientProgress();
         PlayerPerkData perkData = progress.getPerkData();
 
@@ -553,7 +557,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         this.breakEffects.keySet().removeIf(perk -> !drawPerkSealBreak(perk, renderStack, this.breakEffects.get(perk), partialTicks));
     }
 
-    private boolean drawPerkSealBreak(AbstractPerk perk, MatrixStack renderStack, long tick, float pTicks) {
+    private boolean drawPerkSealBreak(AbstractPerk perk, PoseStack renderStack, long tick, float pTicks) {
         int count = (int) (ClientScheduler.getClientTick() - tick);
         SpriteSheetResource sealBreakSprite = SpritesAS.SPR_PERK_SEAL_BREAK;
         if (count >= sealBreakSprite.getFrameCount()) {
@@ -593,7 +597,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         return true;
     }
 
-    private boolean drawPerkUnlock(AbstractPerk perk, MatrixStack renderStack, long tick) {
+    private boolean drawPerkUnlock(AbstractPerk perk, PoseStack renderStack, long tick) {
         int count = (int) (ClientScheduler.getClientTick() - tick);
         SpriteSheetResource spritePerkUnlock = SpritesAS.SPR_PERK_UNLOCK;
         if (count >= spritePerkUnlock.getFrameCount()) {
@@ -626,7 +630,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
     }
 
     @Nullable
-    private Rectangle.Float drawPerk(BatchPerkContext ctx, MatrixStack renderStack, PerkTreePoint<?> perkPoint,
+    private Rectangle.Float drawPerk(BatchPerkContext ctx, PoseStack renderStack, PerkTreePoint<?> perkPoint,
                                       float pTicks, long effectTick, boolean renderSeal,
                                       Collection<Runnable> outRenderDynamic) {
         Point.Float offset = this.sizeHandler.scalePointToGui(this, this.mousePosition, perkPoint.getOffset());
@@ -666,12 +670,12 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         return new Rectangle.Float(offset.x - (drawSize.width / 2), offset.y - (drawSize.height / 2), drawSize.width, drawSize.height);
     }
 
-    private void drawSeal(BatchPerkContext ctx, MatrixStack renderStack, double size, double x, double y, long spriteOffsetTick) {
+    private void drawSeal(BatchPerkContext ctx, PoseStack renderStack, double size, double x, double y, long spriteOffsetTick) {
         BufferContext batch = ctx.getContext(sealContext);
         drawSeal(batch, renderStack, size, x, y, spriteOffsetTick, 1F);
     }
 
-    private void drawSeal(BufferBuilder vb, MatrixStack renderStack, double size, double x, double y, long spriteOffsetTick, float alpha) {
+    private void drawSeal(BufferBuilder vb, PoseStack renderStack, double size, double x, double y, long spriteOffsetTick, float alpha) {
         SpriteSheetResource tex = SpritesAS.SPR_PERK_SEAL;
         if (tex == null) {
             return;
@@ -695,11 +699,11 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         }
     }
 
-    private void drawSearchMarkHalo(BatchPerkContext ctx, MatrixStack renderStack, Rectangle.Float draw, float x, float y) {
+    private void drawSearchMarkHalo(BatchPerkContext ctx, PoseStack renderStack, Rectangle.Float draw, float x, float y) {
         drawSearchHalo(ctx, renderStack, (draw.width + draw.height) / 2F, x, y);
     }
 
-    private void drawSearchHalo(BatchPerkContext ctx, MatrixStack renderStack, float size, float x, float y) {
+    private void drawSearchHalo(BatchPerkContext ctx, PoseStack renderStack, float size, float x, float y) {
         BufferContext batch = ctx.getContext(searchContext);
         SpriteSheetResource searchMark = SpritesAS.SPR_PERK_SEARCH;
 
@@ -722,7 +726,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         }
     }
 
-    private void drawConnection(BufferBuilder vb, MatrixStack renderStack, AllocationStatus status, Point.Float source, Point.Float target, long effectTick) {
+    private void drawConnection(BufferBuilder vb, PoseStack renderStack, AllocationStatus status, Point.Float source, Point.Float target, long effectTick) {
         Point.Float offsetSrc = this.sizeHandler.scalePointToGui(this, this.mousePosition, source);
         Point.Float offsetDst = this.sizeHandler.scalePointToGui(this, this.mousePosition, target);
         Color overlay = status.getPerkConnectionColor();
@@ -796,7 +800,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
                 true);
     }
 
-    private void drawBackground(MatrixStack renderStack) {
+    private void drawBackground(PoseStack renderStack) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableAlphaTest();
@@ -823,7 +827,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
             if (perk.getCategory().getName().getString().toLowerCase(Locale.ROOT).contains(matchText)) {
                 this.searchMatches.add(perk);
             } else {
-                for (IFormattableTextComponent tooltip : perk.getLocalizedTooltip()) {
+                for (MutableComponent tooltip : perk.getLocalizedTooltip()) {
                     if (tooltip.getString().toLowerCase(Locale.ROOT).contains(matchText)) {
                         this.searchMatches.add(perk);
                         break;
@@ -831,7 +835,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
                 }
             }
         }
-        IFormattableTextComponent sealedInfo = new TranslationTextComponent("perk.info.astralsorcery.sealed");
+        MutableComponent sealedInfo = Component.translatable("perk.info.astralsorcery.sealed");
         if (sealedInfo.getString().toLowerCase(Locale.ROOT).contains(matchText)) {
             PlayerProgress prog = ResearchHelper.getClientProgress();
             for (AbstractPerk sealed : prog.getPerkData().getSealedPerks()) {
@@ -854,7 +858,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
             return true;
         }
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
 
         if (!this.mouseSealStack.isEmpty()) {
             this.mouseSealStack = ItemStack.EMPTY;
@@ -1004,7 +1008,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
                 if (mouseButton == 0 && mc.gameSettings.showDebugInfo && hasControlDown()) {
                     String perkKey = perk.getRegistryName().toString();
                     Minecraft.getInstance().keyboardListener.setClipboardString(perkKey);
-                    mc.player.sendMessage(new TranslationTextComponent("astralsorcery.misc.ctrlcopy.copied", perkKey), Util.DUMMY_UUID);
+                    mc.player.sendMessage(Component.translatable("astralsorcery.misc.ctrlcopy.copied", perkKey), Util.DUMMY_UUID);
                     break;
                 }
                 if (mouseButton == 1) {

@@ -15,12 +15,12 @@ import hellfirepvp.astralsorcery.common.event.CooldownSetEvent;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,8 +43,8 @@ public class AttributeTypeCooldown extends PerkAttributeType {
     }
 
     private void onCooldown(CooldownSetEvent event) {
-        PlayerEntity player = event.getPlayer();
-        World world = player.getEntityWorld();
+        Player player = event.getPlayer();
+        Level world = player.getEntityWorld();
 
         if (world.isRemote()) {
             return;
@@ -53,8 +53,8 @@ public class AttributeTypeCooldown extends PerkAttributeType {
         if (!prog.isValid()) {
             return;
         }
-        if (player instanceof ServerPlayerEntity) {
-            if (MiscUtils.isPlayerFakeMP((ServerPlayerEntity) player)) {
+        if (player instanceof ServerPlayer) {
+            if (MiscUtils.isPlayerFakeMP((ServerPlayer) player)) {
                 return;
             }
         }

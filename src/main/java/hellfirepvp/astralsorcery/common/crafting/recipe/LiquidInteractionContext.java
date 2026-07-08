@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.crafting.recipe;
 
 import hellfirepvp.astralsorcery.common.crafting.helper.RecipeCraftingContext;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod

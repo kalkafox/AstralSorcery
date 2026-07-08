@@ -15,12 +15,12 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.WellLiquefaction;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.awt.*;
 
@@ -55,7 +55,7 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
     }
 
     @Override
-    public WellLiquefaction read(ResourceLocation recipeId, PacketBuffer buffer) {
+    public WellLiquefaction read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         Ingredient input = Ingredient.read(buffer);
         Fluid fluid = ByteBufUtils.readRegistryEntry(buffer);
         float shatter = buffer.readFloat();
@@ -65,7 +65,7 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
     }
 
     @Override
-    public void write(PacketBuffer buffer, WellLiquefaction recipe) {
+    public void write(FriendlyByteBuf buffer, WellLiquefaction recipe) {
         recipe.getInput().write(buffer);
         ByteBufUtils.writeRegistryEntry(buffer, recipe.getFluidOutput());
         buffer.writeFloat(recipe.getShatterMultiplier());

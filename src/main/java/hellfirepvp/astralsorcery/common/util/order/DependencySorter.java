@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.util.order;
 import com.google.common.collect.Lists;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
-import net.minecraftforge.fml.loading.toposort.TopologicalSort;
+import net.neoforged.fml.loading.toposort.TopologicalSort;
 
 import java.util.Collection;
 import java.util.List;

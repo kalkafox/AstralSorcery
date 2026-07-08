@@ -13,10 +13,10 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.data.research.ResearchProgression;
 import hellfirepvp.astralsorcery.common.util.item.ItemComparator;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IItemProvider;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class BookLookupRegistry {
     private BookLookupRegistry() {}
 
     @Nullable
-    public static BookLookupInfo findPage(PlayerEntity player, LogicalSide side, ItemStack search) {
+    public static BookLookupInfo findPage(Player player, LogicalSide side, ItemStack search) {
         for (ItemStack compare : lookupMap.keySet()) {
             if (ItemComparator.compare(compare, search, ItemComparator.Clause.Sets.ITEMSTACK_CRAFTING)) {
                 BookLookupInfo info = lookupMap.get(compare);
@@ -49,7 +49,7 @@ public class BookLookupRegistry {
         return null;
     }
 
-    public static void registerItemLookup(IItemProvider item, ResearchNode parentNode, int nodePage, ResearchProgression neededProgression) {
+    public static void registerItemLookup(ItemLike item, ResearchNode parentNode, int nodePage, ResearchProgression neededProgression) {
         registerItemLookup(new ItemStack(item), parentNode, nodePage, neededProgression);
     }
 

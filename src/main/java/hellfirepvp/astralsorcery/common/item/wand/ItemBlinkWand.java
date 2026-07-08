@@ -8,6 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.item.wand;
 
+import net.minecraft.network.chat.MutableComponent;
+
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.Iterables;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.function.VFXAlphaFunction;
@@ -29,24 +33,24 @@ import hellfirepvp.astralsorcery.common.util.RaytraceAssist;
 import hellfirepvp.astralsorcery.common.util.block.BlockUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.UseAction;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.util.text.*;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -73,12 +77,12 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        tooltip.add(getBlinkMode(stack).getDisplay().mergeStyle(TextFormatting.GOLD));
+    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        tooltip.add(getBlinkMode(stack).getDisplay().withStyle(TextFormatting.GOLD));
     }
 
     @Override
-    public float getAlignmentChargeCost(PlayerEntity player, ItemStack stack) {
+    public float getAlignmentChargeCost(Player player, ItemStack stack) {
         if (player.getCooldownTracker().hasCooldown(this)) {
             return 0F;
         }
@@ -96,7 +100,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
+    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
         ItemStack held = player.getHeldItem(hand);
         if (player.isSneaking()) {
             BlinkMode nextMode = getBlinkMode(held).next();
@@ -109,7 +113,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
+    public UseAnim getUseAction(ItemStack stack) {
         return UseAction.BOW;
     }
 
@@ -119,11 +123,11 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
     }
 
     @Override
-    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, LivingEntity entityLiving, int timeLeft) {
-        if (worldIn.isRemote() || !(entityLiving instanceof ServerPlayerEntity)) {
+    public void onPlayerStoppedUsing(ItemStack stack, Level worldIn, LivingEntity entityLiving, int timeLeft) {
+        if (worldIn.isRemote() || !(entityLiving instanceof ServerPlayer)) {
             return;
         }
-        ServerPlayerEntity player = (ServerPlayerEntity) entityLiving;
+        ServerPlayer player = (ServerPlayer) entityLiving;
 
         BlinkMode mode = getBlinkMode(stack);
         if (mode == BlinkMode.TELEPORT) {
@@ -195,10 +199,10 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
 
     @OnlyIn(Dist.CLIENT)
     private void playUseParticles(ItemStack stack, LivingEntity entity, int useTicks, float usagePercent) {
-        if (!(entity instanceof PlayerEntity)) {
+        if (!(entity instanceof Player)) {
             return;
         }
-        PlayerEntity player = (PlayerEntity) entity;
+        Player player = (Player) entity;
         if (player.getCooldownTracker().hasCooldown(this)) {
             return;
         }
@@ -292,7 +296,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemBlinkWand)) {
             return;
         }
-        CompoundNBT nbt = NBTHelper.getPersistentData(stack);
+        CompoundTag nbt = NBTHelper.getPersistentData(stack);
         nbt.putInt("blinkMode", mode.ordinal());
     }
 
@@ -301,7 +305,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemBlinkWand)) {
             return BlinkMode.LAUNCH;
         }
-        CompoundNBT nbt = NBTHelper.getPersistentData(stack);
+        CompoundTag nbt = NBTHelper.getPersistentData(stack);
         return MiscUtils.getEnumEntry(BlinkMode.class, nbt.getInt("blinkMode"));
     }
 
@@ -316,12 +320,12 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             this.name = name;
         }
 
-        public IFormattableTextComponent getName() {
-            return new TranslationTextComponent("astralsorcery.misc.blink.mode." + this.name);
+        public MutableComponent getName() {
+            return Component.translatable("astralsorcery.misc.blink.mode." + this.name);
         }
 
-        public IFormattableTextComponent getDisplay() {
-            return new TranslationTextComponent("astralsorcery.misc.blink.mode", this.getName());
+        public MutableComponent getDisplay() {
+            return Component.translatable("astralsorcery.misc.blink.mode", this.getName());
         }
 
         @Nonnull

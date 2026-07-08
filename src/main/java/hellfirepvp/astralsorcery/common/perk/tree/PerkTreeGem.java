@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.screen.journal.perk.BatchPerkContext;
 import hellfirepvp.astralsorcery.client.screen.journal.perk.DynamicPerkRender;
@@ -21,11 +21,11 @@ import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.AllocationStatus;
 import hellfirepvp.astralsorcery.common.perk.node.socket.GemSocketPerk;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -54,7 +54,7 @@ public class PerkTreeGem<T extends AbstractPerk & GemSocketPerk> extends PerkTre
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderAt(AllocationStatus status, MatrixStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float zLevel, float scale) {
+    public void renderAt(AllocationStatus status, PoseStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float zLevel, float scale) {
         ItemStack stack = this.getPerk().getContainedItem(Minecraft.getInstance().player, LogicalSide.CLIENT);
         if (!stack.isEmpty()) {
             float posX = x - (8 * scale);
@@ -71,7 +71,7 @@ public class PerkTreeGem<T extends AbstractPerk & GemSocketPerk> extends PerkTre
     @Nullable
     @Override
     @OnlyIn(Dist.CLIENT)
-    public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, MatrixStack renderStack,
+    public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, PoseStack renderStack,
                                              AllocationStatus status, long spriteOffsetTick, float pTicks,
                                              float x, float y, float zLevel, float scale) {
         SpriteSheetResource tex = status.getPerkTreeHaloSprite();

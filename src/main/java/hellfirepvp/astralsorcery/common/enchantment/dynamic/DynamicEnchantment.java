@@ -8,7 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.enchantment.dynamic;
 
-import net.minecraft.enchantment.Enchantment;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,10 +25,10 @@ public class DynamicEnchantment {
 
     protected final DynamicEnchantmentType type;
     @Nullable
-    protected final Enchantment enchantment;
+    protected final ResourceKey<Enchantment> enchantment;
     protected int levelAddition;
 
-    public DynamicEnchantment(DynamicEnchantmentType type, @Nonnull Enchantment enchantment, int levelAddition) {
+    public DynamicEnchantment(DynamicEnchantmentType type, @Nonnull ResourceKey<Enchantment> enchantment, int levelAddition) {
         if (!type.isEnchantmentSpecific()) {
             throw new IllegalArgumentException("Tried to create dynamic enchantment with a type that doesn\'t require an enchantment, but supplied an enchantment!");
         }
@@ -50,7 +51,7 @@ public class DynamicEnchantment {
     }
 
     @Nullable
-    public Enchantment getEnchantment() {
+    public ResourceKey<Enchantment> getEnchantment() {
         return enchantment;
     }
 
@@ -70,7 +71,11 @@ public class DynamicEnchantment {
     @Nonnull
     public DynamicEnchantment copy(int level) {
         if (this.getType().isEnchantmentSpecific()) {
-            return new DynamicEnchantment(this.getType(), this.getEnchantment(), level);
+            ResourceKey<Enchantment> enchantment = this.getEnchantment();
+            if (enchantment == null) {
+                throw new IllegalStateException("Missing enchantment key for enchantment-specific dynamic modifier");
+            }
+            return new DynamicEnchantment(this.getType(), enchantment, level);
         } else {
             return new DynamicEnchantment(this.type, level);
         }

@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.client.render.tile;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.model.builtin.ModelAttunementAltar;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.util.Mth;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,12 +29,12 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
 
     private static final ModelAttunementAltar MODEL_ATTUNEMENT_ALTAR = new ModelAttunementAltar();
 
-    public RenderAttunementAltar(TileEntityRendererDispatcher tileRenderer) {
+    public RenderAttunementAltar(BlockEntityRenderDispatcher tileRenderer) {
         super(tileRenderer);
     }
 
     @Override
-    public void render(TileAttunementAltar tile, float pTicks, MatrixStack renderStack, IRenderTypeBuffer renderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void render(TileAttunementAltar tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         renderStack.push();
         renderStack.translate(0.5, 0.5, 0.5);
         renderStack.rotate(Vector3f.XP.rotationDegrees(180));

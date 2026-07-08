@@ -35,17 +35,18 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import hellfirepvp.astralsorcery.common.util.dispenser.FluidContainerDispenseBehavior;
-import net.minecraft.block.Block;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.ColorHandlerEvent;
 
 import java.util.List;
 
@@ -151,10 +152,10 @@ public class RegistryItems {
             return ItemKnowledgeShare.isCreative(stack) || ItemKnowledgeShare.getKnowledge(stack) != null ? 1 : 0;
         });
         ItemModelsProperties.registerProperty(RESONATOR, new ResourceLocation("upgrade"), (stack, world, entity) -> {
-            if (!(entity instanceof PlayerEntity)) {
+            if (!(entity instanceof Player)) {
                 return ItemResonator.ResonatorUpgrade.STARLIGHT.ordinal() / (float) ItemResonator.ResonatorUpgrade.values().length;
             }
-            ItemResonator.ResonatorUpgrade current = ItemResonator.getCurrentUpgrade((PlayerEntity) entity, stack);
+            ItemResonator.ResonatorUpgrade current = ItemResonator.getCurrentUpgrade((Player) entity, stack);
             return current.ordinal() / (float) ItemResonator.ResonatorUpgrade.values().length;
         });
         ItemModelsProperties.registerProperty(Item.getItemFromBlock(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER), new ResourceLocation("stage"), (stack, world, entity) -> {
@@ -167,14 +168,13 @@ public class RegistryItems {
 
     private static void registerItemBlock(CustomItemBlock block) {
         BlockItem itemBlock = block.createItemBlock(buildItemBlockProperties((Block) block));
-        itemBlock.setRegistryName(itemBlock.getBlock().getRegistryName());
-        AstralSorcery.getProxy().getRegistryPrimer().register(itemBlock);
+        ResourceLocation name = AstralSorcery.getProxy().getRegistryPrimer().getName(itemBlock.getBlock());
+        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.ITEM, name, itemBlock);
     }
 
     private static <T extends Item> T registerItem(T item) {
         ResourceLocation name = NameUtil.fromClass(item, "Item");
-        item.setRegistryName(name);
-        AstralSorcery.getProxy().getRegistryPrimer().register(item);
+        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.ITEM, name, item);
         if (item instanceof ItemDynamicColor) {
             colorItems.add((ItemDynamicColor) item);
         }
@@ -185,7 +185,7 @@ public class RegistryItems {
         Item.Properties props = new Item.Properties();
         props.group(CommonProxy.ITEM_GROUP_AS);
         if (block instanceof CustomItemBlockProperties) {
-            ItemGroup group = ((CustomItemBlockProperties) block).getItemGroup();
+            CreativeModeTab group = ((CustomItemBlockProperties) block).getItemGroup();
             if (group != null) {
                 props.group(group);
             }

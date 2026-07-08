@@ -19,8 +19,8 @@ import hellfirepvp.astralsorcery.common.crafting.nojson.WorldMeltableRegistry;
 import hellfirepvp.astralsorcery.common.crafting.recipe.*;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.effect.*;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.util.registry.Registry;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.core.Registry;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import static hellfirepvp.astralsorcery.common.lib.AltarRecipeEffectsAS.*;
 import static hellfirepvp.astralsorcery.common.lib.RecipeTypesAS.*;

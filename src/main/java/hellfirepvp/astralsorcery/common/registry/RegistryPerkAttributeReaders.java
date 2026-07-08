@@ -12,14 +12,14 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.base.Mods;
 import hellfirepvp.astralsorcery.common.perk.reader.*;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ForgeMod;
+import net.neoforged.fml.RegistryObject;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import static hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS.*;
 

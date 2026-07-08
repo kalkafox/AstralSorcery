@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.cmd.argument;
 
+import net.minecraft.network.chat.Component;
+
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -16,9 +18,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import hellfirepvp.astralsorcery.common.constellation.*;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 public class ArgumentTypeConstellation implements ArgumentType<IConstellation> {
 
     public static final SimpleCommandExceptionType CONSTELLATION_NOT_FOUND =
-            new SimpleCommandExceptionType(new TranslationTextComponent("astralsorcery.command.argument.constellation.notfound"));
+            new SimpleCommandExceptionType(Component.translatable("astralsorcery.command.argument.constellation.notfound"));
 
     private final Predicate<IConstellation> filter;
 

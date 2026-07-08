@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.perk.node.socket;
 
+import net.minecraft.network.chat.Component;
+
 import hellfirepvp.astralsorcery.common.data.research.PerkAllocationType;
 import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.lib.PerkNamesAS;
@@ -15,15 +17,14 @@ import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
 import hellfirepvp.astralsorcery.common.perk.node.MajorPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkTreeGem;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkTreePoint;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.MutableComponent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Collection;
 
@@ -48,7 +49,7 @@ public class GemSocketMajorPerk extends MajorPerk implements GemSocketPerk {
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(PlayerEntity player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
         Collection<PerkAttributeModifier> mods = super.getModifiers(player, side, ignoreRequirements);
         ItemStack contained = getContainedItem(player, side);
         if (!contained.isEmpty() && contained.getItem() instanceof GemSocketItem) {
@@ -58,7 +59,7 @@ public class GemSocketMajorPerk extends MajorPerk implements GemSocketPerk {
     }
 
     @Override
-    public void onRemovePerkServer(PlayerEntity player, PerkAllocationType allocationType, PlayerProgress progress, CompoundNBT dataStorage) {
+    public void onRemovePerkServer(Player player, PerkAllocationType allocationType, PlayerProgress progress, CompoundTag dataStorage) {
         super.onRemovePerkServer(player, allocationType, progress, dataStorage);
 
         // Will be removed?
@@ -69,9 +70,9 @@ public class GemSocketMajorPerk extends MajorPerk implements GemSocketPerk {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addLocalizedTooltip(Collection<IFormattableTextComponent> tooltip) {
+    public boolean addLocalizedTooltip(Collection<MutableComponent> tooltip) {
         if (super.addLocalizedTooltip(tooltip)) {
-            tooltip.add(new StringTextComponent(""));
+            tooltip.add(Component.literal(""));
         }
         if (canSeeClient()) {
             this.addTooltipInfo(tooltip);

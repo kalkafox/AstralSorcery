@@ -16,13 +16,13 @@ import hellfirepvp.astralsorcery.datagen.data.recipes.builder.ResultCookingRecip
 import hellfirepvp.astralsorcery.datagen.data.recipes.builder.SimpleShapedRecipeBuilder;
 import hellfirepvp.astralsorcery.datagen.data.recipes.builder.SimpleShapelessRecipeBuilder;
 import hellfirepvp.astralsorcery.datagen.data.recipes.builder.StoneCuttingRecipeBuilder;
-import net.minecraft.data.CustomRecipeBuilder;
+import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.tags.ItemTags;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.function.Consumer;
 

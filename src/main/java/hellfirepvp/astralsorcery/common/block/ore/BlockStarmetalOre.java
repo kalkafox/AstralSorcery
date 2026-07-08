@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.common.block.ore;
 
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
-import net.minecraft.block.Block;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.ToolType;
 
 /**
  * This class is part of the Astral Sorcery Mod

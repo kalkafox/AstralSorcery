@@ -12,8 +12,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.cmd.sub.*;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,8 +24,8 @@ import net.minecraft.command.Commands;
  */
 public class CommandAstralSorcery {
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralCommandNode<CommandSource> cmdAstralSorcery = dispatcher.register(
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralCommandNode<CommandSourceStack> cmdAstralSorcery = dispatcher.register(
                 Commands.literal("as")
                         .then(CommandAttune.register())
                         .then(CommandConstellation.register())

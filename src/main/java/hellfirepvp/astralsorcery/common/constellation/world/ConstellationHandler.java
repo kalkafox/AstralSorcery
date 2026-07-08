@@ -13,7 +13,7 @@ import com.google.common.collect.Maps;
 import hellfirepvp.astralsorcery.common.base.MoonPhase;
 import hellfirepvp.astralsorcery.common.constellation.*;
 import hellfirepvp.astralsorcery.common.data.config.entry.GeneralConfig;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -56,7 +56,7 @@ public class ConstellationHandler {
         return lastRecordedDay;
     }
 
-    public void tick(World world) {
+    public void tick(Level world) {
         if (activeMap.isEmpty()) {
             initialize();
         }
@@ -70,7 +70,7 @@ public class ConstellationHandler {
         }
     }
 
-    private void updateActiveConstellations(World world) {
+    private void updateActiveConstellations(Level world) {
         this.visibleSpecialConstellations.clear();
         MoonPhase ph = MoonPhase.fromWorld(world);
 

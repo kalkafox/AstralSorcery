@@ -41,21 +41,21 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventoryFiltered;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.common.util.LazyOptional;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.neoforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -237,7 +237,7 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
 
     @Nonnull
     @Override
-    public RegistryKey<World> getDimension() {
+    public ResourceKey<Level> getDimension() {
         return this.getWorld().getDimensionKey();
     }
 
@@ -438,7 +438,7 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
     }
 
     @Nullable
-    public PlayerEntity getOwner() {
+    public Player getOwner() {
         if (this.ownerUUID == null || this.world == null) {
             return null;
         }
@@ -568,7 +568,7 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.inventory = this.inventory.deserialize(compound.getCompound("inventory"));
@@ -577,22 +577,22 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
         this.working = compound.getBoolean("working");
 
         this.offsetMirrors.clear();
-        ListNBT tagList = compound.getList("mirrors", Constants.NBT.TAG_COMPOUND);
-        for (INBT nbt : tagList) {
-            CompoundNBT tag = (CompoundNBT) nbt;
+        ListTag tagList = compound.getList("mirrors", Constants.NBT.TAG_COMPOUND);
+        for (Tag nbt : tagList) {
+            CompoundTag tag = (CompoundTag) nbt;
             this.offsetMirrors.put(NBTHelper.readBlockPosFromNBT(tag), tag.getBoolean("connect"));
         }
 
         this.offsetConfigurations.clear();
-        ListNBT tagBlocks = compound.getList("blockConfiguration", Constants.NBT.TAG_COMPOUND);
-        for (INBT nbt : tagBlocks) {
-            CompoundNBT tag = (CompoundNBT) nbt;
+        ListTag tagBlocks = compound.getList("blockConfiguration", Constants.NBT.TAG_COMPOUND);
+        for (Tag nbt : tagBlocks) {
+            CompoundTag tag = (CompoundTag) nbt;
             this.offsetConfigurations.put(NBTHelper.readBlockPosFromNBT(tag), NBTHelper.getBlockState(tag, "state"));
         }
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.put("inventory", this.inventory.serialize());
@@ -604,18 +604,18 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
         }
         compound.putBoolean("working", this.working);
 
-        ListNBT listPositions = new ListNBT();
+        ListTag listPositions = new ListTag();
         for (Map.Entry<BlockPos, Boolean> posEntry : this.offsetMirrors.entrySet()) {
-            CompoundNBT cmp = new CompoundNBT();
+            CompoundTag cmp = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(posEntry.getKey(), cmp);
             cmp.putBoolean("connect", posEntry.getValue());
             listPositions.add(cmp);
         }
         compound.put("mirrors", listPositions);
 
-        ListNBT listConfigurations = new ListNBT();
+        ListTag listConfigurations = new ListTag();
         for (Map.Entry<BlockPos, BlockState> posEntry : this.offsetConfigurations.entrySet()) {
-            CompoundNBT cmp = new CompoundNBT();
+            CompoundTag cmp = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(posEntry.getKey(), cmp);
             NBTHelper.setBlockState(cmp, "state", posEntry.getValue());
             listConfigurations.add(cmp);

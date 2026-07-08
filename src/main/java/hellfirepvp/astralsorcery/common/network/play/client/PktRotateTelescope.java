@@ -15,16 +15,16 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -39,12 +39,12 @@ import java.util.Optional;
 public class PktRotateTelescope extends ASPacket<PktRotateTelescope> {
 
     private boolean isClockwise = false;
-    private RegistryKey<World> dim = null;
+    private ResourceKey<Level> dim = null;
     private BlockPos pos = BlockPos.ZERO;
 
     public PktRotateTelescope() {}
 
-    public PktRotateTelescope(boolean isClockwise, RegistryKey<World> dim, BlockPos pos) {
+    public PktRotateTelescope(boolean isClockwise, ResourceKey<Level> dim, BlockPos pos) {
         this.isClockwise = isClockwise;
         this.dim = dim;
         this.pos = pos;
@@ -81,7 +81,7 @@ public class PktRotateTelescope extends ASPacket<PktRotateTelescope> {
             @OnlyIn(Dist.CLIENT)
             public void handleClient(PktRotateTelescope packet, NetworkEvent.Context context) {
                 context.enqueueWork(() -> {
-                    Optional<World> clWorld = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
+                    Optional<Level> clWorld = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
                     clWorld.ifPresent(world -> {
                         TileTelescope tt = MiscUtils.getTileAt(world, packet.pos, TileTelescope.class, false);
                         if(tt != null) {
@@ -99,7 +99,7 @@ public class PktRotateTelescope extends ASPacket<PktRotateTelescope> {
                 context.enqueueWork(() -> {
                     //TODO 1.16.2 re-check once worlds are not all constantly loaded
                     MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-                    World world = srv.getWorld(packet.dim);
+                    Level world = srv.getWorld(packet.dim);
 
                     TileTelescope tt = MiscUtils.getTileAt(world, packet.pos, TileTelescope.class, false);
                     if(tt != null) {

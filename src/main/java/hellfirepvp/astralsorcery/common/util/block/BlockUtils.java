@@ -11,33 +11,33 @@ package hellfirepvp.astralsorcery.common.util.block;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.BlockDropCaptureAssist;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.potion.EffectUtils;
-import net.minecraft.potion.Effects;
-import net.minecraft.state.Property;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.ToolType;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.ToolType;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.event.world.BlockEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,17 +56,17 @@ import java.util.Random;
 public class BlockUtils {
 
     @Nonnull
-    public static List<ItemStack> getDrops(ServerWorld world, BlockPos pos, int harvestFortune, Random rand) {
+    public static List<ItemStack> getDrops(ServerLevel world, BlockPos pos, int harvestFortune, Random rand) {
         return getDrops(world, pos, harvestFortune, rand, ItemStack.EMPTY);
     }
 
     @Nonnull
-    public static List<ItemStack> getDrops(ServerWorld world, BlockPos pos, int harvestFortune, Random rand, ItemStack tool) {
+    public static List<ItemStack> getDrops(ServerLevel world, BlockPos pos, int harvestFortune, Random rand, ItemStack tool) {
         return getDrops(world, pos, world.getBlockState(pos), harvestFortune, rand, tool);
     }
 
     @Nonnull
-    public static List<ItemStack> getDrops(ServerWorld world, BlockPos pos, BlockState state, int harvestFortune, Random rand, ItemStack tool) {
+    public static List<ItemStack> getDrops(ServerLevel world, BlockPos pos, BlockState state, int harvestFortune, Random rand, ItemStack tool) {
         LootContext.Builder builder = new LootContext.Builder(world)
                 .withParameter(LootParameters.field_237457_g_, Vector3d.copyCentered(pos))
                 .withParameter(LootParameters.BLOCK_STATE, state)
@@ -86,7 +86,7 @@ public class BlockUtils {
         return it;
     }
 
-    public static BlockPos firstSolidDown(IBlockReader world, BlockPos at) {
+    public static BlockPos firstSolidDown(BlockGetter world, BlockPos at) {
         BlockState state = world.getBlockState(at);
         while (at.getY() > 0 && !state.getMaterial().blocksMovement() && state.getFluidState().isEmpty()) {
             at = at.down();
@@ -95,15 +95,15 @@ public class BlockUtils {
         return at;
     }
 
-    public static boolean isReplaceable(World world, BlockPos pos) {
+    public static boolean isReplaceable(Level world, BlockPos pos) {
         return isReplaceable(world, pos, world.getBlockState(pos));
     }
 
-    public static boolean isReplaceable(World world, BlockPos pos, BlockState state) {
+    public static boolean isReplaceable(Level world, BlockPos pos, BlockState state) {
         if (world.isAirBlock(pos)) {
             return true;
         }
-        BlockItemUseContext ctx = TestBlockUseContext.getHandContext(world, null, Hand.MAIN_HAND, pos, Direction.UP);
+        BlockPlaceContext ctx = TestBlockUseContext.getHandContext(world, null, Hand.MAIN_HAND, pos, Direction.UP);
         return state.isReplaceable(ctx);
     }
 
@@ -151,7 +151,7 @@ public class BlockUtils {
         return breakSpeed;
     }
 
-    public static boolean isFluidBlock(World world, BlockPos pos) {
+    public static boolean isFluidBlock(Level world, BlockPos pos) {
         return isFluidBlock(world.getBlockState(pos));
     }
 
@@ -194,7 +194,7 @@ public class BlockUtils {
         return true;
     }
 
-    public static boolean canToolBreakBlockWithoutPlayer(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ItemStack stack) {
+    public static boolean canToolBreakBlockWithoutPlayer(@Nonnull Level world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ItemStack stack) {
         if (state.getBlockHardness(world, pos) == -1) {
             return false;
         }
@@ -215,23 +215,23 @@ public class BlockUtils {
         return toolLevel >= state.getHarvestLevel();
     }
 
-    public static boolean breakBlockWithPlayer(BlockPos pos, ServerPlayerEntity playerMP) {
+    public static boolean breakBlockWithPlayer(BlockPos pos, ServerPlayer playerMP) {
         return playerMP.interactionManager.tryHarvestBlock(pos);
     }
 
     //Copied from ForgeHooks.onBlockBreak & PlayerInteractionManager.tryHarvestBlock
     //Duplicate break functionality without a active player.
     //Emulates a FakePlayer - attempts without a player as harvester in case a fakeplayer leads to issues.
-    public static boolean breakBlockWithoutPlayer(ServerWorld world, BlockPos pos) {
+    public static boolean breakBlockWithoutPlayer(ServerLevel world, BlockPos pos) {
         return breakBlockWithoutPlayer(world, pos, world.getBlockState(pos), ItemStack.EMPTY, true, false);
     }
 
     @Deprecated
-    public static boolean breakBlockWithoutPlayer(ServerWorld world, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions, boolean playEffects) {
+    public static boolean breakBlockWithoutPlayer(ServerLevel world, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions, boolean playEffects) {
         return breakBlockWithoutPlayer(world, pos, stateBroken, heldItem, breakBlock, ignoreHarvestRestrictions);
     }
 
-    public static boolean breakBlockWithoutPlayer(ServerWorld world, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions) {
+    public static boolean breakBlockWithoutPlayer(ServerLevel world, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions) {
         FakePlayer fakePlayer = AstralSorcery.getProxy().getASFakePlayerServer(world);
         int xp;
         try {
@@ -241,7 +241,7 @@ public class BlockUtils {
             }
             BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, pos, stateBroken, fakePlayer);
             event.setCanceled(preCancelEvent);
-            MinecraftForge.EVENT_BUS.post(event);
+            NeoForge.EVENT_BUS.post(event);
 
             if (event.isCanceled()) {
                 return false;
@@ -296,7 +296,7 @@ public class BlockUtils {
 
         if (harvestable) {
             try {
-                TileEntity tileentity = MiscUtils.getTileAt(world, pos, TileEntity.class, true);
+                BlockEntity tileentity = MiscUtils.getTileAt(world, pos, TileEntity.class, true);
                 ItemStack harvestStack = heldCopy.isEmpty() ? ItemStack.EMPTY : heldCopy.copy();
                 stateBroken.getBlock().harvestBlock(world, fakePlayer, pos, stateBroken, tileentity, harvestStack);
             } catch (Exception exc) {
@@ -327,7 +327,7 @@ public class BlockUtils {
         return true;
     }
 
-    private static void restoreWorldState(World world, boolean prevCaptureFlag, List<BlockSnapshot> prevSnapshots) {
+    private static void restoreWorldState(Level world, boolean prevCaptureFlag, List<BlockSnapshot> prevSnapshots) {
         world.captureBlockSnapshots = false;
 
         world.restoringBlockSnapshots = true;

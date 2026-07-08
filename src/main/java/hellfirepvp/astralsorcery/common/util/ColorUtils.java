@@ -10,19 +10,18 @@ package hellfirepvp.astralsorcery.common.util;
 
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Mth;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -108,8 +107,8 @@ public class ColorUtils {
     }
 
     @Nonnull
-    public static IFormattableTextComponent getTranslation(DyeColor color) {
-        return new TranslationTextComponent(String.format("color.minecraft.%s", color.getTranslationKey()));
+    public static MutableComponent getTranslation(DyeColor color) {
+        return Component.translatable(String.format("color.minecraft.%s", color.getTranslationKey()));
     }
 
     @Nonnull
@@ -118,7 +117,7 @@ public class ColorUtils {
     }
 
     @Nonnull
-    public static TextFormatting textFormattingForDye(DyeColor color) {
+    public static ChatFormatting textFormattingForDye(DyeColor color) {
         switch (color) {
             case WHITE:
                 return TextFormatting.WHITE;

@@ -11,26 +11,26 @@ package hellfirepvp.astralsorcery.common.util.item;
 import hellfirepvp.astralsorcery.common.base.Mods;
 import hellfirepvp.astralsorcery.common.integration.IntegrationBotania;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tags.ITag;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.CapabilityItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,18 +54,18 @@ public class ItemUtils {
     public static final IItemHandler EMPTY_INVENTORY = new ItemHandlerEmpty();
     private static final Random rand = new Random();
 
-    public static ItemEntity dropItem(World world, double x, double y, double z, ItemStack stack) {
+    public static ItemEntity dropItem(Level world, double x, double y, double z, ItemStack stack) {
         if (world.isRemote) {
             return null;
         }
         ItemEntity ei = new ItemEntity(world, x, y, z, stack);
-        ei.setMotion(new Vector3d(0, 0, 0));
+        ei.setMotion(new Vec3(0, 0, 0));
         world.addEntity(ei);
         ei.setPickupDelay(20);
         return ei;
     }
 
-    public static ItemEntity dropItemNaturally(World world, double x, double y, double z, ItemStack stack) {
+    public static ItemEntity dropItemNaturally(Level world, double x, double y, double z, ItemStack stack) {
         if (world.isRemote) {
             return null;
         }
@@ -115,7 +115,7 @@ public class ItemUtils {
     }
 
     public static boolean isEquippableArmor(Entity entity, ItemStack stack) {
-        for (EquipmentSlotType type : EquipmentSlotType.values()) {
+        for (EquipmentSlot type : EquipmentSlotType.values()) {
             if (type.getSlotType() == EquipmentSlotType.Group.ARMOR) {
                 if (stack.canEquip(type, entity)) {
                     return true;
@@ -125,8 +125,8 @@ public class ItemUtils {
         return false;
     }
 
-    public static ItemStack dropItemToPlayer(PlayerEntity player, ItemStack stack) {
-        World world = player.getEntityWorld();
+    public static ItemStack dropItemToPlayer(Player player, ItemStack stack) {
+        Level world = player.getEntityWorld();
         if (world.isRemote() || stack.isEmpty()) {
             return stack;
         }
@@ -155,7 +155,7 @@ public class ItemUtils {
 
     @Nonnull
     public static ItemStack changeItem(@Nonnull ItemStack stack, @Nonnull Item item) {
-        CompoundNBT nbt = stack.write(new CompoundNBT());
+        CompoundTag nbt = stack.write(new CompoundTag());
         nbt.putString("id", item.getRegistryName().toString());
         return ItemStack.read(nbt);
     }
@@ -176,12 +176,12 @@ public class ItemUtils {
 
     @Nonnull
     public static List<ItemStack> getItemsOfTag(ResourceLocation key) {
-        ITag<Item> tag = ItemTags.getCollection().get(key);
+        Tag<Item> tag = ItemTags.getCollection().get(key);
         return tag == null ? Collections.emptyList() : getItemsOfTag(tag);
     }
 
     @Nonnull
-    public static List<ItemStack> getItemsOfTag(ITag<Item> itemTag) {
+    public static List<ItemStack> getItemsOfTag(Tag<Item> itemTag) {
         return itemTag.getAllElements().stream().map(ItemStack::new).collect(Collectors.toList());
     }
 
@@ -199,7 +199,7 @@ public class ItemUtils {
         return findItemsInInventory(handler, match, strict);
     }
 
-    public static Collection<ItemStack> findItemsInPlayerInventory(PlayerEntity player, ItemStack match, boolean strict) {
+    public static Collection<ItemStack> findItemsInPlayerInventory(Player player, ItemStack match, boolean strict) {
         IItemHandler handler = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(EMPTY_INVENTORY);
         Collection<ItemStack> results = findItemsInInventory(handler, match, strict);
 
@@ -223,7 +223,7 @@ public class ItemUtils {
         return stacksOut;
     }
 
-    public static Map<Integer, ItemStack> findItemsIndexedInPlayerInventory(PlayerEntity player, Predicate<ItemStack> match) {
+    public static Map<Integer, ItemStack> findItemsIndexedInPlayerInventory(Player player, Predicate<ItemStack> match) {
         return findItemsIndexedInInventory(player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(EMPTY_INVENTORY), match);
     }
 
@@ -245,7 +245,7 @@ public class ItemUtils {
         return stacksOut;
     }
 
-    public static boolean consumeFromPlayerInventory(PlayerEntity player, ItemStack requestingItemStack, ItemStack toConsume, boolean simulate) {
+    public static boolean consumeFromPlayerInventory(Player player, ItemStack requestingItemStack, ItemStack toConsume, boolean simulate) {
         int consumed = 0;
         ItemStack tryConsume = copyStackWithSize(toConsume, toConsume.getCount() - consumed);
 
@@ -290,7 +290,7 @@ public class ItemUtils {
         return cAmt <= 0;
     }
 
-    public static void dropInventory(IItemHandler handle, World worldIn, BlockPos pos) {
+    public static void dropInventory(IItemHandler handle, Level worldIn, BlockPos pos) {
         if (worldIn.isRemote) {
             return;
         }

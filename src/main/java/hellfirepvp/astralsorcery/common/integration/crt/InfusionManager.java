@@ -16,10 +16,10 @@ import com.blamejared.crafttweaker.impl.actions.recipes.*;
 import com.blamejared.crafttweaker.impl.item.MCItemStackMutable;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInfusion;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.resources.ResourceLocation;
 import org.openzen.zencode.java.ZenCodeType;
 
 /**
@@ -54,7 +54,7 @@ public class InfusionManager implements IRecipeManager {
     }
     
     @Override
-    public IRecipeType<LiquidInfusion> getRecipeType() {
+    public RecipeType<LiquidInfusion> getRecipeType() {
         return RecipeTypesAS.TYPE_INFUSION.getType();
     }
 }

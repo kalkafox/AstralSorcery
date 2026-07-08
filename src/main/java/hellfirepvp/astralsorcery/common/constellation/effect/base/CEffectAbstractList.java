@@ -22,13 +22,13 @@ import hellfirepvp.astralsorcery.common.util.block.iterator.BlockPositionGenerat
 import hellfirepvp.astralsorcery.common.util.block.iterator.BlockRandomPositionGenerator;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,10 +88,10 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
     }
 
     @Nullable
-    public abstract T recreateElement(CompoundNBT tag, BlockPos pos);
+    public abstract T recreateElement(CompoundTag tag, BlockPos pos);
 
     @Nullable
-    public abstract T createElement(World world, BlockPos pos);
+    public abstract T createElement(Level world, BlockPos pos);
 
     @Nonnull
     protected BlockPositionGenerator createPositionStrategy() {
@@ -129,7 +129,7 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
         this.elements.clear();
     }
 
-    public boolean isValid(World world, T element) {
+    public boolean isValid(Level world, T element) {
         return this.verifier.test(world, element.getPos(), world.getBlockState(element.getPos()));
     }
 
@@ -152,7 +152,7 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
     }
 
     @Nonnull
-    public Either<T, BlockPos> peekNewPosition(World world, BlockPos pos, ConstellationEffectProperties prop) {
+    public Either<T, BlockPos> peekNewPosition(Level world, BlockPos pos, ConstellationEffectProperties prop) {
         if (this.excludesRitual || this.excludeRitualColumn) {
             MiscUtils.executeWithChunk(world, pos, () -> {
                 this.isLinkedRitual = MiscUtils.getTileAt(world, pos, TileRitualLink.class, true) != null;
@@ -182,7 +182,7 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
     }
 
     @Nonnull
-    public Either<T, BlockPos> findNewPosition(World world, BlockPos pos, ConstellationEffectProperties prop) {
+    public Either<T, BlockPos> findNewPosition(Level world, BlockPos pos, ConstellationEffectProperties prop) {
         return this.peekNewPosition(world, pos, prop).ifLeft(entry -> {
             if (!this.hasElement(entry.getPos())) {
                 this.elements.add(entry);
@@ -203,16 +203,16 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
     }
 
     @Override
-    public void readFromNBT(CompoundNBT cmp) {
+    public void readFromNBT(CompoundTag cmp) {
         super.readFromNBT(cmp);
 
         this.elements.clear();
 
-        ListNBT list = cmp.getList("elements", Constants.NBT.TAG_COMPOUND);
-        for (INBT nbt : list) {
-            CompoundNBT tag = (CompoundNBT) nbt;
+        ListTag list = cmp.getList("elements", Constants.NBT.TAG_COMPOUND);
+        for (Tag nbt : list) {
+            CompoundTag tag = (CompoundTag) nbt;
             BlockPos pos = NBTHelper.readBlockPosFromNBT(tag);
-            CompoundNBT tagData = tag.getCompound("data");
+            CompoundTag tagData = tag.getCompound("data");
             T element = this.recreateElement(tagData, pos);
             if (element != null) {
                 element.readFromNBT(tagData);
@@ -222,15 +222,15 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
     }
 
     @Override
-    public void writeToNBT(CompoundNBT cmp) {
+    public void writeToNBT(CompoundTag cmp) {
         super.writeToNBT(cmp);
 
-        ListNBT list = new ListNBT();
+        ListTag list = new ListTag();
         for (T element : this.elements) {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(element.getPos(), tag);
 
-            CompoundNBT dataTag = new CompoundNBT();
+            CompoundTag dataTag = new CompoundTag();
             element.writeToNBT(dataTag);
             tag.put("data", dataTag);
 
@@ -243,9 +243,9 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
 
         public BlockPos getPos();
 
-        public void writeToNBT(CompoundNBT nbt);
+        public void writeToNBT(CompoundTag nbt);
 
-        public void readFromNBT(CompoundNBT nbt);
+        public void readFromNBT(CompoundTag nbt);
 
     }
 
@@ -253,7 +253,7 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
 
         private final int defaultMaxAmount;
 
-        public ForgeConfigSpec.IntValue maxAmount;
+        public ModConfigSpec.IntValue maxAmount;
 
         public CountConfig(String constellationName, double defaultRange, double defaultRangePerLens, int defaultMaxAmount) {
             super(constellationName, defaultRange, defaultRangePerLens);
@@ -261,7 +261,7 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.maxAmount = cfgBuilder

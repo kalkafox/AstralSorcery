@@ -11,10 +11,10 @@ package hellfirepvp.astralsorcery.common.advancement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ import java.util.function.Predicate;
  * Created by HellFirePvP
  * Date: 30.05.2019 / 16:44
  */
-public abstract class ListenerCriterionTrigger<T extends ICriterionInstance> implements ICriterionTrigger<T> {
+public abstract class ListenerCriterionTrigger<T extends CriterionTriggerInstance> implements CriterionTrigger<T> {
 
     protected final Map<PlayerAdvancements, Listeners<T>> listeners = Maps.newHashMap();
     private final ResourceLocation id;
@@ -69,7 +69,7 @@ public abstract class ListenerCriterionTrigger<T extends ICriterionInstance> imp
         this.listeners.remove(playerAdvancementsIn);
     }
 
-    public static class Listeners<T extends ICriterionInstance> {
+    public static class Listeners<T extends CriterionTriggerInstance> {
 
         private final PlayerAdvancements playerAdvancements;
         private final Set<Listener<T>> listeners = Sets.newHashSet();

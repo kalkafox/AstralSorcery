@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.storage;
 
 import hellfirepvp.astralsorcery.common.data.world.StorageNetworkBuffer;
 import hellfirepvp.astralsorcery.common.lib.DataAS;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -28,17 +28,17 @@ import java.util.Map;
 public class StorageNetworkHandler {
 
     //private static final AxisAlignedBB box = new AxisAlignedBB(-3, 0, -3, 3, 0, 3);
-    private static final Map<RegistryKey<World>, NetworkHelper> mappingHelpers = new HashMap<>();
+    private static final Map<ResourceKey<Level>, NetworkHelper> mappingHelpers = new HashMap<>();
 
-    public static NetworkHelper getHandler(World world) {
+    public static NetworkHelper getHandler(Level world) {
         return mappingHelpers.computeIfAbsent(world.getDimensionKey(), id -> new NetworkHelper(world));
     }
 
-    public static void clearHandler(World world) {
+    public static void clearHandler(Level world) {
         clearHandler(world.getDimensionKey());
     }
 
-    public static void clearHandler(RegistryKey<World> dimKey) {
+    public static void clearHandler(ResourceKey<Level> dimKey) {
         mappingHelpers.remove(dimKey);
     }
 
@@ -46,7 +46,7 @@ public class StorageNetworkHandler {
 
         private final StorageNetworkBuffer buffer;
 
-        private NetworkHelper(World world) {
+        private NetworkHelper(Level world) {
             this.buffer = DataAS.DOMAIN_AS.getData(world, DataAS.KEY_STORAGE_NETWORK);
         }
 

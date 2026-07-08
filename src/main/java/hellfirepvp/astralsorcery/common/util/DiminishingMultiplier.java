@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 /**
  * This class is part of the Astral Sorcery Mod

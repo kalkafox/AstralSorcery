@@ -17,16 +17,16 @@ import hellfirepvp.astralsorcery.common.block.tile.BlockLens;
 import hellfirepvp.astralsorcery.common.block.tile.BlockPrism;
 import hellfirepvp.astralsorcery.common.block.tile.BlockStructural;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
-import net.minecraft.block.Block;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.StairsBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.state.Property;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.generators.*;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.client.model.generators.*;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.IForgeRegistryEntry;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Collection;
@@ -209,7 +209,7 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         this.slabBlock(b, model(key), model(suffixPath(key, "_top")), doubleSlabModel);
     }
 
-    private void simpleStairs(StairsBlock b) {
+    private void simpleStairs(StairBlock b) {
         ResourceLocation key = b.getRegistryName();
         this.stairsBlock(b, model(key), model(suffixPath(key, "_inner")), model(suffixPath(key, "_outer")));
     }

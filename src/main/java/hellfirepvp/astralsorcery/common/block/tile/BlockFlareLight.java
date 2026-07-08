@@ -14,26 +14,26 @@ import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
 import hellfirepvp.astralsorcery.common.util.ColorUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.DyeColor;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.awt.*;
 import java.util.Random;
@@ -58,7 +58,7 @@ public class BlockFlareLight extends Block {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
         Color c = ColorUtils.flareColorFromDye(state.get(COLOR));
         for (int i = 0; i < 2; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
@@ -89,45 +89,45 @@ public class BlockFlareLight extends Block {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
+    public boolean addDestroyEffects(BlockState state, Level world, BlockPos pos, ParticleEngine manager) {
         return true;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addHitEffects(BlockState state, World worldObj, RayTraceResult target, ParticleManager manager) {
+    public boolean addHitEffects(BlockState state, Level worldObj, HitResult target, ParticleEngine manager) {
         return true;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addRunningEffects(BlockState state, World world, BlockPos pos, Entity entity) {
+    public boolean addRunningEffects(BlockState state, Level world, BlockPos pos, Entity entity) {
         return true;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addLandingEffects(BlockState state1, ServerWorld worldserver, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
+    public boolean addLandingEffects(BlockState state1, ServerLevel worldserver, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
         return true;
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext ctx) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
         return SHAPE;
     }
 
     @Override
-    public boolean isAir(BlockState state, IBlockReader world, BlockPos pos) {
+    public boolean isAir(BlockState state, BlockGetter world, BlockPos pos) {
         return false;
     }
 
     @Override
-    public boolean canBeReplacedByLogs(BlockState state, IWorldReader world, BlockPos pos) {
+    public boolean canBeReplacedByLogs(BlockState state, LevelReader world, BlockPos pos) {
         return true;
     }
 
     @Override
-    public boolean canBeReplacedByLeaves(BlockState state, IWorldReader world, BlockPos pos) {
+    public boolean canBeReplacedByLeaves(BlockState state, LevelReader world, BlockPos pos) {
         return true;
     }
 
@@ -137,7 +137,7 @@ public class BlockFlareLight extends Block {
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public RenderShape getRenderType(BlockState state) {
         return BlockRenderType.INVISIBLE;
     }
 }

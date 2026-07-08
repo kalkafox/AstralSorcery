@@ -16,11 +16,11 @@ import hellfirepvp.astralsorcery.common.world.feature.RockCrystalFeature;
 import hellfirepvp.astralsorcery.common.world.placement.ChancePlacement;
 import hellfirepvp.astralsorcery.common.world.placement.RiverbedPlacement;
 import hellfirepvp.astralsorcery.common.world.placement.WorldFilteredPlacement;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.NoFeatureConfig;
-import net.minecraft.world.gen.feature.structure.IStructurePieceType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.gen.feature.structure.Structure;
 
 import java.util.Arrays;
@@ -43,13 +43,13 @@ public class WorldGenerationAS {
         public static final ResourceLocation KEY_DESERT_SHRINE = AstralSorcery.key("desert_shrine");
         public static final ResourceLocation KEY_SMALL_SHRINE = AstralSorcery.key("small_shrine");
 
-        public static IStructurePieceType ANCIENT_SHRINE_PIECE;
-        public static IStructurePieceType DESERT_SHRINE_PIECE;
-        public static IStructurePieceType SMALL_SHRINE_PIECE;
+        public static StructurePieceType ANCIENT_SHRINE_PIECE;
+        public static StructurePieceType DESERT_SHRINE_PIECE;
+        public static StructurePieceType SMALL_SHRINE_PIECE;
 
-        public static Structure<NoFeatureConfig> STRUCTURE_ANCIENT_SHRINE;
-        public static Structure<NoFeatureConfig> STRUCTURE_DESERT_SHRINE;
-        public static Structure<NoFeatureConfig> STRUCTURE_SMALL_SHRINE;
+        public static Structure<NoneFeatureConfiguration> STRUCTURE_ANCIENT_SHRINE;
+        public static Structure<NoneFeatureConfiguration> STRUCTURE_DESERT_SHRINE;
+        public static Structure<NoneFeatureConfiguration> STRUCTURE_SMALL_SHRINE;
 
     }
 

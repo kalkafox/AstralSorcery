@@ -8,10 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.crafting.helper;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.world.World;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,12 +20,12 @@ import net.minecraftforge.items.IItemHandler;
  * Created by HellFirePvP
  * Date: 30.06.2019 / 23:39
  */
-public interface IHandlerRecipe<I extends IItemHandler> extends IRecipe<IInventory> {
+public interface IHandlerRecipe<I extends IItemHandler> extends Recipe<Container> {
 
-    boolean matches(I handler, World world);
+    boolean matches(I handler, Level world);
 
     @Override
-    default boolean matches(IInventory inv, World worldIn) {
+    default boolean matches(Container inv, Level worldIn) {
         return false;
     }
 }

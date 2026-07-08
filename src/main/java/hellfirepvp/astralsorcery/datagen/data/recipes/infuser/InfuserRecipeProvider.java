@@ -12,11 +12,11 @@ import hellfirepvp.astralsorcery.common.crafting.builder.LiquidInfusionBuilder;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraftforge.common.Tags;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.function.Consumer;
 

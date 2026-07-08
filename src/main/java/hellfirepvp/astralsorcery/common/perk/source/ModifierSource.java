@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.perk.source;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,11 +22,11 @@ import net.minecraftforge.fml.LogicalSide;
 //Each ModifierSource should be a AttributeModifierProvider in some way or subclass.
 public interface ModifierSource {
 
-    boolean canApplySource(PlayerEntity player, LogicalSide dist);
+    boolean canApplySource(Player player, LogicalSide dist);
 
-    void onRemove(PlayerEntity player, LogicalSide dist);
+    void onRemove(Player player, LogicalSide dist);
 
-    void onApply(PlayerEntity player, LogicalSide dist);
+    void onApply(Player player, LogicalSide dist);
 
     boolean isEqual(ModifierSource other);
 

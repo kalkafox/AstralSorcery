@@ -13,13 +13,13 @@ import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.util.DamageUtil;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -41,9 +41,9 @@ public class EffectBleed extends EffectCustomTexture {
 
     @Override
     public void performEffect(LivingEntity entity, int amplifier) {
-        if (entity instanceof PlayerEntity &&
+        if (entity instanceof Player &&
                 !entity.getEntityWorld().isRemote() &&
-                entity.getEntityWorld() instanceof ServerWorld &&
+                entity.getEntityWorld() instanceof ServerLevel &&
                 !((MinecraftServer) LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER)).isPVPEnabled()) {
             return;
         }

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.constellation.mantle;
 
+import hellfirepvp.astralsorcery.common.registry.internal.AbstractAstralRegistryEntry;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.function.VFXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.VFXColorFunction;
@@ -23,20 +24,19 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForge;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -51,7 +51,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 17.02.2020 / 20:13
  */
-public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> implements ITickHandler {
+public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEffect> implements ITickHandler {
 
     protected static final Random rand = new Random();
 
@@ -63,7 +63,7 @@ public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> impl
         this.setRegistryName(this.constellation.getRegistryName());
         this.playerAffectionFlag = new PlayerAffectionFlags.NoOpAffectionFlag(AstralSorcery.key("mantle_effect_" + constellation.getSimpleName()));
 
-        this.attachEventListeners(MinecraftForge.EVENT_BUS);
+        this.attachEventListeners(NeoForge.EVENT_BUS);
         this.attachTickHandlers(AstralSorcery.getProxy().getTickManager()::register);
     }
 
@@ -85,17 +85,17 @@ public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> impl
         }
     }
 
-    protected void tickServer(PlayerEntity player) {}
+    protected void tickServer(Player player) {}
 
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {}
+    protected void tickClient(Player player) {}
 
     protected boolean usesTickMethods() {
         return false;
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected void playCapeSparkles(PlayerEntity player, float chance) {
+    protected void playCapeSparkles(Player player, float chance) {
         if (player == Minecraft.getInstance().player && Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a()) {
             chance *= 0.1F;
         }
@@ -130,7 +130,7 @@ public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> impl
 
     @Nonnull
     @OnlyIn(Dist.CLIENT)
-    protected FXFacingParticle spawnFacingParticle(PlayerEntity player, Vector3 at) {
+    protected FXFacingParticle spawnFacingParticle(Player player, Vector3 at) {
         return EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .setOwner(player.getUniqueID())
                 .spawn(at);
@@ -142,7 +142,7 @@ public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> impl
             return;
         }
 
-        PlayerEntity pl = (PlayerEntity) context[0];
+        Player pl = (Player) context[0];
         LogicalSide side = (LogicalSide) context[1];
         boolean hasMantle = ItemMantle.getEffect(pl, this.getAssociatedConstellation()) != null;
         if (!hasMantle) {
@@ -150,7 +150,7 @@ public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> impl
         }
 
         if (side.isServer()) {
-            if (!(pl instanceof ServerPlayerEntity) || MiscUtils.isPlayerFakeMP((ServerPlayerEntity) pl)) {
+            if (!(pl instanceof ServerPlayer) || MiscUtils.isPlayerFakeMP((ServerPlayer) pl)) {
                 return;
             }
             PlayerAffectionFlags.markPlayerAffected(pl, this.playerAffectionFlag);
@@ -161,13 +161,13 @@ public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> impl
     }
 
     @Nonnull
-    protected CompoundNBT getData(LivingEntity entity) {
+    protected CompoundTag getData(LivingEntity entity) {
         if (entity == null) {
-            return new CompoundNBT();
+            return new CompoundTag();
         }
         ItemStack stack = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemMantle)) {
-            return new CompoundNBT();
+            return new CompoundTag();
         }
         return NBTHelper.getPersistentData(stack);
     }
@@ -191,14 +191,14 @@ public abstract class MantleEffect extends ForgeRegistryEntry<MantleEffect> impl
 
         private final boolean defaultEnabled = true;
 
-        public ForgeConfigSpec.BooleanValue enabled;
+        public ModConfigSpec.BooleanValue enabled;
 
         public Config(String constellationName) {
             super(String.format("constellation.mantle.%s", constellationName));
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.enabled = cfgBuilder
                     .comment("Set this to false to disable this mantle effect")
                     .translation(translationKey("enabled"))

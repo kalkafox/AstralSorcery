@@ -15,21 +15,21 @@ import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -40,20 +40,20 @@ import net.minecraftforge.fml.network.NetworkHooks;
  */
 public class EntityStarmetal extends EntityCustomItemReplacement implements InteractableEntity {
 
-    public EntityStarmetal(EntityType<? extends ItemEntity> type, World world) {
+    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level world) {
         super(type, world);
         ReflectionHelper.setSkipItemPhysicsRender(this);
         recalculateSize();
     }
 
-    public EntityStarmetal(EntityType<? extends ItemEntity> type, World world, double x, double y, double z) {
+    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
         this(type, world);
         this.setPosition(x, y, z);
         this.rotationYaw = this.rand.nextFloat() * 360.0F;
         this.setMotion(this.rand.nextDouble() * 0.2D - 0.1D, 0.2D, this.rand.nextDouble() * 0.2D - 0.1D);
     }
 
-    public EntityStarmetal(EntityType<? extends ItemEntity> type, World world, double x, double y, double z, ItemStack stack) {
+    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
         this(type, world, x, y, z);
         this.setItem(stack);
         this.lifespan = stack.isEmpty() ? 6000 : stack.getEntityLifespan(world);
@@ -75,8 +75,8 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
 
     @Override
     public boolean hitByEntity(Entity entity) {
-        if (!this.getEntityWorld().isRemote() && entity instanceof ServerPlayerEntity) {
-            ItemStack held = ((ServerPlayerEntity) entity).getHeldItem(Hand.MAIN_HAND);
+        if (!this.getEntityWorld().isRemote() && entity instanceof ServerPlayer) {
+            ItemStack held = ((ServerPlayer) entity).getHeldItem(Hand.MAIN_HAND);
             if (!held.isEmpty() && held.getItem() instanceof ItemChisel) {
 
                 ItemStack thisStack = this.getItem();
@@ -88,7 +88,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
                         doDamage = this.createStardust(fortuneLevel);
                     }
                     if (doDamage || rand.nextFloat() < 0.35F) {
-                        held.damageItem(1, (PlayerEntity) entity, (player) -> player.sendBreakAnimation(Hand.MAIN_HAND));
+                        held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(Hand.MAIN_HAND));
                     }
                 }
             }
@@ -129,7 +129,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
     }
 
     @Override
-    public EntitySize getSize(Pose poseIn) {
+    public EntityDimensions getSize(Pose poseIn) {
         if (!this.isOnGround()) {
             return EntityType.ITEM.getSize();
         }
@@ -137,7 +137,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

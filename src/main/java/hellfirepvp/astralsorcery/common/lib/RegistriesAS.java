@@ -20,9 +20,11 @@ import hellfirepvp.astralsorcery.common.perk.PerkConverter;
 import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
 import hellfirepvp.astralsorcery.common.perk.reader.PerkAttributeReader;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
+import hellfirepvp.astralsorcery.common.registry.internal.LegacyRegistry;
 import hellfirepvp.astralsorcery.common.structure.types.StructureType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -48,17 +50,34 @@ public class RegistriesAS {
     public static final ResourceLocation REGISTRY_NAME_CRYSTAL_USAGES = AstralSorcery.key("attribute_crystal_usages");
     public static final ResourceLocation REGISTRY_NAME_ALTAR_EFFECTS = AstralSorcery.key("altar_recipe_effects");
 
-    public static IForgeRegistry<IConstellation> REGISTRY_CONSTELLATIONS;
-    public static IForgeRegistry<ConstellationEffectProvider> REGISTRY_CONSTELLATION_EFFECT;
-    public static IForgeRegistry<MantleEffect> REGISTRY_MANTLE_EFFECT;
-    public static IForgeRegistry<EngravingEffect> REGISTRY_ENGRAVING_EFFECT;
-    public static IForgeRegistry<StructureType> REGISTRY_STRUCTURE_TYPES;
-    public static IForgeRegistry<PerkAttributeType> REGISTRY_PERK_ATTRIBUTE_TYPES;
-    public static IForgeRegistry<PerkConverter> REGISTRY_PERK_ATTRIBUTE_CONVERTERS;
-    public static IForgeRegistry<PerkAttributeModifier> REGISTRY_PERK_CUSTOM_MODIFIERS;
-    public static IForgeRegistry<PerkAttributeReader> REGISTRY_PERK_ATTRIBUTE_READERS;
-    public static IForgeRegistry<CrystalProperty> REGISTRY_CRYSTAL_PROPERTIES;
-    public static IForgeRegistry<PropertyUsage> REGISTRY_CRYSTAL_USAGES;
-    public static IForgeRegistry<AltarRecipeEffect> REGISTRY_ALTAR_EFFECTS;
+    public static final ResourceKey<Registry<IConstellation>> REGISTRY_KEY_CONSTELLATIONS = key(REGISTRY_NAME_CONSTELLATIONS);
+    public static final ResourceKey<Registry<ConstellationEffectProvider>> REGISTRY_KEY_CONSTELLATION_EFFECTS = key(REGISTRY_NAME_CONSTELLATION_EFFECTS);
+    public static final ResourceKey<Registry<MantleEffect>> REGISTRY_KEY_MANTLE_EFFECTS = key(REGISTRY_NAME_MANTLE_EFFECTS);
+    public static final ResourceKey<Registry<EngravingEffect>> REGISTRY_KEY_ENGRAVING_EFFECTS = key(REGISTRY_NAME_ENGRAVING_EFFECT);
+    public static final ResourceKey<Registry<StructureType>> REGISTRY_KEY_STRUCTURE_TYPES = key(REGISTRY_NAME_STRUCTURE_TYPES);
+    public static final ResourceKey<Registry<PerkAttributeType>> REGISTRY_KEY_PERK_ATTRIBUTE_TYPES = key(REGISTRY_NAME_PERK_ATTRIBUTE_TYPES);
+    public static final ResourceKey<Registry<PerkConverter>> REGISTRY_KEY_PERK_ATTRIBUTE_CONVERTERS = key(REGISTRY_NAME_PERK_ATTRIBUTE_CONVERTERS);
+    public static final ResourceKey<Registry<PerkAttributeModifier>> REGISTRY_KEY_PERK_CUSTOM_MODIFIERS = key(REGISTRY_NAME_PERK_CUSTOM_MODIFIERS);
+    public static final ResourceKey<Registry<PerkAttributeReader>> REGISTRY_KEY_PERK_ATTRIBUTE_READERS = key(REGISTRY_NAME_PERK_ATTRIBUTE_READERS);
+    public static final ResourceKey<Registry<CrystalProperty>> REGISTRY_KEY_CRYSTAL_PROPERTIES = key(REGISTRY_NAME_CRYSTAL_PROPERTIES);
+    public static final ResourceKey<Registry<PropertyUsage>> REGISTRY_KEY_CRYSTAL_USAGES = key(REGISTRY_NAME_CRYSTAL_USAGES);
+    public static final ResourceKey<Registry<AltarRecipeEffect>> REGISTRY_KEY_ALTAR_EFFECTS = key(REGISTRY_NAME_ALTAR_EFFECTS);
+
+    public static LegacyRegistry<IConstellation> REGISTRY_CONSTELLATIONS;
+    public static LegacyRegistry<ConstellationEffectProvider> REGISTRY_CONSTELLATION_EFFECT;
+    public static LegacyRegistry<MantleEffect> REGISTRY_MANTLE_EFFECT;
+    public static LegacyRegistry<EngravingEffect> REGISTRY_ENGRAVING_EFFECT;
+    public static LegacyRegistry<StructureType> REGISTRY_STRUCTURE_TYPES;
+    public static LegacyRegistry<PerkAttributeType> REGISTRY_PERK_ATTRIBUTE_TYPES;
+    public static LegacyRegistry<PerkConverter> REGISTRY_PERK_ATTRIBUTE_CONVERTERS;
+    public static LegacyRegistry<PerkAttributeModifier> REGISTRY_PERK_CUSTOM_MODIFIERS;
+    public static LegacyRegistry<PerkAttributeReader> REGISTRY_PERK_ATTRIBUTE_READERS;
+    public static LegacyRegistry<CrystalProperty> REGISTRY_CRYSTAL_PROPERTIES;
+    public static LegacyRegistry<PropertyUsage> REGISTRY_CRYSTAL_USAGES;
+    public static LegacyRegistry<AltarRecipeEffect> REGISTRY_ALTAR_EFFECTS;
+
+    private static <T> ResourceKey<Registry<T>> key(ResourceLocation name) {
+        return ResourceKey.createRegistryKey(name);
+    }
 
 }

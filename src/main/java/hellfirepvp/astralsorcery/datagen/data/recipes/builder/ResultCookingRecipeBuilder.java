@@ -10,13 +10,13 @@ package hellfirepvp.astralsorcery.datagen.data.recipes.builder;
 
 import com.google.gson.JsonObject;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.AbstractCookingRecipe;
-import net.minecraft.item.crafting.CookingRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.SimpleCookingSerializer;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -35,9 +35,9 @@ public class ResultCookingRecipeBuilder {
     private final Ingredient ingredient;
     private final float experience;
     private final int cookingTime;
-    private final CookingRecipeSerializer<?> recipeSerializer;
+    private final SimpleCookingSerializer<?> recipeSerializer;
 
-    private ResultCookingRecipeBuilder(ItemStack result, Ingredient ingredientIn, float experienceIn, int cookingTimeIn, CookingRecipeSerializer<?> serializer) {
+    private ResultCookingRecipeBuilder(ItemStack result, Ingredient ingredientIn, float experienceIn, int cookingTimeIn, SimpleCookingSerializer<?> serializer) {
         this.result = result.copy();
         this.ingredient = ingredientIn;
         this.experience = experienceIn;
@@ -45,7 +45,7 @@ public class ResultCookingRecipeBuilder {
         this.recipeSerializer = serializer;
     }
 
-    public static ResultCookingRecipeBuilder cookingRecipe(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn, CookingRecipeSerializer<?> serializer) {
+    public static ResultCookingRecipeBuilder cookingRecipe(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn, SimpleCookingSerializer<?> serializer) {
         return new ResultCookingRecipeBuilder(result, ingredientIn, experienceIn, cookingTimeIn, serializer);
     }
 
@@ -83,9 +83,9 @@ public class ResultCookingRecipeBuilder {
         private final ItemStack result;
         private final float experience;
         private final int cookingTime;
-        private final IRecipeSerializer<? extends AbstractCookingRecipe> serializer;
+        private final RecipeSerializer<? extends AbstractCookingRecipe> serializer;
 
-        public Result(ResourceLocation idIn, Ingredient ingredientIn, ItemStack resultIn, float experienceIn, int cookingTimeIn, IRecipeSerializer<? extends AbstractCookingRecipe> serializerIn) {
+        public Result(ResourceLocation idIn, Ingredient ingredientIn, ItemStack resultIn, float experienceIn, int cookingTimeIn, RecipeSerializer<? extends AbstractCookingRecipe> serializerIn) {
             this.id = idIn;
             this.ingredient = ingredientIn;
             this.result = resultIn;
@@ -105,7 +105,7 @@ public class ResultCookingRecipeBuilder {
             json.addProperty("cookingtime", this.cookingTime);
         }
 
-        public IRecipeSerializer<?> getSerializer() {
+        public RecipeSerializer<?> getSerializer() {
             return this.serializer;
         }
 

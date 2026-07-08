@@ -8,22 +8,22 @@
 
 package hellfirepvp.astralsorcery.common.effect;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.DisplayEffectsScreen;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
+import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.IEventBus;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -36,12 +36,12 @@ import java.util.Random;
  * Created by HellFirePvP
  * Date: 26.08.2019 / 19:18
  */
-public abstract class EffectCustomTexture extends Effect {
+public abstract class EffectCustomTexture extends MobEffect {
 
     protected static final Random rand = new Random();
     private final Color colorAsObj;
 
-    public EffectCustomTexture(EffectType type, Color color) {
+    public EffectCustomTexture(MobEffectCategory type, Color color) {
         super(type, color.getRGB());
         this.colorAsObj = color;
     }
@@ -52,7 +52,7 @@ public abstract class EffectCustomTexture extends Effect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderInventoryEffect(EffectInstance effect, DisplayEffectsScreen<?> gui, MatrixStack renderStack, int x, int y, float z) {
+    public void renderInventoryEffect(MobEffectInstance effect, EffectRenderingInventoryScreen<?> gui, PoseStack renderStack, int x, int y, float z) {
         float wh = 18;
         float offsetX = x + 6;
         float offsetY = y + 7;
@@ -74,7 +74,7 @@ public abstract class EffectCustomTexture extends Effect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderHUDEffect(EffectInstance effect, AbstractGui gui, MatrixStack renderStack, int x, int y, float z, float alpha) {
+    public void renderHUDEffect(MobEffectInstance effect, AbstractGui gui, PoseStack renderStack, int x, int y, float z, float alpha) {
         float wh = 18;
         float offsetX = x + 3;
         float offsetY = y + 3;

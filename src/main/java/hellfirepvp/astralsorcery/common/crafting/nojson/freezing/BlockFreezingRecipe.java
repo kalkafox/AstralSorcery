@@ -12,15 +12,15 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.block.BlockPredicate;
 import hellfirepvp.astralsorcery.common.util.block.BlockPredicates;
 import hellfirepvp.astralsorcery.common.util.block.WorldBlockPos;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ITag;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.Tag;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -61,7 +61,7 @@ public class BlockFreezingRecipe extends WorldFreezingRecipe {
     }
 
     @Override
-    public void doOutput(World world, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
+    public void doOutput(Level world, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
         BlockState generated = this.outputGenerator.apply(WorldBlockPos.wrapServer(world, pos), state);
         if (generated != state) {
             world.setBlockState(pos, generated, Constants.BlockFlags.DEFAULT_AND_RERENDER);

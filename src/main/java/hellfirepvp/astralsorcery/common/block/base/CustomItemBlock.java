@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.block.base;
 
 import hellfirepvp.astralsorcery.common.item.block.ItemBlockCustom;
-import net.minecraft.block.Block;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 
 /**
  * This class is part of the Astral Sorcery Mod

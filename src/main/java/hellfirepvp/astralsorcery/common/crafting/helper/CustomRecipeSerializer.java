@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.crafting.helper;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.registry.internal.AbstractAstralRegistryEntry;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,7 +20,7 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
  * Created by HellFirePvP
  * Date: 06.07.2019 / 20:38
  */
-public abstract class CustomRecipeSerializer<T extends CustomMatcherRecipe> extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<T> {
+public abstract class CustomRecipeSerializer<T extends CustomMatcherRecipe> extends AbstractAstralRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<T> {
 
     public CustomRecipeSerializer(ResourceLocation name) {
         this.setRegistryName(name);

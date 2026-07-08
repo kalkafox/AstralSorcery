@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.data.config.base;
 
 import hellfirepvp.astralsorcery.common.data.config.CommonConfig;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.config.ModConfig;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 19.04.2019 / 23:12
  */
-public abstract class ConfigEntry implements Consumer<ForgeConfigSpec.Builder> {
+public abstract class ConfigEntry implements Consumer<ModConfigSpec.Builder> {
 
     private final Set<ConfigEntry> subSections = new HashSet<>();
     private final String path;
@@ -50,7 +50,7 @@ public abstract class ConfigEntry implements Consumer<ForgeConfigSpec.Builder> {
     }
 
     @Override
-    public final void accept(ForgeConfigSpec.Builder builder) {
+    public final void accept(ModConfigSpec.Builder builder) {
         this.createEntries(builder);
 
         for (ConfigEntry section : subSections) {
@@ -65,7 +65,7 @@ public abstract class ConfigEntry implements Consumer<ForgeConfigSpec.Builder> {
         return String.format("config.%s.%s.%s", this.configType.extension(), this.getFullPath(), key);
     }
 
-    public abstract void createEntries(ForgeConfigSpec.Builder cfgBuilder);
+    public abstract void createEntries(ModConfigSpec.Builder cfgBuilder);
 
     public void reload() {}
 

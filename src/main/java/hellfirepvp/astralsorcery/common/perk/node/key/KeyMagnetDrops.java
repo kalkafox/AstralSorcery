@@ -12,15 +12,15 @@ import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +47,8 @@ public class KeyMagnetDrops extends KeyPerk {
 
     private void onEntityLoot(LivingDropsEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) source.getTrueSource();
+        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
+            Player player = (Player) source.getTrueSource();
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (prog.getPerkData().hasPerkEffect(this)) {

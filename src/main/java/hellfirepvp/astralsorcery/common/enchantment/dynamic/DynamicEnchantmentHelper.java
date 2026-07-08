@@ -8,28 +8,36 @@
 
 package hellfirepvp.astralsorcery.common.enchantment.dynamic;
 
-import com.google.common.collect.Maps;
 import hellfirepvp.astralsorcery.common.base.Mods;
 import hellfirepvp.astralsorcery.common.data.config.registry.AmuletEnchantmentRegistry;
 import hellfirepvp.astralsorcery.common.enchantment.amulet.AmuletEnchantmentHelper;
 import hellfirepvp.astralsorcery.common.event.DynamicEnchantmentEvent;
 import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.util.object.ObjectReference;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.QuickChargeEnchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BookItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BookItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.enchanting.GetEnchantmentLevelEvent;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -40,36 +48,48 @@ import java.util.*;
  */
 public class DynamicEnchantmentHelper {
 
-    private static int getNewEnchantmentLevel(int current, String enchStr, ItemStack item, @Nullable List<DynamicEnchantment> context) {
-        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchStr));
-        if (enchantment != null) {
-            current = getNewEnchantmentLevel(current, enchantment, item, context);
-            if (enchantment instanceof QuickChargeEnchantment) {
-                current = MathHelper.clamp(current, 0, 5);
-            }
+    public static void onGetEnchantmentLevel(GetEnchantmentLevelEvent event) {
+        ItemStack stack = event.getStack();
+        if (!canHaveDynamicEnchantment(stack)) {
+            return;
         }
-        return current;
+
+        List<DynamicEnchantment> context = fireEnchantmentGatheringEvent(stack);
+        if (context.isEmpty()) {
+            return;
+        }
+
+        Holder<Enchantment> target = event.getTargetEnchant();
+        if (target != null) {
+            int level = event.getEnchantments().getLevel(target);
+            event.getEnchantments().set(target, getNewEnchantmentLevel(level, target, stack, context));
+            return;
+        }
+
+        addNewLevels(event.getEnchantments(), stack, context, event);
     }
 
-    public static int getNewEnchantmentLevel(int current, Enchantment enchantment, ItemStack item, @Nullable List<DynamicEnchantment> context) {
+    public static int getNewEnchantmentLevel(int current, Holder<Enchantment> enchantment, ItemStack item, @Nullable List<DynamicEnchantment> context) {
         if (!canHaveDynamicEnchantment(item)) {
             return current;
         }
-        if (enchantment == null || !AmuletEnchantmentRegistry.canBeInfluenced(enchantment)) {
+
+        Optional<ResourceKey<Enchantment>> key = enchantment.unwrapKey();
+        if (key.isEmpty() || !AmuletEnchantmentRegistry.canBeInfluenced(key.get())) {
             return current;
         }
 
         List<DynamicEnchantment> modifiers = context != null ? context : fireEnchantmentGatheringEvent(item);
         for (DynamicEnchantment mod : modifiers) {
-            Enchantment target = mod.getEnchantment();
+            ResourceKey<Enchantment> target = mod.getEnchantment();
             switch (mod.getType()) {
                 case ADD_TO_SPECIFIC:
-                    if (enchantment.equals(target)) {
+                    if (key.get().equals(target) && (current > 0 || canAddDynamicEnchantment(item, enchantment))) {
                         current += mod.getLevelAddition();
                     }
                     break;
                 case ADD_TO_EXISTING_SPECIFIC:
-                    if (enchantment.equals(target) && current > 0) {
+                    if (key.get().equals(target) && current > 0) {
                         current += mod.getLevelAddition();
                     }
                     break;
@@ -82,87 +102,60 @@ public class DynamicEnchantmentHelper {
                     break;
             }
         }
-        if (enchantment instanceof QuickChargeEnchantment) {
-            current = MathHelper.clamp(current, 0, 5);
+        if (enchantment.is(Enchantments.QUICK_CHARGE)) {
+            current = Mth.clamp(current, 0, 5);
         }
         return current;
     }
 
-    public static ListNBT modifyEnchantmentTags(ListNBT existingEnchantments, ItemStack stack) {
-        if (!canHaveDynamicEnchantment(stack)) {
-            return existingEnchantments;
+    public static ItemEnchantments.Mutable addNewLevels(ItemEnchantments.Mutable enchantments, ItemStack stack, List<DynamicEnchantment> context, GetEnchantmentLevelEvent event) {
+        Set<Holder<Enchantment>> existing = new HashSet<>(enchantments.keySet());
+        for (Holder<Enchantment> enchantment : existing) {
+            enchantments.set(enchantment, getNewEnchantmentLevel(enchantments.getLevel(enchantment), enchantment, stack, context));
         }
 
-        List<DynamicEnchantment> context = fireEnchantmentGatheringEvent(stack);
-        if (context.isEmpty()) {
-            return existingEnchantments;
-        }
-
-        ListNBT returnNew = new ListNBT();
-        Set<String> enchantments = new HashSet<>(existingEnchantments.size());
-        for (int i = 0; i < existingEnchantments.size(); i++) {
-            CompoundNBT cmp = existingEnchantments.getCompound(i);
-            String enchKey = cmp.getString("id");
-            int lvl = cmp.getInt("lvl");
-            int newLvl = getNewEnchantmentLevel(lvl, enchKey, stack, context);
-
-            CompoundNBT newEnchTag = new CompoundNBT();
-            newEnchTag.putString("id", enchKey);
-            newEnchTag.putInt("lvl", newLvl);
-            returnNew.add(newEnchTag);
-
-            enchantments.add(enchKey);
+        Set<ResourceKey<Enchantment>> existingKeys = new HashSet<>();
+        for (Holder<Enchantment> enchantment : enchantments.keySet()) {
+            enchantment.unwrapKey().ifPresent(existingKeys::add);
         }
 
         for (DynamicEnchantment mod : context) {
-            if (mod.getType() == DynamicEnchantmentType.ADD_TO_SPECIFIC) {
-                Enchantment ench = mod.getEnchantment();
-                if (ench == null || !AmuletEnchantmentRegistry.canBeInfluenced(ench)) {
-                    continue;
-                }
-
-                if (!stack.canApplyAtEnchantingTable(ench)) {
-                    continue;
-                }
-                String enchName = ench.getRegistryName().toString();
-                if (!enchantments.contains(enchName)) { //Means we didn't add the levels on the other iteration
-                    CompoundNBT newEnchTag = new CompoundNBT();
-                    newEnchTag.putString("id", enchName);
-                    newEnchTag.putInt("lvl", getNewEnchantmentLevel(0, ench, stack, context));
-                    returnNew.add(newEnchTag);
-                }
+            if (mod.getType() != DynamicEnchantmentType.ADD_TO_SPECIFIC) {
+                continue;
             }
+
+            ResourceKey<Enchantment> enchantmentKey = mod.getEnchantment();
+            if (enchantmentKey == null || existingKeys.contains(enchantmentKey) || !AmuletEnchantmentRegistry.canBeInfluenced(enchantmentKey)) {
+                continue;
+            }
+
+            Optional<Holder.Reference<Enchantment>> enchantment = event.getHolder(enchantmentKey);
+            if (enchantment.isEmpty() || !event.isTargetting(enchantmentKey) || !canAddDynamicEnchantment(stack, enchantment.get())) {
+                continue;
+            }
+
+            enchantments.set(enchantment.get(), getNewEnchantmentLevel(0, enchantment.get(), stack, context));
+            existingKeys.add(enchantmentKey);
         }
-        return returnNew;
+        return enchantments;
     }
 
+    private static boolean canAddDynamicEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+        return stack.supportsEnchantment(enchantment) || stack.is(Items.BOOK) || stack.is(Items.ENCHANTED_BOOK);
+    }
+
+    @Deprecated
+    public static int getNewEnchantmentLevel(int current, Enchantment enchantment, ItemStack item, @Nullable List<DynamicEnchantment> context) {
+        return current;
+    }
+
+    @Deprecated
+    public static ListTag modifyEnchantmentTags(ListTag existingEnchantments, ItemStack stack) {
+        return existingEnchantments;
+    }
+
+    @Deprecated
     public static Map<Enchantment, Integer> addNewLevels(Map<Enchantment, Integer> enchantmentLevelMap, ItemStack stack) {
-        if (!canHaveDynamicEnchantment(stack)) {
-            return enchantmentLevelMap;
-        }
-
-        List<DynamicEnchantment> context = fireEnchantmentGatheringEvent(stack);
-        if (context.isEmpty()) {
-            return enchantmentLevelMap;
-        }
-
-        Map<Enchantment, Integer> copyRet = Maps.newLinkedHashMap(enchantmentLevelMap);
-        enchantmentLevelMap.clear();
-        for (Map.Entry<Enchantment, Integer> enchant : copyRet.entrySet()) {
-            enchantmentLevelMap.put(enchant.getKey(), getNewEnchantmentLevel(enchant.getValue(), enchant.getKey(), stack, context));
-        }
-
-        for (DynamicEnchantment mod : context) {
-            if (mod.getType() == DynamicEnchantmentType.ADD_TO_SPECIFIC) {
-                Enchantment ench = mod.getEnchantment();
-                if (ench == null || !AmuletEnchantmentRegistry.canBeInfluenced(ench)) {
-                    continue;
-                }
-                if (!enchantmentLevelMap.containsKey(ench)) { //Means we didn't add the levels on the other iteration
-                    enchantmentLevelMap.put(ench, getNewEnchantmentLevel(0, ench, stack, context));
-                }
-            }
-        }
         return enchantmentLevelMap;
     }
 
@@ -173,17 +166,17 @@ public class DynamicEnchantmentHelper {
                 if (stack.isEmpty()) {
                     return;
                 }
-                Item i = stack.getItem();
-                if (i.getRegistryName() == null) {
+                Item item = stack.getItem();
+                ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(item);
+                if (itemKey == null) {
                     return;
                 }
                 try {
-                    if (!i.isEnchantable(stack) || i instanceof BookItem) {
+                    if (!item.isEnchantable(stack) || item instanceof BookItem) {
                         return;
                     }
                 } catch (NullPointerException exc) {
-                    //In most cases this is caused due to capabilities being not initialized during search tree indexing
-                    //Silently ignore for now
+                    // Some search/indexing paths query stacks before their auxiliary data has fully initialized.
                     return;
                 }
                 if (Mods.DRACONIC_EVOLUTION.owns(stack.getItem())) {
@@ -193,27 +186,26 @@ public class DynamicEnchantmentHelper {
             });
             return mayHaveDynamicEnchantments.get();
         }
-        //If we ever end up here, we have a cycle somewhere, probably as a result of checking
-        //if the item is enchantable or damageable relies on if enchantments are already being applied on it or not.
-        //This probably means we don't want to influence the item with dynamic enchantments.
+        // If we ever end up here, we have a cycle somewhere, probably as a result of checking
+        // if the item is enchantable or damageable relies on if enchantments are already being applied on it or not.
+        // This probably means we don't want to influence the item with dynamic enchantments.
         return false;
     }
 
     //This is more or less just a map to say whatever we add upon.
     private static List<DynamicEnchantment> fireEnchantmentGatheringEvent(ItemStack tool) {
-        PlayerEntity foundEntity = AmuletEnchantmentHelper.getPlayerHavingTool(tool);
+        Player foundEntity = AmuletEnchantmentHelper.getPlayerHavingTool(tool);
         if (foundEntity == null) {
             return new ArrayList<>();
         }
         DynamicEnchantmentEvent.Add addEvent = new DynamicEnchantmentEvent.Add(tool, foundEntity);
-        if (MinecraftForge.EVENT_BUS.post(addEvent)) {
+        if (NeoForge.EVENT_BUS.post(addEvent).isCanceled()) {
             return new ArrayList<>();
         }
         DynamicEnchantmentEvent.Modify modifyEvent = new DynamicEnchantmentEvent.Modify(tool, addEvent.getEnchantmentsToApply(), foundEntity);
-        if (MinecraftForge.EVENT_BUS.post(modifyEvent)) {
+        if (NeoForge.EVENT_BUS.post(modifyEvent).isCanceled()) {
             return new ArrayList<>();
         }
         return modifyEvent.getEnchantmentsToApply();
     }
-
 }

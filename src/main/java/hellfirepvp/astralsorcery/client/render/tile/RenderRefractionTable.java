@@ -8,19 +8,19 @@
 
 package hellfirepvp.astralsorcery.client.render.tile;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.model.builtin.ModelRefractionTable;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.tile.TileRefractionTable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,12 +33,12 @@ public class RenderRefractionTable extends CustomTileEntityRenderer<TileRefracti
 
     private static final ModelRefractionTable MODEL_REFRACTION_TABLE = new ModelRefractionTable();
 
-    public RenderRefractionTable(TileEntityRendererDispatcher tileRenderer) {
+    public RenderRefractionTable(BlockEntityRenderDispatcher tileRenderer) {
         super(tileRenderer);
     }
 
     @Override
-    public void render(TileRefractionTable tile, float pTicks, MatrixStack renderStack, IRenderTypeBuffer renderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void render(TileRefractionTable tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         if (!tile.hasParchment() && !tile.getInputStack().isEmpty()) {
             ItemStack input = tile.getInputStack();
 
@@ -56,7 +56,7 @@ public class RenderRefractionTable extends CustomTileEntityRenderer<TileRefracti
         renderStack.rotate(Vector3f.XP.rotationDegrees(180F));
 
         RenderType type = MODEL_REFRACTION_TABLE.getGeneralType();
-        IVertexBuilder vb = renderTypeBuffer.getBuffer(type);
+        VertexConsumer vb = renderTypeBuffer.getBuffer(type);
         MODEL_REFRACTION_TABLE.renderFrame(renderStack, vb,
                 combinedLight, combinedOverlay, 1F, 1F, 1F, 1F, tile.hasParchment());
         RenderingUtils.refreshDrawing(vb, type);

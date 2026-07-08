@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
 import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
@@ -19,19 +19,19 @@ import hellfirepvp.astralsorcery.common.item.base.AlignmentChargeConsumer;
 import hellfirepvp.astralsorcery.common.item.base.AlignmentChargeRevealer;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraft.client.MainWindow;
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.GameType;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.GameType;
+import net.neoforged.neoforge.client.event.RenderGameOverlayEvent;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -72,20 +72,20 @@ public class AlignmentChargeRenderer implements ITickHandler {
             return;
         }
 
-        MatrixStack renderStack = event.getMatrixStack();
-        MainWindow window = event.getWindow();
+        PoseStack renderStack = event.getPoseStack();
+        Window window = event.getWindow();
         int screenWidth = window.getScaledWidth();
         int screenHeight = window.getScaledHeight();
         int barWidth = 194;
         int offsetLeft = screenWidth / 2 - barWidth / 2;
         int offsetTop = screenHeight + 3 - 81; //*sigh* vanilla
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         float percFilled = AlignmentChargeHandler.INSTANCE.getFilledPercentage(player, LogicalSide.CLIENT);
 
         boolean hasEnoughCharge = true;
         float usagePerc = 0F;
-        for (EquipmentSlotType type : EquipmentSlotType.values()) {
+        for (EquipmentSlot type : EquipmentSlotType.values()) {
             ItemStack equipped = player.getItemStackFromSlot(type);
             if (!equipped.isEmpty() && equipped.getItem() instanceof AlignmentChargeConsumer) {
                 float chargeRequired = ((AlignmentChargeConsumer) equipped.getItem()).getAlignmentChargeCost(player, equipped);
@@ -131,13 +131,13 @@ public class AlignmentChargeRenderer implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player != null) {
             if (AlignmentChargeHandler.INSTANCE.getFilledPercentage(player, LogicalSide.CLIENT) <= 0.95F) {
                 revealCharge(20);
             }
 
-            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+            for (EquipmentSlot slot : EquipmentSlotType.values()) {
                 ItemStack stack = player.getItemStackFromSlot(slot);
                 if (!stack.isEmpty() && stack.getItem() instanceof AlignmentChargeRevealer &&
                         ((AlignmentChargeRevealer) stack.getItem()).shouldReveal(stack)) {

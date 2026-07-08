@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.effect.vfx;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.context.base.BatchRenderContext;
 import hellfirepvp.astralsorcery.client.effect.function.VFXAlphaFunction;
@@ -17,9 +17,9 @@ import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.client.util.SphereBuilder;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
 
 import java.awt.*;
 import java.util.LinkedList;
@@ -84,7 +84,7 @@ public class FXColorEffectSphere extends EntityVisualFX {
     }
 
     @Override
-    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, MatrixStack renderStack, IVertexBuilder vb, float pTicks) {
+    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, PoseStack renderStack, VertexConsumer vb, float pTicks) {
         int alpha = this.getAlpha(pTicks);
         if (this.removeIfInvisible && alpha <= 0) {
             this.requestRemoval();

@@ -11,12 +11,12 @@ package hellfirepvp.astralsorcery.common.perk.node.key;
 import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -40,8 +40,8 @@ public class KeyNoKnockback extends KeyPerk {
 
     private void onKnockback(LivingKnockBackEvent event) {
         LivingEntity attacked = event.getEntityLiving();
-        if (attacked instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) attacked;
+        if (attacked instanceof Player) {
+            Player player = (Player) attacked;
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (prog.getPerkData().hasPerkEffect(this)) {

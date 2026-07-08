@@ -15,13 +15,13 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.common.data.WorldCacheDomain;
 import hellfirepvp.observerlib.common.data.base.GlobalWorldData;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -53,7 +53,7 @@ public class StorageNetworkBuffer extends GlobalWorldData {
 
         for (StorageNetwork network : this.rawNetworks.values()) {
             for (StorageNetwork.CoreArea core : network.getCores()) {
-                AxisAlignedBB box = core.getRealBox();
+                AABB box = core.getRealBox();
                 ChunkPos from = Vector3.getMin(box).toChunkPos();
                 ChunkPos to   = Vector3.getMax(box).toChunkPos();
 
@@ -69,10 +69,10 @@ public class StorageNetworkBuffer extends GlobalWorldData {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
-        ListNBT networks = new ListNBT();
+    public void writeToNBT(CompoundTag compound) {
+        ListTag networks = new ListTag();
         for (StorageNetwork network : this.rawNetworks.values()) {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             network.writeToNBT(tag);
             networks.add(tag);
         }
@@ -80,12 +80,12 @@ public class StorageNetworkBuffer extends GlobalWorldData {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         this.rawNetworks.clear();
 
-        ListNBT networks = compound.getList("networks", Constants.NBT.TAG_COMPOUND);
+        ListTag networks = compound.getList("networks", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < networks.size(); i++) {
-            CompoundNBT tag = networks.getCompound(i);
+            CompoundTag tag = networks.getCompound(i);
             StorageNetwork net = new StorageNetwork();
             net.readFromNBT(tag);
             if (net.getCores().isEmpty()) {
@@ -102,6 +102,6 @@ public class StorageNetworkBuffer extends GlobalWorldData {
     }
 
     @Override
-    public void updateTick(World world) {}
+    public void updateTick(Level world) {}
 
 }

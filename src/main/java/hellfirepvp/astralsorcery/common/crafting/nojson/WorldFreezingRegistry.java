@@ -11,9 +11,9 @@ package hellfirepvp.astralsorcery.common.crafting.nojson;
 import hellfirepvp.astralsorcery.common.crafting.nojson.freezing.BlockFreezingRecipe;
 import hellfirepvp.astralsorcery.common.crafting.nojson.freezing.FluidFreezingRecipe;
 import hellfirepvp.astralsorcery.common.crafting.nojson.freezing.WorldFreezingRecipe;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +38,7 @@ public class WorldFreezingRegistry extends CustomRecipeRegistry<WorldFreezingRec
     }
 
     @Nullable
-    public WorldFreezingRecipe getRecipeFor(World world, BlockPos pos) {
+    public WorldFreezingRecipe getRecipeFor(Level world, BlockPos pos) {
         return this.getRecipes()
                 .stream()
                 .filter(recipe -> recipe.canFreeze(world, pos))

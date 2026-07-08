@@ -15,16 +15,16 @@ import hellfirepvp.astralsorcery.common.network.PacketChannel;
 import hellfirepvp.astralsorcery.common.network.play.server.PktUpdateGateways;
 import hellfirepvp.astralsorcery.common.util.SidedReference;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.event.world.WorldEvent;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -42,7 +42,7 @@ public class CelestialGatewayHandler {
     private CelestialGatewayFilter filter = null;
     private boolean startUp = false;
 
-    private final SidedReference<Map<RegistryKey<World>, Collection<GatewayCache.GatewayNode>>> cache = new SidedReference<>();
+    private final SidedReference<Map<ResourceKey<Level>, Collection<GatewayCache.GatewayNode>>> cache = new SidedReference<>();
 
     private CelestialGatewayHandler() {}
 
@@ -53,12 +53,12 @@ public class CelestialGatewayHandler {
         return filter;
     }
 
-    public void addPosition(World world, GatewayCache.GatewayNode node) {
+    public void addPosition(Level world, GatewayCache.GatewayNode node) {
         if (world.isRemote()) {
             return;
         }
 
-        RegistryKey<World> dimKey = world.getDimensionKey();
+        ResourceKey<Level> dimKey = world.getDimensionKey();
         if (!cache.getData(LogicalSide.SERVER).map(map -> map.get(dimKey)).isPresent()) {
             forceLoad(world.getDimensionKey());
         }
@@ -77,12 +77,12 @@ public class CelestialGatewayHandler {
         }
     }
 
-    public void removePosition(World world, BlockPos pos) {
+    public void removePosition(Level world, BlockPos pos) {
         if (world.isRemote()) {
             return;
         }
 
-        RegistryKey<World> dimKey = world.getDimensionKey();
+        ResourceKey<Level> dimKey = world.getDimensionKey();
         Optional<Collection<GatewayCache.GatewayNode>> worldData = cache.getData(LogicalSide.SERVER).map(map -> map.get(dimKey));
         if (!worldData.isPresent()) {
             return;
@@ -96,7 +96,7 @@ public class CelestialGatewayHandler {
         }
     }
 
-    private void forceLoad(RegistryKey<World> world) {
+    private void forceLoad(ResourceKey<Level> world) {
         //TODO re-check once worlds aren't ALL statically loaded.
         MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
         srv.getWorld(world);
@@ -128,12 +128,12 @@ public class CelestialGatewayHandler {
             return; //We're already loading up there.
         }
 
-        IWorld world = event.getWorld();
-        if (world.isRemote() || !(world instanceof World)) {
+        LevelAccessor world = event.getWorld();
+        if (world.isRemote() || !(world instanceof Level)) {
             return;
         }
 
-        this.loadIntoCache((World) world);
+        this.loadIntoCache((Level) world);
         this.syncToAll();
     }
 
@@ -142,18 +142,18 @@ public class CelestialGatewayHandler {
         PacketChannel.CHANNEL.sendToAll(pkt);
     }
 
-    public Collection<GatewayCache.GatewayNode> getGatewaysForWorld(World world, LogicalSide side) {
+    public Collection<GatewayCache.GatewayNode> getGatewaysForWorld(Level world, LogicalSide side) {
         return this.cache.getData(side)
                 .map(data -> data.getOrDefault(world.getDimensionKey(), Collections.emptyList()))
                 .orElse(Collections.emptyList());
     }
 
-    public Map<RegistryKey<World>, Collection<GatewayCache.GatewayNode>> getGatewayCache(LogicalSide side) {
+    public Map<ResourceKey<Level>, Collection<GatewayCache.GatewayNode>> getGatewayCache(LogicalSide side) {
         return this.cache.getData(side).orElse(Collections.emptyMap());
     }
 
     @Nullable
-    public GatewayCache.GatewayNode getGatewayNode(World world, LogicalSide side, BlockPos pos) {
+    public GatewayCache.GatewayNode getGatewayNode(Level world, LogicalSide side, BlockPos pos) {
         return this.cache.getData(side)
                 .map(data -> data.get(world.getDimensionKey()))
                 .orElse(Collections.emptyList())
@@ -164,13 +164,13 @@ public class CelestialGatewayHandler {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void updateClientCache(@Nullable Map<RegistryKey<World>, Collection<GatewayCache.GatewayNode>> positions) {
+    public void updateClientCache(@Nullable Map<ResourceKey<Level>, Collection<GatewayCache.GatewayNode>> positions) {
         this.cache.setData(LogicalSide.CLIENT, positions);
     }
 
-    private void loadIntoCache(World world) {
+    private void loadIntoCache(Level world) {
         GatewayCache cache = DataAS.DOMAIN_AS.getData(world, DataAS.KEY_GATEWAY_CACHE);
-        Map<RegistryKey<World>, Collection<GatewayCache.GatewayNode>> gatewayCache = this.cache.getData(LogicalSide.SERVER).orElse(new HashMap<>());
+        Map<ResourceKey<Level>, Collection<GatewayCache.GatewayNode>> gatewayCache = this.cache.getData(LogicalSide.SERVER).orElse(new HashMap<>());
         gatewayCache.put(world.getDimensionKey(), new HashSet<>(cache.getGatewayPositions()));
         this.cache.setData(LogicalSide.SERVER, gatewayCache);
     }

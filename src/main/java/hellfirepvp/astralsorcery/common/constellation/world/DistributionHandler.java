@@ -15,8 +15,8 @@ import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.constellation.IConstellationSpecialShowup;
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class DistributionHandler {
         this.ctx = ctx;
     }
 
-    public void tick(World world) {
+    public void tick(Level world) {
         ConstellationHandler cst = this.ctx.getConstellationHandler();
         int tracked = cst.getLastTrackedDay();
 
@@ -62,7 +62,7 @@ public class DistributionHandler {
         return this.activeDistribution.getOrDefault(cst, 0F);
     }
 
-    private void updateDistribution(World world) {
+    private void updateDistribution(Level world) {
         MoonPhase current = MoonPhase.fromWorld(world);
         Map<IConstellation, Float> distribution = new HashMap<>(this.dayDistributionMap.get(current.ordinal()));
 

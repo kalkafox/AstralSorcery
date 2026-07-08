@@ -21,12 +21,12 @@ import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.perk.node.key.KeyMantleFlight;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
@@ -46,7 +46,7 @@ public class MantleEffectVicio extends MantleEffect {
     }
 
     @Override
-    protected void tickServer(PlayerEntity player) {
+    protected void tickServer(Player player) {
         super.tickServer(player);
 
         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
@@ -69,7 +69,7 @@ public class MantleEffectVicio extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         if (player.isElytraFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.isFlying)) {
@@ -86,14 +86,14 @@ public class MantleEffectVicio extends MantleEffect {
     @Nonnull
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected FXFacingParticle spawnFacingParticle(PlayerEntity player, Vector3 at) {
+    protected FXFacingParticle spawnFacingParticle(Player player, Vector3 at) {
         if (player.isElytraFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.isFlying)) {
             at.subtract(player.getMotion().mul(1.5, 1.5, 1.5));
         }
         return super.spawnFacingParticle(player, at);
     }
 
-    public static boolean isUsableElytra(ItemStack elytraStack, PlayerEntity wearingEntity) {
+    public static boolean isUsableElytra(ItemStack elytraStack, Player wearingEntity) {
         if (elytraStack.getItem() instanceof ItemMantle) {
             MantleEffect effect = ItemMantle.getEffect(wearingEntity, ConstellationsAS.vicio);
             PlayerProgress progress;
@@ -121,14 +121,14 @@ public class MantleEffectVicio extends MantleEffect {
 
         private static final int defaultChargeCost = 100;
 
-        private ForgeConfigSpec.IntValue chargeCost;
+        private ModConfigSpec.IntValue chargeCost;
 
         public VicioConfig() {
             super("vicio");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.chargeCost = cfgBuilder

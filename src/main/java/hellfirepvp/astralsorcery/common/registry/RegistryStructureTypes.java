@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.StructuresAS;
 import hellfirepvp.astralsorcery.common.structure.types.StructureType;
 import hellfirepvp.observerlib.api.util.BlockArray;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Supplier;
 

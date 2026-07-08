@@ -18,14 +18,14 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeGrid;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeTypeHandler;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.effect.AltarRecipeEffect;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -68,7 +68,7 @@ public class SimpleAltarRecipeBuilder<T extends SimpleAltarRecipe> extends Custo
         return this.addRelayInput(Ingredient.fromTag(tag));
     }
 
-    public SimpleAltarRecipeBuilder<T> addRelayInput(IItemProvider item) {
+    public SimpleAltarRecipeBuilder<T> addRelayInput(ItemLike item) {
         return this.addRelayInput(Ingredient.fromItems(item));
     }
 
@@ -102,7 +102,7 @@ public class SimpleAltarRecipeBuilder<T extends SimpleAltarRecipe> extends Custo
         return this;
     }
 
-    public SimpleAltarRecipeBuilder<T> addOutput(IItemProvider output) {
+    public SimpleAltarRecipeBuilder<T> addOutput(ItemLike output) {
         this.addOutput(new ItemStack(output));
         return this;
     }

@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.base.patreon.types;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.effect.function.VFXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.VFXColorFunction;
@@ -23,16 +23,16 @@ import hellfirepvp.astralsorcery.common.base.patreon.PatreonEffect;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -72,7 +72,7 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        PlayerEntity player = (PlayerEntity) context[0];
+        Player player = (Player) context[0];
         LogicalSide side = (LogicalSide) context[1];
 
         if (side.isClient() &&
@@ -85,7 +85,7 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void playEffects(PlayerEntity player) {
+    private void playEffects(Player player) {
         float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, 0);
         float yOffset = 1.3F;
         if (player.isSneaking()) {
@@ -127,7 +127,7 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
         }
     }
 
-    private boolean shouldDoEffect(PlayerEntity player) {
+    private boolean shouldDoEffect(Player player) {
         return player.getUniqueID().equals(playerUUID) &&
                 !player.isPassenger() &&
                 !player.isElytraFlying() &&
@@ -137,15 +137,15 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     void onRender(RenderPlayerEvent.Post event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if (!shouldDoEffect(player)) {
             return;
         }
-        this.renderWings(player, event.getMatrixStack(), event.getPartialRenderTick());
+        this.renderWings(player, event.getPoseStack(), event.getPartialRenderTick());
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void renderWings(PlayerEntity player, MatrixStack renderStack, float pTicks) {
+    private void renderWings(Player player, PoseStack renderStack, float pTicks) {
         float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, pTicks);
         float yOffset = 1.3F;
         if (player.isSneaking() && !player.abilities.isFlying) {

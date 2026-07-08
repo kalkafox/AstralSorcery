@@ -17,20 +17,20 @@ import hellfirepvp.astralsorcery.common.item.ItemTome;
 import hellfirepvp.astralsorcery.common.item.crystal.ItemCrystalBase;
 import hellfirepvp.astralsorcery.common.lib.CapabilitiesAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.entity.AreaEffectCloudEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.LecternTileEntity;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
-import net.minecraftforge.event.world.ChunkEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.neoforged.neoforge.event.entity.EntityJoinWorldEvent;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerSleepInBedEvent;
+import net.neoforged.neoforge.event.world.ChunkEvent;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -63,7 +63,7 @@ public class EventHandlerMisc {
         if (event.getWorld().isRemote()) {
             return;
         }
-        LecternTileEntity lectern = MiscUtils.getTileAt(event.getWorld(), event.getPos(), LecternTileEntity.class, false);
+        LecternBlockEntity lectern = MiscUtils.getTileAt(event.getWorld(), event.getPos(), LecternTileEntity.class, false);
         if (lectern != null) {
             ItemStack contained = lectern.getBook();
             if (contained.getItem() instanceof ItemTome) {
@@ -74,19 +74,19 @@ public class EventHandlerMisc {
     }
 
     private static void onChunkLoad(ChunkEvent.Load event) {
-        IChunk ch = event.getChunk();
-        if (ch instanceof Chunk && !event.getWorld().isRemote()) {
-            ((Chunk) ch).getCapability(CapabilitiesAS.CHUNK_FLUID).ifPresent(entry -> {
+        ChunkAccess ch = event.getChunk();
+        if (ch instanceof LevelChunk && !event.getWorld().isRemote()) {
+            ((LevelChunk) ch).getCapability(CapabilitiesAS.CHUNK_FLUID).ifPresent(entry -> {
                 if (!entry.isInitialized()) {
-                    IWorld w = event.getWorld();
-                    if (w instanceof ISeedReader) {
-                        long seed = ((ISeedReader) w).getSeed();
+                    LevelAccessor w = event.getWorld();
+                    if (w instanceof WorldGenLevel) {
+                        long seed = ((WorldGenLevel) w).getSeed();
                         long chX = event.getChunk().getPos().x;
                         long chZ = event.getChunk().getPos().z;
                         seed ^= chX << 32;
                         seed ^= chZ;
                         entry.generate(seed);
-                        ((Chunk) ch).markDirty();
+                        ((LevelChunk) ch).markDirty();
                     }
                 }
             });
@@ -103,8 +103,8 @@ public class EventHandlerMisc {
     }
 
     private static void onSpawnEffectCloud(EntityJoinWorldEvent event) {
-        if (event.getEntity() instanceof AreaEffectCloudEntity &&
-                MiscUtils.contains(((AreaEffectCloudEntity) event.getEntity()).effects, effect -> effect.getPotion() instanceof EffectDropModifier)) {
+        if (event.getEntity() instanceof AreaEffectCloud &&
+                MiscUtils.contains(((AreaEffectCloud) event.getEntity()).effects, effect -> effect.getPotion() instanceof EffectDropModifier)) {
             event.setCanceled(true);
         }
     }

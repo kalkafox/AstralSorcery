@@ -9,10 +9,10 @@
 package hellfirepvp.astralsorcery.common.starlight.network;
 
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.TickEvent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -29,7 +29,7 @@ import java.util.Map;
 public class StarlightTransmissionHandler implements ITickHandler {
 
     private static final StarlightTransmissionHandler instance = new StarlightTransmissionHandler();
-    private final Map<RegistryKey<World>, TransmissionWorldHandler> worldHandlers = new HashMap<>();
+    private final Map<ResourceKey<Level>, TransmissionWorldHandler> worldHandlers = new HashMap<>();
 
     private StarlightTransmissionHandler() {}
 
@@ -39,12 +39,12 @@ public class StarlightTransmissionHandler implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        World world = (World) context[0];
-        if (world.isRemote() || !(world instanceof ServerWorld)) {
+        Level world = (Level) context[0];
+        if (world.isRemote() || !(world instanceof ServerLevel)) {
             return;
         }
 
-        worldHandlers.computeIfAbsent(world.getDimensionKey(), TransmissionWorldHandler::new).tick((ServerWorld) world);
+        worldHandlers.computeIfAbsent(world.getDimensionKey(), TransmissionWorldHandler::new).tick((ServerLevel) world);
     }
 
     public void clearServer() {
@@ -52,8 +52,8 @@ public class StarlightTransmissionHandler implements ITickHandler {
         worldHandlers.clear();
     }
 
-    public void informWorldUnload(World world) {
-        RegistryKey<World> dimKey = world.getDimensionKey();
+    public void informWorldUnload(Level world) {
+        ResourceKey<Level> dimKey = world.getDimensionKey();
         TransmissionWorldHandler handle = worldHandlers.get(dimKey);
         if (handle != null) {
             handle.clear();
@@ -62,7 +62,7 @@ public class StarlightTransmissionHandler implements ITickHandler {
     }
 
     @Nullable
-    public TransmissionWorldHandler getWorldHandler(World world) {
+    public TransmissionWorldHandler getWorldHandler(Level world) {
         if (world == null) {
             return null;
         }

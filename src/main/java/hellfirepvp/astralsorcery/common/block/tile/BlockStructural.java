@@ -13,31 +13,31 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.GuiType;
 import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
-import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.block.*;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.*;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ToolType;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -64,7 +64,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {}
+    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {}
 
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
@@ -72,7 +72,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 return STRUCT_TELESCOPE;
@@ -92,7 +92,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public SoundType getSoundType(BlockState state, IWorldReader world, BlockPos pos, @Nullable Entity entity) {
+    public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, @Nullable Entity entity) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 return SoundType.WOOD;
@@ -102,7 +102,7 @@ public class BlockStructural extends Block {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
+    public boolean addDestroyEffects(BlockState state, Level world, BlockPos pos, ParticleEngine manager) {
         EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
             switch (state.get(BLOCK_TYPE)) {
                 case TELESCOPE:
@@ -115,12 +115,12 @@ public class BlockStructural extends Block {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addHitEffects(BlockState state, World world, RayTraceResult target, ParticleManager manager) {
-        if (target instanceof BlockRayTraceResult) {
+    public boolean addHitEffects(BlockState state, Level world, HitResult target, ParticleEngine manager) {
+        if (target instanceof BlockHitResult) {
             EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
                 switch (state.get(BLOCK_TYPE)) {
                     case TELESCOPE:
-                        manager.addBlockDestroyEffects(((BlockRayTraceResult) target).getPos().down(), BlocksAS.TELESCOPE.getDefaultState());
+                        manager.addBlockDestroyEffects(((BlockHitResult) target).getPos().down(), BlocksAS.TELESCOPE.getDefaultState());
                         break;
                 }
             });
@@ -129,7 +129,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity entity, Hand hand, BlockRayTraceResult rayTraceResult) {
+    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult rayTraceResult) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 if (world.isRemote()) {
@@ -152,7 +152,7 @@ public class BlockStructural extends Block {
 
     /*
     TODO custom states via state container
-    private static float getBlockHardness(BlockState state, IBlockReader world, BlockPos pos) {
+    private static float getBlockHardness(BlockState state, BlockGetter world, BlockPos pos) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().getBlockHardness(world, pos.down());
@@ -160,7 +160,7 @@ public class BlockStructural extends Block {
         return super.getBlockHardness(state, world, pos);
     }
 
-    private static boolean isOpaque(BlockState state, IBlockReader world, BlockPos pos) {
+    private static boolean isOpaque(BlockState state, BlockGetter world, BlockPos pos) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().isNormalCube(world, pos.down());
@@ -169,7 +169,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public float getExplosionResistance(BlockState state, IWorldReader world, BlockPos pos, @Nullable Entity exploder, Explosion explosion) {
+    public float getExplosionResistance(BlockState state, LevelReader world, BlockPos pos, @Nullable Entity exploder, Explosion explosion) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().getExplosionResistance(world, pos.down(), exploder, explosion);
@@ -178,7 +178,7 @@ public class BlockStructural extends Block {
     }*/
 
     @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().getPickBlock(target, world, pos.down(), player);
@@ -187,7 +187,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 if (world.isAirBlock(pos.down())) {
@@ -199,7 +199,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor) {
+    public void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbor) {
         if (!(world instanceof IWorldWriter)) {
             return;
         }
@@ -212,11 +212,11 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState p_149645_1_) {
+    public RenderShape getRenderType(BlockState p_149645_1_) {
         return BlockRenderType.INVISIBLE;
     }
 
-    public static enum BlockType implements IStringSerializable {
+    public static enum BlockType implements StringRepresentable {
 
         DUMMY(Blocks.AIR.getDefaultState()),
         TELESCOPE(BlocksAS.TELESCOPE.getDefaultState());

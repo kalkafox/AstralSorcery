@@ -10,13 +10,13 @@ package hellfirepvp.astralsorcery.common.item.block;
 
 import hellfirepvp.astralsorcery.common.block.tile.BlockGemCrystalCluster;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,7 +35,7 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (isInGroup(group)) {
             for (BlockGemCrystalCluster.GrowthStageType stage : BlockGemCrystalCluster.STAGE.getAllowedValues()) {
                 ItemStack cluster = new ItemStack(this);
@@ -47,7 +47,7 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
 
     @Nullable
     @Override
-    protected BlockState getStateForPlacement(BlockItemUseContext context) {
+    protected BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState toPlace = super.getStateForPlacement(context);
         if (toPlace != null) {
             return toPlace.with(BlockGemCrystalCluster.STAGE, this.getGrowthStage(context.getItem()));

@@ -20,23 +20,23 @@ import hellfirepvp.astralsorcery.common.tile.TileCelestialCrystals;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.BlockItem;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.level.block.*;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -73,7 +73,7 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     }
 
     @Override
-    public void receiveStarlight(World world, Random rand, BlockPos pos, IWeakConstellation starlightType, double amount) {
+    public void receiveStarlight(Level world, Random rand, BlockPos pos, IWeakConstellation starlightType, double amount) {
         TileCelestialCrystals crystals = MiscUtils.getTileAt(world, pos, TileCelestialCrystals.class, false);
         if (crystals != null) {
             crystals.grow((int) (TileCelestialCrystals.TICK_GROWTH_CHANCE / amount));
@@ -86,8 +86,8 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-        Vector3d offset = state.getOffset(world, pos);
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        Vec3 offset = state.getOffset(world, pos);
         VoxelShape shape;
         switch (state.get(STAGE)) {
             case 4:
@@ -117,12 +117,12 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     /*
     TODO custom states via state container
     @Override
-    public Vector3d getOffset(BlockState state, IBlockReader world, BlockPos pos) {
+    public Vec3 getOffset(BlockState state, BlockGetter world, BlockPos pos) {
         return super.getOffset(state, world, pos).mul(0.7, 0.7, 0.7);
     }*/
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
+    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
         if (!this.isValidPosition(state, world, pos)) {
             return Blocks.AIR.getDefaultState();
         }
@@ -130,12 +130,12 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, IWorldReader world, BlockPos pos) {
+    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
         return hasSolidSideOnTop(world, pos.down());
     }
 
     @Override
-    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onReplaced(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
         if (state.getBlock() != newState.getBlock()) {
             super.onReplaced(state, world, pos, newState, isMoving);
 
@@ -147,18 +147,18 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public RenderShape getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader world) {
+    public BlockEntity createNewTileEntity(BlockGetter world) {
         return new TileCelestialCrystals();
     }
 }

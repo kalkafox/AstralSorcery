@@ -18,14 +18,13 @@ import hellfirepvp.astralsorcery.common.data.research.ProgressionTier;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.item.base.IConstellationFocus;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -45,7 +44,7 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World world, List<ITextComponent> toolTip, ITooltipFlag flag) {
+    public void addInformation(ItemStack stack, @Nullable Level world, List<Component> toolTip, TooltipFlag flag) {
         CrystalAttributes.TooltipResult result = addCrystalPropertyToolTip(stack, toolTip);
         if (result != null) {
             ProgressionTier tier = ResearchHelper.getClientProgress().getTierReached();
@@ -54,11 +53,11 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
             IWeakConstellation c = getAttunedConstellation(stack);
             if (c != null) {
                 if (GatedKnowledge.CRYSTAL_TUNE.canSee(tier) && ResearchHelper.getClientProgress().hasConstellationDiscovered(c)) {
-                    toolTip.add(new TranslationTextComponent("crystal.info.astralsorcery.attuned",
-                            c.getConstellationName().mergeStyle(TextFormatting.BLUE))
-                            .mergeStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("crystal.info.astralsorcery.attuned",
+                            c.getConstellationName().withStyle(TextFormatting.BLUE))
+                            .withStyle(TextFormatting.GRAY));
                 } else if (!addedMissing) {
-                    toolTip.add(new TranslationTextComponent("astralsorcery.progress.missing.knowledge").mergeStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(TextFormatting.GRAY));
                     addedMissing = true;
                 }
             }
@@ -66,21 +65,21 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
             IMinorConstellation tr = getTraitConstellation(stack);
             if (tr != null) {
                 if (GatedKnowledge.CRYSTAL_TUNE.canSee(tier) && ResearchHelper.getClientProgress().hasConstellationDiscovered(tr)) {
-                    toolTip.add(new TranslationTextComponent("crystal.info.astralsorcery.trait",
-                            tr.getConstellationName().mergeStyle(TextFormatting.BLUE))
-                            .mergeStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("crystal.info.astralsorcery.trait",
+                            tr.getConstellationName().withStyle(TextFormatting.BLUE))
+                            .withStyle(TextFormatting.GRAY));
                 } else if (!addedMissing) {
-                    toolTip.add(new TranslationTextComponent("astralsorcery.progress.missing.knowledge").mergeStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(TextFormatting.GRAY));
                 }
             }
         }
     }
 
     @Override
-    public ITextComponent getDisplayName(ItemStack stack) {
+    public Component getDisplayName(ItemStack stack) {
         IWeakConstellation cst = this.getAttunedConstellation(stack);
         if (cst != null) {
-            return new TranslationTextComponent(super.getTranslationKey(stack) + ".typed", cst.getConstellationName());
+            return Component.translatable(super.getTranslationKey(stack) + ".typed", cst.getConstellationName());
         }
         return super.getDisplayName(stack);
     }

@@ -11,14 +11,14 @@ package hellfirepvp.astralsorcery.common.constellation.effect.base;
 import hellfirepvp.astralsorcery.common.constellation.effect.ConstellationEffectRegistry;
 import hellfirepvp.astralsorcery.common.constellation.world.DayTimeHelper;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
-import net.minecraft.entity.*;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.MobSpawnInfo;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.entity.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -47,20 +47,20 @@ public class ListEntries {
         }
 
         @Override
-        public void readFromNBT(CompoundNBT nbt) {
+        public void readFromNBT(CompoundTag nbt) {
             super.readFromNBT(nbt);
 
             this.type = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(nbt.getString("entity")));
         }
 
         @Override
-        public void writeToNBT(CompoundNBT nbt) {
+        public void writeToNBT(CompoundTag nbt) {
             super.writeToNBT(nbt);
 
             nbt.putString("entity", this.type.getRegistryName().toString());
         }
 
-        public static EntitySpawnEntry createEntry(ServerWorld world, BlockPos pos, SpawnReason reason) {
+        public static EntitySpawnEntry createEntry(ServerLevel world, BlockPos pos, MobSpawnType reason) {
             Biome b = world.getBiome(pos);
             List<MobSpawnInfo.Spawners> applicable = new LinkedList<>();
             if (DayTimeHelper.isNight(world)) {
@@ -81,7 +81,7 @@ public class ListEntries {
             return null;
         }
 
-        public void spawn(ServerWorld world, SpawnReason reason) {
+        public void spawn(ServerLevel world, MobSpawnType reason) {
             if (this.type == null) {
                 return;
             }
@@ -96,9 +96,9 @@ public class ListEntries {
                         at.getY() + 0.5,
                         at.getZ() + 0.5,
                         world.rand.nextFloat() * 360.0F, 0.0F);
-                if (e instanceof MobEntity) {
-                    ((MobEntity) e).onInitialSpawn(world, world.getDifficultyForLocation(at), reason, null, null);
-                    if (!((MobEntity) e).isNotColliding(world)) {
+                if (e instanceof Mob) {
+                    ((Mob) e).onInitialSpawn(world, world.getDifficultyForLocation(at), reason, null, null);
+                    if (!((Mob) e).isNotColliding(world)) {
                         e.remove();
                         return;
                     }
@@ -132,14 +132,14 @@ public class ListEntries {
         }
 
         @Override
-        public void writeToNBT(CompoundNBT nbt) {
+        public void writeToNBT(CompoundTag nbt) {
             super.writeToNBT(nbt);
 
             nbt.putInt("maxCount", this.maxCount);
         }
 
         @Override
-        public void readFromNBT(CompoundNBT nbt) {
+        public void readFromNBT(CompoundTag nbt) {
             super.readFromNBT(nbt);
 
             this.maxCount = nbt.getInt("maxCount");
@@ -163,14 +163,14 @@ public class ListEntries {
         }
 
         @Override
-        public void writeToNBT(CompoundNBT nbt) {
+        public void writeToNBT(CompoundTag nbt) {
             super.writeToNBT(nbt);
 
             nbt.putInt("counter", this.counter);
         }
 
         @Override
-        public void readFromNBT(CompoundNBT nbt) {
+        public void readFromNBT(CompoundTag nbt) {
             super.readFromNBT(nbt);
 
             this.counter = nbt.getInt("counter");
@@ -191,10 +191,10 @@ public class ListEntries {
         }
 
         @Override
-        public void writeToNBT(CompoundNBT nbt) {}
+        public void writeToNBT(CompoundTag nbt) {}
 
         @Override
-        public void readFromNBT(CompoundNBT nbt) {}
+        public void readFromNBT(CompoundTag nbt) {}
 
     }
 }

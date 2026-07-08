@@ -8,17 +8,16 @@
 
 package hellfirepvp.astralsorcery.common.structure.types;
 
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistryEntry;
 import hellfirepvp.observerlib.api.ChangeSubscriber;
 import hellfirepvp.observerlib.api.ObserverHelper;
 import hellfirepvp.observerlib.api.util.BlockArray;
 import hellfirepvp.observerlib.common.change.ChangeObserverStructure;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -30,7 +29,7 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 30.05.2019 / 15:07
  */
-public class StructureType implements IForgeRegistryEntry<StructureType> {
+public class StructureType implements AstralRegistryEntry<StructureType> {
 
     private final ResourceLocation name;
     private final Supplier<BlockArray> structureSupplier;
@@ -44,11 +43,11 @@ public class StructureType implements IForgeRegistryEntry<StructureType> {
         return this.structureSupplier.get();
     }
 
-    public ITextComponent getDisplayName() {
-        return new TranslationTextComponent(String.format("structure.%s.%s.name", name.getNamespace(), name.getPath()));
+    public Component getDisplayName() {
+        return Component.translatable(String.format("structure.%s.%s.name", name.getNamespace(), name.getPath()));
     }
 
-    public ChangeSubscriber<ChangeObserverStructure> observe(World world, BlockPos pos) {
+    public ChangeSubscriber<ChangeObserverStructure> observe(Level world, BlockPos pos) {
         return ObserverHelper.getHelper().observeArea(world, pos, new ObserverProviderStructure(getRegistryName()));
     }
 
@@ -63,8 +62,4 @@ public class StructureType implements IForgeRegistryEntry<StructureType> {
         return this.name;
     }
 
-    @Override
-    public Class<StructureType> getRegistryType() {
-        return StructureType.class;
-    }
 }

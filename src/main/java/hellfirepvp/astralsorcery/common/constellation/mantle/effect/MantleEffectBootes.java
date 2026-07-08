@@ -16,24 +16,24 @@ import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +63,7 @@ public class MantleEffectBootes extends MantleEffect {
     }
 
     @Override
-    protected void tickServer(PlayerEntity player) {
+    protected void tickServer(Player player) {
         super.tickServer(player);
 
         ItemStack mantle = player.getItemStackFromSlot(EquipmentSlotType.CHEST);
@@ -71,7 +71,7 @@ public class MantleEffectBootes extends MantleEffect {
             return;
         }
 
-        World world = player.getEntityWorld();
+        Level world = player.getEntityWorld();
         List<EntityFlare> flares = gatherFlares(world, mantle);
         if (flares.size() < CONFIG.maxFlareCount.get()) {
             if (player.ticksExisted % 80 == 0) {
@@ -97,7 +97,7 @@ public class MantleEffectBootes extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         this.playCapeSparkles(player, 0.15F);
@@ -109,7 +109,7 @@ public class MantleEffectBootes extends MantleEffect {
         if (!attacked.getEntityWorld().isRemote() && src.getTrueSource() instanceof LivingEntity) {
             LivingEntity attacker = (LivingEntity) src.getTrueSource();
             if (ItemMantle.getEffect(attacker, ConstellationsAS.bootes) != null && attacked.isAlive()) {
-                if (attacked instanceof PlayerEntity && !MiscUtils.canPlayerAttackServer(attacker, attacked)) {
+                if (attacked instanceof Player && !MiscUtils.canPlayerAttackServer(attacker, attacked)) {
                     return;
                 }
                 this.forEachFlare(attacker, flare -> flare.setAttackTarget(attacked));
@@ -136,7 +136,7 @@ public class MantleEffectBootes extends MantleEffect {
         this.gatherFlares(owner.getEntityWorld(), mantle).forEach(fn);
     }
 
-    protected List<EntityFlare> gatherFlares(World world, ItemStack mantleStack) {
+    protected List<EntityFlare> gatherFlares(Level world, ItemStack mantleStack) {
         List<EntityFlare> flares = new ArrayList<>();
         for (int flareId : getEntityIds(mantleStack)) {
             Entity e = world.getEntityByID(flareId);
@@ -148,14 +148,14 @@ public class MantleEffectBootes extends MantleEffect {
     }
 
     protected void setEntityIds(ItemStack mantleStack, List<Integer> ids) {
-        ListNBT list = new ListNBT();
+        ListTag list = new ListTag();
         ids.forEach(i -> list.add(IntNBT.valueOf(i)));
         NBTHelper.getPersistentData(mantleStack).put("flareIds", list);
     }
 
     protected List<Integer> getEntityIds(ItemStack mantleStack) {
         List<Integer> ids = new ArrayList<>();
-        ListNBT nbtIds = NBTHelper.getPersistentData(mantleStack).getList("flareIds", Constants.NBT.TAG_INT);
+        ListTag nbtIds = NBTHelper.getPersistentData(mantleStack).getList("flareIds", Constants.NBT.TAG_INT);
         for (int i = 0; i < nbtIds.size(); i++) {
             ids.add(nbtIds.getInt(i));
         }
@@ -178,16 +178,16 @@ public class MantleEffectBootes extends MantleEffect {
 
         private final int defaultChargeCostPerFlare = 400;
 
-        public ForgeConfigSpec.IntValue maxFlareCount;
+        public ModConfigSpec.IntValue maxFlareCount;
 
-        public ForgeConfigSpec.IntValue chargeCostPerFlare;
+        public ModConfigSpec.IntValue chargeCostPerFlare;
 
         public BootesConfig() {
             super("bootes");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.maxFlareCount = cfgBuilder

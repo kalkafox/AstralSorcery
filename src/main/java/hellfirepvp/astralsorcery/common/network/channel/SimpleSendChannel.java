@@ -1,74 +1,58 @@
 /*******************************************************************************
  * HellFirePvP / Astral Sorcery 2022
- *
- * All rights reserved.
- * The source code is available on github: https://github.com/HellFirePvP/AstralSorcery
- * For further details, see the License file there.
  ******************************************************************************/
 
 package hellfirepvp.astralsorcery.common.network.channel;
 
+import hellfirepvp.astralsorcery.common.network.PacketChannel;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
- * This class is part of the Astral Sorcery Mod
- * The complete source code for this mod can be found on github.
- * Class: SimpleSendChannel
- * Created by HellFirePvP
- * Date: 30.05.2019 / 17:56
+ * Sending facade backed by NeoForge custom payloads.
  */
-public abstract class SimpleSendChannel {
+public class SimpleSendChannel {
 
-    private final SimpleChannel channel;
-
-    public SimpleSendChannel(SimpleChannel channel) {
-        this.channel = channel;
-    }
-
-    public <P extends ASPacket<P>> void sendToPlayer(PlayerEntity player, P packet) {
-        if (player instanceof ServerPlayerEntity) {
-            this.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), packet);
+    public <P extends ASPacket<P>> void sendToPlayer(Player player, P packet) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            PacketDistributor.sendToPlayer(serverPlayer, PacketChannel.envelope(packet));
         }
     }
 
     public <P extends ASPacket<P>> void sendToAll(P packet) {
-        this.send(PacketDistributor.ALL.noArg(), packet);
+        PacketDistributor.sendToAllPlayers(PacketChannel.envelope(packet));
     }
 
-    public <P extends ASPacket<P>> void sendToAllObservingChunk(P packet, Chunk ch) {
-        this.send(PacketDistributor.TRACKING_CHUNK.with(() -> ch), packet);
+    public <P extends ASPacket<P>> void sendToAllObservingChunk(P packet, LevelChunk chunk) {
+        if (chunk.getLevel() instanceof ServerLevel level) {
+            PacketDistributor.sendToPlayersTrackingChunk(level, chunk.getPos(), PacketChannel.envelope(packet));
+        }
     }
 
-    public <P extends ASPacket<P>> void sendToAllAround(P packet, PacketDistributor.TargetPoint point) {
-        this.send(PacketDistributor.NEAR.with(() -> point), packet);
+    public <P extends ASPacket<P>> void sendToAllAround(P packet, PacketChannel.TargetPoint point) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return;
+        }
+        ServerLevel level = server.getLevel(point.dimension());
+        if (level != null) {
+            PacketDistributor.sendToPlayersNear(level, null, point.x(), point.y(), point.z(), point.range(),
+                    PacketChannel.envelope(packet));
+        }
     }
 
-    public <MSG> void sendToServer(MSG message) {
-        channel.sendToServer(message);
+    public <P extends ASPacket<P>> void sendToServer(P packet) {
+        PacketDistributor.sendToServer(PacketChannel.envelope(packet));
     }
 
-    public <MSG> void sendTo(MSG message, NetworkManager manager, NetworkDirection direction) {
-        channel.sendTo(message, manager, direction);
+    public void reply(ASPacket<?> packet, PacketContext context) {
+        context.reply(packet);
     }
-
-    public <MSG> void send(PacketDistributor.PacketTarget target, MSG message) {
-        channel.send(target, message);
-    }
-
-    public <MSG> void reply(MSG msgToReply, NetworkEvent.Context context) {
-        channel.reply(msgToReply, context);
-    }
-
-    public <MSG> SimpleChannel.MessageBuilder<MSG> messageBuilder(final Class<MSG> type, int id) {
-        return channel.messageBuilder(type, id);
-    }
-
 }

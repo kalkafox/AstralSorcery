@@ -21,15 +21,15 @@ import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tick.PlayerTickPerk;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,7 +51,7 @@ public class KeyGrowables extends KeyPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(PlayerEntity player, LogicalSide side) {
+    public void onPlayerTick(Player player, LogicalSide side) {
         if (!side.isServer()) {
             return;
         }
@@ -68,7 +68,7 @@ public class KeyGrowables extends KeyPerk implements PlayerTickPerk {
                     rand.nextInt(rRadius * 2) + 1 - rRadius,
                     rand.nextInt(rRadius * 2) + 1 - rRadius,
                     rand.nextInt(rRadius * 2) + 1 - rRadius);
-            World w = player.getEntityWorld();
+            Level w = player.getEntityWorld();
             CropHelper.GrowablePlant plant = CropHelper.wrapPlant(w, pos);
             PktPlayEffect pkt = null;
             if (plant != null) {
@@ -95,16 +95,16 @@ public class KeyGrowables extends KeyPerk implements PlayerTickPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue chanceToBonemeal;
-        private ForgeConfigSpec.IntValue radius;
-        private ForgeConfigSpec.IntValue chargeCost;
+        private ModConfigSpec.DoubleValue chanceToBonemeal;
+        private ModConfigSpec.IntValue radius;
+        private ModConfigSpec.IntValue chargeCost;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.chanceToBonemeal = cfgBuilder
                     .comment("Sets the chance to try to see if a random plant near the player gets bonemeal'd.")
                     .translation(translationKey("chanceToBonemeal"))

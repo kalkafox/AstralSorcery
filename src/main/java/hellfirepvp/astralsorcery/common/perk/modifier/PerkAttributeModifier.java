@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.modifier;
 
+import hellfirepvp.astralsorcery.common.registry.internal.AbstractAstralRegistryEntry;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
@@ -19,12 +20,11 @@ import hellfirepvp.astralsorcery.common.perk.PerkConverter;
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,7 +38,7 @@ import java.util.Objects;
  * Created by HellFirePvP
  * Date: 08.08.2019 / 17:25
  */
-public class PerkAttributeModifier extends ForgeRegistryEntry<PerkAttributeModifier> {
+public class PerkAttributeModifier extends AbstractAstralRegistryEntry<PerkAttributeModifier> {
 
     private static long counter = 0;
 
@@ -131,12 +131,12 @@ public class PerkAttributeModifier extends ForgeRegistryEntry<PerkAttributeModif
         return value;
     }
 
-    public float getValue(PlayerEntity player, PlayerProgress progress) {
+    public float getValue(Player player, PlayerProgress progress) {
         return getRawValue();
     }
 
     @OnlyIn(Dist.CLIENT)
-    public float getValueForDisplay(PlayerEntity player, PlayerProgress progress) {
+    public float getValueForDisplay(Player player, PlayerProgress progress) {
         return getValue(player, progress);
     }
 

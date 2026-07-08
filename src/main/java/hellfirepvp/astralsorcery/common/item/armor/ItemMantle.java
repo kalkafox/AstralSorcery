@@ -27,22 +27,22 @@ import hellfirepvp.astralsorcery.common.perk.source.provider.equipment.Equipment
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.astralsorcery.common.util.object.CacheReference;
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -77,7 +77,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (this.isInGroup(group)) {
             items.add(new ItemStack(this));
             for (IConstellation cst : RegistriesAS.REGISTRY_CONSTELLATIONS.getValues()) {
@@ -94,31 +94,31 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
 
     @Override
     public boolean canElytraFly(ItemStack stack, LivingEntity entity) {
-        if (!(entity instanceof PlayerEntity)) {
+        if (!(entity instanceof Player)) {
             return false;
         }
-        return MantleEffectVicio.isUsableElytra(stack, (PlayerEntity) entity);
+        return MantleEffectVicio.isUsableElytra(stack, (Player) entity);
     }
 
     @Override
     public boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
-        if (!(entity instanceof PlayerEntity)) {
+        if (!(entity instanceof Player)) {
             return false;
         }
-        return MantleEffectVicio.isUsableElytra(stack, (PlayerEntity) entity);
+        return MantleEffectVicio.isUsableElytra(stack, (Player) entity);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         IConstellation cst = this.getConstellation(stack);
         if (cst instanceof IWeakConstellation) {
-            tooltip.add(cst.getConstellationName().mergeStyle(TextFormatting.BLUE));
+            tooltip.add(cst.getConstellationName().withStyle(TextFormatting.BLUE));
         }
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, PlayerEntity player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
         if (ItemMantle.getEffect(stack, ConstellationsAS.evorsio) == null) {
             return Collections.emptyList();
         }
@@ -141,7 +141,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     @Override
     @Nullable
     @OnlyIn(Dist.CLIENT)
-    public <A extends BipedModel<?>> A getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlotType armorSlot, A _default) {
+    public <A extends HumanoidModel<?>> A getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, A _default) {
         if (modelArmor == null) {
             modelArmor = new ModelArmorMantle();
         }
@@ -151,7 +151,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     @Override
     @Nullable
     @OnlyIn(Dist.CLIENT)
-    public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlotType slot, String type) {
+    public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
         return AstralSorcery.key("textures/model/armor/mantle.png").toString();
     }
 
@@ -214,7 +214,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     }
 
     @Override
-    public float getAlignmentChargeCost(PlayerEntity player, ItemStack stack) {
+    public float getAlignmentChargeCost(Player player, ItemStack stack) {
         return 0;
     }
 }

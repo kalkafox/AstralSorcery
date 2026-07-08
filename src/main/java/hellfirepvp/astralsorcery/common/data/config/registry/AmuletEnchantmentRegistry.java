@@ -11,8 +11,14 @@ package hellfirepvp.astralsorcery.common.data.config.registry;
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigDataAdapter;
 import hellfirepvp.astralsorcery.common.data.config.registry.sets.AmuletEnchantmentEntry;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.util.LinkedList;
@@ -37,16 +43,23 @@ public class AmuletEnchantmentRegistry extends ConfigDataAdapter<AmuletEnchantme
     @Override
     public List<AmuletEnchantmentEntry> getDefaultValues() {
         List<AmuletEnchantmentEntry> enchantments = new LinkedList<>();
-        for (Enchantment e : ForgeRegistries.ENCHANTMENTS.getValues()) {
-            if (!e.isCurse()) { //Cause fck curses on this.
-                enchantments.add(new AmuletEnchantmentEntry(e, e.getRarity().getWeight()));
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return enchantments;
+        }
+        Registry<Enchantment> registry = server.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+        for (Holder.Reference<Enchantment> enchantment : registry.holders().toList()) {
+            if (enchantment.is(EnchantmentTags.CURSE)) {
+                continue;
             }
+            enchantment.unwrapKey().ifPresent(key ->
+                    enchantments.add(new AmuletEnchantmentEntry(key, enchantment.value().getWeight())));
         }
         return enchantments;
     }
 
     @Nullable
-    public static Enchantment getRandomEnchant() {
+    public static ResourceKey<Enchantment> getRandomEnchant() {
         List<AmuletEnchantmentEntry> cfgValues = INSTANCE.getConfiguredValues();
         if (cfgValues.isEmpty()) {
             return null;
@@ -58,13 +71,17 @@ public class AmuletEnchantmentRegistry extends ConfigDataAdapter<AmuletEnchantme
         return entry.getEnchantment();
     }
 
-    public static boolean canBeInfluenced(Enchantment ench) {
+    public static boolean canBeInfluenced(ResourceKey<Enchantment> ench) {
         for (AmuletEnchantmentEntry e : INSTANCE.getConfiguredValues()) {
             if (e.getEnchantment().equals(ench)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static boolean canBeInfluenced(Holder<Enchantment> ench) {
+        return ench.unwrapKey().map(AmuletEnchantmentRegistry::canBeInfluenced).orElse(false);
     }
 
     @Override

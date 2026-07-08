@@ -16,14 +16,14 @@ import hellfirepvp.astralsorcery.common.lib.EffectsAS;
 import hellfirepvp.astralsorcery.common.perk.CooldownPerk;
 import hellfirepvp.astralsorcery.common.perk.PerkCooldownHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,15 +52,15 @@ public class KeyCheatDeath extends KeyPerk implements CooldownPerk {
     }
 
     private void onDeath(LivingDeathEvent event) {
-        if (event.getEntityLiving() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+        if (event.getEntityLiving() instanceof Player) {
+            Player player = (Player) event.getEntityLiving();
             LogicalSide side = this.getSide(player);
             PlayerProgress progress = ResearchHelper.getProgress(player, side);
             if (side.isServer() && progress.getPerkData().hasPerkEffect(this)) {
                 if (!PerkCooldownHelper.isCooldownActiveForPlayer(player, this) &&
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, side, CONFIG.chargeCost.get(), false)) {
                     PerkCooldownHelper.setCooldownActiveForPlayer(player, this, CONFIG.cooldownPotionApplication.get());
-                    player.addPotionEffect(new EffectInstance(EffectsAS.EFFECT_CHEAT_DEATH,
+                    player.addPotionEffect(new MobEffectInstance(EffectsAS.EFFECT_CHEAT_DEATH,
                             CONFIG.potionDuration.get(),
                             CONFIG.potionAmplifier.get(),
                             true, false, true));
@@ -70,21 +70,21 @@ public class KeyCheatDeath extends KeyPerk implements CooldownPerk {
     }
 
     @Override
-    public void onCooldownTimeout(PlayerEntity player) {}
+    public void onCooldownTimeout(Player player) {}
 
     private static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.IntValue cooldownPotionApplication;
-        private ForgeConfigSpec.IntValue potionDuration;
-        private ForgeConfigSpec.IntValue potionAmplifier;
-        private ForgeConfigSpec.IntValue chargeCost;
+        private ModConfigSpec.IntValue cooldownPotionApplication;
+        private ModConfigSpec.IntValue potionDuration;
+        private ModConfigSpec.IntValue potionAmplifier;
+        private ModConfigSpec.IntValue chargeCost;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             cooldownPotionApplication = cfgBuilder
                     .comment("Once the potion effect gets applied, it'll take at least this amount of ticks or a server restart until it can be re-applied by this perk.")
                     .translation(translationKey("cooldownPotionApplication"))

@@ -12,18 +12,18 @@ import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.base.LargeBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMarble;
 import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ContainerBlock;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
+import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -34,9 +34,9 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 17.11.2019 / 07:43
  */
-public class BlockAttunementAltar extends ContainerBlock implements CustomItemBlock, LargeBlock {
+public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemBlock, LargeBlock {
 
-    private static final AxisAlignedBB PLACEMENT_BOX = new AxisAlignedBB(-1, 0, -1, 1, 1, 1);
+    private static final AABB PLACEMENT_BOX = new AABB(-1, 0, -1, 1, 1, 1);
     private static final VoxelShape ATTUNEMENT_ALTAR = Block.makeCuboidShape(-2, 0, -2, 18, 6, 18);
     private static final VoxelShape ATTUNEMENT_ALTAR_COLLISION = Block.makeCuboidShape(0, 0, 0, 16, 6, 16);
 
@@ -48,34 +48,34 @@ public class BlockAttunementAltar extends ContainerBlock implements CustomItemBl
     }
 
     @Override
-    public AxisAlignedBB getBlockSpace() {
+    public AABB getBlockSpace() {
         return PLACEMENT_BOX;
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.canPlaceAt(context) ? this.getDefaultState() : null;
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return ATTUNEMENT_ALTAR;
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return ATTUNEMENT_ALTAR_COLLISION;
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
         return new TileAttunementAltar();
     }
 }

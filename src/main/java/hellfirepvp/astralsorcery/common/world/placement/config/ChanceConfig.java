@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.world.placement.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import net.minecraft.world.gen.placement.IPlacementConfig;
 
 import java.util.Random;

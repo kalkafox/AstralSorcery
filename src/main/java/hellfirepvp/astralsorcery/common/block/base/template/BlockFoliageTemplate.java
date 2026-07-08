@@ -9,15 +9,15 @@
 package hellfirepvp.astralsorcery.common.block.base.template;
 
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraftforge.common.IPlantable;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.neoforged.neoforge.common.IPlantable;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,10 +32,10 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
         super(properties);
     }
 
-    protected abstract boolean isValidGround(BlockState state, IBlockReader worldIn, BlockPos pos);
+    protected abstract boolean isValidGround(BlockState state, BlockGetter worldIn, BlockPos pos);
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
+    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
         if (!state.isValidPosition(world, pos)) {
             return Blocks.AIR.getDefaultState();
         }
@@ -43,7 +43,7 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, IWorldReader world, BlockPos pos) {
+    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
         BlockPos blockpos = pos.down();
         if (state.getBlock() == this) {
             return world.getBlockState(blockpos).canSustainPlant(world, blockpos, Direction.UP, this);
@@ -52,12 +52,12 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState p_200123_1_, IBlockReader p_200123_2_, BlockPos p_200123_3_) {
+    public boolean propagatesSkylightDown(BlockState p_200123_1_, BlockGetter p_200123_2_, BlockPos p_200123_3_) {
         return true;
     }
 
     @Override
-    public BlockState getPlant(IBlockReader world, BlockPos pos) {
+    public BlockState getPlant(BlockGetter world, BlockPos pos) {
         BlockState state = world.getBlockState(pos);
         if (state.getBlock() != this) {
             return this.getDefaultState();

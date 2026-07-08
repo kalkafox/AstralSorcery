@@ -18,12 +18,12 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.RootPerk;
 import hellfirepvp.astralsorcery.common.perk.tick.PlayerTickPerk;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.stats.StatisticsManager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.StatsCounter;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class RootVicio extends RootPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void removePerkLogic(PlayerEntity player, LogicalSide side) {
+    public void removePerkLogic(Player player, LogicalSide side) {
         super.removePerkLogic(player, side);
 
         if (side.isServer()) {
@@ -76,16 +76,16 @@ public class RootVicio extends RootPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(PlayerEntity player, LogicalSide side) {
-        if (!side.isServer() || !(player instanceof ServerPlayerEntity)) {
+    public void onPlayerTick(Player player, LogicalSide side) {
+        if (!side.isServer() || !(player instanceof ServerPlayer)) {
             return;
         }
 
         UUID uuid = player.getUniqueID();
-        ServerPlayerEntity sPlayer = (ServerPlayerEntity) player;
+        ServerPlayer sPlayer = (ServerPlayer) player;
         PlayerProgress prog = ResearchHelper.getProgress(player, side);
 
-        StatisticsManager mgr = sPlayer.getStats();
+        StatsCounter mgr = sPlayer.getStats();
         int walked = mgr.getValue(Stats.CUSTOM.get(Stats.WALK_ONE_CM));
         int sprint = mgr.getValue(Stats.CUSTOM.get(Stats.SPRINT_ONE_CM));
         int flown = mgr.getValue(Stats.CUSTOM.get(Stats.FLY_ONE_CM));

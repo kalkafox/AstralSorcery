@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.client.effect.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.data.config.entry.RenderingConfig;
 import hellfirepvp.astralsorcery.client.effect.EffectProperties;
 import hellfirepvp.astralsorcery.client.effect.EntityComplexFX;
@@ -25,7 +25,7 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.order.DependencySorter;
 import hellfirepvp.observerlib.common.util.AlternatingSet;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import java.io.IOException;
 import java.util.*;
@@ -64,7 +64,7 @@ public final class EffectHandler {
         return c.getValue();
     }
 
-    public void render(MatrixStack renderStack, float pTicks) {
+    public void render(PoseStack renderStack, float pTicks) {
         if (this.orderedEffects == null || AssetLibrary.isReloading()) {
             return;
         }

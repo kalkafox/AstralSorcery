@@ -8,11 +8,13 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.network.chat.Component;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.common.data.journal.JournalPage;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.client.gui.Font;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.text.*;
 
 import java.util.LinkedList;
@@ -27,34 +29,34 @@ import java.util.List;
  */
 public class RenderPageText extends RenderablePage {
 
-    private final FontRenderer fontRenderer;
-    private final List<IReorderingProcessor> localizedText;
+    private final Font fontRenderer;
+    private final List<FormattedCharSequence> localizedText;
 
     public RenderPageText(String unlocalized) {
         this(RenderablePage.getFontRenderer(), unlocalized);
     }
 
-    public RenderPageText(FontRenderer fontRenderer, String unlocalized) {
+    public RenderPageText(Font fontRenderer, String unlocalized) {
         super(null, -1);
         this.fontRenderer = fontRenderer;
         this.localizedText = buildLines(unlocalized);
     }
 
-    private List<IReorderingProcessor> buildLines(String unlocText) {
+    private List<FormattedCharSequence> buildLines(String unlocText) {
         String text = LanguageMap.getInstance().func_230503_a_(unlocText);
-        List<IReorderingProcessor> lines = new LinkedList<>();
+        List<FormattedCharSequence> lines = new LinkedList<>();
         for (String segment : text.split("<NL>")) {
-            lines.addAll(fontRenderer.trimStringToWidth(new StringTextComponent(segment), JournalPage.DEFAULT_WIDTH));
+            lines.addAll(fontRenderer.trimStringToWidth(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
             lines.add(IReorderingProcessor.field_242232_a);
         }
         return lines;
     }
 
     @Override
-    public void render(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
         renderStack.push();
         renderStack.translate(x, y, z);
-        for (IReorderingProcessor text : this.localizedText) {
+        for (FormattedCharSequence text : this.localizedText) {
             RenderingDrawUtils.renderStringAt(text, renderStack, this.fontRenderer, 0x00CCCCCC, false);
             renderStack.translate(0, 10, 0);
         }

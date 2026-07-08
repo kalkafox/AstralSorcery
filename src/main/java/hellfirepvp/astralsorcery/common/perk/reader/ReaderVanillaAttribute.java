@@ -14,17 +14,17 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeLimiter;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeMap;
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.RegistryObject;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -51,18 +51,18 @@ public class ReaderVanillaAttribute extends PerkAttributeReader {
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, PlayerEntity player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
         return player.getAttribute(this.attribute.get()).getBaseValue();
     }
 
     @Override
-    public double getModifierValueForMode(PerkAttributeMap statMap, PlayerEntity player, LogicalSide side, ModifierType mode) {
+    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode) {
         return statMap.getModifier(player, ResearchHelper.getProgress(player, side), this.getType(), mode);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public PerkStatistic getStatistics(PerkAttributeMap statMap, PlayerEntity player) {
+    public PerkStatistic getStatistics(PerkAttributeMap statMap, Player player) {
         String limitStr = "";
         Double limit = null;
         if (PerkAttributeLimiter.hasLimit(this.getType())) {

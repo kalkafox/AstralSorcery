@@ -8,10 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.model.armor;
 
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,7 +21,7 @@ import net.minecraft.entity.item.ArmorStandEntity;
  * Date: 17.02.2020 / 21:22
  */
 //Again, another version, another ripoff of net.minecraft.client.renderer.entity.model.ArmorStandArmorModel
-public class CustomArmorModel<T extends LivingEntity> extends BipedModel<T> {
+public class CustomArmorModel<T extends LivingEntity> extends HumanoidModel<T> {
 
     public CustomArmorModel() {
         super(0F);
@@ -29,8 +29,8 @@ public class CustomArmorModel<T extends LivingEntity> extends BipedModel<T> {
 
     @Override
     public void setRotationAngles(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entity instanceof ArmorStandEntity) {
-            ArmorStandEntity armorStand = (ArmorStandEntity) entity;
+        if (entity instanceof ArmorStand) {
+            ArmorStand armorStand = (ArmorStand) entity;
 
             this.bipedHead.rotateAngleX = ((float)Math.PI / 180F) * armorStand.getHeadRotation().getX();
             this.bipedHead.rotateAngleY = ((float)Math.PI / 180F) * armorStand.getHeadRotation().getY();
@@ -59,7 +59,7 @@ public class CustomArmorModel<T extends LivingEntity> extends BipedModel<T> {
         }
     }
 
-    protected void setRotateAngle(ModelRenderer modelPart, float x, float y, float z) {
+    protected void setRotateAngle(ModelPart modelPart, float x, float y, float z) {
         modelPart.rotateAngleX = x;
         modelPart.rotateAngleY = y;
         modelPart.rotateAngleZ = z;

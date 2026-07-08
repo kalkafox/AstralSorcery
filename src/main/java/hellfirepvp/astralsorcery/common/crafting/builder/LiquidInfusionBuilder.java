@@ -13,15 +13,15 @@ import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeBuilder;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInfusion;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.tags.ITag;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.nbt.Tag;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 
@@ -63,7 +63,7 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
         return this;
     }
 
-    public LiquidInfusionBuilder setItemInput(IItemProvider item) {
+    public LiquidInfusionBuilder setItemInput(ItemLike item) {
         this.itemInput = Ingredient.fromItems(item);
         return this;
     }
@@ -78,7 +78,7 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
         return this;
     }
 
-    public LiquidInfusionBuilder setOutput(IItemProvider output) {
+    public LiquidInfusionBuilder setOutput(ItemLike output) {
         return this.setOutput(new ItemStack(output));
     }
 

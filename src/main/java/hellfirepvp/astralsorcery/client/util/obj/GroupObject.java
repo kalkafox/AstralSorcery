@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.util.obj;
 
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 
@@ -34,7 +34,7 @@ public class GroupObject {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void render(IVertexBuilder vb) {
+    public void render(VertexConsumer vb) {
         if (faces.size() > 0) {
             for (Face face : faces) {
                 face.addFaceForRender(vb);

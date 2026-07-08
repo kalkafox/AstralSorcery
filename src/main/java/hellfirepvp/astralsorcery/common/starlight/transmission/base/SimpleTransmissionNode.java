@@ -17,12 +17,12 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.NodeConnection;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionProvider;
 import hellfirepvp.astralsorcery.common.util.RaytraceAssist;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.*;
 
@@ -55,7 +55,7 @@ public class SimpleTransmissionNode implements ITransmissionNode {
         return thisPos;
     }
 
-    public void updateIgnoreBlockCollisionState(World world, boolean ignoreBlockCollision) {
+    public void updateIgnoreBlockCollisionState(Level world, boolean ignoreBlockCollision) {
         this.ignoreBlockCollision = ignoreBlockCollision;
         TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(world);
         if (assistNext != null && handle != null) {
@@ -72,7 +72,7 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public boolean notifyUnlink(World world, BlockPos to) {
+    public boolean notifyUnlink(Level world, BlockPos to) {
         if (to.equals(nextPos)) { //cleanup
             this.nextPos = null;
             this.assistNext = null;
@@ -84,11 +84,11 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public void notifyLink(World world, BlockPos pos) {
+    public void notifyLink(Level world, BlockPos pos) {
         addLink(world, pos, true, false);
     }
 
-    private void addLink(World world, BlockPos pos, boolean doRayTest, boolean oldRayState) {
+    private void addLink(Level world, BlockPos pos, boolean doRayTest, boolean oldRayState) {
         this.nextPos = pos;
         this.assistNext = new RaytraceAssist(thisPos, nextPos);
         if (doRayTest) {
@@ -100,11 +100,11 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public boolean notifyBlockChange(World world, BlockPos at) {
+    public boolean notifyBlockChange(Level world, BlockPos at) {
         if (nextPos == null) {
             return false;
         }
-        Vector3d bPosAt = Vector3d.copy(at);
+        Vec3 bPosAt = Vector3d.copy(at);
         double dstStart = thisPos.distanceSq(bPosAt, false);
         double dstEnd = nextPos.distanceSq(bPosAt, false);
         if (dstStart > dstToNextSq || dstEnd > dstToNextSq) {
@@ -116,12 +116,12 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public void notifySourceLink(World world, BlockPos source) {
+    public void notifySourceLink(Level world, BlockPos source) {
         sourcesToThis.add(source);
     }
 
     @Override
-    public void notifySourceUnlink(World world, BlockPos source) {
+    public void notifySourceUnlink(Level world, BlockPos source) {
         sourcesToThis.remove(source);
     }
 
@@ -144,18 +144,18 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         this.thisPos = NBTHelper.readBlockPosFromNBT(compound);
         this.sourcesToThis.clear();
         this.ignoreBlockCollision = compound.getBoolean("ignoreBlockCollision");
 
-        ListNBT list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
+        ListTag list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             sourcesToThis.add(NBTHelper.readBlockPosFromNBT(list.getCompound(i)));
         }
 
         if (compound.contains("nextPos")) {
-            CompoundNBT tag = compound.getCompound("nextPos");
+            CompoundTag tag = compound.getCompound("nextPos");
             BlockPos next = NBTHelper.readBlockPosFromNBT(tag);
             boolean oldRay = tag.getBoolean("rayState");
             addLink(null, next, false, oldRay);
@@ -163,20 +163,20 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         NBTHelper.writeBlockPosToNBT(thisPos, compound);
         compound.putBoolean("ignoreBlockCollision", this.ignoreBlockCollision);
 
-        ListNBT sources = new ListNBT();
+        ListTag sources = new ListTag();
         for (BlockPos source : sourcesToThis) {
-            CompoundNBT comp = new CompoundNBT();
+            CompoundTag comp = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(source, comp);
             sources.add(comp);
         }
         compound.put("sources", sources);
 
         if (nextPos != null) {
-            CompoundNBT pos = new CompoundNBT();
+            CompoundTag pos = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(nextPos, pos);
             pos.putBoolean("rayState", nextReachable);
             compound.put("nextPos", pos);

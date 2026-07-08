@@ -11,9 +11,9 @@ package hellfirepvp.astralsorcery.client.resource;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.effect.EntityComplexFX;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -54,7 +54,7 @@ public class SpriteSheetResource extends AbstractRenderableTexture {
     }
 
     @Override
-    public RenderState.TextureState asState() {
+    public RenderStateShard.TextureStateShard asState() {
         return this.resource.asState();
     }
 

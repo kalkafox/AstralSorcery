@@ -11,10 +11,10 @@ package hellfirepvp.astralsorcery.common.crafting.helper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import hellfirepvp.astralsorcery.common.util.IngredientHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.nbt.CompoundTag;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
 
 import javax.annotation.Nullable;
 
@@ -42,7 +42,7 @@ public class WrappedIngredient {
     }
 
     @Nullable
-    public static WrappedIngredient deserialize(CompoundNBT tag) {
+    public static WrappedIngredient deserialize(CompoundTag tag) {
         if (!tag.contains("ingredient")) {
             return null;
         }
@@ -50,8 +50,8 @@ public class WrappedIngredient {
         return new WrappedIngredient(CraftingHelper.getIngredient(jsonElement));
     }
 
-    public CompoundNBT serialize() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag serialize() {
+        CompoundTag tag = new CompoundTag();
         tag.putString("ingredient", this.ingredient.serialize().toString());
         return tag;
     }

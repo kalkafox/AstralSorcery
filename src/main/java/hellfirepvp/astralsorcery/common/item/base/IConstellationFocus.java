@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.item.base;
 
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 

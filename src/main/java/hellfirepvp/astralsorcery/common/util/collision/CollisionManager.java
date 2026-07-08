@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.util.collision;
 
 import hellfirepvp.astralsorcery.common.constellation.mantle.effect.MantleEffectAevitas;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShapeSpliterator;
 
 import javax.annotation.Nullable;
@@ -30,7 +30,7 @@ public class CollisionManager {
 
     private static final int maxCacheSize = 20;
     private static final LinkedList<VoxelShapeSpliterator> accessList = new LinkedList<>();
-    private static final Map<VoxelShapeSpliterator, List<AxisAlignedBB>> instanceFlags = new HashMap<>();
+    private static final Map<VoxelShapeSpliterator, List<AABB>> instanceFlags = new HashMap<>();
 
     public static void init() {
         register(new MantleEffectAevitas.PlayerWalkableAir());
@@ -41,9 +41,9 @@ public class CollisionManager {
     }
 
     @Nullable
-    public static AxisAlignedBB getIteratorBoundingBoxes(VoxelShapeSpliterator iterator, @Nullable Entity entity) {
+    public static AABB getIteratorBoundingBoxes(VoxelShapeSpliterator iterator, @Nullable Entity entity) {
         if (!instanceFlags.containsKey(iterator)) {
-            List<AxisAlignedBB> additionalBoundingBoxes = getAdditionalBoundingBoxes(entity);
+            List<AABB> additionalBoundingBoxes = getAdditionalBoundingBoxes(entity);
             if (additionalBoundingBoxes.isEmpty()) {
                 return null;
             }
@@ -51,7 +51,7 @@ public class CollisionManager {
             instanceFlags.put(iterator, additionalBoundingBoxes);
             accessList.addFirst(iterator);
         }
-        List<AxisAlignedBB> boxes = instanceFlags.get(iterator);
+        List<AABB> boxes = instanceFlags.get(iterator);
         if (boxes == null || boxes.isEmpty()) {
             return null;
         }
@@ -68,9 +68,9 @@ public class CollisionManager {
         return false;
     }
 
-    public static List<AxisAlignedBB> getAdditionalBoundingBoxes(@Nullable Entity entity) {
-        List<AxisAlignedBB> additionalCollision = new ArrayList<>();
-        AxisAlignedBB entityBox = entity != null ? entity.getBoundingBox() : new AxisAlignedBB(BlockPos.ZERO);
+    public static List<AABB> getAdditionalBoundingBoxes(@Nullable Entity entity) {
+        List<AABB> additionalCollision = new ArrayList<>();
+        AABB entityBox = entity != null ? entity.getBoundingBox() : new AABB(BlockPos.ZERO);
         customHandlers.stream()
                 .filter(handler -> handler.shouldAddCollisionFor(entity))
                 .forEach(handler -> handler.addCollision(entity, entityBox, additionalCollision));

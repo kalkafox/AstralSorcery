@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.container;
 
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nullable;
 
@@ -21,11 +21,11 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 03.08.2019 / 16:10
  */
-public abstract class ContainerTileEntity<T extends TileEntity> extends Container {
+public abstract class ContainerTileEntity<T extends BlockEntity> extends AbstractContainerMenu {
 
     private final T te;
 
-    protected ContainerTileEntity(T tileEntity, @Nullable ContainerType<?> type, int windowId) {
+    protected ContainerTileEntity(T tileEntity, @Nullable MenuType<?> type, int windowId) {
         super(type, windowId);
         this.te = tileEntity;
     }

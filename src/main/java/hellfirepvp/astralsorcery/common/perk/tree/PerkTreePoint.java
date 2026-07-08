@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.screen.journal.perk.BatchPerkContext;
 import hellfirepvp.astralsorcery.client.screen.journal.perk.PerkRender;
@@ -17,10 +17,10 @@ import hellfirepvp.astralsorcery.client.screen.journal.perk.group.PerkPointRende
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.AllocationStatus;
-import net.minecraft.client.renderer.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -73,7 +73,7 @@ public class PerkTreePoint<T extends AbstractPerk> implements PerkRender {
     @Nullable
     @Override
     @OnlyIn(Dist.CLIENT)
-    public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, MatrixStack renderStack,
+    public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, PoseStack renderStack,
                                              AllocationStatus status, long spriteOffsetTick, float pTicks,
                                              float x, float y, float zLevel, float scale) {
         SpriteSheetResource tex = status.getPerkTreeSprite();

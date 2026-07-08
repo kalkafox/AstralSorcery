@@ -11,16 +11,16 @@ package hellfirepvp.astralsorcery.client.util.sound;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.sound.CategorizedSoundEvent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.ITickableSound;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.resources.sounds.TickableSoundInstance;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
 
 import java.util.function.Predicate;
 
-public class FadeSound extends SimpleSound implements ITickableSound, ISound {
+public class FadeSound extends SimpleSoundInstance implements TickableSoundInstance, SoundInstance {
 
     private Predicate<FadeSound> func = null;
     private boolean hasStoppedPlaying = false;
@@ -36,7 +36,7 @@ public class FadeSound extends SimpleSound implements ITickableSound, ISound {
         this(sound, sound.getCategory(), volume, pitch, pos, isGlobal);
     }
 
-    public FadeSound(SoundEvent sound, SoundCategory category, float volume, float pitch, Vector3 pos, boolean isGlobal) {
+    public FadeSound(SoundEvent sound, SoundSource category, float volume, float pitch, Vector3 pos, boolean isGlobal) {
         super(sound.getName(), category, volume, pitch, true, 0, AttenuationType.LINEAR, (float) pos.getX(), (float) pos.getY(), (float) pos.getZ(), isGlobal);
     }
 

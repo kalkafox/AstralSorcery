@@ -12,12 +12,12 @@ import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.advancement.PerkLevelTrigger;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import net.minecraft.advancements.criterion.CriterionInstance;
-import net.minecraft.advancements.criterion.EntityPredicate;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.loot.ConditionArraySerializer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,7 +53,7 @@ public class PerkLevelInstance extends CriterionInstance {
         return instance;
     }
 
-    public boolean test(ServerPlayerEntity player) {
+    public boolean test(ServerPlayer player) {
         return ResearchHelper.getProgress(player, LogicalSide.SERVER).getPerkData().getPerkLevel(player, LogicalSide.SERVER) >= this.levelNeeded;
     }
 }

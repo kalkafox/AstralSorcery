@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.constellation;
 
 import hellfirepvp.astralsorcery.common.constellation.star.StarConnection;
 import hellfirepvp.astralsorcery.common.constellation.star.StarLocation;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.registry.internal.AbstractAstralRegistryEntry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +23,7 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 18.10.2020 / 20:09
  */
-public abstract class BaseConstellation extends ForgeRegistryEntry<IConstellation> implements IConstellation {
+public abstract class BaseConstellation extends AbstractAstralRegistryEntry<IConstellation> implements IConstellation {
 
     private final List<StarLocation> starLocations = new ArrayList<>(); //31x31 locations are valid. 0-indexed.
     private final List<StarConnection> connections = new ArrayList<>(); //The connections between 2 tuples/stars in the constellation.

@@ -8,8 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.render.IDrawRenderTypeBuffer;
@@ -26,16 +28,14 @@ import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import hellfirepvp.observerlib.api.block.MatchableState;
 import hellfirepvp.observerlib.api.client.StructureRenderer;
 import hellfirepvp.observerlib.api.structure.Structure;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.Font;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.FormattedText;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -57,15 +57,15 @@ public class RenderPageStructure extends RenderablePage {
     private final StructureRenderer structureRenderer;
     private final Structure structure;
     private final Vector3 shift;
-    private final List<Tuple<ItemStack, ITextProperties>> contentStacks;
-    private final ITextProperties name;
+    private final List<Tuple<ItemStack, FormattedText>> contentStacks;
+    private final FormattedText name;
 
     private Optional<Integer> drawSlice = Optional.empty();
     private Rectangle.Float switchView = null, sliceUp = null, sliceDown = null, switchRequiredAir = null;
     private long totalRenderFrame = 0;
     private boolean showAirBlocks = false;
 
-    public RenderPageStructure(@Nullable ResearchNode node, int nodePage, Structure structure, @Nullable ITextProperties name, @Nonnull Vector3 shift) {
+    public RenderPageStructure(@Nullable ResearchNode node, int nodePage, Structure structure, @Nullable FormattedText name, @Nonnull Vector3 shift) {
         super(node, nodePage);
         this.structure = structure;
         this.structureRenderer = new StructureRenderer(this.structure).setIsolateIndividualBlock(true);
@@ -74,13 +74,13 @@ public class RenderPageStructure extends RenderablePage {
         this.contentStacks = new ArrayList<>();
         structure.getAsStacks(this.structureRenderer.getRenderWorld(), Minecraft.getInstance().player).forEach(stack -> {
             ItemStack display = ItemUtils.copyStackWithSize(stack, 1);
-            ITextProperties description = new StringTextComponent(stack.getCount() + "x ").append(stack.getDisplayName());
+            FormattedText description = Component.literal(stack.getCount() + "x ").append(stack.getDisplayName());
             this.contentStacks.add(new Tuple<>(display, description));
         });
     }
 
     @Override
-    public void render(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
         this.totalRenderFrame++;
 
         this.renderStructure(renderStack, x, y, pTicks);
@@ -93,7 +93,7 @@ public class RenderPageStructure extends RenderablePage {
         this.renderSliceButtons(renderStack, x, y + 10, z, mouseX, mouseY);
     }
 
-    private void renderSliceButtons(MatrixStack renderStack, float offsetX, float offsetY, float zLevel, float mouseX, float mouseY) {
+    private void renderSliceButtons(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float mouseX, float mouseY) {
         TexturesAS.TEX_GUI_BOOK_STRUCTURE_ICONS.bindTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -206,7 +206,7 @@ public class RenderPageStructure extends RenderablePage {
         return maxSlice;
     }
 
-    private void renderHeadline(MatrixStack renderStack, float offsetX, float offsetY, float zLevel, ITextProperties title) {
+    private void renderHeadline(PoseStack renderStack, float offsetX, float offsetY, float zLevel, FormattedText title) {
         float scale = 1.3F;
         RenderSystem.disableDepthTest();
 
@@ -219,11 +219,11 @@ public class RenderPageStructure extends RenderablePage {
         RenderSystem.enableDepthTest();
     }
 
-    private float renderSizeDescription(MatrixStack renderStack, float offsetX, float offsetY, float zLevel) {
+    private float renderSizeDescription(PoseStack renderStack, float offsetX, float offsetY, float zLevel) {
         Vector3 size = new Vector3(this.structure.getMaximumOffset()).subtract(this.structure.getMinimumOffset()).add(1, 1, 1);
-        FontRenderer fr = RenderablePage.getFontRenderer();
+        Font fr = RenderablePage.getFontRenderer();
         float scale = 1.3F;
-        ITextProperties description = new StringTextComponent(String.format("%s - %s - %s", size.getBlockX(), size.getBlockY(), size.getBlockZ()));
+        FormattedText description = Component.literal(String.format("%s - %s - %s", size.getBlockX(), size.getBlockY(), size.getBlockZ()));
         float length = fr.getStringPropertyWidth(description) * scale;
 
         RenderSystem.disableDepthTest();
@@ -239,7 +239,7 @@ public class RenderPageStructure extends RenderablePage {
             int max = this.getCurrentMaxSlice();
             int height = max - min;
             int level = yLevel - min;
-            ITextProperties slice = new StringTextComponent(String.format("%s / %s", level + 1, height + 1));
+            FormattedText slice = Component.literal(String.format("%s / %s", level + 1, height + 1));
 
             renderStack.push();
             renderStack.translate(offsetX, offsetY + 14, zLevel);
@@ -252,7 +252,7 @@ public class RenderPageStructure extends RenderablePage {
         return length + 8F;
     }
 
-    private void renderStructure(MatrixStack renderStack, float offsetX, float offsetY, float pTicks) {
+    private void renderStructure(PoseStack renderStack, float offsetX, float offsetY, float pTicks) {
         Point.Double renderOffset = renderOffset(offsetX + 8, offsetY);
         this.structureRenderer.setRenderWithRequiredAir(this.showAirBlocks);
         this.structureRenderer.render3DSliceGUI(renderStack, renderOffset.x + shift.getX(), renderOffset.y + shift.getY(), pTicks, drawSlice);
@@ -264,7 +264,7 @@ public class RenderPageStructure extends RenderablePage {
     }
 
     @Override
-    public void postRender(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
         renderStack.push();
         renderStack.translate(x + 160, y + 10, z);
         Rectangle rect = RenderingDrawUtils.drawInfoStar(renderStack, IDrawRenderTypeBuffer.defaultBuffer(), 15, pTicks);
@@ -276,12 +276,12 @@ public class RenderPageStructure extends RenderablePage {
         }
 
         if (this.switchView != null && this.switchView.contains(mouseX, mouseY)) {
-            ITextProperties switchInfo = new TranslationTextComponent("astralsorcery.journal.structure.switch_view");
+            FormattedText switchInfo = Component.translatable("astralsorcery.journal.structure.switch_view");
             RenderingDrawUtils.renderBlueTooltipComponents(renderStack, this.switchView.x + this.switchView.width / 2, this.switchView.y + this.switchView.height / 2, z + 500,
                     Lists.newArrayList(switchInfo), RenderablePage.getFontRenderer(), false);
         }
         if (this.switchRequiredAir != null && this.switchRequiredAir.contains(mouseX, mouseY)) {
-            ITextProperties switchInfo = new TranslationTextComponent("astralsorcery.journal.structure.required_air");
+            FormattedText switchInfo = Component.translatable("astralsorcery.journal.structure.required_air");
             RenderingDrawUtils.renderBlueTooltipComponents(renderStack, this.switchRequiredAir.x + this.switchRequiredAir.width / 2, this.switchRequiredAir.y + this.switchRequiredAir.height / 2, z + 500,
                     Lists.newArrayList(switchInfo), RenderablePage.getFontRenderer(), false);
         }

@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.registry;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.CrystalIngredientSerializer;
 import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredientSerializer;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
 
 import static hellfirepvp.astralsorcery.common.lib.IngredientSerializersAS.CRYSTAL_SERIALIZER;
 import static hellfirepvp.astralsorcery.common.lib.IngredientSerializersAS.FLUID_SERIALIZER;

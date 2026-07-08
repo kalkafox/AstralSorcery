@@ -24,25 +24,25 @@ import hellfirepvp.astralsorcery.common.world.structure.feature.FeatureAncientSh
 import hellfirepvp.astralsorcery.common.world.structure.feature.FeatureDesertShrineStructure;
 import hellfirepvp.astralsorcery.common.world.structure.feature.FeatureSmallShrineStructure;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.WorldGenRegistries;
-import net.minecraft.world.gen.DimensionSettings;
-import net.minecraft.world.gen.GenerationStage;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.gen.blockplacer.SimpleBlockPlacer;
-import net.minecraft.world.gen.blockstateprovider.SimpleBlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.SimpleStateProvider;
 import net.minecraft.world.gen.feature.*;
-import net.minecraft.world.gen.feature.structure.IStructurePieceType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.feature.template.TagMatchRuleTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 import net.minecraft.world.gen.placement.NoPlacementConfig;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraft.world.gen.placement.TopSolidRangeConfig;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
-import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
-import net.minecraftforge.event.world.BiomeLoadingEvent;
+import net.neoforged.neoforge.common.world.BiomeGenerationSettingsBuilder;
+import net.neoforged.neoforge.event.world.BiomeLoadingEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +85,7 @@ public class RegistryWorldGeneration {
         STRUCTURE_SMALL_SHRINE   = registerStructure(KEY_SMALL_SHRINE, CFG_SMALL_SHRINE, new FeatureSmallShrineStructure());
 
         GEN_GLOW_FLOWER = registerConfiguredFeature(KEY_GLOW_FLOWER, GenerationStage.Decoration.VEGETAL_DECORATION, CFG_GLOW_FLOWER,
-                Feature.FLOWER.withConfiguration(new BlockClusterFeatureConfig.Builder(new SimpleBlockStateProvider(BlocksAS.GLOW_FLOWER.getDefaultState()), SimpleBlockPlacer.PLACER)
+                Feature.FLOWER.withConfiguration(new BlockClusterFeatureConfig.Builder(new SimpleStateProvider(BlocksAS.GLOW_FLOWER.getDefaultState()), SimpleBlockPlacer.PLACER)
                         .tries(12)
                         .build())
                         .func_242732_c(6)
@@ -98,7 +98,7 @@ public class RegistryWorldGeneration {
                         .withPlacement(CHANCE.withChance(1F / 25F))
                         .withPlacement(WORLD_FILTER.configure(CFG_ROCK_CRYSTAL.worldFilterConfig())));
         GEN_AQUAMARINE = registerConfiguredFeature(KEY_AQUAMARINE, GenerationStage.Decoration.UNDERGROUND_ORES, CFG_AQUAMARINE,
-                REPLACE_BLOCK.withConfiguration(new ReplaceBlockConfig(new TagMatchRuleTest(BlockTags.SAND), BlocksAS.AQUAMARINE_SAND_ORE.getDefaultState()))
+                REPLACE_BLOCK.withConfiguration(new ReplaceBlockConfig(new TagMatchTest(BlockTags.SAND), BlocksAS.AQUAMARINE_SAND_ORE.getDefaultState()))
                         .withPlacement(RIVERBED.configure(NoPlacementConfig.INSTANCE))
                         .func_242732_c(8)
                         .withPlacement(WORLD_FILTER.configure(CFG_AQUAMARINE.worldFilterConfig())));
@@ -144,7 +144,7 @@ public class RegistryWorldGeneration {
                 GenerationStage.Decoration stage = FEATURE_STAGE.get(feature);
                 if (stage == null) {
                     ResourceLocation key = WorldGenRegistries.CONFIGURED_FEATURE.getOptionalKey(feature)
-                            .map(RegistryKey::getLocation)
+                            .map(ResourceKey::getLocation)
                             .orElse(new ResourceLocation("not_registered"));
                     throw new IllegalArgumentException("Unknown generation stage for feature " + key + "!");
                 }
@@ -178,7 +178,7 @@ public class RegistryWorldGeneration {
         AstralSorcery.getProxy().getRegistryPrimer().register(placement.setRegistryName(key));
     }
 
-    private static <T extends IStructurePieceType> T registerStructurePiece(ResourceLocation key, T type) {
+    private static <T extends StructurePieceType> T registerStructurePiece(ResourceLocation key, T type) {
         return Registry.register(Registry.STRUCTURE_PIECE, key, type);
     }
 

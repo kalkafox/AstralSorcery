@@ -22,21 +22,21 @@ import hellfirepvp.astralsorcery.common.util.RecipeHelper;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -77,7 +77,7 @@ public class ItemColoredLensFire extends ItemColoredLens {
         }
 
         @Override
-        public void entityInBeam(World world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
+        public void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
             if (world.isRemote()) {
                 return;
             }
@@ -105,7 +105,7 @@ public class ItemColoredLensFire extends ItemColoredLens {
                     return;
                 }
             } else if (entity instanceof LivingEntity) {
-                if (entity instanceof PlayerEntity) {
+                if (entity instanceof Player) {
                     if (!GeneralConfig.CONFIG.doColoredLensesAffectPlayers.get() ||
                             entity.getServer() == null ||
                             !entity.getServer().isPVPEnabled()) {
@@ -118,8 +118,8 @@ public class ItemColoredLensFire extends ItemColoredLens {
         }
 
         @Override
-        public void blockInBeam(World world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {
-            if (!(world instanceof ServerWorld)) {
+        public void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {
+            if (!(world instanceof ServerLevel)) {
                 return;
             }
 

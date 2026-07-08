@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.common.util.block.iterator;
 
 import hellfirepvp.astralsorcery.common.util.block.BlockGeometry;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,12 +58,12 @@ public class BlockSpherePositionGenerator extends BlockPositionGenerator {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT nbt) {
+    public void writeToNBT(CompoundTag nbt) {
         nbt.putInt("currentRadius", this.currentRadius);
     }
 
     @Override
-    public void readFromNBT(CompoundNBT nbt) {
+    public void readFromNBT(CompoundTag nbt) {
         this.currentRadius = nbt.getInt("currentRadius");
     }
 

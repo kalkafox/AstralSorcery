@@ -8,7 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.network.chat.Component;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
@@ -18,13 +20,12 @@ import hellfirepvp.astralsorcery.common.data.research.ProgressionTier;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
-import net.minecraft.client.renderer.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -46,7 +47,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public void render(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
         this.clearFrameRectangles();
 
         this.renderRecipeGrid(renderStack, x, y, z, TexturesAS.TEX_GUI_BOOK_GRID_INFUSION);
@@ -79,7 +80,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
         });
     }
 
-    private void renderLiquidInput(BufferBuilder buf, MatrixStack renderStack, TextureAtlasSprite tas, int x, int y) {
+    private void renderLiquidInput(BufferBuilder buf, PoseStack renderStack, TextureAtlasSprite tas, int x, int y) {
         RenderingGuiUtils.rect(buf, renderStack, 28 + x * 25.15F, 76 + y * 25.15F, 0, 22.3F, 22.3F)
                 .tex(tas)
                 .draw();
@@ -91,21 +92,21 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public void postRender(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
         this.renderHoverTooltips(renderStack, mouseX, mouseY, z, this.recipe.getId());
         this.renderInfoStarTooltips(renderStack, x, y, z, mouseX, mouseY, (toolTip) -> {
-            toolTip.add(new TranslationTextComponent("astralsorcery.journal.recipe.infusion.liquid",
+            toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.liquid",
                     this.recipe.getLiquidInput().getAttributes().getDisplayName(new FluidStack(this.recipe.getLiquidInput(), FluidAttributes.BUCKET_VOLUME))));
-            toolTip.add(new TranslationTextComponent("astralsorcery.journal.recipe.infusion.chance.format",
+            toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.chance.format",
                     this.getInfuserChanceDescription(this.recipe.getConsumptionChance())));
             if (this.recipe.doesConsumeMultipleFluids()) {
-                toolTip.add(new TranslationTextComponent("astralsorcery.journal.recipe.infusion.multiple"));
+                toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.multiple"));
             }
             if (!this.recipe.acceptsChaliceInput() && ResearchHelper.getClientProgress().getTierReached().isThisLaterOrEqual(ProgressionTier.TRAIT_CRAFT)) {
-                toolTip.add(new TranslationTextComponent("astralsorcery.journal.recipe.infusion.no_chalice"));
+                toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.no_chalice"));
             }
             if (this.recipe.doesCopyNBTToOutputs()) {
-                toolTip.add(new TranslationTextComponent("astralsorcery.journal.recipe.infusion.copy_nbt"));
+                toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.copy_nbt"));
             }
         });
     }

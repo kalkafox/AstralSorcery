@@ -17,11 +17,11 @@ import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tick.PlayerTickPerk;
 import hellfirepvp.astralsorcery.common.tile.TileIlluminator;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,7 +43,7 @@ public class KeySpawnLights extends KeyPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(PlayerEntity player, LogicalSide side) {
+    public void onPlayerTick(Player player, LogicalSide side) {
         if (side.isServer()) {
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (!prog.isValid() || !prog.doPerkAbilities()) {
@@ -81,16 +81,16 @@ public class KeySpawnLights extends KeyPerk implements PlayerTickPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.IntValue lightSpawnRate;
-        private ForgeConfigSpec.IntValue lightSpawnRadius;
-        private ForgeConfigSpec.IntValue chargeCost;
+        private ModConfigSpec.IntValue lightSpawnRate;
+        private ModConfigSpec.IntValue lightSpawnRadius;
+        private ModConfigSpec.IntValue chargeCost;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.lightSpawnRate = cfgBuilder
                     .comment("Defines the rate in ticks a position to spawn a light in is attempted to be found near the player")
                     .translation(translationKey("lightSpawnRate"))

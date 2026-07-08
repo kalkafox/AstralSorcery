@@ -11,9 +11,9 @@ package hellfirepvp.astralsorcery.datagen.data.loot;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.LootTableProvider;
+import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.loot.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +35,7 @@ public final class AstralLootTableProvider extends LootTableProvider {
     }
 
     @Override
-    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables() {
+    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
         return Lists.newArrayList(
                 Pair.of(BlockLootTableProvider::new, LootParameterSets.BLOCK),
                 Pair.of(EntityLootTableProvider::new, LootParameterSets.ENTITY),

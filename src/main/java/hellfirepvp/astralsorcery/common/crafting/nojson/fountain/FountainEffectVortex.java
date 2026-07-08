@@ -26,17 +26,17 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.tile.TileFountain;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.GameRules;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.GameRules;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -80,16 +80,16 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
         Vector3 at = new Vector3(fountain).add(0.5, 0.5, 0.5);
         Vector3 vortexAt = at.clone().addY(-4);
 
-        AxisAlignedBB captureBox = new AxisAlignedBB(0, 0, 0, 1, 1, 1)
+        AABB captureBox = new AABB(0, 0, 0, 1, 1, 1)
                 .offset(fountain.getPos().down(4))
                 .grow(2);
-        AxisAlignedBB pullBox = captureBox.grow(14);
+        AABB pullBox = captureBox.grow(14);
 
         float boxCapacity = 5 * 5 * 5;
         float density = 0;
         List<LivingEntity> captured = fountain.getWorld().getEntitiesWithinAABB(LivingEntity.class, captureBox);
         for (LivingEntity le : captured) {
-            if (le == null || !le.isAlive() || le instanceof PlayerEntity || !TechnicalEntityRegistry.INSTANCE.canAffect(le)) {
+            if (le == null || !le.isAlive() || le instanceof Player || !TechnicalEntityRegistry.INSTANCE.canAffect(le)) {
                 continue;
             }
             float entitySize = le.getHeight() * le.getWidth() * le.getWidth();
@@ -101,7 +101,7 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
                     le.setPositionAndRotation(heldPos.getX(), heldPos.getY(), heldPos.getZ(), le.rotationYaw, le.rotationPitch);
                 }
 
-                if (le instanceof EnderDragonEntity) {
+                if (le instanceof EnderDragon) {
                     GameRules rules = fountain.getWorld().getGameRules();
                     boolean prev = rules.getBoolean(GameRules.MOB_GRIEFING);
                     rules.get(GameRules.MOB_GRIEFING).set(false, null);
@@ -122,13 +122,13 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
         List<LivingEntity> pulling = fountain.getWorld().getEntitiesWithinAABB(LivingEntity.class, pullBox);
         pulling.removeAll(captured);
         for (LivingEntity le : pulling) {
-            if (le == null || !le.isAlive() || le instanceof PlayerEntity || !TechnicalEntityRegistry.INSTANCE.canAffect(le)) {
+            if (le == null || !le.isAlive() || le instanceof Player || !TechnicalEntityRegistry.INSTANCE.canAffect(le)) {
                 continue;
             }
             EventHelperEntityFreeze.freeze(le);
 
             EntityUtils.applyVortexMotion(() -> Vector3.atEntityCorner(le), (v) -> {
-                if (le instanceof EnderDragonEntity) {
+                if (le instanceof EnderDragon) {
                     Vector3 nextPos = Vector3.atEntityCorner(le).add(v);
                     if (le.isServerWorld()) {
                         le.setPositionAndUpdate(nextPos.getX(), nextPos.getY(), nextPos.getZ());

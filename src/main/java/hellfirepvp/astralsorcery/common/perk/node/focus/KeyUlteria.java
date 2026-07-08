@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.perk.node.focus;
 
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod

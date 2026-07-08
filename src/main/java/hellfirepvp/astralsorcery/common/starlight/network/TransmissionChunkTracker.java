@@ -8,11 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.starlight.network;
 
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.event.world.ChunkEvent;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.event.world.ChunkEvent;
+import net.neoforged.neoforge.event.world.WorldEvent;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,41 +35,41 @@ public class TransmissionChunkTracker {
     }
 
     private void onChLoad(ChunkEvent.Load event) {
-        IWorld iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof World)) {
+        LevelAccessor iWorld = event.getWorld();
+        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
             return;
         }
-        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((World) iWorld);
+        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((Level) iWorld);
         if (handle != null) {
             handle.informChunkLoad(event.getChunk().getPos());
         }
     }
 
     private void onChUnload(ChunkEvent.Unload event) {
-        IWorld iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof World)) {
+        LevelAccessor iWorld = event.getWorld();
+        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
             return;
         }
-        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((World) iWorld);
+        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((Level) iWorld);
         if (handle != null) {
             handle.informChunkUnload(event.getChunk().getPos());
         }
     }
 
     private void onWorldLoad(WorldEvent.Load event) {
-        IWorld iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof World)) {
+        LevelAccessor iWorld = event.getWorld();
+        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
             return;
         }
-        StarlightUpdateHandler.getInstance().informWorldLoad((World) iWorld);
+        StarlightUpdateHandler.getInstance().informWorldLoad((Level) iWorld);
     }
 
     private void onWorldUnload(WorldEvent.Unload event) {
-        IWorld iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof World)) {
+        LevelAccessor iWorld = event.getWorld();
+        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
             return;
         }
-        StarlightTransmissionHandler.getInstance().informWorldUnload((World) iWorld);
+        StarlightTransmissionHandler.getInstance().informWorldUnload((Level) iWorld);
     }
 
 }

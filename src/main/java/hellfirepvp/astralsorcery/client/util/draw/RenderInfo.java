@@ -10,11 +10,11 @@ package hellfirepvp.astralsorcery.client.util.draw;
 
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraftforge.event.TickEvent;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -41,7 +41,7 @@ public class RenderInfo implements ITickHandler {
     /** The Y component (scaled along the X axis) of the entity's pitch rotation */
     private float rotationXY;
 
-    private Vector3d view = Vector3d.ZERO;
+    private Vec3 view = Vector3d.ZERO;
 
     private RenderInfo() {}
 
@@ -51,7 +51,7 @@ public class RenderInfo implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        ActiveRenderInfo info = this.getARI();
+        Camera info = this.getARI();
         if (info != null) {
             this.rotationX = MathHelper.cos(info.getYaw() * ((float)Math.PI / 180F));
             this.rotationZ = MathHelper.sin(info.getYaw() * ((float)Math.PI / 180F));
@@ -82,7 +82,7 @@ public class RenderInfo implements ITickHandler {
     }
 
     @Nullable
-    public ActiveRenderInfo getARI() {
+    public Camera getARI() {
         GameRenderer gr = Minecraft.getInstance().gameRenderer;
         if (gr != null) {
             return gr.getActiveRenderInfo();

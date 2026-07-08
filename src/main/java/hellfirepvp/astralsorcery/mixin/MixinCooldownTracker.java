@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.mixin;
 
 import hellfirepvp.astralsorcery.common.event.CooldownSetEvent;
-import net.minecraft.util.CooldownTracker;
-import net.minecraft.util.ServerCooldownTracker;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.world.item.ItemCooldowns;
+import net.minecraft.world.item.ServerItemCooldowns;
+import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -28,10 +28,10 @@ public class MixinCooldownTracker {
 
     @ModifyVariable(method = "setCooldown", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     public int fireCooldownEvent(int cooldownTicks) {
-        CooldownTracker tracker = (CooldownTracker)(Object) this;
-        if (tracker instanceof ServerCooldownTracker) {
-            CooldownSetEvent event = new CooldownSetEvent(((ServerCooldownTracker) tracker).player, cooldownTicks);
-            MinecraftForge.EVENT_BUS.post(event);
+        ItemCooldowns tracker = (ItemCooldowns)(Object) this;
+        if (tracker instanceof ServerItemCooldowns) {
+            CooldownSetEvent event = new CooldownSetEvent(((ServerItemCooldowns) tracker).player, cooldownTicks);
+            NeoForge.EVENT_BUS.post(event);
             cooldownTicks = Math.max(event.getResultCooldown(), 1);
         }
         return cooldownTicks;

@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.render.tile;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
@@ -17,11 +17,11 @@ import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.tile.TileChalice;
 import hellfirepvp.astralsorcery.common.util.ColorUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.awt.*;
 
@@ -34,12 +34,12 @@ import java.awt.*;
  */
 public class RenderChalice extends CustomTileEntityRenderer<TileChalice> {
 
-    public RenderChalice(TileEntityRendererDispatcher tileRenderer) {
+    public RenderChalice(BlockEntityRenderDispatcher tileRenderer) {
         super(tileRenderer);
     }
 
     @Override
-    public void render(TileChalice tile, float pTicks, MatrixStack renderStack, IRenderTypeBuffer renderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void render(TileChalice tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         FluidStack stack = tile.getTank().getFluid();
         if (stack.isEmpty()) {
             return;
@@ -68,7 +68,7 @@ public class RenderChalice extends CustomTileEntityRenderer<TileChalice> {
         renderStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.scale(percSize, percSize, percSize);
 
-        IVertexBuilder buf = renderTypeBuffer.getBuffer(RenderTypesAS.TER_CHALICE_LIQUID);
+        VertexConsumer buf = renderTypeBuffer.getBuffer(RenderTypesAS.TER_CHALICE_LIQUID);
         RenderingDrawUtils.renderTexturedCubeCentralColorNormal(renderStack, buf,
                 uOffset, vOffset, uPart, vPart,
                 color.getRed(), color.getGreen(), color.getBlue(), 255,

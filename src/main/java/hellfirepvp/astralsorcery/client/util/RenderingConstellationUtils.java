@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.constellation.ConstellationBackgroundInfo;
 import hellfirepvp.astralsorcery.client.constellation.ConstellationRenderInfos;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
@@ -21,11 +21,11 @@ import hellfirepvp.astralsorcery.common.constellation.world.ActiveCelestialsHand
 import hellfirepvp.astralsorcery.common.data.config.entry.GeneralConfig;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.client.renderer.MultiBufferSource;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -42,7 +42,7 @@ import java.util.function.Supplier;
  */
 public class RenderingConstellationUtils {
 
-    public static void renderConstellationSky(IConstellation c, MatrixStack renderStack, ActiveCelestialsHandler.RenderPosition renderPos, Supplier<Float> brightnessFn) {
+    public static void renderConstellationSky(IConstellation c, PoseStack renderStack, ActiveCelestialsHandler.RenderPosition renderPos, Supplier<Float> brightnessFn) {
         Matrix4f matr = renderStack.getLast().getMatrix();
 
         Vector3 renderOffset = renderPos.offset;
@@ -117,17 +117,17 @@ public class RenderingConstellationUtils {
         });
     }
 
-    public static void renderConstellationIntoWorldFlat(IConstellation c, MatrixStack renderStack, IRenderTypeBuffer buffer, Vector3 offset, double scale, double line, float brightness) {
+    public static void renderConstellationIntoWorldFlat(IConstellation c, PoseStack renderStack, MultiBufferSource buffer, Vector3 offset, double scale, double line, float brightness) {
         renderConstellationIntoWorldFlat(c.getConstellationColor(), c, renderStack, buffer, offset, scale, line, brightness);
     }
 
-    public static void renderConstellationIntoWorldFlat(Color color, IConstellation c, MatrixStack renderStack, Vector3 offset, double scale, double line, float brightness) {
+    public static void renderConstellationIntoWorldFlat(Color color, IConstellation c, PoseStack renderStack, Vector3 offset, double scale, double line, float brightness) {
         IRenderTypeBuffer.Impl drawBuffers = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
         renderConstellationIntoWorldFlat(color, c, renderStack, drawBuffers, offset, scale, line, brightness);
         drawBuffers.finish();
     }
 
-    public static void renderConstellationIntoWorldFlat(Color color, IConstellation c, MatrixStack renderStack, IRenderTypeBuffer buffer, Vector3 offset, double scale, double line, float brightness) {
+    public static void renderConstellationIntoWorldFlat(Color color, IConstellation c, PoseStack renderStack, MultiBufferSource buffer, Vector3 offset, double scale, double line, float brightness) {
         Matrix4f matr = renderStack.getLast().getMatrix();
         Vector3 thisOffset = offset.clone();
         double starSize = 1D / ((double) IConstellation.STAR_GRID_WIDTH_HEIGHT) * scale;
@@ -141,7 +141,7 @@ public class RenderingConstellationUtils {
         Vector3 drawOffset = new Vector3(-15.5D * starSize, 0, -15.5D * starSize);
         Vector3 dirU = new Vector3(scale, 0, 0);
         Vector3 dirV = new Vector3(0, 0, scale);
-        IVertexBuilder buf;
+        VertexConsumer buf;
 
         ConstellationBackgroundInfo backgroundInfo = ConstellationRenderInfos.getBackgroundRenderInfo(c);
         if (backgroundInfo != null) {
@@ -201,7 +201,7 @@ public class RenderingConstellationUtils {
         }
     }
 
-    public static Map<StarLocation, Rectangle.Float> renderConstellationIntoGUI(IConstellation c, MatrixStack renderStack,
+    public static Map<StarLocation, Rectangle.Float> renderConstellationIntoGUI(IConstellation c, PoseStack renderStack,
                                                                                 float offsetX, float offsetY, float zLevel,
                                                                                 float width, float height, double linebreadth,
                                                                                 Supplier<Float> brightnessFn,
@@ -209,7 +209,7 @@ public class RenderingConstellationUtils {
         return renderConstellationIntoGUI(c.getTierRenderColor(), c, renderStack, offsetX, offsetY, zLevel, width, height, linebreadth, brightnessFn, isKnown, applyStarBrightness);
     }
 
-    public static Map<StarLocation, Rectangle.Float> renderConstellationIntoGUI(Color col, IConstellation c, MatrixStack renderStack,
+    public static Map<StarLocation, Rectangle.Float> renderConstellationIntoGUI(Color col, IConstellation c, PoseStack renderStack,
                                                                                 float offsetX, float offsetY, float zLevel,
                                                                                 float width, float height, double linebreadth,
                                                                                 Supplier<Float> brightnessFn,

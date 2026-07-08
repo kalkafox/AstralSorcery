@@ -9,11 +9,11 @@
 package hellfirepvp.astralsorcery.common.data.sync.base;
 
 import hellfirepvp.astralsorcery.common.data.sync.SyncDataHolder;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,12 +34,12 @@ public abstract class AbstractData {
         SyncDataHolder.markForUpdate(this.key);
     }
 
-    public abstract void clear(RegistryKey<World> dim);
+    public abstract void clear(ResourceKey<Level> dim);
 
     public abstract void clearServer();
 
-    public abstract void writeAllDataToPacket(CompoundNBT compound);
+    public abstract void writeAllDataToPacket(CompoundTag compound);
 
-    public abstract void writeDiffDataToPacket(CompoundNBT compound);
+    public abstract void writeDiffDataToPacket(CompoundTag compound);
 
 }

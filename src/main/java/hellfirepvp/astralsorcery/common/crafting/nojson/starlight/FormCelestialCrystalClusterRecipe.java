@@ -25,16 +25,16 @@ import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.tile.TileCelestialCrystals;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.*;
 
@@ -73,7 +73,7 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public boolean matches(ItemEntity trigger, World world, BlockPos at) {
+    public boolean matches(ItemEntity trigger, Level world, BlockPos at) {
         if (!world.getBlockState(at.down()).isTopSolid(world, at.down(), trigger, Direction.UP)) {
             return false;
         }
@@ -87,7 +87,7 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public void doServerCraftTick(ItemEntity trigger, World world, BlockPos at) {
+    public void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at) {
         Random r = new Random(MathHelper.getPositionRandom(at));
         if (!world.isRemote() && getAndIncrementCraftingTick(trigger) > 50 + r.nextInt(20)) {
             ItemStack crystalFound;
@@ -109,7 +109,7 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void doClientEffectTick(ItemEntity trigger, World world, BlockPos at) {
+    public void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at) {
         for (int i = 0; i < 3; i++) {
             Vector3 pos = Vector3.atEntityCorner(trigger);
             MiscUtils.applyRandomOffset(pos, rand, 0.15F);

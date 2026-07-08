@@ -8,12 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.storage;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,15 +55,15 @@ public class StorageKey {
     }
 
     @Nonnull
-    public CompoundNBT serialize() {
-        CompoundNBT keyTag = new CompoundNBT();
+    public CompoundTag serialize() {
+        CompoundTag keyTag = new CompoundTag();
         keyTag.putString("name", stack.getItem().getRegistryName().toString());
         return keyTag;
     }
 
     //If the item in question does no longer exist in the registry, return null.
     @Nullable
-    public static StorageKey deserialize(CompoundNBT nbt) {
+    public static StorageKey deserialize(CompoundTag nbt) {
         ResourceLocation rl = new ResourceLocation(nbt.getString("name"));
         Item i = ForgeRegistries.ITEMS.getValue(rl);
         if (i == null || i == Items.AIR) {

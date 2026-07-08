@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.perk.data;
 
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.HashSet;

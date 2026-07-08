@@ -18,8 +18,8 @@ import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.util.ReadWriteLockable;
 import hellfirepvp.astralsorcery.common.util.log.LogCategory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,7 +46,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         this.side = side;
     }
 
-    Collection<PerkAttributeModifier> applyModifier(@Nonnull PlayerEntity player, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
+    Collection<PerkAttributeModifier> applyModifier(@Nonnull Player player, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
         PlayerProgress prog = ResearchHelper.getProgress(player, this.side);
         List<PerkAttributeModifier> added = new ArrayList<>();
 
@@ -71,7 +71,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         return added;
     }
 
-    private boolean cacheModifier(PlayerEntity player, PerkAttributeType type, PerkAttributeModifier modifier) {
+    private boolean cacheModifier(Player player, PerkAttributeType type, PerkAttributeModifier modifier) {
         boolean noModifiers = getModifiersByType(type, modifier.getMode()).isEmpty();
         List<PerkAttributeModifier> modifiers = this.modifiers.computeIfAbsent(type, t -> Lists.newArrayList());
         if (modifiers.contains(modifier)) {
@@ -84,7 +84,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         return modifiers.add(modifier);
     }
 
-    Collection<PerkAttributeModifier> removeModifier(@Nonnull PlayerEntity player, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
+    Collection<PerkAttributeModifier> removeModifier(@Nonnull Player player, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
         PlayerProgress prog = ResearchHelper.getProgress(player, this.side);
         List<PerkAttributeModifier> removed = new ArrayList<>();
 
@@ -109,7 +109,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         return removed;
     }
 
-    private boolean dropModifier(PlayerEntity player, PerkAttributeType type, PerkAttributeModifier modifier) {
+    private boolean dropModifier(Player player, PerkAttributeType type, PerkAttributeModifier modifier) {
         if (modifiers.computeIfAbsent(type, t -> Lists.newArrayList()).remove(modifier)) {
             boolean completelyRemoved = modifiers.get(type).isEmpty();
             if (getModifiersByType(type, modifier.getMode()).isEmpty()) {
@@ -121,7 +121,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
     }
 
     @Nonnull
-    private PerkAttributeModifier convertModifier(@Nonnull PlayerEntity player, @Nonnull PlayerProgress progress, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
+    private PerkAttributeModifier convertModifier(@Nonnull Player player, @Nonnull PlayerProgress progress, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
         for (PerkConverter converter : converters) {
             modifier = converter.convertModifier(player, progress, modifier, owningSource);
         }
@@ -129,7 +129,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
     }
 
     @Nonnull
-    private Collection<PerkAttributeModifier> gainModifiers(@Nonnull PlayerEntity player, @Nonnull PlayerProgress progress, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
+    private Collection<PerkAttributeModifier> gainModifiers(@Nonnull Player player, @Nonnull PlayerProgress progress, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
         Collection<PerkAttributeModifier> modifiers = Lists.newArrayList();
         for (PerkConverter converter : converters) {
             modifiers.addAll(converter.gainExtraModifiers(player, progress, modifier, owningSource));
@@ -137,7 +137,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         return modifiers;
     }
 
-    boolean applyConverter(PlayerEntity player, PerkConverter converter) {
+    boolean applyConverter(Player player, PerkConverter converter) {
         assertConvertersModifiable();
 
         LogCategory.PERKS.info(() -> "Try adding converter " + converter.getRegistryName() + " on " + this.side.name());
@@ -153,7 +153,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         return true;
     }
 
-    boolean removeConverter(PlayerEntity player, PerkConverter converter) {
+    boolean removeConverter(Player player, PerkConverter converter) {
         assertConvertersModifiable();
 
         LogCategory.PERKS.info(() -> "Try removing converter " + converter.getRegistryName() + " on " + this.side.name());
@@ -195,15 +195,15 @@ public class PerkAttributeMap implements ReadWriteLockable {
                 .collect(Collectors.toList());
     }
 
-    public float getModifier(PlayerEntity player, PlayerProgress progress, PerkAttributeType type) {
+    public float getModifier(Player player, PlayerProgress progress, PerkAttributeType type) {
         return getModifier(player, progress, type, EnumSet.allOf(ModifierType.class));
     }
 
-    public float getModifier(PlayerEntity player, PlayerProgress progress, PerkAttributeType type, ModifierType mode) {
+    public float getModifier(Player player, PlayerProgress progress, PerkAttributeType type, ModifierType mode) {
         return getModifier(player, progress, type, EnumSet.of(mode));
     }
 
-    public float getModifier(PlayerEntity player, PlayerProgress progress, PerkAttributeType type, Collection<ModifierType> applicableModes) {
+    public float getModifier(Player player, PlayerProgress progress, PerkAttributeType type, Collection<ModifierType> applicableModes) {
         float perkEffectModifier;
         if (!type.equals(PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT)) {
             perkEffectModifier = getModifier(player, progress, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
@@ -233,7 +233,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         });
     }
 
-    public float modifyValue(PlayerEntity player, PlayerProgress progress, PerkAttributeType type, float value) {
+    public float modifyValue(Player player, PlayerProgress progress, PerkAttributeType type, float value) {
         float perkEffectModifier;
         if (!type.equals(PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT)) {
             perkEffectModifier = modifyValue(player, progress, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, 1F);

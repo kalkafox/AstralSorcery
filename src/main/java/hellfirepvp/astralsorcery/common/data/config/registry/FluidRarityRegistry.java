@@ -13,7 +13,7 @@ import hellfirepvp.astralsorcery.common.base.Mods;
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigDataAdapter;
 import hellfirepvp.astralsorcery.common.data.config.registry.sets.FluidRarityEntry;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.List;

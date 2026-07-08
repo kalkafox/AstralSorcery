@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.data.ASDataSerializers;
-import net.minecraft.network.datasync.IDataSerializer;
-import net.minecraftforge.registries.DataSerializerEntry;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.neoforged.neoforge.registries.DataSerializerEntry;
 
 import java.util.Locale;
 
@@ -34,7 +34,7 @@ public class RegistryDataSerializers {
         FLUID = register(ASDataSerializers.FLUID, "fluid");
     }
 
-    private static <V, T extends IDataSerializer<V>> T register(T dataSerializer, String name) {
+    private static <V, T extends EntityDataSerializer<V>> T register(T dataSerializer, String name) {
         DataSerializerEntry entry = new DataSerializerEntry(dataSerializer);
         entry.setRegistryName(AstralSorcery.key(name.toLowerCase(Locale.ROOT)));
         AstralSorcery.getProxy().getRegistryPrimer().register(entry);

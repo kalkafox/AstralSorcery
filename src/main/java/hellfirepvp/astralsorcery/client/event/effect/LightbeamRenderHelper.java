@@ -20,12 +20,12 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
-import net.minecraftforge.event.TickEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import java.awt.*;
 import java.util.EnumSet;
@@ -62,7 +62,7 @@ public class LightbeamRenderHelper implements ITickHandler {
             }
             if (rView != null) {
                 Entity renderView = rView;
-                RegistryKey<World> dimKey = renderView.getEntityWorld().getDimensionKey();
+                ResourceKey<Level> dimKey = renderView.getEntityWorld().getDimensionKey();
 
                 SyncDataHolder.executeClient(SyncDataHolder.DATA_LIGHT_CONNECTIONS, ClientLightConnections.class, (data) -> {
                     for (Map.Entry<BlockPos, Set<BlockPos>> entry : data.getClientConnections(dimKey).entrySet()) {

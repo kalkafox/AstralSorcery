@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.perk.modifier;
 
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -17,14 +19,13 @@ import hellfirepvp.astralsorcery.common.perk.source.AttributeModifierProvider;
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.MutableComponent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class AttributeModifierPerk extends AttributeConverterPerk implements Att
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(PlayerEntity player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
         if (!ignoreRequirements && ResearchHelper.getProgress(player, side).getPerkData().isPerkSealed(this)) {
             return Collections.emptyList();
         }
@@ -70,7 +71,7 @@ public class AttributeModifierPerk extends AttributeConverterPerk implements Att
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addLocalizedTooltip(Collection<IFormattableTextComponent> tooltip) {
+    public boolean addLocalizedTooltip(Collection<MutableComponent> tooltip) {
         Collection<PerkAttributeModifier> modifiers = this.getModifiers(Minecraft.getInstance().player, LogicalSide.CLIENT, true);
         boolean addEmptyLine = !modifiers.isEmpty();
 
@@ -78,7 +79,7 @@ public class AttributeModifierPerk extends AttributeConverterPerk implements Att
             for (PerkAttributeModifier modifier : modifiers) {
                 String modifierDisplay = modifier.getLocalizedDisplayString();
                 if (modifierDisplay != null) {
-                    tooltip.add(new StringTextComponent(modifierDisplay));
+                    tooltip.add(Component.literal(modifierDisplay));
                 } else {
                     addEmptyLine = false;
                 }

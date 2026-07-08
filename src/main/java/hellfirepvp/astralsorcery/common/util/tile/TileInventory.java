@@ -11,13 +11,13 @@ package hellfirepvp.astralsorcery.common.util.tile;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntitySynchronized;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.items.CapabilityItemHandler;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -77,7 +77,7 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
     }
 
     @Nonnull
-    public TileInventory deserialize(CompoundNBT tag) {
+    public TileInventory deserialize(CompoundTag tag) {
         this.deserializeNBT(tag);
         if (this.getSlots() != this.slotCountProvider.get()) {
             TileInventory newInv = makeNewInstance();
@@ -92,7 +92,7 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
     }
 
     @Nonnull
-    public CompoundNBT serialize() {
+    public CompoundTag serialize() {
         return this.serializeNBT();
     }
 

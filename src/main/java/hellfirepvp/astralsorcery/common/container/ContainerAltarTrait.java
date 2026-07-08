@@ -14,11 +14,11 @@ import hellfirepvp.astralsorcery.common.item.base.IConstellationFocus;
 import hellfirepvp.astralsorcery.common.lib.ContainerTypesAS;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.SlotItemHandler;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.SlotItemHandler;
 
 import java.util.Optional;
 
@@ -33,12 +33,12 @@ public class ContainerAltarTrait extends ContainerAltarBase {
 
     private SlotConstellationFocus focusSlot;
 
-    public ContainerAltarTrait(TileAltar altar, PlayerInventory inv, int windowId) {
+    public ContainerAltarTrait(TileAltar altar, Inventory inv, int windowId) {
         super(altar, ContainerTypesAS.ALTAR_RADIANCE, inv, windowId);
     }
 
     @Override
-    void bindPlayerInventory(PlayerInventory plInventory) {
+    void bindPlayerInventory(Inventory plInventory) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
                 addSlot(new Slot(plInventory, j + i * 9 + 9, 48 + j * 18, 120 + i * 18));
@@ -62,7 +62,7 @@ public class ContainerAltarTrait extends ContainerAltarBase {
     }
 
     @Override
-    Optional<ItemStack> handleCustomTransfer(PlayerEntity player, int index) {
+    Optional<ItemStack> handleCustomTransfer(Player player, int index) {
         Slot slot = this.inventorySlots.get(index);
         if (slot != null && slot.getHasStack()) {
             ItemStack slotStack = slot.getStack();

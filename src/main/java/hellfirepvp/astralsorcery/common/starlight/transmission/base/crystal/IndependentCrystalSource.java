@@ -25,13 +25,13 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.astralsorcery.common.util.world.SkyCollectionHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,7 +61,7 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
     private boolean enhanced = false;
 
     @Override
-    public float produceStarlightTick(ServerWorld world, BlockPos pos) {
+    public float produceStarlightTick(ServerLevel world, BlockPos pos) {
         if (!doesSeeSky || crystalAttributes == null) {
             return 0F;
         }
@@ -108,7 +108,7 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
     }
 
     @Override
-    public <T extends TileEntity> boolean updateFromTileEntity(T tile) {
+    public <T extends BlockEntity> boolean updateFromTileEntity(T tile) {
         if (!(tile instanceof TileCollectorCrystal)) {
             return true;
         }
@@ -161,7 +161,7 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         this.constellation = NBTHelper.readOptional(compound, "constellation", (nbt) -> {
             IConstellation cst = IConstellation.readFromNBT(nbt);
             if (cst instanceof IWeakConstellation) {
@@ -178,7 +178,7 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         if (crystalAttributes != null) {
             crystalAttributes.store(compound);
         }

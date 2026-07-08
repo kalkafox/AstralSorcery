@@ -13,14 +13,14 @@ import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeBuilder;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
 import hellfirepvp.astralsorcery.common.crafting.recipe.WellLiquefaction;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -55,7 +55,7 @@ public class WellRecipeBuilder extends CustomRecipeBuilder<WellLiquefaction> {
         return new WellRecipeBuilder(id);
     }
 
-    public WellRecipeBuilder setItemInput(IItemProvider item) {
+    public WellRecipeBuilder setItemInput(ItemLike item) {
         this.input = Ingredient.fromItems(item);
         return this;
     }

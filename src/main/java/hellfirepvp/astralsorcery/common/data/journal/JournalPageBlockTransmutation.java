@@ -15,8 +15,8 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.BlockTransmutation;
 import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.util.RecipeHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;

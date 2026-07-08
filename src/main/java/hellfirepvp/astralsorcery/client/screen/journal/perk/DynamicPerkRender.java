@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.perk;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.perk.AllocationStatus;
 
 /**
@@ -20,7 +20,7 @@ import hellfirepvp.astralsorcery.common.perk.AllocationStatus;
  */
 public interface DynamicPerkRender {
 
-    public void renderAt(AllocationStatus status, MatrixStack renderStack, long spriteOffsetTick, float pTicks,
+    public void renderAt(AllocationStatus status, PoseStack renderStack, long spriteOffsetTick, float pTicks,
                          float x, float y, float zLevel, float scale);
 
 }

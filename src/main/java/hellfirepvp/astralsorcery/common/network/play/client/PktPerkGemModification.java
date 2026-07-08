@@ -17,10 +17,10 @@ import hellfirepvp.astralsorcery.common.perk.node.socket.GemSocketItem;
 import hellfirepvp.astralsorcery.common.perk.node.socket.GemSocketPerk;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
@@ -85,7 +85,7 @@ public class PktPerkGemModification extends ASPacket<PktPerkGemModification> {
         return (packet, context, side) -> {
             context.enqueueWork(() -> {
                 PerkTree.PERK_TREE.getPerk(side, packet.perkKey).ifPresent(perk -> {
-                    PlayerEntity player = context.getSender();
+                    Player player = context.getSender();
                     if (!(perk instanceof GemSocketPerk)) { //Exclusively for socketable gem perks.
                         return;
                     }
@@ -107,7 +107,7 @@ public class PktPerkGemModification extends ASPacket<PktPerkGemModification> {
         };
     }
 
-    private <T extends AbstractPerk & GemSocketPerk> void tryInsertPerk(AbstractPerk perk, PlayerEntity player, PktPerkGemModification packet) {
+    private <T extends AbstractPerk & GemSocketPerk> void tryInsertPerk(AbstractPerk perk, Player player, PktPerkGemModification packet) {
         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!prog.isValid()) {
             return;

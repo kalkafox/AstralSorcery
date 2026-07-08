@@ -20,13 +20,13 @@ import hellfirepvp.astralsorcery.common.perk.source.ModifierManager;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,11 +42,11 @@ public class PerkEffectHelper {
 
     private PerkEffectHelper() {}
 
-    public static void onPlayerConnectEvent(ServerPlayerEntity player) {
+    public static void onPlayerConnectEvent(ServerPlayer player) {
         modifyAllPerks(player, LogicalSide.SERVER, Action.ADD);
 
         //Restore current overscaled health
-        CompoundNBT asData = NBTHelper.getPersistentData(player);
+        CompoundTag asData = NBTHelper.getPersistentData(player);
         if (asData.contains("health", Constants.NBT.TAG_FLOAT)) {
             player.setHealth(asData.getFloat("health"));
         }
@@ -54,14 +54,14 @@ public class PerkEffectHelper {
         PacketChannel.CHANNEL.sendToPlayer(player, new PktSyncPerkActivity(PktSyncPerkActivity.Type.UNLOCKALL));
     }
 
-    public static void onPlayerDisconnectEvent(ServerPlayerEntity player) {
+    public static void onPlayerDisconnectEvent(ServerPlayer player) {
         modifyAllPerks(player, LogicalSide.SERVER, Action.REMOVE);
 
         //Store current overscaled health
         NBTHelper.getPersistentData(player).putFloat("health", player.getHealth());
     }
 
-    public static void onPlayerCloneEvent(ServerPlayerEntity original, ServerPlayerEntity newPlayer) {
+    public static void onPlayerCloneEvent(ServerPlayer original, ServerPlayer newPlayer) {
         modifyAllPerks(original, LogicalSide.SERVER, Action.REMOVE);
         modifyAllPerks(newPlayer, LogicalSide.SERVER, Action.ADD);
         PerkCooldownHelper.removeAllCooldowns(original, LogicalSide.SERVER);
@@ -74,8 +74,8 @@ public class PerkEffectHelper {
      **************************************************************************************************** */
 
     @OnlyIn(Dist.CLIENT)
-    public static void clientChangePerkData(AbstractPerk perk, CompoundNBT oldData, CompoundNBT newData) {
-        PlayerEntity player = Minecraft.getInstance().player;
+    public static void clientChangePerkData(AbstractPerk perk, CompoundTag oldData, CompoundTag newData) {
+        Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
@@ -94,7 +94,7 @@ public class PerkEffectHelper {
 
     @OnlyIn(Dist.CLIENT)
     public static void clientClearAllPerks() {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
@@ -113,7 +113,7 @@ public class PerkEffectHelper {
 
     @OnlyIn(Dist.CLIENT)
     public static void clientRefreshAllPerks() {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
@@ -126,12 +126,12 @@ public class PerkEffectHelper {
                                       INTERNAL PERK APPLICATION LOGIC
      **************************************************************************************************** */
 
-    private static void modifyAllPerks(PlayerEntity player, LogicalSide side, Action action) {
+    private static void modifyAllPerks(Player player, LogicalSide side, Action action) {
         ResearchHelper.getProgress(player, side).getPerkData().getEffectGrantingPerks()
                 .forEach(perk -> modifySource(player, side, perk, action));
     }
 
-    public static void updateSource(PlayerEntity player, LogicalSide side, ModifierSource oldSource, ModifierSource newSource) {
+    public static void updateSource(Player player, LogicalSide side, ModifierSource oldSource, ModifierSource newSource) {
         PlayerProgress progress = ResearchHelper.getProgress(player, side);
         if (!progress.isValid()) {
             return;
@@ -148,7 +148,7 @@ public class PerkEffectHelper {
         });
     }
 
-    public static <T extends ModifierSource> void modifySources(PlayerEntity player, LogicalSide side, Collection<T> sources, Action action) {
+    public static <T extends ModifierSource> void modifySources(Player player, LogicalSide side, Collection<T> sources, Action action) {
         PlayerProgress progress = ResearchHelper.getProgress(player, side);
         if (!progress.isValid()) {
             return;
@@ -168,7 +168,7 @@ public class PerkEffectHelper {
         }
     }
 
-    public static void modifySource(PlayerEntity player, LogicalSide side, ModifierSource source, Action action) {
+    public static void modifySource(Player player, LogicalSide side, ModifierSource source, Action action) {
         PlayerProgress progress = ResearchHelper.getProgress(player, side);
         if (!progress.isValid()) {
             return;
@@ -186,7 +186,7 @@ public class PerkEffectHelper {
         }
     }
 
-    private static void applySource(PerkAttributeMap attrMap, PlayerEntity player, LogicalSide side, ModifierSource add) {
+    private static void applySource(PerkAttributeMap attrMap, Player player, LogicalSide side, ModifierSource add) {
         //The onlyAdd perk is already on the playerprogress (potentially with other, not-yet-added perks); filter it away.
         Collection<ModifierSource> sources = ModifierManager.getAppliedModifiers(player, side);
         //List<ModifierSource> sources = new LinkedList<>(prog.getAppliedPerks());
@@ -212,7 +212,7 @@ public class PerkEffectHelper {
         newModifiers.forEach(mod -> mod.getAttributeType().onApply(player, side, add));
     }
 
-    private static Collection<PerkAttributeModifier> applyModifiers(ModifierSource source, PerkAttributeMap attrMap, PlayerEntity player, LogicalSide side) {
+    private static Collection<PerkAttributeModifier> applyModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide side) {
         Collection<PerkAttributeModifier> addedModifiers = new ArrayList<>();
         if (source instanceof AttributeModifierProvider) {
             for (PerkAttributeModifier modifier : ((AttributeModifierProvider) source).getModifiers(player, side, false)) {
@@ -222,7 +222,7 @@ public class PerkEffectHelper {
         return addedModifiers;
     }
 
-    private static void removeSource(PerkAttributeMap attrMap, PlayerEntity player, LogicalSide side, ModifierSource remove) {
+    private static void removeSource(PerkAttributeMap attrMap, Player player, LogicalSide side, ModifierSource remove) {
         //Drop the old source
         ModifierManager.removeModifier(player, side, remove);
 
@@ -249,7 +249,7 @@ public class PerkEffectHelper {
         });
     }
 
-    private static Collection<PerkAttributeModifier> removeModifiers(ModifierSource source, PerkAttributeMap attrMap, PlayerEntity player, LogicalSide side) {
+    private static Collection<PerkAttributeModifier> removeModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide side) {
         Collection<PerkAttributeModifier> removedModifiers = new ArrayList<>();
         if (source instanceof AttributeModifierProvider) {
             for (PerkAttributeModifier modifier : ((AttributeModifierProvider) source).getModifiers(player, side, false)) {

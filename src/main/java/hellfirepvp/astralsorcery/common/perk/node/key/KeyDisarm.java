@@ -15,18 +15,18 @@ import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -54,15 +54,15 @@ public class KeyDisarm extends KeyPerk {
 
     private void onAttack(LivingHurtEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) source.getTrueSource();
+        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
+            Player player = (Player) source.getTrueSource();
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 float chance = PerkAttributeHelper.getOrCreateMap(player, side)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.dropChance.get().floatValue());
                 float currentChance = MathHelper.clamp(chance, 0F, 1F);
-                for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+                for (EquipmentSlot slot : EquipmentSlotType.values()) {
                     if (rand.nextFloat() >= currentChance) {
                         continue;
                     }
@@ -80,14 +80,14 @@ public class KeyDisarm extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue dropChance;
+        private ModConfigSpec.DoubleValue dropChance;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.dropChance = cfgBuilder
                     .comment("Defines the chance (in percent) per hit to make the attacked entity drop its armor.")
                     .translation(translationKey("dropChance"))

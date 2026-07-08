@@ -16,10 +16,10 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeTypeHan
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.tags.ItemTags;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.function.Consumer;
 

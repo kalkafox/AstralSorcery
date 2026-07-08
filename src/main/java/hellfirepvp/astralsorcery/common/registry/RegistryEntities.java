@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
+import net.minecraft.core.registries.Registries;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.render.entity.RenderEntityEmpty;
 import hellfirepvp.astralsorcery.client.render.entity.RenderEntityGrapplingHook;
@@ -24,14 +25,14 @@ import hellfirepvp.astralsorcery.common.entity.item.EntityStarmetal;
 import hellfirepvp.astralsorcery.common.entity.technical.EntityGrapplingHook;
 import hellfirepvp.astralsorcery.common.entity.technical.EntityObservatoryHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.EntityType;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.fml.client.registry.RenderingRegistry;
 
 import static hellfirepvp.astralsorcery.common.lib.EntityTypesAS.*;
 
@@ -150,7 +151,7 @@ public class RegistryEntities {
         RenderingRegistry.registerEntityRenderingHandler(ITEM_HIGHLIGHT, new RenderEntityItemHighlighted.Factory());
         RenderingRegistry.registerEntityRenderingHandler(ITEM_EXPLOSION_RESISTANT, new RenderEntityItemHighlighted.Factory());
         RenderingRegistry.registerEntityRenderingHandler(ITEM_CRYSTAL, new RenderEntityItemHighlighted.Factory());
-        RenderingRegistry.registerEntityRenderingHandler(ITEM_STARMETAL_INGOT, manager -> new ItemRenderer(manager, Minecraft.getInstance().getItemRenderer()));
+        RenderingRegistry.registerEntityRenderingHandler(ITEM_STARMETAL_INGOT, manager -> new ItemEntityRenderer(manager, Minecraft.getInstance().getItemRenderer()));
 
         RenderingRegistry.registerEntityRenderingHandler(OBSERVATORY_HELPER, new RenderEntityEmpty.Factory());
         RenderingRegistry.registerEntityRenderingHandler(GRAPPLING_HOOK, new RenderEntityGrapplingHook.Factory());
@@ -158,8 +159,7 @@ public class RegistryEntities {
 
     private static <E extends Entity> EntityType<E> register(String name, EntityType.Builder<E> typeBuilder) {
         EntityType<E> type = typeBuilder.build(AstralSorcery.key(name).toString());
-        type.setRegistryName(AstralSorcery.key(name));
-        AstralSorcery.getProxy().getRegistryPrimer().register(type);
+        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.ENTITY_TYPE, AstralSorcery.key(name), type);
         return type;
     }
 }

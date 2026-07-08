@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.base.patreon.types;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
@@ -19,18 +19,18 @@ import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.base.patreon.FlareColor;
 import hellfirepvp.astralsorcery.common.base.patreon.PatreonEffect;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.RenderWorldLastEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
 
@@ -88,10 +88,10 @@ public class TypeBlockRing extends PatreonEffect {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void onRenderLast(RenderWorldLastEvent event) {
-        PlayerEntity pl = Minecraft.getInstance().player;
+        Player pl = Minecraft.getInstance().player;
         if (Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a() && //First person
                 pl != null && pl.getUniqueID().equals(playerUUID)) {
-            MatrixStack renderStack = event.getMatrixStack();
+            PoseStack renderStack = event.getPoseStack();
 
             int alpha = 88;
             if (pl.rotationPitch >= 35F) {
@@ -113,16 +113,16 @@ public class TypeBlockRing extends PatreonEffect {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void onRenderPost(RenderPlayerEvent.Post ev) {
-        PlayerEntity player = ev.getPlayer();
+        Player player = ev.getPlayer();
         if (!player.getUniqueID().equals(playerUUID)) {
             return;
         }
 
-        renderRingAt(ev.getMatrixStack(), player, 88, ev.getPartialRenderTick());
+        renderRingAt(ev.getPoseStack(), player, 88, ev.getPartialRenderTick());
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void renderRingAt(MatrixStack renderStack, PlayerEntity player, int alphaMultiplier, float pTicks) {
+    private void renderRingAt(PoseStack renderStack, Player player, int alphaMultiplier, float pTicks) {
         float addedRotationAngle = 0;
 
         if (rotationSpeed > 1) {

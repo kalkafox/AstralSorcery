@@ -12,12 +12,12 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.loot.*;
 import hellfirepvp.astralsorcery.common.loot.global.LootModifierPerkVoidTrash;
 import hellfirepvp.astralsorcery.common.loot.global.LootModifierScorchingHeat;
-import net.minecraft.loot.LootFunction;
-import net.minecraft.loot.LootFunctionType;
-import net.minecraft.loot.functions.LootFunctionManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
+import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.loot.GlobalLootModifierSerializer;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 
 import static hellfirepvp.astralsorcery.common.lib.LootAS.*;
 
@@ -43,7 +43,7 @@ public class RegistryLoot {
         Functions.COPY_GATEWAY_COLOR = registerFunction(new CopyGatewayColor.Serializer(), AstralSorcery.key("copy_gateway_color"));
     }
 
-    private static <T extends LootFunction> LootFunctionType registerFunction(LootFunction.Serializer<T> serializer, ResourceLocation key) {
+    private static <T extends LootItemConditionalFunction> LootItemFunctionType registerFunction(LootFunction.Serializer<T> serializer, ResourceLocation key) {
         return LootFunctionManager.func_237451_a_(key.toString(), serializer);
     }
 

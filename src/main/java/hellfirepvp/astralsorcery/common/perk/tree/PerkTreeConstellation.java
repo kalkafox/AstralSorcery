@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.tree;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.screen.journal.perk.BatchPerkContext;
@@ -25,8 +25,8 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.AllocationStatus;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -63,7 +63,7 @@ public class PerkTreeConstellation<T extends AbstractPerk> extends PerkTreePoint
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderAt(AllocationStatus status, MatrixStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float zLevel, float scale) {
+    public void renderAt(AllocationStatus status, PoseStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float zLevel, float scale) {
         if (this.associatedConstellation == null) {
             return;
         }
@@ -89,7 +89,7 @@ public class PerkTreeConstellation<T extends AbstractPerk> extends PerkTreePoint
     @Nullable
     @Override
     @OnlyIn(Dist.CLIENT)
-    public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, MatrixStack renderStack,
+    public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, PoseStack renderStack,
                                              AllocationStatus status, long spriteOffsetTick, float pTicks,
                                              float x, float y, float zLevel, float scale) {
         SpriteSheetResource tex = status.getPerkTreeHaloSprite();

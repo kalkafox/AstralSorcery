@@ -10,10 +10,10 @@ package hellfirepvp.astralsorcery.common.crafting.recipe;
 
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.data.research.ResearchProgression;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
@@ -26,7 +26,7 @@ import javax.annotation.Nonnull;
  */
 public interface GatedRecipe {
 
-    boolean hasProgressionServer(PlayerEntity player);
+    boolean hasProgressionServer(Player player);
 
     @OnlyIn(Dist.CLIENT)
     boolean hasProgressionClient();
@@ -36,7 +36,7 @@ public interface GatedRecipe {
         @Nonnull
         ResearchProgression getRequiredProgression();
 
-        default boolean hasProgressionServer(PlayerEntity player) {
+        default boolean hasProgressionServer(Player player) {
             return ResearchHelper.getProgress(player, LogicalSide.SERVER)
                     .hasResearch(getRequiredProgression());
         }

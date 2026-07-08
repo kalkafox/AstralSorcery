@@ -10,18 +10,18 @@ package hellfirepvp.astralsorcery.common.util.data;
 
 import com.google.gson.*;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -105,14 +105,14 @@ public class JsonHelper {
             //Copied from CraftingHelper.getItemStack's NBT deserialization.
             try {
                 JsonElement element = json.get("nbt");
-                CompoundNBT nbt;
+                CompoundTag nbt;
                 if (element.isJsonObject()) {
                     nbt = JsonToNBT.getTagFromJson(GSON.toJson(element));
                 } else {
                     nbt = JsonToNBT.getTagFromJson(JSONUtils.getString(element, "nbt"));
                 }
 
-                CompoundNBT tempRead = new CompoundNBT();
+                CompoundTag tempRead = new CompoundTag();
                 tempRead.put("Tag", nbt);
                 tempRead.putString("FluidName", fluidName);
                 tempRead.putInt("Amount", JSONUtils.getInt(json, "amount", FluidAttributes.BUCKET_VOLUME));

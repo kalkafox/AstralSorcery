@@ -12,12 +12,12 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Locale;
 
@@ -41,10 +41,10 @@ public class AttributeTypeAllElementalResist extends PerkAttributeType {
     }
 
     private void onDamageTaken(LivingHurtEvent event) {
-        if (!(event.getEntityLiving() instanceof PlayerEntity)) {
+        if (!(event.getEntityLiving() instanceof Player)) {
             return;
         }
-        PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+        Player player = (Player) event.getEntityLiving();
         LogicalSide side = this.getSide(player);
         if (!hasTypeApplied(player, side)) {
             return;

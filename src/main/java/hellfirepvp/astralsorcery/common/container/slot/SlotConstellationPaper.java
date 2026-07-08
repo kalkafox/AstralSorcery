@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.container.slot;
 
 import hellfirepvp.astralsorcery.common.container.ContainerTome;
 import hellfirepvp.astralsorcery.common.item.ItemConstellationPaper;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod

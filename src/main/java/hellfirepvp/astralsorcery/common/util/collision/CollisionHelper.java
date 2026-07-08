@@ -8,14 +8,14 @@
 
 package hellfirepvp.astralsorcery.common.util.collision;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapeSpliterator;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -34,7 +34,7 @@ public class CollisionHelper {
         if (!CollisionManager.needsCustomCollision(iterator.entity)) {
             return false;
         }
-        AxisAlignedBB box = CollisionManager.getIteratorBoundingBoxes(iterator, iterator.entity);
+        AABB box = CollisionManager.getIteratorBoundingBoxes(iterator, iterator.entity);
         if (box == null) {
             return false;
         }
@@ -48,15 +48,15 @@ public class CollisionHelper {
     }
 
     @Nullable
-    public static Vector3d onEntityCollision(Vector3d allowedMovement, Entity entity) {
+    public static Vec3 onEntityCollision(Vec3 allowedMovement, Entity entity) {
         if (!CollisionManager.needsCustomCollision(entity)) {
             return null;
         }
-        List<AxisAlignedBB> additionalBoxes = CollisionManager.getAdditionalBoundingBoxes(entity);
-        AxisAlignedBB entityBox = entity.getBoundingBox().grow(1.0E-7D);
-        for (AxisAlignedBB box : additionalBoxes) {
+        List<AABB> additionalBoxes = CollisionManager.getAdditionalBoundingBoxes(entity);
+        AABB entityBox = entity.getBoundingBox().grow(1.0E-7D);
+        for (AABB box : additionalBoxes) {
             double newYMovement = VoxelShapes.create(box).getAllowedOffset(Direction.Axis.Y, entityBox, allowedMovement.y);
-            allowedMovement = new Vector3d(allowedMovement.x, newYMovement, allowedMovement.z);
+            allowedMovement = new Vec3(allowedMovement.x, newYMovement, allowedMovement.z);
         }
 
         return allowedMovement;

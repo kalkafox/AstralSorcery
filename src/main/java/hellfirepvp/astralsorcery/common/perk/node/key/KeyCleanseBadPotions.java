@@ -13,16 +13,16 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.event.entity.living.LivingHealEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,16 +49,16 @@ public class KeyCleanseBadPotions extends KeyPerk {
 
     private void onHeal(LivingHealEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        if (entity instanceof PlayerEntity && !entity.world.isRemote()) {
-            PlayerEntity player = (PlayerEntity) entity;
-            List<EffectInstance> badEffects = player.getActivePotionEffects()
+        if (entity instanceof Player && !entity.world.isRemote()) {
+            Player player = (Player) entity;
+            List<MobEffectInstance> badEffects = player.getActivePotionEffects()
                     .stream()
                     .filter(p -> p.getPotion().getEffectType() == EffectType.HARMFUL)
                     .collect(Collectors.toList());
             if (badEffects.isEmpty()) {
                 return;
             }
-            EffectInstance effect = badEffects.get(rand.nextInt(badEffects.size()));
+            MobEffectInstance effect = badEffects.get(rand.nextInt(badEffects.size()));
             PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 float inclChance = 0.1F;

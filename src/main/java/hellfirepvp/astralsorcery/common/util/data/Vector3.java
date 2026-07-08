@@ -8,19 +8,19 @@
 
 package hellfirepvp.astralsorcery.common.util.data;
 
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.Vec3i;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Random;
 import java.util.function.Consumer;
@@ -70,15 +70,15 @@ public class Vector3 {
         this.z = z;
     }
 
-    public Vector3(Vector3i pos) {
+    public Vector3(Vec3i pos) {
         this(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public Vector3(Vector3d vec) {
+    public Vector3(Vec3 vec) {
         this(vec.x, vec.y, vec.z);
     }
 
-    public Vector3(TileEntity te) {
+    public Vector3(BlockEntity te) {
         this(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
     }
 
@@ -91,11 +91,11 @@ public class Vector3 {
         return atEntityCorner(entity).addY(entity.getHeight() / 2F);
     }
 
-    public static Vector3 getMin(AxisAlignedBB box) {
+    public static Vector3 getMin(AABB box) {
         return new Vector3(box.minX, box.minY, box.minZ);
     }
 
-    public static Vector3 getMax(AxisAlignedBB box) {
+    public static Vector3 getMax(AABB box) {
         return new Vector3(box.maxX, box.maxY, box.maxZ);
     }
 
@@ -108,14 +108,14 @@ public class Vector3 {
         return new Vector3(x, y, z);
     }
 
-    public Vector3 add(Vector3i vec) {
+    public Vector3 add(Vec3i vec) {
         this.x += vec.getX();
         this.y += vec.getY();
         this.z += vec.getZ();
         return this;
     }
 
-    public Vector3 add(Vector3d vec) {
+    public Vector3 add(Vec3 vec) {
         this.x += vec.getX();
         this.y += vec.getY();
         this.z += vec.getZ();
@@ -172,14 +172,14 @@ public class Vector3 {
         return this;
     }
 
-    public Vector3 subtract(Vector3i vec) {
+    public Vector3 subtract(Vec3i vec) {
         this.x -= vec.getX();
         this.y -= vec.getY();
         this.z -= vec.getZ();
         return this;
     }
 
-    public Vector3 subtract(Vector3d vec) {
+    public Vector3 subtract(Vec3 vec) {
         this.x -= vec.getX();
         this.y -= vec.getY();
         this.z -= vec.getZ();
@@ -252,22 +252,22 @@ public class Vector3 {
         return difX * difX + difY * difY + difZ * difZ;
     }
 
-    public double distance(Vector3i o) {
+    public double distance(Vec3i o) {
         return Math.sqrt(distanceSquared(o));
     }
 
-    public double distanceSquared(Vector3i o) {
+    public double distanceSquared(Vec3i o) {
         double difX = x - o.getX();
         double difY = y - o.getY();
         double difZ = z - o.getZ();
         return difX * difX + difY * difY + difZ * difZ;
     }
 
-    public double distance(Vector3d o) {
+    public double distance(Vec3 o) {
         return Math.sqrt(distanceSquared(o));
     }
 
-    public double distanceSquared(Vector3d o) {
+    public double distanceSquared(Vec3 o) {
         double difX = x - o.x;
         double difY = y - o.y;
         double difZ = z - o.z;
@@ -454,8 +454,8 @@ public class Vector3 {
         return (difX * difX + difY * difY + difZ * difZ) <= (radius * radius);
     }
 
-    public Vector3d toVector3d() {
-        return new Vector3d(x, y, z);
+    public Vec3 toVector3d() {
+        return new Vec3(x, y, z);
     }
 
     public BlockPos toBlockPos() {
@@ -505,13 +505,13 @@ public class Vector3 {
 
     @Deprecated
     @OnlyIn(Dist.CLIENT)
-    public IVertexBuilder drawPos(IVertexBuilder buf) {
+    public VertexConsumer drawPos(VertexConsumer buf) {
         buf.pos((float) this.x, (float) this.y, (float) this.z);
         return buf;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public IVertexBuilder drawPos(Matrix4f renderMatrix, IVertexBuilder buf) {
+    public VertexConsumer drawPos(Matrix4f renderMatrix, VertexConsumer buf) {
         buf.pos(renderMatrix, (float) this.x, (float) this.y, (float) this.z);
         return buf;
     }

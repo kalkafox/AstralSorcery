@@ -14,7 +14,7 @@ import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
 import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.RenderStateUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import org.lwjgl.opengl.GL11;
 
@@ -48,7 +48,7 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder disableTexture() {
-        this.builder.texture(new RenderState.TextureState());
+        this.builder.texture(new RenderStateShard.TextureStateShard());
         return this;
     }
 
@@ -58,17 +58,17 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder smoothShade() {
-        this.builder.shadeModel(new RenderState.ShadeModelState(true));
+        this.builder.shadeModel(new RenderStateShard.ShadeModelState(true));
         return this;
     }
 
     public RenderStateBuilder enableItemRendering() {
-        this.builder.diffuseLighting(new RenderState.DiffuseLightingState(true));
+        this.builder.diffuseLighting(new RenderStateShard.DiffuseLightingState(true));
         return this;
     }
 
     public RenderStateBuilder disableDepth() {
-        this.builder.depthTest(new RenderState.DepthTestState("always", GL11.GL_ALWAYS) {
+        this.builder.depthTest(new RenderStateShard.DepthTestStateShard("always", GL11.GL_ALWAYS) {
             @Override
             public void setupRenderState() {
                 //For some ungodly reason this might not be reset to disable depth testing by default...
@@ -86,17 +86,17 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder enableLighting() {
-        this.builder.lightmap(new RenderState.LightmapState(true));
+        this.builder.lightmap(new RenderStateShard.LightmapStateShard(true));
         return this;
     }
 
     public RenderStateBuilder enableDiffuseLighting() {
-        this.builder.diffuseLighting(new RenderState.DiffuseLightingState(true));
+        this.builder.diffuseLighting(new RenderStateShard.DiffuseLightingState(true));
         return this;
     }
 
     public RenderStateBuilder enableOverlay() {
-        this.builder.overlay(new RenderState.OverlayState(true));
+        this.builder.overlay(new RenderStateShard.OverlayStateShard(true));
         return this;
     }
 
@@ -106,7 +106,7 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder alpha(float alphaThreshold) {
-        this.builder.alpha(new RenderState.AlphaState(alphaThreshold));
+        this.builder.alpha(new RenderStateShard.AlphaState(alphaThreshold));
         return this;
     }
 
@@ -131,7 +131,7 @@ public class RenderStateBuilder {
         return this.builder.build(false);
     }
 
-    private static class ParticleTarget extends RenderState.TargetState {
+    private static class ParticleTarget extends RenderStateShard.OutputStateShard {
 
         private static final ParticleTarget INSTANCE = new ParticleTarget();
 

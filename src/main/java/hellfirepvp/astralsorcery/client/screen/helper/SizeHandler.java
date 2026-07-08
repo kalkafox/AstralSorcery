@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.client.screen.helper;
 
 import hellfirepvp.astralsorcery.client.screen.base.WidthHeightScreen;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import javax.annotation.Nullable;
 import java.awt.*;

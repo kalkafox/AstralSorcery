@@ -20,37 +20,37 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.observerlib.api.block.BlockStructureObserver;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ContainerBlock;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -62,7 +62,7 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 10.09.2020 / 16:46
  */
-public class BlockCelestialGateway extends ContainerBlock implements CustomItemBlock, BlockStructureObserver {
+public class BlockCelestialGateway extends BaseEntityBlock implements CustomItemBlock, BlockStructureObserver {
 
     private static final VoxelShape SHAPE = VoxelShapes.create(1D / 16D, 0D / 16D, 1D / 16D, 15D / 16D, 1D / 16D, 15D / 16D);
 
@@ -76,17 +76,17 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable IBlockReader worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(ItemStack stack, @Nullable BlockGetter worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
         DyeColor color = getColor(stack);
         if (color != null) {
-            tooltip.add(ColorUtils.getTranslation(color).mergeStyle(ColorUtils.textFormattingForDye(color)));
+            tooltip.add(ColorUtils.getTranslation(color).withStyle(ColorUtils.textFormattingForDye(color)));
         }
     }
 
     @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
         ItemStack stack = new ItemStack(BlocksAS.GATEWAY);
         TileCelestialGateway gateway = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, true);
         if (gateway != null) {
@@ -99,12 +99,12 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         TileCelestialGateway gateway = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, false);
         if (gateway != null &&
                 gateway.getOwner() != null &&
@@ -134,7 +134,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
     }
 
     @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+    public void onBlockPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.onBlockPlacedBy(world, pos, state, placer, stack);
 
         TileCelestialGateway gateway = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, true);
@@ -150,7 +150,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
     }
 
     @Override
-    public float getPlayerRelativeBlockHardness(BlockState state, PlayerEntity player, IBlockReader world, BlockPos pos) {
+    public float getPlayerRelativeBlockHardness(BlockState state, Player player, BlockGetter world, BlockPos pos) {
         TileCelestialGateway gateway = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, true);
         if (gateway != null) {
             if (!gateway.isLocked() || (gateway.getOwner() != null && gateway.getOwner().isPlayer(player))) {
@@ -163,7 +163,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
 
     //TODO custom states via state container
     //@Override
-    //public float getBlockHardness(BlockState blockState, IBlockReader world, BlockPos pos) {
+    //public float getBlockHardness(BlockState blockState, BlockGetter world, BlockPos pos) {
     //    TileCelestialGateway gateway = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, true);
     //    if (gateway != null && gateway.isLocked() && gateway.getOwner() != null) {
     //        //Assume this is non-player related hardness. In which case, it cannot be mined to begin with.
@@ -173,7 +173,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
     //}
 
     @Override
-    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moving) {
+    public void onReplaced(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moving) {
         if (state != newState && !world.isRemote()) {
             DataAS.DOMAIN_AS.getData(world, DataAS.KEY_GATEWAY_CACHE).removePosition(world, pos);
             TileCelestialGateway gateway = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, true);
@@ -186,7 +186,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
     }
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
+    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
         if (!this.isValidPosition(state, world, pos)) {
             return Blocks.AIR.getDefaultState();
         }
@@ -194,7 +194,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, IWorldReader world, BlockPos pos) {
+    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
         TileCelestialGateway gateway = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, true);
         if (gateway != null && gateway.isLocked()) {
             return true;
@@ -209,7 +209,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
             return null;
         }
 
-        CompoundNBT tag = NBTHelper.getPersistentData(stack);
+        CompoundTag tag = NBTHelper.getPersistentData(stack);
         if (!tag.contains("color")) {
             return null;
         }
@@ -222,7 +222,7 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
             return;
         }
 
-        CompoundNBT tag = NBTHelper.getPersistentData(stack);
+        CompoundTag tag = NBTHelper.getPersistentData(stack);
         if (color == null) {
             tag.remove("color");
         } else {
@@ -231,18 +231,18 @@ public class BlockCelestialGateway extends ContainerBlock implements CustomItemB
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public RenderShape getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader world) {
+    public BlockEntity createNewTileEntity(BlockGetter world) {
         return new TileCelestialGateway();
     }
 }

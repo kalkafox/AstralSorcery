@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.data.research;
 
 import hellfirepvp.astralsorcery.common.constellation.IMajorConstellation;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collection;
 import java.util.Collections;

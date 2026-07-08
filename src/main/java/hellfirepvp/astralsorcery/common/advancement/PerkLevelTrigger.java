@@ -11,9 +11,9 @@ package hellfirepvp.astralsorcery.common.advancement;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.advancement.instance.PerkLevelInstance;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.loot.ConditionArrayParser;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,7 +35,7 @@ public class PerkLevelTrigger extends ListenerCriterionTrigger<PerkLevelInstance
         return PerkLevelInstance.deserialize(getId(), object);
     }
 
-    public void trigger(ServerPlayerEntity player) {
+    public void trigger(ServerPlayer player) {
         Listeners<PerkLevelInstance> listeners = this.listeners.get(player.getAdvancements());
         if (listeners != null) {
             listeners.trigger((i) -> i.test(player));

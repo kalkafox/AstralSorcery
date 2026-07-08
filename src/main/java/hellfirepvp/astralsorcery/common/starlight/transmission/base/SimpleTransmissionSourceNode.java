@@ -13,7 +13,7 @@ import hellfirepvp.astralsorcery.common.starlight.IStarlightSource;
 import hellfirepvp.astralsorcery.common.starlight.transmission.IPrismTransmissionNode;
 import hellfirepvp.astralsorcery.common.starlight.transmission.ITransmissionSource;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionProvider;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 /**
  * This class is part of the Astral Sorcery Mod

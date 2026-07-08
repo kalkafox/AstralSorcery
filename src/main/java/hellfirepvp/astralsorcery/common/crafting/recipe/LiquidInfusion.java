@@ -19,17 +19,17 @@ import hellfirepvp.astralsorcery.common.util.MapStream;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
@@ -64,7 +64,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
         this.copyNBTToOutputs = copyNBTToOutputs;
     }
 
-    public boolean matches(TileInfuser infuser, PlayerEntity crafter, LogicalSide side) {
+    public boolean matches(TileInfuser infuser, Player crafter, LogicalSide side) {
         if (crafter == null) {
             return false;
         }
@@ -137,7 +137,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
         return copyNBTToOutputs;
     }
 
-    public static LiquidInfusion read(ResourceLocation recipeId, PacketBuffer buffer) {
+    public static LiquidInfusion read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         Fluid fluidIn = ByteBufUtils.readRegistryEntry(buffer);
         Ingredient itemIn = Ingredient.read(buffer);
         ItemStack output = ByteBufUtils.readItemStack(buffer);
@@ -149,7 +149,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
         return new LiquidInfusion(recipeId, duration, fluidIn, itemIn, output, consumptionChance, consumeMultiple, acceptChalice, copyNBTToOutputs);
     }
 
-    public final void write(PacketBuffer buffer) {
+    public final void write(FriendlyByteBuf buffer) {
         ByteBufUtils.writeRegistryEntry(buffer, this.getLiquidInput());
         this.getItemInput().write(buffer);
         ByteBufUtils.writeItemStack(buffer, this.output);
@@ -172,7 +172,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
     }
 
     @Override
-    public IRecipeType<?> getType() {
+    public RecipeType<?> getType() {
         return RecipeTypesAS.TYPE_INFUSION.getType();
     }
 

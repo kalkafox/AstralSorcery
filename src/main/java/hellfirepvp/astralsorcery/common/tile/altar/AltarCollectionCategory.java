@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.tile.altar;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 

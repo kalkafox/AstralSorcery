@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.constellation.world.event;
 
 import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
 import hellfirepvp.astralsorcery.common.data.config.entry.GeneralConfig;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 import java.util.Random;
 
@@ -29,7 +29,7 @@ public class LunarEclipse extends CelestialEvent {
     private int eventTick = 0;
 
     @Override
-    public void tick(World world, Random rand, WorldContext ctx) {
+    public void tick(Level world, Random rand, WorldContext ctx) {
         for (int i = 0; i < 12 + rand.nextInt(12); i++) {
             rand.nextLong(); //Flush
         }

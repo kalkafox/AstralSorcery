@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.event.effect;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -18,16 +18,16 @@ import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.client.util.obj.WavefrontObject;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.zip.GZIPInputStream;
@@ -51,7 +51,7 @@ public class ClientMiscEventHandler {
     //Obligatory, dev gimmick
     @OnlyIn(Dist.CLIENT)
     static void onRender(RenderPlayerEvent.Post event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if (player == null) return;
         if (player.getUniqueID().hashCode() != 1529485240) return;
 
@@ -68,7 +68,7 @@ public class ClientMiscEventHandler {
 
         if (player.isPassenger() || player.isElytraFlying()) return;
 
-        Vector3d motion = player.getMotion();
+        Vec3 motion = player.getMotion();
 
         boolean f = player.abilities.isFlying;
         float ma = f ? 15 : 5;
@@ -76,7 +76,7 @@ public class ClientMiscEventHandler {
                 ((65 - ma) * Math.max(0, Math.min(1, (float) new Vector3(motion.x, 0, motion.z).length())));
         float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, event.getPartialRenderTick());
 
-        MatrixStack renderStack = event.getMatrixStack();
+        PoseStack renderStack = event.getPoseStack();
         renderStack.push();
         float swimAngle = player.getSwimAnimation(event.getPartialRenderTick());
         if (swimAngle > 0) {

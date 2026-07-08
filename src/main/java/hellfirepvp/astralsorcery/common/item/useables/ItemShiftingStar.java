@@ -21,25 +21,24 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.item.base.PerkExperienceRevealer;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.UseAction;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.Util;
+import net.minecraft.util.Mth;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -61,27 +60,27 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         IConstellation cst = this.getBaseConstellation();
         if (cst != null) {
             if (ResearchHelper.getClientProgress().hasConstellationDiscovered(cst)) {
-                tooltip.add(cst.getConstellationName().mergeStyle(TextFormatting.BLUE));
+                tooltip.add(cst.getConstellationName().withStyle(TextFormatting.BLUE));
             } else {
-                tooltip.add(new TranslationTextComponent("astralsorcery.misc.noinformation").mergeStyle(TextFormatting.GRAY));
+                tooltip.add(Component.translatable("astralsorcery.misc.noinformation").withStyle(TextFormatting.GRAY));
             }
         }
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+    public InteractionResultHolder<ItemStack> onItemRightClick(Level worldIn, Player playerIn, InteractionHand handIn) {
         playerIn.setActiveHand(handIn);
         return super.onItemRightClick(worldIn, playerIn, handIn);
     }
 
     @Override
-    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, LivingEntity entityLiving) {
-        if (!worldIn.isRemote() && entityLiving instanceof ServerPlayerEntity) {
-            ServerPlayerEntity player = (ServerPlayerEntity) entityLiving;
+    public ItemStack onItemUseFinish(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
+        if (!worldIn.isRemote() && entityLiving instanceof ServerPlayer) {
+            ServerPlayer player = (ServerPlayer) entityLiving;
             IMajorConstellation cst = this.getBaseConstellation();
             if (cst != null) {
                 PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
@@ -92,12 +91,12 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
                 double perkExp = prog.getPerkData().getPerkExp();
                 if (ResearchManager.setAttunedConstellation(player, cst)) {
                     ResearchManager.setExp(player, MathHelper.lfloor(perkExp));
-                    player.sendMessage(new TranslationTextComponent("astralsorcery.progress.switch.attunement").mergeStyle(TextFormatting.BLUE), Util.DUMMY_UUID);
+                    player.sendMessage(Component.translatable("astralsorcery.progress.switch.attunement").withStyle(TextFormatting.BLUE), Util.DUMMY_UUID);
                     SoundHelper.playSoundAround(SoundEvents.BLOCK_GLASS_BREAK, worldIn, entityLiving.getPosition(), 1F, 1F);
                     return ItemStack.EMPTY;
                 }
             } else if (ResearchManager.setAttunedConstellation(player, null)) {
-                player.sendMessage(new TranslationTextComponent("astralsorcery.progress.remove.attunement").mergeStyle(TextFormatting.BLUE), Util.DUMMY_UUID);
+                player.sendMessage(Component.translatable("astralsorcery.progress.remove.attunement").withStyle(TextFormatting.BLUE), Util.DUMMY_UUID);
                 SoundHelper.playSoundAround(SoundEvents.BLOCK_GLASS_BREAK, worldIn, entityLiving.getPosition(), 1F, 1F);
                 return ItemStack.EMPTY;
             }
@@ -158,7 +157,7 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
+    public UseAnim getUseAction(ItemStack stack) {
         return UseAction.BOW;
     }
 

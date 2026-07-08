@@ -23,16 +23,16 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.awt.*;
 import java.util.Collections;
@@ -72,14 +72,14 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public boolean matches(ItemEntity trigger, World world, BlockPos at) {
+    public boolean matches(ItemEntity trigger, Level world, BlockPos at) {
         List<Entity> otherEntities = getEntitiesInBlock(world, at);
         otherEntities.remove(trigger);
         return otherEntities.isEmpty();
     }
 
     @Override
-    public void doServerCraftTick(ItemEntity trigger, World world, BlockPos at) {
+    public void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at) {
         Random r = new Random(MathHelper.getPositionRandom(at));
         if (!world.isRemote() && getAndIncrementCraftingTick(trigger) > 80 + r.nextInt(40)) {
             ItemStack stack = trigger.getItem();
@@ -102,7 +102,7 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void doClientEffectTick(ItemEntity trigger, World world, BlockPos at) {
+    public void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at) {
         Color c = ColorsAS.DEFAULT_GENERIC_PARTICLE;
         if (trigger.getItem().getItem() instanceof ItemRockCrystal ||
                 trigger.getItem().getItem() instanceof ItemAttunedRockCrystal) {

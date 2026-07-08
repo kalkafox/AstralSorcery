@@ -12,9 +12,10 @@ import hellfirepvp.astralsorcery.common.data.config.base.ConfigEntry;
 import hellfirepvp.astralsorcery.common.data.config.registry.AmuletEnchantmentRegistry;
 import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentType;
 import hellfirepvp.astralsorcery.common.item.ItemEnchantmentAmulet;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -34,11 +35,11 @@ public class AmuletRandomizeHelper {
     public static final Config CONFIG = new Config();
     private static final Random rand = new Random();
 
-    private static ForgeConfigSpec.DoubleValue chance2nd;
-    private static ForgeConfigSpec.DoubleValue chance3rd;
-    private static ForgeConfigSpec.DoubleValue chance2Level;
-    private static ForgeConfigSpec.DoubleValue chanceToAll;
-    private static ForgeConfigSpec.DoubleValue chanceToNonExisting;
+    private static ModConfigSpec.DoubleValue chance2nd;
+    private static ModConfigSpec.DoubleValue chance3rd;
+    private static ModConfigSpec.DoubleValue chance2Level;
+    private static ModConfigSpec.DoubleValue chanceToAll;
+    private static ModConfigSpec.DoubleValue chanceToNonExisting;
 
     public static void rollAmulet(ItemStack stack) {
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemEnchantmentAmulet)) {
@@ -51,7 +52,7 @@ public class AmuletRandomizeHelper {
             if (type != null) {
                 int lvl = getRollLevel();
                 if (type.isEnchantmentSpecific()) {
-                    Enchantment e = AmuletEnchantmentRegistry.getRandomEnchant();
+                    ResourceKey<Enchantment> e = AmuletEnchantmentRegistry.getRandomEnchant();
                     if (e != null) {
                         ench.add(new AmuletEnchantment(type, e, lvl));
                     }
@@ -154,7 +155,7 @@ public class AmuletRandomizeHelper {
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             chance2nd = cfgBuilder
                     .comment("Defines the chance to roll a 2nd-enchantment-manipulating roll on the amulet. Value defines a percent chance from 0% to 100%. Setting this to 0 also prevents a 3rd roll")
                     .translation(translationKey("chance2nd"))

@@ -14,16 +14,16 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.item.crafting.SpecialRecipeSerializer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
@@ -36,13 +36,13 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 29.11.2019 / 13:24
  */
-public class RecipeDyeableChangeColor extends SpecialRecipe {
+public class RecipeDyeableChangeColor extends CustomRecipe {
 
-    private final Supplier<IRecipeSerializer<?>> serializer;
+    private final Supplier<RecipeSerializer<?>> serializer;
     private final Item targetItem;
     private final BiConsumer<ItemStack, DyeColor> colorFn;
 
-    public RecipeDyeableChangeColor(ResourceLocation idIn, Supplier<IRecipeSerializer<?>> serializer, Item targetItem, BiConsumer<ItemStack, DyeColor> colorFn) {
+    public RecipeDyeableChangeColor(ResourceLocation idIn, Supplier<RecipeSerializer<?>> serializer, Item targetItem, BiConsumer<ItemStack, DyeColor> colorFn) {
         super(idIn);
         this.serializer = serializer;
         this.targetItem = targetItem;
@@ -50,12 +50,12 @@ public class RecipeDyeableChangeColor extends SpecialRecipe {
     }
 
     @Override
-    public boolean matches(CraftingInventory inv, World worldIn) {
+    public boolean matches(CraftingContainer inv, Level worldIn) {
         return tryFindValidRecipeAndDye(inv) != null;
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack getCraftingResult(CraftingContainer inv) {
         Tuple<DyeColor, ItemStack> itemColorTpl = tryFindValidRecipeAndDye(inv);
         if (itemColorTpl == null) {
             return ItemStack.EMPTY;
@@ -66,7 +66,7 @@ public class RecipeDyeableChangeColor extends SpecialRecipe {
     }
 
     @Nullable
-    private Tuple<DyeColor, ItemStack> tryFindValidRecipeAndDye(CraftingInventory inv) {
+    private Tuple<DyeColor, ItemStack> tryFindValidRecipeAndDye(CraftingContainer inv) {
         ItemStack itemFound = ItemStack.EMPTY;
         DyeColor dyeColorFound = null;
         int nonEmptyItemsFound = 0;
@@ -100,7 +100,7 @@ public class RecipeDyeableChangeColor extends SpecialRecipe {
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<?> getSerializer() {
         return this.serializer.get();
     }
 

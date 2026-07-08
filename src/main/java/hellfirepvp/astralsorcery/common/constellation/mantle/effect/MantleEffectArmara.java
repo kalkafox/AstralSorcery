@@ -19,18 +19,18 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Random;
 
@@ -62,7 +62,7 @@ public class MantleEffectArmara extends MantleEffect {
     }
 
     @Override
-    protected void tickServer(PlayerEntity player) {
+    protected void tickServer(Player player) {
         super.tickServer(player);
 
         if (getCurrentImmunityStacks(player) >= CONFIG.immunityStacks.get()) {
@@ -84,7 +84,7 @@ public class MantleEffectArmara extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         this.playCapeSparkles(player, 0.15F);
@@ -141,7 +141,7 @@ public class MantleEffectArmara extends MantleEffect {
     }
 
     private void onHurt(LivingHurtEvent event) {
-        World world = event.getEntity().getEntityWorld();
+        Level world = event.getEntity().getEntityWorld();
         LivingEntity hurt = event.getEntityLiving();
 
         if (world.isRemote()) {
@@ -196,17 +196,17 @@ public class MantleEffectArmara extends MantleEffect {
 
         private final int defaultChargeCostPerStack = 750;
 
-        public ForgeConfigSpec.IntValue immunityStacks;
-        public ForgeConfigSpec.IntValue immunityRechargeTicks;
+        public ModConfigSpec.IntValue immunityStacks;
+        public ModConfigSpec.IntValue immunityRechargeTicks;
 
-        public ForgeConfigSpec.IntValue chargeCostPerStack;
+        public ModConfigSpec.IntValue chargeCostPerStack;
 
         public ArmaraConfig() {
             super("armara");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.immunityStacks = cfgBuilder

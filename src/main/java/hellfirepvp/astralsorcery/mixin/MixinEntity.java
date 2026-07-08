@@ -9,13 +9,13 @@
 package hellfirepvp.astralsorcery.mixin;
 
 import hellfirepvp.astralsorcery.common.util.collision.CollisionHelper;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.util.ReuseableStream;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,11 +32,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinEntity {
 
     @Inject(method = "collideBoundingBoxHeuristically", at = @At(value = "RETURN", ordinal = 1), cancellable = true)
-    private static void addCustomCollision(Entity entity, Vector3d vec, AxisAlignedBB collisionBox, World world, ISelectionContext context, ReuseableStream<VoxelShape> potentialHits, CallbackInfoReturnable<Vector3d> cir) {
+    private static void addCustomCollision(Entity entity, Vec3 vec, AABB collisionBox, Level world, CollisionContext context, ReuseableStream<VoxelShape> potentialHits, CallbackInfoReturnable<Vec3> cir) {
         if (entity == null) {
             return;
         }
-        Vector3d allowedMovement = CollisionHelper.onEntityCollision(vec, entity);
+        Vec3 allowedMovement = CollisionHelper.onEntityCollision(vec, entity);
         if (allowedMovement != null) {
             cir.setReturnValue(allowedMovement);
         }

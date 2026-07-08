@@ -11,8 +11,8 @@ package hellfirepvp.astralsorcery.common.starlight.transmission.registry;
 import hellfirepvp.astralsorcery.common.event.StarlightNetworkEvent;
 import hellfirepvp.astralsorcery.common.starlight.IIndependentStarlightSource;
 import hellfirepvp.astralsorcery.common.starlight.transmission.base.crystal.IndependentCrystalSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,7 +53,7 @@ public class SourceClassRegistry {
     public static void setupRegistry() {
         register(new IndependentCrystalSource.Provider());
 
-        MinecraftForge.EVENT_BUS.post(new StarlightNetworkEvent.SourceProviderRegistry(eventInstance));
+        NeoForge.EVENT_BUS.post(new StarlightNetworkEvent.SourceProviderRegistry(eventInstance));
     }
 
     public static interface SourceProvider {

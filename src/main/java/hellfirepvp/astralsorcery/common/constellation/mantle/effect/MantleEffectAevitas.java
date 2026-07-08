@@ -22,18 +22,18 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.util.collision.CustomCollisionHandler;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.FoodStats;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class MantleEffectAevitas extends MantleEffect {
     }
 
     @Override
-    protected void tickServer(PlayerEntity player) {
+    protected void tickServer(Player player) {
         super.tickServer(player);
 
         if (isStandingOnAir(player)) {
@@ -71,7 +71,7 @@ public class MantleEffectAevitas extends MantleEffect {
             player.heal(CONFIG.healthPerCycle.get().floatValue());
         }
         if (foodChance > 0 && rand.nextInt(foodChance) == 0) {
-            FoodStats stats = player.getFoodStats();
+            FoodData stats = player.getFoodStats();
             if (stats.getFoodLevel() < 20 || stats.getSaturationLevel() < 5) {
                 if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFood.get())) {
                     stats.addStats(CONFIG.foodPerCycle.get().intValue(), 0.5F);
@@ -83,7 +83,7 @@ public class MantleEffectAevitas extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         this.playCapeSparkles(player, 0.1F);
@@ -114,7 +114,7 @@ public class MantleEffectAevitas extends MantleEffect {
         return CONFIG;
     }
 
-    public static boolean canSupportEffect(PlayerEntity player) {
+    public static boolean canSupportEffect(Player player) {
         LogicalSide side = player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
         PlayerProgress progress = ResearchHelper.getProgress(player, side);
         return progress.doPerkAbilities() &&
@@ -124,7 +124,7 @@ public class MantleEffectAevitas extends MantleEffect {
 
     public static boolean isStandingOnAir(Entity entity) {
         if (entity.isOnGround()) {
-            World world = entity.getEntityWorld();
+            Level world = entity.getEntityWorld();
             BlockPos at = entity.getPosition().down();
             return world.getBlockState(at).isAir(world, at);
         }
@@ -142,21 +142,21 @@ public class MantleEffectAevitas extends MantleEffect {
         private final int defaultChargeCostPerHeal = 100;
         private final int defaultChargeCostPerFood = 100;
 
-        public ForgeConfigSpec.IntValue healChance;
-        public ForgeConfigSpec.IntValue feedChance;
-        public ForgeConfigSpec.DoubleValue healthPerCycle;
-        public ForgeConfigSpec.DoubleValue foodPerCycle;
+        public ModConfigSpec.IntValue healChance;
+        public ModConfigSpec.IntValue feedChance;
+        public ModConfigSpec.DoubleValue healthPerCycle;
+        public ModConfigSpec.DoubleValue foodPerCycle;
 
-        public ForgeConfigSpec.DoubleValue chargeCostPerTravelTick;
-        public ForgeConfigSpec.IntValue chargeCostPerHeal;
-        public ForgeConfigSpec.IntValue chargeCostPerFood;
+        public ModConfigSpec.DoubleValue chargeCostPerTravelTick;
+        public ModConfigSpec.IntValue chargeCostPerHeal;
+        public ModConfigSpec.IntValue chargeCostPerFood;
 
         public AevitasConfig() {
             super("aevitas");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.healChance = cfgBuilder
@@ -193,19 +193,19 @@ public class MantleEffectAevitas extends MantleEffect {
 
     public static class PlayerWalkableAir implements CustomCollisionHandler {
 
-        private static final AxisAlignedBB FULL_BOX = new AxisAlignedBB(BlockPos.ZERO);
+        private static final AABB FULL_BOX = new AABB(BlockPos.ZERO);
 
         @Override
         public boolean shouldAddCollisionFor(Entity entity) {
-            if (!(entity instanceof PlayerEntity) || ((PlayerEntity) entity).abilities.isFlying) {
+            if (!(entity instanceof Player) || ((Player) entity).abilities.isFlying) {
                 return false;
             }
             return ItemMantle.getEffect((LivingEntity) entity, ConstellationsAS.aevitas) != null &&
-                    canSupportEffect((PlayerEntity) entity);
+                    canSupportEffect((Player) entity);
         }
 
         @Override
-        public void addCollision(Entity entity, AxisAlignedBB testBox, List<AxisAlignedBB> additionalCollision) {
+        public void addCollision(Entity entity, AABB testBox, List<AABB> additionalCollision) {
             int yOffset = 1;
             if (entity.getPose() == Pose.CROUCHING && isStandingOnAir(entity)) {
                 yOffset = 2;

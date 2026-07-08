@@ -33,12 +33,13 @@ import hellfirepvp.astralsorcery.common.block.tile.fountain.BlockFountainPrimeLi
 import hellfirepvp.astralsorcery.common.block.tile.fountain.BlockFountainPrimeOre;
 import hellfirepvp.astralsorcery.common.block.tile.fountain.BlockFountainPrimeVortex;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.ColorHandlerEvent;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -140,14 +141,14 @@ public class RegistryBlocks {
 
     private static BlockSlabTemplate makeSlab(BlockState base, String name) {
         BlockSlabTemplate slabs = new BlockSlabTemplate(base, Block.Properties.from(base.getBlock()));
-        ResourceLocation slabsName = base.getBlock().getRegistryName();
+        ResourceLocation slabsName = AstralSorcery.getProxy().getRegistryPrimer().getName(base.getBlock());
         slabsName = new ResourceLocation(slabsName.getNamespace(), name);
         return registerBlock(slabs, slabsName);
     }
 
     private static BlockStairsTemplate makeStairs(BlockState base, String name) {
         BlockStairsTemplate stairs = new BlockStairsTemplate(base, Block.Properties.from(base.getBlock()));
-        ResourceLocation stairsName = base.getBlock().getRegistryName();
+        ResourceLocation stairsName = AstralSorcery.getProxy().getRegistryPrimer().getName(base.getBlock());
         stairsName = new ResourceLocation(stairsName.getNamespace(), name);
         return registerBlock(stairs, stairsName);
     }
@@ -157,8 +158,7 @@ public class RegistryBlocks {
     }
 
     private static <T extends Block> T registerBlock(T block, ResourceLocation name) {
-        block.setRegistryName(name);
-        AstralSorcery.getProxy().getRegistryPrimer().register(block);
+        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.BLOCK, name, block);
         if (block instanceof CustomItemBlock) {
             ITEM_BLOCKS.add((CustomItemBlock) block);
         }

@@ -11,8 +11,8 @@ package hellfirepvp.astralsorcery.client.screen.journal.perk.group;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
 import hellfirepvp.astralsorcery.client.screen.journal.perk.BatchPerkContext;
 import hellfirepvp.astralsorcery.client.screen.journal.perk.PerkRenderGroup;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod

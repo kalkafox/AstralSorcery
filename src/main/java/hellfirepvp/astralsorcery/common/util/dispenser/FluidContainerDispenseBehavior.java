@@ -9,25 +9,25 @@
 package hellfirepvp.astralsorcery.common.util.dispenser;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.dispenser.DefaultDispenseItemBehavior;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.dispenser.IDispenseItemBehavior;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.DispenserTileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.fluids.FluidActionResult;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 import javax.annotation.Nonnull;
 
@@ -51,7 +51,7 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
     }
 
     @Override
-    protected ItemStack dispenseStack(IBlockSource source, ItemStack stack) {
+    protected ItemStack dispenseStack(BlockSource source, ItemStack stack) {
         if (FluidUtil.getFluidContained(stack).isPresent()) {
             return dumpContainer(source, stack);
         } else {
@@ -60,8 +60,8 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
     }
 
     @Nonnull
-    private ItemStack fillContainer(IBlockSource source, ItemStack stack) {
-        World world = source.getWorld();
+    private ItemStack fillContainer(BlockSource source, ItemStack stack) {
+        Level world = source.getWorld();
         Direction dispenserFacing = source.getBlockState().get(DispenserBlock.FACING);
         BlockPos blockpos = source.getBlockPos().offset(dispenserFacing);
 
@@ -74,7 +74,7 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
 
         if (stack.getCount() == 1) {
             return resultStack;
-        } else if (((DispenserTileEntity)source.getBlockTileEntity()).addItemStack(resultStack) < 0) {
+        } else if (((DispenserBlockEntity)source.getBlockTileEntity()).addItemStack(resultStack) < 0) {
             this.defaultBehavior.dispense(source, resultStack);
         }
 
@@ -84,8 +84,8 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
     }
 
     @Nonnull
-    private ItemStack dumpContainer(IBlockSource source, @Nonnull ItemStack stack) {
-        ServerWorld world = source.getWorld();
+    private ItemStack dumpContainer(BlockSource source, @Nonnull ItemStack stack) {
+        ServerLevel world = source.getWorld();
         ItemStack singleStack = stack.copy();
         singleStack.setCount(1);
         LazyOptional<IFluidHandlerItem> itemFluidHandler = FluidUtil.getFluidHandler(singleStack);
@@ -97,7 +97,7 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
                 .orElse(FluidStack.EMPTY);
         Direction dispenserFacing = source.getBlockState().get(DispenserBlock.FACING);
         BlockPos pos = source.getBlockPos().offset(dispenserFacing);
-        PlayerEntity player = AstralSorcery.getProxy().getASFakePlayerServer((ServerWorld) world);
+        Player player = AstralSorcery.getProxy().getASFakePlayerServer((ServerLevel) world);
         FluidActionResult result = FluidUtil.tryPlaceFluid(player, source.getWorld(), Hand.MAIN_HAND, pos, stack, drained);
 
         if (result.isSuccess()) {
@@ -105,7 +105,7 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
 
             if (drainedStack.getCount() == 1) {
                 return drainedStack;
-            } else if (!drainedStack.isEmpty() && ((DispenserTileEntity) source.getBlockTileEntity()).addItemStack(drainedStack) < 0) {
+            } else if (!drainedStack.isEmpty() && ((DispenserBlockEntity) source.getBlockTileEntity()).addItemStack(drainedStack) < 0) {
                 this.defaultBehavior.dispense(source, drainedStack);
             }
 

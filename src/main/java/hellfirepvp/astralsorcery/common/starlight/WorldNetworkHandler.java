@@ -17,12 +17,12 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.IPrismTransmissio
 import hellfirepvp.astralsorcery.common.starlight.transmission.ITransmissionSource;
 import hellfirepvp.astralsorcery.common.starlight.transmission.NodeConnection;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -39,18 +39,18 @@ import java.util.List;
 public class WorldNetworkHandler {
 
     private final LightNetworkBuffer buffer;
-    private final World world;
+    private final Level world;
 
-    public WorldNetworkHandler(LightNetworkBuffer lightNetworkBuffer, World world) {
+    public WorldNetworkHandler(LightNetworkBuffer lightNetworkBuffer, Level world) {
         this.buffer = lightNetworkBuffer;
         this.world = world;
     }
 
-    public World getWorld() {
+    public Level getWorld() {
         return world;
     }
 
-    public static WorldNetworkHandler getNetworkHandler(World world) {
+    public static WorldNetworkHandler getNetworkHandler(Level world) {
         return DataAS.DOMAIN_AS.getData(world, DataAS.KEY_STARLIGHT_NETWORK).getNetworkHandler(world);
     }
 
@@ -141,8 +141,8 @@ public class WorldNetworkHandler {
         return null;
     }
 
-    public void markDirty(Vector3i... positions) {
-        for (Vector3i pos : positions) {
+    public void markDirty(Vec3i... positions) {
+        for (Vec3i pos : positions) {
             buffer.markDirty(pos);
         }
     }

@@ -45,20 +45,20 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -359,11 +359,11 @@ public class TileAttunementAltar extends TileEntityTick {
             return;
         }
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null || player.getDistanceSq(Vector3d.copyCentered(getPos())) >= 256) {
             return;
         }
-        Tuple<Hand, ItemStack> heldTpl = MiscUtils.getMainOrOffHand(player, stack -> stack.getItem() instanceof ItemConstellationPaper);
+        Tuple<InteractionHand, ItemStack> heldTpl = MiscUtils.getMainOrOffHand(player, stack -> stack.getItem() instanceof ItemConstellationPaper);
         if (heldTpl != null) {
             ItemStack cstPaper = heldTpl.getB();
             IConstellation cst = ((ItemConstellationPaper) cstPaper.getItem()).getConstellation(cstPaper);
@@ -473,7 +473,7 @@ public class TileAttunementAltar extends TileEntityTick {
                     continue;
                 }
 
-                TileEntity tile = MiscUtils.getTileAt(getWorld(), expectedRelayPos, TileEntity.class, true);
+                BlockEntity tile = MiscUtils.getTileAt(getWorld(), expectedRelayPos, TileEntity.class, true);
                 if (!(tile instanceof TileSpectralRelay) && !(tile instanceof TileAttunementAltar)) {
                     isValid = false;
                     break;
@@ -519,12 +519,12 @@ public class TileAttunementAltar extends TileEntityTick {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public AxisAlignedBB getRenderBoundingBox() {
+    public AABB getRenderBoundingBox() {
         return super.getRenderBoundingBox().expand(3.5, 2, 3.5);
     }
 
     @Override
-    public void writeNetNBT(CompoundNBT compound) {
+    public void writeNetNBT(CompoundTag compound) {
         super.writeNetNBT(compound);
 
         if (this.activeConstellation != null) {
@@ -532,7 +532,7 @@ public class TileAttunementAltar extends TileEntityTick {
         }
 
         if (this.currentRecipe != null) {
-            CompoundNBT nbt = new CompoundNBT();
+            CompoundTag nbt = new CompoundTag();
             nbt.putString("recipe", this.currentRecipe.getRecipe().getKey().toString());
             this.currentRecipe.writeToNBT(nbt);
             compound.put("currentRecipe", nbt);
@@ -540,7 +540,7 @@ public class TileAttunementAltar extends TileEntityTick {
     }
 
     @Override
-    public void readNetNBT(CompoundNBT compound) {
+    public void readNetNBT(CompoundTag compound) {
         super.readNetNBT(compound);
 
         if (compound.contains("activeConstellation")) {
@@ -550,7 +550,7 @@ public class TileAttunementAltar extends TileEntityTick {
         }
 
         if (compound.contains("currentRecipe")) {
-            CompoundNBT nbt = compound.getCompound("currentRecipe");
+            CompoundTag nbt = compound.getCompound("currentRecipe");
             AttunementRecipe recipe = AttunementCraftingRegistry.INSTANCE.getRecipe(new ResourceLocation(nbt.getString("recipe")));
             if (recipe != null) {
                 this.currentRecipe = recipe.deserialize(this, nbt, this.currentRecipe);

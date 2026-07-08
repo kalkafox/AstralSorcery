@@ -20,11 +20,11 @@ import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.image.SkyImageGenerator;
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
-import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.Util;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.Util;
 import org.lwjgl.opengl.GL11;
 
 import static hellfirepvp.astralsorcery.client.lib.RenderTypesAS.*;
@@ -396,7 +396,7 @@ public class RegistryRenderTypes {
         return rType;
     }
 
-    private static class IdentityProjectionModelTexturingState extends RenderState.TexturingState {
+    private static class IdentityProjectionModelTexturingState extends RenderStateShard.TexturingStateShard {
 
         private final int zoom;
 

@@ -16,17 +16,17 @@ import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.util.MapStream;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -128,7 +128,7 @@ public class PlayerPerkData {
                 .orElse(false);
     }
 
-    public boolean updatePerkData(AbstractPerk perk, CompoundNBT data) {
+    public boolean updatePerkData(AbstractPerk perk, CompoundTag data) {
         AppliedPerk appliedPerk = this.perks.get(perk);
         if (appliedPerk == null) {
             return false;
@@ -165,15 +165,15 @@ public class PlayerPerkData {
     }
 
     @Nullable
-    public CompoundNBT getData(AbstractPerk perk) {
+    public CompoundTag getData(AbstractPerk perk) {
         return this.findAppliedPerk(perk)
                 .map(AppliedPerk::getPerkData)
-                .map(CompoundNBT::copy)
+                .map(CompoundTag::copy)
                 .orElse(null);
     }
 
     @Nullable
-    public CompoundNBT getMetaData(AbstractPerk perk) {
+    public CompoundTag getMetaData(AbstractPerk perk) {
         return this.findAppliedPerk(perk)
                 .map(AppliedPerk::getApplicationData)
                 .orElse(null);
@@ -206,13 +206,13 @@ public class PlayerPerkData {
         return Collections.unmodifiableCollection(this.freePointTokens);
     }
 
-    public int getAvailablePerkPoints(PlayerEntity player, LogicalSide side) {
+    public int getAvailablePerkPoints(Player player, LogicalSide side) {
         int allocatedPerks = (int) this.perks.values().stream().filter(perk -> perk.isAllocated(PerkAllocationType.UNLOCKED)).count() - 1;
         int allocationLevels = PerkLevelManager.getLevel(getPerkExp(), player, side);
         return (allocationLevels + this.freePointTokens.size()) - allocatedPerks;
     }
 
-    public boolean hasFreeAllocationPoint(PlayerEntity player, LogicalSide side) {
+    public boolean hasFreeAllocationPoint(Player player, LogicalSide side) {
         return getAvailablePerkPoints(player, side) > 0;
     }
 
@@ -220,15 +220,15 @@ public class PlayerPerkData {
         return perkExp;
     }
 
-    public int getPerkLevel(PlayerEntity player, LogicalSide side) {
+    public int getPerkLevel(Player player, LogicalSide side) {
         return PerkLevelManager.getLevel(getPerkExp(), player, side);
     }
 
-    public float getPercentToNextLevel(PlayerEntity player, LogicalSide side) {
+    public float getPercentToNextLevel(Player player, LogicalSide side) {
         return PerkLevelManager.getNextLevelPercent(getPerkExp(), player, side);
     }
 
-    protected void modifyExp(double exp, PlayerEntity player) {
+    protected void modifyExp(double exp, Player player) {
         int currLevel = PerkLevelManager.getLevel(getPerkExp(), player, LogicalSide.SERVER);
         if (exp >= 0 && currLevel >= PerkLevelManager.getLevelCap(LogicalSide.SERVER, player)) {
             return;
@@ -247,7 +247,7 @@ public class PlayerPerkData {
         this.perkExp = Math.max(exp, 0);
     }
 
-    void load(PlayerProgress progress, CompoundNBT tag) {
+    void load(PlayerProgress progress, CompoundTag tag) {
         this.perks.clear();
         this.freePointTokens.clear();
         this.perkExp = 0;
@@ -279,32 +279,32 @@ public class PlayerPerkData {
         this.freePointTokens.addAll(NBTHelper.readList(tag, "tokens", Constants.NBT.TAG_STRING,
                 nbt -> new ResourceLocation(nbt.getString().replace("-", "_"))));
 
-        ListNBT list = tag.getList("perks", Constants.NBT.TAG_COMPOUND);
+        ListTag list = tag.getList("perks", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            CompoundNBT nbt = list.getCompound(i);
+            CompoundTag nbt = list.getCompound(i);
             AppliedPerk.deserialize(nbt).ifPresent(perk -> this.perks.put(perk.getPerk(), perk));
         }
     }
 
-    void save(CompoundNBT tag) {
+    void save(CompoundTag tag) {
         PerkTree.PERK_TREE.getVersion(LogicalSide.SERVER)
                 .ifPresent(version -> tag.putLong("perkTreeVersion", version));
         tag.putDouble("perkExp", this.perkExp);
 
-        ListNBT tokens = new ListNBT();
+        ListTag tokens = new ListTag();
         for (ResourceLocation key : this.freePointTokens) {
             tokens.add(StringNBT.valueOf(key.toString()));
         }
         tag.put("tokens", tokens);
 
-        ListNBT perks = new ListNBT();
+        ListTag perks = new ListTag();
         for (AppliedPerk perk : this.perks.values()) {
             perks.add(perk.serialize());
         }
         tag.put("perks", perks);
     }
 
-    public void write(PacketBuffer buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeDouble(this.perkExp);
         ByteBufUtils.writeCollection(buf, this.freePointTokens, ByteBufUtils::writeResourceLocation);
         ByteBufUtils.writeCollection(buf, this.perks.values(), (buffer, perk) -> {
@@ -313,7 +313,7 @@ public class PlayerPerkData {
         });
     }
 
-    public static PlayerPerkData read(PacketBuffer buf, LogicalSide side) {
+    public static PlayerPerkData read(FriendlyByteBuf buf, LogicalSide side) {
         PlayerPerkData data = new PlayerPerkData();
         data.perkExp = buf.readDouble();
         data.freePointTokens = ByteBufUtils.readSet(buf, ByteBufUtils::readResourceLocation);
@@ -340,11 +340,11 @@ public class PlayerPerkData {
         this.perks = copyFrom.perks;
     }
 
-    private boolean isLegacyData(CompoundNBT tag) {
+    private boolean isLegacyData(CompoundTag tag) {
         return tag.contains("sealedPerks");
     }
 
-    private void loadLegacyData(PlayerProgress progress, CompoundNBT compound) {
+    private void loadLegacyData(PlayerProgress progress, CompoundTag compound) {
         long perkTreeLevel = compound.getLong("perkTreeVersion");
         if (PerkTree.PERK_TREE.getVersion(LogicalSide.SERVER).map(v -> !v.equals(perkTreeLevel)).orElse(true)) { //If your perk tree is different, clear it.
             AstralSorcery.log.info("Clearing perk-tree because the player's skill-tree version was outdated!");
@@ -359,11 +359,11 @@ public class PlayerPerkData {
             }
         } else {
             if (compound.contains("perks")) {
-                ListNBT list = compound.getList("perks", Constants.NBT.TAG_COMPOUND);
+                ListTag list = compound.getList("perks", Constants.NBT.TAG_COMPOUND);
                 for (int i = 0; i < list.size(); i++) {
-                    CompoundNBT tag = list.getCompound(i);
+                    CompoundTag tag = list.getCompound(i);
                     String perkRegName = tag.getString("perkName");
-                    CompoundNBT data = tag.getCompound("perkData");
+                    CompoundTag data = tag.getCompound("perkData");
                     PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, new ResourceLocation(perkRegName)).ifPresent(perk -> {
                         AppliedPerk appliedPerk = new AppliedPerk(perk);
                         appliedPerk.addAllocation(PlayerPerkAllocation.unlock(), false);
@@ -373,9 +373,9 @@ public class PlayerPerkData {
                 }
             }
             if (compound.contains("sealedPerks")) {
-                ListNBT list = compound.getList("sealedPerks", Constants.NBT.TAG_COMPOUND);
+                ListTag list = compound.getList("sealedPerks", Constants.NBT.TAG_COMPOUND);
                 for (int i = 0; i < list.size(); i++) {
-                    CompoundNBT tag = list.getCompound(i);
+                    CompoundTag tag = list.getCompound(i);
                     String perkRegName = tag.getString("perkName");
                     PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, new ResourceLocation(perkRegName)).ifPresent(perk -> {
                         AppliedPerk newPerk = this.perks.get(perk);
@@ -387,7 +387,7 @@ public class PlayerPerkData {
             }
 
             if (compound.contains("pointTokens")) {
-                ListNBT list = compound.getList("pointTokens", Constants.NBT.TAG_STRING);
+                ListTag list = compound.getList("pointTokens", Constants.NBT.TAG_STRING);
                 for (int i = 0; i < list.size(); i++) {
                     String[] resource = legacySplitKey(list.getString(i).toLowerCase(Locale.ROOT));
                     resource[1] = resource[1].replace("-", "_").replace(":", "_");
@@ -416,8 +416,8 @@ public class PlayerPerkData {
         private static final String APPLICATION_KEYS = "application";
 
         private final AbstractPerk perk;
-        private CompoundNBT perkData = new CompoundNBT();
-        private CompoundNBT applicationData = new CompoundNBT();
+        private CompoundTag perkData = new CompoundTag();
+        private CompoundTag applicationData = new CompoundTag();
         private Set<PerkAllocationType> applicationTypes = new HashSet<>();
 
         public AppliedPerk(AbstractPerk perk) {
@@ -441,11 +441,11 @@ public class PlayerPerkData {
             return this.perk;
         }
 
-        public CompoundNBT getPerkData() {
+        public CompoundTag getPerkData() {
             return this.perkData;
         }
 
-        public CompoundNBT getApplicationData() {
+        public CompoundTag getApplicationData() {
             return this.applicationData;
         }
 
@@ -458,12 +458,12 @@ public class PlayerPerkData {
         }
 
         private int getAllocationCount(PerkAllocationType type) {
-            CompoundNBT metaData = this.getApplicationData();
+            CompoundTag metaData = this.getApplicationData();
             if (!metaData.contains(APPLICATION_KEYS, Constants.NBT.TAG_COMPOUND)) {
                 return 0;
             }
-            CompoundNBT applicationMeta = metaData.getCompound(APPLICATION_KEYS);
-            ListNBT allocations = applicationMeta.getList(type.getSaveKey(), Constants.NBT.TAG_COMPOUND);
+            CompoundTag applicationMeta = metaData.getCompound(APPLICATION_KEYS);
+            ListTag allocations = applicationMeta.getList(type.getSaveKey(), Constants.NBT.TAG_COMPOUND);
             return allocations.size();
         }
 
@@ -472,12 +472,12 @@ public class PlayerPerkData {
         }
 
         private PerkRemovalResult removeAllocation(PlayerPerkAllocation type, boolean simulate) {
-            CompoundNBT metaData = this.getApplicationData();
+            CompoundTag metaData = this.getApplicationData();
             if (!metaData.contains(APPLICATION_KEYS, Constants.NBT.TAG_COMPOUND)) {
                 return PerkRemovalResult.FAILURE;
             }
-            CompoundNBT applicationMeta = metaData.getCompound(APPLICATION_KEYS);
-            ListNBT allocations = applicationMeta.getList(type.getType().getSaveKey(), Constants.NBT.TAG_COMPOUND);
+            CompoundTag applicationMeta = metaData.getCompound(APPLICATION_KEYS);
+            ListTag allocations = applicationMeta.getList(type.getType().getSaveKey(), Constants.NBT.TAG_COMPOUND);
             if (allocations.isEmpty()) {
                 return PerkRemovalResult.FAILURE;
             }
@@ -485,7 +485,7 @@ public class PlayerPerkData {
             boolean removedMatch = false;
             UUID removeUUID = type.getLockUUID();
             for (int i = 0; i < allocations.size(); i++) {
-                CompoundNBT tag = allocations.getCompound(i);
+                CompoundTag tag = allocations.getCompound(i);
                 UUID lockUUID = tag.getUniqueId("uuid");
                 if (lockUUID.equals(removeUUID)) {
                     if (!simulate) {
@@ -521,26 +521,26 @@ public class PlayerPerkData {
                 this.applicationTypes.add(type.getType());
             }
 
-            CompoundNBT metaData = this.getApplicationData();
+            CompoundTag metaData = this.getApplicationData();
             if (!metaData.contains(APPLICATION_KEYS, Constants.NBT.TAG_COMPOUND)) {
                 if (simulate) {
                     return true;
                 }
-                metaData.put(APPLICATION_KEYS, new CompoundNBT());
+                metaData.put(APPLICATION_KEYS, new CompoundTag());
             }
-            CompoundNBT applicationMeta = metaData.getCompound(APPLICATION_KEYS);
+            CompoundTag applicationMeta = metaData.getCompound(APPLICATION_KEYS);
 
             String key = type.getType().getSaveKey();
             if (!applicationMeta.contains(key, Constants.NBT.TAG_LIST)) {
                 if (simulate) {
                     return true;
                 }
-                applicationMeta.put(key, new ListNBT());
+                applicationMeta.put(key, new ListTag());
             }
-            ListNBT allocations = applicationMeta.getList(key, Constants.NBT.TAG_COMPOUND);
+            ListTag allocations = applicationMeta.getList(key, Constants.NBT.TAG_COMPOUND);
 
             UUID newUUID = type.getLockUUID();
-            CompoundNBT newKeyTag = new CompoundNBT();
+            CompoundTag newKeyTag = new CompoundTag();
             newKeyTag.putUniqueId("uuid", newUUID);
 
             if (allocations.isEmpty()) {
@@ -550,7 +550,7 @@ public class PlayerPerkData {
                 return true;
             }
             for (int i = 0; i < allocations.size(); i++) {
-                CompoundNBT tag = allocations.getCompound(i);
+                CompoundTag tag = allocations.getCompound(i);
                 UUID lockUUID = tag.getUniqueId("uuid");
                 if (lockUUID.equals(newUUID)) {
                     return false;
@@ -566,8 +566,8 @@ public class PlayerPerkData {
             return this.applicationTypes;
         }
 
-        private CompoundNBT serialize() {
-            CompoundNBT out = new CompoundNBT();
+        private CompoundTag serialize() {
+            CompoundTag out = new CompoundTag();
             out.putString("perk", this.perk.getRegistryName().toString());
             out.put("perkData", this.perkData);
             out.put("applicationData", this.applicationData);
@@ -578,7 +578,7 @@ public class PlayerPerkData {
             return out;
         }
 
-        private static Optional<AppliedPerk> deserialize(CompoundNBT tag) {
+        private static Optional<AppliedPerk> deserialize(CompoundTag tag) {
             ResourceLocation key = new ResourceLocation(tag.getString("perk"));
             return PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, key)
                     .map(AppliedPerk::new)
@@ -593,13 +593,13 @@ public class PlayerPerkData {
                     });
         }
 
-        private void write(PacketBuffer buf) {
+        private void write(FriendlyByteBuf buf) {
             ByteBufUtils.writeNBTTag(buf, this.perkData);
             ByteBufUtils.writeNBTTag(buf, this.applicationData);
             ByteBufUtils.writeCollection(buf, this.applicationTypes, ByteBufUtils::writeEnumValue);
         }
 
-        private void read(PacketBuffer buf) {
+        private void read(FriendlyByteBuf buf) {
             this.perkData = ByteBufUtils.readNBTTag(buf);
             this.applicationData = ByteBufUtils.readNBTTag(buf);
             this.applicationTypes = ByteBufUtils.readSet(buf, buffer -> ByteBufUtils.readEnumValue(buffer, PerkAllocationType.class));

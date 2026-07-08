@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.client.screen.journal;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.screen.base.WidthHeightScreen;
@@ -21,13 +21,13 @@ import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.IReorderingProcessor;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.LanguageMap;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.locale.Language;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -51,11 +51,11 @@ public class ScreenJournal extends WidthHeightScreen {
 
     protected Map<Rectangle, BookmarkProvider> drawnBookmarks = Maps.newHashMap();
 
-    protected ScreenJournal(ITextComponent titleIn, int bookmarkIndex) {
+    protected ScreenJournal(Component titleIn, int bookmarkIndex) {
         this(titleIn, 270, 420, bookmarkIndex);
     }
 
-    public ScreenJournal(ITextComponent titleIn, int guiHeight, int guiWidth, int bookmarkIndex) {
+    public ScreenJournal(Component titleIn, int guiHeight, int guiWidth, int bookmarkIndex) {
         super(titleIn, guiHeight, guiWidth);
         this.bookmarkIndex = bookmarkIndex;
     }
@@ -69,11 +69,11 @@ public class ScreenJournal extends WidthHeightScreen {
         return true;
     }
 
-    protected IReorderingProcessor localize(ITextProperties txt) {
+    protected FormattedCharSequence localize(FormattedText txt) {
         return LanguageMap.getInstance().func_241870_a(txt);
     }
 
-    protected void drawDefault(MatrixStack renderStack, AbstractRenderableTexture texture, int mouseX, int mouseY) {
+    protected void drawDefault(PoseStack renderStack, AbstractRenderableTexture texture, int mouseX, int mouseY) {
         this.setBlitOffset(100);
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
@@ -84,7 +84,7 @@ public class ScreenJournal extends WidthHeightScreen {
         this.setBlitOffset(0);
     }
 
-    private void drawBookmarks(MatrixStack renderStack, int mouseX, int mouseY) {
+    private void drawBookmarks(PoseStack renderStack, int mouseX, int mouseY) {
         drawnBookmarks.clear();
 
         int bookmarkWidth  = 67;
@@ -111,9 +111,9 @@ public class ScreenJournal extends WidthHeightScreen {
         }
     }
 
-    private Rectangle drawBookmark(MatrixStack renderStack,
+    private Rectangle drawBookmark(PoseStack renderStack,
                                    float offsetX, float offsetY, int width, int height, int mouseOverWidth,
-                                   float zLevel, IFormattableTextComponent title, int titleRGBColor, int mouseX, int mouseY,
+                                   float zLevel, MutableComponent title, int titleRGBColor, int mouseX, int mouseY,
                                    AbstractRenderableTexture texture, AbstractRenderableTexture textureStretched) {
         texture.bindTexture();
 

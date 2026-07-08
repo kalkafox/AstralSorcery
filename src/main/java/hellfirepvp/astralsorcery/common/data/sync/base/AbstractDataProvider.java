@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.data.sync.base;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod

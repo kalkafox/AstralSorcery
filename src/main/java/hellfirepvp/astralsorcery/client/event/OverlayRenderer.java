@@ -8,16 +8,16 @@
 
 package hellfirepvp.astralsorcery.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.item.base.client.ItemOverlayRender;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.event.RenderGameOverlayEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -42,20 +42,20 @@ public class OverlayRenderer {
             return;
         }
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null || Minecraft.getInstance().world == null) {
             return;
         }
 
-        MatrixStack renderStack = event.getMatrixStack();
-        for (EquipmentSlotType type : EquipmentSlotType.values()) {
+        PoseStack renderStack = event.getPoseStack();
+        for (EquipmentSlot type : EquipmentSlotType.values()) {
             if (doHudRender(renderStack, player.getItemStackFromSlot(type), pTicks)) {
                 break;
             }
         }
     }
 
-    private boolean doHudRender(MatrixStack renderStack, ItemStack heldItem, float pTicks) {
+    private boolean doHudRender(PoseStack renderStack, ItemStack heldItem, float pTicks) {
         if (heldItem.isEmpty()) {
             return false;
         }

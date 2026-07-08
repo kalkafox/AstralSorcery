@@ -12,14 +12,14 @@ import hellfirepvp.astralsorcery.common.auxiliary.gateway.CelestialGatewayHandle
 import hellfirepvp.astralsorcery.common.data.world.GatewayCache;
 import hellfirepvp.astralsorcery.common.network.base.ASLoginPacket;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -33,7 +33,7 @@ import java.util.*;
  */
 public class PktLoginSyncGateway extends ASLoginPacket<PktLoginSyncGateway> {
 
-    private Map<RegistryKey<World>, Collection<GatewayCache.GatewayNode>> positions = new HashMap<>();
+    private Map<ResourceKey<Level>, Collection<GatewayCache.GatewayNode>> positions = new HashMap<>();
 
     public PktLoginSyncGateway() {}
 
@@ -48,7 +48,7 @@ public class PktLoginSyncGateway extends ASLoginPacket<PktLoginSyncGateway> {
     public Encoder<PktLoginSyncGateway> encoder() {
         return (packet, buffer) -> {
             buffer.writeInt(packet.positions.size());
-            for (RegistryKey<World> dim : packet.positions.keySet()) {
+            for (ResourceKey<Level> dim : packet.positions.keySet()) {
                 ByteBufUtils.writeVanillaRegistryEntry(buffer, dim);
                 ByteBufUtils.writeCollection(buffer, packet.positions.get(dim), (buf, node) -> node.write(buf));
             }
@@ -62,7 +62,7 @@ public class PktLoginSyncGateway extends ASLoginPacket<PktLoginSyncGateway> {
             PktLoginSyncGateway pkt = new PktLoginSyncGateway();
             int dimSize = buffer.readInt();
             for (int i = 0; i < dimSize; i++) {
-                RegistryKey<World> dim = ByteBufUtils.readVanillaRegistryEntry(buffer);
+                ResourceKey<Level> dim = ByteBufUtils.readVanillaRegistryEntry(buffer);
                 pkt.positions.put(dim, ByteBufUtils.readList(buffer, GatewayCache.GatewayNode::read));
             }
             return pkt;

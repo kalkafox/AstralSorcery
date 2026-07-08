@@ -8,14 +8,14 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.util.text.ITextComponent;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import net.minecraft.network.chat.Component;
 
 import java.awt.*;
 
@@ -34,7 +34,7 @@ public class WidthHeightScreen extends InputScreen {
 
     protected boolean closeWithInventoryKey = true;
 
-    protected WidthHeightScreen(ITextComponent titleIn, int guiHeight, int guiWidth) {
+    protected WidthHeightScreen(Component titleIn, int guiHeight, int guiWidth) {
         super(titleIn);
         this.guiHeight = guiHeight;
         this.guiWidth = guiWidth;
@@ -76,7 +76,7 @@ public class WidthHeightScreen extends InputScreen {
         guiTop = height / 2 - guiHeight / 2;
     }
 
-    protected void drawWHRect(MatrixStack renderStack, AbstractRenderableTexture resource) {
+    protected void drawWHRect(PoseStack renderStack, AbstractRenderableTexture resource) {
         //Whoever disables blending on GUI overlays, your states bleed into following GUIs
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();

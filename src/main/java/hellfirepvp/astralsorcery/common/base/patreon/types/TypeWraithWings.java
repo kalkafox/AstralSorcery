@@ -8,21 +8,21 @@
 
 package hellfirepvp.astralsorcery.common.base.patreon.types;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.render.ObjModelRender;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.base.patreon.FlareColor;
 import hellfirepvp.astralsorcery.common.base.patreon.PatreonEffect;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.util.Mth;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -50,7 +50,7 @@ public class TypeWraithWings extends PatreonEffect {
         bus.register(this);
     }
 
-    private boolean shouldDoEffect(PlayerEntity player) {
+    private boolean shouldDoEffect(Player player) {
         return player.getUniqueID().equals(playerUUID) &&
                 !player.isPassenger() &&
                 !player.isElytraFlying() &&
@@ -60,11 +60,11 @@ public class TypeWraithWings extends PatreonEffect {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     void onRender(RenderPlayerEvent.Post event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if (!shouldDoEffect(player)) {
             return;
         }
-        MatrixStack renderStack = event.getMatrixStack();
+        PoseStack renderStack = event.getPoseStack();
 
         float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, event.getPartialRenderTick());
 

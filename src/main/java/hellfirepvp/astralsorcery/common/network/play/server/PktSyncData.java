@@ -13,12 +13,12 @@ import hellfirepvp.astralsorcery.common.data.sync.base.ClientData;
 import hellfirepvp.astralsorcery.common.data.sync.base.ClientDataReader;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -33,11 +33,11 @@ import java.util.Map;
  */
 public class PktSyncData extends ASPacket<PktSyncData> {
 
-    private Map<ResourceLocation, CompoundNBT> diffData = new HashMap<>();
+    private Map<ResourceLocation, CompoundTag> diffData = new HashMap<>();
 
     public PktSyncData() {}
 
-    public PktSyncData(Map<ResourceLocation, CompoundNBT> dataToSend) {
+    public PktSyncData(Map<ResourceLocation, CompoundTag> dataToSend) {
         this.diffData = dataToSend;
     }
 
@@ -63,7 +63,7 @@ public class PktSyncData extends ASPacket<PktSyncData> {
 
             for (int i = 0; i < size; i++) {
                 ResourceLocation key = ByteBufUtils.readResourceLocation(buffer);
-                CompoundNBT tag = ByteBufUtils.readNBTTag(buffer);
+                CompoundTag tag = ByteBufUtils.readNBTTag(buffer);
                 pktData.diffData.put(key, tag);
             }
             return pktData;

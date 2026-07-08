@@ -17,16 +17,16 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.util.block.BlockDiscoverer;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.MobSpawnerTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.items.CapabilityItemHandler;
 
 import java.awt.*;
 import java.util.List;
@@ -50,7 +50,7 @@ public class MantleEffectLucerna extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         this.playCapeSparkles(player, 0.15F);
@@ -59,7 +59,7 @@ public class MantleEffectLucerna extends MantleEffect {
             this.playEntityHighlight(player);
         }
         if (CONFIG.findSpawners.get() && rand.nextInt(10) == 0) {
-            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_SPAWNER, (tileEntity) -> tileEntity instanceof MobSpawnerTileEntity);
+            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_SPAWNER, (tileEntity) -> tileEntity instanceof SpawnerBlockEntity);
         }
         if (CONFIG.findChests.get() && rand.nextInt(10) == 0) {
             this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (tileEntity) -> tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent());
@@ -67,7 +67,7 @@ public class MantleEffectLucerna extends MantleEffect {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void playBlockHighlight(PlayerEntity player, Color highlightColor, Predicate<TileEntity> test) {
+    private void playBlockHighlight(Player player, Color highlightColor, Predicate<BlockEntity> test) {
         float chance = 0.9F;
         Set<BlockPos> positions = BlockDiscoverer.searchForTileEntitiesAround(player.getEntityWorld(), player.getPosition(), CONFIG.range.get(), test);
         for (BlockPos pos : positions) {
@@ -102,8 +102,8 @@ public class MantleEffectLucerna extends MantleEffect {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void playEntityHighlight(PlayerEntity player) {
-        AxisAlignedBB box = new AxisAlignedBB(0, 0, 0, 0, 0, 0)
+    private void playEntityHighlight(Player player) {
+        AABB box = new AABB(0, 0, 0, 0, 0, 0)
                 .grow(CONFIG.range.get())
                 .offset(player.getPosition());
         List<LivingEntity> entities = player.getEntityWorld().getEntitiesWithinAABB(LivingEntity.class, box);
@@ -154,16 +154,16 @@ public class MantleEffectLucerna extends MantleEffect {
         private final boolean defaultFindSpawners = true;
         private final boolean defaultFindChests = true;
 
-        public ForgeConfigSpec.IntValue range;
-        public ForgeConfigSpec.BooleanValue findSpawners;
-        public ForgeConfigSpec.BooleanValue findChests;
+        public ModConfigSpec.IntValue range;
+        public ModConfigSpec.BooleanValue findSpawners;
+        public ModConfigSpec.BooleanValue findChests;
 
         public LucernaConfig() {
             super("lucerna");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.range = cfgBuilder

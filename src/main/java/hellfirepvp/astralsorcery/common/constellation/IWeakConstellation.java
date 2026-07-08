@@ -11,9 +11,8 @@ package hellfirepvp.astralsorcery.common.constellation;
 import hellfirepvp.astralsorcery.common.constellation.effect.ConstellationEffectProvider;
 import hellfirepvp.astralsorcery.common.constellation.mantle.MantleEffect;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 
 import javax.annotation.Nullable;
 
@@ -36,15 +35,15 @@ public interface IWeakConstellation extends IConstellation {
         return RegistriesAS.REGISTRY_MANTLE_EFFECT.getValue(this.getRegistryName());
     }
 
-    default public ITextComponent getInfoRitualEffect() {
-        return new TranslationTextComponent(this.getTranslationKey() + ".ritual");
+    default public Component getInfoRitualEffect() {
+        return Component.translatable(this.getTranslationKey() + ".ritual");
     }
 
-    default public ITextComponent getInfoCorruptedRitualEffect() {
-        return new TranslationTextComponent(this.getTranslationKey() + ".corruption");
+    default public Component getInfoCorruptedRitualEffect() {
+        return Component.translatable(this.getTranslationKey() + ".corruption");
     }
 
-    default public ITextComponent getInfoMantleEffect() {
-        return new TranslationTextComponent(this.getTranslationKey() + ".mantle");
+    default public Component getInfoMantleEffect() {
+        return Component.translatable(this.getTranslationKey() + ".mantle");
     }
 }

@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.util.block.iterator;
 
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
 
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -50,8 +50,8 @@ public abstract class BlockPositionGenerator {
 
     protected abstract BlockPos genNext(Vector3 offset, double radius);
 
-    public abstract void writeToNBT(CompoundNBT nbt);
+    public abstract void writeToNBT(CompoundTag nbt);
 
-    public abstract void readFromNBT(CompoundNBT nbt);
+    public abstract void readFromNBT(CompoundTag nbt);
 
 }

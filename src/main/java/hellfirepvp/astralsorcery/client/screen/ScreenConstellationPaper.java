@@ -8,7 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.network.chat.Component;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.screen.base.WidthHeightScreen;
@@ -24,10 +26,9 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.FormattedText;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,7 +81,7 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
     }
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         RenderSystem.enableDepthTest();
         drawWHRect(renderStack, TexturesAS.TEX_GUI_CONSTELLATION_PAPER);
         drawHeader(renderStack);
@@ -88,8 +89,8 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
         drawPhaseInformation(renderStack);
     }
 
-    private void drawHeader(MatrixStack renderStack) {
-        IFormattableTextComponent name = this.constellation.getConstellationName();
+    private void drawHeader(PoseStack renderStack) {
+        MutableComponent name = this.constellation.getConstellationName();
         float length = font.getStringPropertyWidth(name) * 1.8F;
         double offsetLeft = (width >> 1) - (length / 2);
         int offsetTop = guiTop + 45;
@@ -101,7 +102,7 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
         renderStack.pop();
     }
 
-    private void drawConstellation(MatrixStack renderStack) {
+    private void drawConstellation(PoseStack renderStack) {
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
 
@@ -115,14 +116,14 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
         RenderSystem.disableBlend();
     }
 
-    private void drawPhaseInformation(MatrixStack renderStack) {
+    private void drawPhaseInformation(PoseStack renderStack) {
         if (this.phases == null) {
             this.resolvePhases();
         }
 
         List<MoonPhase> phases = this.phases == null ? Collections.emptyList() : this.phases;
         if (phases.isEmpty()) {
-            ITextProperties text = new TranslationTextComponent("astralsorcery.journal.constellation.unknown");
+            FormattedText text = Component.translatable("astralsorcery.journal.constellation.unknown");
             RenderingDrawUtils.renderStringCentered(Minecraft.getInstance().fontRenderer, renderStack,
                     text, guiLeft + guiWidth / 2 + 25, guiTop + 239,
                     1.8F, 0xAA4D4D4D);

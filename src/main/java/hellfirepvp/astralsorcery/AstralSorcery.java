@@ -10,11 +10,14 @@ package hellfirepvp.astralsorcery;
 
 import hellfirepvp.astralsorcery.client.ClientProxy;
 import hellfirepvp.astralsorcery.common.CommonProxy;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.*;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.common.NeoForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,15 +40,14 @@ public class AstralSorcery {
     private static ModContainer modContainer;
     private final CommonProxy proxy;
 
-    public AstralSorcery() {
+    public AstralSorcery(IEventBus modEventBus, ModContainer container) {
         instance = this;
-        modContainer = ModList.get().getModContainerById(MODID).get();
+        modContainer = container;
 
-
-        this.proxy = DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
+        this.proxy = FMLEnvironment.dist == Dist.CLIENT ? new ClientProxy() : new CommonProxy();
         this.proxy.initialize();
-        this.proxy.attachLifecycle(FMLJavaModLoadingContext.get().getModEventBus());
-        this.proxy.attachEventHandlers(MinecraftForge.EVENT_BUS);
+        this.proxy.attachLifecycle(modEventBus);
+        this.proxy.attachEventHandlers(NeoForge.EVENT_BUS);
     }
 
     public static AstralSorcery getInstance() {
@@ -61,7 +63,7 @@ public class AstralSorcery {
     }
 
     public static ResourceLocation key(String path) {
-        return new ResourceLocation(AstralSorcery.MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(AstralSorcery.MODID, path);
     }
 
     public static boolean isDoingDataGeneration() {

@@ -16,11 +16,11 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkConverter;
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -87,7 +87,7 @@ public class DynamicAttributeModifier extends PerkAttributeModifier {
     }
 
     @Override
-    public float getValue(PlayerEntity player, PlayerProgress progress) {
+    public float getValue(Player player, PlayerProgress progress) {
         if (!resolveModifier()) {
             return super.getValue(player, progress);
         }
@@ -96,7 +96,7 @@ public class DynamicAttributeModifier extends PerkAttributeModifier {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public float getValueForDisplay(PlayerEntity player, PlayerProgress progress) {
+    public float getValueForDisplay(Player player, PlayerProgress progress) {
         if (!resolveModifier()) {
             return super.getValueForDisplay(player, progress);
         }
@@ -162,8 +162,8 @@ public class DynamicAttributeModifier extends PerkAttributeModifier {
         return uuid;
     }
 
-    public CompoundNBT serialize() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag serialize() {
+        CompoundTag tag = new CompoundTag();
         tag.putUniqueId("id", getUniqueId());
         tag.putString("type", getAttributeType().getRegistryName().toString());
         tag.putInt("mode", getMode().ordinal());
@@ -172,7 +172,7 @@ public class DynamicAttributeModifier extends PerkAttributeModifier {
     }
 
     @Nullable
-    public static DynamicAttributeModifier deserialize(CompoundNBT tag) {
+    public static DynamicAttributeModifier deserialize(CompoundTag tag) {
         PerkAttributeType attrType = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(new ResourceLocation(tag.getString("type")));
         if (attrType == null) {
             return null;

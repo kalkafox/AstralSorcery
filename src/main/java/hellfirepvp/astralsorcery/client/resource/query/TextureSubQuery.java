@@ -10,10 +10,10 @@ package hellfirepvp.astralsorcery.client.resource.query;
 
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.resource.AssetLoader;
-import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -47,7 +47,7 @@ public class TextureSubQuery extends TextureQuery {
             }
 
             @Override
-            public RenderState.TextureState asState() {
+            public RenderStateShard.TextureStateShard asState() {
                 return res.asState();
             }
 

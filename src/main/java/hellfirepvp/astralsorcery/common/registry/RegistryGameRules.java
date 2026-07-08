@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import net.minecraft.world.GameRules;
+import net.minecraft.world.level.GameRules;
 
 import static hellfirepvp.astralsorcery.common.lib.GameRulesAS.*;
 

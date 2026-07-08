@@ -22,21 +22,21 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.tile.FluidTankAccess;
 import hellfirepvp.astralsorcery.common.util.tile.SimpleSingleFluidTank;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -125,7 +125,7 @@ public class TileFountain extends TileEntityTick {
         FountainEffect.OperationSegment segment = ByteBufUtils.readEnumValue(pktPlayEffect.getExtraData(), FountainEffect.OperationSegment.class);
         FountainEffect.OperationSegment nextSegment = ByteBufUtils.readEnumValue(pktPlayEffect.getExtraData(), FountainEffect.OperationSegment.class);
 
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return;
         }
@@ -143,7 +143,7 @@ public class TileFountain extends TileEntityTick {
     @OnlyIn(Dist.CLIENT)
     public static void replaceEffect(PktPlayEffect pktPlayEffect) {
         BlockPos at = ByteBufUtils.readPos(pktPlayEffect.getExtraData());
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return;
         }
@@ -265,7 +265,7 @@ public class TileFountain extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.tickActiveFountainEffect = compound.getInt("tickActiveFountainEffect");
@@ -291,7 +291,7 @@ public class TileFountain extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.putInt("tickActiveFountainEffect", this.tickActiveFountainEffect);
@@ -300,7 +300,7 @@ public class TileFountain extends TileEntityTick {
         if (this.currentEffect != null) {
             compound.putString("currentEffect", this.currentEffect.getId().toString());
             if (this.effectContext != null) {
-                CompoundNBT tag = new CompoundNBT();
+                CompoundTag tag = new CompoundTag();
                 this.effectContext.writeToNBT(tag);
                 compound.put("currentEffectData", tag);
             }

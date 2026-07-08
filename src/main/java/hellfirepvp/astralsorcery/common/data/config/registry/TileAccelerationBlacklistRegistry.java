@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.data.config.registry;
 
+import hellfirepvp.astralsorcery.common.tile.base.TickableBlockEntity;
 import com.google.common.collect.Lists;
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigDataAdapter;
 import hellfirepvp.astralsorcery.common.data.config.registry.sets.TileAccelerationBlacklistEntry;
@@ -15,7 +16,7 @@ import hellfirepvp.astralsorcery.common.tile.*;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.tile.base.network.TileSourceBase;
 import hellfirepvp.astralsorcery.common.tile.base.network.TileTransmissionBase;
-import net.minecraft.tileentity.*;
+import net.minecraft.world.level.block.entity.*;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -36,8 +37,8 @@ public class TileAccelerationBlacklistRegistry extends ConfigDataAdapter<TileAcc
 
     private TileAccelerationBlacklistRegistry() {}
 
-    public boolean canBeInfluenced(TileEntity tile) {
-        if (!(tile instanceof ITickableTileEntity)) {
+    public boolean canBeInfluenced(BlockEntity tile) {
+        if (!(tile instanceof TickableBlockEntity)) {
             return false;
         }
 
@@ -59,7 +60,7 @@ public class TileAccelerationBlacklistRegistry extends ConfigDataAdapter<TileAcc
         return true;
     }
 
-    public void addErrored(TileEntity tile) {
+    public void addErrored(BlockEntity tile) {
         if (tile != null && !this.erroredTiles.contains(tile.getClass())) {
             this.erroredTiles.add(tile.getClass());
         }

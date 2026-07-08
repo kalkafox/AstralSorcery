@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.crafting.recipe.interaction;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

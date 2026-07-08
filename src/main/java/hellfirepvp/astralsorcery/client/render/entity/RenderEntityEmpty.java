@@ -8,14 +8,14 @@
 
 package hellfirepvp.astralsorcery.client.render.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.client.registry.IRenderFactory;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,12 +26,12 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
  */
 public class RenderEntityEmpty extends EntityRenderer<Entity> {
 
-    public RenderEntityEmpty(EntityRendererManager mgr) {
+    public RenderEntityEmpty(EntityRenderDispatcher mgr) {
         super(mgr);
     }
 
     @Override
-    public void render(Entity entity, float entityYaw, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {}
+    public void render(Entity entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {}
 
     @Override
     public ResourceLocation getEntityTexture(Entity entity) {
@@ -41,7 +41,7 @@ public class RenderEntityEmpty extends EntityRenderer<Entity> {
     public static class Factory implements IRenderFactory<Entity> {
 
         @Override
-        public EntityRenderer<? super Entity> createRenderFor(EntityRendererManager manager) {
+        public EntityRenderer<? super Entity> createRenderFor(EntityRenderDispatcher manager) {
             return new RenderEntityEmpty(manager);
         }
     }

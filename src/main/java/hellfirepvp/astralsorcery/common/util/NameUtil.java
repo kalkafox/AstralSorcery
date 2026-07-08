@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.util;
 
 import com.google.common.base.CaseFormat;
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 

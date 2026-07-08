@@ -17,14 +17,14 @@ import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.RootPerk;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.CombatTracker;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.CombatTracker;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
@@ -58,14 +58,14 @@ public class RootDiscidia extends RootPerk {
 
     private void onDamage(LivingDamageEvent event) {
         DamageSource ds = event.getSource();
-        PlayerEntity player = null;
+        Player player = null;
         if (ds.getImmediateSource() != null &&
-                ds.getImmediateSource() instanceof PlayerEntity) {
-            player = (PlayerEntity) ds.getImmediateSource();
+                ds.getImmediateSource() instanceof Player) {
+            player = (Player) ds.getImmediateSource();
         }
         if (player == null && ds.getTrueSource() != null &&
-                ds.getTrueSource() instanceof PlayerEntity) {
-            player = (PlayerEntity) ds.getTrueSource();
+                ds.getTrueSource() instanceof Player) {
+            player = (Player) ds.getTrueSource();
         }
         if (player == null) {
             return;

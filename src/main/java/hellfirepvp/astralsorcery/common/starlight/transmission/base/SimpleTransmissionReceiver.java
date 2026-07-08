@@ -12,11 +12,11 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.ITransmissionRece
 import hellfirepvp.astralsorcery.common.tile.base.network.TileReceiverBase;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -40,7 +40,7 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
     }
 
     @Override
-    public void update(World world) {
+    public void update(Level world) {
         if (this.needsTileSync) {
             T tile = getTileAtPos(world);
             if (tile != null && this.syncTileData(world, tile)) {
@@ -53,7 +53,7 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
         this.needsTileSync = true;
     }
 
-    public abstract boolean syncTileData(World world, T tile);
+    public abstract boolean syncTileData(Level world, T tile);
 
     public abstract Class<T> getTileClass();
 
@@ -63,17 +63,17 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
     }
 
     @Override
-    public void notifySourceLink(World world, BlockPos source) {
+    public void notifySourceLink(Level world, BlockPos source) {
         sourcesToThis.add(source);
     }
 
     @Override
-    public void notifySourceUnlink(World world, BlockPos source) {
+    public void notifySourceUnlink(Level world, BlockPos source) {
         sourcesToThis.remove(source);
     }
 
     @Override
-    public boolean notifyBlockChange(World world, BlockPos changed) {
+    public boolean notifyBlockChange(Level world, BlockPos changed) {
         return false;
     }
 
@@ -83,31 +83,31 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
     }
 
     @Nullable
-    public T getTileAtPos(World world) {
+    public T getTileAtPos(Level world) {
         return MiscUtils.getTileAt(world, getLocationPos(), this.getTileClass(), false);
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         this.sourcesToThis.clear();
 
         this.thisPos = NBTHelper.readBlockPosFromNBT(compound);
         this.needsTileSync = compound.getBoolean("needsTileSync");
 
-        ListNBT list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
+        ListTag list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             sourcesToThis.add(NBTHelper.readBlockPosFromNBT(list.getCompound(i)));
         }
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         NBTHelper.writeBlockPosToNBT(thisPos, compound);
         compound.putBoolean("needsTileSync", this.needsTileSync);
 
-        ListNBT sources = new ListNBT();
+        ListTag sources = new ListTag();
         for (BlockPos source : sourcesToThis) {
-            CompoundNBT comp = new CompoundNBT();
+            CompoundTag comp = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(source, comp);
             sources.add(comp);
         }

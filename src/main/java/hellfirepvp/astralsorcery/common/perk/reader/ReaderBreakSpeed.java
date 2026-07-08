@@ -13,14 +13,14 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeLimiter;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeMap;
 import hellfirepvp.astralsorcery.common.perk.type.AttributeTypeBreakSpeed;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -37,7 +37,7 @@ public class ReaderBreakSpeed extends ReaderFlatAttribute {
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, PlayerEntity player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
         AttributeTypeBreakSpeed.evaluateBreakSpeedWithoutPerks = true;
         double speed;
         try {
@@ -50,7 +50,7 @@ public class ReaderBreakSpeed extends ReaderFlatAttribute {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public PerkStatistic getStatistics(PerkAttributeMap statMap, PlayerEntity player) {
+    public PerkStatistic getStatistics(PerkAttributeMap statMap, Player player) {
         String limitStr = "";
         Double limit = null;
         if (PerkAttributeLimiter.hasLimit(this.getType())) {

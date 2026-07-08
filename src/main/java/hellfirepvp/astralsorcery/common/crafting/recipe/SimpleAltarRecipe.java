@@ -30,15 +30,15 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -186,7 +186,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
         this.outputs.add(ItemUtils.copyStackWithSize(output, output.getCount()));
     }
 
-    public boolean matches(LogicalSide side, PlayerEntity crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
+    public boolean matches(LogicalSide side, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
         if (crafter == null) {
             return false;
         }
@@ -220,11 +220,11 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
 
     public void serializeAdditionalJson(JsonObject recipeObject) {}
 
-    public void writeRecipeSync(PacketBuffer buf) {}
+    public void writeRecipeSync(FriendlyByteBuf buf) {}
 
-    public void readRecipeSync(PacketBuffer buf) {}
+    public void readRecipeSync(FriendlyByteBuf buf) {}
 
-    public static SimpleAltarRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+    public static SimpleAltarRecipe read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         AltarType type = ByteBufUtils.readEnumValue(buffer, AltarType.class);
         int duration = buffer.readInt();
         int starlight = buffer.readInt();
@@ -248,7 +248,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
         return recipe;
     }
 
-    public final void write(PacketBuffer buffer) {
+    public final void write(FriendlyByteBuf buffer) {
         ByteBufUtils.writeEnumValue(buffer, this.getAltarType());
         buffer.writeInt(this.getDuration());
         buffer.writeInt(this.getStarlightRequirement());
@@ -310,7 +310,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
     }
 
     @Override
-    public IRecipeType<?> getType() {
+    public RecipeType<?> getType() {
         return RecipeTypesAS.TYPE_ALTAR.getType();
     }
 

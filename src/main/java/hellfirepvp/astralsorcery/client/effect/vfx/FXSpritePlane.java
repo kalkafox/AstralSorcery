@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.effect.vfx;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.effect.EntityDynamicFX;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.context.base.BatchRenderContext;
@@ -78,10 +78,10 @@ public class FXSpritePlane extends EntityVisualFX implements EntityDynamicFX {
     }
 
     @Override
-    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, MatrixStack renderStack, IVertexBuilder vb, float pTicks) {}
+    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, PoseStack renderStack, VertexConsumer vb, float pTicks) {}
 
     @Override
-    public <T extends EntityVisualFX & EntityDynamicFX> void renderNow(BatchRenderContext<T> ctx, MatrixStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
+    public <T extends EntityVisualFX & EntityDynamicFX> void renderNow(BatchRenderContext<T> ctx, PoseStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
         SpriteSheetResource ssr = this.sprite != null ? this.sprite : ctx.getSprite();
         Tuple<Float, Float> uvOffset = ssr.getUVOffset(this, pTicks, spriteDisplayFactor);
 
@@ -104,7 +104,7 @@ public class FXSpritePlane extends EntityVisualFX implements EntityDynamicFX {
         }
 
         RenderTypeDecorator decorated = RenderTypeDecorator.wrapSetup(ctx.getRenderType(), ssr::bindTexture, () -> BlockAtlasTexture.getInstance().bindTexture());
-        IVertexBuilder buf = drawBuffer.getBuffer(decorated);
+        VertexConsumer buf = drawBuffer.getBuffer(decorated);
         RenderingDrawUtils.renderAngleRotatedTexturedRectVB(buf, renderStack, vec,
                 axis, (float) Math.toRadians(deg), scale,
                 uvOffset.getA(), uvOffset.getB(), ssr.getULength(), ssr.getVLength(),

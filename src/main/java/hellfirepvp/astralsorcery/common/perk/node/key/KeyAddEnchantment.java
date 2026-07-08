@@ -18,13 +18,14 @@ import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentTy
 import hellfirepvp.astralsorcery.common.event.DynamicEnchantmentEvent;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.List;
 
@@ -53,11 +54,11 @@ public class KeyAddEnchantment extends KeyPerk {
         }
     }
 
-    public KeyAddEnchantment addEnchantment(Enchantment ench, int level) {
+    public KeyAddEnchantment addEnchantment(ResourceKey<Enchantment> ench, int level) {
         return addEnchantment(DynamicEnchantmentType.ADD_TO_SPECIFIC, ench, level);
     }
 
-    public KeyAddEnchantment addEnchantment(DynamicEnchantmentType type, Enchantment ench, int level) {
+    public KeyAddEnchantment addEnchantment(DynamicEnchantmentType type, ResourceKey<Enchantment> ench, int level) {
         this.enchantments.add(new DynamicEnchantment(type, ench, level));
         return this;
     }
@@ -67,7 +68,7 @@ public class KeyAddEnchantment extends KeyPerk {
         return this;
     }
     private void onEnchantmentAddClient(DynamicEnchantmentEvent.Add event) {
-        PlayerEntity player = event.getResolvedPlayer();
+        Player player = event.getResolvedPlayer();
         LogicalSide side = this.getSide(player);
         if (side.isClient()) {
             addEnchantments(player, side, event);
@@ -75,14 +76,14 @@ public class KeyAddEnchantment extends KeyPerk {
     }
 
     private void onEnchantmentAddServer(DynamicEnchantmentEvent.Add event) {
-        PlayerEntity player = event.getResolvedPlayer();
+        Player player = event.getResolvedPlayer();
         LogicalSide side = this.getSide(player);
         if (side.isServer()) {
             addEnchantments(player, side, event);
         }
     }
 
-    private void addEnchantments(PlayerEntity player, LogicalSide side, DynamicEnchantmentEvent.Add event) {
+    private void addEnchantments(Player player, LogicalSide side, DynamicEnchantmentEvent.Add event) {
         PlayerProgress prog = ResearchHelper.getProgress(player, side);
         if (prog.getPerkData().hasPerkEffect(this)) {
             List<DynamicEnchantment> listedEnchantments = event.getEnchantmentsToApply();
@@ -106,25 +107,22 @@ public class KeyAddEnchantment extends KeyPerk {
         this.enchantments.clear();
 
         if (perkData.has("enchantments")) {
-            JsonArray array = JSONUtils.getJsonArray(perkData, "enchantments");
+            JsonArray array = GsonHelper.getAsJsonArray(perkData, "enchantments");
             for (int i = 0; i < array.size(); i++) {
-                JsonObject serializedEnchantment = JSONUtils.getJsonObject(array.get(i), "enchantments[%s]");
+                JsonObject serializedEnchantment = GsonHelper.convertToJsonObject(array.get(i), "enchantments[" + i + "]");
 
-                String typeKey = JSONUtils.getString(serializedEnchantment, "type");
+                String typeKey = GsonHelper.getAsString(serializedEnchantment, "type");
                 DynamicEnchantmentType type;
                 try {
                     type = DynamicEnchantmentType.valueOf(typeKey);
                 } catch (Exception exc) {
                     throw new IllegalArgumentException("Unknown dynamic enchantment type: " + typeKey);
                 }
-                int level = JSONUtils.getInt(serializedEnchantment, "level");
+                int level = GsonHelper.getAsInt(serializedEnchantment, "level");
 
                 if (type.isEnchantmentSpecific()) {
-                    String enchantmentKey = JSONUtils.getString(serializedEnchantment, "enchantment");
-                    Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantmentKey));
-                    if (ench == null) {
-                        throw new IllegalArgumentException("Unknown Enchantment: " + enchantmentKey);
-                    }
+                    String enchantmentKey = GsonHelper.getAsString(serializedEnchantment, "enchantment");
+                    ResourceKey<Enchantment> ench = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse(enchantmentKey));
                     this.addEnchantment(type, ench, level);
                 } else {
                     this.addAllEnchantmentIncrease(level);
@@ -145,7 +143,7 @@ public class KeyAddEnchantment extends KeyPerk {
 
                 serializedEnchantment.addProperty("type", enchantment.getType().name());
                 if (enchantment.getEnchantment() != null) {
-                    serializedEnchantment.addProperty("enchantment", enchantment.getEnchantment().getRegistryName().toString());
+                    serializedEnchantment.addProperty("enchantment", enchantment.getEnchantment().location().toString());
                 }
                 serializedEnchantment.addProperty("level", enchantment.getLevelAddition());
 

@@ -8,24 +8,23 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
-import com.google.common.collect.Sets;
+import hellfirepvp.astralsorcery.common.enchantment.AstralEnchantmentType;
 import hellfirepvp.astralsorcery.common.item.base.TypeEnchantableItem;
-import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,27 +36,19 @@ import net.minecraftforge.common.ToolType;
 public class ItemCrystalAxe extends ItemCrystalTierItem implements TypeEnchantableItem {
 
     public ItemCrystalAxe() {
-        super(ToolType.AXE, new Properties(), Sets.newHashSet(Material.WOOD, Material.PLANTS, Material.TALL_PLANTS, Material.BAMBOO, Material.LEAVES));
+        super(BlockTags.MINEABLE_WITH_AXE, new Properties(), ItemAbilities.DEFAULT_AXE_ACTIONS);
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> stacks) {
-        if (this.isInGroup(group)) {
-            ItemStack stack = new ItemStack(this);
-            CrystalPropertiesAS.CREATIVE_CRYSTAL_TOOL_ATTRIBUTES.store(stack);
-            stacks.add(stack);
-        }
+    public boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type) {
+        return type == AstralEnchantmentType.BREAKABLE || type == AstralEnchantmentType.DIGGER;
     }
 
     @Override
-    public boolean canEnchantItem(ItemStack stack, EnchantmentType type) {
-        return type == EnchantmentType.BREAKABLE || type == EnchantmentType.DIGGER;
-    }
-
-    @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        EnchantmentType type = enchantment.type;
-        return type == EnchantmentType.DIGGER || type == EnchantmentType.BREAKABLE;
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+        return super.supportsEnchantment(stack, enchantment) ||
+                AstralEnchantmentType.DIGGER.contains(enchantment) ||
+                AstralEnchantmentType.BREAKABLE.contains(enchantment);
     }
 
     @Override
@@ -71,30 +62,32 @@ public class ItemCrystalAxe extends ItemCrystalTierItem implements TypeEnchantab
     }
 
     @Override
-    protected boolean isToolEfficientAgainst(BlockState state) {
-        return state.getMaterial() == Material.LEAVES;
-    }
-
-    @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
-        World world = context.getWorld();
-        BlockPos blockpos = context.getPos();
-        BlockState blockstate = world.getBlockState(blockpos);
-        BlockState block = blockstate.getToolModifiedState(world, blockpos, context.getPlayer(), context.getItem(), ToolType.AXE);
-        if (block != null) {
-            PlayerEntity playerentity = context.getPlayer();
-            world.playSound(playerentity, blockpos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            if (!world.isRemote()) {
-                world.setBlockState(blockpos, block, 11);
-                if (playerentity != null) {
-                    context.getItem().damageItem(1, playerentity, (stack) ->
-                            stack.sendBreakAnimation(context.getHand()));
-                }
-            }
-
-            return ActionResultType.func_233537_a_(world.isRemote());
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        BlockState state = level.getBlockState(pos);
+        Player player = context.getPlayer();
+        BlockState modifiedState = state.getToolModifiedState(context, ItemAbilities.AXE_STRIP, false);
+        if (modifiedState != null) {
+            level.playSound(player, pos, SoundEvents.AXE_STRIP, SoundSource.BLOCKS, 1.0F, 1.0F);
+        } else if ((modifiedState = state.getToolModifiedState(context, ItemAbilities.AXE_SCRAPE, false)) != null) {
+            level.playSound(player, pos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0F, 1.0F);
+            level.levelEvent(player, 3005, pos, 0);
+        } else if ((modifiedState = state.getToolModifiedState(context, ItemAbilities.AXE_WAX_OFF, false)) != null) {
+            level.playSound(player, pos, SoundEvents.AXE_WAX_OFF, SoundSource.BLOCKS, 1.0F, 1.0F);
+            level.levelEvent(player, 3004, pos, 0);
         } else {
-            return ActionResultType.PASS;
+            return InteractionResult.PASS;
         }
+
+        ItemStack stack = context.getItemInHand();
+        if (!level.isClientSide) {
+            level.setBlock(pos, modifiedState, 11);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, modifiedState));
+            if (player != null) {
+                stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
+            }
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 }

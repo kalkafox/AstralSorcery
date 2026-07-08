@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.datagen.data.loot;
 
 import hellfirepvp.astralsorcery.common.base.Mods;
 import net.minecraft.data.loot.EntityLootTables;
-import net.minecraft.entity.EntityType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.entity.EntityType;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.stream.Collectors;
 

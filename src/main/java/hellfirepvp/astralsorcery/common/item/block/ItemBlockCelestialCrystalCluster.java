@@ -14,19 +14,19 @@ import hellfirepvp.astralsorcery.common.crystal.CrystalAttributeGenItem;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
 import hellfirepvp.astralsorcery.common.crystal.CrystalGenerator;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -46,7 +46,7 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean isSelected) {
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean isSelected) {
         if (!world.isRemote()) {
             CrystalAttributes attributes = getAttributes(stack);
 
@@ -59,7 +59,7 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
@@ -68,7 +68,7 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (isInGroup(group)) {
             for (int stage : BlockCelestialCrystalCluster.STAGE.getAllowedValues()) {
                 ItemStack cluster = new ItemStack(this);
@@ -80,7 +80,7 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
 
     @Nullable
     @Override
-    protected BlockState getStateForPlacement(BlockItemUseContext context) {
+    protected BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState toPlace = super.getStateForPlacement(context);
         if (toPlace != null) {
             return toPlace.with(BlockCelestialCrystalCluster.STAGE, this.getDamage(context.getItem()));

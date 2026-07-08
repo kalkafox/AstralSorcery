@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.render.IDrawRenderTypeBuffer;
@@ -19,20 +19,19 @@ import hellfirepvp.astralsorcery.client.util.draw.RenderInfo;
 import hellfirepvp.astralsorcery.common.util.MapStream;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IReorderingProcessor;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix3f;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.Mth;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.LanguageMap;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.locale.Language;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -50,9 +49,9 @@ import java.util.List;
 public class RenderingDrawUtils {
 
     private static final Random rand = new Random();
-    private static final MatrixStack EMPTY = new MatrixStack();
+    private static final PoseStack EMPTY = new PoseStack();
 
-    public static void renderStringCentered(@Nullable FontRenderer fr, MatrixStack renderStack, ITextProperties text, int x, int y, float scale, int color) {
+    public static void renderStringCentered(@Nullable Font fr, PoseStack renderStack, FormattedText text, int x, int y, float scale, int color) {
         if (fr == null) {
             fr = Minecraft.getInstance().fontRenderer;
         }
@@ -67,43 +66,43 @@ public class RenderingDrawUtils {
         renderStack.pop();
     }
 
-    public static float renderString(ITextProperties text) {
+    public static float renderString(FormattedText text) {
         return renderStringAt(text, EMPTY, Minecraft.getInstance().fontRenderer, Color.WHITE.getRGB(), false);
     }
 
-    public static float renderString(IReorderingProcessor text) {
+    public static float renderString(FormattedCharSequence text) {
         return renderStringAt(text, EMPTY, Minecraft.getInstance().fontRenderer, Color.WHITE.getRGB(), false);
     }
 
-    public static float renderString(ITextProperties text, int color) {
+    public static float renderString(FormattedText text, int color) {
         return renderStringAt(text, EMPTY, Minecraft.getInstance().fontRenderer, color, false);
     }
 
-    public static float renderString(IReorderingProcessor text, int color) {
+    public static float renderString(FormattedCharSequence text, int color) {
         return renderStringAt(text, EMPTY, Minecraft.getInstance().fontRenderer, color, false);
     }
 
-    public static float renderString(@Nullable FontRenderer fr, ITextProperties text, int color) {
+    public static float renderString(@Nullable Font fr, FormattedText text, int color) {
         return renderStringAt(text, EMPTY, fr, color, false);
     }
 
-    public static float renderString(@Nullable FontRenderer fr, IReorderingProcessor text, int color) {
+    public static float renderString(@Nullable Font fr, FormattedCharSequence text, int color) {
         return renderStringAt(text, EMPTY, fr, color, false);
     }
 
-    public static float renderStringAt(@Nullable FontRenderer fr, MatrixStack renderStack, ITextProperties text, int color) {
+    public static float renderStringAt(@Nullable Font fr, PoseStack renderStack, FormattedText text, int color) {
         return renderStringAt(text, renderStack, fr, color, true);
     }
 
-    public static float renderStringAt(@Nullable FontRenderer fr, MatrixStack renderStack, IReorderingProcessor text, int color) {
+    public static float renderStringAt(@Nullable Font fr, PoseStack renderStack, FormattedCharSequence text, int color) {
         return renderStringAt(text, renderStack, fr, color, true);
     }
 
-    public static float renderStringAt(ITextProperties text, MatrixStack renderStack, @Nullable FontRenderer fr, int color, boolean dropShadow) {
+    public static float renderStringAt(FormattedText text, PoseStack renderStack, @Nullable Font fr, int color, boolean dropShadow) {
         return renderStringAt(LanguageMap.getInstance().func_241870_a(text), renderStack, fr, color, dropShadow);
     }
 
-    public static float renderStringAt(IReorderingProcessor text, MatrixStack renderStack, @Nullable FontRenderer fr, int color, boolean dropShadow) {
+    public static float renderStringAt(FormattedCharSequence text, PoseStack renderStack, @Nullable Font fr, int color, boolean dropShadow) {
         if (fr == null) {
             fr = Minecraft.getInstance().fontRenderer;
         }
@@ -113,8 +112,8 @@ public class RenderingDrawUtils {
         return length;
     }
 
-    public static Rectangle drawInfoStar(MatrixStack renderStack, IDrawRenderTypeBuffer buffer, float widthHeightBase, float pTicks) {
-        IVertexBuilder vb = buffer.getBuffer(RenderTypesAS.GUI_MISC_INFO_STAR);
+    public static Rectangle drawInfoStar(PoseStack renderStack, IDrawRenderTypeBuffer buffer, float widthHeightBase, float pTicks) {
+        VertexConsumer vb = buffer.getBuffer(RenderTypesAS.GUI_MISC_INFO_STAR);
 
         float tick = ClientScheduler.getClientTick() + pTicks;
         float deg = (tick * 2) % 360F;
@@ -130,7 +129,7 @@ public class RenderingDrawUtils {
                 MathHelper.floor(widthHeightBase), MathHelper.floor(widthHeightBase));
     }
 
-    private static void drawInfoStarSingle(MatrixStack renderStack, IVertexBuilder vb, float widthHeight, double deg) {
+    private static void drawInfoStarSingle(PoseStack renderStack, VertexConsumer vb, float widthHeight, double deg) {
         Vector3 offset = new Vector3(-widthHeight / 2D, -widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
         Vector3 uv01   = new Vector3(-widthHeight / 2D,  widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
         Vector3 uv11   = new Vector3( widthHeight / 2D,  widthHeight / 2D, 0).rotate(deg, Vector3.RotAxis.Z_AXIS);
@@ -143,19 +142,19 @@ public class RenderingDrawUtils {
         vb.pos(matr, (float) offset.getX(), (float) offset.getY(), 0).tex(0, 0).endVertex();
     }
 
-    public static void renderBlueTooltipComponents(MatrixStack renderStack, float x, float y, float zLevel,
-                                                   List<ITextProperties> tooltipData, FontRenderer fontRenderer, boolean isFirstLineHeadline) {
-        List<Tuple<ItemStack, ITextProperties>> stackTooltip = MapStream.ofValues(tooltipData, t -> ItemStack.EMPTY).toTupleList();
+    public static void renderBlueTooltipComponents(PoseStack renderStack, float x, float y, float zLevel,
+                                                   List<FormattedText> tooltipData, Font fontRenderer, boolean isFirstLineHeadline) {
+        List<Tuple<ItemStack, FormattedText>> stackTooltip = MapStream.ofValues(tooltipData, t -> ItemStack.EMPTY).toTupleList();
         renderBlueTooltip(renderStack, x, y, zLevel, stackTooltip, fontRenderer, isFirstLineHeadline);
     }
 
-    public static void renderBlueTooltip(MatrixStack renderStack, float x, float y, float zLevel,
-                                         List<Tuple<ItemStack, ITextProperties>> tooltipData, FontRenderer fontRenderer, boolean isFirstLineHeadline) {
+    public static void renderBlueTooltip(PoseStack renderStack, float x, float y, float zLevel,
+                                         List<Tuple<ItemStack, FormattedText>> tooltipData, Font fontRenderer, boolean isFirstLineHeadline) {
         renderTooltip(renderStack, x, y, zLevel, tooltipData, fontRenderer, isFirstLineHeadline, 0xFF000027, 0xFF000044, Color.WHITE);
     }
 
-    public static void renderTooltip(MatrixStack renderStack, float x, float y, float zLevel,
-                                     List<Tuple<ItemStack, ITextProperties>> tooltipData, FontRenderer fontRenderer, boolean isFirstLineHeadline,
+    public static void renderTooltip(PoseStack renderStack, float x, float y, float zLevel,
+                                     List<Tuple<ItemStack, FormattedText>> tooltipData, Font fontRenderer, boolean isFirstLineHeadline,
                                      int color, int colorFade, Color strColor) {
         int stackBoxSize = 18;
 
@@ -163,8 +162,8 @@ public class RenderingDrawUtils {
             boolean anyItemFound = false;
 
             int maxWidth = 0;
-            for (Tuple<ItemStack, ITextProperties> toolTip : tooltipData) {
-                FontRenderer customFR = toolTip.getA().getItem().getFontRenderer(toolTip.getA());
+            for (Tuple<ItemStack, FormattedText> toolTip : tooltipData) {
+                Font customFR = toolTip.getA().getItem().getFontRenderer(toolTip.getA());
                 if (customFR == null) {
                     customFR = fontRenderer;
                 }
@@ -184,14 +183,14 @@ public class RenderingDrawUtils {
             }
 
             int formatWidth = anyItemFound ? maxWidth - stackBoxSize : maxWidth;
-            List<Tuple<ItemStack, List<IReorderingProcessor>>> lengthLimitedToolTip = new LinkedList<>();
-            for (Tuple<ItemStack, ITextProperties> toolTip : tooltipData) {
-                FontRenderer customFR = toolTip.getA().getItem().getFontRenderer(toolTip.getA());
+            List<Tuple<ItemStack, List<FormattedCharSequence>>> lengthLimitedToolTip = new LinkedList<>();
+            for (Tuple<ItemStack, FormattedText> toolTip : tooltipData) {
+                Font customFR = toolTip.getA().getItem().getFontRenderer(toolTip.getA());
                 if (customFR == null) {
                     customFR = fontRenderer;
                 }
 
-                List<IReorderingProcessor> textLines = customFR.trimStringToWidth(toolTip.getB(), formatWidth);
+                List<FormattedCharSequence> textLines = customFR.trimStringToWidth(toolTip.getB(), formatWidth);
                 if (textLines.isEmpty()) {
                     textLines = Collections.singletonList(IReorderingProcessor.field_242232_a);
                 }
@@ -205,9 +204,9 @@ public class RenderingDrawUtils {
                 if (lengthLimitedToolTip.size() > 1 && isFirstLineHeadline) {
                     sumLineHeight += 2;
                 }
-                Iterator<Tuple<ItemStack, List<IReorderingProcessor>>> iterator = lengthLimitedToolTip.iterator();
+                Iterator<Tuple<ItemStack, List<FormattedCharSequence>>> iterator = lengthLimitedToolTip.iterator();
                 while (iterator.hasNext()) {
-                    Tuple<ItemStack, List<IReorderingProcessor>> toolTip = iterator.next();
+                    Tuple<ItemStack, List<FormattedCharSequence>> toolTip = iterator.next();
                     int segmentHeight = 0;
                     if (!toolTip.getA().isEmpty()) {
                         segmentHeight += 2;
@@ -240,7 +239,7 @@ public class RenderingDrawUtils {
             renderStack.push();
             renderStack.translate(pX, pY, 0);
             boolean first = true;
-            for (Tuple<ItemStack, List<IReorderingProcessor>> toolTip : lengthLimitedToolTip) {
+            for (Tuple<ItemStack, List<FormattedCharSequence>> toolTip : lengthLimitedToolTip) {
                 int minYShift = 10;
                 if (!toolTip.getA().isEmpty()) {
                     renderStack.push();
@@ -251,8 +250,8 @@ public class RenderingDrawUtils {
                     minYShift = stackBoxSize;
                     renderStack.translate(0, 2, 0);
                 }
-                for (IReorderingProcessor text : toolTip.getB()) {
-                    FontRenderer customFR = toolTip.getA().getItem().getFontRenderer(toolTip.getA());
+                for (FormattedCharSequence text : toolTip.getB()) {
+                    Font customFR = toolTip.getA().getItem().getFontRenderer(toolTip.getA());
                     if (customFR == null) {
                         customFR = fontRenderer;
                     }
@@ -276,11 +275,11 @@ public class RenderingDrawUtils {
         }
     }
 
-    public static void renderBlueTooltipBox(MatrixStack renderStack, int x, int y, int width, int height) {
+    public static void renderBlueTooltipBox(PoseStack renderStack, int x, int y, int width, int height) {
         renderTooltipBox(renderStack, x, y, width, height, 0x000027, 0x000044);
     }
 
-    public static void renderTooltipBox(MatrixStack renderStack, int x, int y, int width, int height, int color, int colorFade) {
+    public static void renderTooltipBox(PoseStack renderStack, int x, int y, int width, int height, int color, int colorFade) {
         int pX = x + 12;
         int pY = y - 12;
 
@@ -297,7 +296,7 @@ public class RenderingDrawUtils {
         drawGradientRect(renderStack, 0, pX - 3,           pY + height + 2, pX + width + 3, pY + height + 3,     color, color);
     }
 
-    public static void drawGradientRect(MatrixStack renderStack, float zLevel, float left, float top, float right, float bottom, int startColor, int endColor) {
+    public static void drawGradientRect(PoseStack renderStack, float zLevel, float left, float top, float right, float bottom, int startColor, int endColor) {
         float startAlpha = (float) (startColor >> 24 & 255) / 255.0F;
         float startRed   = (float) (startColor >> 16 & 255) / 255.0F;
         float startGreen = (float) (startColor >>  8 & 255) / 255.0F;
@@ -323,14 +322,14 @@ public class RenderingDrawUtils {
         RenderSystem.enableTexture();
     }
 
-    public static void renderLightRayFan(MatrixStack renderStack, IRenderTypeBuffer buffer, Color color, long seed, int minScale, float scale, int count) {
+    public static void renderLightRayFan(PoseStack renderStack, MultiBufferSource buffer, Color color, long seed, int minScale, float scale, int count) {
         rand.setSeed(seed);
 
         float f1 = ClientScheduler.getClientTick() / 400.0F;
         float f2 = 0.0F;
         int alpha = (int) (255.0F * (1.0F - f2));
 
-        IVertexBuilder vb = buffer.getBuffer(RenderTypesAS.EFFECT_LIGHTRAY_FAN);
+        VertexConsumer vb = buffer.getBuffer(RenderTypesAS.EFFECT_LIGHTRAY_FAN);
 
         renderStack.push();
         for (int i = 0; i < count; i++) {
@@ -368,20 +367,20 @@ public class RenderingDrawUtils {
         RenderingUtils.refreshDrawing(vb, RenderTypesAS.EFFECT_LIGHTRAY_FAN);
     }
 
-    public static void renderFacingFullQuadVB(IVertexBuilder vb, MatrixStack renderStack, double px, double py, double pz, float scale, float angle, int r, int g, int b, int alpha) {
+    public static void renderFacingFullQuadVB(VertexConsumer vb, PoseStack renderStack, double px, double py, double pz, float scale, float angle, int r, int g, int b, int alpha) {
         renderFacingQuadVB(vb, renderStack, px, py, pz, scale, angle, 0F, 0F, 1F, 1F, r, g, b, alpha);
     }
 
-    public static void renderFacingSpriteVB(IVertexBuilder vb, MatrixStack renderStack, double px, double py, double pz, float scale, float angle, SpriteSheetResource sprite, long spriteTick, int r, int g, int b, int alpha) {
+    public static void renderFacingSpriteVB(VertexConsumer vb, PoseStack renderStack, double px, double py, double pz, float scale, float angle, SpriteSheetResource sprite, long spriteTick, int r, int g, int b, int alpha) {
         Tuple<Float, Float> uv = sprite.getUVOffset(spriteTick);
         renderFacingQuadVB(vb, renderStack, px, py, pz, scale, angle, uv.getA(), uv.getB(), sprite.getULength(), sprite.getVLength(), r, g, b, alpha);
     }
 
-    public static void renderFacingQuadVB(IVertexBuilder vb, MatrixStack renderStack, double px, double py, double pz, float scale, float angle, float u, float v, float uLength, float vLength, int r, int g, int b, int alpha) {
+    public static void renderFacingQuadVB(VertexConsumer vb, PoseStack renderStack, double px, double py, double pz, float scale, float angle, float u, float v, float uLength, float vLength, int r, int g, int b, int alpha) {
         Vector3 pos = new Vector3(px, py, pz);
 
         RenderInfo ri = RenderInfo.getInstance();
-        ActiveRenderInfo ari = ri.getARI();
+        Camera ari = ri.getARI();
 
         float arX =  ri.getRotationX();
         float arZ =  ri.getRotationZ();
@@ -389,7 +388,7 @@ public class RenderingDrawUtils {
         float arXY = ri.getRotationXY();
         float arXZ = ri.getRotationXZ();
 
-        Vector3d view = ari.getProjectedView();
+        Vec3 view = ari.getProjectedView();
         Vector3f look = ari.getViewVector();
 
         Vector3 iPos = new Vector3(view);
@@ -431,7 +430,7 @@ public class RenderingDrawUtils {
         pos.clone().add(v4).subtract(iPos).drawPos(matr, vb).color(r, g, b, alpha).tex(u, v + vLength).endVertex();
     }
 
-    public static void renderTexturedCubeCentralColorLighted(IVertexBuilder buf, MatrixStack renderStack,
+    public static void renderTexturedCubeCentralColorLighted(VertexConsumer buf, PoseStack renderStack,
                                                              float u, float v, float uLength, float vLength,
                                                              int r, int g, int b, int a,
                                                              int combinedLight) {
@@ -469,7 +468,7 @@ public class RenderingDrawUtils {
         buf.pos(matr, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).lightmap(combinedLight).endVertex();
     }
 
-    public static void renderTexturedCubeCentralColorNormal(MatrixStack renderStack, IVertexBuilder vb,
+    public static void renderTexturedCubeCentralColorNormal(PoseStack renderStack, VertexConsumer vb,
                                                             float u, float v, float uLength, float vLength,
                                                             int r, int g, int b, int a,
                                                             Matrix3f normalMatr) {
@@ -506,7 +505,7 @@ public class RenderingDrawUtils {
         vb.pos(offset, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
     }
 
-    public static void renderAngleRotatedTexturedRectVB(IVertexBuilder vb, MatrixStack renderStack, Vector3 renderOffset, Vector3 axis, float angleRad, float scale, float u, float v, float uLength, float vLength, int r, int g, int b, int a) {
+    public static void renderAngleRotatedTexturedRectVB(VertexConsumer vb, PoseStack renderStack, Vector3 renderOffset, Vector3 axis, float angleRad, float scale, float u, float v, float uLength, float vLength, int r, int g, int b, int a) {
         Vector3 renderStart = axis.clone().perpendicular().rotate(angleRad, axis).normalize();
         Matrix4f matr = renderStack.getLast().getMatrix();
 

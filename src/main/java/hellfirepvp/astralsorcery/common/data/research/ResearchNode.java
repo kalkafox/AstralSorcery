@@ -13,11 +13,10 @@ import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.client.resource.query.TextureQuery;
 import hellfirepvp.astralsorcery.common.auxiliary.book.BookLookupRegistry;
 import hellfirepvp.astralsorcery.common.data.journal.JournalPage;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -58,7 +57,7 @@ public class ResearchNode {
         this.unlocName = unlocName;
     }
 
-    public ResearchNode(IItemProvider item, String unlocName, float renderPosX, float renderPosZ) {
+    public ResearchNode(ItemLike item, String unlocName, float renderPosX, float renderPosZ) {
         this(new ItemStack(item), unlocName, renderPosX, renderPosZ);
     }
 
@@ -67,7 +66,7 @@ public class ResearchNode {
         this.renderItemStacks = new ItemStack[] { itemStack };
     }
 
-    public ResearchNode(IItemProvider[] items, String unlocName, float renderPosX, float renderPosZ) {
+    public ResearchNode(ItemLike[] items, String unlocName, float renderPosX, float renderPosZ) {
         this(NodeRenderType.ITEMSTACK, unlocName, renderPosX, renderPosZ);
         this.renderItemStacks = new ItemStack[items.length];
         for (int i = 0; i < items.length; i++) {
@@ -122,7 +121,7 @@ public class ResearchNode {
         return this;
     }
 
-    public ResearchNode addTomeLookup(IItemProvider item, int nodePage, ResearchProgression progression) {
+    public ResearchNode addTomeLookup(ItemLike item, int nodePage, ResearchProgression progression) {
         BookLookupRegistry.registerItemLookup(item, this, nodePage, progression);
         return this;
     }
@@ -160,8 +159,8 @@ public class ResearchNode {
         return pages;
     }
 
-    public ITextComponent getName() {
-        return new TranslationTextComponent(String.format("astralsorcery.journal.node.%s.name", this.getKey()));
+    public Component getName() {
+        return Component.translatable(String.format("astralsorcery.journal.node.%s.name", this.getKey()));
     }
 
     public String getKey() {

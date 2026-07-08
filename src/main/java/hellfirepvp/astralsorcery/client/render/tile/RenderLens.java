@@ -8,18 +8,18 @@
 
 package hellfirepvp.astralsorcery.client.render.tile;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.model.builtin.ModelLens;
 import hellfirepvp.astralsorcery.client.model.builtin.ModelLensColored;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.tile.TileLens;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.core.BlockPos;
 
 import java.awt.*;
 import java.util.List;
@@ -36,12 +36,12 @@ public class RenderLens extends CustomTileEntityRenderer<TileLens> {
     private static final ModelLens MODEL_LENS = new ModelLens();
     private static final ModelLensColored MODEL_LENS_COLORED = new ModelLensColored();
 
-    public RenderLens(TileEntityRendererDispatcher tileRenderer) {
+    public RenderLens(BlockEntityRenderDispatcher tileRenderer) {
         super(tileRenderer);
     }
 
     @Override
-    public void render(TileLens tile, float pTicks, MatrixStack renderStack, IRenderTypeBuffer renderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void render(TileLens tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         List<BlockPos> linked = tile.getLinkedPositions();
         float degYaw = 0;
         float degPitch = 0;
@@ -215,20 +215,20 @@ public class RenderLens extends CustomTileEntityRenderer<TileLens> {
         renderStack.pop();
     }
 
-    private void renderLensColored(MatrixStack renderStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, Color c, float pitch) {
+    private void renderLensColored(PoseStack renderStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, Color c, float pitch) {
         MODEL_LENS_COLORED.glass.    rotateAngleX = pitch * 0.017453292F;
         MODEL_LENS_COLORED.fitting1. rotateAngleX = pitch * 0.017453292F;
         MODEL_LENS_COLORED.fitting2. rotateAngleX = pitch * 0.017453292F;
         MODEL_LENS_COLORED.detail1_1.rotateAngleX = pitch * 0.017453292F;
         MODEL_LENS_COLORED.detail1.  rotateAngleX = pitch * 0.017453292F;
 
-        IVertexBuilder vb = buffer.getBuffer(RenderTypesAS.MODEL_LENS_COLORED_GLASS);
+        VertexConsumer vb = buffer.getBuffer(RenderTypesAS.MODEL_LENS_COLORED_GLASS);
         MODEL_LENS_COLORED.renderGlass(renderStack, vb, combinedLight, combinedOverlay, c.getRed() / 255F, c.getGreen() / 255F, c.getBlue() / 255F, 1F);
         RenderingUtils.refreshDrawing(vb, RenderTypesAS.MODEL_LENS_COLORED_GLASS);
         MODEL_LENS_COLORED.render(renderStack, buffer, combinedLight, combinedOverlay);
     }
 
-    private void renderLens(MatrixStack renderStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay, float pitch) {
+    private void renderLens(PoseStack renderStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, float pitch) {
         MODEL_LENS.lens.rotateAngleX = pitch * 0.017453292F;
 
         MODEL_LENS.render(renderStack, buffer, combinedLight, combinedOverlay);

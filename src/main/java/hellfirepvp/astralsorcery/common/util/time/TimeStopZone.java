@@ -10,20 +10,20 @@ package hellfirepvp.astralsorcery.common.util.time;
 
 import hellfirepvp.astralsorcery.common.data.config.registry.TileAccelerationBlacklistRegistry;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.boss.dragon.phase.IPhase;
-import net.minecraft.entity.boss.dragon.phase.PhaseType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
@@ -43,14 +43,14 @@ public class TimeStopZone {
 
     final float range;
     final BlockPos offset;
-    private final World world;
+    private final Level world;
     private int ticksToLive;
 
     private boolean active = true;
 
-    private final List<TileEntity> cachedTiles = new LinkedList<>();
+    private final List<BlockEntity> cachedTiles = new LinkedList<>();
 
-    TimeStopZone(EntityTargetController ctrl, float range, BlockPos offset, World world, int tickLivespan) {
+    TimeStopZone(EntityTargetController ctrl, float range, BlockPos offset, Level world, int tickLivespan) {
         this.targetController = ctrl;
         this.range = range;
         this.offset = offset;
@@ -69,11 +69,11 @@ public class TimeStopZone {
 
         for (int xx = minX; xx <= maxX; ++xx) {
             for (int zz = minZ; zz <= maxZ; ++zz) {
-                Chunk ch = world.getChunk(xx, zz);
+                LevelChunk ch = world.getChunk(xx, zz);
                 if (!ch.isEmpty()) {
-                    Map<BlockPos, TileEntity> map = ch.getTileEntityMap();
-                    for (Map.Entry<BlockPos, TileEntity> teEntry : map.entrySet()) {
-                        TileEntity te = teEntry.getValue();
+                    Map<BlockPos, BlockEntity> map = ch.getTileEntityMap();
+                    for (Map.Entry<BlockPos, BlockEntity> teEntry : map.entrySet()) {
+                        BlockEntity te = teEntry.getValue();
                         if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) &&
                                 te.getPos().withinDistance(offset, range) &&
                                 world.tickableTileEntities.contains(te)) {
@@ -86,10 +86,10 @@ public class TimeStopZone {
         }
     }
 
-    private void safeCacheTile(TileEntity te) {
+    private void safeCacheTile(BlockEntity te) {
         if (te == null) return;
 
-        for (TileEntity tile : cachedTiles) {
+        for (BlockEntity tile : cachedTiles) {
             if (tile.getPos().equals(te.getPos())) {
                 return;
             }
@@ -102,10 +102,10 @@ public class TimeStopZone {
     }
 
     void stopEffect() {
-        for (TileEntity cached : cachedTiles) {
+        for (BlockEntity cached : cachedTiles) {
             BlockState state = world.getBlockState(cached.getPos());
             if (state.getBlock().hasTileEntity(state)) {
-                TileEntity te = state.getBlock().createTileEntity(state, world);
+                BlockEntity te = state.getBlock().createTileEntity(state, world);
                 if (te != null && te.getClass().isAssignableFrom(cached.getClass())) {
                     world.tickableTileEntities.add(cached);
                 }
@@ -146,11 +146,11 @@ public class TimeStopZone {
             e.travel(Vector3d.ZERO);
         }
 
-        if (e instanceof EnderDragonEntity) {
-            IPhase phase = ((EnderDragonEntity) e).getPhaseManager().getCurrentPhase();
+        if (e instanceof EnderDragon) {
+            DragonPhaseInstance phase = ((EnderDragon) e).getPhaseManager().getCurrentPhase();
             if (phase.getType() != PhaseType.HOLDING_PATTERN &&
                     phase.getType() != PhaseType.DYING) {
-                ((EnderDragonEntity) e).getPhaseManager().setPhase(PhaseType.HOLDING_PATTERN);
+                ((EnderDragon) e).getPhaseManager().setPhase(PhaseType.HOLDING_PATTERN);
             }
         }
     }
@@ -171,13 +171,13 @@ public class TimeStopZone {
             if (!e.isAlive() || e.getHealth() <= 0) {
                 return false;
             }
-            if (e instanceof EnderDragonEntity && ((EnderDragonEntity) e).getPhaseManager().getCurrentPhase().getType() == PhaseType.DYING) {
+            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getType() == PhaseType.DYING) {
                 return false;
             }
             if (hasOwner && e.getEntityId() == ownerId) {
                 return false;
             }
-            return targetPlayers || !(e instanceof PlayerEntity);
+            return targetPlayers || !(e instanceof Player);
         }
 
         public static EntityTargetController allExcept(Entity entity) {
@@ -189,8 +189,8 @@ public class TimeStopZone {
         }
 
         @Nonnull
-        public CompoundNBT serializeNBT() {
-            CompoundNBT out = new CompoundNBT();
+        public CompoundTag serializeNBT() {
+            CompoundTag out = new CompoundTag();
             out.putBoolean("targetPlayers", this.targetPlayers);
             out.putBoolean("hasOwner", this.hasOwner);
             out.putInt("ownerEntityId", this.ownerId);
@@ -198,7 +198,7 @@ public class TimeStopZone {
         }
 
         @Nonnull
-        public static EntityTargetController deserializeNBT(CompoundNBT cmp) {
+        public static EntityTargetController deserializeNBT(CompoundTag cmp) {
             boolean targetPlayers = cmp.getBoolean("targetPlayers");
             boolean hasOwner = cmp.getBoolean("hasOwner");
             int ownerId = cmp.getInt("ownerEntityId");

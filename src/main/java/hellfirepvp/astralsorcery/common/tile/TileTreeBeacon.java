@@ -34,24 +34,24 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.event.world.SaplingGrowTreeEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.neoforge.event.world.SaplingGrowTreeEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -132,14 +132,14 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
         if (rand.nextFloat() > Config.CONFIG.dropChance.get()) {
             return true;
         }
-        World world = this.getWorld();
-        if (!(world instanceof ServerWorld)) {
+        Level world = this.getWorld();
+        if (!(world instanceof ServerLevel)) {
             return false;
         }
         if (!MiscUtils.canEntityTickAt(world, harvest.getPos())) {
             return false;
         }
-        List<ItemStack> drops = BlockUtils.getDrops((ServerWorld) world, harvest.getPos(), harvest.getFakedState(), 2, rand, ItemStack.EMPTY);
+        List<ItemStack> drops = BlockUtils.getDrops((ServerLevel) world, harvest.getPos(), harvest.getFakedState(), 2, rand, ItemStack.EMPTY);
         drops.forEach(drop -> {
             if (drop.isEmpty()) {
                 return;
@@ -177,7 +177,7 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
             return false;
         }
 
-        World world = this.getWorld();
+        Level world = this.getWorld();
         BlockState state = world.getBlockState(pos);
         if (!state.isAir(world, pos)) {
             if (this.getWorld().setBlockState(pos, BlocksAS.TREE_BEACON_COMPONENT.getDefaultState(), Constants.BlockFlags.DEFAULT)) {
@@ -317,7 +317,7 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
 
     @Nonnull
     @Override
-    public RegistryKey<World> getDimension() {
+    public ResourceKey<Level> getDimension() {
         return this.getWorld().getDimensionKey();
     }
 
@@ -356,13 +356,13 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.treeComponents.clear();
-        ListNBT componentList = compound.getList("components", Constants.NBT.TAG_COMPOUND);
+        ListTag componentList = compound.getList("components", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < componentList.size(); i++) {
-            CompoundNBT tag = componentList.getCompound(i);
+            CompoundTag tag = componentList.getCompound(i);
             this.treeComponents.put(NBTHelper.readBlockPosFromNBT(tag), tag.getInt("weight"));
         }
 
@@ -372,12 +372,12 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
-        ListNBT componentList = new ListNBT();
+        ListTag componentList = new ListTag();
         MapStream.forEach(this.treeComponents, (pos, weight) -> {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(pos, tag);
             tag.putInt("weight", weight);
             componentList.add(tag);
@@ -402,19 +402,19 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
         private static final int    defaultLogWeight    = 2;
         private static final int    defaultLeafWeight   = 1;
 
-        public ForgeConfigSpec.DoubleValue range;
-        public ForgeConfigSpec.IntValue    maxCount;
-        public ForgeConfigSpec.DoubleValue dropChance;
-        public ForgeConfigSpec.IntValue    breakChance;
-        public ForgeConfigSpec.IntValue    logWeight;
-        public ForgeConfigSpec.IntValue    leafWeight;
+        public ModConfigSpec.DoubleValue range;
+        public ModConfigSpec.IntValue    maxCount;
+        public ModConfigSpec.DoubleValue dropChance;
+        public ModConfigSpec.IntValue    breakChance;
+        public ModConfigSpec.IntValue    logWeight;
+        public ModConfigSpec.IntValue    leafWeight;
 
         private Config() {
             super("tree_beacon");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.range = cfgBuilder
                     .comment("Set the radius of the tree beacon.")
                     .translation(translationKey("range"))
@@ -444,18 +444,18 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
 
     public static class TreeWatcher {
 
-        private static final Map<RegistryKey<World>, Set<BlockPos>> WATCHERS = new HashMap<>();
+        private static final Map<ResourceKey<Level>, Set<BlockPos>> WATCHERS = new HashMap<>();
 
         public static void clearServerCache() {
             WATCHERS.clear();
         }
 
         public static void onGrow(SaplingGrowTreeEvent event) {
-            if (event.getWorld().isRemote() || !(event.getWorld() instanceof ServerWorld)) {
+            if (event.getWorld().isRemote() || !(event.getWorld() instanceof ServerLevel)) {
                 return;
             }
 
-            ServerWorld world = (ServerWorld) event.getWorld();
+            ServerLevel world = (ServerLevel) event.getWorld();
             BlockPos treePos = event.getPos();
             TreeType type = TreeType.isTree(world, treePos);
             if (type == null) {

@@ -8,17 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.event.helper;
 
-import hellfirepvp.astralsorcery.common.enchantment.EnchantmentPlayerTick;
+import hellfirepvp.astralsorcery.common.enchantment.EnchantmentHelperAS;
+import hellfirepvp.astralsorcery.common.lib.EnchantmentsAS;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.player.Player;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.fml.LogicalSide;
 
-import java.util.Collection;
 import java.util.EnumSet;
-import java.util.stream.Collectors;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,27 +32,20 @@ public class EventHelperEnchantmentTick implements ITickHandler {
 
     public static final EventHelperEnchantmentTick INSTANCE = new EventHelperEnchantmentTick();
 
-    private Collection<EnchantmentPlayerTick> tickableEnchantments = null;
-
     private EventHelperEnchantmentTick() {}
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        PlayerEntity player = (PlayerEntity) context[0];
+        Player player = (Player) context[0];
         LogicalSide side = (LogicalSide) context[1];
 
-        if (tickableEnchantments == null) {
-            tickableEnchantments = ForgeRegistries.ENCHANTMENTS.getValues().stream()
-                    .filter(enchantment -> enchantment instanceof EnchantmentPlayerTick)
-                    .map(enchantment -> (EnchantmentPlayerTick) enchantment)
-                    .collect(Collectors.toList());
-        }
-
-        for (EnchantmentPlayerTick ench : this.tickableEnchantments) {
-            int totalLevel = EnchantmentHelper.getMaxEnchantmentLevel(ench, player);
-            if (totalLevel > 0) {
-                ench.tick(player, side, totalLevel);
-            }
+        if (side.isServer()) {
+            EnchantmentHelperAS.getHolder(player.registryAccess(), EnchantmentsAS.NIGHT_VISION).ifPresent(nightVision -> {
+                int level = EnchantmentHelper.getItemEnchantmentLevel(nightVision, player.getItemBySlot(EquipmentSlot.HEAD));
+                if (level > 0) {
+                    player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, level - 1, true, false));
+                }
+            });
         }
     }
 

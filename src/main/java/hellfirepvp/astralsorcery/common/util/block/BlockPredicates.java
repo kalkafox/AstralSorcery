@@ -9,18 +9,18 @@
 package hellfirepvp.astralsorcery.common.util.block;
 
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tags.ITag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.tags.Tag;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class BlockPredicates {
 
-    public static BlockPredicate isInTag(ITag<Block> blockTag) {
+    public static BlockPredicate isInTag(Tag<Block> blockTag) {
         return (world, pos, state) -> state.isIn(blockTag);
     }
 
@@ -49,14 +49,14 @@ public class BlockPredicates {
         return (world, pos, state) -> applicable.contains(state);
     }
 
-    public static <T extends TileEntity> BlockPredicate doesTileExist(T tile, boolean loadTileWorldAndChunk) {
-        RegistryKey<World> dim = tile.getWorld().getDimensionKey();
-        TileEntityType<?> tileType = tile.getType();
+    public static <T extends BlockEntity> BlockPredicate doesTileExist(T tile, boolean loadTileWorldAndChunk) {
+        ResourceKey<Level> dim = tile.getWorld().getDimensionKey();
+        BlockEntityType<?> tileType = tile.getType();
         MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
 
         return (world, pos, state) -> {
             if (loadTileWorldAndChunk || srv.forgeGetWorldMap().containsKey(dim)) {
-                World foundWorld = srv.getWorld(dim);
+                Level foundWorld = srv.getWorld(dim);
                 if (foundWorld == null) {
                     //If the intent was to load the world and it doesn't exist, then the tile doesn't exist either
                     //If the intent was to NOT load the world, but the world isn't there, we assume the tile still exists.
@@ -65,7 +65,7 @@ public class BlockPredicates {
                 if (!loadTileWorldAndChunk && !foundWorld.getChunkProvider().isChunkLoaded(new ChunkPos(pos))) {
                     return true;
                 }
-                TileEntity te = MiscUtils.getTileAt(foundWorld, pos, TileEntity.class, true);
+                BlockEntity te = MiscUtils.getTileAt(foundWorld, pos, TileEntity.class, true);
                 return te != null && te.getType().equals(tileType);
             }
             return true;

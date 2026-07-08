@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.client.util.camera;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.Mth;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,7 +22,7 @@ import net.minecraft.util.math.MathHelper;
  */
 public class ClientCameraUtil {
 
-    public static void positionCamera(PlayerEntity renderView, float pTicks, double x, double y, double z, double prevX, double prevY, double prevZ, double yaw, double yawPrev, double pitch, double pitchPrev) {
+    public static void positionCamera(Player renderView, float pTicks, double x, double y, double z, double prevX, double prevY, double prevZ, double yaw, double yawPrev, double pitch, double pitchPrev) {
         double dYaw = MathHelper.positiveModulo(yaw - yawPrev, 360d);
         // Use the smaller arc
         if (dYaw > 180) {
@@ -38,7 +38,7 @@ public class ClientCameraUtil {
             mc.setRenderViewEntity(renderView);
             rv = renderView;
         }
-        PlayerEntity render = (PlayerEntity) rv;
+        Player render = (Player) rv;
 
         render.setRawPosition(x, y, z);
         render.prevPosX = prevX;
@@ -84,7 +84,7 @@ public class ClientCameraUtil {
     public static void resetCamera() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
-            PlayerEntity player = mc.player;
+            Player player = mc.player;
             mc.setRenderViewEntity(player);
             //double x = player.getPosX();
             //double y = player.getPosY();

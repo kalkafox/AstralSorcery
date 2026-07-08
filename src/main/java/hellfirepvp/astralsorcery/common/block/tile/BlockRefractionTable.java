@@ -23,25 +23,25 @@ import hellfirepvp.astralsorcery.common.tile.TileRefractionTable;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ContainerBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -53,10 +53,10 @@ import java.util.Random;
  * Created by HellFirePvP
  * Date: 26.04.2020 / 20:17
  */
-public class BlockRefractionTable extends ContainerBlock implements CustomItemBlock, LargeBlock {
+public class BlockRefractionTable extends BaseEntityBlock implements CustomItemBlock, LargeBlock {
 
     private static final VoxelShape REFRACTION_TABLE = Block.makeCuboidShape(-6, 0, -4, 22, 24, 20);
-    private static final AxisAlignedBB PLACEMENT_BOX = new AxisAlignedBB(-1, 0, -1, 1, 1, 1);
+    private static final AABB PLACEMENT_BOX = new AABB(-1, 0, -1, 1, 1, 1);
 
     public BlockRefractionTable() {
         super(PropertiesWood.defaultInfusedWood()
@@ -64,23 +64,23 @@ public class BlockRefractionTable extends ContainerBlock implements CustomItemBl
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return REFRACTION_TABLE;
     }
 
     @Override
-    public AxisAlignedBB getBlockSpace() {
+    public AABB getBlockSpace() {
         return PLACEMENT_BOX;
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.canPlaceAt(context) ? this.getDefaultState() : null;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState stateIn, World worldIn, BlockPos pos, Random rand) {
+    public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, Random rand) {
         for (int i = 0; i < rand.nextInt(3); i++) {
             Vector3 offset = new Vector3(-5.0 / 16.0, 1.505, -3.0 / 16.0);
             int random = rand.nextInt(ColorsAS.REFRACTION_TABLE_COLORS.length);
@@ -100,7 +100,7 @@ public class BlockRefractionTable extends ContainerBlock implements CustomItemBl
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
+    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack held = player.getHeldItem(hand);
         if (!world.isRemote()) {
             TileRefractionTable tft = MiscUtils.getTileAt(world, pos, TileRefractionTable.class, true);
@@ -172,7 +172,7 @@ public class BlockRefractionTable extends ContainerBlock implements CustomItemBl
     }
 
     @Override
-    public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onReplaced(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
         TileRefractionTable te = MiscUtils.getTileAt(world, pos, TileRefractionTable.class, true);
         if (te != null && !world.isRemote) {
             te.dropContents();
@@ -182,13 +182,13 @@ public class BlockRefractionTable extends ContainerBlock implements CustomItemBl
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
         return new TileRefractionTable();
     }
 }

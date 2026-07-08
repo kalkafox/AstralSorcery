@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.event;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.eventbus.api.Event;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.bus.api.Event;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,17 +20,17 @@ import net.minecraftforge.eventbus.api.Event;
  */
 public class CooldownSetEvent extends Event {
 
-    private final PlayerEntity player;
+    private final Player player;
     private final int originalCooldown;
     private int cooldown;
 
-    public CooldownSetEvent(PlayerEntity player, int originalCooldown) {
+    public CooldownSetEvent(Player player, int originalCooldown) {
         this.player = player;
         this.originalCooldown = originalCooldown;
         this.setCooldown(this.getOriginalCooldown());
     }
 
-    public PlayerEntity getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 

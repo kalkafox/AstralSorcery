@@ -16,11 +16,11 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.lib.AltarRecipeEffectsAS;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -52,7 +52,7 @@ public class ConstellationUpgradeRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public boolean matches(LogicalSide side, PlayerEntity crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
+    public boolean matches(LogicalSide side, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
         return altar.getAltarType() == AltarType.ATTUNEMENT && super.matches(side, crafter, altar, ignoreStarlightRequirement);
     }
 

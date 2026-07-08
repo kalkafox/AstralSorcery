@@ -17,18 +17,18 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.perk.node.key.KeyVoidTrash;
 import hellfirepvp.astralsorcery.common.util.loot.LootUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.conditions.ILootCondition;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.loot.GlobalLootModifierSerializer;
+import net.neoforged.neoforge.common.loot.LootModifier;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  */
 public class LootModifierPerkVoidTrash extends LootModifier {
 
-    private LootModifierPerkVoidTrash(ILootCondition[] conditionsIn) {
+    private LootModifierPerkVoidTrash(LootItemCondition[] conditionsIn) {
         super(conditionsIn);
     }
 
@@ -54,10 +54,10 @@ public class LootModifierPerkVoidTrash extends LootModifier {
             return generatedLoot;
         }
         Entity e = context.get(LootParameters.THIS_ENTITY);
-        if (!(e instanceof PlayerEntity)) {
+        if (!(e instanceof Player)) {
             return generatedLoot;
         }
-        PlayerEntity player = (PlayerEntity) e;
+        Player player = (Player) e;
         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!prog.isValid() || !prog.getPerkData().hasPerkEffect(perk -> perk instanceof KeyVoidTrash)) {
             return generatedLoot;
@@ -91,7 +91,7 @@ public class LootModifierPerkVoidTrash extends LootModifier {
     public static class Serializer extends GlobalLootModifierSerializer<LootModifierPerkVoidTrash> {
 
         @Override
-        public LootModifierPerkVoidTrash read(ResourceLocation location, JsonObject object, ILootCondition[] lootConditions) {
+        public LootModifierPerkVoidTrash read(ResourceLocation location, JsonObject object, LootItemCondition[] lootConditions) {
             return new LootModifierPerkVoidTrash(lootConditions);
         }
 

@@ -8,17 +8,17 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
-import net.minecraft.client.gui.IHasContainer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -28,11 +28,11 @@ import org.lwjgl.opengl.GL11;
  * Created by HellFirePvP
  * Date: 15.08.2019 / 14:56
  */
-public abstract class ScreenCustomContainer<T extends Container> extends ContainerScreen<T> implements IHasContainer<T> {
+public abstract class ScreenCustomContainer<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements MenuAccess<T> {
 
     private final int sWidth, sHeight;
 
-    public ScreenCustomContainer(T screenContainer, PlayerInventory inv, ITextComponent name, int width, int height) {
+    public ScreenCustomContainer(T screenContainer, Inventory inv, Component name, int width, int height) {
         super(screenContainer, inv, name);
         this.sWidth = width;
         this.sHeight = height;
@@ -54,14 +54,14 @@ public abstract class ScreenCustomContainer<T extends Container> extends Contain
 
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         this.renderBackground(renderStack);
         super.render(renderStack, mouseX, mouseY, pTicks);
         this.renderHoveredTooltip(renderStack, mouseX, mouseY);
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(MatrixStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
         this.getBackgroundTexture().bindTexture();
 
         RenderSystem.enableBlend();

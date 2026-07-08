@@ -15,11 +15,11 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.RaytraceAssist;
 import hellfirepvp.astralsorcery.common.util.block.BlockDiscoverer;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -37,7 +37,7 @@ import java.util.Optional;
 public class ChaliceHelper {
 
     @Nonnull
-    public static List<BlockPos> findNearbyChalices(World world, BlockPos origin, int distance) {
+    public static List<BlockPos> findNearbyChalices(Level world, BlockPos origin, int distance) {
         Vector3 thisVector = new Vector3(origin).add(0.5, 1.5, 0.5);
 
         List<BlockPos> foundChalices = BlockDiscoverer.searchForBlocksAround(world, origin, MathHelper.clamp(distance, 0, 16),
@@ -57,7 +57,7 @@ public class ChaliceHelper {
 
     //Distance must be positive and less or equal to 16
     @Nonnull
-    public static List<TileChalice> findNearbyChalicesContaining(World world, BlockPos origin, FluidStack expected, int distance) {
+    public static List<TileChalice> findNearbyChalicesContaining(Level world, BlockPos origin, FluidStack expected, int distance) {
         List<TileChalice> out = new LinkedList<>();
         for (BlockPos chalicePos : findNearbyChalices(world, origin, distance)) {
             TileChalice chalice = MiscUtils.getTileAt(world, chalicePos, TileChalice.class, true);
@@ -72,7 +72,7 @@ public class ChaliceHelper {
     //Distance must be positive and less or equal to 16
     //Only returns a value if the chalices combined fulfilled the amount requirement.
     @Nonnull
-    public static Optional<List<TileChalice>> findNearbyChalicesCombined(World world, BlockPos origin, FluidStack expected, int distance) {
+    public static Optional<List<TileChalice>> findNearbyChalicesCombined(Level world, BlockPos origin, FluidStack expected, int distance) {
         FluidStack required = expected.copy();
 
         List<TileChalice> out = new LinkedList<>();
@@ -93,7 +93,7 @@ public class ChaliceHelper {
         return Optional.empty();
     }
 
-    public static boolean doChalicesContainCombined(World world, Collection<BlockPos> chalicePositions, FluidStack expected) {
+    public static boolean doChalicesContainCombined(Level world, Collection<BlockPos> chalicePositions, FluidStack expected) {
         FluidStack required = expected.copy();
 
         for (BlockPos pos : chalicePositions) {

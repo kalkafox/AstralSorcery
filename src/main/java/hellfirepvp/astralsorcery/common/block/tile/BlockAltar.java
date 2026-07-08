@@ -20,21 +20,21 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ToolType;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 
@@ -62,8 +62,8 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-        if (!world.isRemote() && player instanceof ServerPlayerEntity) {
+    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!world.isRemote() && player instanceof ServerPlayer) {
             TileAltar altar = MiscUtils.getTileAt(world, pos, TileAltar.class, true);
             if (altar != null) {
                 CustomContainerProvider<?> provider;
@@ -91,7 +91,7 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
                 }
 
                 if (provider != null) {
-                    provider.openFor((ServerPlayerEntity) player);
+                    provider.openFor((ServerPlayer) player);
                 }
             }
         }
@@ -99,7 +99,7 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onReplaced(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!(newState.getBlock() instanceof BlockAltar)) {
             TileAltar ta = MiscUtils.getTileAt(worldIn, pos, TileAltar.class, true);
             if (ta != null && !worldIn.isRemote) {
@@ -119,18 +119,18 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public RenderShape getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader world) {
+    public BlockEntity createNewTileEntity(BlockGetter world) {
         return new TileAltar().updateType(this.type, true);
     }
 }

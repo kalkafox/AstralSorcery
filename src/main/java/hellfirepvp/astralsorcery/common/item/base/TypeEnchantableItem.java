@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.item.base;
 
-import net.minecraft.enchantment.EnchantmentType;
-import net.minecraft.item.ItemStack;
+import hellfirepvp.astralsorcery.common.enchantment.AstralEnchantmentType;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,6 +20,6 @@ import net.minecraft.item.ItemStack;
  */
 public interface TypeEnchantableItem {
 
-    boolean canEnchantItem(ItemStack stack, EnchantmentType type);
+    boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type);
 
 }

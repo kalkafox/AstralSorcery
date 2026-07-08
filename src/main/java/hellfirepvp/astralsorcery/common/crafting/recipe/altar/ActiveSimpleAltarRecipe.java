@@ -20,24 +20,24 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.RecipeHelper;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.templates.VoidFluidHandler;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.neoforge.fluids.FluidActionResult;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.templates.VoidFluidHandler;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -64,7 +64,7 @@ public class ActiveSimpleAltarRecipe {
     private int totalCraftingTime;
 
     private CraftingState state;
-    private CompoundNBT craftingData = new CompoundNBT();
+    private CompoundTag craftingData = new CompoundTag();
 
     private List<CraftingFocusStack> focusStacks = new LinkedList<>();
 
@@ -87,7 +87,7 @@ public class ActiveSimpleAltarRecipe {
         }
     }
 
-    public CompoundNBT getCraftingData() {
+    public CompoundTag getCraftingData() {
         return craftingData;
     }
 
@@ -108,7 +108,7 @@ public class ActiveSimpleAltarRecipe {
     }
 
     @Nullable
-    public PlayerEntity tryGetCraftingPlayerServer() {
+    public Player tryGetCraftingPlayerServer() {
         MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
         return srv.getPlayerList().getPlayerByUUID(this.getPlayerCraftingUUID());
     }
@@ -269,7 +269,7 @@ public class ActiveSimpleAltarRecipe {
     }
 
     @Nullable
-    public static ActiveSimpleAltarRecipe deserialize(CompoundNBT compound, @Nullable ActiveSimpleAltarRecipe previous) {
+    public static ActiveSimpleAltarRecipe deserialize(CompoundTag compound, @Nullable ActiveSimpleAltarRecipe previous) {
         RecipeManager mgr = RecipeHelper.getRecipeManager();
         if (mgr == null) {
             return null;
@@ -287,7 +287,7 @@ public class ActiveSimpleAltarRecipe {
         int total = compound.getInt("totalCraftingTime");
         CraftingState state = CraftingState.values()[compound.getInt("state")];
         List<CraftingFocusStack> stacks = new LinkedList<>();
-        ListNBT listStacks = compound.getList("focusStacks", Constants.NBT.TAG_COMPOUND);
+        ListTag listStacks = compound.getList("focusStacks", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < listStacks.size(); i++) {
             stacks.add(new CraftingFocusStack(listStacks.getCompound(i)));
         }
@@ -303,8 +303,8 @@ public class ActiveSimpleAltarRecipe {
     }
 
     @Nonnull
-    public CompoundNBT serialize() {
-        CompoundNBT compound = new CompoundNBT();
+    public CompoundTag serialize() {
+        CompoundTag compound = new CompoundTag();
         compound.putString("recipeToCraft", getRecipeToCraft().getId().toString());
         compound.putUniqueId("playerCraftingUUID", getPlayerCraftingUUID());
         compound.putInt("ticksCrafting", getTicksCrafting());
@@ -312,7 +312,7 @@ public class ActiveSimpleAltarRecipe {
         compound.putInt("state", getState().ordinal());
         compound.put("craftingData", craftingData);
 
-        ListNBT list = new ListNBT();
+        ListTag list = new ListTag();
         for (CraftingFocusStack stack : this.focusStacks) {
             list.add(stack.serialize());
         }

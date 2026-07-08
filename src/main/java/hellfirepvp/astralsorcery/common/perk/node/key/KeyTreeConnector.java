@@ -14,13 +14,13 @@ import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.perk.node.MajorPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkTreePoint;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 
@@ -39,7 +39,7 @@ public class KeyTreeConnector extends MajorPerk {
     }
 
     @Override
-    public boolean mayUnlockPerk(PlayerProgress progress, PlayerEntity player) {
+    public boolean mayUnlockPerk(PlayerProgress progress, Player player) {
         if (!progress.getPerkData().hasFreeAllocationPoint(player, getSide(player)) ||
                 !canSee(player, progress)) return false;
         PlayerPerkData perkData = progress.getPerkData();
@@ -63,11 +63,11 @@ public class KeyTreeConnector extends MajorPerk {
     }
 
     @Override
-    public void onUnlockPerkServer(@Nullable PlayerEntity player, PerkAllocationType allocationType, PlayerProgress progress, CompoundNBT dataStorage) {
+    public void onUnlockPerkServer(@Nullable Player player, PerkAllocationType allocationType, PlayerProgress progress, CompoundTag dataStorage) {
         super.onUnlockPerkServer(player, allocationType, progress, dataStorage);
 
         if (allocationType == PerkAllocationType.UNLOCKED) {
-            ListNBT listTokens = new ListNBT();
+            ListTag listTokens = new ListTag();
             for (AbstractPerk otherPerk : PerkTree.PERK_TREE.getConnectedPerks(LogicalSide.SERVER, this)) {
                 if (ResearchManager.forceApplyPerk(player, otherPerk, PlayerPerkAllocation.unlock())) {
                     ResourceLocation token = AstralSorcery.key("connector_tk_" + otherPerk.getRegistryName().getPath());
@@ -81,11 +81,11 @@ public class KeyTreeConnector extends MajorPerk {
     }
 
     @Override
-    public void onRemovePerkServer(PlayerEntity player, PerkAllocationType allocationType, PlayerProgress progress, CompoundNBT dataStorage) {
+    public void onRemovePerkServer(Player player, PerkAllocationType allocationType, PlayerProgress progress, CompoundTag dataStorage) {
         super.onRemovePerkServer(player, allocationType, progress, dataStorage);
 
         if (allocationType == PerkAllocationType.UNLOCKED) {
-            ListNBT list = dataStorage.getList("pointtokens", Constants.NBT.TAG_STRING);
+            ListTag list = dataStorage.getList("pointtokens", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
                 ResearchManager.revokeFreePoint(player, new ResourceLocation(list.getString(i)));
             }

@@ -10,19 +10,18 @@ package hellfirepvp.astralsorcery.common.enchantment.amulet;
 
 import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantment;
 import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentType;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.LanguageMap;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.Util;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,7 +32,7 @@ import javax.annotation.Nullable;
  */
 public class AmuletEnchantment extends DynamicEnchantment {
 
-    public AmuletEnchantment(DynamicEnchantmentType type, @Nonnull Enchantment enchantment, int levelAddition) {
+    public AmuletEnchantment(DynamicEnchantmentType type, @Nonnull ResourceKey<Enchantment> enchantment, int levelAddition) {
         super(type, enchantment, levelAddition);
     }
 
@@ -41,22 +40,24 @@ public class AmuletEnchantment extends DynamicEnchantment {
         super(type, levelAddition);
     }
 
-    //TODO nested translation components..?
-    @OnlyIn(Dist.CLIENT)
-    public IFormattableTextComponent getDisplay() {
+    public MutableComponent getDisplay() {
         String typeStr = this.getType().getDisplayName();
-        String levelsStr = I18n.format(String.format("astralsorcery.amulet.enchantment.level.%s", this.levelAddition > 1 ? "more" : "one"));
+        MutableComponent levels = Component.translatable(String.format("astralsorcery.amulet.enchantment.level.%s", this.levelAddition > 1 ? "more" : "one"));
 
         if (this.getType().isEnchantmentSpecific()) {
-            return new TranslationTextComponent(typeStr,
-                    String.valueOf(this.getLevelAddition()), levelsStr, LanguageMap.getInstance().func_230503_a_(this.getEnchantment().getName()));
+            ResourceKey<Enchantment> enchantment = this.getEnchantment();
+            MutableComponent enchantmentName = enchantment == null ?
+                    Component.empty() :
+                    Component.translatable(Util.makeDescriptionId("enchantment", enchantment.location()));
+            return Component.translatable(typeStr,
+                    String.valueOf(this.getLevelAddition()), levels, enchantmentName);
         } else {
-            return new TranslationTextComponent(typeStr, String.valueOf(this.getLevelAddition()), levelsStr);
+            return Component.translatable(typeStr, String.valueOf(this.getLevelAddition()), levels);
         }
     }
 
     public boolean canMerge(AmuletEnchantment other) {
-        return this.type.equals(other.type) && (!this.type.isEnchantmentSpecific() || this.enchantment.equals(other.enchantment));
+        return this.type.equals(other.type) && (!this.type.isEnchantmentSpecific() || Objects.equals(this.enchantment, other.enchantment));
     }
 
     public void merge(AmuletEnchantment src) {
@@ -65,31 +66,30 @@ public class AmuletEnchantment extends DynamicEnchantment {
         }
     }
 
-    public CompoundNBT serialize() {
-        CompoundNBT cmp = new CompoundNBT();
+    public CompoundTag serialize() {
+        CompoundTag cmp = new CompoundTag();
         cmp.putInt("type", this.type.ordinal());
         cmp.putInt("level", this.levelAddition);
         if (this.type.isEnchantmentSpecific()) { //Enchantment must not be null here anyway as the type requires a ench to begin with
-            cmp.putString("ench", this.enchantment.getRegistryName().toString());
+            cmp.putString("ench", this.enchantment.location().toString());
         }
         return cmp;
     }
 
     @Nullable
-    public static AmuletEnchantment deserialize(CompoundNBT cmp) {
+    public static AmuletEnchantment deserialize(CompoundTag cmp) {
         int typeId = cmp.getInt("type");
+        if (typeId < 0 || typeId >= DynamicEnchantmentType.values().length) {
+            return null;
+        }
         DynamicEnchantmentType type = DynamicEnchantmentType.values()[typeId];
         int level = Math.max(0, cmp.getInt("level"));
         if (type.isEnchantmentSpecific()) {
-            ResourceLocation res = new ResourceLocation(cmp.getString("ench"));
-            Enchantment e = ForgeRegistries.ENCHANTMENTS.getValue(res);
-            if (e != null) {
-                return new AmuletEnchantment(type, e, level);
-            }
+            ResourceLocation res = ResourceLocation.parse(cmp.getString("ench"));
+            return new AmuletEnchantment(type, ResourceKey.create(Registries.ENCHANTMENT, res), level);
         } else {
             return new AmuletEnchantment(type, level);
         }
-        return null;
     }
 
 }

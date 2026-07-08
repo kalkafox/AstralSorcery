@@ -9,17 +9,15 @@
 package hellfirepvp.astralsorcery.common.network.base;
 
 import hellfirepvp.astralsorcery.common.network.PacketChannel;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -41,16 +39,15 @@ public abstract class ASPacket<T extends ASPacket<T>> {
     @Nonnull
     public abstract Handler<T> handler();
 
-    public static interface Encoder<T extends ASPacket<T>> extends BiConsumer<T, PacketBuffer> {}
+    public static interface Encoder<T extends ASPacket<T>> extends BiConsumer<T, FriendlyByteBuf> {}
 
-    public static interface Decoder<T extends ASPacket<T>> extends Function<PacketBuffer, T> {}
+    public static interface Decoder<T extends ASPacket<T>> extends Function<FriendlyByteBuf, T> {}
 
-    public static interface Handler<T extends ASPacket<T>> extends BiConsumer<T, Supplier<NetworkEvent.Context>> {
+    public static interface Handler<T extends ASPacket<T>> extends BiConsumer<T, PacketContext> {
 
         @Override
-        default void accept(T t, Supplier<NetworkEvent.Context> contextSupplier) {
-            NetworkEvent.Context ctx = contextSupplier.get();
-            switch (ctx.getDirection().getReceptionSide()) {
+        default void accept(T t, PacketContext ctx) {
+            switch (ctx.getReceptionSide()) {
                 case CLIENT:
                     this.handleClient(t, ctx);
                     break;
@@ -58,23 +55,22 @@ public abstract class ASPacket<T extends ASPacket<T>> {
                     this.handleServer(t, ctx);
                     break;
             }
-            ctx.setPacketHandled(true);
         }
 
         @OnlyIn(Dist.CLIENT)
-        default void handleClient(T packet, NetworkEvent.Context context) {
+        default void handleClient(T packet, PacketContext context) {
             this.handle(packet, context, LogicalSide.CLIENT);
         }
 
-        default void handleServer(T packet, NetworkEvent.Context context) {
+        default void handleServer(T packet, PacketContext context) {
             this.handle(packet, context, LogicalSide.SERVER);
         }
 
-        void handle(T packet, NetworkEvent.Context context, LogicalSide side);
+        void handle(T packet, PacketContext context, LogicalSide side);
 
     }
 
-    protected final void replyWith(T packet, NetworkEvent.Context ctx) {
+    protected final void replyWith(T packet, PacketContext ctx) {
         PacketChannel.CHANNEL.reply(packet, ctx);
     }
 }

@@ -11,24 +11,24 @@ package hellfirepvp.astralsorcery.common.util;
 import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipe;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.AbstractCookingRecipe;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
+import net.neoforged.fml.common.thread.EffectiveSide;
 import org.apache.commons.lang3.ObjectUtils;
 
 import javax.annotation.Nonnull;
@@ -57,7 +57,7 @@ public class RecipeHelper {
     }
 
     @Nonnull
-    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(World world, BlockState input) {
+    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(Level world, BlockState input) {
         ItemStack stack = ItemUtils.createBlockStack(input);
         if (stack.isEmpty()) {
             return Optional.empty();
@@ -66,10 +66,10 @@ public class RecipeHelper {
     }
 
     @Nonnull
-    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(World world, ItemStack input) {
+    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(Level world, ItemStack input) {
         RecipeManager mgr = world.getRecipeManager();
-        IInventory inv = new Inventory(input);
-        Optional<IRecipe<IInventory>> optRecipe = (Optional<IRecipe<IInventory>>) ObjectUtils.firstNonNull(
+        Container inv = new SimpleContainer(input);
+        Optional<Recipe<Container>> optRecipe = (Optional<Recipe<Container>>) ObjectUtils.firstNonNull(
                 mgr.getRecipe(IRecipeType.SMELTING, inv, world),
                 mgr.getRecipe(IRecipeType.CAMPFIRE_COOKING, inv, world),
                 mgr.getRecipe(IRecipeType.SMOKING, inv, world),
@@ -100,7 +100,7 @@ public class RecipeHelper {
     @Nullable
     @OnlyIn(Dist.CLIENT)
     private static RecipeManager getClientManager() {
-        ClientPlayNetHandler conn;
+        ClientPacketListener conn;
         if ((conn = Minecraft.getInstance().getConnection()) != null) {
             return conn.getRecipeManager();
         }

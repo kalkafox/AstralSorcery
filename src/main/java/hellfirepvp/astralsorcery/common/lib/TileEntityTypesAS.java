@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.tile.*;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,28 +23,28 @@ public class TileEntityTypesAS {
 
     private TileEntityTypesAS() {}
 
-    public static TileEntityType<TileSpectralRelay> SPECTRAL_RELAY;
-    public static TileEntityType<TileAltar> ALTAR;
-    public static TileEntityType<TileAttunementAltar> ATTUNEMENT_ALTAR;
-    public static TileEntityType<TileCelestialCrystals> CELESTIAL_CRYSTAL_CLUSTER;
-    public static TileEntityType<TileCelestialGateway> GATEWAY;
-    public static TileEntityType<TileChalice> CHALICE;
-    public static TileEntityType<TileCollectorCrystal> COLLECTOR_CRYSTAL;
-    public static TileEntityType<TileFountain> FOUNTAIN;
-    public static TileEntityType<TileGemCrystals> GEM_CRYSTAL_CLUSTER;
-    public static TileEntityType<TileIlluminator> ILLUMINATOR;
-    public static TileEntityType<TileInfuser> INFUSER;
-    public static TileEntityType<TileLens> LENS;
-    public static TileEntityType<TileObservatory> OBSERVATORY;
-    public static TileEntityType<TilePrism> PRISM;
-    public static TileEntityType<TileRefractionTable> REFRACTION_TABLE;
-    public static TileEntityType<TileRitualLink> RITUAL_LINK;
-    public static TileEntityType<TileRitualPedestal> RITUAL_PEDESTAL;
-    public static TileEntityType<TileTelescope> TELESCOPE;
-    public static TileEntityType<TileTranslucentBlock> TRANSLUCENT_BLOCK;
-    public static TileEntityType<TileTreeBeacon> TREE_BEACON;
-    public static TileEntityType<TileTreeBeaconComponent> TREE_BEACON_COMPONENT;
-    public static TileEntityType<TileVanishing> VANISHING;
-    public static TileEntityType<TileWell> WELL;
+    public static BlockEntityType<TileSpectralRelay> SPECTRAL_RELAY;
+    public static BlockEntityType<TileAltar> ALTAR;
+    public static BlockEntityType<TileAttunementAltar> ATTUNEMENT_ALTAR;
+    public static BlockEntityType<TileCelestialCrystals> CELESTIAL_CRYSTAL_CLUSTER;
+    public static BlockEntityType<TileCelestialGateway> GATEWAY;
+    public static BlockEntityType<TileChalice> CHALICE;
+    public static BlockEntityType<TileCollectorCrystal> COLLECTOR_CRYSTAL;
+    public static BlockEntityType<TileFountain> FOUNTAIN;
+    public static BlockEntityType<TileGemCrystals> GEM_CRYSTAL_CLUSTER;
+    public static BlockEntityType<TileIlluminator> ILLUMINATOR;
+    public static BlockEntityType<TileInfuser> INFUSER;
+    public static BlockEntityType<TileLens> LENS;
+    public static BlockEntityType<TileObservatory> OBSERVATORY;
+    public static BlockEntityType<TilePrism> PRISM;
+    public static BlockEntityType<TileRefractionTable> REFRACTION_TABLE;
+    public static BlockEntityType<TileRitualLink> RITUAL_LINK;
+    public static BlockEntityType<TileRitualPedestal> RITUAL_PEDESTAL;
+    public static BlockEntityType<TileTelescope> TELESCOPE;
+    public static BlockEntityType<TileTranslucentBlock> TRANSLUCENT_BLOCK;
+    public static BlockEntityType<TileTreeBeacon> TREE_BEACON;
+    public static BlockEntityType<TileTreeBeaconComponent> TREE_BEACON_COMPONENT;
+    public static BlockEntityType<TileVanishing> VANISHING;
+    public static BlockEntityType<TileWell> WELL;
 
 }

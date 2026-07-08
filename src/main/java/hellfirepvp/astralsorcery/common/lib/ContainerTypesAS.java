@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.container.*;
-import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.world.inventory.MenuType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,12 +22,12 @@ public class ContainerTypesAS {
 
     private ContainerTypesAS() {}
 
-    public static ContainerType<ContainerTome> TOME;
-    public static ContainerType<ContainerObservatory> OBSERVATORY;
+    public static MenuType<ContainerTome> TOME;
+    public static MenuType<ContainerObservatory> OBSERVATORY;
 
-    public static ContainerType<ContainerAltarDiscovery> ALTAR_DISCOVERY;
-    public static ContainerType<ContainerAltarAttunement> ALTAR_ATTUNEMENT;
-    public static ContainerType<ContainerAltarConstellation> ALTAR_CONSTELLATION;
-    public static ContainerType<ContainerAltarTrait> ALTAR_RADIANCE;
+    public static MenuType<ContainerAltarDiscovery> ALTAR_DISCOVERY;
+    public static MenuType<ContainerAltarAttunement> ALTAR_ATTUNEMENT;
+    public static MenuType<ContainerAltarConstellation> ALTAR_CONSTELLATION;
+    public static MenuType<ContainerAltarTrait> ALTAR_RADIANCE;
 
 }

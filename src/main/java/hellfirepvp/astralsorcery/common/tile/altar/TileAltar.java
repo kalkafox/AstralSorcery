@@ -40,24 +40,24 @@ import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventoryFiltered;
 import hellfirepvp.astralsorcery.common.util.world.SkyCollectionHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ForgeHooks;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -177,14 +177,14 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         BlockPos at = ByteBufUtils.readPos(pkt.getExtraData());
         boolean isChaining = pkt.getExtraData().readBoolean();
 
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return;
         }
 
         TileAltar thisAltar = MiscUtils.getTileAt(world, at, TileAltar.class, false);
         if (thisAltar != null) {
-            IRecipe<?> recipe = world.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).get(recipeName);
+            Recipe<?> recipe = world.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).get(recipeName);
             if (recipe instanceof SimpleAltarRecipe) {
                 ((SimpleAltarRecipe) recipe).getCraftingEffects().forEach(effect -> {
                     effect.onCraftingFinish(thisAltar, isChaining);
@@ -248,12 +248,12 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         markForUpdate();
     }
 
-    protected SimpleAltarRecipe findRecipe(PlayerEntity crafter) {
+    protected SimpleAltarRecipe findRecipe(Player crafter) {
         return RecipeTypesAS.TYPE_ALTAR.findRecipe(new SimpleAltarRecipeContext(crafter, LogicalSide.SERVER, this)
                 .setIgnoreStarlightRequirement(false));
     }
 
-    protected boolean startCrafting(SimpleAltarRecipe recipe, PlayerEntity crafter) {
+    protected boolean startCrafting(SimpleAltarRecipe recipe, Player crafter) {
         if (this.getActiveRecipe() != null) {
             return false;
         }
@@ -268,7 +268,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     @Override
-    public boolean onInteract(World world, BlockPos pos, PlayerEntity player, Direction side, boolean sneak) {
+    public boolean onInteract(Level world, BlockPos pos, Player player, Direction side, boolean sneak) {
         if (!world.isRemote() && this.hasMultiblock()) {
             if (this.getActiveRecipe() != null) {
                 if (this.getActiveRecipe().matches(this, false, false)) {
@@ -306,8 +306,8 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
             this.collectStarlight(heightAmount * altarTier * 60F, AltarCollectionCategory.HEIGHT);
 
             if (posDistribution == -1) {
-                if (world instanceof ISeedReader) {
-                    posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((ISeedReader) world, pos);
+                if (world instanceof WorldGenLevel) {
+                    posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) world, pos);
                 } else {
                     posDistribution = 0.3F;
                 }
@@ -435,8 +435,8 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public AxisAlignedBB getRenderBoundingBox() {
-        AxisAlignedBB box = super.getRenderBoundingBox().expand(0, 5, 0);
+    public AABB getRenderBoundingBox() {
+        AABB box = super.getRenderBoundingBox().expand(0, 5, 0);
         if (this.getAltarType().isThisGEThan(AltarType.RADIANCE)) {
             box = box.grow(3, 0, 3);
         }
@@ -450,7 +450,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
 
         this.altarType = newType;
 
-        CompoundNBT thisTag = new CompoundNBT();
+        CompoundTag thisTag = new CompoundTag();
         this.writeCustomNBT(thisTag);
         this.readCustomNBT(thisTag);
         if (!initialPlacement) {
@@ -462,21 +462,21 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     @Override
-    public void readNetNBT(CompoundNBT compound) {
+    public void readNetNBT(CompoundTag compound) {
         super.readNetNBT(compound);
 
         this.starlightStorage.readNBT(compound);
     }
 
     @Override
-    public void writeNetNBT(CompoundNBT compound) {
+    public void writeNetNBT(CompoundTag compound) {
         super.writeNetNBT(compound);
 
         this.starlightStorage.writeNBT(compound);
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.altarType = AltarType.values()[compound.getInt("altarType")];
@@ -492,7 +492,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.putInt("altarType", this.altarType.ordinal());

@@ -8,16 +8,16 @@
 
 package hellfirepvp.astralsorcery.client.render.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.common.entity.item.EntityItemHighlighted;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.neoforged.fml.client.registry.IRenderFactory;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,14 +26,14 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
  * Created by HellFirePvP
  * Date: 18.08.2019 / 10:37
  */
-public class RenderEntityItemHighlighted extends ItemRenderer {
+public class RenderEntityItemHighlighted extends ItemEntityRenderer {
 
-    protected RenderEntityItemHighlighted(EntityRendererManager renderManager) {
+    protected RenderEntityItemHighlighted(EntityRenderDispatcher renderManager) {
         super(renderManager, Minecraft.getInstance().getItemRenderer());
     }
 
     @Override
-    public void render(ItemEntity entity, float entityYaw, float partialTicks, MatrixStack renderStack, IRenderTypeBuffer buffer, int packedLight) {
+    public void render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack renderStack, MultiBufferSource buffer, int packedLight) {
         if (entity instanceof EntityItemHighlighted && ((EntityItemHighlighted) entity).hasColor()) {
             renderStack.push();
             renderStack.translate(0, 0.35F, 0);
@@ -49,7 +49,7 @@ public class RenderEntityItemHighlighted extends ItemRenderer {
     public static class Factory implements IRenderFactory<EntityItemHighlighted> {
 
         @Override
-        public EntityRenderer<? super EntityItemHighlighted> createRenderFor(EntityRendererManager manager) {
+        public EntityRenderer<? super EntityItemHighlighted> createRenderFor(EntityRenderDispatcher manager) {
             return new RenderEntityItemHighlighted(manager);
         }
     }

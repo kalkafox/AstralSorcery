@@ -19,10 +19,10 @@ import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.TileEntityTypesAS;
 import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class TileVanishing extends TileEntityTick {
 
-    private static final AxisAlignedBB SEARCH_BOX = new AxisAlignedBB(-4,0, -4, 4, 3, 4);
+    private static final AABB SEARCH_BOX = new AABB(-4,0, -4, 4, 3, 4);
 
     public TileVanishing() {
         super(TileEntityTypesAS.VANISHING);
@@ -48,8 +48,8 @@ public class TileVanishing extends TileEntityTick {
         if (!this.getWorld().isRemote() && this.getTicksExisted() % 5 == 0) {
             boolean removeBlock = true;
 
-            List<PlayerEntity> players = getWorld().getEntitiesWithinAABB(PlayerEntity.class, SEARCH_BOX.offset(getPos()));
-            for (PlayerEntity player : players) {
+            List<Player> players = getWorld().getEntitiesWithinAABB(PlayerEntity.class, SEARCH_BOX.offset(getPos()));
+            for (Player player : players) {
                 if (ItemMantle.getEffect(player, ConstellationsAS.aevitas) != null) {
                     double yDiff = player.getPosY() - this.getPos().getY();
 

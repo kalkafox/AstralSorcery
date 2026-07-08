@@ -9,13 +9,13 @@
 package hellfirepvp.astralsorcery.common.item.armor;
 
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.IArmorMaterial;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.SoundEvent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.sounds.SoundEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,15 +24,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  * Created by HellFirePvP
  * Date: 17.02.2020 / 19:16
  */
-public class ArmorMaterialImbuedLeather implements IArmorMaterial {
+public class ArmorMaterialImbuedLeather implements ArmorMaterial {
 
     @Override
-    public int getDurability(EquipmentSlotType slot) {
+    public int getDurability(EquipmentSlot slot) {
         return 486;
     }
 
     @Override
-    public int getDamageReductionAmount(EquipmentSlotType slot) {
+    public int getDamageReductionAmount(EquipmentSlot slot) {
         switch (slot) {
             case CHEST:
                 return 7;

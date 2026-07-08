@@ -13,7 +13,7 @@ import hellfirepvp.astralsorcery.common.data.sync.client.ClientTimeFreezeEffects
 import hellfirepvp.astralsorcery.common.util.time.TimeStopEffectHelper;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.event.TickEvent;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import java.util.EnumSet;
 import java.util.List;

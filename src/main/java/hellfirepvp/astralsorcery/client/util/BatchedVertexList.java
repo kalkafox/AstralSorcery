@@ -8,11 +8,11 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
-import net.minecraft.client.renderer.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.lwjgl.opengl.GL11;
 
 import java.util.function.Consumer;
@@ -48,7 +48,7 @@ public class BatchedVertexList {
         this.initialized = true;
     }
 
-    public void render(MatrixStack renderStack) {
+    public void render(PoseStack renderStack) {
         if (!this.initialized) {
             return;
         }

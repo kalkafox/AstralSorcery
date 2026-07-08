@@ -8,10 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
 
 import javax.annotation.Nullable;
 
@@ -33,9 +33,9 @@ public abstract class RenderablePage {
         this.nodePage = nodePage;
     }
 
-    public abstract void render(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY);
+    public abstract void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY);
 
-    public void postRender(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {}
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {}
 
     public boolean propagateMouseClick(double mouseX, double mouseZ) {
         return false;
@@ -45,7 +45,7 @@ public abstract class RenderablePage {
         return false;
     }
 
-    public static FontRenderer getFontRenderer() {
+    public static Font getFontRenderer() {
         return Minecraft.getInstance().fontRenderer;
     }
 

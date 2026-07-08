@@ -29,25 +29,25 @@ import hellfirepvp.astralsorcery.common.util.RecipeHelper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -74,11 +74,11 @@ public class ActiveLiquidInfusionRecipe {
 
     private int ticksCrafting = 0;
     private final Set<BlockPos> supportingChalices = new HashSet<>();
-    private CompoundNBT craftingData = new CompoundNBT();
+    private CompoundTag craftingData = new CompoundTag();
 
     private Object orbitalLiquid = null;
 
-    public ActiveLiquidInfusionRecipe(World world, BlockPos center, LiquidInfusion recipeToCraft, UUID playerCraftingUUID) {
+    public ActiveLiquidInfusionRecipe(Level world, BlockPos center, LiquidInfusion recipeToCraft, UUID playerCraftingUUID) {
         this(recipeToCraft, playerCraftingUUID);
 
         if (this.recipeToCraft.acceptsChaliceInput()) {
@@ -91,7 +91,7 @@ public class ActiveLiquidInfusionRecipe {
         this.playerCraftingUUID = playerCraftingUUID;
     }
 
-    private void findChalices(World world, BlockPos center) {
+    private void findChalices(Level world, BlockPos center) {
         ChaliceHelper.findNearbyChalicesCombined(world, center, this.getChaliceRequiredFluidInput(), CHALICE_DISTANCE)
                 .ifPresent(chalices -> chalices.forEach(chalice -> this.supportingChalices.add(chalice.getPos())));
     }
@@ -301,7 +301,7 @@ public class ActiveLiquidInfusionRecipe {
         return fixTime + chaliceTime;
     }
 
-    public CompoundNBT getCraftingData() {
+    public CompoundTag getCraftingData() {
         return craftingData;
     }
 
@@ -322,13 +322,13 @@ public class ActiveLiquidInfusionRecipe {
     }
 
     @Nullable
-    public PlayerEntity tryGetCraftingPlayerServer() {
+    public Player tryGetCraftingPlayerServer() {
         MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
         return srv.getPlayerList().getPlayerByUUID(this.getPlayerCraftingUUID());
     }
 
     @Nullable
-    public static ActiveLiquidInfusionRecipe deserialize(CompoundNBT compound, @Nullable ActiveLiquidInfusionRecipe prev) {
+    public static ActiveLiquidInfusionRecipe deserialize(CompoundTag compound, @Nullable ActiveLiquidInfusionRecipe prev) {
         RecipeManager mgr = RecipeHelper.getRecipeManager();
         if (mgr == null) {
             return null;
@@ -344,11 +344,11 @@ public class ActiveLiquidInfusionRecipe {
 
         UUID uuidCraft = compound.getUniqueId("playerCraftingUUID");
         int tick = compound.getInt("ticksCrafting");
-        ListNBT chalices = compound.getList("supportingChalices", Constants.NBT.TAG_COMPOUND);
+        ListTag chalices = compound.getList("supportingChalices", Constants.NBT.TAG_COMPOUND);
 
         Set<BlockPos> chalicePositions = new HashSet<>();
         for (int i = 0; i < chalices.size(); i++) {
-            CompoundNBT tag = chalices.getCompound(i);
+            CompoundTag tag = chalices.getCompound(i);
             chalicePositions.add(NBTHelper.readBlockPosFromNBT(tag));
         }
 
@@ -364,11 +364,11 @@ public class ActiveLiquidInfusionRecipe {
     }
 
     @Nonnull
-    public CompoundNBT serialize() {
-        ListNBT chalicePositions = new ListNBT();
-        this.supportingChalices.forEach(pos -> chalicePositions.add(NBTHelper.writeBlockPosToNBT(pos, new CompoundNBT())));
+    public CompoundTag serialize() {
+        ListTag chalicePositions = new ListTag();
+        this.supportingChalices.forEach(pos -> chalicePositions.add(NBTHelper.writeBlockPosToNBT(pos, new CompoundTag())));
 
-        CompoundNBT compound = new CompoundNBT();
+        CompoundTag compound = new CompoundTag();
         compound.putString("recipeToCraft", getRecipeToCraft().getId().toString());
         compound.putUniqueId("playerCraftingUUID", getPlayerCraftingUUID());
         compound.putInt("ticksCrafting", getTicksCrafting());

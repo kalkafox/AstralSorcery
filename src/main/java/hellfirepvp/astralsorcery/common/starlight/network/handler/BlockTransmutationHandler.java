@@ -25,14 +25,14 @@ import hellfirepvp.astralsorcery.common.util.block.WorldBlockPos;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,12 +50,12 @@ public class BlockTransmutationHandler implements StarlightNetworkRegistry.IStar
     private static final Map<WorldBlockPos, ActiveTransmutation> runningTransmutations = new HashMap<>();
 
     @Override
-    public boolean isApplicable(World world, BlockPos pos, BlockState state, IWeakConstellation starlightType) {
+    public boolean isApplicable(Level world, BlockPos pos, BlockState state, IWeakConstellation starlightType) {
         return RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.findRecipe(new BlockTransmutationContext(world, pos, state, starlightType)) != null;
     }
 
     @Override
-    public void receiveStarlight(World world, Random rand, BlockPos pos, BlockState state, IWeakConstellation starlightType, double amount) {
+    public void receiveStarlight(Level world, Random rand, BlockPos pos, BlockState state, IWeakConstellation starlightType, double amount) {
         BlockTransmutation recipe = RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.findRecipe(new BlockTransmutationContext(world, pos, state, starlightType));
         if (recipe == null) {
             return; //Wait what
@@ -122,7 +122,7 @@ public class BlockTransmutationHandler implements StarlightNetworkRegistry.IStar
             return this.accumulatedStarlight >= this.recipe.getStarlightRequired();
         }
 
-        private boolean finish(IWorld world, BlockPos pos) {
+        private boolean finish(LevelAccessor world, BlockPos pos) {
             BlockState out = this.recipe.getOutput();
             if (world.setBlockState(pos, out, Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
 

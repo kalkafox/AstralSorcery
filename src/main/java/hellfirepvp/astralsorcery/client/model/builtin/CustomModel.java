@@ -8,13 +8,13 @@
 
 package hellfirepvp.astralsorcery.client.model.builtin;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.Model;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Function;
 
@@ -35,11 +35,11 @@ public abstract class CustomModel extends Model {
         return this.getRenderType(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
     }
 
-    public void render(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, int packedOverlayIn) {
+    public void render(PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, int packedOverlayIn) {
         this.render(matrixStackIn, buffer.getBuffer(this.getGeneralType()), packedLightIn, packedOverlayIn, 1F, 1F, 1F, 1F);
     }
 
-    protected void setRotateAngle(ModelRenderer modelPart, float x, float y, float z) {
+    protected void setRotateAngle(ModelPart modelPart, float x, float y, float z) {
         modelPart.rotateAngleX = x;
         modelPart.rotateAngleY = y;
         modelPart.rotateAngleZ = z;

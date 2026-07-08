@@ -10,9 +10,10 @@ package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.sound.CategorizedSoundEvent;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
 
 import static hellfirepvp.astralsorcery.common.lib.SoundsAS.*;
 
@@ -62,22 +63,20 @@ public class RegistrySounds {
         GUI_JOURNAL_PAGE = registerSound("gui_journal_page", SoundCategory.MASTER);
     }
 
-    private static <T extends SoundEvent> T registerSound(String jsonName, SoundCategory predefinedCategory) {
+    private static <T extends SoundEvent> T registerSound(String jsonName, SoundSource predefinedCategory) {
         ResourceLocation res = AstralSorcery.key(jsonName);
         CategorizedSoundEvent se = new CategorizedSoundEvent(res, predefinedCategory);
-        se.setRegistryName(res);
-        return registerSound((T) se);
+        return registerSound((T) se, res);
     }
 
     private static <T extends SoundEvent> T registerSound(String jsonName) {
         ResourceLocation res = AstralSorcery.key(jsonName);
         SoundEvent se = new SoundEvent(res);
-        se.setRegistryName(res);
-        return registerSound((T) se);
+        return registerSound((T) se, res);
     }
 
-    private static <T extends SoundEvent> T registerSound(T soundEvent) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(soundEvent);
+    private static <T extends SoundEvent> T registerSound(T soundEvent, ResourceLocation name) {
+        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.SOUND_EVENT, name, soundEvent);
         return soundEvent;
     }
 

@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.client.util;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.fonts.TextInputUtil;
+import net.minecraft.client.gui.font.TextFieldHelper;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
@@ -27,10 +27,10 @@ public class ScreenTextEntry {
     private String text = "";
     private Runnable changeCallback = null;
 
-    private final TextInputUtil inputUtil;
+    private final TextFieldHelper inputUtil;
 
     public ScreenTextEntry() {
-        inputUtil = new TextInputUtil(
+        inputUtil = new TextFieldHelper(
                 this::getText,
                 this::setText,
                 TextInputUtil.getClipboardTextSupplier(Minecraft.getInstance()),

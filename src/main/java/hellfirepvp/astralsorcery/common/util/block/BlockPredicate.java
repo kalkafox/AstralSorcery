@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.util.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,6 +21,6 @@ import net.minecraft.world.World;
  */
 public interface BlockPredicate {
 
-    public boolean test(World world, BlockPos pos, BlockState state);
+    public boolean test(Level world, BlockPos pos, BlockState state);
 
 }

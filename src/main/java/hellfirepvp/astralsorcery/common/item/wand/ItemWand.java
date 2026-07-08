@@ -29,23 +29,23 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.api.util.BlockArray;
 import hellfirepvp.observerlib.client.preview.StructurePreview;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -63,12 +63,12 @@ public class ItemWand extends Item implements OverrideInteractItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
-        boolean active = isSelected || (entity instanceof PlayerEntity && ((PlayerEntity) entity).getHeldItemOffhand() == stack);
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
+        boolean active = isSelected || (entity instanceof Player && ((Player) entity).getHeldItemOffhand() == stack);
 
         if (!world.isRemote()) {
             if (active) {
-                if (entity instanceof ServerPlayerEntity) {
+                if (entity instanceof ServerPlayer) {
                     RockCrystalBuffer buf = DataAS.DOMAIN_AS.getData(world, DataAS.KEY_ROCK_CRYSTAL_BUFFER);
 
                     ChunkPos pos = new ChunkPos(entity.getPosition());
@@ -82,12 +82,12 @@ public class ItemWand extends Item implements OverrideInteractItem {
                             if (!DayTimeHelper.isDay(world) && random.nextInt(600) == 0) {
                                 PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.ROCK_CRYSTAL_COLUMN)
                                         .addData(b -> ByteBufUtils.writeVector(b, new Vector3(rPos.up())));
-                                PacketChannel.CHANNEL.sendToPlayer((PlayerEntity) entity, pkt);
+                                PacketChannel.CHANNEL.sendToPlayer((Player) entity, pkt);
                             }
                             if (random.nextInt(800) == 0) {
                                 PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.ROCK_CRYSTAL_SPARKS)
                                         .addData(b -> ByteBufUtils.writeVector(b, new Vector3(rPos.up())));
-                                PacketChannel.CHANNEL.sendToPlayer((PlayerEntity) entity, pkt);
+                                PacketChannel.CHANNEL.sendToPlayer((Player) entity, pkt);
                             }
                         });
                     }
@@ -97,13 +97,13 @@ public class ItemWand extends Item implements OverrideInteractItem {
     }
 
     @Override
-    public boolean shouldInterceptBlockInteract(LogicalSide side, PlayerEntity player, Hand hand, BlockPos pos, Direction face) {
+    public boolean shouldInterceptBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, Direction face) {
         return true;
     }
 
     @Override
-    public boolean doBlockInteract(LogicalSide side, PlayerEntity player, Hand hand, BlockPos pos, Direction face) {
-        World world = player.getEntityWorld();
+    public boolean doBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, Direction face) {
+        Level world = player.getEntityWorld();
         BlockState state = world.getBlockState(pos);
         Block b = state.getBlock();
         if (b instanceof WandInteractable) {
@@ -137,8 +137,8 @@ public class ItemWand extends Item implements OverrideInteractItem {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void displayClientStructurePreview(World world, BlockPos pos, StructureType type) {
-        StructurePreview.newBuilder(world.getDimensionKey(), pos, (MatchableStructure) type.getStructure())
+    private void displayClientStructurePreview(Level world, BlockPos pos, StructureType type) {
+        StructurePreview.newBuilder(world.dimension(), pos, (MatchableStructure) type.getStructure())
                 .removeIfOutInDifferentWorld()
                 .andPersistOnlyIf((inWorld, at) -> {
                     return MiscUtils.executeWithChunk(world, pos, () -> {
@@ -159,7 +159,7 @@ public class ItemWand extends Item implements OverrideInteractItem {
     public static void playUndergroundEffect(PktPlayEffect effect) {
         Vector3 at = ByteBufUtils.readVector(effect.getExtraData());
 
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return;
         }
@@ -185,7 +185,7 @@ public class ItemWand extends Item implements OverrideInteractItem {
     public static void playEffect(PktPlayEffect effect) {
         Vector3 pos = ByteBufUtils.readVector(effect.getExtraData());
 
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return;
         }

@@ -9,13 +9,13 @@
 package hellfirepvp.astralsorcery.common.entity.item;
 
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,15 +26,15 @@ import net.minecraftforge.fml.network.NetworkHooks;
  */
 public class EntityItemExplosionResistant extends EntityItemHighlighted {
 
-    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, World world) {
+    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level world) {
         super(type, world);
     }
 
-    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, World world, double x, double y, double z) {
+    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
         super(type, world, x, y, z);
     }
 
-    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, World world, double x, double y, double z, ItemStack stack) {
+    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
         super(type, world, x, y, z, stack);
     }
 
@@ -48,7 +48,7 @@ public class EntityItemExplosionResistant extends EntityItemHighlighted {
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

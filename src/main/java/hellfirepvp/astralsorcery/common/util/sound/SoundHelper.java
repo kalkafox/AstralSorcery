@@ -13,14 +13,14 @@ import hellfirepvp.astralsorcery.client.util.sound.FadeSound;
 import hellfirepvp.astralsorcery.client.util.sound.PositionedLoopSound;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.Predicate;
 
@@ -33,23 +33,23 @@ import java.util.function.Predicate;
  */
 public class SoundHelper {
 
-    public static void playSoundAround(SoundEvent sound, World world, Vector3i position, float volume, float pitch) {
+    public static void playSoundAround(SoundEvent sound, Level world, Vec3i position, float volume, float pitch) {
         playSoundAround(sound, SoundCategory.MASTER, world, position.getX(), position.getY(), position.getZ(), volume, pitch);
     }
 
-    public static void playSoundAround(SoundEvent sound, SoundCategory category, World world, Vector3i position, float volume, float pitch) {
+    public static void playSoundAround(SoundEvent sound, SoundSource category, Level world, Vec3i position, float volume, float pitch) {
         playSoundAround(sound, category, world, position.getX(), position.getY(), position.getZ(), volume, pitch);
     }
 
-    public static void playSoundAround(SoundEvent sound, World world, Vector3 position, float volume, float pitch) {
+    public static void playSoundAround(SoundEvent sound, Level world, Vector3 position, float volume, float pitch) {
         playSoundAround(sound, SoundCategory.MASTER, world, position.getX(), position.getY(), position.getZ(), volume, pitch);
     }
 
-    public static void playSoundAround(SoundEvent sound, SoundCategory category, World world, Vector3 position, float volume, float pitch) {
+    public static void playSoundAround(SoundEvent sound, SoundSource category, Level world, Vector3 position, float volume, float pitch) {
         playSoundAround(sound, category, world, position.getX(), position.getY(), position.getZ(), volume, pitch);
     }
 
-    public static void playSoundAround(SoundEvent sound, SoundCategory category, World world, double posX, double posY, double posZ, float volume, float pitch) {
+    public static void playSoundAround(SoundEvent sound, SoundSource category, Level world, double posX, double posY, double posZ, float volume, float pitch) {
         if (sound instanceof CategorizedSoundEvent) {
             category = ((CategorizedSoundEvent) sound).getCategory();
         }
@@ -58,7 +58,7 @@ public class SoundHelper {
 
     @OnlyIn(Dist.CLIENT)
     public static PositionedLoopSound playSoundLoopClient(SoundEvent sound, Vector3 pos, float volume, float pitch, boolean isGlobal, Predicate<PositionedLoopSound> func) {
-        SoundCategory cat = SoundCategory.MASTER;
+        SoundSource cat = SoundCategory.MASTER;
         if (sound instanceof CategorizedSoundEvent) {
             cat = ((CategorizedSoundEvent) sound).getCategory();
         }
@@ -70,7 +70,7 @@ public class SoundHelper {
 
     @OnlyIn(Dist.CLIENT)
     public static FadeLoopSound playSoundLoopFadeInClient(SoundEvent sound, Vector3 pos, float volume, float pitch, boolean isGlobal, Predicate<PositionedLoopSound> func) {
-        SoundCategory cat = SoundCategory.MASTER;
+        SoundSource cat = SoundCategory.MASTER;
         if (sound instanceof CategorizedSoundEvent) {
             cat = ((CategorizedSoundEvent) sound).getCategory();
         }
@@ -82,7 +82,7 @@ public class SoundHelper {
 
     @OnlyIn(Dist.CLIENT)
     public static FadeSound playSoundFadeInClient(SoundEvent sound, Vector3 pos, float volume, float pitch, boolean isGlobal, Predicate<FadeSound> func) {
-        SoundCategory cat = SoundCategory.MASTER;
+        SoundSource cat = SoundCategory.MASTER;
         if (sound instanceof CategorizedSoundEvent) {
             cat = ((CategorizedSoundEvent) sound).getCategory();
         }
@@ -93,13 +93,13 @@ public class SoundHelper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static float getSoundVolume(SoundCategory cat) {
+    public static float getSoundVolume(SoundSource cat) {
         return Minecraft.getInstance().gameSettings.getSoundLevel(cat);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void playSoundClient(SoundEvent sound, float volume, float pitch) {
-        ClientPlayerEntity player = Minecraft.getInstance().player;
+        LocalPlayer player = Minecraft.getInstance().player;
         if (player != null) {
             player.playSound(sound, volume, pitch);
         }
@@ -111,7 +111,7 @@ public class SoundHelper {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void playSoundClientWorld(SoundEvent sound, SoundCategory cat, BlockPos pos, float volume, float pitch) {
+    public static void playSoundClientWorld(SoundEvent sound, SoundSource cat, BlockPos pos, float volume, float pitch) {
         if (Minecraft.getInstance().world != null) {
             Minecraft.getInstance().world.playSound(Minecraft.getInstance().player, pos.getX(), pos.getY(), pos.getZ(), sound, cat, volume, pitch);
         }

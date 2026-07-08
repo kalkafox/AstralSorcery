@@ -8,8 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -18,7 +21,7 @@ import net.minecraft.item.crafting.Ingredient;
  * Created by HellFirePvP
  * Date: 17.08.2019 / 16:13
  */
-public class CrystalToolTier implements IItemTier {
+public class CrystalToolTier implements Tier {
 
     private static final CrystalToolTier INSTANCE = new CrystalToolTier();
 
@@ -29,32 +32,56 @@ public class CrystalToolTier implements IItemTier {
     }
 
     @Override
-    public int getMaxUses() {
+    public int getUses() {
         return 16192;
     }
 
     @Override
-    public float getEfficiency() {
+    public float getSpeed() {
         return 4.5F;
     }
 
     @Override
-    public float getAttackDamage() {
+    public float getAttackDamageBonus() {
         return 3.5F;
     }
 
     @Override
-    public int getHarvestLevel() {
-        return 3;
+    public TagKey<Block> getIncorrectBlocksForDrops() {
+        return BlockTags.INCORRECT_FOR_DIAMOND_TOOL;
     }
 
     @Override
-    public int getEnchantability() {
+    public int getEnchantmentValue() {
         return 24;
     }
 
     @Override
-    public Ingredient getRepairMaterial() {
+    public Ingredient getRepairIngredient() {
         return Ingredient.EMPTY;
+    }
+
+    public int getMaxUses() {
+        return this.getUses();
+    }
+
+    public float getEfficiency() {
+        return this.getSpeed();
+    }
+
+    public float getAttackDamage() {
+        return this.getAttackDamageBonus();
+    }
+
+    public int getHarvestLevel() {
+        return 3;
+    }
+
+    public int getEnchantability() {
+        return this.getEnchantmentValue();
+    }
+
+    public Ingredient getRepairMaterial() {
+        return this.getRepairIngredient();
     }
 }

@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.base.patreon;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -73,7 +73,7 @@ public class PatreonDataManager {
                     PatreonEffect pe = type.getProvider().buildEffect(plUuid, entry.getParameters());
 
                     pe.initialize();
-                    pe.attachEventListeners(MinecraftForge.EVENT_BUS);
+                    pe.attachEventListeners(NeoForge.EVENT_BUS);
                     pe.attachTickListeners(AstralSorcery.getProxy().getTickManager()::register);
                     PatreonEffectHelper.playerEffectMap.computeIfAbsent(plUuid, uuid -> new ArrayList<>()).add(pe);
                     PatreonEffectHelper.effectMap.put(pe.getEffectUUID(), pe);
@@ -93,7 +93,7 @@ public class PatreonDataManager {
                         Arrays.asList("777971c5-fb58-4519-a975-b1b5766e44d1",
                                 "null"));
                 effect.initialize();
-                effect.attachEventListeners(MinecraftForge.EVENT_BUS);
+                effect.attachEventListeners(NeoForge.EVENT_BUS);
                 effect.attachTickListeners(AstralSorcery.getProxy().getTickManager()::register);
                 PatreonEffectHelper.playerEffectMap.computeIfAbsent(hellfire, uuid -> new ArrayList<>()).add(effect);
                 PatreonEffectHelper.effectMap.put(effect.getEffectUUID(), effect);*/

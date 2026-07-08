@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.cmd.sub;
 
+import net.minecraft.network.chat.Component;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,19 +17,18 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.block.BlockStateHelper;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -40,7 +41,7 @@ public class CommandSerialize {
 
     private CommandSerialize() {}
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("serialize")
                 .requires(cs -> cs.hasPermissionLevel(2))
                 .then(Commands.literal("hand")
@@ -49,14 +50,14 @@ public class CommandSerialize {
                         .executes(CommandSerialize::serializeLook));
     }
 
-    private static int serializeHand(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        PlayerEntity player = context.getSource().asPlayer();
+    private static int serializeHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Player player = context.getSource().asPlayer();
         ItemStack held = player.getHeldItemMainhand();
         String serialized = JsonHelper.serializeItemStack(held).toString();
 
-        IFormattableTextComponent msg = new StringTextComponent(serialized);
+        MutableComponent msg = Component.literal(serialized);
         Style s = Style.EMPTY.setFormatting(TextFormatting.GREEN)
-                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy")))
+                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
                 .setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
         msg.setStyle(s);
 
@@ -64,15 +65,15 @@ public class CommandSerialize {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int serializeLook(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        PlayerEntity player = context.getSource().asPlayer();
-        BlockRayTraceResult result = MiscUtils.rayTraceLookBlock(player);
+    private static int serializeLook(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Player player = context.getSource().asPlayer();
+        BlockHitResult result = MiscUtils.rayTraceLookBlock(player);
         BlockState state = result == null ? Blocks.AIR.getDefaultState() : player.getEntityWorld().getBlockState(result.getPos());
         String serialized = BlockStateHelper.serialize(state);
 
-        IFormattableTextComponent msg = new StringTextComponent(serialized);
+        MutableComponent msg = Component.literal(serialized);
         Style s = Style.EMPTY.setFormatting(TextFormatting.GREEN)
-                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Copy")))
+                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
                 .setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
         msg.setStyle(s);
 

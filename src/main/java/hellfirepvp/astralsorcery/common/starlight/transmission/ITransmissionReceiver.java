@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.common.starlight.transmission;
 
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
 import hellfirepvp.astralsorcery.common.starlight.WorldNetworkHandler;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,13 +31,13 @@ public interface ITransmissionReceiver extends IPrismTransmissionNode {
     }
 
     @Override
-    default public void notifyLink(World world, BlockPos to) {}
+    default public void notifyLink(Level world, BlockPos to) {}
 
     @Override
-    default public boolean notifyUnlink(World world, BlockPos to) {
+    default public boolean notifyUnlink(Level world, BlockPos to) {
         return false;
     }
 
-    public void onStarlightReceive(World world, IWeakConstellation type, double amount);
+    public void onStarlightReceive(Level world, IWeakConstellation type, double amount);
 
 }

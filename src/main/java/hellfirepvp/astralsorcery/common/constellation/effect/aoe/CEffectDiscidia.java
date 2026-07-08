@@ -26,18 +26,18 @@ import hellfirepvp.astralsorcery.common.util.DamageSourceUtil;
 import hellfirepvp.astralsorcery.common.util.DamageUtil;
 import hellfirepvp.astralsorcery.common.util.block.ILocatable;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,7 +62,7 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(World world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         Vector3 playAt = new Vector3(pos).add(0.5, 0.5, 0.5);
         if (pos.equals(pedestal.getPos())) {
             playAt.add(
@@ -82,11 +82,11 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
     }
 
     @Override
-    public boolean playEffect(World world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         boolean didEffect = false;
 
         float damage = CONFIG.damage.get().floatValue(); //Randomize?..
-        PlayerEntity owner = this.getOwningPlayerInWorld(world, pos);
+        Player owner = this.getOwningPlayerInWorld(world, pos);
         DamageSource src = owner == null ? CommonProxy.DAMAGE_SOURCE_STELLAR :
                 DamageSourceUtil.withEntityDirect(CommonProxy.DAMAGE_SOURCE_STELLAR, owner);
         List<LivingEntity> entities = this.collectEntities(world, pos, properties);
@@ -94,11 +94,11 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
             if (rand.nextInt(6) != 0) {
                 continue;
             }
-            if (properties.isCorrupted() && entity instanceof MobEntity && entity.getClassification(false) == EntityClassification.MONSTER) {
+            if (properties.isCorrupted() && entity instanceof Mob && entity.getClassification(false) == EntityClassification.MONSTER) {
                 entity.heal(damage);
-                entity.addPotionEffect(new EffectInstance(Effects.RESISTANCE, 30, 1));
+                entity.addPotionEffect(new MobEffectInstance(Effects.RESISTANCE, 30, 1));
             } else {
-                if (entity instanceof PlayerEntity) {
+                if (entity instanceof Player) {
                     continue;
                 }
                 if (entity.equals(owner)) {
@@ -106,8 +106,8 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
                 }
                 DamageUtil.shotgunAttack(entity, e -> DamageUtil.attackEntityFrom(entity, src, damage));
             }
-            if (entity instanceof PlayerEntity) {
-                markPlayerAffected((PlayerEntity) entity);
+            if (entity instanceof Player) {
+                markPlayerAffected((Player) entity);
             }
 
             didEffect = true;
@@ -130,14 +130,14 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
 
         private final double defaultDamage = 3D;
 
-        public ForgeConfigSpec.DoubleValue damage;
+        public ModConfigSpec.DoubleValue damage;
 
         public DiscidiaConfig() {
             super("discidia", 10D, 2D);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.damage = cfgBuilder

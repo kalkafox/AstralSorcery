@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.crafting.nojson;
 
 import hellfirepvp.astralsorcery.common.crafting.nojson.starlight.*;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
@@ -36,7 +36,7 @@ public class LiquidStarlightCraftingRegistry extends CustomRecipeRegistry<Liquid
     }
 
     @Nullable
-    public LiquidStarlightRecipe getRecipeFor(ItemEntity itemEntity, World world, BlockPos at) {
+    public LiquidStarlightRecipe getRecipeFor(ItemEntity itemEntity, Level world, BlockPos at) {
         return this.getRecipes()
                 .stream()
                 .filter(recipe -> recipe.doesStartRecipe(itemEntity.getItem()))
@@ -49,7 +49,7 @@ public class LiquidStarlightCraftingRegistry extends CustomRecipeRegistry<Liquid
         if (!itemEntity.isAlive()) {
             return;
         }
-        World world = itemEntity.getEntityWorld();
+        Level world = itemEntity.getEntityWorld();
 
         LiquidStarlightRecipe recipe = LiquidStarlightCraftingRegistry.INSTANCE.getRecipeFor(itemEntity, world, at);
         if (recipe != null) {

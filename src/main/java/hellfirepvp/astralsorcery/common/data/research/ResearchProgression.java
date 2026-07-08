@@ -10,9 +10,7 @@ package hellfirepvp.astralsorcery.common.data.research;
 
 import com.google.common.collect.Lists;
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.IExtensibleEnum;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,7 +24,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 10.08.2016 / 13:38
  */
-public enum ResearchProgression implements IExtensibleEnum {
+public enum ResearchProgression {
 
     DISCOVERY(ProgressionTier.DISCOVERY),
     BASIC_CRAFT(ProgressionTier.BASIC_CRAFT, DISCOVERY),
@@ -94,8 +92,8 @@ public enum ResearchProgression implements IExtensibleEnum {
         return Collections.unmodifiableList(preConditions);
     }
 
-    public ITextComponent getName() {
-        return new TranslationTextComponent(this.unlocName);
+    public Component getName() {
+        return Component.translatable(this.unlocName);
     }
 
     @Nullable

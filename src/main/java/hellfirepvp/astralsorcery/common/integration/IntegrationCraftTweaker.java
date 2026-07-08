@@ -8,13 +8,17 @@
 
 package hellfirepvp.astralsorcery.common.integration;
 
+import net.minecraft.network.chat.MutableComponent;
+
+import net.minecraft.network.chat.Component;
+
 import com.blamejared.crafttweaker.api.CraftTweakerAPI;
 import com.blamejared.crafttweaker.impl.commands.CTCommandCollectionEvent;
 import hellfirepvp.astralsorcery.common.block.tile.altar.AltarType;
 import hellfirepvp.astralsorcery.common.constellation.*;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import net.minecraft.util.text.*;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,7 +43,7 @@ public class IntegrationCraftTweaker {
                 CraftTweakerAPI.logDump("%s\tis weak: %s, is major: %s", resourceLocation.toString(), constellation instanceof IWeakConstellation, constellation instanceof IMajorConstellation);
             });
             
-            final StringTextComponent message = new StringTextComponent(TextFormatting.GREEN + "Constellations written to the log" + TextFormatting.RESET);
+            final MutableComponent message = Component.literal(TextFormatting.GREEN + "Constellations written to the log" + TextFormatting.RESET);
             commandContext.getSource().sendFeedback(message, true);
             return 0;
         });
@@ -49,7 +53,7 @@ public class IntegrationCraftTweaker {
             for(AltarType value : AltarType.values()) {
                 CraftTweakerAPI.logDump(value.name());
             }
-            final StringTextComponent message = new StringTextComponent(TextFormatting.GREEN + "Altar Types written to the log" + TextFormatting.RESET);
+            final MutableComponent message = Component.literal(TextFormatting.GREEN + "Altar Types written to the log" + TextFormatting.RESET);
             commandContext.getSource().sendFeedback(message, true);
             return 0;
         });

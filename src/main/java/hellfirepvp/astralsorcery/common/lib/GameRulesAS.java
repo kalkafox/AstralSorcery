@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.lib;
 
-import net.minecraft.world.GameRules;
+import net.minecraft.world.level.GameRules;
 
 /**
  * This class is part of the Astral Sorcery Mod

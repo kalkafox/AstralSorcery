@@ -10,11 +10,11 @@ package hellfirepvp.astralsorcery.common.perk.node.key;
 
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigEntry;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,15 +53,15 @@ public class KeyVoidTrash extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue oreChance;
-        private ForgeConfigSpec.ConfigValue<List<String>> trashItems;
+        private ModConfigSpec.DoubleValue oreChance;
+        private ModConfigSpec.ConfigValue<List<String>> trashItems;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.trashItems = cfgBuilder
                     .comment("List items that should count as trash and should be voided.")
                     .translation(translationKey("trashItems"))

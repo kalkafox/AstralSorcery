@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.perk.node;
 import hellfirepvp.astralsorcery.common.perk.modifier.AttributeModifierPerk;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkTreeMajor;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkTreePoint;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod

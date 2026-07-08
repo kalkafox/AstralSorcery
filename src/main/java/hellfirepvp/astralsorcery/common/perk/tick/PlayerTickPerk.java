@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.perk.tick;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,6 +20,6 @@ import net.minecraftforge.fml.LogicalSide;
  */
 public interface PlayerTickPerk {
 
-    void onPlayerTick(PlayerEntity player, LogicalSide side);
+    void onPlayerTick(Player player, LogicalSide side);
 
 }

@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.common.block.tile.altar.AltarType;
@@ -52,7 +52,7 @@ public class RenderPageAltarRecipe extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public void render(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
         this.clearFrameRectangles();
 
         this.renderRecipeGrid(renderStack, x, y, z, this.gridTexture);
@@ -93,7 +93,7 @@ public class RenderPageAltarRecipe extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public void postRender(MatrixStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
         this.renderHoverTooltips(renderStack, mouseX, mouseY, z, this.recipe.getId());
         this.renderInfoStarTooltips(renderStack, x, y, z, mouseX, mouseY, (toolTip) -> {
             this.addAltarRecipeTooltip(this.recipe, toolTip);

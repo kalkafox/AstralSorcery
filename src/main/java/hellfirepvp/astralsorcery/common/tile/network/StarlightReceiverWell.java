@@ -13,8 +13,8 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.IPrismTransmissio
 import hellfirepvp.astralsorcery.common.starlight.transmission.base.SimpleTransmissionReceiver;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionProvider;
 import hellfirepvp.astralsorcery.common.tile.TileWell;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,7 +30,7 @@ public class StarlightReceiverWell extends SimpleTransmissionReceiver<TileWell> 
     }
 
     @Override
-    public void onStarlightReceive(World world, IWeakConstellation type, double amount) {
+    public void onStarlightReceive(Level world, IWeakConstellation type, double amount) {
         TileWell well = getTileAtPos(world);
         if (well != null) {
             well.receiveStarlight(amount);
@@ -38,7 +38,7 @@ public class StarlightReceiverWell extends SimpleTransmissionReceiver<TileWell> 
     }
 
     @Override
-    public boolean syncTileData(World world, TileWell tile) {
+    public boolean syncTileData(Level world, TileWell tile) {
         return true;
     }
 

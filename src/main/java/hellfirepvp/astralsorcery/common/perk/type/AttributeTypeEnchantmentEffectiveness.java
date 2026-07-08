@@ -14,9 +14,9 @@ import hellfirepvp.astralsorcery.common.event.AttributeEvent;
 import hellfirepvp.astralsorcery.common.event.DynamicEnchantmentEvent;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -38,7 +38,7 @@ public class AttributeTypeEnchantmentEffectiveness extends PerkAttributeType {
     }
 
     private void onModify(DynamicEnchantmentEvent.Modify event) {
-        PlayerEntity player = event.getResolvedPlayer();
+        Player player = event.getResolvedPlayer();
         LogicalSide side = this.getSide(player);
         if (!hasTypeApplied(player, side)) {
             return;

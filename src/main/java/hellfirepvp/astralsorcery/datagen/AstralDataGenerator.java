@@ -18,10 +18,10 @@ import hellfirepvp.astralsorcery.datagen.data.tags.AstralBlockTagsProvider;
 import hellfirepvp.astralsorcery.datagen.data.tags.AstralItemTagsProvider;
 import net.minecraft.data.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.GatherDataEvent;
 
 /**
  * This class is part of the Astral Sorcery Mod

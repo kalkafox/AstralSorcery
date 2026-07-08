@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.client.effect.function;
 
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import javax.annotation.Nonnull;
 

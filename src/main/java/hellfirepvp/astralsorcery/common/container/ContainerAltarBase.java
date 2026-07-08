@@ -11,13 +11,13 @@ package hellfirepvp.astralsorcery.common.container;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -31,10 +31,10 @@ import java.util.Optional;
  */
 public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> {
 
-    private final PlayerInventory playerInv;
+    private final Inventory playerInv;
     private final TileInventory invHandler;
 
-    protected ContainerAltarBase(TileAltar altar, @Nullable ContainerType<?> type, PlayerInventory inv, int windowId) {
+    protected ContainerAltarBase(TileAltar altar, @Nullable MenuType<?> type, Inventory inv, int windowId) {
         super(altar, type, windowId);
         this.playerInv = inv;
         this.invHandler = altar.getInventory();
@@ -43,17 +43,17 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
         bindAltarInventory(this.invHandler);
     }
 
-    abstract void bindPlayerInventory(PlayerInventory plInventory);
+    abstract void bindPlayerInventory(Inventory plInventory);
 
     abstract void bindAltarInventory(TileInventory altarInventory);
 
-    abstract Optional<ItemStack> handleCustomTransfer(PlayerEntity player, int index);
+    abstract Optional<ItemStack> handleCustomTransfer(Player player, int index);
 
     //Yes this is not a pretty solution. tell me a better one.
     public abstract int translateIndex(int fromIndex);
 
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack transferStackInSlot(Player playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
@@ -95,7 +95,7 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity player) {
+    public boolean canInteractWith(Player player) {
         BlockPos pos = this.getTileEntity().getPos();
         if (MiscUtils.getTileAt(this.getTileEntity().getWorld(), pos, TileEntity.class, false) != this.getTileEntity()) {
             return false;

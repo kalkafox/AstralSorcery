@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.block.tile.crystal.CollectorCrystalType;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
 import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 /**
  * This class is part of the Astral Sorcery Mod

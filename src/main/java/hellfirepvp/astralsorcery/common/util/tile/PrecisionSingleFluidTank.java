@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.util.tile;
 
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.IFluidTank;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 
@@ -192,8 +192,8 @@ public class PrecisionSingleFluidTank implements IFluidTank {
         return drain(resource.getAmount(), action);
     }
 
-    public CompoundNBT writeNBT() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag writeNBT() {
+        CompoundTag tag = new CompoundTag();
         tag.putDouble("amt", this.amount);
         tag.putInt("capacity", this.maxCapacity);
         tag.putBoolean("aIn", this.allowInput);
@@ -202,7 +202,7 @@ public class PrecisionSingleFluidTank implements IFluidTank {
         return tag;
     }
 
-    public void readNBT(CompoundNBT tag) {
+    public void readNBT(CompoundTag tag) {
         this.amount = tag.getDouble("amt");
         this.maxCapacity = tag.getInt("capacity");
         this.allowInput = tag.getBoolean("aIn");
@@ -210,7 +210,7 @@ public class PrecisionSingleFluidTank implements IFluidTank {
         this.fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(tag.getString("fluid")));
     }
 
-    public static PrecisionSingleFluidTank deserialize(CompoundNBT tag) {
+    public static PrecisionSingleFluidTank deserialize(CompoundTag tag) {
         PrecisionSingleFluidTank tank = new PrecisionSingleFluidTank();
         tank.readNBT(tag);
         return tank;

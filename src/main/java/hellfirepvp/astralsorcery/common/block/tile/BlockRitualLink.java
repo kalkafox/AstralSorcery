@@ -11,16 +11,16 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesGlass;
 import hellfirepvp.astralsorcery.common.tile.TileRitualLink;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ContainerBlock;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.BlockGetter;
+import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 10.07.2019 / 21:01
  */
-public class BlockRitualLink extends ContainerBlock implements CustomItemBlock {
+public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock {
 
     private static final VoxelShape RITUAL_LINK = VoxelShapes.create(6D / 16D, 2D / 16D, 6D / 16D, 10D / 16D, 14D / 16D, 10D / 16D);
 
@@ -41,18 +41,18 @@ public class BlockRitualLink extends ContainerBlock implements CustomItemBlock {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return RITUAL_LINK;
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
+    public RenderShape getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
         return new TileRitualLink();
     }
 }

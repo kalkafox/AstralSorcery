@@ -8,11 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.item;
 
-import hellfirepvp.astralsorcery.common.CommonProxy;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,17 +25,16 @@ public class ItemChisel extends Item {
 
     public ItemChisel() {
         super(new Properties()
-                .maxDamage(72)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .durability(72));
     }
 
     @Override
-    public int getItemEnchantability(ItemStack stack) {
+    public int getEnchantmentValue(ItemStack stack) {
         return 3;
     }
 
     @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        return super.canApplyAtEnchantingTable(stack, enchantment) || enchantment == Enchantments.FORTUNE;
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+        return super.supportsEnchantment(stack, enchantment) || enchantment.is(Enchantments.FORTUNE);
     }
 }

@@ -25,21 +25,21 @@ import hellfirepvp.astralsorcery.common.util.block.WorldBlockPos;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
 import hellfirepvp.astralsorcery.common.util.tick.TickTokenMap;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,7 +65,7 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(World world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         if (pedestal.getTicksExisted() % 20 == 0) {
             EffectHelper.spawnSource(new FXOrbitalArmara(new Vector3(pos).add(0.5, 0.5, 0.5))
                     .setOrbitRadius(0.8 + rand.nextFloat() * 0.7)
@@ -90,15 +90,15 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
         if (!projectiles.isEmpty()) {
             for (Entity e : projectiles) {
                 if (e.isAlive() && TechnicalEntityRegistry.INSTANCE.canAffect(e)) {
-                    if (e instanceof ProjectileEntity) {
+                    if (e instanceof Projectile) {
                         double xRatio = (pos.getX() + 0.5) - e.getPosX();
                         double zRatio = (pos.getZ() + 0.5) - e.getPosZ();
                         float f = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
                         Vector3 motion = new Vector3(e.getMotion());
                         motion.multiply(new Vector3(0.5, 1, 0.5));
                         motion.subtract(xRatio / f * 0.4, 0, zRatio / f * 0.4);
-                        ((ProjectileEntity) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
-                    } else if (e instanceof MobEntity) {
+                        ((Projectile) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
+                    } else if (e instanceof Mob) {
                         ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getPosX(), (pos.getZ() + 0.5) - e.getPosZ());
                     }
                 }
@@ -107,7 +107,7 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
     }
 
     @Override
-    public boolean playEffect(World world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         int toAdd = 2 + rand.nextInt(5);
         WorldBlockPos at = WorldBlockPos.wrapServer(world, pos);
         TickTokenMap.SimpleTickToken<Double> token = EventHelperSpawnDeny.spawnDenyRegions.get(at);
@@ -126,15 +126,15 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
             if (!projectiles.isEmpty()) {
                 for (Entity e : projectiles) {
                     if (e.isAlive() && TechnicalEntityRegistry.INSTANCE.canAffect(e)) {
-                        if (e instanceof ProjectileEntity) {
+                        if (e instanceof Projectile) {
                             double xRatio = (pos.getX() + 0.5) - e.getPosX();
                             double zRatio = (pos.getZ() + 0.5) - e.getPosZ();
                             float f = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
                             Vector3 motion = new Vector3(e.getMotion());
                             motion.multiply(new Vector3(0.5, 1, 0.5));
                             motion.subtract(xRatio / f * 0.4, 0, zRatio / f * 0.4);
-                            ((ProjectileEntity) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
-                        } else if (e instanceof MobEntity) {
+                            ((Projectile) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
+                        } else if (e instanceof Mob) {
                             ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getPosX(), (pos.getZ() + 0.5) - e.getPosZ());
                         }
                     }
@@ -145,27 +145,27 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
         int potionAmplifier = CONFIG.potionAmplifier.get();
         List<LivingEntity> entities = this.collectEntities(world, pos, properties);
         for (LivingEntity entity : entities) {
-            if (entity.isAlive() && (entity instanceof MobEntity || entity instanceof PlayerEntity)) {
+            if (entity.isAlive() && (entity instanceof Mob || entity instanceof Player)) {
                 if (properties.isCorrupted()) {
-                    if (entity instanceof PlayerEntity) {
+                    if (entity instanceof Player) {
                         continue;
                     }
 
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.SPEED, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.REGENERATION, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.RESISTANCE, 100, potionAmplifier + 2));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.STRENGTH, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.WATER_BREATHING, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.HASTE, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 100, 5));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.SPEED, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.REGENERATION, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.RESISTANCE, 100, potionAmplifier + 2));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.STRENGTH, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.WATER_BREATHING, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.HASTE, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 100, 5));
                 } else {
-                    EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.RESISTANCE, 30, Math.min(potionAmplifier, 3), true, true));
-                    if (entity instanceof PlayerEntity) {
-                        EntityUtils.applyPotionEffectAtHalf(entity, new EffectInstance(Effects.ABSORPTION, 30, potionAmplifier, true, false));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.RESISTANCE, 30, Math.min(potionAmplifier, 3), true, true));
+                    if (entity instanceof Player) {
+                        EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.ABSORPTION, 30, potionAmplifier, true, false));
                     }
                 }
-                if (entity instanceof PlayerEntity) {
-                    markPlayerAffected((PlayerEntity) entity);
+                if (entity instanceof Player) {
+                    markPlayerAffected((Player) entity);
                 }
             }
         }
@@ -184,14 +184,14 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
     }
 
     @Override
-    public void readFromNBT(CompoundNBT cmp) {
+    public void readFromNBT(CompoundTag cmp) {
         super.readFromNBT(cmp);
 
         this.rememberedTimeout = cmp.getInt("rememberedTimeout");
     }
 
     @Override
-    public void writeToNBT(CompoundNBT cmp) {
+    public void writeToNBT(CompoundTag cmp) {
         super.writeToNBT(cmp);
 
         cmp.putInt("rememberedTimeout", this.rememberedTimeout);
@@ -201,14 +201,14 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
 
         private final int defaultPotionAmplifier = 1;
 
-        public ForgeConfigSpec.IntValue potionAmplifier;
+        public ModConfigSpec.IntValue potionAmplifier;
 
         public ArmaraConfig() {
             super("armara", 16, 2);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.potionAmplifier = cfgBuilder

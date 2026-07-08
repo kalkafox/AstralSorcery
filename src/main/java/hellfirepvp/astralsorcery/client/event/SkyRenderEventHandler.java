@@ -13,12 +13,12 @@ import hellfirepvp.astralsorcery.client.sky.ChainingSkyRenderer;
 import hellfirepvp.astralsorcery.common.constellation.SkyHandler;
 import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.client.world.DimensionRenderInfo;
-import net.minecraftforge.client.ISkyRenderHandler;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
+import net.neoforged.neoforge.client.ISkyRenderHandler;
+import net.neoforged.neoforge.client.event.EntityViewRenderEvent;
+import net.neoforged.neoforge.client.event.RenderWorldLastEvent;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,7 +30,7 @@ import net.minecraftforge.fml.LogicalSide;
 public class SkyRenderEventHandler {
 
     public static void onRender(RenderWorldLastEvent event) {
-        ClientWorld world = Minecraft.getInstance().world;
+        ClientLevel world = Minecraft.getInstance().world;
         if (world != null && world.func_239132_a_().func_241683_c_() == DimensionRenderInfo.FogType.NORMAL) {
             ISkyRenderHandler render = world.func_239132_a_().getSkyRenderHandler();
             if (!(render instanceof ChainingSkyRenderer)) {
@@ -43,7 +43,7 @@ public class SkyRenderEventHandler {
     }
 
     public static void onFog(EntityViewRenderEvent.FogColors event) {
-        ClientWorld world = Minecraft.getInstance().world;
+        ClientLevel world = Minecraft.getInstance().world;
         if (world != null) {
             String strDimKey = world.getDimensionKey().getLocation().toString();
             if (world.func_239132_a_().func_241683_c_() == DimensionRenderInfo.FogType.NORMAL &&

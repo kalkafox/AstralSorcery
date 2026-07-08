@@ -16,12 +16,11 @@ import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
 import hellfirepvp.astralsorcery.common.crystal.CrystalProperty;
 import hellfirepvp.astralsorcery.common.crystal.CrystalPropertyRegistry;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +40,7 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> stacks) {
+    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> stacks) {
         if (isInGroup(group)) {
             for (IWeakConstellation cst : ConstellationRegistry.getWeakConstellations()) {
                 ItemStack stack = new ItemStack(this);
@@ -59,10 +58,10 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
         }
     }
     @Override
-    public ITextComponent getDisplayName(ItemStack stack) {
+    public Component getDisplayName(ItemStack stack) {
         IWeakConstellation cst = this.getAttunedConstellation(stack);
         if (cst != null) {
-            return new TranslationTextComponent(super.getTranslationKey(stack) + ".typed", cst.getConstellationName());
+            return Component.translatable(super.getTranslationKey(stack) + ".typed", cst.getConstellationName());
         }
         return super.getDisplayName(stack);
     }

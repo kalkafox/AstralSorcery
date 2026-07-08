@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.storage;
 
 import hellfirepvp.astralsorcery.common.util.block.ILocatable;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
@@ -28,7 +28,7 @@ public interface IStorageNetworkTile<T extends IStorageNetworkTile<T>> extends I
     public T getAssociatedCore();
 
     //The world the network is in. Usually the tile's world
-    public World getNetworkWorld();
+    public Level getNetworkWorld();
 
     //This tile's notification of mapping or network changes
     public void receiveMappingChange(StorageNetworkHandler.MappingChange newMapping);

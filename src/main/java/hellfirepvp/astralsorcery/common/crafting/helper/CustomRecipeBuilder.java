@@ -11,10 +11,10 @@ package hellfirepvp.astralsorcery.common.crafting.helper;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
 import org.apache.logging.log4j.Level;
 
 import javax.annotation.Nonnull;
@@ -34,7 +34,7 @@ import java.util.function.Consumer;
  */
 public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
 
-    private static final Map<IRecipeType<?>, Set<ResourceLocation>> builtRecipes = new HashMap<>();
+    private static final Map<RecipeType<?>, Set<ResourceLocation>> builtRecipes = new HashMap<>();
 
     public void build(Consumer<IFinishedRecipe> consumerIn) {
         this.build(consumerIn, null);
@@ -83,7 +83,7 @@ public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
         }
 
         @Override
-        public IRecipeSerializer<?> getSerializer() {
+        public RecipeSerializer<?> getSerializer() {
             return this.recipe.getSerializer();
         }
 

@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.tile.altar;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -45,12 +45,12 @@ public class DeferredStarlightStorage {
         return starlightStorage.getLast();
     }
 
-    public void readNBT(CompoundNBT compound) {
+    public void readNBT(CompoundTag compound) {
         this.starlightStorage.clear();
         this.starlightStorage.addLast(compound.getInt("starlightStorage"));
     }
 
-    public void writeNBT(CompoundNBT compound) {
+    public void writeNBT(CompoundTag compound) {
         compound.putInt("starlightStorage", this.getStoredStarlight());
     }
 }

@@ -8,10 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.Arrays;
 import java.util.List;

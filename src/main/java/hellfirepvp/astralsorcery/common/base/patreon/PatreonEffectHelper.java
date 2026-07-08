@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.base.patreon;
 
 import com.google.common.collect.Maps;
 import hellfirepvp.astralsorcery.client.data.config.entry.RenderingConfig;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,7 +48,7 @@ public class PatreonEffectHelper {
         return effectMap.get(effectUUID);
     }
 
-    public static <T extends PlayerEntity> Map<UUID, List<PatreonEffect>> getPatreonEffects(Collection<T> players) {
+    public static <T extends Player> Map<UUID, List<PatreonEffect>> getPatreonEffects(Collection<T> players) {
         if (!loadingFinished) {
             return Maps.newHashMap();
         }

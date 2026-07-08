@@ -20,14 +20,14 @@ import hellfirepvp.astralsorcery.common.tile.TileTelescope;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
@@ -46,9 +46,9 @@ public enum GuiType {
     TELESCOPE,
     HAND_TELESCOPE;
 
-    public CompoundNBT serializeArguments(Object[] data) {
+    public CompoundTag serializeArguments(Object[] data) {
         try {
-            CompoundNBT nbt = new CompoundNBT();
+            CompoundTag nbt = new CompoundTag();
             switch (this) {
                 case CONSTELLATION_PAPER:
                     nbt.putString("cst", ((IConstellation) data[0]).getRegistryName().toString());
@@ -68,9 +68,9 @@ public enum GuiType {
 
     @Nullable
     @OnlyIn(Dist.CLIENT)
-    public Screen deserialize(CompoundNBT data) {
-        World clWorld = Minecraft.getInstance().world;
-        PlayerEntity clPlayer = Minecraft.getInstance().player;
+    public Screen deserialize(CompoundTag data) {
+        Level clWorld = Minecraft.getInstance().world;
+        Player clPlayer = Minecraft.getInstance().player;
         if (clWorld == null || clPlayer == null) {
             return null;
         }

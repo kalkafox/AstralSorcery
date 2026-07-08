@@ -11,9 +11,9 @@ package hellfirepvp.astralsorcery.common.registry;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.custom.RecipeDyeableChangeColor;
 import hellfirepvp.astralsorcery.common.crafting.serializer.*;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import static hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS.*;
 
@@ -39,7 +39,7 @@ public class RegistryRecipeSerializers {
         CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER = register(new RecipeDyeableChangeColor.CelestialGatewayColorSerializer());
     }
 
-    private static <C extends IInventory, R extends IRecipe<C>, T extends IRecipeSerializer<R>> T register(T serializer) {
+    private static <C extends Container, R extends Recipe<C>, T extends RecipeSerializer<R>> T register(T serializer) {
         AstralSorcery.getProxy().getRegistryPrimer().register(serializer);
         return serializer;
     }

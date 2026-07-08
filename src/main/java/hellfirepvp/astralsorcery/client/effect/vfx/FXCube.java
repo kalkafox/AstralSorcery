@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.effect.vfx;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.effect.EntityDynamicFX;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.context.base.BatchRenderContext;
@@ -96,10 +96,10 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
     }
 
     @Override
-    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, MatrixStack renderStack, IVertexBuilder vb, float pTicks) {}
+    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, PoseStack renderStack, VertexConsumer vb, float pTicks) {}
 
     @Override
-    public <T extends EntityVisualFX & EntityDynamicFX> void renderNow(BatchRenderContext<T> ctx, MatrixStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
+    public <T extends EntityVisualFX & EntityDynamicFX> void renderNow(BatchRenderContext<T> ctx, PoseStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
         float u, v, uLength, vLength;
         if (this.tas != null) {
             u = this.tas.getMinU();
@@ -128,7 +128,7 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
         renderStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.scale(scale, scale, scale);
 
-        IVertexBuilder buf = drawBuffer.getBuffer(ctx.getRenderType());
+        VertexConsumer buf = drawBuffer.getBuffer(ctx.getRenderType());
         RenderingDrawUtils.renderTexturedCubeCentralColorLighted(buf, renderStack,
                 u, v, uLength, vLength,
                 c.getRed(), c.getGreen(), c.getBlue(), alpha,

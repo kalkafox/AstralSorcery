@@ -10,15 +10,15 @@ package hellfirepvp.astralsorcery.common.block.tile;
 
 import hellfirepvp.astralsorcery.common.block.base.BlockFakedState;
 import hellfirepvp.astralsorcery.common.tile.TileTreeBeaconComponent;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -40,13 +40,13 @@ public class BlockTreeBeaconComponent extends BlockFakedState {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
+    public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
         this.playParticles(world, pos, rand);
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
         return new TileTreeBeaconComponent();
     }
 }

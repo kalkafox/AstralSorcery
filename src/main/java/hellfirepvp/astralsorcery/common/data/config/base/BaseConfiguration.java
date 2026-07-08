@@ -10,9 +10,10 @@ package hellfirepvp.astralsorcery.common.data.config.base;
 
 import com.google.common.base.Splitter;
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class BaseConfiguration {
     }
 
     public void buildConfiguration() {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
         for (ConfigEntry entry : configEntries) {
             List<String> splitPath = DOT_SPLITTER.splitToList(entry.getPath());
@@ -59,18 +60,17 @@ public class BaseConfiguration {
         makeAndRegister(builder.build(), AstralSorcery.MODID);
     }
 
-    private void makeAndRegister(ForgeConfigSpec spec, String file) {
+    private void makeAndRegister(ModConfigSpec spec, String file) {
         String fileName = this.configType == ModConfig.Type.SERVER ?
                 String.format("%s.toml", file) :
                 String.format("%s-%s.toml", file, this.configType.extension());
         ModContainer ct = AstralSorcery.getModContainer();
-        ModConfig cfg = new ModConfig(this.configType, spec, ct, fileName);
-        ct.addConfig(cfg);
+        ct.registerConfig(this.configType, spec, fileName);
 
         REGISTERED_CONFIGS.put(this.configType, this);
     }
 
-    public static void refreshConfiguration(ModConfig.Loading cfgLoadEvent) {
+    public static void refreshConfiguration(ModConfigEvent.Loading cfgLoadEvent) {
         ModConfig config = cfgLoadEvent.getConfig();
         if (config.getModId().equals(AstralSorcery.MODID)) {
             BaseConfiguration cfg = REGISTERED_CONFIGS.get(config.getType());

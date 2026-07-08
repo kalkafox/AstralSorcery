@@ -29,15 +29,15 @@ import hellfirepvp.astralsorcery.common.util.block.iterator.BlockLayerPositionGe
 import hellfirepvp.astralsorcery.common.util.block.iterator.BlockPositionGenerator;
 import hellfirepvp.astralsorcery.common.util.block.iterator.BlockRandomPositionGenerator;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -78,19 +78,19 @@ public class CEffectMineralis extends CEffectAbstractList<ListEntries.PosEntry> 
 
     @Nullable
     @Override
-    public ListEntries.PosEntry recreateElement(CompoundNBT tag, BlockPos pos) {
+    public ListEntries.PosEntry recreateElement(CompoundTag tag, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Nullable
     @Override
-    public ListEntries.PosEntry createElement(World world, BlockPos pos) {
+    public ListEntries.PosEntry createElement(Level world, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(World world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
         if (rand.nextFloat() < 0.6F) {
@@ -109,7 +109,7 @@ public class CEffectMineralis extends CEffectAbstractList<ListEntries.PosEntry> 
     }
 
     @Override
-    public boolean playEffect(World world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         return this.peekNewPosition(world, pos, properties).mapLeft(entry -> {
             BlockPos at = entry.getPos();
             BlockState atState = world.getBlockState(at);
@@ -167,7 +167,7 @@ public class CEffectMineralis extends CEffectAbstractList<ListEntries.PosEntry> 
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.replaceableStates = this.defaultReplaceableStates.getAsConfig(

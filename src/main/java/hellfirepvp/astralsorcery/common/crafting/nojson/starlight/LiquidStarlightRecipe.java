@@ -11,20 +11,20 @@ package hellfirepvp.astralsorcery.common.crafting.nojson.starlight;
 import hellfirepvp.astralsorcery.common.crafting.nojson.CustomRecipe;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -56,25 +56,25 @@ public abstract class LiquidStarlightRecipe extends CustomRecipe {
 
     public abstract boolean doesStartRecipe(ItemStack item);
 
-    public abstract boolean matches(ItemEntity trigger, World world, BlockPos at);
+    public abstract boolean matches(ItemEntity trigger, Level world, BlockPos at);
 
-    public abstract void doServerCraftTick(ItemEntity trigger, World world, BlockPos at);
+    public abstract void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at);
 
     @OnlyIn(Dist.CLIENT)
-    public abstract void doClientEffectTick(ItemEntity trigger, World world, BlockPos at);
+    public abstract void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at);
 
-    protected final List<Entity> getEntitiesInBlock(IWorld world, BlockPos pos) {
-        return world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos));
+    protected final List<Entity> getEntitiesInBlock(LevelAccessor world, BlockPos pos) {
+        return world.getEntitiesWithinAABB(Entity.class, new AABB(pos));
     }
 
     @Nullable
-    protected final ItemStack consumeItemEntityInBlock(IWorld world, BlockPos pos, Item itemClass) {
+    protected final ItemStack consumeItemEntityInBlock(LevelAccessor world, BlockPos pos, Item itemClass) {
         return consumeItemEntityInBlock(world, pos, 1, stack ->
                 itemClass.getClass().isAssignableFrom(stack.getItem().getClass()));
     }
 
     @Nullable
-    protected final ItemStack consumeItemEntityInBlock(IWorld world, BlockPos pos, int count, Predicate<ItemStack> match) {
+    protected final ItemStack consumeItemEntityInBlock(LevelAccessor world, BlockPos pos, int count, Predicate<ItemStack> match) {
         List<Entity> entities = getEntitiesInBlock(world, pos).stream()
                 .filter(e -> e instanceof ItemEntity)
                 .collect(Collectors.toList());
@@ -105,7 +105,7 @@ public abstract class LiquidStarlightRecipe extends CustomRecipe {
     protected final void setCraftingTick(Entity e, int tick) {
         long wTick = e.getEntityWorld().getGameTime();
 
-        CompoundNBT nbt = NBTHelper.getPersistentData(e);
+        CompoundTag nbt = NBTHelper.getPersistentData(e);
         nbt.putInt("craftTick", tick);
         nbt.putLong("wCraftTick", wTick);
     }
@@ -113,7 +113,7 @@ public abstract class LiquidStarlightRecipe extends CustomRecipe {
     protected final int getCraftingTick(Entity e) {
         long wTick = e.getEntityWorld().getGameTime();
 
-        CompoundNBT nbt = NBTHelper.getPersistentData(e);
+        CompoundTag nbt = NBTHelper.getPersistentData(e);
         if (!nbt.contains("wCraftTick", Constants.NBT.TAG_LONG)) {
             return 0;
         }

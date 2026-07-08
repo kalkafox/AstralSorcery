@@ -11,13 +11,13 @@ package hellfirepvp.astralsorcery.common.util.block;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.object.TransformReference;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -32,30 +32,30 @@ import java.util.function.Function;
  */
 public class WorldBlockPos extends BlockPos {
 
-    private final TransformReference<RegistryKey<World>, World> worldReference;
+    private final TransformReference<ResourceKey<Level>, Level> worldReference;
 
-    private WorldBlockPos(TransformReference<RegistryKey<World>, World> worldReference, BlockPos pos) {
+    private WorldBlockPos(TransformReference<ResourceKey<Level>, Level> worldReference, BlockPos pos) {
         super(pos);
         this.worldReference = worldReference;
     }
 
-    private WorldBlockPos(RegistryKey<World> type, BlockPos pos, Function<RegistryKey<World>, World> worldProvider) {
+    private WorldBlockPos(ResourceKey<Level> type, BlockPos pos, Function<ResourceKey<Level>, Level> worldProvider) {
         super(pos);
         this.worldReference = new TransformReference<>(type, worldProvider);
     }
 
-    public static WorldBlockPos wrapServer(World world, BlockPos pos) {
+    public static WorldBlockPos wrapServer(Level world, BlockPos pos) {
         return new WorldBlockPos(world.getDimensionKey(), pos, type -> {
             MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
             return server.getWorld(type);
         });
     }
 
-    public static WorldBlockPos wrapTileEntity(TileEntity tile) {
+    public static WorldBlockPos wrapTileEntity(BlockEntity tile) {
         return new WorldBlockPos(tile.getWorld().getDimensionKey(), tile.getPos(), type -> tile.getWorld());
     }
 
-    public RegistryKey<World> getWorldKey() {
+    public ResourceKey<Level> getWorldKey() {
         return this.worldReference.getReference();
     }
 
@@ -74,13 +74,13 @@ public class WorldBlockPos extends BlockPos {
     }
 
     @Override
-    public WorldBlockPos add(Vector3i vec) {
+    public WorldBlockPos add(Vec3i vec) {
         return wrapInternal(super.add(vec));
     }
 
     @Nullable
-    public <T extends TileEntity> T getTileAt(Class<T> tileClass, boolean forceChunkLoad) {
-        World world = this.worldReference.getValue();
+    public <T extends BlockEntity> T getTileAt(Class<T> tileClass, boolean forceChunkLoad) {
+        Level world = this.worldReference.getValue();
         if (world != null) {
             return MiscUtils.getTileAt(world, this, tileClass, forceChunkLoad);
         }
@@ -88,7 +88,7 @@ public class WorldBlockPos extends BlockPos {
     }
 
     @Nullable
-    public World getWorld() {
+    public Level getWorld() {
         return this.worldReference.getValue();
     }
 

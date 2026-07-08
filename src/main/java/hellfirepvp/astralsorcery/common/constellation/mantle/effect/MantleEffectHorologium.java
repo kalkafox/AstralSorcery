@@ -15,13 +15,13 @@ import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.util.time.TimeStopController;
 import hellfirepvp.astralsorcery.common.util.time.TimeStopZone;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,7 +51,7 @@ public class MantleEffectHorologium extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         if (!player.getCooldownTracker().hasCooldown(ItemsAS.MANTLE)) {
@@ -63,10 +63,10 @@ public class MantleEffectHorologium extends MantleEffect {
 
     private void onHurt(LivingHurtEvent event) {
         if (ItemMantle.getEffect(event.getEntityLiving(), ConstellationsAS.horologium) != null &&
-                event.getEntityLiving() instanceof PlayerEntity &&
+                event.getEntityLiving() instanceof Player &&
                 !event.getEntityLiving().getEntityWorld().isRemote() &&
                 !event.getSource().isFireDamage()) {
-            PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+            Player player = (Player) event.getEntityLiving();
 
             if (!player.getCooldownTracker().hasCooldown(ItemsAS.MANTLE) &&
                     AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFreeze.get())) {
@@ -95,11 +95,11 @@ public class MantleEffectHorologium extends MantleEffect {
 
         private final int defaultChargeCostPerFreeze = 400;
 
-        public ForgeConfigSpec.DoubleValue effectRange;
-        public ForgeConfigSpec.IntValue effectDuration;
-        public ForgeConfigSpec.IntValue cooldown;
+        public ModConfigSpec.DoubleValue effectRange;
+        public ModConfigSpec.IntValue effectDuration;
+        public ModConfigSpec.IntValue cooldown;
 
-        public ForgeConfigSpec.IntValue chargeCostPerFreeze;
+        public ModConfigSpec.IntValue chargeCostPerFreeze;
 
 
         public HorologiumConfig() {
@@ -107,7 +107,7 @@ public class MantleEffectHorologium extends MantleEffect {
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.effectRange = cfgBuilder

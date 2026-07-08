@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.event;
 
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSourceProvider;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 import java.util.function.Consumer;
 

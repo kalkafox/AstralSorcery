@@ -20,18 +20,18 @@ import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.util.data.ASDataSerializers;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.network.NetworkHooks;
 
 import java.awt.*;
 import java.util.Random;
@@ -43,16 +43,16 @@ import java.util.Random;
  * Created by HellFirePvP
  * Date: 26.11.2020 / 19:30
  */
-public class EntityShootingStar extends ThrowableEntity {
+public class EntityShootingStar extends ThrowableProjectile {
 
-    private static final DataParameter<Long> EFFECT_SEED = EntityDataManager.createKey(EntityShootingStar.class, ASDataSerializers.LONG);
+    private static final EntityDataAccessor<Long> EFFECT_SEED = EntityDataManager.createKey(EntityShootingStar.class, ASDataSerializers.LONG);
 
-    protected EntityShootingStar(World worldIn) {
+    protected EntityShootingStar(Level worldIn) {
         super(EntityTypesAS.SHOOTING_STAR, worldIn);
         this.dataManager.set(EFFECT_SEED, rand.nextLong());
     }
 
-    protected EntityShootingStar(double x, double y, double z, World worldIn) {
+    protected EntityShootingStar(double x, double y, double z, Level worldIn) {
         this(worldIn);
         this.setPosition(x, y, z);
     }
@@ -82,9 +82,9 @@ public class EntityShootingStar extends ThrowableEntity {
     }
 
     private void adjustMotion() {
-        Vector3d motion = getMotion();
+        Vec3 motion = getMotion();
         double y = Math.min(-0.7F, motion.getY());
-        setMotion(new Vector3d(motion.getX(), y, motion.getZ()));
+        setMotion(new Vec3(motion.getX(), y, motion.getZ()));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -92,7 +92,7 @@ public class EntityShootingStar extends ThrowableEntity {
         float maxRenderPosDist = 96F;
 
         VFXRenderOffsetFunction<FXFacingParticle> renderFn = (fx, iPos, pTicks) -> {
-            PlayerEntity pl = Minecraft.getInstance().player;
+            Player pl = Minecraft.getInstance().player;
             if (pl == null) {
                 return iPos;
             }
@@ -103,7 +103,7 @@ public class EntityShootingStar extends ThrowableEntity {
             return Vector3.atEntityCorner(pl).add(v.normalize().multiply(maxRenderPosDist));
         };
         VFXScaleFunction<EntityVisualFX> scaleFn = (fx, scaleIn, pTicks) -> {
-            PlayerEntity pl = Minecraft.getInstance().player;
+            Player pl = Minecraft.getInstance().player;
             if (pl == null) {
                 return scaleIn;
             }
@@ -169,7 +169,7 @@ public class EntityShootingStar extends ThrowableEntity {
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

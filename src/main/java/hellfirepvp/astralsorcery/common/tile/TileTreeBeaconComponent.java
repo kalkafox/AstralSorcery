@@ -12,8 +12,8 @@ import hellfirepvp.astralsorcery.common.lib.TileEntityTypesAS;
 import hellfirepvp.astralsorcery.common.tile.base.TileFakedState;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nonnull;
 
@@ -59,14 +59,14 @@ public class TileTreeBeaconComponent extends TileFakedState {
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.treeBeaconPos = NBTHelper.readFromSubTag(compound, "treeBeaconPos", NBTHelper::readBlockPosFromNBT);
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         NBTHelper.setAsSubTag(compound, "treeBeaconPos", tag -> NBTHelper.writeBlockPosToNBT(this.treeBeaconPos, tag));

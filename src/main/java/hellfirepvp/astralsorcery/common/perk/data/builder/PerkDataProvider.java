@@ -12,9 +12,9 @@ import com.google.gson.*;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DirectoryCache;
-import net.minecraft.data.IDataProvider;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.data.HashCache;
+import net.minecraft.data.DataProvider;
+import net.minecraft.resources.ResourceLocation;
 
 import java.awt.*;
 import java.io.BufferedWriter;
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 14.08.2020 / 19:09
  */
-public abstract class PerkDataProvider implements IDataProvider {
+public abstract class PerkDataProvider implements DataProvider {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     protected final DataGenerator generator;
@@ -44,7 +44,7 @@ public abstract class PerkDataProvider implements IDataProvider {
     public abstract void registerPerks(Consumer<FinishedPerk> registrar);
 
     @Override
-    public void act(DirectoryCache cache) throws IOException {
+    public void act(HashCache cache) throws IOException {
         Path path = this.generator.getOutputFolder();
 
         List<FinishedPerk> builtPerks = new ArrayList<>();
@@ -67,7 +67,7 @@ public abstract class PerkDataProvider implements IDataProvider {
         this.savePerkFile(cache, allPerks, path.resolve("data/astralsorcery/perks/_full_tree.json"));
     }
 
-    private void savePerkFile(DirectoryCache cache, JsonElement perk, Path filePath) {
+    private void savePerkFile(HashCache cache, JsonElement perk, Path filePath) {
         try {
             String perkJson = GSON.toJson(perk);
             String perkHash = HASH_FUNCTION.hashUnencodedChars(perkJson).toString();

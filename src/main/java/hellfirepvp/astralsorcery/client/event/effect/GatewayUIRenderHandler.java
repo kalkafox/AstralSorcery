@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.event.effect;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
@@ -22,17 +22,17 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.TickEvent;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.event.RenderWorldLastEvent;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
 
@@ -61,7 +61,7 @@ public class GatewayUIRenderHandler implements ITickHandler {
         return INSTANCE;
     }
 
-    public GatewayUI getOrCreateUI(World world, BlockPos pos, Vector3 renderPos) {
+    public GatewayUI getOrCreateUI(Level world, BlockPos pos, Vector3 renderPos) {
         if (currentUI == null ||
                 !currentUI.getDimType().equals(world.getDimensionKey()) ||
                 !currentUI.getPos().equals(pos)) {
@@ -81,7 +81,7 @@ public class GatewayUIRenderHandler implements ITickHandler {
         if (this.currentUI == null) {
             return true;
         }
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         TileCelestialGateway gateway;
         if (world == null ||
                 this.currentUI.getVisibleTicks() <= 0 ||
@@ -99,10 +99,10 @@ public class GatewayUIRenderHandler implements ITickHandler {
             return;
         }
         float pTicks = event.getPartialTicks();
-        MatrixStack renderStack = event.getMatrixStack();
+        PoseStack renderStack = event.getPoseStack();
         Vector3 renderOffset = this.currentUI.getRenderCenter();
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         double dst = renderOffset.distance(Vector3.atEntityCorner(player).addY(1.5));
         if(dst > 3) {
             return;
@@ -119,16 +119,16 @@ public class GatewayUIRenderHandler implements ITickHandler {
         this.renderGatewayAllowedPlayers(renderStack, renderOffset, dst, pTicks);
     }
 
-    private void renderGatewayAllowedPlayers(MatrixStack renderStack, Vector3 renderOffset, double distance, float pTicks) {
+    private void renderGatewayAllowedPlayers(PoseStack renderStack, Vector3 renderOffset, double distance, float pTicks) {
         GatewayCache.GatewayNode node = this.currentUI.getThisGatewayNode();
         if (node == null || !node.isLocked() || node.getOwner() == null || node.getAllowedUsers().isEmpty()) {
             return;
         }
         UUID currentUUID = Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUniqueID() : null;
-        RayTraceResult mouseOverRtr = Minecraft.getInstance().objectMouseOver;
+        HitResult mouseOverRtr = Minecraft.getInstance().objectMouseOver;
         BlockPos blockSelected;
-        if (mouseOverRtr != null && mouseOverRtr.getType() == RayTraceResult.Type.BLOCK && mouseOverRtr instanceof BlockRayTraceResult) {
-            blockSelected = ((BlockRayTraceResult) mouseOverRtr).getPos().up();
+        if (mouseOverRtr != null && mouseOverRtr.getType() == RayTraceResult.Type.BLOCK && mouseOverRtr instanceof BlockHitResult) {
+            blockSelected = ((BlockHitResult) mouseOverRtr).getPos().up();
         } else {
             blockSelected = null;
         }
@@ -154,11 +154,11 @@ public class GatewayUIRenderHandler implements ITickHandler {
         });
     }
 
-    private void renderGatewayFocusedEntry(MatrixStack renderStack, Vector3 renderOffset, float pTicks) {
-        PlayerEntity player = Minecraft.getInstance().player;
+    private void renderGatewayFocusedEntry(PoseStack renderStack, Vector3 renderOffset, float pTicks) {
+        Player player = Minecraft.getInstance().player;
         GatewayUI.GatewayEntry entry = findMatchingEntry(MathHelper.wrapDegrees(player.rotationYaw), MathHelper.wrapDegrees(player.rotationPitch));
         if (entry != null) {
-            ITextComponent display = entry.getNode().getDisplayName();
+            Component display = entry.getNode().getDisplayName();
             if (display != null && !display.getString().isEmpty()) {
                 Vector3 at = entry.getRelativePos().clone()
                         .add(renderOffset)
@@ -176,7 +176,7 @@ public class GatewayUIRenderHandler implements ITickHandler {
         }
     }
 
-    private void renderGatewayShieldOverlay(MatrixStack renderStack, Vector3 renderOffset, double distance, float pTicks) {
+    private void renderGatewayShieldOverlay(PoseStack renderStack, Vector3 renderOffset, double distance, float pTicks) {
         float alpha = MathHelper.clamp(1F - ((float) (distance / 2D)), 0F, 1F);
         Color c = ColorsAS.CONSTELLATION_SINGLE_STAR;
         int red = c.getRed();

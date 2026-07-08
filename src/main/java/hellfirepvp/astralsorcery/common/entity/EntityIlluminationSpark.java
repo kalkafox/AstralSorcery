@@ -17,23 +17,23 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.util.block.BlockUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -42,17 +42,17 @@ import net.minecraftforge.fml.network.NetworkHooks;
  * Created by HellFirePvP
  * Date: 17.08.2019 / 10:45
  */
-public class EntityIlluminationSpark extends ThrowableEntity {
+public class EntityIlluminationSpark extends ThrowableProjectile {
 
-    public EntityIlluminationSpark(World world) {
+    public EntityIlluminationSpark(Level world) {
         super(EntityTypesAS.ILLUMINATION_SPARK, world);
     }
 
-    public EntityIlluminationSpark(double x, double y, double z, World world) {
+    public EntityIlluminationSpark(double x, double y, double z, Level world) {
         super(EntityTypesAS.ILLUMINATION_SPARK, x, y, z, world);
     }
 
-    public EntityIlluminationSpark(LivingEntity thrower, World world) {
+    public EntityIlluminationSpark(LivingEntity thrower, Level world) {
         super(EntityTypesAS.ILLUMINATION_SPARK, thrower, world);
         this.func_234612_a_(thrower, thrower.rotationPitch, thrower.rotationYaw, 0F, 0.7F, 0.9F);
     }
@@ -118,18 +118,18 @@ public class EntityIlluminationSpark extends ThrowableEntity {
     }
 
     @Override
-    protected void onImpact(RayTraceResult result) {
+    protected void onImpact(HitResult result) {
         if (world.isRemote()) {
             return;
         }
-        if (!(result instanceof BlockRayTraceResult) || !(this.func_234616_v_() instanceof PlayerEntity)) {
+        if (!(result instanceof BlockHitResult) || !(this.func_234616_v_() instanceof Player)) {
             remove();
             return;
         }
-        PlayerEntity player = (PlayerEntity) this.func_234616_v_();
-        BlockRayTraceResult brtr = (BlockRayTraceResult) result;
+        Player player = (Player) this.func_234616_v_();
+        BlockHitResult brtr = (BlockHitResult) result;
 
-        BlockItemUseContext bCtx = new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND, brtr));
+        BlockPlaceContext bCtx = new BlockPlaceContext(new UseOnContext(player, Hand.MAIN_HAND, brtr));
 
         BlockPos pos = bCtx.getPos();
         if (!BlockUtils.isReplaceable(world, pos)) {
@@ -143,7 +143,7 @@ public class EntityIlluminationSpark extends ThrowableEntity {
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

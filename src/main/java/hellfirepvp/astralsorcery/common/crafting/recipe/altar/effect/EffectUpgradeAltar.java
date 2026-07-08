@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.crafting.recipe.altar.effect;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.ActiveSimpleAltarRecipe;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,7 +30,7 @@ public class EffectUpgradeAltar extends AltarRecipeEffect {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void onTick(TileAltar altar, ActiveSimpleAltarRecipe.CraftingState state) {
-        ParticleManager mgr = Minecraft.getInstance().particles;
+        ParticleEngine mgr = Minecraft.getInstance().particles;
         if (state == ActiveSimpleAltarRecipe.CraftingState.ACTIVE &&
                 rand.nextInt(8) == 0) {
             mgr.addBlockDestroyEffects(altar.getPos(), BlocksAS.MARBLE_RUNED.getDefaultState());
@@ -39,7 +39,7 @@ public class EffectUpgradeAltar extends AltarRecipeEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void onTESR(TileAltar altar, ActiveSimpleAltarRecipe.CraftingState state, MatrixStack renderStack, IRenderTypeBuffer buffer, float pTicks, int combinedLight) {}
+    public void onTESR(TileAltar altar, ActiveSimpleAltarRecipe.CraftingState state, PoseStack renderStack, MultiBufferSource buffer, float pTicks, int combinedLight) {}
 
     @Override
     @OnlyIn(Dist.CLIENT)

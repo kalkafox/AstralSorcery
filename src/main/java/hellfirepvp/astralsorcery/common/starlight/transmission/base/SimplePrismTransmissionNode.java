@@ -16,12 +16,12 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.NodeConnection;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionProvider;
 import hellfirepvp.astralsorcery.common.util.RaytraceAssist;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.*;
 
@@ -49,7 +49,7 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
         return thisPos;
     }
 
-    public void updateIgnoreBlockCollisionState(World world, boolean ignoreBlockCollision) {
+    public void updateIgnoreBlockCollisionState(Level world, boolean ignoreBlockCollision) {
         this.ignoreBlockCollision = ignoreBlockCollision;
         TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(world);
         if (handle != null) {
@@ -72,22 +72,22 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
     }
 
     @Override
-    public boolean notifyUnlink(World world, BlockPos to) {
+    public boolean notifyUnlink(Level world, BlockPos to) {
         return nextNodes.remove(to) != null;
     }
 
     @Override
-    public void notifyLink(World world, BlockPos pos) {
+    public void notifyLink(Level world, BlockPos pos) {
         addLink(world, pos, true, false);
     }
 
-    private void addLink(World world, BlockPos pos, boolean doRayCheck, boolean previousRayState) {
+    private void addLink(Level world, BlockPos pos, boolean doRayCheck, boolean previousRayState) {
         PrismNext nextNode = new PrismNext(this, world, thisPos, pos, doRayCheck, previousRayState);
         this.nextNodes.put(pos, nextNode);
     }
 
     @Override
-    public boolean notifyBlockChange(World world, BlockPos at) {
+    public boolean notifyBlockChange(Level world, BlockPos at) {
         boolean anyChange = false;
         for (PrismNext next : nextNodes.values()) {
             if (next.notifyBlockPlace(world, thisPos, at)) anyChange = true;
@@ -96,12 +96,12 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
     }
 
     @Override
-    public void notifySourceLink(World world, BlockPos source) {
+    public void notifySourceLink(Level world, BlockPos source) {
         sourcesToThis.add(source);
     }
 
     @Override
-    public void notifySourceUnlink(World world, BlockPos source) {
+    public void notifySourceUnlink(Level world, BlockPos source) {
         sourcesToThis.remove(source);
     }
 
@@ -125,19 +125,19 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         this.thisPos = NBTHelper.readBlockPosFromNBT(compound);
         this.sourcesToThis.clear();
         this.ignoreBlockCollision = compound.getBoolean("ignoreBlockCollision");
 
-        ListNBT list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
+        ListTag list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             sourcesToThis.add(NBTHelper.readBlockPosFromNBT(list.getCompound(i)));
         }
 
-        ListNBT nextList = compound.getList("nextList", Constants.NBT.TAG_COMPOUND);
+        ListTag nextList = compound.getList("nextList", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < nextList.size(); i++) {
-            CompoundNBT tag = nextList.getCompound(i);
+            CompoundTag tag = nextList.getCompound(i);
             BlockPos next = NBTHelper.readBlockPosFromNBT(tag);
             boolean oldState = tag.getBoolean("rayState");
             addLink(null, next, false, oldState); //Rebuild link.
@@ -145,22 +145,22 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         NBTHelper.writeBlockPosToNBT(thisPos, compound);
         compound.putBoolean("ignoreBlockCollision", this.ignoreBlockCollision);
 
-        ListNBT sources = new ListNBT();
+        ListTag sources = new ListTag();
         for (BlockPos source : sourcesToThis) {
-            CompoundNBT comp = new CompoundNBT();
+            CompoundTag comp = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(source, comp);
             sources.add(comp);
         }
         compound.put("sources", sources);
 
-        ListNBT nextList = new ListNBT();
+        ListTag nextList = new ListTag();
         for (BlockPos next : nextNodes.keySet()) {
             PrismNext prism = nextNodes.get(next);
-            CompoundNBT pos = new CompoundNBT();
+            CompoundTag pos = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(next, pos);
             pos.putBoolean("rayState", prism.reachable);
             nextList.add(pos);
@@ -176,7 +176,7 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
         private final BlockPos pos;
         private RaytraceAssist rayAssist;
 
-        private PrismNext(SimplePrismTransmissionNode parent, World world, BlockPos start, BlockPos end, boolean doRayTest, boolean oldRayState) {
+        private PrismNext(SimplePrismTransmissionNode parent, Level world, BlockPos start, BlockPos end, boolean doRayTest, boolean oldRayState) {
             this.parent = parent;
             this.pos = end;
             this.rayAssist = new RaytraceAssist(start, end);
@@ -188,8 +188,8 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
             this.distanceSq = end.distanceSq(Vector3d.copy(start), false);
         }
 
-        private boolean notifyBlockPlace(World world, BlockPos connect, BlockPos at) {
-            Vector3d bPosAt = Vector3d.copy(at);
+        private boolean notifyBlockPlace(Level world, BlockPos connect, BlockPos at) {
+            Vec3 bPosAt = Vector3d.copy(at);
             double dstStart = connect.distanceSq(bPosAt, false);
             double dstEnd = pos.distanceSq(bPosAt, false);
             if (dstStart > distanceSq || dstEnd > distanceSq) return false;

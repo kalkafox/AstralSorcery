@@ -8,8 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.integration.jei;
 
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteractionContext;
@@ -24,12 +26,11 @@ import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.MutableComponent;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.text.DecimalFormat;
 import java.util.Collection;
@@ -76,7 +77,7 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
     }
 
     @Override
-    public void draw(LiquidInteraction recipe, MatrixStack renderStack, double mouseX, double mouseY) {
+    public void draw(LiquidInteraction recipe, PoseStack renderStack, double mouseX, double mouseY) {
         this.icon.draw(renderStack, 3, 36);
         this.icon.draw(renderStack, 93, 36);
 
@@ -91,8 +92,8 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
             int totalWeight = sameInteractions.stream().mapToInt(LiquidInteraction::getWeight).sum();
             float perc = ((float) recipe.getWeight() / totalWeight) * 100;
 
-            FontRenderer fr = Minecraft.getInstance().fontRenderer;
-            IFormattableTextComponent txt = new TranslationTextComponent("jei.astralsorcery.tip.chance", FORMAT_CHANCE.format(perc));
+            Font fr = Minecraft.getInstance().fontRenderer;
+            MutableComponent txt = Component.translatable("jei.astralsorcery.tip.chance", FORMAT_CHANCE.format(perc));
             int width = fr.getStringPropertyWidth(txt);
             fr.func_243248_b(renderStack, txt, 74 - width, 44, 0x333333);
         }

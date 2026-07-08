@@ -22,14 +22,14 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.util.Mth;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,7 +62,7 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        PlayerEntity player = (PlayerEntity) context[0];
+        Player player = (Player) context[0];
         LogicalSide side = (LogicalSide) context[1];
 
         if (side.isClient() && shouldDoEffect(player)) {
@@ -71,7 +71,7 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void spawnHaloParticles(PlayerEntity player) {
+    private void spawnHaloParticles(Player player) {
         Vector3 headPos = Vector3.atEntityCorner(player).addY(player.getEyeHeight(player.getPose()));
 
         for (int i = 0; i < 3; i++) {
@@ -151,7 +151,7 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
         }
     }
 
-    private boolean shouldDoEffect(PlayerEntity player) {
+    private boolean shouldDoEffect(Player player) {
         return player.getUniqueID().equals(playerUUID) &&
                 (player.getPose() == Pose.STANDING || player.getPose() == Pose.CROUCHING) &&
                 !player.isPotionActive(Effects.INVISIBILITY);

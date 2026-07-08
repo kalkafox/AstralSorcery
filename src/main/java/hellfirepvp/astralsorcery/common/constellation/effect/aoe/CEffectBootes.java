@@ -28,14 +28,14 @@ import hellfirepvp.astralsorcery.common.util.block.ILocatable;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,7 +61,7 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(World world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         if (rand.nextInt(3) == 0) {
             ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
@@ -89,7 +89,7 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
     }
 
     @Override
-    public boolean playEffect(World world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         boolean didEffect = false;
 
         List<LivingEntity> entities = this.collectEntities(world, pos, properties);
@@ -103,7 +103,7 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
 
             if (properties.isCorrupted()) {
                 entity.hurtResistantTime = 0;
-                entity.addPotionEffect(new EffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 1000, 5));
+                entity.addPotionEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 1000, 5));
                 if (DamageUtil.attackEntityFrom(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, 5_000)) {
                     didEffect = true;
                 }
@@ -151,15 +151,15 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
         private final double defaultHerdingChance = 0.05;
         private final double defaultHerdingLootChance = 0.01;
 
-        public ForgeConfigSpec.DoubleValue herdingChance;
-        public ForgeConfigSpec.DoubleValue herdingLootChance;
+        public ModConfigSpec.DoubleValue herdingChance;
+        public ModConfigSpec.DoubleValue herdingLootChance;
 
         public BootesConfig() {
             super("bootes", 12D, 4D);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.herdingChance = cfgBuilder

@@ -12,11 +12,11 @@ import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentHe
 import hellfirepvp.astralsorcery.common.event.DynamicEnchantmentEvent;
 import hellfirepvp.astralsorcery.common.item.ItemEnchantmentAmulet;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.event.TickEvent;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import java.util.EnumSet;
 
@@ -38,7 +38,7 @@ public class PlayerAmuletHandler implements ITickHandler {
             return;
         }
 
-        Tuple<ItemStack, PlayerEntity> linkedAmulet = AmuletEnchantmentHelper.getWornAmulet(event.getEnchantedItemStack());
+        Tuple<ItemStack, Player> linkedAmulet = AmuletEnchantmentHelper.getWornAmulet(event.getEnchantedItemStack());
         if (linkedAmulet == null ||
                 linkedAmulet.getA().isEmpty() ||
                 linkedAmulet.getB() == null) {
@@ -50,18 +50,18 @@ public class PlayerAmuletHandler implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        PlayerEntity player = (PlayerEntity) context[0];
+        Player player = (Player) context[0];
         applyAmuletTags(player);
         clearAmuletTags(player);
     }
 
-    private void applyAmuletTags(PlayerEntity player) {
-        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-            AmuletEnchantmentHelper.applyAmuletOwner(player.getItemStackFromSlot(slot), player);
+    private void applyAmuletTags(Player player) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            AmuletEnchantmentHelper.applyAmuletOwner(player.getItemBySlot(slot), player);
         }
     }
 
-    private void clearAmuletTags(PlayerEntity player) {
+    private void clearAmuletTags(Player player) {
         AmuletEnchantmentHelper.removeAmuletTagsAndCleanup(player, true);
     }
 

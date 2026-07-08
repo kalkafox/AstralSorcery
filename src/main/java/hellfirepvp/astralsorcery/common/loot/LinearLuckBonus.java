@@ -12,15 +12,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.lib.LootAS;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.loot.*;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.loot.conditions.ILootCondition;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 import java.util.Random;
 import java.util.Set;
@@ -32,19 +32,19 @@ import java.util.Set;
  * Created by HellFirePvP
  * Date: 20.07.2019 / 22:07
  */
-public class LinearLuckBonus extends LootFunction {
+public class LinearLuckBonus extends LootItemConditionalFunction {
 
-    private LinearLuckBonus(ILootCondition[] lootConditions) {
+    private LinearLuckBonus(LootItemCondition[] lootConditions) {
         super(lootConditions);
     }
 
     @Override
-    public Set<LootParameter<?>> getRequiredParameters() {
+    public Set<LootContextParam<?>> getRequiredParameters() {
         return ImmutableSet.of(LootParameters.TOOL);
     }
 
     @Override
-    public LootFunctionType getFunctionType() {
+    public LootItemFunctionType getFunctionType() {
         return LootAS.Functions.LINEAR_LUCK_BONUS;
     }
 
@@ -54,8 +54,8 @@ public class LinearLuckBonus extends LootFunction {
         if (tool != null) {
             int luck = 0;
             Entity e = lootContext.get(LootParameters.THIS_ENTITY);
-            if (e instanceof PlayerEntity && ((PlayerEntity) e).isPotionActive(Effects.LUCK)) {
-                luck += ((PlayerEntity) e).getActivePotionEffect(Effects.LUCK).getAmplifier() + 1;
+            if (e instanceof Player && ((Player) e).isPotionActive(Effects.LUCK)) {
+                luck += ((Player) e).getActivePotionEffect(Effects.LUCK).getAmplifier() + 1;
             }
             luck += EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, tool);
             luck += EnchantmentHelper.getEnchantmentLevel(Enchantments.LOOTING, tool);
@@ -77,7 +77,7 @@ public class LinearLuckBonus extends LootFunction {
     public static class Serializer extends LootFunction.Serializer<LinearLuckBonus> {
 
         @Override
-        public LinearLuckBonus deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, ILootCondition[] iLootConditions) {
+        public LinearLuckBonus deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] iLootConditions) {
             return new LinearLuckBonus(iLootConditions);
         }
     }

@@ -12,8 +12,8 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.StructureTypesAS;
 import hellfirepvp.observerlib.api.block.MatchableState;
 import hellfirepvp.observerlib.api.util.PatternBlockArray;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
 
 /**
  * This class is part of the Astral Sorcery Mod

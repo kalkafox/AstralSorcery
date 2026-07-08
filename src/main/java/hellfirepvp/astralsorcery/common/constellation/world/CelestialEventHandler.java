@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.common.constellation.world.event.CelestialEvent
 import hellfirepvp.astralsorcery.common.constellation.world.event.LunarEclipse;
 import hellfirepvp.astralsorcery.common.constellation.world.event.SolarEclipse;
 import hellfirepvp.astralsorcery.common.constellation.world.event.StarFall;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +70,7 @@ public class CelestialEventHandler {
         return Math.abs(tick);
     }
 
-    void tick(World world) {
+    void tick(Level world) {
         for (CelestialEvent event : this.events) {
             event.tick(world, this.ctx.getRandom(event.getSeedModifier()), ctx);
         }

@@ -11,9 +11,9 @@ package hellfirepvp.astralsorcery.common.base.patreon.types;
 import hellfirepvp.astralsorcery.client.render.entity.layer.StarryLayerRenderer;
 import hellfirepvp.astralsorcery.common.base.patreon.FlareColor;
 import hellfirepvp.astralsorcery.common.base.patreon.PatreonEffect;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
 import java.util.UUID;

@@ -10,19 +10,19 @@ package hellfirepvp.astralsorcery.common.tile.base;
 
 import hellfirepvp.astralsorcery.common.util.block.ILocatable;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.Random;
 
@@ -33,12 +33,12 @@ import java.util.Random;
  * Created by HellFirePvP
  * Date: 11.05.2016 / 18:17
  */
-public abstract class TileEntitySynchronized extends TileEntity implements ILocatable {
+public abstract class TileEntitySynchronized extends BlockEntity implements ILocatable {
 
     protected static final Random rand = new Random();
-    protected static final AxisAlignedBB BOX = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
+    protected static final AABB BOX = new AABB(0, 0, 0, 1, 1, 1);
 
-    protected TileEntitySynchronized(TileEntityType<?> tileEntityTypeIn) {
+    protected TileEntitySynchronized(BlockEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
 
@@ -48,23 +48,23 @@ public abstract class TileEntitySynchronized extends TileEntity implements ILoca
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
+    public void read(BlockState state, CompoundTag nbt) {
         super.read(state, nbt);
         readCustomNBT(nbt);
         readSaveNBT(nbt);
     }
 
     //Both Network & Chunk-saving
-    public void readCustomNBT(CompoundNBT compound) {}
+    public void readCustomNBT(CompoundTag compound) {}
 
     //Only Network-read
-    public void readNetNBT(CompoundNBT compound) {}
+    public void readNetNBT(CompoundTag compound) {}
 
     //Only Chunk-read
-    public void readSaveNBT(CompoundNBT compound) {}
+    public void readSaveNBT(CompoundTag compound) {}
 
     @Override
-    public final CompoundNBT write(CompoundNBT compound) {
+    public final CompoundTag write(CompoundTag compound) {
         compound = super.write(compound);
         writeCustomNBT(compound);
         writeSaveNBT(compound);
@@ -72,32 +72,32 @@ public abstract class TileEntitySynchronized extends TileEntity implements ILoca
     }
 
     //Both Network & Chunk-saving
-    public void writeCustomNBT(CompoundNBT compound) {}
+    public void writeCustomNBT(CompoundTag compound) {}
 
     //Only Network-write
-    public void writeNetNBT(CompoundNBT compound) {}
+    public void writeNetNBT(CompoundTag compound) {}
 
     //Only Chunk-write
-    public void writeSaveNBT(CompoundNBT compound) {}
+    public void writeSaveNBT(CompoundTag compound) {}
 
     @Override
-    public final SUpdateTileEntityPacket getUpdatePacket() {
-        CompoundNBT compound = new CompoundNBT();
+    public final ClientboundBlockEntityDataPacket getUpdatePacket() {
+        CompoundTag compound = new CompoundTag();
         super.write(compound);
         writeCustomNBT(compound);
         writeNetNBT(compound);
-        return new SUpdateTileEntityPacket(getPos(), 255, compound);
+        return new ClientboundBlockEntityDataPacket(getPos(), 255, compound);
     }
 
     @Override
-    public CompoundNBT getUpdateTag() {
-        CompoundNBT compound = new CompoundNBT();
+    public CompoundTag getUpdateTag() {
+        CompoundTag compound = new CompoundTag();
         super.write(compound);
         writeCustomNBT(compound);
         return compound;
     }
 
-    public final void onDataPacket(NetworkManager manager, SUpdateTileEntityPacket packet) {
+    public final void onDataPacket(Connection manager, ClientboundBlockEntityDataPacket packet) {
         super.onDataPacket(manager, packet);
         readCustomNBT(packet.getNbtCompound());
         readNetNBT(packet.getNbtCompound());

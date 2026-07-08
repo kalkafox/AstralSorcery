@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.data.config.entry;
 
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigEntry;
 import hellfirepvp.astralsorcery.common.util.log.LogCategory;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -27,16 +27,16 @@ public class LogConfig extends ConfigEntry {
 
     public static final LogConfig CONFIG = new LogConfig();
 
-    private Map<LogCategory, ForgeConfigSpec.BooleanValue> loggingConfigurations = new HashMap<>();
+    private Map<LogCategory, ModConfigSpec.BooleanValue> loggingConfigurations = new HashMap<>();
 
     private LogConfig() {
         super("logging");
     }
 
     @Override
-    public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+    public void createEntries(ModConfigSpec.Builder cfgBuilder) {
         for (LogCategory category : LogCategory.values()) {
-            ForgeConfigSpec.BooleanValue bValLogging = cfgBuilder
+            ModConfigSpec.BooleanValue bValLogging = cfgBuilder
                     .comment("Set to true to enable this logging category. Only do this if you have to debug this section of code! May spam your log HEAVILY!")
                     .translation(translationKey(category.name().toLowerCase(Locale.ROOT)))
                     .define(category.name().toLowerCase(Locale.ROOT), false);
@@ -46,7 +46,7 @@ public class LogConfig extends ConfigEntry {
     }
 
     public boolean isLoggingEnabled(LogCategory category) {
-        ForgeConfigSpec.BooleanValue cfg = this.loggingConfigurations.get(category);
+        ModConfigSpec.BooleanValue cfg = this.loggingConfigurations.get(category);
         return cfg != null && cfg.get();
     }
 

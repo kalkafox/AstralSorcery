@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.client.util.camera;
 
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod

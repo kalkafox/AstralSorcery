@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.constellation.world;
 
 import hellfirepvp.astralsorcery.common.data.config.entry.GeneralConfig;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 public class DayTimeHelper {
 
     //Convenience method
-    public static float getCurrentDaytimeDistribution(World world) {
+    public static float getCurrentDaytimeDistribution(Level world) {
         int dLength = GeneralConfig.CONFIG.dayLength.get();
         float dayPart = ((world.getDayTime() % dLength) + dLength) % dLength;
         if (dayPart < (dLength / 2F)) return 0F;
@@ -31,11 +31,11 @@ public class DayTimeHelper {
         return 1F;
     }
 
-    public static boolean isNight(World world) {
+    public static boolean isNight(Level world) {
         return getCurrentDaytimeDistribution(world) >= 0.55;
     }
 
-    public static boolean isDay(World world) {
+    public static boolean isDay(Level world) {
         return getCurrentDaytimeDistribution(world) <= 0.05;
     }
 }

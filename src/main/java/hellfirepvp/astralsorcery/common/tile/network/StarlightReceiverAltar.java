@@ -14,8 +14,8 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.base.SimpleTransm
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionProvider;
 import hellfirepvp.astralsorcery.common.tile.altar.AltarCollectionCategory;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,7 +31,7 @@ public class StarlightReceiverAltar extends SimpleTransmissionReceiver<TileAltar
     }
 
     @Override
-    public void onStarlightReceive(World world, IWeakConstellation type, double amount) {
+    public void onStarlightReceive(Level world, IWeakConstellation type, double amount) {
         TileAltar altar = getTileAtPos(world);
         if (altar != null) {
             int altarTier = altar.getAltarType().ordinal();
@@ -40,7 +40,7 @@ public class StarlightReceiverAltar extends SimpleTransmissionReceiver<TileAltar
     }
 
     @Override
-    public boolean syncTileData(World world, TileAltar tile) {
+    public boolean syncTileData(Level world, TileAltar tile) {
         return true;
     }
 

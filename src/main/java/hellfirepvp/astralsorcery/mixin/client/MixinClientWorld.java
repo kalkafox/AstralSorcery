@@ -11,9 +11,9 @@ package hellfirepvp.astralsorcery.mixin.client;
 import hellfirepvp.astralsorcery.client.data.config.entry.RenderingConfig;
 import hellfirepvp.astralsorcery.common.constellation.SkyHandler;
 import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.LogicalSide;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,7 +31,7 @@ public class MixinClientWorld {
 
     @Inject(method = "getSunBrightness", at = @At("RETURN"), cancellable = true)
     public void solarEclipseSunBrightness(float partialTicks, CallbackInfoReturnable<Float> cir) {
-        World world = (World)(Object) this;
+        Level world = (Level)(Object) this;
 
         WorldContext ctx = SkyHandler.getContext(world, LogicalSide.CLIENT);
         String strDimKey = world.getDimensionKey().getLocation().toString();

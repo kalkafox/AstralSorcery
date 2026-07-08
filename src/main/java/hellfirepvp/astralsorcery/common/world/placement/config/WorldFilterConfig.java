@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.world.placement.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.IServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.gen.placement.IPlacementConfig;
 
 import java.util.List;
@@ -36,18 +36,18 @@ public class WorldFilterConfig implements IPlacementConfig {
     });
 
     private final Supplier<Boolean> ignoreFilter;
-    private final Supplier<List<RegistryKey<World>>> worldFilter;
+    private final Supplier<List<ResourceKey<Level>>> worldFilter;
 
-    public WorldFilterConfig(boolean ignoreFilter, List<RegistryKey<World>> worldFilter) {
+    public WorldFilterConfig(boolean ignoreFilter, List<ResourceKey<Level>> worldFilter) {
         this(() -> ignoreFilter, () -> worldFilter);
     }
 
-    public WorldFilterConfig(Supplier<Boolean> ignoreFilter, Supplier<List<RegistryKey<World>>> worldFilter) {
+    public WorldFilterConfig(Supplier<Boolean> ignoreFilter, Supplier<List<ResourceKey<Level>>> worldFilter) {
         this.ignoreFilter = ignoreFilter;
         this.worldFilter = worldFilter;
     }
 
-    public boolean generatesIn(IServerWorld world) {
+    public boolean generatesIn(ServerLevelAccessor world) {
          return this.ignoreFilter.get() || this.worldFilter.get().contains(world.getWorld().getDimensionKey());
     }
 }

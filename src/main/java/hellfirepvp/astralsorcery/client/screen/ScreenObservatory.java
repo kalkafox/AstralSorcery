@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.client.screen;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
@@ -28,14 +28,14 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.tile.TileObservatory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IHasContainer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.settings.PointOfView;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.client.CameraType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
+import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -50,7 +50,7 @@ import java.util.*;
  * Created by HellFirePvP
  * Date: 15.02.2020 / 18:27
  */
-public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObservatory, ConstellationDiscoveryScreen.DrawArea> implements IHasContainer<ContainerObservatory> {
+public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObservatory, ConstellationDiscoveryScreen.DrawArea> implements MenuAccess<ContainerObservatory> {
 
     private static final Random RAND = new Random();
     private static final int FRAME_TEXTURE_SIZE = 16;
@@ -65,7 +65,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
                 Minecraft.getInstance().getMainWindow().getScaledWidth() - FRAME_TEXTURE_SIZE * 2);
         this.container = container;
 
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player != null) {
             TileObservatory observatory = this.getTile();
             player.rotationPitch     = observatory.observatoryPitch;
@@ -128,7 +128,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
     }
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         RenderSystem.enableDepthTest();
         super.render(renderStack, mouseX, mouseY, pTicks);
 
@@ -146,7 +146,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
         this.drawFrame(renderStack);
     }
 
-    private void drawObservatoryScreen(MatrixStack renderStack, float pTicks) {
+    private void drawObservatoryScreen(PoseStack renderStack, float pTicks) {
         boolean canSeeSky = this.canObserverSeeSky(this.getTile().getPos(), 2);
         double guiFactor = Minecraft.getInstance().getMainWindow().getGuiScaleFactor();
         float pitch = Minecraft.getInstance().player.getPitch(pTicks);
@@ -254,7 +254,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
         RenderSystem.enableAlphaTest();
     }
 
-    private void drawFrame(MatrixStack renderStack) {
+    private void drawFrame(PoseStack renderStack) {
         this.setBlitOffset(10);
         TexturesAS.TEX_GUI_OBSERVATORY.bindTexture();
 
@@ -289,7 +289,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
         this.setBlitOffset(0);
     }
 
-    private void drawSkyBackground(MatrixStack renderStack, float pTicks, boolean canSeeSky, float angleOpacity) {
+    private void drawSkyBackground(PoseStack renderStack, float pTicks, boolean canSeeSky, float angleOpacity) {
         Tuple<Color, Color> rgbFromTo = SkyScreen.getSkyGradient(canSeeSky, angleOpacity, pTicks);
         RenderingDrawUtils.drawGradientRect(renderStack, this.getGuiZLevel(),
                 this.guiLeft, this.guiTop,

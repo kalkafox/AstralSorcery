@@ -37,26 +37,26 @@ import hellfirepvp.astralsorcery.common.util.sound.CategorizedSoundEvent;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -151,14 +151,14 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
         ResourceLocation recipeName = ByteBufUtils.readResourceLocation(pkt.getExtraData());
         BlockPos at = ByteBufUtils.readPos(pkt.getExtraData());
 
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return;
         }
 
         TileInfuser thisInfuser = MiscUtils.getTileAt(world, at, TileInfuser.class, false);
         if (thisInfuser != null) {
-            IRecipe<?> recipe = world.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_INFUSION.getType()).get(recipeName);
+            Recipe<?> recipe = world.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_INFUSION.getType()).get(recipeName);
             if (recipe instanceof LiquidInfusion) {
                 FluidStack stack = new FluidStack(((LiquidInfusion) recipe).getLiquidInput(), FluidAttributes.BUCKET_VOLUME);
                 Vector3 pos = new Vector3(at).add(0.5, 1, 0.5);
@@ -234,11 +234,11 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
         markForUpdate();
     }
 
-    protected LiquidInfusion findRecipe(PlayerEntity crafter) {
+    protected LiquidInfusion findRecipe(Player crafter) {
         return RecipeTypesAS.TYPE_INFUSION.findRecipe(new LiquidInfusionContext(this, crafter, LogicalSide.SERVER));
     }
 
-    protected boolean startCrafting(LiquidInfusion recipe, PlayerEntity crafter) {
+    protected boolean startCrafting(LiquidInfusion recipe, Player crafter) {
         if (this.getActiveRecipe() != null) {
             return false;
         }
@@ -251,7 +251,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     }
 
     @Override
-    public boolean onInteract(World world, BlockPos pos, PlayerEntity player, Direction side, boolean sneak) {
+    public boolean onInteract(Level world, BlockPos pos, Player player, Direction side, boolean sneak) {
         if (!world.isRemote() && this.hasMultiblock() && !this.getItemInput().isEmpty()) {
             if (this.getActiveRecipe() != null) {
                 if (this.getActiveRecipe().matches(this)) {
@@ -317,7 +317,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.inventory = this.inventory.deserialize(compound.getCompound("inventory"));
@@ -334,7 +334,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.put("inventory", this.inventory.serialize());

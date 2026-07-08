@@ -13,15 +13,15 @@ import hellfirepvp.astralsorcery.common.data.sync.client.ClientTimeFreezeEntitie
 import hellfirepvp.astralsorcery.common.data.sync.server.DataTimeFreezeEffects;
 import hellfirepvp.astralsorcery.common.data.sync.server.DataTimeFreezeEntities;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.boss.dragon.phase.PhaseType;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.event.TickEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,14 +36,14 @@ import java.util.*;
  */
 public class TimeStopController implements ITickHandler {
 
-    private static final Map<RegistryKey<World>, List<TimeStopZone>> activeTimeStopZones = new HashMap<>();
+    private static final Map<ResourceKey<Level>, List<TimeStopZone>> activeTimeStopZones = new HashMap<>();
 
     public static final TimeStopController INSTANCE = new TimeStopController();
 
     private TimeStopController() {}
 
     @Nullable
-    public static TimeStopZone tryGetZoneAt(World world, BlockPos pos) {
+    public static TimeStopZone tryGetZoneAt(Level world, BlockPos pos) {
         if (world.isRemote) {
             return null;
         }
@@ -67,7 +67,7 @@ public class TimeStopController implements ITickHandler {
      * @return null if the world's provider is null, otherwise a registered and running instance of the timeStopEffect
      */
     @Nonnull
-    public static TimeStopZone freezeWorldAt(@Nonnull TimeStopZone.EntityTargetController controller, @Nonnull World world, @Nonnull BlockPos offset, float range, int maxAge) {
+    public static TimeStopZone freezeWorldAt(@Nonnull TimeStopZone.EntityTargetController controller, @Nonnull Level world, @Nonnull BlockPos offset, float range, int maxAge) {
         TimeStopZone stopZone = new TimeStopZone(controller, range, offset, world, maxAge);
         List<TimeStopZone> zones = activeTimeStopZones.computeIfAbsent(world.getDimensionKey(), (id) -> new LinkedList<>());
         zones.add(stopZone);
@@ -78,12 +78,12 @@ public class TimeStopController implements ITickHandler {
         return stopZone;
     }
 
-    public static void onWorldUnload(World world) {
+    public static void onWorldUnload(Level world) {
         if (world.isRemote()) {
             return;
         }
 
-        RegistryKey<World> dimKey = world.getDimensionKey();
+        ResourceKey<Level> dimKey = world.getDimensionKey();
         for (TimeStopZone stop : activeTimeStopZones.getOrDefault(dimKey, Collections.emptyList())) {
             stop.stopEffect();
         }
@@ -104,7 +104,7 @@ public class TimeStopController implements ITickHandler {
             if (!e.isAlive() || e.getHealth() <= 0) {
                 shouldFreeze = false;
             }
-            if (e instanceof EnderDragonEntity && ((EnderDragonEntity) e).getPhaseManager().getCurrentPhase().getType() == PhaseType.DYING) {
+            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getType() == PhaseType.DYING) {
                 shouldFreeze = false;
             }
             if (shouldFreeze) {
@@ -138,7 +138,7 @@ public class TimeStopController implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        for (Map.Entry<RegistryKey<World>, List<TimeStopZone>> zoneMap : activeTimeStopZones.entrySet()) {
+        for (Map.Entry<ResourceKey<Level>, List<TimeStopZone>> zoneMap : activeTimeStopZones.entrySet()) {
             Iterator<TimeStopZone> iterator = zoneMap.getValue().iterator();
             while (iterator.hasNext()) {
                 TimeStopZone zone = iterator.next();

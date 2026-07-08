@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.client.util.obj;
 
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
-import net.minecraft.resources.IResource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
 
 import java.io.BufferedReader;
@@ -62,7 +62,7 @@ public class WavefrontObject {
         this.fileName = resource.toString();
 
         try {
-            IResource res = Minecraft.getInstance().getResourceManager().getResource(resource);
+            Resource res = Minecraft.getInstance().getResourceManager().getResource(resource);
             loadObjModel(res.getInputStream());
         } catch (IOException e) {
             throw new ModelFormatException("IO Exception reading model format", e);
@@ -178,7 +178,7 @@ public class WavefrontObject {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void render(IVertexBuilder vb) {
+    public void render(VertexConsumer vb) {
         for (GroupObject groupObject : groupObjects) {
             groupObject.render(vb);
         }

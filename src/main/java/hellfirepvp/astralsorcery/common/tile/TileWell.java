@@ -33,18 +33,18 @@ import hellfirepvp.astralsorcery.common.util.tile.FluidTankAccess;
 import hellfirepvp.astralsorcery.common.util.tile.PrecisionSingleFluidTank;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventoryFiltered;
 import hellfirepvp.astralsorcery.common.util.world.SkyCollectionHelper;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ISeedReader;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.WorldGenLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.common.util.LazyOptional;
+import net.neoforged.neoforge.fluids.FluidAttributes;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -224,8 +224,8 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
             dstr = yLevel / 120F;
         }
         if (posDistribution == -1) {
-            if (world instanceof ISeedReader) {
-                posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((ISeedReader) world, getPos());
+            if (world instanceof WorldGenLevel) {
+                posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) world, getPos());
             } else {
                 posDistribution = 0.3F;
             }
@@ -258,7 +258,7 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.tank.readNBT(compound.getCompound("tank"));
@@ -266,7 +266,7 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.put("tank", this.tank.writeNBT());

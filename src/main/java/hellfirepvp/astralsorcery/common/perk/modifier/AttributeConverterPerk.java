@@ -17,10 +17,10 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkConverter;
 import hellfirepvp.astralsorcery.common.perk.ProgressGatedPerk;
 import hellfirepvp.astralsorcery.common.perk.source.AttributeConverterProvider;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.LogicalSide;
 
 import java.awt.*;
 import java.util.Collection;
@@ -52,7 +52,7 @@ public class AttributeConverterPerk extends ProgressGatedPerk implements Attribu
     }
 
     @Override
-    public Collection<PerkConverter> getConverters(PlayerEntity player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkConverter> getConverters(Player player, LogicalSide side, boolean ignoreRequirements) {
         if (!ignoreRequirements && ResearchHelper.getProgress(player, side).getPerkData().isPerkSealed(this)) {
             return Collections.emptyList();
         }
@@ -61,10 +61,10 @@ public class AttributeConverterPerk extends ProgressGatedPerk implements Attribu
     }
 
     @Override
-    public void applyPerkLogic(PlayerEntity player, LogicalSide side) {}
+    public void applyPerkLogic(Player player, LogicalSide side) {}
 
     @Override
-    public void removePerkLogic(PlayerEntity player, LogicalSide side) {}
+    public void removePerkLogic(Player player, LogicalSide side) {}
 
     @Override
     public void deserializeData(JsonObject perkData) {

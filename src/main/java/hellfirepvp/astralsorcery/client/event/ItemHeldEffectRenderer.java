@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.item.base.client.ItemHeldRender;
 import net.minecraft.client.Minecraft;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.event.RenderWorldLastEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,21 +37,21 @@ public class ItemHeldEffectRenderer {
 
     private void onHeldRender(RenderWorldLastEvent event) {
         float pTicks = event.getPartialTicks();
-        MatrixStack renderStack = event.getMatrixStack();
+        PoseStack renderStack = event.getPoseStack();
 
         if (Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) {
             return;
         }
 
 
-        for (EquipmentSlotType type : EquipmentSlotType.values()) {
+        for (EquipmentSlot type : EquipmentSlotType.values()) {
             if (doHeldRender(Minecraft.getInstance().player.getItemStackFromSlot(type), renderStack, pTicks)) {
                 break;
             }
         }
     }
 
-    private boolean doHeldRender(ItemStack heldItem, MatrixStack renderStack, float pTicks) {
+    private boolean doHeldRender(ItemStack heldItem, PoseStack renderStack, float pTicks) {
         if (heldItem.isEmpty()) {
             return false;
         }

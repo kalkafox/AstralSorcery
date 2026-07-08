@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.data.sync.base;
 
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -20,7 +20,7 @@ import net.minecraft.world.World;
  */
 public abstract class ClientData<C extends ClientData<C>> {
 
-    public abstract void clear(RegistryKey<World> dim);
+    public abstract void clear(ResourceKey<Level> dim);
 
     public abstract void clearClient();
 }

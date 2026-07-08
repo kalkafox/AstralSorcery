@@ -13,16 +13,16 @@ import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.EffectsAS;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.potion.EffectType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +54,8 @@ public class EffectDropModifier extends EffectCustomTexture {
     private void onDrops(LivingDropsEvent event) {
         LivingEntity le = event.getEntityLiving();
         if (le.getEntityWorld().isRemote() ||
-                !(le instanceof MobEntity) ||
-                !(le.getEntityWorld() instanceof ServerWorld) ||
+                !(le instanceof Mob) ||
+                !(le.getEntityWorld() instanceof ServerLevel) ||
                 !le.getEntityWorld().getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
             return;
         }

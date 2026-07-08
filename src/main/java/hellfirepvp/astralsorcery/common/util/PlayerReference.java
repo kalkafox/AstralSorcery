@@ -9,16 +9,15 @@
 package hellfirepvp.astralsorcery.common.util;
 
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -34,22 +33,22 @@ import java.util.UUID;
 public class PlayerReference {
 
     private final UUID playerUUID;
-    private final IFormattableTextComponent playerName;
+    private final MutableComponent playerName;
 
-    public PlayerReference(UUID playerUUID, IFormattableTextComponent playerName) {
+    public PlayerReference(UUID playerUUID, MutableComponent playerName) {
         this.playerUUID = playerUUID;
         this.playerName = playerName;
     }
 
-    public static PlayerReference of(PlayerEntity player) {
-        ITextComponent txt = player.getDisplayName();
-        if (txt instanceof IFormattableTextComponent) {
-            return new PlayerReference(player.getUniqueID(), (IFormattableTextComponent) txt);
+    public static PlayerReference of(Player player) {
+        Component txt = player.getDisplayName();
+        if (txt instanceof MutableComponent) {
+            return new PlayerReference(player.getUniqueID(), (MutableComponent) txt);
         }
-        return new PlayerReference(player.getUniqueID(), new StringTextComponent("").append(txt));
+        return new PlayerReference(player.getUniqueID(), Component.literal("").append(txt));
     }
 
-    public boolean isPlayer(PlayerEntity player) {
+    public boolean isPlayer(Player player) {
         return this.getPlayerUUID().equals(player.getUniqueID());
     }
 
@@ -57,7 +56,7 @@ public class PlayerReference {
         return this.playerUUID;
     }
 
-    public ITextComponent getPlayerName() {
+    public Component getPlayerName() {
         return this.playerName;
     }
 
@@ -75,7 +74,7 @@ public class PlayerReference {
     }
 
     @Nullable
-    public ServerPlayerEntity getOnlinePlayer() {
+    public ServerPlayer getOnlinePlayer() {
         MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
         if (server == null) {
             throw new IllegalArgumentException("Called getOnlinePlayer on clientside or while no server is running!");
@@ -83,27 +82,27 @@ public class PlayerReference {
         return server.getPlayerList().getPlayerByUUID(this.playerUUID);
     }
 
-    public CompoundNBT serialize() {
-        CompoundNBT tag = new CompoundNBT();
+    public CompoundTag serialize() {
+        CompoundTag tag = new CompoundTag();
         this.writeToNBT(tag);
         return tag;
     }
 
-    public void writeToNBT(CompoundNBT tag) {
+    public void writeToNBT(CompoundTag tag) {
         tag.putUniqueId("playerUUID", this.playerUUID);
         tag.putString("playerName", ITextComponent.Serializer.toJson(this.playerName));
     }
 
-    public void write(PacketBuffer buf) {
+    public void write(FriendlyByteBuf buf) {
         ByteBufUtils.writeUUID(buf, this.playerUUID);
         ByteBufUtils.writeTextComponent(buf, this.playerName);
     }
 
-    public static PlayerReference deserialize(CompoundNBT tag) {
+    public static PlayerReference deserialize(CompoundTag tag) {
         return new PlayerReference(tag.getUniqueId("playerUUID"), ITextComponent.Serializer.getComponentFromJson(tag.getString("playerName")));
     }
 
-    public static PlayerReference read(PacketBuffer buf) {
+    public static PlayerReference read(FriendlyByteBuf buf) {
         return new PlayerReference(ByteBufUtils.readUUID(buf), ByteBufUtils.readTextComponent(buf));
     }
 }

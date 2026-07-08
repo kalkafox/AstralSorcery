@@ -13,14 +13,14 @@ import hellfirepvp.astralsorcery.common.data.sync.server.DataTimeFreezeEntities;
 import hellfirepvp.astralsorcery.common.util.tick.TimeoutList;
 import hellfirepvp.astralsorcery.common.util.time.TimeStopController;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 
 import java.util.function.Consumer;
 

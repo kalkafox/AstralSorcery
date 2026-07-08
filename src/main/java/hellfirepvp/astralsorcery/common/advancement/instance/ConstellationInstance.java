@@ -17,10 +17,10 @@ import hellfirepvp.astralsorcery.common.constellation.IMinorConstellation;
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import net.minecraft.advancements.criterion.CriterionInstance;
-import net.minecraft.advancements.criterion.EntityPredicate;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.loot.ConditionArraySerializer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Arrays;
 import java.util.HashSet;

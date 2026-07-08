@@ -10,12 +10,12 @@ package hellfirepvp.astralsorcery.common.world;
 
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigEntry;
 import hellfirepvp.astralsorcery.common.world.placement.config.WorldFilterConfig;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,14 +32,14 @@ import java.util.stream.Collectors;
 public class FeatureGenerationConfig extends ConfigEntry {
 
     private List<Biome.Category> categories = new ArrayList<>();
-    private List<RegistryKey<World>> worlds = new ArrayList<>();
+    private List<ResourceKey<Level>> worlds = new ArrayList<>();
     private boolean defaultEveryBiome = false, defaultEveryWorld = false;
 
-    private ForgeConfigSpec.BooleanValue enabled;
-    private ForgeConfigSpec.BooleanValue everyBiome;
-    private ForgeConfigSpec.BooleanValue everyWorld;
-    private ForgeConfigSpec.ConfigValue<List<String>> biomeCategoryNames;
-    private ForgeConfigSpec.ConfigValue<List<String>> worldNames;
+    private ModConfigSpec.BooleanValue enabled;
+    private ModConfigSpec.BooleanValue everyBiome;
+    private ModConfigSpec.BooleanValue everyWorld;
+    private ModConfigSpec.ConfigValue<List<String>> biomeCategoryNames;
+    private ModConfigSpec.ConfigValue<List<String>> worldNames;
 
     public FeatureGenerationConfig(ResourceLocation featureName) {
         this(featureName.getPath());
@@ -54,7 +54,7 @@ public class FeatureGenerationConfig extends ConfigEntry {
         return (T) this;
     }
 
-    public <T extends FeatureGenerationConfig> T generatesInWorlds(List<RegistryKey<World>> worlds) {
+    public <T extends FeatureGenerationConfig> T generatesInWorlds(List<ResourceKey<Level>> worlds) {
         this.worlds = worlds;
         return (T) this;
     }
@@ -70,7 +70,7 @@ public class FeatureGenerationConfig extends ConfigEntry {
     }
 
     @Override
-    public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+    public void createEntries(ModConfigSpec.Builder cfgBuilder) {
         this.enabled = cfgBuilder
                 .comment("Set this to false to disable this worldgen feature.")
                 .translation(translationKey("enabled"))
@@ -97,7 +97,7 @@ public class FeatureGenerationConfig extends ConfigEntry {
 
         //TODO Structures..
         List<String> defaultWorlds = worlds.stream()
-                .map(RegistryKey::getLocation)
+                .map(ResourceKey::getLocation)
                 .map(ResourceLocation::getPath)
                 .collect(Collectors.toList());
         this.worldNames = cfgBuilder

@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.common.entity.*;
 import hellfirepvp.astralsorcery.common.entity.item.*;
 import hellfirepvp.astralsorcery.common.entity.technical.EntityGrapplingHook;
 import hellfirepvp.astralsorcery.common.entity.technical.EntityObservatoryHelper;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 
 /**
  * This class is part of the Astral Sorcery Mod

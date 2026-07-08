@@ -10,10 +10,10 @@ package hellfirepvp.astralsorcery.common.starlight;
 
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.SourceClassRegistry;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -31,7 +31,7 @@ public interface IIndependentStarlightSource {
     public static final Random rand = new Random();
 
     //As the purpose of the source, this should produce the starlight - called once every tick
-    public float produceStarlightTick(ServerWorld world, BlockPos pos);
+    public float produceStarlightTick(ServerLevel world, BlockPos pos);
 
     //Can be null or change per tick.
     @Nullable
@@ -43,7 +43,7 @@ public interface IIndependentStarlightSource {
 
     //Update the state of the independent tile. for example if "doesSeeSky" has changed or something.
     //Return true to indicate a successful update.
-    default public <T extends TileEntity> boolean updateFromTileEntity(T tile) {
+    default public <T extends BlockEntity> boolean updateFromTileEntity(T tile) {
         return true;
     }
 
@@ -55,8 +55,8 @@ public interface IIndependentStarlightSource {
 
     public SourceClassRegistry.SourceProvider getProvider();
 
-    public void readFromNBT(CompoundNBT compound);
+    public void readFromNBT(CompoundTag compound);
 
-    public void writeToNBT(CompoundNBT compound);
+    public void writeToNBT(CompoundTag compound);
 
 }

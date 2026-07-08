@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.data.config.entry;
 
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigEntry;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -27,7 +27,7 @@ public class MachineryConfig extends ConfigEntry {
     }
 
     @Override
-    public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+    public void createEntries(ModConfigSpec.Builder cfgBuilder) {
 
     }
 }

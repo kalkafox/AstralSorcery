@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.crafting.nojson;
 import hellfirepvp.astralsorcery.common.crafting.nojson.fountain.FountainEffect;
 import hellfirepvp.astralsorcery.common.crafting.nojson.fountain.FountainEffectLiquid;
 import hellfirepvp.astralsorcery.common.crafting.nojson.fountain.FountainEffectVortex;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

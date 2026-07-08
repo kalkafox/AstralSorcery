@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.lib;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.custom.RecipeDyeableChangeColor;
 import hellfirepvp.astralsorcery.common.crafting.serializer.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod

@@ -16,13 +16,13 @@ import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.util.DamageUtil;
 import hellfirepvp.astralsorcery.common.util.PartialEffectExecutor;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,12 +51,12 @@ public class ItemColoredLensDamage extends ItemColoredLens {
         }
 
         @Override
-        public void entityInBeam(World world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
+        public void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
             if (world.isRemote() || !(entity instanceof LivingEntity)) {
                 return;
             }
             executor.executeAll(() -> {
-                if (entity instanceof PlayerEntity) {
+                if (entity instanceof Player) {
                     if (!GeneralConfig.CONFIG.doColoredLensesAffectPlayers.get() ||
                             entity.getServer() == null ||
                             !entity.getServer().isPVPEnabled()) {
@@ -68,6 +68,6 @@ public class ItemColoredLensDamage extends ItemColoredLens {
         }
 
         @Override
-        public void blockInBeam(World world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
+        public void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
     }
 }

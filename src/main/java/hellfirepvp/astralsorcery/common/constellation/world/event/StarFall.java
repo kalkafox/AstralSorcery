@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.constellation.world.event;
 
 import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 
 import java.util.Random;
 
@@ -23,7 +23,7 @@ import java.util.Random;
 public class StarFall extends CelestialEvent {
 
     @Override
-    public void tick(World world, Random rand, WorldContext ctx) {
+    public void tick(Level world, Random rand, WorldContext ctx) {
 
     }
 

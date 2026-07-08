@@ -15,12 +15,12 @@ import hellfirepvp.astralsorcery.common.data.sync.base.ClientData;
 import hellfirepvp.astralsorcery.common.data.sync.base.ClientDataReader;
 import hellfirepvp.astralsorcery.common.network.base.ASLoginPacket;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class PktLoginSyncDataHolder extends ASLoginPacket<PktLoginSyncDataHolder> {
 
-    private Map<ResourceLocation, CompoundNBT> syncData = new HashMap<>();
+    private Map<ResourceLocation, CompoundTag> syncData = new HashMap<>();
 
     public PktLoginSyncDataHolder() {}
 
@@ -43,7 +43,7 @@ public class PktLoginSyncDataHolder extends ASLoginPacket<PktLoginSyncDataHolder
         PktLoginSyncDataHolder pkt = new PktLoginSyncDataHolder();
         for (ResourceLocation key : SyncDataRegistry.getKnownKeys()) {
             SyncDataHolder.executeServer(key, AbstractData.class, data -> {
-                CompoundNBT nbt = new CompoundNBT();
+                CompoundTag nbt = new CompoundTag();
                 data.writeAllDataToPacket(nbt);
                 pkt.syncData.put(key, nbt);
             });
@@ -73,7 +73,7 @@ public class PktLoginSyncDataHolder extends ASLoginPacket<PktLoginSyncDataHolder
 
             for (int i = 0; i < size; i++) {
                 ResourceLocation key = ByteBufUtils.readResourceLocation(buffer);
-                CompoundNBT tag = ByteBufUtils.readNBTTag(buffer);
+                CompoundTag tag = ByteBufUtils.readNBTTag(buffer);
                 pktData.syncData.put(key, tag);
             }
             return pktData;

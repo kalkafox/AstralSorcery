@@ -28,19 +28,19 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.PacketDistributor;
 
 import java.util.List;
 
@@ -80,8 +80,8 @@ public class KeyLightningArc extends KeyPerk {
         }
 
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) source.getTrueSource();
+        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
+            Player player = (Player) source.getTrueSource();
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (side.isServer() && prog.getPerkData().hasPerkEffect(this) && prog.doPerkAbilities()) {
@@ -103,19 +103,19 @@ public class KeyLightningArc extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue arcChance;
-        private ForgeConfigSpec.DoubleValue arcPercent;
-        private ForgeConfigSpec.DoubleValue arcDistance;
-        private ForgeConfigSpec.IntValue arcTicks;
+        private ModConfigSpec.DoubleValue arcChance;
+        private ModConfigSpec.DoubleValue arcPercent;
+        private ModConfigSpec.DoubleValue arcDistance;
+        private ModConfigSpec.IntValue arcTicks;
 
-        private ForgeConfigSpec.IntValue chargeCost;
+        private ModConfigSpec.IntValue chargeCost;
 
         public Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.arcChance = cfgBuilder
                     .comment("Sets the chance to spawn a damage-arc effect when an enemy is hit (value is in percent).")
                     .translation(translationKey("arcChance"))
@@ -139,15 +139,15 @@ public class KeyLightningArc extends KeyPerk {
 
     static class RepetitiveArcEffect {
 
-        private final World world;
-        private final PlayerEntity player;
+        private final Level world;
+        private final Player player;
         private final int entityStartId;
         private final float damage;
         private final double distance;
 
         private int count;
 
-        public RepetitiveArcEffect(World world, PlayerEntity player, int count, int entityStartId, float damage, double distance) {
+        public RepetitiveArcEffect(Level world, Player player, int count, int entityStartId, float damage, double distance) {
             this.world = world;
             this.player = player;
             this.count = count;
@@ -167,7 +167,7 @@ public class KeyLightningArc extends KeyPerk {
             Entity start = world.getEntityByID(entityStartId);
 
             if (start instanceof LivingEntity && start.isAlive()) {
-                AxisAlignedBB box = new AxisAlignedBB(-distance, -distance, -distance, distance, distance, distance);
+                AABB box = new AABB(-distance, -distance, -distance, distance, distance, distance);
 
                 LivingEntity last = null;
                 LivingEntity entity = (LivingEntity) start;

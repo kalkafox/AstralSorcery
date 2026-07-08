@@ -14,13 +14,14 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.tile.*;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.client.registry.ClientRegistry;
 
 import static hellfirepvp.astralsorcery.common.lib.TileEntityTypesAS.*;
 
@@ -80,7 +81,7 @@ public class RegistryTileEntities {
         ClientRegistry.bindTileEntityRenderer(WELL, RenderWell::new);
     }
 
-    private static <T extends TileEntity> TileEntityType<T> registerTile(Class<T> tileClass, Block... validBlocks) {
+    private static <T extends BlockEntity> BlockEntityType<T> registerTile(Class<T> tileClass, Block... validBlocks) {
         ResourceLocation name = NameUtil.fromClass(tileClass, "Tile");
         TileEntityType.Builder<T> typeBuilder = TileEntityType.Builder.create(() -> {
             try {
@@ -91,9 +92,8 @@ public class RegistryTileEntities {
             throw new IllegalArgumentException("Unexpected Constructor for class: " + tileClass.getName());
         }, validBlocks);
 
-        TileEntityType<T> type = typeBuilder.build(null);
-        type.setRegistryName(name);
-        AstralSorcery.getProxy().getRegistryPrimer().register(type);
+        BlockEntityType<T> type = typeBuilder.build(null);
+        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.BLOCK_ENTITY_TYPE, name, type);
         return type;
     }
 }

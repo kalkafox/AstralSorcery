@@ -11,15 +11,15 @@ package hellfirepvp.astralsorcery.common.event.handler;
 import hellfirepvp.astralsorcery.common.item.base.OverrideInteractItem;
 import hellfirepvp.astralsorcery.common.tile.base.TileOwned;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -67,25 +67,25 @@ public class EventHandlerInteract {
         if (event instanceof BlockEvent.EntityMultiPlaceEvent) {
             return; //Handled 1 method below.
         }
-        IWorld world = event.getWorld();
-        if (world.isRemote() || !(event.getEntity() instanceof PlayerEntity)) {
+        LevelAccessor world = event.getWorld();
+        if (world.isRemote() || !(event.getEntity() instanceof Player)) {
             return;
         }
-        handleOwnerPlacement(world, event.getPos(), (PlayerEntity) event.getEntity());
+        handleOwnerPlacement(world, event.getPos(), (Player) event.getEntity());
     }
 
     private static void onMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
-        IWorld world = event.getWorld();
-        if (world.isRemote() || !(event.getEntity() instanceof PlayerEntity)) {
+        LevelAccessor world = event.getWorld();
+        if (world.isRemote() || !(event.getEntity() instanceof Player)) {
             return;
         }
-        PlayerEntity placer = (PlayerEntity) event.getEntity();
+        Player placer = (Player) event.getEntity();
         for (BlockSnapshot snapshot : event.getReplacedBlockSnapshots()) {
             handleOwnerPlacement(world, snapshot.getPos(), placer);
         }
     }
 
-    private static void handleOwnerPlacement(IWorld world, BlockPos pos, PlayerEntity placer) {
+    private static void handleOwnerPlacement(LevelAccessor world, BlockPos pos, Player placer) {
         TileOwned owned = MiscUtils.getTileAt(world, pos, TileOwned.class, true);
         if (owned != null) {
             owned.setOwner(placer);

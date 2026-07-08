@@ -17,13 +17,13 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
@@ -88,7 +88,7 @@ public class PktShootEntity extends ASPacket<PktShootEntity> {
             @OnlyIn(Dist.CLIENT)
             public void handleClient(PktShootEntity packet, NetworkEvent.Context context) {
                 context.enqueueWork(() -> {
-                    Optional<World> world = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
+                    Optional<Level> world = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
                     Entity entity = world.map(w -> w.getEntityByID(packet.entityId)).orElse(null);
                     if (entity != null) {
                         entity.setMotion(packet.motionVector.toVector3d());

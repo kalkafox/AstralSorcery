@@ -8,27 +8,24 @@
 
 package hellfirepvp.astralsorcery.common.item.tool;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
+import hellfirepvp.astralsorcery.common.enchantment.AstralEnchantmentType;
 import hellfirepvp.astralsorcery.common.item.base.TypeEnchantableItem;
-import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.CampfireBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
-
-import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,32 +36,20 @@ import java.util.Map;
  */
 public class ItemCrystalShovel extends ItemCrystalTierItem implements TypeEnchantableItem {
 
-    private static final Map<Block, BlockState> BLOCK_PAVE_MAP = new ImmutableMap.Builder<Block, BlockState>()
-            .put(Blocks.GRASS_BLOCK, Blocks.GRASS_PATH.getDefaultState())
-            .build();
-
     public ItemCrystalShovel() {
-        super(ToolType.SHOVEL, new Properties(), Sets.newHashSet(Material.SNOW, Material.SNOW_BLOCK));
+        super(BlockTags.MINEABLE_WITH_SHOVEL, new Properties(), ItemAbilities.DEFAULT_SHOVEL_ACTIONS);
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> stacks) {
-        if (this.isInGroup(group)) {
-            ItemStack stack = new ItemStack(this);
-            CrystalPropertiesAS.CREATIVE_CRYSTAL_TOOL_ATTRIBUTES.store(stack);
-            stacks.add(stack);
-        }
+    public boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type) {
+        return type == AstralEnchantmentType.BREAKABLE || type == AstralEnchantmentType.DIGGER;
     }
 
     @Override
-    public boolean canEnchantItem(ItemStack stack, EnchantmentType type) {
-        return type == EnchantmentType.BREAKABLE || type == EnchantmentType.DIGGER;
-    }
-
-    @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        EnchantmentType type = enchantment.type;
-        return type == EnchantmentType.DIGGER || type == EnchantmentType.BREAKABLE;
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+        return super.supportsEnchantment(stack, enchantment) ||
+                AstralEnchantmentType.DIGGER.contains(enchantment) ||
+                AstralEnchantmentType.BREAKABLE.contains(enchantment);
     }
 
     @Override
@@ -78,41 +63,37 @@ public class ItemCrystalShovel extends ItemCrystalTierItem implements TypeEnchan
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
-        World world = context.getWorld();
-        BlockPos pos = context.getPos();
-        BlockState state = world.getBlockState(pos);
-        if (context.getFace() == Direction.DOWN) {
-            return ActionResultType.PASS;
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        BlockState state = level.getBlockState(pos);
+        if (context.getClickedFace() == Direction.DOWN) {
+            return InteractionResult.PASS;
         } else {
-            PlayerEntity playerentity = context.getPlayer();
-            BlockState modifiedState = state.getToolModifiedState(world, pos, playerentity, context.getItem(), ToolType.SHOVEL);
+            Player player = context.getPlayer();
+            BlockState modifiedState = state.getToolModifiedState(context, ItemAbilities.SHOVEL_FLATTEN, false);
             BlockState targetState = null;
-            if (modifiedState != null && world.isAirBlock(pos.up())) {
-                world.playSound(playerentity, pos, SoundEvents.ITEM_SHOVEL_FLATTEN, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            if (modifiedState != null && level.getBlockState(pos.above()).isAir()) {
+                level.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0F, 1.0F);
                 targetState = modifiedState;
-            } else if (state.getBlock() instanceof CampfireBlock && state.get(CampfireBlock.LIT)) {
-                if (!world.isRemote()) {
-                    world.playEvent(null, 1009, pos, 0);
+            } else if ((targetState = state.getToolModifiedState(context, ItemAbilities.SHOVEL_DOUSE, false)) != null) {
+                if (!level.isClientSide()) {
+                    level.levelEvent(null, 1009, pos, 0);
                 }
-
-                CampfireBlock.extinguish(world, pos, state);
-                targetState = state.with(CampfireBlock.LIT, false);
             }
 
             if (targetState != null) {
-                if (!world.isRemote()) {
-                    world.setBlockState(pos, targetState, 11);
-                    if (playerentity != null) {
-                        context.getItem().damageItem(1, playerentity, (player) -> {
-                            player.sendBreakAnimation(context.getHand());
-                        });
+                if (!level.isClientSide()) {
+                    level.setBlock(pos, targetState, 11);
+                    level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, targetState));
+                    if (player != null) {
+                        context.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
                     }
                 }
 
-                return ActionResultType.func_233537_a_(world.isRemote());
+                return InteractionResult.sidedSuccess(level.isClientSide);
             } else {
-                return ActionResultType.PASS;
+                return InteractionResult.PASS;
             }
         }
     }

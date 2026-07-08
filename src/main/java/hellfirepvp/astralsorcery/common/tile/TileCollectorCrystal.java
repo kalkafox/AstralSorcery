@@ -31,11 +31,11 @@ import hellfirepvp.astralsorcery.common.tile.base.network.TileSourceBase;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -240,7 +240,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.constellationType = NBTHelper.readOptional(compound, "constellationType", (nbt) -> {
@@ -264,7 +264,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         if (getAttributes() != null) {
@@ -277,7 +277,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     }
 
     @Override
-    public AxisAlignedBB getRenderBoundingBox() {
+    public AABB getRenderBoundingBox() {
         return BOX.grow(1).offset(getPos());
     }
 

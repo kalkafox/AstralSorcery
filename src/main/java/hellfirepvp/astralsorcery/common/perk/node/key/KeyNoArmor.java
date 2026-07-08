@@ -14,13 +14,13 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -47,11 +47,11 @@ public class KeyNoArmor extends KeyPerk {
     }
 
     private void onLivingHurt(LivingHurtEvent event) {
-        if (!(event.getEntityLiving() instanceof PlayerEntity)) {
+        if (!(event.getEntityLiving() instanceof Player)) {
             return;
         }
 
-        PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+        Player player = (Player) event.getEntityLiving();
         LogicalSide side = this.getSide(player);
         PlayerProgress prog = ResearchHelper.getProgress(player, side);
         if (prog.getPerkData().hasPerkEffect(this)) {
@@ -71,14 +71,14 @@ public class KeyNoArmor extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue damageTakenMultiplier;
+        private ModConfigSpec.DoubleValue damageTakenMultiplier;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.damageTakenMultiplier = cfgBuilder
                     .comment("The multiplier that is applied to damage the player receives. The lower the more damage is negated.")
                     .translation(translationKey("damageTakenMultiplier"))

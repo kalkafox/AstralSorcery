@@ -8,19 +8,20 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.network.chat.Component;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.StringTextComponent;
+import org.joml.Matrix4f;
+import net.minecraft.network.chat.FormattedText;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class RenderingOverlayUtils {
 
-    public static void renderDefaultItemDisplay(MatrixStack renderStack, List<Tuple<ItemStack, Integer>> itemStacks) {
+    public static void renderDefaultItemDisplay(PoseStack renderStack, List<Tuple<ItemStack, Integer>> itemStacks) {
         int heightNormal  =  26;
         int heightSplit = 13;
         int width   =  26;
@@ -42,7 +43,7 @@ public class RenderingOverlayUtils {
         int offsetY =  15;
 
         ItemRenderer itemRender = Minecraft.getInstance().getItemRenderer();
-        FontRenderer fontRenderer = Minecraft.getInstance().fontRenderer;
+        Font fontRenderer = Minecraft.getInstance().fontRenderer;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -112,7 +113,7 @@ public class RenderingOverlayUtils {
         int txtColor = 0x00DDDDDD;
         for (Tuple<ItemStack, Integer> stackTpl : itemStacks) {
             ItemStack stack = stackTpl.getA();
-            FontRenderer fr;
+            Font fr;
             if ((fr = stack.getItem().getFontRenderer(stack)) == null) {
                 fr = fontRenderer;
             }
@@ -120,7 +121,7 @@ public class RenderingOverlayUtils {
             if (stackTpl.getB() == -1) {
                 amountStr = "\u221E"; //+Inf
             }
-            ITextProperties prop = new StringTextComponent(amountStr);
+            FormattedText prop = Component.literal(amountStr);
             int length = fontRenderer.getStringPropertyWidth(prop);
 
             renderStack.push();

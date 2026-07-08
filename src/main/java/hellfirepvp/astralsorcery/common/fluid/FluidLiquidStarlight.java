@@ -8,12 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.fluid;
 
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Rarity;
-import net.minecraft.state.StateContainer;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.ForgeFlowingFluid;
 
 /**
  * This class is part of the Astral Sorcery Mod

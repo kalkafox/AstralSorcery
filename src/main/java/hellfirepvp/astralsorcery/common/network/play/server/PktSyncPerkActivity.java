@@ -14,13 +14,13 @@ import hellfirepvp.astralsorcery.common.perk.PerkEffectHelper;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class PktSyncPerkActivity extends ASPacket<PktSyncPerkActivity> {
 
     private Type type = null;
     private ResourceLocation perkKey = null;
-    private CompoundNBT newData = null, oldData = null;
+    private CompoundTag newData = null, oldData = null;
     private List<ResourceLocation> perkKeys = new ArrayList<>();
 
     public PktSyncPerkActivity() {}
@@ -52,7 +52,7 @@ public class PktSyncPerkActivity extends ASPacket<PktSyncPerkActivity> {
         this.type = type;
     }
 
-    public PktSyncPerkActivity(AbstractPerk perk, CompoundNBT oldData, CompoundNBT newData) {
+    public PktSyncPerkActivity(AbstractPerk perk, CompoundTag oldData, CompoundTag newData) {
         this.type = Type.DATACHANGE;
         this.perkKey = perk.getRegistryName();
         this.oldData = oldData;
@@ -103,7 +103,7 @@ public class PktSyncPerkActivity extends ASPacket<PktSyncPerkActivity> {
             @OnlyIn(Dist.CLIENT)
             public void handleClient(PktSyncPerkActivity packet, NetworkEvent.Context context) {
                 context.enqueueWork(() -> {
-                    PlayerEntity player = Minecraft.getInstance().player;
+                    Player player = Minecraft.getInstance().player;
                     if (player == null) {
                         return;
                     }

@@ -10,8 +10,7 @@ package hellfirepvp.astralsorcery.common.constellation;
 
 import hellfirepvp.astralsorcery.common.base.MoonPhase;
 import hellfirepvp.astralsorcery.common.constellation.effect.ConstellationEffectProperties;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
@@ -26,8 +25,8 @@ public interface IMinorConstellation extends IConstellation {
 
     public List<MoonPhase> getShowupMoonPhases(long rSeed);
 
-    default public ITextComponent getInfoTraitEffect() {
-        return new TranslationTextComponent(this.getTranslationKey() + ".trait");
+    default public Component getInfoTraitEffect() {
+        return Component.translatable(this.getTranslationKey() + ".trait");
     }
 
     default public void affectConstellationEffect(ConstellationEffectProperties properties) {}

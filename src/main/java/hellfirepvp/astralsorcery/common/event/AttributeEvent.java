@@ -11,14 +11,14 @@ package hellfirepvp.astralsorcery.common.event;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeTypeHelper;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifierManager;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.Event;
 
 import javax.annotation.Nullable;
 
@@ -33,11 +33,11 @@ public class AttributeEvent {
 
     public static class PostProcessVanilla extends Event {
 
-        private final ModifiableAttributeInstance instance;
+        private final AttributeInstance instance;
         private final double originalValue;
         private double value;
 
-        public PostProcessVanilla(ModifiableAttributeInstance instance, double value) {
+        public PostProcessVanilla(AttributeInstance instance, double value) {
             this.instance = instance;
             this.originalValue = value;
             this.value = value;
@@ -55,7 +55,7 @@ public class AttributeEvent {
             this.value = value;
         }
 
-        public ModifiableAttributeInstance getInstance() {
+        public AttributeInstance getInstance() {
             return instance;
         }
 
@@ -71,12 +71,12 @@ public class AttributeEvent {
 
     public static class PostProcessModded extends Event {
 
-        private final PlayerEntity player;
+        private final Player player;
         private final PerkAttributeType type;
         private final double originalValue;
         private double value;
 
-        public PostProcessModded(double value, PerkAttributeType type, PlayerEntity player) {
+        public PostProcessModded(double value, PerkAttributeType type, Player player) {
             this.player = player;
             this.type = type;
             this.originalValue = value;
@@ -99,22 +99,22 @@ public class AttributeEvent {
             return type;
         }
 
-        public PlayerEntity getPlayer() {
+        public Player getPlayer() {
             return player;
         }
     }
 
-    public static double postProcessModded(PlayerEntity player, PerkAttributeType type, double value) {
+    public static double postProcessModded(Player player, PerkAttributeType type, double value) {
         PostProcessModded ev = new PostProcessModded(value, type, player);
-        MinecraftForge.EVENT_BUS.post(ev);
+        NeoForge.EVENT_BUS.post(ev);
         return ev.getValue();
     }
 
-    public static float postProcessModded(PlayerEntity player, PerkAttributeType type, float value) {
+    public static float postProcessModded(Player player, PerkAttributeType type, float value) {
         return (float) postProcessModded(player, type, (double) value);
     }
 
-    public static double postProcessModded(PlayerEntity player, ResourceLocation key, double value) {
+    public static double postProcessModded(Player player, ResourceLocation key, double value) {
         PerkAttributeType pType = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(key);
         if (pType == null) {
             return value;
@@ -122,25 +122,25 @@ public class AttributeEvent {
         return postProcessModded(player, pType, value);
     }
 
-    public static float postProcessModded(PlayerEntity player, ResourceLocation key, float value) {
+    public static float postProcessModded(Player player, ResourceLocation key, float value) {
         return (float) postProcessModded(player, key, (double) value);
     }
 
-    public static double postProcessVanilla(double value, ModifiableAttributeInstance attribute) {
+    public static double postProcessVanilla(double value, AttributeInstance attribute) {
         AttributeEvent.PostProcessVanilla event = new AttributeEvent.PostProcessVanilla(attribute, value);
-        MinecraftForge.EVENT_BUS.post(event);
+        NeoForge.EVENT_BUS.post(event);
         return event.getAttribute().clampValue(event.getValue());
     }
 
     @Nullable
-    private static LivingEntity getEntity(AttributeModifierManager map) {
+    private static LivingEntity getEntity(AttributeMap map) {
         if (map instanceof EntityModifierManager) {
             return ((EntityModifierManager) map).getLivingEntity();
         }
         return null;
     }
 
-    public static void setEntity(AttributeModifierManager map, LivingEntity entity) {
+    public static void setEntity(AttributeMap map, LivingEntity entity) {
         if (map instanceof EntityModifierManager) {
             ((EntityModifierManager) map).setLivingEntity(entity);
         }

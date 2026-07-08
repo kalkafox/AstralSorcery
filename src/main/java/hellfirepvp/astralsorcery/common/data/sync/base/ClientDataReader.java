@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.data.sync.base;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -19,8 +19,8 @@ import net.minecraft.nbt.CompoundNBT;
  */
 public abstract class ClientDataReader<C extends ClientData<C>> {
 
-    public abstract void readFromIncomingFullSync(C data, CompoundNBT compound);
+    public abstract void readFromIncomingFullSync(C data, CompoundTag compound);
 
-    public abstract void readFromIncomingDiff(C data, CompoundNBT compound);
+    public abstract void readFromIncomingDiff(C data, CompoundTag compound);
 
 }

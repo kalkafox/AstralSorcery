@@ -10,9 +10,10 @@ package hellfirepvp.astralsorcery.common.data.config.registry.sets;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigDataSet;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,10 +27,10 @@ import javax.annotation.Nullable;
  */
 public class AmuletEnchantmentEntry implements ConfigDataSet, Comparable<AmuletEnchantmentEntry> {
 
-    private final Enchantment enchantment;
+    private final ResourceKey<Enchantment> enchantment;
     private final int weight;
 
-    public AmuletEnchantmentEntry(Enchantment ench, int weight) {
+    public AmuletEnchantmentEntry(ResourceKey<Enchantment> ench, int weight) {
         this.enchantment = ench;
         this.weight = weight;
     }
@@ -38,7 +39,7 @@ public class AmuletEnchantmentEntry implements ConfigDataSet, Comparable<AmuletE
         return weight;
     }
 
-    public Enchantment getEnchantment() {
+    public ResourceKey<Enchantment> getEnchantment() {
         return enchantment;
     }
 
@@ -50,7 +51,7 @@ public class AmuletEnchantmentEntry implements ConfigDataSet, Comparable<AmuletE
     @Nonnull
     @Override
     public String serialize() {
-        return this.enchantment.getRegistryName().toString() + ";" + weight;
+        return this.enchantment.location().toString() + ";" + weight;
     }
 
     @Nullable
@@ -63,17 +64,12 @@ public class AmuletEnchantmentEntry implements ConfigDataSet, Comparable<AmuletE
         String weight = spl[1];
 
         //TODO find a better solution than hardcoding (duh)
-        ResourceLocation registryName = new ResourceLocation(enchantmentKey);
+        ResourceLocation registryName = ResourceLocation.parse(enchantmentKey);
         if (registryName.toString().equalsIgnoreCase("cofhcore:holding")) {
             AstralSorcery.log.info("Auto-ignoring amulet enchantment 'cofhcore:holding' as it's prone to cause issues.");
             return null;
         }
 
-        Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(registryName);
-        if (ench == null) {
-            AstralSorcery.log.info("Ignoring whitelist entry " + str + " for amulet enchantments - Enchantment does not exist!");
-            return null;
-        }
         int w;
         try {
             w = Integer.parseInt(weight);
@@ -81,6 +77,6 @@ public class AmuletEnchantmentEntry implements ConfigDataSet, Comparable<AmuletE
             AstralSorcery.log.info("Ignoring whitelist entry " + str + " for amulet enchantments - last :-separated argument is not a number!");
             return null;
         }
-        return new AmuletEnchantmentEntry(ench, w);
+        return new AmuletEnchantmentEntry(ResourceKey.create(Registries.ENCHANTMENT, registryName), w);
     }
 }

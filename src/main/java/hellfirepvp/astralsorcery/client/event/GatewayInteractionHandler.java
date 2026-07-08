@@ -26,17 +26,18 @@ import hellfirepvp.astralsorcery.common.util.MapStream;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.Hand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 
 import java.awt.*;
 import java.util.Collections;
@@ -61,13 +62,14 @@ public class GatewayInteractionHandler {
 
     public static void attachEventListeners(IEventBus eventBus) {
         eventBus.addListener(GatewayInteractionHandler::clientTick);
-        eventBus.addListener(EventPriority.LOWEST, GatewayInteractionHandler::renderTick);
+        eventBus.addListener(EventPriority.LOWEST, GatewayInteractionHandler::renderTickPre);
+        eventBus.addListener(EventPriority.LOWEST, GatewayInteractionHandler::renderTickPost);
         eventBus.addListener(GatewayInteractionHandler::onAccessRevoke);
     }
 
     private static void onAccessRevoke(PlayerInteractEvent.RightClickBlock event) {
-        PlayerEntity player = event.getPlayer();
-        World world = event.getWorld();
+        Player player = event.getPlayer();
+        Level world = event.getWorld();
         if (player == null || world == null || !world.isRemote() || event.getHand() != Hand.MAIN_HAND) {
             return;
         }
@@ -98,9 +100,9 @@ public class GatewayInteractionHandler {
                 });
     }
 
-    private static void clientTick(TickEvent.ClientTickEvent event) {
-        PlayerEntity player = Minecraft.getInstance().player;
-        World world = Minecraft.getInstance().world;
+    private static void clientTick(ClientTickEvent.Post event) {
+        Player player = Minecraft.getInstance().player;
+        Level world = Minecraft.getInstance().world;
         if (player == null || world == null) {
             focusingEntry = null;
             focusTicks = 0;
@@ -215,23 +217,26 @@ public class GatewayInteractionHandler {
         }
     }
 
-    private static void renderTick(TickEvent.RenderTickEvent event) {
+    private static void renderTickPre(RenderFrameEvent.Pre event) {
         GatewayUI ui = GatewayUIRenderHandler.getInstance().getCurrentUI();
         if (ui == null) {
             return;
         }
 
-        if (event.phase == TickEvent.Phase.START) {
-            fovPre = Minecraft.getInstance().gameSettings.fov;
-            if(focusTicks < 80) {
-                return;
-            }
-            float percDone = 1F - ((focusTicks - 80F + event.renderTickTime) / 15F);
-            percDone = (float) Math.pow(percDone, 2.4F);
-            float targetFov = 10F;
-            double diff = fovPre - targetFov;
-            Minecraft.getInstance().gameSettings.fov = Math.max(targetFov, targetFov + diff * percDone);
-        } else {
+        fovPre = Minecraft.getInstance().gameSettings.fov;
+        if(focusTicks < 80) {
+            return;
+        }
+        float partialTick = event.getPartialTick().getGameTimeDeltaPartialTick(false);
+        float percDone = 1F - ((focusTicks - 80F + partialTick) / 15F);
+        percDone = (float) Math.pow(percDone, 2.4F);
+        float targetFov = 10F;
+        double diff = fovPre - targetFov;
+        Minecraft.getInstance().gameSettings.fov = Math.max(targetFov, targetFov + diff * percDone);
+    }
+
+    private static void renderTickPost(RenderFrameEvent.Post event) {
+        if (GatewayUIRenderHandler.getInstance().getCurrentUI() != null) {
             Minecraft.getInstance().gameSettings.fov = fovPre;
         }
     }

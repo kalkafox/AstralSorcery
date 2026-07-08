@@ -34,6 +34,7 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchIOThread;
 import hellfirepvp.astralsorcery.common.data.sync.SyncDataHolder;
 import hellfirepvp.astralsorcery.common.enchantment.amulet.AmuletRandomizeHelper;
 import hellfirepvp.astralsorcery.common.enchantment.amulet.PlayerAmuletHandler;
+import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentHelper;
 import hellfirepvp.astralsorcery.common.event.PlayerAffectionFlags;
 import hellfirepvp.astralsorcery.common.event.handler.*;
 import hellfirepvp.astralsorcery.common.event.helper.*;
@@ -66,33 +67,32 @@ import hellfirepvp.astralsorcery.common.util.time.TimeStopController;
 import hellfirepvp.observerlib.common.event.BlockChangeNotifier;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import hellfirepvp.observerlib.common.util.tick.TickManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.IArmorMaterial;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.FolderName;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.ChatFormatting;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.LevelResource;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.io.File;
 import java.util.List;
@@ -119,19 +119,19 @@ public class CommonProxy {
     public static DamageSource DAMAGE_SOURCE_REFLECT = DamageSourceUtil.newType("thorns")
             .setDamageBypassesArmor().setDamageIsAbsolute();
 
-    public static final ItemGroup ITEM_GROUP_AS = new ItemGroup(AstralSorcery.MODID) {
+    public static final CreativeModeTab ITEM_GROUP_AS = new CreativeModeTab(AstralSorcery.MODID) {
         @Override
         public ItemStack createIcon() {
             return new ItemStack(TOME);
         }
     };
-    public static final ItemGroup ITEM_GROUP_AS_PAPERS = new ItemGroup(AstralSorcery.MODID + ".papers") {
+    public static final CreativeModeTab ITEM_GROUP_AS_PAPERS = new CreativeModeTab(AstralSorcery.MODID + ".papers") {
         @Override
         public ItemStack createIcon() {
             return new ItemStack(CONSTELLATION_PAPER);
         }
     };
-    public static final ItemGroup ITEM_GROUP_AS_CRYSTALS = new ItemGroup(AstralSorcery.MODID + ".crystals") {
+    public static final CreativeModeTab ITEM_GROUP_AS_CRYSTALS = new CreativeModeTab(AstralSorcery.MODID + ".crystals") {
         @Override
         public ItemStack createIcon() {
             return new ItemStack(ROCK_CRYSTAL);
@@ -141,7 +141,7 @@ public class CommonProxy {
     public static final Rarity RARITY_ARTIFACT = Rarity.create("AS_ARTIFACT", TextFormatting.GOLD);
     public static final Rarity RARITY_VESTIGE = Rarity.create("AS_VESTIGE", TextFormatting.RED);
 
-    public static final IArmorMaterial ARMOR_MATERIAL_IMBUED_LEATHER = new ArmorMaterialImbuedLeather();
+    public static final ArmorMaterial ARMOR_MATERIAL_IMBUED_LEATHER = new ArmorMaterialImbuedLeather();
 
     private InternalRegistryPrimer registryPrimer;
     private PrimerEventHandler registryEventHandler;
@@ -199,6 +199,7 @@ public class CommonProxy {
         modEventBus.addListener(BaseConfiguration::refreshConfiguration);
 
         modEventBus.addListener(RegistryRegistries::buildRegistries);
+        modEventBus.addListener(PacketChannel::registerPayloadHandlers);
         modEventBus.addListener(RegistryEntities::initAttributes);
         registryEventHandler.attachEventHandlers(modEventBus);
     }
@@ -224,6 +225,7 @@ public class CommonProxy {
         eventBus.addListener(RegistryWorldGeneration::loadBiomeFeatures);
 
         eventBus.addListener(PlayerAmuletHandler::onEnchantmentAdd);
+        eventBus.addListener(DynamicEnchantmentHelper::onGetEnchantmentLevel);
         eventBus.addListener(BlockDropCaptureAssist.INSTANCE::onDrop);
         eventBus.addListener(CelestialGatewayHandler.INSTANCE::onWorldInit);
         eventBus.addListener(EventPriority.LOW, TileTreeBeacon.TreeWatcher::onGrow);
@@ -304,17 +306,17 @@ public class CommonProxy {
 
     // Utils
 
-    public FakePlayer getASFakePlayerServer(ServerWorld world) {
+    public FakePlayer getASFakePlayerServer(ServerLevel world) {
         return FakePlayerFactory.get(world, new GameProfile(FAKEPLAYER_UUID, "AS-FakePlayer"));
     }
 
     public File getASServerDataDirectory() {
-        MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
             return null;
         }
 
-        File asDataDir = server.func_240776_a_(new FolderName(AstralSorcery.MODID)).toFile();
+        File asDataDir = server.func_240776_a_(new LevelResource(AstralSorcery.MODID)).toFile();
         if (!asDataDir.exists()) {
             asDataDir.mkdirs();
         }
@@ -337,12 +339,12 @@ public class CommonProxy {
 
     // GUI stuff
 
-    public void openGuiClient(GuiType type, CompoundNBT data) {
+    public void openGuiClient(GuiType type, CompoundTag data) {
         //No-Op
     }
 
-    public void openGui(PlayerEntity player, GuiType type, Object... data) {
-        if (player instanceof ServerPlayerEntity && !(player instanceof FakePlayer)) {
+    public void openGui(Player player, GuiType type, Object... data) {
+        if (player instanceof ServerPlayer && !(player instanceof FakePlayer)) {
             PktOpenGui pkt = new PktOpenGui(type, type.serializeArguments(data));
             PacketChannel.CHANNEL.sendToPlayer(player, pkt);
         }
@@ -353,7 +355,7 @@ public class CommonProxy {
     private void onCommonSetup(FMLCommonSetupEvent event) {
         this.serverConfig.buildConfiguration();
 
-        RegistryCapabilities.init(MinecraftForge.EVENT_BUS);
+        RegistryCapabilities.init(NeoForge.EVENT_BUS);
         StarlightNetworkRegistry.setupRegistry();
         CollisionManager.init();
 
@@ -376,18 +378,18 @@ public class CommonProxy {
         event.addListener(PerkTreeLoader.INSTANCE);
     }
 
-    private void onServerStarted(FMLServerStartedEvent event) {
+    private void onServerStarted(ServerStartedEvent event) {
         this.serverLifecycleListeners.forEach(ServerLifecycleListener::onServerStart);
     }
 
-    private void onServerStarting(FMLServerStartingEvent event) {
+    private void onServerStarting(ServerStartingEvent event) {
 
     }
 
-    private void onServerStopping(FMLServerStoppingEvent event) {
+    private void onServerStopping(ServerStoppingEvent event) {
         this.serverLifecycleListeners.forEach(ServerLifecycleListener::onServerStop);
     }
 
-    private void onServerStop(FMLServerStoppedEvent event) {
+    private void onServerStop(ServerStoppedEvent event) {
     }
 }

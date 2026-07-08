@@ -8,8 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.screen;
 
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
@@ -26,11 +28,10 @@ import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.util.Mth;
+import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -51,7 +52,7 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
     private final List<Point.Float> usedStars = new ArrayList<>(randomStars);
 
     public ScreenHandTelescope() {
-        super(new TranslationTextComponent("screen.astralsorcery.hand_telescope"), 216, 216);
+        super(Component.translatable("screen.astralsorcery.hand_telescope"), 216, 216);
     }
 
     @Nonnull
@@ -87,7 +88,7 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
     }
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         RenderSystem.enableDepthTest();
         super.render(renderStack, mouseX, mouseY, pTicks);
 
@@ -96,7 +97,7 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
         this.drawTelescopeCell(renderStack, pTicks);
     }
 
-    private void drawTelescopeCell(MatrixStack renderStack, float pTicks) {
+    private void drawTelescopeCell(PoseStack renderStack, float pTicks) {
         boolean canSeeSky = this.canObserverSeeSky(Minecraft.getInstance().player.getPosition(), 1);
         float pitch = Minecraft.getInstance().player.getPitch(pTicks);
         float angleOpacity = 0F;
@@ -247,7 +248,7 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
         }
     }
 
-    private void drawSkyBackground(MatrixStack renderStack, float pTicks, boolean canSeeSky, float angleOpacity) {
+    private void drawSkyBackground(PoseStack renderStack, float pTicks, boolean canSeeSky, float angleOpacity) {
         Tuple<Color, Color> rgbFromTo = SkyScreen.getSkyGradient(canSeeSky, angleOpacity, pTicks);
         RenderingDrawUtils.drawGradientRect(renderStack, this.getGuiZLevel(),
                 this.guiLeft + 4, this.guiTop + 4,

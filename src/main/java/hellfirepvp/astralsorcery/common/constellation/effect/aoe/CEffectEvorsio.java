@@ -28,17 +28,17 @@ import hellfirepvp.astralsorcery.common.util.block.iterator.BlockPositionGenerat
 import hellfirepvp.astralsorcery.common.util.block.iterator.BlockSpherePositionGenerator;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -71,19 +71,19 @@ public class CEffectEvorsio extends CEffectAbstractList<ListEntries.PosEntry> {
 
     @Nullable
     @Override
-    public ListEntries.PosEntry recreateElement(CompoundNBT tag, BlockPos pos) {
+    public ListEntries.PosEntry recreateElement(CompoundTag tag, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Nullable
     @Override
-    public ListEntries.PosEntry createElement(World world, BlockPos pos) {
+    public ListEntries.PosEntry createElement(Level world, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(World world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         float addY = 1F;
         if (!pedestal.getPos().equals(pos)) {
             addY = 0F;
@@ -99,8 +99,8 @@ public class CEffectEvorsio extends CEffectAbstractList<ListEntries.PosEntry> {
     }
 
     @Override
-    public boolean playEffect(World world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        if (!(world instanceof ServerWorld)) {
+    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        if (!(world instanceof ServerLevel)) {
             return false;
         }
 
@@ -130,7 +130,7 @@ public class CEffectEvorsio extends CEffectAbstractList<ListEntries.PosEntry> {
                 if (this.canBreakBlock(world, at, state, buildFilter(pedestal))) {
                     BlockDropCaptureAssist.startCapturing();
                     try {
-                        BlockUtils.breakBlockWithoutPlayer((ServerWorld) world, at, state,
+                        BlockUtils.breakBlockWithoutPlayer((ServerLevel) world, at, state,
                                 ItemStack.EMPTY, true, true);
                     } finally {
                         NonNullList<ItemStack> captured = BlockDropCaptureAssist.getCapturedStacksAndStop();
@@ -147,7 +147,7 @@ public class CEffectEvorsio extends CEffectAbstractList<ListEntries.PosEntry> {
         }).left().orElse(false);
     }
 
-    private boolean canBreakBlock(World world, BlockPos pos, BlockState state, Predicate<BlockState> blacklist) {
+    private boolean canBreakBlock(Level world, BlockPos pos, BlockState state, Predicate<BlockState> blacklist) {
         if (blacklist.test(state)) {
             return false;
         }

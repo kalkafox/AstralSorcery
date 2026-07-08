@@ -11,11 +11,11 @@ package hellfirepvp.astralsorcery.common.network.play.server;
 import hellfirepvp.astralsorcery.common.auxiliary.charge.AlignmentChargeHandler;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 
@@ -38,7 +38,7 @@ public class PktSyncCharge extends ASPacket<PktSyncCharge> {
         this.charge = charge;
     }
 
-    public PktSyncCharge(PlayerEntity player) {
+    public PktSyncCharge(Player player) {
         this.maxCharge = AlignmentChargeHandler.INSTANCE.getMaximumCharge(player, LogicalSide.SERVER);
         this.charge = AlignmentChargeHandler.INSTANCE.getCurrentCharge(player, LogicalSide.SERVER);
     }

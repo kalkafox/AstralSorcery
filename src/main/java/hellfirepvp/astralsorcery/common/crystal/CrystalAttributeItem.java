@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.crystal;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 

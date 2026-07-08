@@ -12,14 +12,14 @@ import hellfirepvp.astralsorcery.common.auxiliary.charge.AlignmentChargeHandler;
 import hellfirepvp.astralsorcery.common.constellation.mantle.MantleEffect;
 import hellfirepvp.astralsorcery.common.item.armor.ItemMantle;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,7 +43,7 @@ public class MantleEffectEvorsio extends MantleEffect {
     }
 
     private void onBreak(BlockEvent.BreakEvent event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if (ItemMantle.getEffect(player, ConstellationsAS.evorsio) != null) {
             LogicalSide side = player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
             if (side.isServer()) {
@@ -60,7 +60,7 @@ public class MantleEffectEvorsio extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         this.playCapeSparkles(player, 0.1F);
@@ -75,14 +75,14 @@ public class MantleEffectEvorsio extends MantleEffect {
 
         private final int defaultChargeCostPerBreak = 2;
 
-        public ForgeConfigSpec.IntValue chargeCostPerBreak;
+        public ModConfigSpec.IntValue chargeCostPerBreak;
 
         public EvorsioConfig() {
             super("evorsio");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.chargeCostPerBreak = cfgBuilder

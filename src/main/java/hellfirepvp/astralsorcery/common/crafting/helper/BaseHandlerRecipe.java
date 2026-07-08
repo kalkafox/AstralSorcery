@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.crafting.helper;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.Objects;
 

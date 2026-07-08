@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,11 +24,11 @@ import java.util.List;
  */
 public class VoxelUtils {
 
-    public static VoxelShape combineAll(IBooleanFunction fct, VoxelShape... shapes) {
+    public static VoxelShape combineAll(BooleanOp fct, VoxelShape... shapes) {
         return combineAll(fct, Arrays.asList(shapes));
     }
 
-    public static VoxelShape combineAll(IBooleanFunction fct, List<VoxelShape> shapes) {
+    public static VoxelShape combineAll(BooleanOp fct, List<VoxelShape> shapes) {
         if (shapes.isEmpty()) {
             return VoxelShapes.empty();
         }

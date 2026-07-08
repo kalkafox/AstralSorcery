@@ -10,15 +10,15 @@ package hellfirepvp.astralsorcery.common.data.sync.client;
 
 import hellfirepvp.astralsorcery.common.data.sync.base.ClientData;
 import hellfirepvp.astralsorcery.common.data.sync.base.ClientDataReader;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -35,15 +35,15 @@ import java.util.Set;
  */
 public class ClientLightConnections extends ClientData<ClientLightConnections> {
 
-    private final Map<RegistryKey<World>, Map<BlockPos, Set<BlockPos>>> clientPosBuffer = new HashMap<>();
+    private final Map<ResourceKey<Level>, Map<BlockPos, Set<BlockPos>>> clientPosBuffer = new HashMap<>();
 
     @Nonnull
-    public Map<BlockPos, Set<BlockPos>> getClientConnections(RegistryKey<World> dim) {
+    public Map<BlockPos, Set<BlockPos>> getClientConnections(ResourceKey<Level> dim) {
         return this.clientPosBuffer.getOrDefault(dim, new HashMap<>());
     }
 
     @Override
-    public void clear(RegistryKey<World> dim) {
+    public void clear(ResourceKey<Level> dim) {
         this.clientPosBuffer.remove(dim);
     }
 
@@ -55,16 +55,16 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
     public static class Reader extends ClientDataReader<ClientLightConnections> {
 
         @Override
-        public void readFromIncomingFullSync(ClientLightConnections cl, CompoundNBT compound) {
+        public void readFromIncomingFullSync(ClientLightConnections cl, CompoundTag compound) {
             cl.clientPosBuffer.clear();
 
             for (String dimKey : compound.keySet()) {
-                RegistryKey<World> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
 
                 Map<BlockPos, Set<BlockPos>> posMap = new HashMap<>();
-                ListNBT list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
-                for (INBT iTag : list) {
-                    CompoundNBT tag = (CompoundNBT) iTag;
+                ListTag list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
+                for (Tag iTag : list) {
+                    CompoundTag tag = (CompoundTag) iTag;
 
                     BlockPos start = BlockPos.fromLong(tag.getLong("start"));
                     BlockPos end   = BlockPos.fromLong(tag.getLong("end"));
@@ -77,11 +77,11 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
         }
 
         @Override
-        public void readFromIncomingDiff(ClientLightConnections cl, CompoundNBT compound) {
+        public void readFromIncomingDiff(ClientLightConnections cl, CompoundTag compound) {
             Set<String> clearedDimensions = new HashSet<>();
-            for (INBT dimKeyNBT : compound.getList("clear", Constants.NBT.TAG_STRING)) {
+            for (Tag dimKeyNBT : compound.getList("clear", Constants.NBT.TAG_STRING)) {
                 String dimKey = dimKeyNBT.getString();
-                RegistryKey<World> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
                 cl.clientPosBuffer.remove(dim);
 
                 clearedDimensions.add(dimKey);
@@ -91,13 +91,13 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
                 if (clearedDimensions.contains(dimKey)) {
                     continue;
                 }
-                RegistryKey<World> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
 
                 Map<BlockPos, Set<BlockPos>> posMap = cl.clientPosBuffer.computeIfAbsent(dim, d -> new HashMap<>());
 
-                ListNBT list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
-                for (INBT iTag : list) {
-                    CompoundNBT tag = (CompoundNBT) iTag;
+                ListTag list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
+                for (Tag iTag : list) {
+                    CompoundTag tag = (CompoundTag) iTag;
 
                     BlockPos start = BlockPos.fromLong(tag.getLong("start"));
                     BlockPos end = BlockPos.fromLong(tag.getLong("end"));

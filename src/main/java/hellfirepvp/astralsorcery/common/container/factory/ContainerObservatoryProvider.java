@@ -13,11 +13,11 @@ import hellfirepvp.astralsorcery.common.lib.ContainerTypesAS;
 import hellfirepvp.astralsorcery.common.tile.TileObservatory;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.network.IContainerFactory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.BlockPos;
+import net.neoforged.fml.network.IContainerFactory;
 
 import javax.annotation.Nonnull;
 
@@ -38,19 +38,19 @@ public class ContainerObservatoryProvider extends CustomContainerProvider<Contai
     }
 
     @Override
-    protected void writeExtraData(PacketBuffer buf) {
+    protected void writeExtraData(FriendlyByteBuf buf) {
         ByteBufUtils.writePos(buf, this.observatory.getPos());
     }
 
     @Nonnull
     @Override
-    public ContainerObservatory createMenu(int windowId, PlayerInventory plInventory, PlayerEntity player) {
+    public ContainerObservatory createMenu(int windowId, Inventory plInventory, Player player) {
         return new ContainerObservatory(this.observatory, windowId);
     }
 
-    private static ContainerObservatory createFromPacket(int windowId, PlayerInventory plInventory, PacketBuffer data) {
+    private static ContainerObservatory createFromPacket(int windowId, Inventory plInventory, FriendlyByteBuf data) {
         BlockPos at = ByteBufUtils.readPos(data);
-        PlayerEntity player = plInventory.player;
+        Player player = plInventory.player;
         TileObservatory observatory = MiscUtils.getTileAt(player.getEntityWorld(), at, TileObservatory.class, true);
         return new ContainerObservatory(observatory, windowId);
     }
@@ -58,7 +58,7 @@ public class ContainerObservatoryProvider extends CustomContainerProvider<Contai
     public static class Factory implements IContainerFactory<ContainerObservatory> {
 
         @Override
-        public ContainerObservatory create(int windowId, PlayerInventory inv, PacketBuffer data) {
+        public ContainerObservatory create(int windowId, Inventory inv, FriendlyByteBuf data) {
             return ContainerObservatoryProvider.createFromPacket(windowId, inv, data);
         }
     }

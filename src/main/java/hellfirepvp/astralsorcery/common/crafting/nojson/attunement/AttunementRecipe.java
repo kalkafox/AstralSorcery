@@ -10,11 +10,11 @@ package hellfirepvp.astralsorcery.common.crafting.nojson.attunement;
 
 import hellfirepvp.astralsorcery.common.crafting.nojson.CustomRecipe;
 import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?>> ext
 
     @Nonnull
     @OnlyIn(Dist.CLIENT)
-    public T deserialize(TileAttunementAltar altar, CompoundNBT nbt, @Nullable T previousInstance) {
+    public T deserialize(TileAttunementAltar altar, CompoundTag nbt, @Nullable T previousInstance) {
         T activeRecipe = this.createRecipe(altar);
         activeRecipe.readFromNBT(nbt);
         return activeRecipe;
@@ -94,11 +94,11 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?>> ext
             return this.recipe.canStartCrafting(altar);
         }
 
-        public void writeToNBT(CompoundNBT nbt) {
+        public void writeToNBT(CompoundTag nbt) {
             nbt.putInt("tick", this.tick);
         }
 
-        protected void readFromNBT(CompoundNBT nbt) {
+        protected void readFromNBT(CompoundTag nbt) {
             this.tick = nbt.getInt("tick");
         }
 

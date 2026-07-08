@@ -11,16 +11,16 @@ package hellfirepvp.astralsorcery.common.item.dust;
 import hellfirepvp.astralsorcery.common.entity.EntityIlluminationSpark;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.util.block.BlockUtils;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.ForgeEventFactory;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,7 +32,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 public class ItemIlluminationPowder extends ItemUsableDust {
 
     @Override
-    boolean dispense(IBlockSource dispenser) {
+    boolean dispense(BlockSource dispenser) {
         BlockPos at = dispenser.getBlockPos();
         Direction face = dispenser.getBlockState().get(DispenserBlock.FACING);
         EntityIlluminationSpark nocSpark = new EntityIlluminationSpark(at.getX(), at.getY(), at.getZ(), dispenser.getWorld());
@@ -41,15 +41,15 @@ public class ItemIlluminationPowder extends ItemUsableDust {
     }
 
     @Override
-    boolean rightClickAir(World world, PlayerEntity player, ItemStack dust) {
+    boolean rightClickAir(Level world, Player player, ItemStack dust) {
         return world.addEntity(new EntityIlluminationSpark(player, world));
     }
 
     @Override
-    boolean rightClickBlock(ItemUseContext ctx) {
-        World world = ctx.getWorld();
+    boolean rightClickBlock(UseOnContext ctx) {
+        Level world = ctx.getWorld();
         BlockPos pos = ctx.getPos();
-        PlayerEntity player = ctx.getPlayer();
+        Player player = ctx.getPlayer();
         if (player == null) {
             return false;
         }

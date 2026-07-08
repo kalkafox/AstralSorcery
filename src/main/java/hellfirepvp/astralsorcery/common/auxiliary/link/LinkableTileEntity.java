@@ -8,17 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.auxiliary.link;
 
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.Lists;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Style;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -30,28 +31,28 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 30.06.2019 / 20:57
  */
-//Interface for linking a TileEntity, which should implement this interface, to any other block for whatever reason.
+//Interface for linking a BlockEntity, which should implement this interface, to any other block for whatever reason.
 public interface LinkableTileEntity {
 
     /**
      * This tile's world.
      * Links can only be created in the same world as this tile is in.
      */
-    default public World getLinkWorld() {
-        if (this instanceof TileEntity) {
-            return ((TileEntity) this).getWorld();
+    default public Level getLinkWorld() {
+        if (this instanceof BlockEntity) {
+            return ((BlockEntity) this).getWorld();
         }
-        throw new IllegalStateException("LinkableTileEntity not implemented on TileEntity: " + this.getClass());
+        throw new IllegalStateException("LinkableTileEntity not implemented on BlockEntity: " + this.getClass());
     }
 
     /**
      * This tile's position
      */
     default public BlockPos getLinkPos() {
-        if (this instanceof TileEntity) {
-            return ((TileEntity) this).getPos();
+        if (this instanceof BlockEntity) {
+            return ((BlockEntity) this).getPos();
         }
-        throw new IllegalStateException("LinkableTileEntity not implemented on TileEntity: " + this.getClass());
+        throw new IllegalStateException("LinkableTileEntity not implemented on BlockEntity: " + this.getClass());
     }
 
     /**
@@ -60,11 +61,11 @@ public interface LinkableTileEntity {
      */
     @Nullable
     default public String getUnLocalizedDisplayName() {
-        if (this instanceof TileEntity) {
-            BlockState state = ((TileEntity) this).getBlockState();
+        if (this instanceof BlockEntity) {
+            BlockState state = ((BlockEntity) this).getBlockState();
             return state.getBlock().getTranslationKey();
         }
-        throw new IllegalStateException("LinkableTileEntity not implemented on TileEntity: " + this.getClass());
+        throw new IllegalStateException("LinkableTileEntity not implemented on BlockEntity: " + this.getClass());
     }
 
     /**
@@ -86,7 +87,7 @@ public interface LinkableTileEntity {
      * @param player the player that created the link.
      * @param other the new location linked to.
      */
-    public void onBlockLinkCreate(PlayerEntity player, BlockPos other);
+    public void onBlockLinkCreate(Player player, BlockPos other);
 
     /**
      * Informs of a successful link creation.
@@ -95,7 +96,7 @@ public interface LinkableTileEntity {
      * @param player the player that created the link.
      * @param linked the new entity linked to.
      */
-    public void onEntityLinkCreate(PlayerEntity player, LivingEntity linked);
+    public void onEntityLinkCreate(Player player, LivingEntity linked);
 
     /**
      * Informs that a player right-clicked the tile to start the linking process.
@@ -104,12 +105,12 @@ public interface LinkableTileEntity {
      *
      * @return boolean true if the select actually selected it, false for any other selection modification
      */
-    default public boolean onSelect(PlayerEntity player) {
+    default public boolean onSelect(Player player) {
         if (player.isSneaking()) {
             for (BlockPos linkTo : Lists.newArrayList(getLinkedPositions())) {
                 tryUnlink(player, linkTo);
             }
-            player.sendMessage(new TranslationTextComponent("astralsorcery.misc.link.unlink.all").mergeStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+            player.sendMessage(Component.translatable("astralsorcery.misc.link.unlink.all").withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
             return false;
         }
         return true;
@@ -122,7 +123,7 @@ public interface LinkableTileEntity {
      * @param other the other block this tile is supposed to link to.
      * @return true, if and only if a allowed/correct link can be created, false otherwise
      */
-    public boolean tryLinkBlock(PlayerEntity player, BlockPos other);
+    public boolean tryLinkBlock(Player player, BlockPos other);
 
     /**
      * Called when a player right-clicks any entity and then right-clicks this tile,
@@ -132,7 +133,7 @@ public interface LinkableTileEntity {
      * @param other the other entity to link to this block tile.
      * @return true, if and only if a allowed/correct link can be created, false otherwise
      */
-    public boolean tryLinkEntity(PlayerEntity player, LivingEntity other);
+    public boolean tryLinkEntity(Player player, LivingEntity other);
 
     /**
      * Called when a player shift-right-clicks a block that is linked to this tile.
@@ -141,7 +142,7 @@ public interface LinkableTileEntity {
      * @param other the other block this tile has a link to.
      * @return true, if the link got removed, which, in case this is actually linked to the given block, should always happen
      */
-    public boolean tryUnlink(PlayerEntity player, BlockPos other);
+    public boolean tryUnlink(Player player, BlockPos other);
 
     /**
      * Get the block positions this tile is currently linked to.

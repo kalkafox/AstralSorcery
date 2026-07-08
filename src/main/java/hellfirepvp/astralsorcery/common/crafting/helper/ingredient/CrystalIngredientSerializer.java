@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.crafting.helper.ingredient;
 
 import com.google.gson.JsonObject;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,12 +32,12 @@ public class CrystalIngredientSerializer implements IIngredientSerializer<Crysta
     }
 
     @Override
-    public CrystalIngredient parse(PacketBuffer buffer) {
+    public CrystalIngredient parse(FriendlyByteBuf buffer) {
         return new CrystalIngredient(buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean());
     }
 
     @Override
-    public void write(PacketBuffer buffer, CrystalIngredient ingredient) {
+    public void write(FriendlyByteBuf buffer, CrystalIngredient ingredient) {
         buffer.writeBoolean(ingredient.hasToBeAttuned());
         buffer.writeBoolean(ingredient.hasToBeCelestial());
         buffer.writeBoolean(ingredient.canBeAttuned());

@@ -12,16 +12,16 @@ import hellfirepvp.astralsorcery.common.constellation.mantle.MantleEffect;
 import hellfirepvp.astralsorcery.common.item.armor.ItemMantle;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -45,7 +45,7 @@ public class MantleEffectFornax extends MantleEffect {
     }
 
     private void onHurt(LivingHurtEvent event) {
-        World world = event.getEntityLiving().getEntityWorld();
+        Level world = event.getEntityLiving().getEntityWorld();
         if (world.isRemote()) {
             return;
         }
@@ -53,7 +53,7 @@ public class MantleEffectFornax extends MantleEffect {
         LivingEntity attacked = event.getEntityLiving();
         Entity attacker = event.getSource().getTrueSource();
         if (attacker instanceof LivingEntity) {
-            if (attacked instanceof ServerPlayerEntity && MiscUtils.isPlayerFakeMP((ServerPlayerEntity) attacked)) {
+            if (attacked instanceof ServerPlayer && MiscUtils.isPlayerFakeMP((ServerPlayer) attacked)) {
                 return;
             }
 
@@ -73,7 +73,7 @@ public class MantleEffectFornax extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         if (player.isBurning()) {
@@ -99,16 +99,16 @@ public class MantleEffectFornax extends MantleEffect {
         private final double defaultDamageIncreaseInFire = 1.6F;
         private final double defaultHealPercentFromFireDamage = 0.6F;
 
-        public ForgeConfigSpec.DoubleValue damageReductionInFire;
-        public ForgeConfigSpec.DoubleValue damageIncreaseInFire;
-        public ForgeConfigSpec.DoubleValue healPercentFromFireDamage;
+        public ModConfigSpec.DoubleValue damageReductionInFire;
+        public ModConfigSpec.DoubleValue damageIncreaseInFire;
+        public ModConfigSpec.DoubleValue healPercentFromFireDamage;
 
         public FornaxConfig() {
             super("fornax");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.damageReductionInFire = cfgBuilder

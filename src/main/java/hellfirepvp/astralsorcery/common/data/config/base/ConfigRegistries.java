@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.data.config.base;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +49,10 @@ public class ConfigRegistries {
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             for (ConfigDataAdapter<?> dataRegistry : ConfigRegistries.this.dataRegistries) {
 
-                ForgeConfigSpec.ConfigValue<List<? extends String>> cfgList = cfgBuilder
+                ModConfigSpec.ConfigValue<List<? extends String>> cfgList = cfgBuilder
                         .comment(dataRegistry.getCommentDescription())
                         .translation(dataRegistry.getTranslationKey())
                         .defineList(registrySubSection(dataRegistry.getSectionName()),

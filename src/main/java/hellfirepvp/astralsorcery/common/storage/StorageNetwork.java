@@ -11,11 +11,11 @@ package hellfirepvp.astralsorcery.common.storage;
 import com.google.common.collect.Maps;
 import hellfirepvp.astralsorcery.common.util.MapStream;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Map;
 public class StorageNetwork {
 
     private CoreArea master = null;
-    private final Map<BlockPos, AxisAlignedBB> cores = Maps.newHashMap();
+    private final Map<BlockPos, AABB> cores = Maps.newHashMap();
 
     //True if set.
     public boolean setMaster(@Nullable BlockPos pos) {
@@ -52,7 +52,7 @@ public class StorageNetwork {
     }
 
     //True if it didn't overwrite a previous one
-    public boolean addCore(BlockPos pos, AxisAlignedBB box) {
+    public boolean addCore(BlockPos pos, AABB box) {
         return this.cores.put(pos, box) == null;
     }
 
@@ -65,10 +65,10 @@ public class StorageNetwork {
         return MapStream.of(this.cores).toList(CoreArea::new);
     }
 
-    public void writeToNBT(CompoundNBT tag) {
-        ListNBT list = new ListNBT();
+    public void writeToNBT(CompoundTag tag) {
+        ListTag list = new ListTag();
         for (CoreArea coreData : this.getCores()) {
-            CompoundNBT coreTag = new CompoundNBT();
+            CompoundTag coreTag = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(coreData.getPos(), coreTag);
             NBTHelper.writeBoundingBox(coreData.getOffsetBox(), coreTag);
             list.add(coreTag);
@@ -81,14 +81,14 @@ public class StorageNetwork {
         }
     }
 
-    public void readFromNBT(CompoundNBT tag) {
+    public void readFromNBT(CompoundTag tag) {
         this.cores.clear();
 
-        ListNBT list = tag.getList("cores", Constants.NBT.TAG_COMPOUND);
+        ListTag list = tag.getList("cores", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            CompoundNBT coreTag = list.getCompound(i);
+            CompoundTag coreTag = list.getCompound(i);
             BlockPos pos = NBTHelper.readBlockPosFromNBT(coreTag);
-            AxisAlignedBB box = NBTHelper.readBoundingBox(coreTag);
+            AABB box = NBTHelper.readBoundingBox(coreTag);
             this.addCore(pos, box);
         }
 
@@ -98,9 +98,9 @@ public class StorageNetwork {
     public static class CoreArea {
 
         private final BlockPos pos;
-        private final AxisAlignedBB offsetBox;
+        private final AABB offsetBox;
 
-        private CoreArea(BlockPos pos, AxisAlignedBB offsetBox) {
+        private CoreArea(BlockPos pos, AABB offsetBox) {
             this.pos = pos;
             this.offsetBox = offsetBox;
         }
@@ -109,11 +109,11 @@ public class StorageNetwork {
             return pos;
         }
 
-        public AxisAlignedBB getOffsetBox() {
+        public AABB getOffsetBox() {
             return offsetBox;
         }
 
-        public AxisAlignedBB getRealBox() {
+        public AABB getRealBox() {
             return offsetBox.offset(getPos());
         }
     }

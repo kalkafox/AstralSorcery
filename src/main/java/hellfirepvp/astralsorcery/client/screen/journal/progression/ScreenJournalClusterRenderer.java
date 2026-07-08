@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.client.screen.journal.progression;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.screen.base.WidthHeightScreen;
@@ -26,12 +26,12 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.data.research.ResearchProgression;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
+import net.minecraft.network.chat.FormattedText;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -93,12 +93,12 @@ public class ScreenJournalClusterRenderer {
         return false;
     }
 
-    public void drawMouseHighlight(MatrixStack renderStack, float zLevel, int mouseX, int mouseY) {
+    public void drawMouseHighlight(PoseStack renderStack, float zLevel, int mouseX, int mouseY) {
         Rectangle frame = new Rectangle(renderOffsetX, renderOffsetY, renderGuiWidth, renderGuiHeight);
         if (frame.contains(mouseX, mouseY)) {
             for (Rectangle r : clickableNodes.keySet()) {
                 if (r.contains(mouseX, mouseY)) {
-                    ITextProperties name = clickableNodes.get(r).getName();
+                    FormattedText name = clickableNodes.get(r).getName();
 
                     renderStack.push();
                     renderStack.translate(r.getX(), r.getY(), zLevel + 200);
@@ -164,13 +164,13 @@ public class ScreenJournalClusterRenderer {
         moveMouse(0, 0);
     }
 
-    public void drawClusterScreen(MatrixStack renderStack, WidthHeightScreen parentGui, float zLevel) {
+    public void drawClusterScreen(PoseStack renderStack, WidthHeightScreen parentGui, float zLevel) {
         clickableNodes.clear();
 
         drawNodesAndConnections(renderStack, parentGui, zLevel);
     }
 
-    private void drawNodesAndConnections(MatrixStack renderStack, WidthHeightScreen parentGui, float zLevel) {
+    private void drawNodesAndConnections(PoseStack renderStack, WidthHeightScreen parentGui, float zLevel) {
         alpha = progressionSizeHandler.getScalingFactor(); //between 0.25F and ~1F
         alpha -= 0.25F;
         alpha /= 0.75F;
@@ -192,7 +192,7 @@ public class ScreenJournalClusterRenderer {
         displayPositions.forEach((node, pos) -> renderNodeToGUI(renderStack, node, pos, zLevel));
     }
 
-    private void renderNodeToGUI(MatrixStack renderStack, ResearchNode node, Point.Float offset, float zLevel) {
+    private void renderNodeToGUI(PoseStack renderStack, ResearchNode node, Point.Float offset, float zLevel) {
         float zoomedWH = progressionSizeHandler.getZoomedWHNode();
         float offsetX = offset.x - zoomedWH / 2F;
         float offsetY = offset.y - zoomedWH / 2F;
@@ -268,7 +268,7 @@ public class ScreenJournalClusterRenderer {
         }
     }
 
-    private void drawConnection(MatrixStack renderStack, float originX, float originY, float targetX, float targetY, float zLevel) {
+    private void drawConnection(PoseStack renderStack, float originX, float originY, float targetX, float targetY, float zLevel) {
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
@@ -300,7 +300,7 @@ public class ScreenJournalClusterRenderer {
         RenderSystem.enableTexture();
     }
 
-    private void drawLinePart(IVertexBuilder buf, MatrixStack renderStack, double lx, double ly, double hx, double hy, float zLevel, float brightness) {
+    private void drawLinePart(VertexConsumer buf, PoseStack renderStack, double lx, double ly, double hx, double hy, float zLevel, float brightness) {
         Matrix4f offset = renderStack.getLast().getMatrix();
         buf.pos(offset, (float) lx, (float) ly, zLevel)
                 .color(brightness * alpha, brightness * alpha, brightness * alpha, 0.4F * alpha)

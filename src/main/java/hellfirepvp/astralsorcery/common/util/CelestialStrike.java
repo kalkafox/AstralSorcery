@@ -23,18 +23,18 @@ import hellfirepvp.astralsorcery.common.network.play.server.PktPlayEffect;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.world.SkyCollectionHelper;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityPredicates;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -50,11 +50,11 @@ import java.util.Random;
  */
 public class CelestialStrike {
 
-    private static final AxisAlignedBB EMPTY = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    private static final AABB EMPTY = new AABB(0, 0, 0, 0, 0, 0);
 
     private CelestialStrike() {}
 
-    public static void play(@Nullable LivingEntity attacker, ServerWorld world, Vector3 at, Vector3 displayPosition) {
+    public static void play(@Nullable LivingEntity attacker, ServerLevel world, Vector3 at, Vector3 displayPosition) {
         double radius = 16D;
         List<LivingEntity> livingEntities = world.getEntitiesWithinAABB(LivingEntity.class,
                 EMPTY.grow(radius, radius / 2, radius)
@@ -66,15 +66,15 @@ public class CelestialStrike {
         DamageSource ds = CommonProxy.DAMAGE_SOURCE_STELLAR;
         if (attacker != null) {
             ds = DamageSource.causeMobDamage(attacker);
-            if (attacker instanceof PlayerEntity) {
-                ds = DamageSource.causePlayerDamage((PlayerEntity) attacker);
+            if (attacker instanceof Player) {
+                ds = DamageSource.causePlayerDamage((Player) attacker);
             }
         }
         float dmg = 25F;
         dmg += SkyCollectionHelper.getSkyNoiseDistribution(world, at.toBlockPos()) * 10F;
         for (LivingEntity living : livingEntities) {
-            if ((living instanceof PlayerEntity) &&
-                    (living.isSpectator() || ((PlayerEntity) living).isCreative() ||
+            if ((living instanceof Player) &&
+                    (living.isSpectator() || ((Player) living).isCreative() ||
                             (attacker != null && living.isOnSameTeam(attacker)))) {
                 continue;
             }

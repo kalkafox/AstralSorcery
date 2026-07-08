@@ -10,11 +10,11 @@ package hellfirepvp.astralsorcery.common.block.base.template;
 
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesWood;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,7 +30,7 @@ public class BlockInfusedWoodTemplate extends Block implements CustomItemBlock {
     }
 
     @Override
-    public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction face) {
+    public int getFlammability(BlockState state, BlockGetter world, BlockPos pos, Direction face) {
         return 60;
     }
 }

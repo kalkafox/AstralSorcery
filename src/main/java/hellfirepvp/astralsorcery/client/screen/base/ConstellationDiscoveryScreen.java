@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.client.screen.base;
 
 import com.google.common.collect.Iterables;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.util.MouseUtil;
@@ -28,14 +28,14 @@ import hellfirepvp.astralsorcery.common.network.play.client.PktDiscoverConstella
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSide;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import org.joml.Matrix4f;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -65,7 +65,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
 
     private boolean initialized = false;
 
-    protected ConstellationDiscoveryScreen(ITextComponent titleIn, int guiHeight, int guiWidth) {
+    protected ConstellationDiscoveryScreen(Component titleIn, int guiHeight, int guiWidth) {
         super(titleIn, guiHeight, guiWidth);
     }
 
@@ -128,7 +128,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
     }
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float partialTicks) {
         if (this.isMouseRotatingGui()) {
             if (hasShiftDown() && Minecraft.getInstance().mouseHelper.isMouseGrabbed()) {
                 MouseUtil.ungrab();
@@ -141,7 +141,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
         super.render(renderStack, mouseX, mouseY, partialTicks);
     }
 
-    protected void renderDrawnLines(MatrixStack renderStack, Random rand, float pTicks) {
+    protected void renderDrawnLines(PoseStack renderStack, Random rand, float pTicks) {
         if (!canDraw()) {
             this.clearDrawing();
             return;
@@ -164,7 +164,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
         });
     }
 
-    private void drawLine(BufferBuilder buf, MatrixStack renderStack, float pTicks, Point from, Point to, Supplier<Float> brightnessFn, float lineBreadth) {
+    private void drawLine(BufferBuilder buf, PoseStack renderStack, float pTicks, Point from, Point to, Supplier<Float> brightnessFn, float lineBreadth) {
         float brightness = brightnessFn.get();
         float starBr = this.multiplyStarBrightness(pTicks, brightness);
         if (starBr <= 0.0F) {
@@ -331,7 +331,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
     }
 
     protected boolean canObserverSeeSky(BlockPos pos, int xzWidth) {
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return false;
         }

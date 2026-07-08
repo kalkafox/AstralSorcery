@@ -22,24 +22,24 @@ import hellfirepvp.astralsorcery.common.item.base.PerkExperienceRevealer;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LecternBlock;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import hellfirepvp.astralsorcery.common.util.Constants;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -61,19 +61,19 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
+    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
         if (world.isRemote() && !player.isSneaking()) {
             AstralSorcery.getProxy().openGui(player, GuiType.TOME);
-        } else if (!world.isRemote() && player.isSneaking() && hand == Hand.MAIN_HAND && player instanceof ServerPlayerEntity) {
+        } else if (!world.isRemote() && player.isSneaking() && hand == Hand.MAIN_HAND && player instanceof ServerPlayer) {
             new ContainerTomeProvider(player.getHeldItem(hand), player.inventory.currentItem)
-                    .openFor((ServerPlayerEntity) player);
+                    .openFor((ServerPlayer) player);
         }
         return ActionResult.resultSuccess(player.getHeldItem(hand));
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
-        World world = context.getWorld();
+    public InteractionResult onItemUse(UseOnContext context) {
+        Level world = context.getWorld();
         BlockState blockstate = world.getBlockState(context.getPos());
         if (blockstate.getBlock() instanceof LecternBlock) {
             return LecternBlock.tryPlaceBook(world, context.getPos(), blockstate, context.getItem()) ? ActionResultType.SUCCESS : ActionResultType.PASS;
@@ -82,8 +82,8 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
         }
     }
 
-    public static IInventory getTomeStorage(ItemStack stack, PlayerEntity player) {
-        Inventory inventory = new Inventory(27);
+    public static Container getTomeStorage(ItemStack stack, Player player) {
+        SimpleContainer inventory = new SimpleContainer(27);
         getStoredConstellations(stack, player).stream().map(cst -> {
             ItemStack cstPaper = new ItemStack(ItemsAS.CONSTELLATION_PAPER);
             if (cstPaper.getItem() instanceof ConstellationBaseItem) {
@@ -94,7 +94,7 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
         return inventory;
     }
 
-    public static List<IConstellation> getStoredConstellations(ItemStack stack, PlayerEntity player) {
+    public static List<IConstellation> getStoredConstellations(ItemStack stack, Player player) {
         LinkedList<IConstellation> out = new LinkedList<>();
 
         PlayerProgress prog = ResearchHelper.getProgress(player, player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER);

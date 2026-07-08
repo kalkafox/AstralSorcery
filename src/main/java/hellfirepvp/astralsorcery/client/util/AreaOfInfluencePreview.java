@@ -17,13 +17,13 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.event.TickEvent;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -44,7 +44,7 @@ public class AreaOfInfluencePreview implements ITickHandler {
     private static final float alphaTick = 1F / MAX_LIFE;
     private static final float sizeCube1 = 1.25F, sizeCube2 = 1.35F;
 
-    private RegistryKey<World> tileDimension = null;
+    private ResourceKey<Level> tileDimension = null;
     private BlockPos tilePosition = null;
     private FXCube effect1 = null, effect2 = null;
 
@@ -59,7 +59,7 @@ public class AreaOfInfluencePreview implements ITickHandler {
     }
 
     public void show(TileAreaOfInfluence aoeTile) {
-        if (!(aoeTile instanceof TileEntity)) {
+        if (!(aoeTile instanceof BlockEntity)) {
             return;
         }
         this.tileDimension = aoeTile.getDimension();
@@ -77,13 +77,13 @@ public class AreaOfInfluencePreview implements ITickHandler {
             this.removeEffects();
             return;
         }
-        World clientWorld = Minecraft.getInstance().world;
+        Level clientWorld = Minecraft.getInstance().world;
         if (clientWorld == null) {
             this.clearClient();
             this.removeEffects();
             return;
         }
-        RegistryKey<World> clientDimType = clientWorld.getDimensionKey();
+        ResourceKey<Level> clientDimType = clientWorld.getDimensionKey();
         if (!clientDimType.equals(this.tileDimension)) {
             this.clearClient();
             this.removeEffects();

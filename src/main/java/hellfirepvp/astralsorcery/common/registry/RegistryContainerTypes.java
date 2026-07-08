@@ -13,15 +13,16 @@ import hellfirepvp.astralsorcery.client.screen.ScreenObservatory;
 import hellfirepvp.astralsorcery.client.screen.container.*;
 import hellfirepvp.astralsorcery.common.container.ContainerObservatory;
 import hellfirepvp.astralsorcery.common.container.factory.*;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.network.IContainerFactory;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.network.IContainerFactory;
 
 import static hellfirepvp.astralsorcery.common.lib.ContainerTypesAS.*;
 
@@ -51,7 +52,7 @@ public class RegistryContainerTypes {
         ScreenManager.registerFactory(TOME, ScreenContainerTome::new);
         ScreenManager.registerFactory(OBSERVATORY, new ScreenManager.IScreenFactory<ContainerObservatory, ScreenObservatory>() {
             @Override
-            public ScreenObservatory create(ContainerObservatory observatory, PlayerInventory playerInventory, ITextComponent name) {
+            public ScreenObservatory create(ContainerObservatory observatory, Inventory playerInventory, Component name) {
                 return new ScreenObservatory(observatory);
             }
         });
@@ -61,14 +62,13 @@ public class RegistryContainerTypes {
         ScreenManager.registerFactory(ALTAR_RADIANCE, ScreenContainerAltarRadiance::new);
     }
 
-    private static <C extends Container, T extends ContainerType<C>> T register(String name, IContainerFactory<C> containerFactory) {
+    private static <C extends AbstractContainerMenu, T extends MenuType<C>> T register(String name, IContainerFactory<C> containerFactory) {
         return register(AstralSorcery.key(name), containerFactory);
     }
 
-    private static <C extends Container, T extends ContainerType<C>> T register(ResourceLocation name, IContainerFactory<C> containerFactory) {
-        ContainerType<C> type = new ContainerType<>(containerFactory);
-        type.setRegistryName(name);
-        AstralSorcery.getProxy().getRegistryPrimer().register(type);
+    private static <C extends AbstractContainerMenu, T extends MenuType<C>> T register(ResourceLocation name, IContainerFactory<C> containerFactory) {
+        MenuType<C> type = new MenuType<>(containerFactory);
+        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.MENU, name, type);
         return (T) type;
     }
 }

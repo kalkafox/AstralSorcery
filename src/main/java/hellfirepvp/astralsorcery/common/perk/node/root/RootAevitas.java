@@ -17,11 +17,11 @@ import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.RootPerk;
 import hellfirepvp.astralsorcery.common.util.DiminishingMultiplier;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 
@@ -54,10 +54,10 @@ public class RootAevitas extends RootPerk {
     }
 
     private void onPlace(BlockEvent.EntityPlaceEvent event) {
-        if (!(event.getEntity() instanceof PlayerEntity)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
-        PlayerEntity player = (PlayerEntity) event.getEntity();
+        Player player = (Player) event.getEntity();
         LogicalSide side = this.getSide(player);
         if (!side.isServer()) {
             return;

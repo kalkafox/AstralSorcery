@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.CrystalIngredient;
 import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredient;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
 
 /**
  * This class is part of the Astral Sorcery Mod

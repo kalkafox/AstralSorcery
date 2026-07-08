@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.world.placement;
 
 import hellfirepvp.astralsorcery.common.world.placement.config.ChanceConfig;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.gen.placement.ConfiguredPlacement;
 import net.minecraft.world.gen.placement.SimplePlacement;
 

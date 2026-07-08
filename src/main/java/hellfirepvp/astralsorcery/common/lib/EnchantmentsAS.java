@@ -8,7 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.lib;
 
-import net.minecraft.enchantment.Enchantment;
+import hellfirepvp.astralsorcery.AstralSorcery;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,7 +24,11 @@ public class EnchantmentsAS {
 
     private EnchantmentsAS() {}
 
-    public static Enchantment NIGHT_VISION;
-    public static Enchantment SCORCHING_HEAT;
+    public static final ResourceKey<Enchantment> NIGHT_VISION = key("night_vision");
+    public static final ResourceKey<Enchantment> SCORCHING_HEAT = key("scorching_heat");
+
+    private static ResourceKey<Enchantment> key(String name) {
+        return ResourceKey.create(Registries.ENCHANTMENT, AstralSorcery.key(name));
+    }
 
 }

@@ -10,12 +10,12 @@ package hellfirepvp.astralsorcery.client.util.camera;
 
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.HandSide;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.HumanoidArm;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,7 +28,7 @@ import java.util.Collections;
  * Created by HellFirePvP
  * Date: 02.12.2019 / 20:10
  */
-public abstract class EntityCameraRenderView extends ClientPlayerEntity {
+public abstract class EntityCameraRenderView extends LocalPlayer {
 
     private Vector3 cameraFocus = null;
 
@@ -97,15 +97,15 @@ public abstract class EntityCameraRenderView extends ClientPlayerEntity {
 
     @Nonnull
     @Override
-    public ItemStack getItemStackFromSlot(EquipmentSlotType slotIn) {
+    public ItemStack getItemStackFromSlot(EquipmentSlot slotIn) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public void setItemStackToSlot(EquipmentSlotType slotIn, @Nullable ItemStack stack) {}
+    public void setItemStackToSlot(EquipmentSlot slotIn, @Nullable ItemStack stack) {}
 
     @Override
-    public HandSide getPrimaryHand() {
+    public HumanoidArm getPrimaryHand() {
         return HandSide.RIGHT;
     }
 }

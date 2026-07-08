@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.crafting.recipe;
 
 import hellfirepvp.astralsorcery.common.crafting.helper.RecipeCraftingContext;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,11 +24,11 @@ import net.minecraftforge.items.IItemHandler;
 public class SimpleAltarRecipeContext extends RecipeCraftingContext<SimpleAltarRecipe, IItemHandler> {
 
     private final TileAltar altar;
-    private final PlayerEntity crafter;
+    private final Player crafter;
     private final LogicalSide side;
     private boolean ignoreStarlightRequirement = false;
 
-    public SimpleAltarRecipeContext(PlayerEntity crafter, LogicalSide side, TileAltar altar) {
+    public SimpleAltarRecipeContext(Player crafter, LogicalSide side, TileAltar altar) {
         this.altar = altar;
         this.crafter = crafter;
         this.side = side;
@@ -43,7 +43,7 @@ public class SimpleAltarRecipeContext extends RecipeCraftingContext<SimpleAltarR
         return side;
     }
 
-    public PlayerEntity getCrafter() {
+    public Player getCrafter() {
         return crafter;
     }
 

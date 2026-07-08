@@ -14,10 +14,9 @@ import hellfirepvp.astralsorcery.common.util.log.LogCategory;
 import hellfirepvp.observerlib.api.ChangeSubscriber;
 import hellfirepvp.observerlib.api.ObserverHelper;
 import hellfirepvp.observerlib.common.change.ChangeObserverStructure;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 
@@ -28,7 +27,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 02.08.2016 / 17:34
  */
-public abstract class TileEntityTick extends TileEntitySynchronized implements ITickableTileEntity, TileRequiresMultiblock {
+public abstract class TileEntityTick extends TileEntitySynchronized implements TickableBlockEntity, TileRequiresMultiblock {
 
     private boolean doesSeeSky = false;
     private int lastUpdateTick = -1;
@@ -38,7 +37,7 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements I
 
     protected int ticksExisted = 0;
 
-    protected TileEntityTick(TileEntityType<?> tileEntityTypeIn) {
+    protected TileEntityTick(BlockEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
 
@@ -145,7 +144,7 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements I
     protected void notifyMultiblockStateUpdate(boolean hadMultiblockPrev, boolean hasMultiblockNow) {}
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
         
         this.ticksExisted = compound.getInt("ticksExisted");
@@ -154,7 +153,7 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements I
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.putInt("ticksExisted", this.ticksExisted);

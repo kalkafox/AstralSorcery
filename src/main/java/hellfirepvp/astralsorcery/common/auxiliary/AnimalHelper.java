@@ -10,11 +10,11 @@ package hellfirepvp.astralsorcery.common.auxiliary;
 
 import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.SquidEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Squid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,7 +36,7 @@ public class AnimalHelper {
     static {
         register(new Squid());
 
-        //Generic fallback for any AnimalEntity
+        //Generic fallback for any Animal
         register(new GenericAnimal());
     }
 
@@ -63,7 +63,7 @@ public class AnimalHelper {
 
         public boolean handles(@Nonnull LivingEntity entity);
 
-        public List<ItemStack> generateDrops(@Nonnull LivingEntity entity, World world, Random rand, float luck);
+        public List<ItemStack> generateDrops(@Nonnull LivingEntity entity, Level world, Random rand, float luck);
 
     }
 
@@ -71,11 +71,11 @@ public class AnimalHelper {
 
         @Override
         public boolean handles(@Nonnull LivingEntity entity) {
-            return entity instanceof AnimalEntity;
+            return entity instanceof Animal;
         }
 
         @Override
-        public List<ItemStack> generateDrops(@Nonnull LivingEntity entity, World world, Random rand, float luck) {
+        public List<ItemStack> generateDrops(@Nonnull LivingEntity entity, Level world, Random rand, float luck) {
             return EntityUtils.generateLoot(entity, rand, CommonProxy.DAMAGE_SOURCE_STELLAR, null);
         }
     }
@@ -84,7 +84,7 @@ public class AnimalHelper {
 
         @Override
         public boolean handles(@Nonnull LivingEntity entity) {
-            return entity instanceof SquidEntity;
+            return entity instanceof Squid;
         }
     }
 }

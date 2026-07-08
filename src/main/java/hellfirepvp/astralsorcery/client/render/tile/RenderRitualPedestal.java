@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.render.tile;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
@@ -17,9 +17,9 @@ import hellfirepvp.astralsorcery.common.item.crystal.ItemAttunedCelestialCrystal
 import hellfirepvp.astralsorcery.common.item.crystal.ItemAttunedRockCrystal;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.tile.TileRitualPedestal;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.world.item.ItemStack;
 
 import java.awt.*;
 
@@ -32,12 +32,12 @@ import java.awt.*;
  */
 public class RenderRitualPedestal extends CustomTileEntityRenderer<TileRitualPedestal> {
 
-    public RenderRitualPedestal(TileEntityRendererDispatcher tileRenderer) {
+    public RenderRitualPedestal(BlockEntityRenderDispatcher tileRenderer) {
         super(tileRenderer);
     }
 
     @Override
-    public void render(TileRitualPedestal tile, float pTicks, MatrixStack renderStack, IRenderTypeBuffer renderTypeBuffer, int combinedLight, int combinedOverlay) {
+    public void render(TileRitualPedestal tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         ItemStack stack = tile.getCurrentCrystal();
         if (stack.isEmpty()) {
             return;

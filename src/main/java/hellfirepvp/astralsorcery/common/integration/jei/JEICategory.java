@@ -10,11 +10,11 @@ package hellfirepvp.astralsorcery.common.integration.jei;
 
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,7 +27,7 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 05.09.2020 / 12:38
  */
-public abstract class JEICategory<T extends IRecipe<?>> implements IRecipeCategory<T> {
+public abstract class JEICategory<T extends Recipe<?>> implements IRecipeCategory<T> {
 
     private final String locTitle;
     private final ResourceLocation uid;

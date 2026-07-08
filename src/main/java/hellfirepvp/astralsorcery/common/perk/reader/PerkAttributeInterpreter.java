@@ -12,10 +12,10 @@ import com.google.common.collect.Maps;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeMap;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -33,14 +33,14 @@ public class PerkAttributeInterpreter {
     private final Map<PerkAttributeType, PerkAttributeReader> attributeReaderOverrides = Maps.newHashMap();
 
     private PerkAttributeMap attributeMap;
-    private final PlayerEntity player;
+    private final Player player;
 
-    private PerkAttributeInterpreter(PerkAttributeMap attributeMap, PlayerEntity player) {
+    private PerkAttributeInterpreter(PerkAttributeMap attributeMap, Player player) {
         this.attributeMap = attributeMap;
         this.player = player;
     }
 
-    public static PerkAttributeInterpreter defaultInterpreter(PlayerEntity player) {
+    public static PerkAttributeInterpreter defaultInterpreter(Player player) {
         return new Builder(player).build();
     }
 
@@ -61,11 +61,11 @@ public class PerkAttributeInterpreter {
 
         private final PerkAttributeInterpreter reader;
 
-        private Builder(PlayerEntity player) {
+        private Builder(Player player) {
             this.reader = new PerkAttributeInterpreter(null, player);
         }
 
-        public static Builder newBuilder(PlayerEntity player) {
+        public static Builder newBuilder(Player player) {
             return new Builder(player);
         }
 

@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.render.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
@@ -19,14 +19,14 @@ import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.entity.technical.EntityGrapplingHook;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.neoforged.fml.client.registry.IRenderFactory;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -40,12 +40,12 @@ import java.util.List;
  */
 public class RenderEntityGrapplingHook extends EntityRenderer<EntityGrapplingHook> {
 
-    protected RenderEntityGrapplingHook(EntityRendererManager renderManager) {
+    protected RenderEntityGrapplingHook(EntityRenderDispatcher renderManager) {
         super(renderManager);
     }
 
     @Override
-    public void render(EntityGrapplingHook entity, float entityYaw, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
+    public void render(EntityGrapplingHook entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {
         int alphaMultiplier;
         if (entity.isDespawning()) {
             alphaMultiplier = MathHelper.clamp(127 - ((int) (entity.despawnPercentage(partialTicks) * 255F)), 0, 255);
@@ -103,7 +103,7 @@ public class RenderEntityGrapplingHook extends EntityRenderer<EntityGrapplingHoo
     public static class Factory implements IRenderFactory<EntityGrapplingHook> {
 
         @Override
-        public EntityRenderer<? super EntityGrapplingHook> createRenderFor(EntityRendererManager manager) {
+        public EntityRenderer<? super EntityGrapplingHook> createRenderFor(EntityRenderDispatcher manager) {
             return new RenderEntityGrapplingHook(manager);
         }
     }

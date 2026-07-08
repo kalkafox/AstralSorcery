@@ -14,12 +14,12 @@ import hellfirepvp.astralsorcery.common.perk.source.AttributeModifierProvider;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierManager;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.Util;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -34,27 +34,27 @@ import java.util.Objects;
  */
 public class EquipmentModifierSource implements ModifierSource, AttributeModifierProvider {
 
-    final EquipmentSlotType slot;
+    final EquipmentSlot slot;
     final ItemStack itemStack;
 
-    EquipmentModifierSource(EquipmentSlotType slot, ItemStack itemStack) {
+    EquipmentModifierSource(EquipmentSlot slot, ItemStack itemStack) {
         this.slot = slot;
         this.itemStack = itemStack;
     }
 
     @Override
-    public boolean canApplySource(PlayerEntity player, LogicalSide dist) {
+    public boolean canApplySource(Player player, LogicalSide dist) {
         return true;
     }
 
     @Override
-    public void onRemove(PlayerEntity player, LogicalSide dist) {}
+    public void onRemove(Player player, LogicalSide dist) {}
 
     @Override
-    public void onApply(PlayerEntity player, LogicalSide dist) {}
+    public void onApply(Player player, LogicalSide dist) {}
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(PlayerEntity player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
         if (this.itemStack.isEmpty()) {
             return Collections.emptyList();
         }

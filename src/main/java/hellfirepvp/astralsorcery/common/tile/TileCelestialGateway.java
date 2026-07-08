@@ -32,22 +32,21 @@ import hellfirepvp.astralsorcery.common.util.PlayerReference;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.PointOfView;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.DyeColor;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.INameable;
+import net.minecraft.client.CameraType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.Nameable;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -61,7 +60,7 @@ import java.util.*;
  * Created by HellFirePvP
  * Date: 10.09.2020 / 17:07
  */
-public class TileCelestialGateway extends TileEntityTick implements INameable, TileOwned, LinkableTileEntity {
+public class TileCelestialGateway extends TileEntityTick implements Nameable, TileOwned, LinkableTileEntity {
 
     private static final BlockPos[] OFFSETS_ALLOWED_PREVIEW = new BlockPos[] {
             new BlockPos(-3, 0, -2),
@@ -90,7 +89,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
     };
 
     private boolean networkRegistered = false;
-    private ITextComponent displayText = null;
+    private Component displayText = null;
     private DyeColor color = null;
 
     private boolean locked = false;
@@ -272,7 +271,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
         return prevOwner;
     }
 
-    public boolean canAddAllowedUser(PlayerEntity otherUser) {
+    public boolean canAddAllowedUser(Player otherUser) {
         return this.canAddAllowedUser(PlayerReference.of(otherUser));
     }
 
@@ -286,7 +285,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
         return !this.allowedUsers.containsValue(otherUser);
     }
 
-    public boolean addAllowedUser(PlayerEntity otherUser) {
+    public boolean addAllowedUser(Player otherUser) {
         return this.addAllowedUser(PlayerReference.of(otherUser));
     }
 
@@ -350,7 +349,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
         return OFFSETS_ALLOWED_PREVIEW[MathHelper.clamp(index, 0, OFFSETS_ALLOWED_PREVIEW.length - 1)];
     }
 
-    public void setDisplayText(@Nullable ITextComponent displayText) {
+    public void setDisplayText(@Nullable Component displayText) {
         this.displayText = displayText;
     }
 
@@ -370,8 +369,8 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
     }
 
     @Override
-    public ITextComponent getName() {
-        return this.displayText != null ? this.displayText : new TranslationTextComponent("block.astralsorcery.celestial_gateway");
+    public Component getName() {
+        return this.displayText != null ? this.displayText : Component.translatable("block.astralsorcery.celestial_gateway");
     }
 
     @Override
@@ -381,7 +380,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
 
     @Nullable
     @Override
-    public ITextComponent getCustomName() {
+    public Component getCustomName() {
         return getName();
     }
 
@@ -390,7 +389,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.networkRegistered = compound.getBoolean("networkRegistered");
@@ -401,13 +400,13 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
         this.owner = NBTHelper.readOptional(compound, "owningPlayer", PlayerReference::deserialize);
         this.allowedUsers.clear();
         NBTHelper.readList(compound, "allowedUsers", Constants.NBT.TAG_COMPOUND, nbt -> {
-            CompoundNBT tag = (CompoundNBT) nbt;
+            CompoundTag tag = (CompoundTag) nbt;
             return new Tuple<>(tag.getInt("index"), PlayerReference.deserialize(tag.getCompound("player")));
         }).forEach(tpl -> this.allowedUsers.put(tpl.getA(), tpl.getB()));
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.putBoolean("networkRegistered", this.networkRegistered);
@@ -421,7 +420,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
         compound.putBoolean("locked", this.locked);
         NBTHelper.writeOptional(compound, "owningPlayer", this.owner, (tag, playerRef) -> playerRef.writeToNBT(tag));
         NBTHelper.writeList(compound, "allowedUsers", this.allowedUsers.entrySet(), entry -> {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             tag.putInt("index", entry.getKey());
             tag.put("player", entry.getValue().serialize());
             return tag;
@@ -429,17 +428,17 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
     }
 
     @Override
-    public void onBlockLinkCreate(PlayerEntity player, BlockPos other) {}
+    public void onBlockLinkCreate(Player player, BlockPos other) {}
 
     @Override
-    public void onEntityLinkCreate(PlayerEntity player, LivingEntity linked) {
-        if (linked instanceof PlayerEntity) {
-            if (this.addAllowedUser((PlayerEntity) linked)) {
+    public void onEntityLinkCreate(Player player, LivingEntity linked) {
+        if (linked instanceof Player) {
+            if (this.addAllowedUser((Player) linked)) {
 
-                ITextComponent accessGrantedMessage = new TranslationTextComponent(
+                Component accessGrantedMessage = Component.translatable(
                         "astralsorcery.misc.link.gateway.link",
                         linked.getDisplayName())
-                        .mergeStyle(TextFormatting.GREEN);
+                        .withStyle(TextFormatting.GREEN);
                 player.sendMessage(accessGrantedMessage, Util.DUMMY_UUID);
                 linked.sendMessage(accessGrantedMessage, Util.DUMMY_UUID);
             }
@@ -447,17 +446,17 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
     }
 
     @Override
-    public boolean tryLinkBlock(PlayerEntity player, BlockPos other) {
+    public boolean tryLinkBlock(Player player, BlockPos other) {
         return false;
     }
 
     @Override
-    public boolean tryLinkEntity(PlayerEntity player, LivingEntity other) {
-        return other instanceof PlayerEntity && this.canAddAllowedUser((PlayerEntity) other);
+    public boolean tryLinkEntity(Player player, LivingEntity other) {
+        return other instanceof Player && this.canAddAllowedUser((Player) other);
     }
 
     @Override
-    public boolean tryUnlink(PlayerEntity player, BlockPos other) {
+    public boolean tryUnlink(Player player, BlockPos other) {
         return false;
     }
 
@@ -467,7 +466,7 @@ public class TileCelestialGateway extends TileEntityTick implements INameable, T
     }
 
     @Override
-    public boolean onSelect(PlayerEntity player) {
+    public boolean onSelect(Player player) {
         return false;
     }
 }

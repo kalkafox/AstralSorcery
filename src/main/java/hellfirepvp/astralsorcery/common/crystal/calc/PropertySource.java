@@ -8,9 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.crystal.calc;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 
 import java.util.Objects;
 
@@ -35,8 +34,8 @@ public abstract class PropertySource<T, I extends PropertySource.SourceInstance>
 
     public abstract I createInstance(T obj);
 
-    public ITextComponent getName() {
-        return new TranslationTextComponent(String.format("crystal.source.%s.%s.name",
+    public Component getName() {
+        return Component.translatable(String.format("crystal.source.%s.%s.name",
                 getRegistryName().getNamespace(), getRegistryName().getPath()));
     }
 

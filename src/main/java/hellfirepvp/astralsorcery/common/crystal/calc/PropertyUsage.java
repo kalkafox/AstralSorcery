@@ -8,11 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.crystal.calc;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.registry.internal.AbstractAstralRegistryEntry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.Objects;
 
@@ -23,14 +22,14 @@ import java.util.Objects;
  * Created by HellFirePvP
  * Date: 30.01.2019 / 08:14
  */
-public class PropertyUsage extends ForgeRegistryEntry<PropertyUsage> {
+public class PropertyUsage extends AbstractAstralRegistryEntry<PropertyUsage> {
 
     public PropertyUsage(ResourceLocation registryName) {
         setRegistryName(registryName);
     }
 
-    public IFormattableTextComponent getName() {
-        return new TranslationTextComponent(String.format("crystal.usage.%s.%s.name",
+    public MutableComponent getName() {
+        return Component.translatable(String.format("crystal.usage.%s.%s.name",
                 getRegistryName().getNamespace(), getRegistryName().getPath()));
     }
 

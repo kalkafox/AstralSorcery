@@ -19,8 +19,8 @@ import com.blamejared.crafttweaker.impl.item.MCItemStackMutable;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.*;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.resources.ResourceLocation;
 import org.openzen.zencode.java.ZenCodeType;
 
 /**
@@ -77,7 +77,7 @@ public class LiquidInteractionManager implements IRecipeManager {
     }
     
     @Override
-    public IRecipeType<LiquidInteraction> getRecipeType() {
+    public RecipeType<LiquidInteraction> getRecipeType() {
         return RecipeTypesAS.TYPE_LIQUID_INTERACTION.getType();
     }
 }

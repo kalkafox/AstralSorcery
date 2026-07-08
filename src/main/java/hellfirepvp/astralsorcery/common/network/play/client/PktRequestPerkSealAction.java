@@ -16,13 +16,13 @@ import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 
@@ -94,7 +94,7 @@ public class PktRequestPerkSealAction extends ASPacket<PktRequestPerkSealAction>
                     }
 
                     PerkTree.PERK_TREE.getPerk(side, packet.perkKey).ifPresent(perk -> {
-                        PlayerEntity player = context.getSender();
+                        Player player = context.getSender();
                         if (packet.doSealing) {
                             if (ItemPerkSeal.useSeal(player, true) &&
                                     ResearchManager.applyPerkSeal(player, perk)) {

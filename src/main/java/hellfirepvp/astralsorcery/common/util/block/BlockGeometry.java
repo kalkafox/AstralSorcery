@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.util.block;
 
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;

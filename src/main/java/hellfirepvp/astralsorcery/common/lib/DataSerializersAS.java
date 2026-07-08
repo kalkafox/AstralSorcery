@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.network.datasync.IDataSerializer;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,8 +23,8 @@ public class DataSerializersAS {
 
     private DataSerializersAS() {}
 
-    public static IDataSerializer<Long> LONG;
-    public static IDataSerializer<Vector3> VECTOR;
-    public static IDataSerializer<FluidStack> FLUID;
+    public static EntityDataSerializer<Long> LONG;
+    public static EntityDataSerializer<Vector3> VECTOR;
+    public static EntityDataSerializer<FluidStack> FLUID;
 
 }

@@ -14,24 +14,24 @@ import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
 import hellfirepvp.astralsorcery.common.container.factory.ContainerObservatoryProvider;
 import hellfirepvp.astralsorcery.common.tile.TileObservatory;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ContainerBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -42,9 +42,9 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 16.02.2020 / 08:11
  */
-public class BlockObservatory extends ContainerBlock implements LargeBlock, CustomItemBlock {
+public class BlockObservatory extends BaseEntityBlock implements LargeBlock, CustomItemBlock {
 
-    private static final AxisAlignedBB PLACEMENT_BOX = new AxisAlignedBB(-1, 0, -1, 1, 3, 1);
+    private static final AABB PLACEMENT_BOX = new AABB(-1, 0, -1, 1, 3, 1);
 
     public BlockObservatory() {
         super(PropertiesMisc.defaultGoldMachinery()
@@ -55,18 +55,18 @@ public class BlockObservatory extends ContainerBlock implements LargeBlock, Cust
     }
 
     @Override
-    public AxisAlignedBB getBlockSpace() {
+    public AABB getBlockSpace() {
         return PLACEMENT_BOX;
     }
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context) {
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.canPlaceAt(context) ? this.getDefaultState() : null;
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+    public InteractionResult onBlockActivated(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
         if (!worldIn.isRemote()) {
             TileObservatory observatory = MiscUtils.getTileAt(worldIn, pos, TileObservatory.class, false);
             if (observatory != null && observatory.isUsable() && !player.isSneaking()) {
@@ -75,7 +75,7 @@ public class BlockObservatory extends ContainerBlock implements LargeBlock, Cust
                     if (player.getRidingEntity() != entity) {
                         player.startRiding(entity);
                     }
-                    new ContainerObservatoryProvider(observatory).openFor((ServerPlayerEntity) player);
+                    new ContainerObservatoryProvider(observatory).openFor((ServerPlayer) player);
                 }
             }
         }
@@ -83,13 +83,13 @@ public class BlockObservatory extends ContainerBlock implements LargeBlock, Cust
     }
 
     @Override
-    public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
         return VoxelShapes.empty();
     }
 
     @Nullable
     @Override
-    public TileEntity createNewTileEntity(IBlockReader worldIn) {
+    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
         return new TileObservatory();
     }
 }

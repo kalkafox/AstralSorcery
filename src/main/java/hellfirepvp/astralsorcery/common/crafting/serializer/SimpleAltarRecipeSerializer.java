@@ -24,10 +24,10 @@ import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -114,7 +114,7 @@ public class SimpleAltarRecipeSerializer extends CustomRecipeSerializer<SimpleAl
     }
 
     @Override
-    public SimpleAltarRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+    public SimpleAltarRecipe read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         return SimpleAltarRecipe.read(recipeId, buffer);
     }
 
@@ -124,7 +124,7 @@ public class SimpleAltarRecipeSerializer extends CustomRecipeSerializer<SimpleAl
     }
 
     @Override
-    public void write(PacketBuffer buffer, SimpleAltarRecipe recipe) {
+    public void write(FriendlyByteBuf buffer, SimpleAltarRecipe recipe) {
         recipe.write(buffer);
     }
 }

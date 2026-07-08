@@ -22,18 +22,18 @@ import hellfirepvp.astralsorcery.common.lib.EffectsAS;
 import hellfirepvp.astralsorcery.common.tile.TileRitualPedestal;
 import hellfirepvp.astralsorcery.common.util.block.ILocatable;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,39 +49,39 @@ import java.util.List;
 public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawnEntry> {
 
     public static PlayerAffectionFlags.AffectionFlag FLAG = makeAffectionFlag("pelotrio");
-    private static final AxisAlignedBB PROXIMITY_BOX = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    private static final AABB PROXIMITY_BOX = new AABB(0, 0, 0, 0, 0, 0);
 
     public static PelotrioConfig CONFIG = new PelotrioConfig();
 
     public CEffectPelotrio(@Nonnull ILocatable origin) {
         super(origin, ConstellationsAS.pelotrio, CONFIG.maxAmount.get(), (world, pos, state) -> {
-            if (!(world instanceof ServerWorld)) {
+            if (!(world instanceof ServerLevel)) {
                 return false;
             }
             pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).up();
-            return ListEntries.EntitySpawnEntry.createEntry((ServerWorld) world, pos, SpawnReason.SPAWNER) != null;
+            return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) world, pos, SpawnReason.SPAWNER) != null;
         });
     }
 
     @Nullable
     @Override
-    public ListEntries.EntitySpawnEntry recreateElement(CompoundNBT tag, BlockPos pos) {
+    public ListEntries.EntitySpawnEntry recreateElement(CompoundTag tag, BlockPos pos) {
         return null;
     }
 
     @Nullable
     @Override
-    public ListEntries.EntitySpawnEntry createElement(World world, BlockPos pos) {
-        if (!(world instanceof ServerWorld)) {
+    public ListEntries.EntitySpawnEntry createElement(Level world, BlockPos pos) {
+        if (!(world instanceof ServerLevel)) {
             return null;
         }
         pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).up();
-        return ListEntries.EntitySpawnEntry.createEntry((ServerWorld) world, pos, SpawnReason.SPAWNER);
+        return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) world, pos, SpawnReason.SPAWNER);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(World world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
         if (rand.nextFloat() < 0.2F) {
@@ -95,8 +95,8 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
     }
 
     @Override
-    public boolean playEffect(World world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        if (!(world instanceof ServerWorld)) {
+    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        if (!(world instanceof ServerLevel)) {
             return false;
         }
 
@@ -107,9 +107,9 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
         if (properties.isCorrupted()) {
             for (LivingEntity entity : nearbyEntities) {
                 if (entity != null && entity.isAlive() && rand.nextInt(300) == 0) {
-                    LivingEntity transmuted = EntityTransmutationRegistry.INSTANCE.transmuteEntity((ServerWorld) world, entity);
+                    LivingEntity transmuted = EntityTransmutationRegistry.INSTANCE.transmuteEntity((ServerLevel) world, entity);
                     if (transmuted != null) {
-                        transmuted.addPotionEffect(new EffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, Integer.MAX_VALUE, 1));
+                        transmuted.addPotionEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, Integer.MAX_VALUE, 1));
                         AstralSorcery.getProxy().scheduleDelayed(() -> world.addEntity(transmuted));
                         update = true;
                     }
@@ -125,7 +125,7 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
             entry.setCounter(count);
             sendConstellationPing(world, new Vector3(entry.getPos()).add(0.5, 0.5, 0.5));
             if (count >= 10) {
-                entry.spawn((ServerWorld) world, SpawnReason.SPAWNER);
+                entry.spawn((ServerLevel) world, SpawnReason.SPAWNER);
                 removeElement(entry);
             }
 
@@ -159,15 +159,15 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
         private final double defaultSpawnChance = 0.05D;
         private final int defaultProximityAmount = 24;
 
-        public ForgeConfigSpec.DoubleValue spawnChance;
-        public ForgeConfigSpec.IntValue proximityAmount;
+        public ModConfigSpec.DoubleValue spawnChance;
+        public ModConfigSpec.IntValue proximityAmount;
 
         public PelotrioConfig() {
             super("pelotrio", 12D, 0D, 5);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.spawnChance = cfgBuilder

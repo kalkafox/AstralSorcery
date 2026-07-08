@@ -13,11 +13,11 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.util.MapStream;
-import net.minecraft.client.resources.JsonReloadListener;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * Created by HellFirePvP
  * Date: 12.08.2020 / 22:15
  */
-public class PerkTreeLoader extends JsonReloadListener {
+public class PerkTreeLoader extends SimpleJsonResourceReloadListener {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
@@ -41,7 +41,7 @@ public class PerkTreeLoader extends JsonReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> dataMap, IResourceManager resourceManager, IProfiler profiler) {
+    protected void apply(Map<ResourceLocation, JsonElement> dataMap, ResourceManager resourceManager, ProfilerFiller profiler) {
         Collection<JsonObject> loadingPerkObjects = MapStream.of(dataMap)
                 .filterKey(key -> !key.getPath().startsWith("_"))
                 .filterValue(JsonElement::isJsonObject)

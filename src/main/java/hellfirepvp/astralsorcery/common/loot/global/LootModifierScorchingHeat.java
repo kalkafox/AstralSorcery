@@ -11,24 +11,24 @@ package hellfirepvp.astralsorcery.common.loot.global;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.util.RecipeHelper;
 import hellfirepvp.astralsorcery.common.util.loot.LootUtil;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.conditions.ILootCondition;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.fml.hooks.BasicEventHooks;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.common.loot.GlobalLootModifierSerializer;
+import net.neoforged.neoforge.common.loot.LootModifier;
+import net.neoforged.fml.hooks.BasicEventHooks;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  */
 public class LootModifierScorchingHeat extends LootModifier {
 
-    private LootModifierScorchingHeat(ILootCondition[] conditionsIn) {
+    private LootModifierScorchingHeat(LootItemCondition[] conditionsIn) {
         super(conditionsIn);
     }
 
@@ -60,8 +60,8 @@ public class LootModifierScorchingHeat extends LootModifier {
                     Optional<Tuple<ItemStack, Float>> furnaceResult = RecipeHelper.findSmeltingResult(context.getWorld(), stack);
                     if (context.has(LootParameters.THIS_ENTITY)) {
                         Entity e = context.get(LootParameters.THIS_ENTITY);
-                        if (e instanceof PlayerEntity) {
-                            furnaceResult.ifPresent(result -> BasicEventHooks.firePlayerSmeltedEvent((PlayerEntity) e, result.getA()));
+                        if (e instanceof Player) {
+                            furnaceResult.ifPresent(result -> BasicEventHooks.firePlayerSmeltedEvent((Player) e, result.getA()));
                         }
                     }
                     furnaceResult.ifPresent(result -> {
@@ -87,10 +87,10 @@ public class LootModifierScorchingHeat extends LootModifier {
                                         iExp += 1;
                                     }
                                     if (iExp >= 1) {
-                                        Vector3d blockPos = context.get(LootParameters.field_237457_g_);
+                                        Vec3 blockPos = context.get(LootParameters.field_237457_g_);
                                         if (blockPos != null) {
-                                            ServerWorld world = context.getWorld();
-                                            world.addEntity(new ExperienceOrbEntity(world, blockPos.getX(), blockPos.getY(), blockPos.getZ(), iExp));
+                                            ServerLevel world = context.getWorld();
+                                            world.addEntity(new ExperienceOrb(world, blockPos.getX(), blockPos.getY(), blockPos.getZ(), iExp));
                                         }
                                     }
                                 }
@@ -105,7 +105,7 @@ public class LootModifierScorchingHeat extends LootModifier {
     public static class Serializer extends GlobalLootModifierSerializer<LootModifierScorchingHeat> {
 
         @Override
-        public LootModifierScorchingHeat read(ResourceLocation location, JsonObject object, ILootCondition[] lootConditions) {
+        public LootModifierScorchingHeat read(ResourceLocation location, JsonObject object, LootItemCondition[] lootConditions) {
             return new LootModifierScorchingHeat(lootConditions);
         }
 

@@ -14,8 +14,8 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Items;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.item.Items;
 
 import java.awt.*;
 import java.util.function.Consumer;

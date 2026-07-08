@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.client.effect.vfx;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.context.base.BatchRenderContext;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.vector.Matrix4f;
+import org.joml.Matrix4f;
 
 import java.awt.*;
 
@@ -47,7 +47,7 @@ public class FXLightbeam extends EntityVisualFX {
     }
 
     @Override
-    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, MatrixStack renderStack, IVertexBuilder vb, float pTicks) {
+    public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, PoseStack renderStack, VertexConsumer vb, float pTicks) {
         Color c = this.getColor(pTicks);
         int r = c.getRed();
         int g = c.getGreen();
@@ -61,7 +61,7 @@ public class FXLightbeam extends EntityVisualFX {
         renderCurrentTextureAroundAxis(vb, renderStack, ctx, renderOffset, Math.toRadians(240F), scale, r, g, b, a);
     }
 
-    private <T extends EntityVisualFX> void renderCurrentTextureAroundAxis(IVertexBuilder vb, MatrixStack renderStack, BatchRenderContext<T> ctx, Vector3 renderOffset, double angle, float scale, int r, int g, int b, int a) {
+    private <T extends EntityVisualFX> void renderCurrentTextureAroundAxis(VertexConsumer vb, PoseStack renderStack, BatchRenderContext<T> ctx, Vector3 renderOffset, double angle, float scale, int r, int g, int b, int a) {
         Vector3 perp = aimPerp.clone().rotate(angle, aim).normalize();
         Vector3 perpTo = perp.clone().multiply(toSize * scale);
         Vector3 perpFrom = perp.multiply(fromSize * scale);

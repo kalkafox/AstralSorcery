@@ -13,15 +13,15 @@ import hellfirepvp.astralsorcery.common.block.tile.BlockCelestialCrystalCluster;
 import hellfirepvp.astralsorcery.common.block.tile.BlockGemCrystalCluster;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.loot.*;
-import net.minecraft.advancements.criterion.StatePropertiesPredicate;
-import net.minecraft.block.Block;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.data.loot.BlockLootTables;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Items;
 import net.minecraft.loot.*;
-import net.minecraft.loot.conditions.BlockStateProperty;
-import net.minecraft.loot.functions.ExplosionDecay;
-import net.minecraft.loot.functions.SetCount;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.stream.Collectors;
 

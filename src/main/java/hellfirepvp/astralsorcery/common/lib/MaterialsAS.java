@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.lib;
 
-import net.minecraft.block.material.Material;
+import net.minecraft.client.resources.model.Material;
 
 /**
  * This class is part of the Astral Sorcery Mod

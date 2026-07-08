@@ -15,13 +15,13 @@ import hellfirepvp.astralsorcery.common.constellation.ConstellationTile;
 import hellfirepvp.astralsorcery.common.constellation.IMinorConstellation;
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
 import hellfirepvp.astralsorcery.common.lib.LootAS;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootFunctionType;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootFunction;
-import net.minecraft.loot.conditions.ILootCondition;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,21 +30,21 @@ import net.minecraft.loot.conditions.ILootCondition;
  * Created by HellFirePvP
  * Date: 16.08.2019 / 06:38
  */
-public class CopyConstellation extends LootFunction {
+public class CopyConstellation extends LootItemConditionalFunction {
 
-    private CopyConstellation(ILootCondition[] conditionsIn) {
+    private CopyConstellation(LootItemCondition[] conditionsIn) {
         super(conditionsIn);
     }
 
     @Override
-    public LootFunctionType getFunctionType() {
+    public LootItemFunctionType getFunctionType() {
         return LootAS.Functions.COPY_CONSTELLATION;
     }
 
     @Override
     protected ItemStack doApply(ItemStack stack, LootContext context) {
         if (context.has(LootParameters.BLOCK_ENTITY)) {
-            TileEntity tile = context.get(LootParameters.BLOCK_ENTITY);
+            BlockEntity tile = context.get(LootParameters.BLOCK_ENTITY);
             if (tile instanceof ConstellationTile && stack.getItem() instanceof ConstellationItem) {
                 IWeakConstellation main = ((ConstellationTile) tile).getAttunedConstellation();
                 IMinorConstellation trait = ((ConstellationTile) tile).getTraitConstellation();
@@ -63,7 +63,7 @@ public class CopyConstellation extends LootFunction {
     public static class Serializer extends LootFunction.Serializer<CopyConstellation> {
 
         @Override
-        public CopyConstellation deserialize(JsonObject jsonObject, JsonDeserializationContext ctx, ILootCondition[] conditions) {
+        public CopyConstellation deserialize(JsonObject jsonObject, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
             return new CopyConstellation(conditions);
         }
     }

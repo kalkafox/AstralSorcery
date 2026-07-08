@@ -8,7 +8,11 @@
 
 package hellfirepvp.astralsorcery.client.event;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.network.chat.MutableComponent;
+
+import net.minecraft.network.chat.Component;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
@@ -20,16 +24,15 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.item.base.PerkExperienceRevealer;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
+import net.neoforged.neoforge.client.event.RenderGameOverlayEvent;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
 import java.util.EnumSet;
@@ -68,8 +71,8 @@ public class PerkExperienceRenderer implements ITickHandler {
             return;
         }
 
-        MatrixStack renderStack = event.getMatrixStack();
-        PlayerEntity player = Minecraft.getInstance().player;
+        PoseStack renderStack = event.getPoseStack();
+        Player player = Minecraft.getInstance().player;
         float frameHeight  = 128F;
         float frameWidth   =  32F;
         float frameOffsetX =   0F;
@@ -101,7 +104,7 @@ public class PerkExperienceRenderer implements ITickHandler {
         });
 
         String strLevel = String.valueOf(perkData.getPerkLevel(player, LogicalSide.CLIENT));
-        StringTextComponent txtLevel = new StringTextComponent(strLevel);
+        MutableComponent txtLevel = Component.literal(strLevel);
         int strLength = Minecraft.getInstance().fontRenderer.getStringPropertyWidth(txtLevel);
 
         renderStack.push();
@@ -119,7 +122,7 @@ public class PerkExperienceRenderer implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        PlayerEntity player = Minecraft.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player != null) {
             ItemStack held = player.getHeldItem(Hand.MAIN_HAND);
             if (!held.isEmpty() &&

@@ -14,9 +14,9 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.base.SimplePrismT
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionProvider;
 import hellfirepvp.astralsorcery.common.tile.TilePrism;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,7 +46,7 @@ public class CrystalPrismTransmissionNode extends SimplePrismTransmissionNode {
     }
 
     @Override
-    public void onTransmissionTick(World world, float starlightAmt, IWeakConstellation type) {
+    public void onTransmissionTick(Level world, float starlightAmt, IWeakConstellation type) {
         TilePrism prism = MiscUtils.getTileAt(world, getLocationPos(), TilePrism.class, false);
         if (prism != null) {
             prism.transmissionTick(starlightAmt, type);
@@ -74,7 +74,7 @@ public class CrystalPrismTransmissionNode extends SimplePrismTransmissionNode {
     }
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {
+    public void readFromNBT(CompoundTag compound) {
         super.readFromNBT(compound);
 
         this.attributes = CrystalAttributes.getCrystalAttributes(compound);
@@ -82,7 +82,7 @@ public class CrystalPrismTransmissionNode extends SimplePrismTransmissionNode {
     }
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {
+    public void writeToNBT(CompoundTag compound) {
         super.writeToNBT(compound);
 
         if (this.attributes != null) {

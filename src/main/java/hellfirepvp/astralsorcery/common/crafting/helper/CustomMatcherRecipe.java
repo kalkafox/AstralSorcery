@@ -8,11 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.crafting.helper;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,12 +33,12 @@ public abstract class CustomMatcherRecipe extends BaseHandlerRecipe<IItemHandler
     }
 
     @Override
-    public final boolean matches(IItemHandler handler, World world) {
+    public final boolean matches(IItemHandler handler, Level world) {
         return false;
     }
 
     @Override
-    public final ItemStack getCraftingResult(IInventory inv) {
+    public final ItemStack getCraftingResult(Container inv) {
         return getRecipeOutput();
     }
 

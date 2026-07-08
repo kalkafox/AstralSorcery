@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.perk;
 
 import hellfirepvp.astralsorcery.common.event.AttributeEvent;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.util.Mth;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;

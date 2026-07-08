@@ -19,25 +19,25 @@ import hellfirepvp.astralsorcery.common.event.helper.EventHelperDamageCancelling
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.util.math.*;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.common.registry.IEntityAdditionalSpawnData;
+import net.neoforged.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -50,10 +50,10 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 29.02.2020 / 18:17
  */
-public class EntityGrapplingHook extends ThrowableEntity implements IEntityAdditionalSpawnData {
+public class EntityGrapplingHook extends ThrowableProjectile implements IEntityAdditionalSpawnData {
 
-    private static final DataParameter<Integer> PULLING_ENTITY = EntityDataManager.createKey(EntityGrapplingHook.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> PULLING = EntityDataManager.createKey(EntityGrapplingHook.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> PULLING_ENTITY = EntityDataManager.createKey(EntityGrapplingHook.class, DataSerializers.VARINT);
+    private static final EntityDataAccessor<Boolean> PULLING = EntityDataManager.createKey(EntityGrapplingHook.class, DataSerializers.BOOLEAN);
 
     private boolean launchedThrower = false;
 
@@ -66,11 +66,11 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
 
     private LivingEntity throwingEntity;
 
-    public EntityGrapplingHook(World world) {
+    public EntityGrapplingHook(Level world) {
         super(EntityTypesAS.GRAPPLING_HOOK, world);
     }
 
-    public EntityGrapplingHook(LivingEntity thrower, World world) {
+    public EntityGrapplingHook(LivingEntity thrower, Level world) {
         super(EntityTypesAS.GRAPPLING_HOOK, thrower, world);
         this.shoot(Vector3.directionFromYawPitch(thrower.rotationYaw, thrower.rotationPitch), 1.5F);
         this.throwingEntity = thrower;
@@ -186,14 +186,14 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
                     mx /= dist * 5.0D;
                     my /= dist * 5.0D;
                     mz /= dist * 5.0D;
-                    Vector3d v2 = new Vector3d(mx, my, mz);
+                    Vec3 v2 = new Vec3(mx, my, mz);
                     if (v2.length() > 0.25D) {
                         v2 = v2.normalize();
                         mx = v2.x / 4.0D;
                         my = v2.y / 4.0D;
                         mz = v2.z / 4.0D;
                     }
-                    Vector3d motion = thrower.getMotion();
+                    Vec3 motion = thrower.getMotion();
                     motion = motion.add(mx, my + 0.04F, mz);
                     if (!launchedThrower) {
                         motion = motion.add(0, 0.4F, 0);
@@ -201,8 +201,8 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
                     }
                     thrower.setMotion(motion);
 
-                    if (thrower instanceof PlayerEntity) {
-                        EventHelperDamageCancelling.markInvulnerableToNextDamage((PlayerEntity) thrower, DamageSource.FALL);
+                    if (thrower instanceof Player) {
+                        EventHelperDamageCancelling.markInvulnerableToNextDamage((Player) thrower, DamageSource.FALL);
                     }
 
                     int roughDst = (int) (dist / 2.5D);
@@ -242,7 +242,7 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
     }
 
     @Override
-    public void writeSpawnData(PacketBuffer buffer) {
+    public void writeSpawnData(FriendlyByteBuf buffer) {
         int id = -1;
         if(this.throwingEntity != null) {
             id = this.throwingEntity.getEntityId();
@@ -251,7 +251,7 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
     }
 
     @Override
-    public void readSpawnData(PacketBuffer additionalData) {
+    public void readSpawnData(FriendlyByteBuf additionalData) {
         int id = additionalData.readInt();
         try {
             if (id > 0) {
@@ -272,7 +272,7 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
     }
 
     @Override
-    public AxisAlignedBB getRenderBoundingBox() {
+    public AABB getRenderBoundingBox() {
         return TileEntity.INFINITE_EXTENT_AABB;
     }
 
@@ -312,8 +312,8 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
     }
 
     @Override
-    protected void onImpact(RayTraceResult result) {
-        Vector3d hit = result.getHitVec();
+    protected void onImpact(HitResult result) {
+        Vec3 hit = result.getHitVec();
         switch (result.getType()) {
             case BLOCK:
                 setPulling(true, null);
@@ -324,7 +324,7 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
                     return;
                 }
                 setPulling(true, (LivingEntity) ((EntityRayTraceResult) result).getEntity());
-                hit = new Vector3d(hit.x, hit.y + ((EntityRayTraceResult) result).getEntity().getHeight() * 3 / 4, hit.z);
+                hit = new Vec3(hit.x, hit.y + ((EntityRayTraceResult) result).getEntity().getHeight() * 3 / 4, hit.z);
                 break;
             default:
                 break;
@@ -334,7 +334,7 @@ public class EntityGrapplingHook extends ThrowableEntity implements IEntityAddit
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public Packet<?> createSpawnPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

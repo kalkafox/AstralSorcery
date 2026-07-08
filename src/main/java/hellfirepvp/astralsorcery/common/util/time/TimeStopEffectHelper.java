@@ -18,18 +18,18 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EntityPredicates;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -77,7 +77,7 @@ public class TimeStopEffectHelper {
 
     @OnlyIn(Dist.CLIENT)
     static void playEntityParticles(LivingEntity e) {
-        EntitySize size = e.getSize(e.getPose());
+        EntityDimensions size = e.getSize(e.getPose());
         double x = e.getPosX() - size.width / 2F + rand.nextFloat() * size.width;
         double y = e.getPosY() + rand.nextFloat() * size.height;
         double z = e.getPosZ() - size.width / 2F + rand.nextFloat() * size.width;
@@ -102,13 +102,13 @@ public class TimeStopEffectHelper {
 
     @OnlyIn(Dist.CLIENT)
     public void playClientTickEffect() {
-        World world = Minecraft.getInstance().world;
+        Level world = Minecraft.getInstance().world;
         if (world == null) {
             return;
         }
 
         List<LivingEntity> entities = world.getEntitiesWithinAABB(LivingEntity.class,
-                new AxisAlignedBB(-range, -range, -range, range, range, range).offset(position.getX(), position.getY(), position.getZ()),
+                new AABB(-range, -range, -range, range, range, range).offset(position.getX(), position.getY(), position.getZ()),
                 EntityPredicates.withinRange(position.getX(), position.getY(), position.getZ(), range));
 
         for (LivingEntity e : entities) {
@@ -124,12 +124,12 @@ public class TimeStopEffectHelper {
 
         for (int xx = minX; xx <= maxX; ++xx) {
             for (int zz = minZ; zz <= maxZ; ++zz) {
-                Chunk ch = world.getChunk(xx, zz);
+                LevelChunk ch = world.getChunk(xx, zz);
                 if (!ch.isEmpty()) {
-                    Map<BlockPos, TileEntity> map = ch.getTileEntityMap();
-                    for (Map.Entry<BlockPos, TileEntity> teEntry : map.entrySet()) {
+                    Map<BlockPos, BlockEntity> map = ch.getTileEntityMap();
+                    for (Map.Entry<BlockPos, BlockEntity> teEntry : map.entrySet()) {
 
-                        TileEntity te = teEntry.getValue();
+                        BlockEntity te = teEntry.getValue();
                         if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) && te.getPos().withinDistance(position, range)) {
 
                             double x = te.getPos().getX() + rand.nextFloat();
@@ -164,8 +164,8 @@ public class TimeStopEffectHelper {
     }
 
     @Nonnull
-    public CompoundNBT serializeNBT() {
-        CompoundNBT out = new CompoundNBT();
+    public CompoundTag serializeNBT() {
+        CompoundTag out = new CompoundTag();
         NBTHelper.writeBlockPosToNBT(this.position, out);
         out.putFloat("range", this.range);
         out.put("targetController", this.targetController.serializeNBT());
@@ -173,7 +173,7 @@ public class TimeStopEffectHelper {
     }
 
     @Nonnull
-    public static TimeStopEffectHelper deserializeNBT(CompoundNBT cmp) {
+    public static TimeStopEffectHelper deserializeNBT(CompoundTag cmp) {
         BlockPos at = NBTHelper.readBlockPosFromNBT(cmp);
         float range = cmp.getFloat("range");
         return new TimeStopEffectHelper(at, range, TimeStopZone.EntityTargetController.deserializeNBT(cmp.getCompound("targetController")));

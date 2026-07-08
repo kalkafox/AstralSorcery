@@ -22,16 +22,16 @@ import hellfirepvp.astralsorcery.common.util.ColorUtils;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.block.BlockPredicate;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.DyeColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -220,7 +220,7 @@ public class TileIlluminator extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.putBoolean("playerPlaced", this.playerPlaced);
@@ -229,7 +229,7 @@ public class TileIlluminator extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.playerPlaced = compound.getBoolean("playerPlaced");
@@ -240,7 +240,7 @@ public class TileIlluminator extends TileEntityTick {
     public static class LightCheck implements BlockPredicate {
 
         @Override
-        public boolean test(World world, BlockPos pos, BlockState state) {
+        public boolean test(Level world, BlockPos pos, BlockState state) {
             return world.isAirBlock(pos) &&
                     !MiscUtils.canSeeSky(world, pos, false, false) &&
                     world.getLight(pos) < 8 &&

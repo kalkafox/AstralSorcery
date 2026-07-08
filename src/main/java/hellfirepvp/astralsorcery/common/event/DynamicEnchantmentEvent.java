@@ -9,10 +9,10 @@
 package hellfirepvp.astralsorcery.common.event;
 
 import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.Cancelable;
+import net.neoforged.bus.api.Event;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
@@ -33,9 +33,9 @@ public class DynamicEnchantmentEvent {
 
         private final List<DynamicEnchantment> enchantmentsToApply = new LinkedList<>();
         private final ItemStack itemStack;
-        private final PlayerEntity resolvedPlayer;
+        private final Player resolvedPlayer;
 
-        public Add(ItemStack itemStack, @Nonnull PlayerEntity player) {
+        public Add(ItemStack itemStack, @Nonnull Player player) {
             this.itemStack = itemStack;
             this.resolvedPlayer = player;
         }
@@ -45,7 +45,7 @@ public class DynamicEnchantmentEvent {
         }
 
         @Nonnull
-        public PlayerEntity getResolvedPlayer() {
+        public Player getResolvedPlayer() {
             return resolvedPlayer;
         }
 
@@ -60,16 +60,16 @@ public class DynamicEnchantmentEvent {
 
         private final List<DynamicEnchantment> enchantmentsToApply;
         private final ItemStack itemStack;
-        private final PlayerEntity resolvedPlayer;
+        private final Player resolvedPlayer;
 
-        public Modify(ItemStack itemStack, List<DynamicEnchantment> enchantmentsToApply, @Nonnull PlayerEntity resolvedPlayer) {
+        public Modify(ItemStack itemStack, List<DynamicEnchantment> enchantmentsToApply, @Nonnull Player resolvedPlayer) {
             this.itemStack = itemStack;
             this.enchantmentsToApply = enchantmentsToApply;
             this.resolvedPlayer = resolvedPlayer;
         }
 
         @Nonnull
-        public PlayerEntity getResolvedPlayer() {
+        public Player getResolvedPlayer() {
             return resolvedPlayer;
         }
 

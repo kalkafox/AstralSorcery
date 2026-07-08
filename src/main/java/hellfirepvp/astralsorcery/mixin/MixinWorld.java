@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.mixin;
 
 import hellfirepvp.astralsorcery.common.constellation.SkyHandler;
 import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,7 +31,7 @@ public class MixinWorld {
 
     @Inject(method = "calculateInitialSkylight", at = @At("RETURN"), cancellable = true)
     public void solarEclipseSunBrightnessServer(CallbackInfo ci) {
-        World world = (World)(Object) this;
+        Level world = (Level)(Object) this;
 
         WorldContext ctx = SkyHandler.getContext(world);
         String strDimKey = world.getDimensionKey().getLocation().toString();

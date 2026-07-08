@@ -8,18 +8,19 @@
 
 package hellfirepvp.astralsorcery.common.cmd.sub;
 
+import net.minecraft.network.chat.Component;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import hellfirepvp.astralsorcery.common.data.research.ResearchManager;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.EntitySelector;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,19 +29,19 @@ import net.minecraft.util.text.TextFormatting;
  * Created by HellFirePvP
  * Date: 21.07.2019 / 16:33
  */
-public class CommandMaximizeAll implements Command<CommandSource> {
+public class CommandMaximizeAll implements Command<CommandSourceStack> {
 
     private static final CommandMaximizeAll CMD = new CommandMaximizeAll();
 
     private CommandMaximizeAll() {}
 
-    public static ArgumentBuilder<CommandSource, ?> register() {
+    public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("maximize")
                 .requires(cs -> cs.hasPermissionLevel(2))
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(ctx -> {
-                            PlayerEntity target = (PlayerEntity) ctx.getArgument("player", EntitySelector.class).selectOne(ctx.getSource());
-                            ctx.getSource().sendFeedback(new StringTextComponent("Success!").mergeStyle(TextFormatting.GREEN), true);
+                            Player target = (Player) ctx.getArgument("player", EntitySelector.class).selectOne(ctx.getSource());
+                            ctx.getSource().sendFeedback(Component.literal("Success!").withStyle(TextFormatting.GREEN), true);
                             maximizeAll(target);
                             return 0;
                         }))
@@ -48,13 +49,13 @@ public class CommandMaximizeAll implements Command<CommandSource> {
     }
 
     @Override
-    public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+    public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         maximizeAll(context.getSource().asPlayer());
-        context.getSource().sendFeedback(new StringTextComponent("Success!").mergeStyle(TextFormatting.GREEN), true);
+        context.getSource().sendFeedback(Component.literal("Success!").withStyle(TextFormatting.GREEN), true);
         return 0;
     }
 
-    private static boolean maximizeAll(PlayerEntity entity) {
+    private static boolean maximizeAll(Player entity) {
         return ResearchManager.forceMaximizeAll(entity);
     }
 }

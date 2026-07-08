@@ -24,17 +24,17 @@ import hellfirepvp.astralsorcery.common.util.PartialEffectExecutor;
 import hellfirepvp.astralsorcery.common.util.RaytraceAssist;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,7 +59,7 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     //So we can tell the client to render beams eventhough the actual connection doesn't exist.
     private List<BlockPos> occupiedConnections = new LinkedList<>();
 
-    protected TileLens(TileEntityType<?> tileEntityTypeIn) {
+    protected TileLens(BlockEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
 
@@ -96,7 +96,7 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     private void doColorEffects() {
-        World world = this.getWorld();
+        Level world = this.getWorld();
         if (!world.isRemote() && !this.occupiedConnections.isEmpty()) {
             this.occupiedConnections.clear();
             markForUpdate();
@@ -211,7 +211,7 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.attributes = CrystalAttributes.getCrystalAttributes(compound);
@@ -221,17 +221,17 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
             this.colorType = null;
         }
         this.occupiedConnections = NBTHelper.readList(compound, "occupiedConnections", Constants.NBT.TAG_COMPOUND,
-                nbt -> NBTHelper.readBlockPosFromNBT((CompoundNBT) nbt));
+                nbt -> NBTHelper.readBlockPosFromNBT((CompoundTag) nbt));
     }
 
     @Override
-    public void readNetNBT(CompoundNBT compound) {
+    public void readNetNBT(CompoundTag compound) {
         super.readNetNBT(compound);
         this.accumulatedStarlight = compound.getFloat("accumulatedStarlight");
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         if (this.attributes != null) {
@@ -241,11 +241,11 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
             compound.putString("colorType", this.colorType.getName().toString());
         }
         NBTHelper.writeList(compound, "occupiedConnections", this.occupiedConnections,
-                pos -> NBTHelper.writeBlockPosToNBT(pos, new CompoundNBT()));
+                pos -> NBTHelper.writeBlockPosToNBT(pos, new CompoundTag()));
     }
 
     @Override
-    public void writeNetNBT(CompoundNBT compound) {
+    public void writeNetNBT(CompoundTag compound) {
         super.writeNetNBT(compound);
         compound.putFloat("accumulatedStarlight", this.accumulatedStarlight);
     }

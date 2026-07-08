@@ -9,13 +9,13 @@
 package hellfirepvp.astralsorcery.common.tile.base;
 
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -32,7 +32,7 @@ public abstract class TileFakedState extends TileEntityTick {
     private BlockState fakedState = Blocks.AIR.getDefaultState();
     private Color overlayColor = Color.WHITE;
 
-    protected TileFakedState(TileEntityType<?> tileEntityTypeIn) {
+    protected TileFakedState(BlockEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
 
@@ -64,7 +64,7 @@ public abstract class TileFakedState extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.fakedState = NBTHelper.getBlockStateFromTag(compound.getCompound("fakedState"), Blocks.AIR.getDefaultState());
@@ -72,7 +72,7 @@ public abstract class TileFakedState extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         NBTHelper.setBlockState(compound, "fakedState", this.fakedState);

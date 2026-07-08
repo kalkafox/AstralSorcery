@@ -11,11 +11,11 @@ package hellfirepvp.astralsorcery.common.crafting.nojson;
 import hellfirepvp.astralsorcery.common.crafting.nojson.meltable.BlockMeltableRecipe;
 import hellfirepvp.astralsorcery.common.crafting.nojson.meltable.FurnaceMeltableRecipe;
 import hellfirepvp.astralsorcery.common.crafting.nojson.meltable.WorldMeltableRecipe;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.Tags;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.Tags;
 
 import javax.annotation.Nullable;
 
@@ -42,7 +42,7 @@ public class WorldMeltableRegistry extends CustomRecipeRegistry<WorldMeltableRec
     }
 
     @Nullable
-    public WorldMeltableRecipe getRecipeFor(World world, BlockPos pos) {
+    public WorldMeltableRecipe getRecipeFor(Level world, BlockPos pos) {
         return this.getRecipes()
                 .stream()
                 .filter(recipe -> recipe.canMelt(world, pos))

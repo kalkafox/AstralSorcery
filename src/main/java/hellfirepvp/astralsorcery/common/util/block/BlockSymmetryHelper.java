@@ -9,10 +9,10 @@
 package hellfirepvp.astralsorcery.common.util.block;
 
 import hellfirepvp.astralsorcery.common.util.data.BiDiPair;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.BlockGetter;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.function.Predicate;
  */
 public class BlockSymmetryHelper {
 
-    public SymmetryResult getDotSymmetry(IBlockReader world, BlockPos center, int radiusLayer, boolean allowMirrorSymmetry, Predicate<BlockState> applicableStateFilter) {
+    public SymmetryResult getDotSymmetry(BlockGetter world, BlockPos center, int radiusLayer, boolean allowMirrorSymmetry, Predicate<BlockState> applicableStateFilter) {
         List<BlockPos> layerPositions = BlockGeometry.getHollowSphere(radiusLayer + 1, radiusLayer);
         SymmetryResult result = new SymmetryResult(layerPositions.size());
         Set<BlockPos> visitedBlocks = new HashSet<>();
@@ -55,9 +55,9 @@ public class BlockSymmetryHelper {
                     result.symmetryPairs.add(new BiDiPair<>(at, dotSym));
 
                     if (!allowMirrorSymmetry) {
-                        checkMirrorSymmetry(world, new Vector3i(-offset.getX(),  offset.getY(),  offset.getZ()), center, result, visitedBlocks);
-                        checkMirrorSymmetry(world, new Vector3i( offset.getX(), -offset.getY(),  offset.getZ()), center, result, visitedBlocks);
-                        checkMirrorSymmetry(world, new Vector3i( offset.getX(),  offset.getY(), -offset.getZ()), center, result, visitedBlocks);
+                        checkMirrorSymmetry(world, new Vec3i(-offset.getX(),  offset.getY(),  offset.getZ()), center, result, visitedBlocks);
+                        checkMirrorSymmetry(world, new Vec3i( offset.getX(), -offset.getY(),  offset.getZ()), center, result, visitedBlocks);
+                        checkMirrorSymmetry(world, new Vec3i( offset.getX(),  offset.getY(), -offset.getZ()), center, result, visitedBlocks);
                     }
                 } else if (!dotState.isAir(world, dotSym)) {
                     result.fillerBlocks.add(at);
@@ -74,7 +74,7 @@ public class BlockSymmetryHelper {
         return result;
     }
 
-    private static void checkMirrorSymmetry(IBlockReader world, Vector3i offset, BlockPos center, SymmetryResult result, Set<BlockPos> visitedBlocks) {
+    private static void checkMirrorSymmetry(BlockGetter world, Vec3i offset, BlockPos center, SymmetryResult result, Set<BlockPos> visitedBlocks) {
         BlockPos at = center.add(offset);
         BlockState state = world.getBlockState(at);
         visitedBlocks.add(at);

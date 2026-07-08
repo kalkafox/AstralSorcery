@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.crafting.nojson;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

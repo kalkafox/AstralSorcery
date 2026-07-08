@@ -8,6 +8,10 @@
 
 package hellfirepvp.astralsorcery.datagen.data.advancements;
 
+import net.minecraft.network.chat.MutableComponent;
+
+import net.minecraft.network.chat.Component;
+
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,15 +26,14 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.advancements.criterion.EntityPredicate;
-import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.criterion.TickTrigger;
-import net.minecraft.data.AdvancementProvider;
+import net.minecraft.data.advancements.AdvancementProvider;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DirectoryCache;
-import net.minecraft.data.IDataProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.data.HashCache;
+import net.minecraft.data.DataProvider;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +61,7 @@ public class AstralAdvancementProvider extends AdvancementProvider {
     }
 
     @Override
-    public void act(DirectoryCache cache) {
+    public void act(HashCache cache) {
         Path path = this.generator.getOutputFolder();
         Set<ResourceLocation> set = Sets.newHashSet();
         Consumer<Advancement> registrar = (advancement) -> {
@@ -82,12 +85,12 @@ public class AstralAdvancementProvider extends AdvancementProvider {
         return base.resolve(String.format("data/%s/advancements/%s.json", advancement.getId().getNamespace(), advancement.getId().getPath()));
     }
 
-    private TranslationTextComponent title(String key) {
-        return new TranslationTextComponent(String.format("advancements.astralsorcery.%s.title", key));
+    private MutableComponent title(String key) {
+        return Component.translatable(String.format("advancements.astralsorcery.%s.title", key));
     }
 
-    private TranslationTextComponent description(String key) {
-        return new TranslationTextComponent(String.format("advancements.astralsorcery.%s.desc", key));
+    private MutableComponent description(String key) {
+        return Component.translatable(String.format("advancements.astralsorcery.%s.desc", key));
     }
 
     private void registerAdvancements(Consumer<Advancement> registrar) {

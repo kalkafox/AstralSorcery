@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.integration.jei;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.recipe.WellLiquefaction;
 import hellfirepvp.astralsorcery.common.integration.IntegrationJEI;
@@ -22,9 +22,9 @@ import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +63,7 @@ public class CategoryWell extends JEICategory<WellLiquefaction> {
     }
 
     @Override
-    public void draw(WellLiquefaction recipe, MatrixStack renderStack, double mouseX, double mouseY) {
+    public void draw(WellLiquefaction recipe, PoseStack renderStack, double mouseX, double mouseY) {
         this.icon.draw(renderStack, 46, 20);
     }
 

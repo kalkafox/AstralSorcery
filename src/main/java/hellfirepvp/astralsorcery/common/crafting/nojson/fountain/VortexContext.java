@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.crafting.nojson.fountain;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 
@@ -25,8 +25,8 @@ public class VortexContext extends FountainEffect.EffectContext {
     public List<Object> ctrlEffectNoise = null;
 
     @Override
-    public void readFromNBT(CompoundNBT compound) {}
+    public void readFromNBT(CompoundTag compound) {}
 
     @Override
-    public void writeToNBT(CompoundNBT compound) {}
+    public void writeToNBT(CompoundTag compound) {}
 }

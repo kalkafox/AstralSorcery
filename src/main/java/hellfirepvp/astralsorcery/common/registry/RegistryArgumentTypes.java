@@ -14,7 +14,7 @@ import hellfirepvp.astralsorcery.common.cmd.argument.ArgumentTypeConstellation;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.command.arguments.IArgumentSerializer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod

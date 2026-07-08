@@ -17,15 +17,15 @@ import hellfirepvp.astralsorcery.common.util.block.BlockPredicate;
 import hellfirepvp.astralsorcery.common.util.block.BlockUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.controller.MovementController;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.EnumSet;
 
@@ -58,7 +58,7 @@ public class SpectralToolBreakBlockGoal extends SpectralToolGoal {
 
     @Override
     public boolean shouldExecute() {
-        MovementController ctrl = this.getEntity().getMoveHelper();
+        MoveControl ctrl = this.getEntity().getMoveHelper();
 
         if (!ctrl.isUpdating()) {
             return true;
@@ -120,7 +120,7 @@ public class SpectralToolBreakBlockGoal extends SpectralToolGoal {
             this.actionCooldown = 0; //lol. wtf.
         }
 
-        World world = this.getEntity().getEntityWorld();
+        Level world = this.getEntity().getEntityWorld();
         boolean resetTimer = false;
 
         if (world.isAirBlock(this.selectedBreakPos)) {
@@ -135,13 +135,13 @@ public class SpectralToolBreakBlockGoal extends SpectralToolGoal {
 
             if (Vector3.atEntityCorner(this.getEntity()).distanceSquared(this.selectedBreakPos) <= 9) {
                 this.actionCooldown++;
-                if (this.actionCooldown >= MantleEffectPelotrio.CONFIG.ticksPerPickaxeBlockBreak.get() && world instanceof ServerWorld) {
+                if (this.actionCooldown >= MantleEffectPelotrio.CONFIG.ticksPerPickaxeBlockBreak.get() && world instanceof ServerLevel) {
                     LivingEntity owner = this.getEntity().getOwningEntity();
-                    if (owner instanceof PlayerEntity) {
+                    if (owner instanceof Player) {
                         BlockDropCaptureAssist.startCapturing();
                     }
                     if (BlockUtils.breakBlockWithoutPlayer(
-                            (ServerWorld) world,
+                            (ServerLevel) world,
                             this.selectedBreakPos,
                             world.getBlockState(this.selectedBreakPos),
                             this.getEntity().getItem(),
@@ -150,9 +150,9 @@ public class SpectralToolBreakBlockGoal extends SpectralToolGoal {
                             true)) {
                         resetTimer = true;
                     }
-                    if (owner instanceof PlayerEntity) {
+                    if (owner instanceof Player) {
                         for (ItemStack dropped : BlockDropCaptureAssist.getCapturedStacksAndStop()) {
-                            ItemStack remainder = ItemUtils.dropItemToPlayer((PlayerEntity) owner, dropped);
+                            ItemStack remainder = ItemUtils.dropItemToPlayer((Player) owner, dropped);
                             if (!remainder.isEmpty()) {
                                 ItemUtils.dropItemNaturally(world, owner.getPosX(), owner.getPosY(), owner.getPosZ(), remainder);
                             }

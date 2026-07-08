@@ -11,8 +11,8 @@ package hellfirepvp.astralsorcery.client.util;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.util.draw.RenderInfo;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,7 +24,7 @@ import net.minecraft.util.math.vector.Vector3d;
 public class RenderingVectorUtils {
 
     public static Vector3 getStandardTranslationRemovalVector(float partialTicks) {
-        Vector3d view = RenderInfo.getInstance().getARI().getProjectedView();
+        Vec3 view = RenderInfo.getInstance().getARI().getProjectedView();
         return new Vector3(view);
     }
 

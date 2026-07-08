@@ -16,8 +16,8 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.IPrismTransmissio
 import hellfirepvp.astralsorcery.common.starlight.transmission.base.crystal.CrystalTransmissionNode;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionProvider;
 import hellfirepvp.astralsorcery.common.tile.TileLens;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,7 +37,7 @@ public class StarlightTransmissionLens extends CrystalTransmissionNode {
     }
 
     @Override
-    public <T extends TileEntity> boolean updateFromTileEntity(T tile) {
+    public <T extends BlockEntity> boolean updateFromTileEntity(T tile) {
         if (!(tile instanceof TileLens)) {
             return super.updateFromTileEntity(tile);
         }

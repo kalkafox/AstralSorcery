@@ -11,11 +11,11 @@ package hellfirepvp.astralsorcery.client.resource;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.sky.astral.AstralSkyRenderer;
 import hellfirepvp.astralsorcery.common.util.object.CacheReference;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.resource.IResourceType;
-import net.minecraftforge.resource.ISelectiveResourceReloadListener;
-import net.minecraftforge.resource.VanillaResourceType;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.resource.IResourceType;
+import net.neoforged.neoforge.resource.ISelectiveResourceReloadListener;
+import net.neoforged.neoforge.resource.VanillaResourceType;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class AssetLibrary implements ISelectiveResourceReloadListener {
     }
 
     @Override
-    public void onResourceManagerReload(IResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
+    public void onResourceManagerReload(ResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
         if (reloading || !resourcePredicate.test(VanillaResourceType.TEXTURES)) {
             return;
         }

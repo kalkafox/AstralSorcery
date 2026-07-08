@@ -14,16 +14,16 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,8 +52,8 @@ public class KeyRampage extends KeyPerk {
 
     private void onEntityDeath(LivingDeathEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) source.getTrueSource();
+        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
+            Player player = (Player) source.getTrueSource();
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (side.isServer() && prog.getPerkData().hasPerkEffect(this)) {
@@ -68,9 +68,9 @@ public class KeyRampage extends KeyPerk {
                     dur = Math.round(PerkAttributeHelper.getOrCreateMap(player, side)
                             .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, dur));
                     if (dur > 0) {
-                        player.addPotionEffect(new EffectInstance(Effects.SPEED, dur, 1, false, false, true));
-                        player.addPotionEffect(new EffectInstance(Effects.HASTE, dur, 1, false, false, true));
-                        player.addPotionEffect(new EffectInstance(Effects.STRENGTH, dur, 1, false, false, true));
+                        player.addPotionEffect(new MobEffectInstance(Effects.SPEED, dur, 1, false, false, true));
+                        player.addPotionEffect(new MobEffectInstance(Effects.HASTE, dur, 1, false, false, true));
+                        player.addPotionEffect(new MobEffectInstance(Effects.STRENGTH, dur, 1, false, false, true));
                     }
                 }
             }
@@ -79,15 +79,15 @@ public class KeyRampage extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue rampageChance;
-        private ForgeConfigSpec.IntValue rampageDuration;
+        private ModConfigSpec.DoubleValue rampageChance;
+        private ModConfigSpec.IntValue rampageDuration;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.rampageChance = cfgBuilder
                     .comment("Defines the chance to gain rampage buffs when killing a mob")
                     .translation(translationKey("rampageChance"))

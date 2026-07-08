@@ -11,13 +11,13 @@ package hellfirepvp.astralsorcery.client.resource;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.Texture;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,7 +29,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class BindableResource extends AbstractRenderableTexture.Full implements ReloadableResource {
 
-    private Texture resource = null;
+    private AbstractTexture resource = null;
     private String path = null;
 
     protected BindableResource(ResourceLocation key) {
@@ -55,12 +55,12 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         this.resource = null;
     }
 
-    protected Texture allocateGlId() {
+    protected AbstractTexture allocateGlId() {
         if (AssetLibrary.isReloading()) {
             return null;
         }
         TextureManager mgr = Minecraft.getInstance().getTextureManager();
-        Texture resource = mgr.getTexture(this.getKey());
+        AbstractTexture resource = mgr.getTexture(this.getKey());
         if (resource != null) {
             return resource;
         }
@@ -83,8 +83,8 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
     }
 
     @Override
-    public RenderState.TextureState asState() {
-        return new RenderState.TextureState(this.getKey(), false, false) {
+    public RenderStateShard.TextureStateShard asState() {
+        return new RenderStateShard.TextureStateShard(this.getKey(), false, false) {
             @Override
             public void setupRenderState() {
                 RenderSystem.enableTexture();

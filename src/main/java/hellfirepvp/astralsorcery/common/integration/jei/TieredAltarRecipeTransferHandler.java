@@ -24,9 +24,9 @@ import mezz.jei.network.Network;
 import mezz.jei.network.packets.PacketRecipeTransfer;
 import mezz.jei.transfer.RecipeTransferUtil;
 import mezz.jei.util.Translator;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -66,7 +66,7 @@ public class TieredAltarRecipeTransferHandler<C extends ContainerAltarBase> impl
 
     @Nullable
     @Override
-    public IRecipeTransferError transferRecipe(C container, IRecipeLayout recipeLayout, PlayerEntity player, boolean maxTransfer, boolean doTransfer) {
+    public IRecipeTransferError transferRecipe(C container, IRecipeLayout recipeLayout, Player player, boolean maxTransfer, boolean doTransfer) {
         if (!ServerInfo.isJeiOnServer()) {
             String tooltipMessage = Translator.translateToLocal("jei.tooltip.error.recipe.transfer.no.server");
             return handlerHelper.createUserErrorWithTooltip(tooltipMessage);

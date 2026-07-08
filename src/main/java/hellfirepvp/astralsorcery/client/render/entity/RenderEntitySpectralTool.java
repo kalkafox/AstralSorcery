@@ -8,20 +8,20 @@
 
 package hellfirepvp.astralsorcery.client.render.entity;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.entity.EntitySpectralTool;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.client.registry.IRenderFactory;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,12 +32,12 @@ import net.minecraftforge.fml.client.registry.IRenderFactory;
  */
 public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool> {
 
-    protected RenderEntitySpectralTool(EntityRendererManager renderManager) {
+    protected RenderEntitySpectralTool(EntityRenderDispatcher renderManager) {
         super(renderManager);
     }
 
     @Override
-    public void render(EntitySpectralTool entity, float entityYaw, float partialTicks, MatrixStack renderStack, IRenderTypeBuffer buffer, int packedLight) {
+    public void render(EntitySpectralTool entity, float entityYaw, float partialTicks, PoseStack renderStack, MultiBufferSource buffer, int packedLight) {
         ItemStack stack = entity.getItem();
         if (stack.isEmpty() || !entity.isAlive()) {
             return;
@@ -64,7 +64,7 @@ public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool>
     public static class Factory implements IRenderFactory<EntitySpectralTool> {
 
         @Override
-        public EntityRenderer<? super EntitySpectralTool> createRenderFor(EntityRendererManager manager) {
+        public EntityRenderer<? super EntitySpectralTool> createRenderFor(EntityRenderDispatcher manager) {
             return new RenderEntitySpectralTool(manager);
         }
     }

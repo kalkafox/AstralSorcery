@@ -8,12 +8,12 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.overlay;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.screen.journal.ScreenJournal;
 import hellfirepvp.astralsorcery.client.screen.journal.ScreenJournalPerkTree;
 import hellfirepvp.astralsorcery.client.screen.journal.ScreenJournalProgression;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,7 +26,7 @@ public abstract class ScreenJournalOverlay extends ScreenJournal {
 
     private final ScreenJournal origin;
 
-    protected ScreenJournalOverlay(ITextComponent titleIn, ScreenJournal origin) {
+    protected ScreenJournalOverlay(Component titleIn, ScreenJournal origin) {
         super(titleIn, origin.getGuiHeight(), origin.getGuiWidth(), NO_BOOKMARK);
         this.origin = origin;
     }
@@ -44,7 +44,7 @@ public abstract class ScreenJournalOverlay extends ScreenJournal {
     }
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         super.render(renderStack, mouseX, mouseY, pTicks);
 
         origin.render(renderStack, 0, 0, pTicks);

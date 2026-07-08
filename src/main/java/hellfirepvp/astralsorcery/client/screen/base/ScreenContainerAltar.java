@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
@@ -21,11 +21,11 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipeContext
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerInventory;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.network.chat.Component;
+import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ import java.awt.*;
  */
 public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends ScreenCustomContainer<T> {
 
-    public ScreenContainerAltar(T screenContainer, PlayerInventory inv, ITextComponent name, int width, int height) {
+    public ScreenContainerAltar(T screenContainer, Inventory inv, Component name, int width, int height) {
         super(screenContainer, inv, name, width, height);
     }
 
@@ -52,13 +52,13 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(MatrixStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.enableDepthTest();
         this.renderGuiBackground(renderStack, partialTicks, mouseX, mouseY);
         super.drawGuiContainerBackgroundLayer(renderStack, partialTicks, mouseX, mouseY);
     }
 
-    protected void renderStarlightBar(MatrixStack renderStack, int offsetX, int offsetZ, int width, int height) {
+    protected void renderStarlightBar(PoseStack renderStack, int offsetX, int offsetZ, int width, int height) {
         TileAltar altar = this.getContainer().getTileEntity();
 
         RenderSystem.disableAlphaTest();
@@ -116,5 +116,5 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
         RenderSystem.enableAlphaTest();
     }
 
-    public abstract void renderGuiBackground(MatrixStack renderStack, float partialTicks, int mouseX, int mouseY);
+    public abstract void renderGuiBackground(PoseStack renderStack, float partialTicks, int mouseX, int mouseY);
 }

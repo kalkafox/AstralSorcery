@@ -8,26 +8,24 @@
 
 package hellfirepvp.astralsorcery.common.item;
 
-import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.constellation.ConstellationRegistry;
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.constellation.engraving.EngravedStarMap;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.MendingEnchantment;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,30 +42,29 @@ public class ItemInfusedGlass extends Item {
 
     public ItemInfusedGlass() {
         super(new Properties()
-                .maxStackSize(1)
-                .maxDamage(5)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+                .durability(5));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
         EngravedStarMap map = getEngraving(stack);
         if (map != null) {
             for (ResourceLocation key : map.getConstellationKeys()) {
                 IConstellation cst = ConstellationRegistry.getConstellation(key);
                 if (cst != null) {
                     String format = "item.astralsorcery.infused_glass.ttip";
-                    ITextComponent cstName = cst.getConstellationName().mergeStyle(TextFormatting.BLUE);
+                    Component cstName = cst.getConstellationName().withStyle(ChatFormatting.BLUE);
 
                     if (Minecraft.getInstance().player != null && Minecraft.getInstance().player.isCreative()) {
                         String percent = String.valueOf(Math.round(map.getDistribution(cst) * 100F));
-                        ITextComponent creativeHint = new TranslationTextComponent("item.astralsorcery.infused_glass.ttip.creative", percent)
-                                .mergeStyle(TextFormatting.LIGHT_PURPLE);
+                        Component creativeHint = Component.translatable("item.astralsorcery.infused_glass.ttip.creative", percent)
+                                .withStyle(ChatFormatting.LIGHT_PURPLE);
 
-                        tooltip.add(new TranslationTextComponent(format, cstName, creativeHint).mergeStyle(TextFormatting.GRAY));
+                        tooltip.add(Component.translatable(format, cstName, creativeHint).withStyle(ChatFormatting.GRAY));
                     } else {
-                        tooltip.add(new TranslationTextComponent(format, cstName, "").mergeStyle(TextFormatting.GRAY));
+                        tooltip.add(Component.translatable(format, cstName, "").withStyle(ChatFormatting.GRAY));
                     }
                 }
             }
@@ -75,25 +72,25 @@ public class ItemInfusedGlass extends Item {
     }
 
     @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        if (enchantment instanceof MendingEnchantment) {
+    public boolean supportsEnchantment(ItemStack stack, Holder<Enchantment> enchantment) {
+        if (enchantment.is(Enchantments.MENDING)) {
             return false;
         }
-        return super.canApplyAtEnchantingTable(stack, enchantment);
+        return super.supportsEnchantment(stack, enchantment);
     }
 
     @Override
-    public boolean hasEffect(ItemStack stack) {
-        return super.hasEffect(stack) || getEngraving(stack) != null;
+    public boolean isFoil(ItemStack stack) {
+        return super.isFoil(stack) || getEngraving(stack) != null;
     }
 
     @Override
-    public String getTranslationKey(ItemStack stack) {
+    public String getDescriptionId(ItemStack stack) {
         EngravedStarMap map = getEngraving(stack);
         if (map != null) {
-            return super.getTranslationKey(stack) + ".active";
+            return super.getDescriptionId(stack) + ".active";
         }
-        return super.getTranslationKey(stack);
+        return super.getDescriptionId(stack);
     }
 
     @Nullable
@@ -102,7 +99,7 @@ public class ItemInfusedGlass extends Item {
             return null;
         }
 
-        CompoundNBT tag = NBTHelper.getPersistentData(stack);
+        CompoundTag tag = NBTHelper.getPersistentData(stack);
         if (tag.contains("starmap", Constants.NBT.TAG_COMPOUND)) {
             return EngravedStarMap.deserialize(tag.getCompound("starmap"));
         }
@@ -114,7 +111,7 @@ public class ItemInfusedGlass extends Item {
             return;
         }
 
-        CompoundNBT tag = NBTHelper.getPersistentData(stack);
+        CompoundTag tag = NBTHelper.getPersistentData(stack);
         if (map == null) {
             tag.remove("starmap");
         } else {

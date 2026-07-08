@@ -13,21 +13,21 @@ import hellfirepvp.astralsorcery.common.constellation.mantle.MantleEffect;
 import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.item.armor.ItemMantle;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.tags.FluidTags;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,7 +53,7 @@ public class MantleEffectOctans extends MantleEffect {
     }
 
     @Override
-    protected void tickServer(PlayerEntity player) {
+    protected void tickServer(Player player) {
         super.tickServer(player);
 
         if (player.areEyesInFluid(FluidTags.WATER)) {
@@ -67,7 +67,7 @@ public class MantleEffectOctans extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         float chance = 0.1F;
@@ -78,7 +78,7 @@ public class MantleEffectOctans extends MantleEffect {
     }
 
     private void handleUnderwaterBreakSpeed(PlayerEvent.BreakSpeed event) {
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
         if (player.areEyesInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(player)) {
             LogicalSide side = player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
             MantleEffectOctans octans = ItemMantle.getEffect(player, ConstellationsAS.octans);
@@ -136,9 +136,9 @@ public class MantleEffectOctans extends MantleEffect {
 
         private final int defaultChargeCostPerBreakSpeed = 30;
 
-        public ForgeConfigSpec.DoubleValue healPerTick;
+        public ModConfigSpec.DoubleValue healPerTick;
 
-        public ForgeConfigSpec.IntValue chargeCostPerBreakSpeed;
+        public ModConfigSpec.IntValue chargeCostPerBreakSpeed;
 
 
         public OctansConfig() {
@@ -146,7 +146,7 @@ public class MantleEffectOctans extends MantleEffect {
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.healPerTick = cfgBuilder

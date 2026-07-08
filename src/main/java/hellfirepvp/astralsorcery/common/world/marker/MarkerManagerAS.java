@@ -15,15 +15,15 @@ import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
 import hellfirepvp.astralsorcery.common.lib.LootAS;
 import hellfirepvp.astralsorcery.common.tile.TileCollectorCrystal;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.tileentity.LockableLootTileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.gen.feature.structure.StructurePiece;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.Random;
 
@@ -36,7 +36,7 @@ import java.util.Random;
  */
 public class MarkerManagerAS {
 
-    public static void handleMarker(String marker, BlockPos pos, IWorld genWorld, Random rand, MutableBoundingBox box) {
+    public static void handleMarker(String marker, BlockPos pos, LevelAccessor genWorld, Random rand, BoundingBox box) {
         switch (marker) {
             case "brick_shrine_chest":
                 if (rand.nextBoolean()) {
@@ -65,7 +65,7 @@ public class MarkerManagerAS {
         }
     }
 
-    private static void makeCollectorCrystal(IWorld world, BlockPos pos, Random rand, MutableBoundingBox box) {
+    private static void makeCollectorCrystal(LevelAccessor world, BlockPos pos, Random rand, BoundingBox box) {
         if (box.isVecInside(pos) && world.getBlockState(pos).getBlock() != BlocksAS.ROCK_COLLECTOR_CRYSTAL) {
             world.setBlockState(pos, BlocksAS.ROCK_COLLECTOR_CRYSTAL.getDefaultState(), Constants.BlockFlags.BLOCK_UPDATE);
 
@@ -78,7 +78,7 @@ public class MarkerManagerAS {
         }
     }
 
-    private static void makeChest(IWorld world, BlockPos pos, ResourceLocation tableName, Random rand, MutableBoundingBox box) {
+    private static void makeChest(LevelAccessor world, BlockPos pos, ResourceLocation tableName, Random rand, BoundingBox box) {
         if (box.isVecInside(pos) && world.getBlockState(pos).getBlock() != Blocks.CHEST) {
             BlockState chest = StructurePiece.correctFacing(world, pos, Blocks.CHEST.getDefaultState());
 

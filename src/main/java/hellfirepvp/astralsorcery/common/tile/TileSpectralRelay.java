@@ -29,17 +29,17 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.capabilities.Capability;
+import net.neoforged.neoforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -109,7 +109,7 @@ public class TileSpectralRelay extends TileEntityTick {
         this.updateRelayProximity();
     }
 
-    public static void cascadeRelayProximityUpdates(World world, BlockPos pos) {
+    public static void cascadeRelayProximityUpdates(Level world, BlockPos pos) {
         if (world.isRemote()) {
             return;
         }
@@ -122,13 +122,13 @@ public class TileSpectralRelay extends TileEntityTick {
         }
         this.setClosestRelayPos(null);
         BlockPos thisPos = this.getPos();
-        Vector3d thisVPos = Vector3d.copy(thisPos);
+        Vec3 thisVPos = Vector3d.copy(thisPos);
         foreachNearbyRelay(this.getWorld(), thisPos, relay -> {
             BlockPos relayPos = relay.getPos();
             if (relayPos.equals(thisPos)) {
                 return;
             }
-            Vector3d relayVPos = Vector3d.copy(relayPos);
+            Vec3 relayVPos = Vector3d.copy(relayPos);
 
             BlockPos otherClosestPos = relay.closestRelayPos;
             if (otherClosestPos == null || thisPos.distanceSq(relayVPos, false) < otherClosestPos.distanceSq(relayVPos, false)) {
@@ -140,7 +140,7 @@ public class TileSpectralRelay extends TileEntityTick {
         });
     }
 
-    private static void foreachNearbyRelay(World world, BlockPos pos, Consumer<TileSpectralRelay> relayConsumer) {
+    private static void foreachNearbyRelay(Level world, BlockPos pos, Consumer<TileSpectralRelay> relayConsumer) {
         List<BlockPos> nearbyRelays = BlockDiscoverer.searchForBlocksAround(world, pos, 8,
                 ((world1, pos1, state) -> {
                     TileSpectralRelay relay;
@@ -243,7 +243,7 @@ public class TileSpectralRelay extends TileEntityTick {
     private void updateAltarPos() {
         Set<BlockPos> altarPositions = BlockDiscoverer.searchForTileEntitiesAround(getWorld(), getPos(), 16, tile -> tile instanceof TileAltar);
 
-        Vector3d thisPos = Vector3d.copy(getPos());
+        Vec3 thisPos = Vector3d.copy(getPos());
         BlockPos closestAltar = null;
         for (BlockPos other : altarPositions) {
             if (closestAltar == null || other.distanceSq(thisPos, false) < closestAltar.distanceSq(thisPos, false)) {
@@ -276,7 +276,7 @@ public class TileSpectralRelay extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundNBT compound) {
+    public void readCustomNBT(CompoundTag compound) {
         super.readCustomNBT(compound);
 
         this.inventory = this.inventory.deserialize(compound.getCompound("inventory"));
@@ -293,15 +293,15 @@ public class TileSpectralRelay extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundNBT compound) {
+    public void writeCustomNBT(CompoundTag compound) {
         super.writeCustomNBT(compound);
 
         compound.put("inventory", this.inventory.serialize());
         if (this.altarPos != null) {
-            compound.put("altarPos", NBTHelper.writeBlockPosToNBT(this.altarPos, new CompoundNBT()));
+            compound.put("altarPos", NBTHelper.writeBlockPosToNBT(this.altarPos, new CompoundTag()));
         }
         if (this.closestRelayPos != null) {
-            compound.put("closestRelayPos", NBTHelper.writeBlockPosToNBT(this.closestRelayPos, new CompoundNBT()));
+            compound.put("closestRelayPos", NBTHelper.writeBlockPosToNBT(this.closestRelayPos, new CompoundTag()));
         }
     }
 

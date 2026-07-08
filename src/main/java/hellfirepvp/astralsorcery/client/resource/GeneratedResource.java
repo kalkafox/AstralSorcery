@@ -11,12 +11,12 @@ package hellfirepvp.astralsorcery.client.resource;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.renderer.texture.Texture;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import com.mojang.blaze3d.platform.TextureUtil;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -46,12 +46,12 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
     }
 
     @Override
-    protected Texture allocateGlId() {
+    protected AbstractTexture allocateGlId() {
         if (AssetLibrary.isReloading()) {
             return null;
         }
         TextureManager mgr = Minecraft.getInstance().getTextureManager();
-        Texture resource = mgr.getTexture(this.getKey());
+        AbstractTexture resource = mgr.getTexture(this.getKey());
         if (resource != null) {
             return resource;
         }
@@ -60,7 +60,7 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
         return mgr.getTexture(this.getKey());
     }
 
-    private static class InMemoryTexture extends Texture {
+    private static class InMemoryTexture extends AbstractTexture {
 
         private final Supplier<BufferedImage> imageGen;
         private final boolean blur, clamp;
@@ -72,7 +72,7 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
         }
 
         @Override
-        public void loadTexture(IResourceManager manager) throws IOException {
+        public void loadTexture(ResourceManager manager) throws IOException {
             NativeImage image = NativeImage.read(NativeImage.PixelFormat.RGBA, createMemInput());
             if (!RenderSystem.isOnRenderThreadOrInit()) {
                 RenderSystem.recordRenderCall(() -> this.loadImage(image, this.blur, this.clamp));

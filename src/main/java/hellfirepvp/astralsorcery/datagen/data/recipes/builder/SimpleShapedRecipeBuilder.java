@@ -15,14 +15,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -45,7 +45,7 @@ public class SimpleShapedRecipeBuilder {
 
     private String subDirectory = null;
 
-    private SimpleShapedRecipeBuilder(IItemProvider result, int count) {
+    private SimpleShapedRecipeBuilder(ItemLike result, int count) {
         this(new ItemStack(result.asItem(), count));
     }
 
@@ -53,11 +53,11 @@ public class SimpleShapedRecipeBuilder {
         this.result = result.copy();
     }
 
-    public static SimpleShapedRecipeBuilder shapedRecipe(IItemProvider result) {
+    public static SimpleShapedRecipeBuilder shapedRecipe(ItemLike result) {
         return shapedRecipe(result, 1);
     }
 
-    public static SimpleShapedRecipeBuilder shapedRecipe(IItemProvider result, int count) {
+    public static SimpleShapedRecipeBuilder shapedRecipe(ItemLike result, int count) {
         return new SimpleShapedRecipeBuilder(result, count);
     }
 
@@ -65,7 +65,7 @@ public class SimpleShapedRecipeBuilder {
         return this.key(symbol, Ingredient.fromTag(tag));
     }
 
-    public SimpleShapedRecipeBuilder key(Character symbol, IItemProvider item) {
+    public SimpleShapedRecipeBuilder key(Character symbol, ItemLike item) {
         return this.key(symbol, Ingredient.fromItems(item));
     }
 
@@ -164,7 +164,7 @@ public class SimpleShapedRecipeBuilder {
             json.add("result", JsonHelper.serializeItemStack(this.result));
         }
 
-        public IRecipeSerializer<?> getSerializer() {
+        public RecipeSerializer<?> getSerializer() {
             return IRecipeSerializer.CRAFTING_SHAPED;
         }
 

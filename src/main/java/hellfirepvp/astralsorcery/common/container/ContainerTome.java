@@ -16,14 +16,14 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchManager;
 import hellfirepvp.astralsorcery.common.item.ItemConstellationPaper;
 import hellfirepvp.astralsorcery.common.item.ItemTome;
 import hellfirepvp.astralsorcery.common.lib.ContainerTypesAS;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.fml.common.thread.EffectiveSide;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import java.util.LinkedList;
 
@@ -34,13 +34,13 @@ import java.util.LinkedList;
  * Created by HellFirePvP
  * Date: 09.08.2019 / 21:14
  */
-public class ContainerTome extends Container {
+public class ContainerTome extends AbstractContainerMenu {
 
-    private final PlayerEntity owningPlayer;
+    private final Player owningPlayer;
     private final ItemStack parentTome;
     private final int tomeIndex;
 
-    public ContainerTome(int id, PlayerInventory plInventory, PlayerEntity owningPlayer, ItemStack tome, int tomeIndex) {
+    public ContainerTome(int id, Inventory plInventory, Player owningPlayer, ItemStack tome, int tomeIndex) {
         super(ContainerTypesAS.TOME, id);
         this.parentTome = tome;
         this.tomeIndex = tomeIndex;
@@ -49,7 +49,7 @@ public class ContainerTome extends Container {
         buildSlots(new InvWrapper(ItemTome.getTomeStorage(tome, this.owningPlayer)));
     }
 
-    private void buildPlayerSlots(PlayerInventory playerInv) {
+    private void buildPlayerSlots(Inventory playerInv) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
                 int index = j + i * 9 + 9;
@@ -79,7 +79,7 @@ public class ContainerTome extends Container {
     }
 
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack transferStackInSlot(Player playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
@@ -124,7 +124,7 @@ public class ContainerTome extends Container {
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
+    public boolean canInteractWith(Player playerIn) {
         return true;
     }
 

@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.loot.LootFunctionType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,11 +29,11 @@ public class LootAS {
 
     public static class Functions {
 
-        public static LootFunctionType LINEAR_LUCK_BONUS;
-        public static LootFunctionType RANDOM_CRYSTAL_PROPERTIES;
-        public static LootFunctionType COPY_CRYSTAL_PROPERTIES;
-        public static LootFunctionType COPY_CONSTELLATION;
-        public static LootFunctionType COPY_GATEWAY_COLOR;
+        public static LootItemFunctionType LINEAR_LUCK_BONUS;
+        public static LootItemFunctionType RANDOM_CRYSTAL_PROPERTIES;
+        public static LootItemFunctionType COPY_CRYSTAL_PROPERTIES;
+        public static LootItemFunctionType COPY_CONSTELLATION;
+        public static LootItemFunctionType COPY_GATEWAY_COLOR;
 
     }
 }

@@ -12,14 +12,14 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.util.color.ColorThief;
 import hellfirepvp.astralsorcery.common.util.ColorUtils;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.resources.IFutureReloadListener;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.util.Unit;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.resource.SelectiveReloadStateHandler;
-import net.minecraftforge.resource.VanillaResourceType;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.resource.SelectiveReloadStateHandler;
+import net.neoforged.neoforge.resource.VanillaResourceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -118,7 +118,7 @@ public class ColorizationHelper {
         return bufferedImage;
     }
 
-    public static IFutureReloadListener onReload() {
+    public static PreparableReloadListener onReload() {
         return (stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) ->
                 stage.markCompleteAwaitingOthers(Unit.INSTANCE).thenRunAsync(() -> {
                     if (!SelectiveReloadStateHandler.INSTANCE.get().test(VanillaResourceType.TEXTURES)) {

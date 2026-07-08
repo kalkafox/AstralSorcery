@@ -22,17 +22,17 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import joptsimple.internal.Strings;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -135,7 +135,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey1);
         }
         int amount1 = JSONUtils.getInt(json, "reactant1Amount");
-        CompoundNBT tag1 = null;
+        CompoundTag tag1 = null;
         if (JSONUtils.hasField(json, "reactant1Tag")) {
             String jsonTag1 = JSONUtils.getString(json, "reactant1Tag");
             try {
@@ -152,7 +152,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey2);
         }
         int amount2 = JSONUtils.getInt(json, "reactant2Amount");
-        CompoundNBT tag2 = null;
+        CompoundTag tag2 = null;
         if (JSONUtils.hasField(json, "reactant2Tag")) {
             String jsonTag2 = JSONUtils.getString(json, "reactant2Tag");
             try {
@@ -203,7 +203,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         object.add("result", ctResult);
     }
 
-    public static LiquidInteraction read(ResourceLocation recipeId, PacketBuffer buffer) {
+    public static LiquidInteraction read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         FluidStack reactant1 = ByteBufUtils.readFluidStack(buffer);
         FluidStack reactant2 = ByteBufUtils.readFluidStack(buffer);
         float chanceConsumeReactant1 = buffer.readFloat();
@@ -218,7 +218,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         return new LiquidInteraction(recipeId, reactant1, chanceConsumeReactant1, reactant2, chanceConsumeReactant2, weight, result);
     }
 
-    public final void write(PacketBuffer buffer) {
+    public final void write(FriendlyByteBuf buffer) {
         ByteBufUtils.writeFluidStack(buffer, this.reactant1);
         ByteBufUtils.writeFluidStack(buffer, this.reactant2);
         buffer.writeFloat(this.chanceConsumeReactant1);
@@ -234,7 +234,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
     }
 
     @Override
-    public IRecipeType<?> getType() {
+    public RecipeType<?> getType() {
         return RecipeTypesAS.TYPE_LIQUID_INTERACTION.getType();
     }
 }

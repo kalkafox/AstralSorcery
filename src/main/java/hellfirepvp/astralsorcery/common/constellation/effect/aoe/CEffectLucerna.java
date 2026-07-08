@@ -25,12 +25,12 @@ import hellfirepvp.astralsorcery.common.util.block.ILocatable;
 import hellfirepvp.astralsorcery.common.util.block.WorldBlockPos;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tick.TickTokenMap;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,7 +55,7 @@ public class CEffectLucerna extends ConstellationEffect implements Constellation
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(World world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         if (ClientScheduler.getClientTick() % 20 == 0) {
             EffectHelper.spawnSource(new FXOrbitalLucerna(new Vector3(pos).add(0.5, 0.5, 0.5))
                     .setOrbitAxis(Vector3.RotAxis.Y_AXIS)
@@ -65,10 +65,10 @@ public class CEffectLucerna extends ConstellationEffect implements Constellation
     }
 
     @Override
-    public boolean runStatusEffect(World world, BlockPos pos, int mirrorAmount, ConstellationEffectProperties modified, @Nullable IMinorConstellation possibleTraitEffect) {
+    public boolean runStatusEffect(Level world, BlockPos pos, int mirrorAmount, ConstellationEffectProperties modified, @Nullable IMinorConstellation possibleTraitEffect) {
         if (modified.isCorrupted()) {
-            if (world instanceof ServerWorld && DayTimeHelper.isNight(world) && rand.nextBoolean()) {
-                SkyHandler.getInstance().revertWorldTimeTick((ServerWorld) world);
+            if (world instanceof ServerLevel && DayTimeHelper.isNight(world) && rand.nextBoolean()) {
+                SkyHandler.getInstance().revertWorldTimeTick((ServerLevel) world);
             }
             return true;
         }
@@ -101,19 +101,19 @@ public class CEffectLucerna extends ConstellationEffect implements Constellation
     }
 
     @Override
-    public boolean playEffect(World world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         return false;
     }
 
     @Override
-    public void readFromNBT(CompoundNBT cmp) {
+    public void readFromNBT(CompoundTag cmp) {
         super.readFromNBT(cmp);
 
         this.rememberedTimeout = cmp.getInt("rememberedTimeout");
     }
 
     @Override
-    public void writeToNBT(CompoundNBT cmp) {
+    public void writeToNBT(CompoundTag cmp) {
         super.writeToNBT(cmp);
 
         cmp.putInt("rememberedTimeout", this.rememberedTimeout);

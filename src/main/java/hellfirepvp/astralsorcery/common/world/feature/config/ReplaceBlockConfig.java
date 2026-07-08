@@ -10,9 +10,9 @@ package hellfirepvp.astralsorcery.common.world.feature.config;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.world.gen.feature.IFeatureConfig;
-import net.minecraft.world.gen.feature.template.RuleTest;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,7 +21,7 @@ import net.minecraft.world.gen.feature.template.RuleTest;
  * Created by HellFirePvP
  * Date: 20.11.2020 / 16:56
  */
-public class ReplaceBlockConfig implements IFeatureConfig {
+public class ReplaceBlockConfig implements FeatureConfiguration {
 
     public static final Codec<ReplaceBlockConfig> CODEC = RecordCodecBuilder.create((codecInstance) -> {
         return codecInstance.group(RuleTest.field_237127_c_.fieldOf("target").forGetter((config) -> {

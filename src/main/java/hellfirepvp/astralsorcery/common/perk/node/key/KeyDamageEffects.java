@@ -14,17 +14,17 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,8 +52,8 @@ public class KeyDamageEffects extends KeyPerk {
 
     private void onDamageResult(LivingDamageEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) source.getTrueSource();
+        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
+            Player player = (Player) source.getTrueSource();
             LogicalSide side = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, side);
             if (prog.getPerkData().hasPerkEffect(this)) {
@@ -63,14 +63,14 @@ public class KeyDamageEffects extends KeyPerk {
                 if (rand.nextFloat() < chance) {
                     switch (rand.nextInt(3)) {
                         case 0:
-                            attacked.addPotionEffect(new EffectInstance(Effects.WITHER, 200, 1, false, false, true));
+                            attacked.addPotionEffect(new MobEffectInstance(Effects.WITHER, 200, 1, false, false, true));
                             break;
                         case 1:
-                            attacked.addPotionEffect(new EffectInstance(Effects.POISON, 200, 1, false, false, true));
+                            attacked.addPotionEffect(new MobEffectInstance(Effects.POISON, 200, 1, false, false, true));
                             break;
                         case 2:
-                            attacked.addPotionEffect(new EffectInstance(Effects.SLOWNESS, 200, 1, false, false, true));
-                            attacked.addPotionEffect(new EffectInstance(Effects.WEAKNESS, 200, 1, false, false, true));
+                            attacked.addPotionEffect(new MobEffectInstance(Effects.SLOWNESS, 200, 1, false, false, true));
+                            attacked.addPotionEffect(new MobEffectInstance(Effects.WEAKNESS, 200, 1, false, false, true));
                             break;
                         default:
                             break;
@@ -82,14 +82,14 @@ public class KeyDamageEffects extends KeyPerk {
 
     public static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.DoubleValue applicationChance;
+        private ModConfigSpec.DoubleValue applicationChance;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             this.applicationChance = cfgBuilder
                     .comment("Defines the chance per hit to apply additional effects.")
                     .translation(translationKey("applicationChance"))

@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.data.config.entry;
 
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigEntry;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,14 +22,14 @@ public class PerkConfig extends ConfigEntry {
 
     public static final PerkConfig CONFIG = new PerkConfig();
 
-    public ForgeConfigSpec.IntValue perkLevelCap;
+    public ModConfigSpec.IntValue perkLevelCap;
 
     private PerkConfig() {
         super("perks");
     }
 
     @Override
-    public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+    public void createEntries(ModConfigSpec.Builder cfgBuilder) {
         perkLevelCap = cfgBuilder
                 .comment("Sets the max level for the perk tree levels.")
                 .translation(translationKey("perkLevelCap"))

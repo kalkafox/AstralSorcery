@@ -10,10 +10,10 @@ package hellfirepvp.astralsorcery.common.perk.node.key;
 
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import hellfirepvp.astralsorcery.common.perk.tick.PlayerTickPerk;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.FoodStats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,9 +29,9 @@ public class KeyReducedFood extends KeyPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(PlayerEntity player, LogicalSide side) {
+    public void onPlayerTick(Player player, LogicalSide side) {
         if (side.isServer() && rand.nextFloat() < 0.01) {
-            FoodStats stats = player.getFoodStats();
+            FoodData stats = player.getFoodStats();
             if (stats.getFoodLevel() < 20 || stats.getSaturationLevel() < 5) {
                 stats.addStats(1, 0.3F);
             }

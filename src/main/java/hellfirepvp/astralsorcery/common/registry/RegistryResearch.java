@@ -19,9 +19,9 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.StructureTypesAS;
 import hellfirepvp.astralsorcery.common.structure.types.StructureType;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IItemProvider;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.Locale;
 import java.util.function.Predicate;
@@ -56,7 +56,7 @@ public class RegistryResearch {
                 .addPage(text("OBSERVATORY.3"))
                 .register(ResearchProgression.RADIANCE);
 
-        ResearchNode resIrradiantStars = new ResearchNode(new IItemProvider[] {
+        ResearchNode resIrradiantStars = new ResearchNode(new ItemLike[] {
                 ItemsAS.SHIFTING_STAR_AEVITAS,
                 ItemsAS.SHIFTING_STAR_ARMARA,
                 ItemsAS.SHIFTING_STAR_DISCIDIA,
@@ -218,7 +218,7 @@ public class RegistryResearch {
                 .addPage(text("ILLUMINATION_WAND.3"))
                 .register(ResearchProgression.CONSTELLATION);
 
-        ResearchNode resInfusedTools = new ResearchNode(new IItemProvider[] {
+        ResearchNode resInfusedTools = new ResearchNode(new ItemLike[] {
                 ItemsAS.INFUSED_CRYSTAL_SWORD,
                 ItemsAS.INFUSED_CRYSTAL_PICKAXE,
                 ItemsAS.INFUSED_CRYSTAL_AXE,
@@ -356,7 +356,7 @@ public class RegistryResearch {
                 .addPage(text("STARLIGHT_NETWORK.1"))
                 .register(ResearchProgression.ATTUNEMENT);
 
-        ResearchNode resTransmutationOres = new ResearchNode(new IItemProvider[] {
+        ResearchNode resTransmutationOres = new ResearchNode(new ItemLike[] {
                 Blocks.MAGMA_BLOCK,
                 Blocks.SAND,
                 Blocks.DIAMOND_ORE,
@@ -445,7 +445,7 @@ public class RegistryResearch {
                 .addTomeLookup(ItemsAS.PERK_SEAL, 1, ResearchProgression.ATTUNEMENT)
                 .register(ResearchProgression.ATTUNEMENT);
 
-        ResearchNode resPerkGems = new ResearchNode(new IItemProvider[] {
+        ResearchNode resPerkGems = new ResearchNode(new ItemLike[] {
                 ItemsAS.PERK_GEM_DAY,
                 ItemsAS.PERK_GEM_NIGHT,
                 ItemsAS.PERK_GEM_SKY
@@ -502,7 +502,7 @@ public class RegistryResearch {
                 .addTomeLookup(ItemsAS.GRAPPLE_WAND, 1, ResearchProgression.ATTUNEMENT)
                 .register(ResearchProgression.ATTUNEMENT);
 
-        ResearchNode resToolWands = new ResearchNode(new IItemProvider[] {
+        ResearchNode resToolWands = new ResearchNode(new ItemLike[] {
                 ItemsAS.ARCHITECT_WAND,
                 ItemsAS.EXCHANGE_WAND
         }, "TOOL_WANDS", 1.5F, 2.25F)
@@ -579,7 +579,7 @@ public class RegistryResearch {
                 .addPage(text("CRYSTAL_GROWTH.2"))
                 .register(ResearchProgression.BASIC_CRAFT);
 
-        ResearchNode resTools = new ResearchNode(new IItemProvider[] {
+        ResearchNode resTools = new ResearchNode(new ItemLike[] {
                 ItemsAS.CRYSTAL_SWORD,
                 ItemsAS.CRYSTAL_PICKAXE,
                 ItemsAS.CRYSTAL_AXE,
@@ -606,7 +606,7 @@ public class RegistryResearch {
                 .addPage(text("WELL.5"))
                 .register(ResearchProgression.BASIC_CRAFT);
 
-        ResearchNode resInfusedWood = new ResearchNode(new IItemProvider[] {
+        ResearchNode resInfusedWood = new ResearchNode(new ItemLike[] {
                 BlocksAS.INFUSED_WOOD,
                 BlocksAS.INFUSED_WOOD_ARCH,
                 BlocksAS.INFUSED_WOOD_COLUMN,
@@ -692,7 +692,7 @@ public class RegistryResearch {
                 .addTomeLookup(ItemsAS.PARCHMENT, 3, ResearchProgression.DISCOVERY)
                 .register(ResearchProgression.DISCOVERY);
 
-        ResearchNode resOres = new ResearchNode(new IItemProvider[] {
+        ResearchNode resOres = new ResearchNode(new ItemLike[] {
                 BlocksAS.ROCK_CRYSTAL_ORE,
                 BlocksAS.AQUAMARINE_SAND_ORE
         }, "ORES", 2, 2)
@@ -722,7 +722,7 @@ public class RegistryResearch {
                 .addPage(text("ALTAR1.6"))
                 .register(ResearchProgression.DISCOVERY);
 
-        ResearchNode resMarbles = new ResearchNode(new IItemProvider[] {
+        ResearchNode resMarbles = new ResearchNode(new ItemLike[] {
                 BlocksAS.MARBLE_RAW,
                 BlocksAS.MARBLE_PILLAR,
                 BlocksAS.MARBLE_ARCH,
@@ -754,7 +754,7 @@ public class RegistryResearch {
                 .addTomeLookup(BlocksAS.MARBLE_STAIRS, 9, ResearchProgression.DISCOVERY)
                 .register(ResearchProgression.DISCOVERY);
 
-        ResearchNode resSootyMarble = new ResearchNode(new IItemProvider[] {
+        ResearchNode resSootyMarble = new ResearchNode(new ItemLike[] {
                 BlocksAS.BLACK_MARBLE_RAW,
                 BlocksAS.BLACK_MARBLE_PILLAR,
                 BlocksAS.BLACK_MARBLE_ARCH,
@@ -796,19 +796,19 @@ public class RegistryResearch {
         resAltar1.addSourceConnectionFrom(resResonatingWand);
     }
 
-    private static JournalPage recipe(IItemProvider outputItem) {
+    private static JournalPage recipe(ItemLike outputItem) {
         return JournalPageRecipe.fromOutputPreferAltarRecipes(stack -> !stack.isEmpty() && stack.getItem().equals(outputItem.asItem()));
     }
 
-    private static JournalPage recipeVanilla(IItemProvider outputItem) {
+    private static JournalPage recipeVanilla(ItemLike outputItem) {
         return JournalPageRecipe.fromOutputPreferVanillaRecipes(stack -> !stack.isEmpty() && stack.getItem().equals(outputItem.asItem()));
     }
 
-    private static JournalPage recipeTransmutation(IItemProvider outputItem) {
+    private static JournalPage recipeTransmutation(ItemLike outputItem) {
         return JournalPageBlockTransmutation.fromOutput(stack -> !stack.isEmpty() && stack.getItem().equals(outputItem.asItem()));
     }
 
-    private static JournalPage recipeInfusion(IItemProvider outputItem) {
+    private static JournalPage recipeInfusion(ItemLike outputItem) {
         return JournalPageLiquidInfusion.fromOutput(stack -> !stack.isEmpty() && stack.getItem().equals(outputItem.asItem()));
     }
 

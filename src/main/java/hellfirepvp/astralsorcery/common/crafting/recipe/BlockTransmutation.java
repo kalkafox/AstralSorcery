@@ -16,12 +16,12 @@ import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.util.block.BlockMatchInformation;
 import hellfirepvp.astralsorcery.common.util.object.PredicateBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,7 +65,7 @@ public class BlockTransmutation extends CustomMatcherRecipe implements GatedReci
         return ResearchProgression.ATTUNEMENT;
     }
 
-    public boolean matches(@Nonnull IWorld world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull IWeakConstellation constellation) {
+    public boolean matches(@Nonnull LevelAccessor world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull IWeakConstellation constellation) {
         if (this.matcher == null) {
             this.matcher = PredicateBuilder.joinOr(stateCheck);
         }
@@ -116,7 +116,7 @@ public class BlockTransmutation extends CustomMatcherRecipe implements GatedReci
     }
 
     @Override
-    public IRecipeType<?> getType() {
+    public RecipeType<?> getType() {
         return RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.getType();
     }
 }

@@ -16,18 +16,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import hellfirepvp.astralsorcery.common.block.tile.altar.AltarType;
 import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredient;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tags.ITag;
-import net.minecraft.tags.Tag;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.JSONUtils;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.nbt.Tag;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.util.GsonHelper;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -206,7 +206,7 @@ public class AltarRecipeGrid {
     }
     */
 
-    public void write(PacketBuffer buffer) {
+    public void write(FriendlyByteBuf buffer) {
         buffer.writeInt(this.width);
         buffer.writeInt(this.height);
         buffer.writeInt(this.gridParts.size());
@@ -216,7 +216,7 @@ public class AltarRecipeGrid {
         });
     }
 
-    public static AltarRecipeGrid read(PacketBuffer buffer) {
+    public static AltarRecipeGrid read(FriendlyByteBuf buffer) {
         int width = buffer.readInt();
         int height = buffer.readInt();
         int gridParts = buffer.readInt();
@@ -350,11 +350,11 @@ public class AltarRecipeGrid {
             return this;
         }
 
-        public Builder key(Character key, ITag.INamedTag<Item> tagIn) {
+        public Builder key(Character key, TagKey<Item> tagIn) {
             return this.key(key, Ingredient.fromTag(tagIn));
         }
 
-        public Builder key(Character key, IItemProvider itemIn) {
+        public Builder key(Character key, ItemLike itemIn) {
             return this.key(key, Ingredient.fromItems(itemIn));
         }
 

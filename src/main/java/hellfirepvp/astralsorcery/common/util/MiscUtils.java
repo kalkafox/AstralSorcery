@@ -15,38 +15,38 @@ import hellfirepvp.astralsorcery.common.base.Mods;
 import hellfirepvp.astralsorcery.common.lib.GameRulesAS;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.log.LogCategory;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.*;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.ForgeMod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import javax.annotation.Nonnull;
@@ -67,33 +67,33 @@ import java.util.stream.Collectors;
 public class MiscUtils {
 
     @Nullable
-    public static <T> T getTileAt(IBlockReader world, BlockPos pos, Class<T> tileClass, boolean forceChunkLoad) {
+    public static <T> T getTileAt(BlockGetter world, BlockPos pos, Class<T> tileClass, boolean forceChunkLoad) {
         if (world == null || pos == null) return null; //Duh.
-        if (world instanceof IWorld) {
-            if (!((IWorld) world).getChunkProvider().isChunkLoaded(new ChunkPos(pos)) && !forceChunkLoad) {
+        if (world instanceof LevelAccessor) {
+            if (!((LevelAccessor) world).getChunkProvider().isChunkLoaded(new ChunkPos(pos)) && !forceChunkLoad) {
                 return null;
             }
         }
-        TileEntity te = world.getTileEntity(pos);
+        BlockEntity te = world.getTileEntity(pos);
         if (te == null) return null;
         if (tileClass.isInstance(te)) return (T) te;
         return null;
     }
 
-    public static boolean canEntityTickAt(IWorld world, BlockPos pos) {
+    public static boolean canEntityTickAt(LevelAccessor world, BlockPos pos) {
         ChunkPos chPos = new ChunkPos(pos);
         if (!world.getChunkProvider().isChunkLoaded(chPos)) {
             return false;
         }
-        if (world.isRemote() || !(world instanceof ServerWorld)) {
+        if (world.isRemote() || !(world instanceof ServerLevel)) {
             //Assume if a chunk is present and loaded on the client that it is valid for the client.
             return true;
         }
-        ServerChunkProvider chunkProvider = ((ServerWorld) world).getChunkProvider();
+        ServerChunkCache chunkProvider = ((ServerLevel) world).getChunkProvider();
         return !chunkProvider.chunkManager.isOutsideSpawningRadius(chPos);
     }
 
-    public static List<BlockSnapshot> captureBlockChanges(World world, Runnable r) {
+    public static List<BlockSnapshot> captureBlockChanges(Level world, Runnable r) {
         world.captureBlockSnapshots = true;
         r.run();
         world.captureBlockSnapshots = false;
@@ -177,11 +177,11 @@ public class MiscUtils {
         return minElement;
     }
 
-    public static boolean canSeeSky(World world, BlockPos at, boolean loadChunk, boolean defaultValue) {
+    public static boolean canSeeSky(Level world, BlockPos at, boolean loadChunk, boolean defaultValue) {
         return canSeeSky(world, at, loadChunk, false, defaultValue);
     }
 
-    public static boolean canSeeSky(World world, BlockPos at, boolean loadChunk, boolean allowInNoSkyWorlds, boolean defaultValue) {
+    public static boolean canSeeSky(Level world, BlockPos at, boolean loadChunk, boolean allowInNoSkyWorlds, boolean defaultValue) {
         if (world.getGameRules().getBoolean(GameRulesAS.IGNORE_SKYLIGHT_CHECK_RULE)) {
             return true;
         }
@@ -300,7 +300,7 @@ public class MiscUtils {
     }
 
     public static boolean isFluidBlock(BlockState state) {
-        return state.getBlock() instanceof FlowingFluidBlock;
+        return state.getBlock() instanceof LiquidBlock;
     }
 
     @Nullable
@@ -308,7 +308,7 @@ public class MiscUtils {
         if (!isFluidBlock(state)) {
             return null;
         }
-        if (state.getBlock() instanceof FlowingFluidBlock) {
+        if (state.getBlock() instanceof LiquidBlock) {
             FluidState fluidState = state.getFluidState();
             if (!fluidState.isEmpty()) {
                 return fluidState.getFluid();
@@ -321,9 +321,9 @@ public class MiscUtils {
         if (!target.isAlive()) {
             return false;
         }
-        if (target instanceof PlayerEntity) {
-            PlayerEntity plTarget = (PlayerEntity) target;
-            if (target.getEntityWorld() instanceof ServerWorld &&
+        if (target instanceof Player) {
+            Player plTarget = (Player) target;
+            if (target.getEntityWorld() instanceof ServerLevel &&
                     target.getEntityWorld().getServer() != null &&
                     target.getEntityWorld().getServer().isPVPEnabled()) {
                 return false;
@@ -331,22 +331,22 @@ public class MiscUtils {
             if (plTarget.isSpectator() || plTarget.isCreative()) {
                 return false;
             }
-            if (source instanceof PlayerEntity &&
-                    !((PlayerEntity) source).canAttackPlayer(plTarget)) {
+            if (source instanceof Player &&
+                    !((Player) source).canAttackPlayer(plTarget)) {
                 return false;
             }
         }
         return true;
     }
 
-    public static boolean canPlayerBreakBlockPos(PlayerEntity player, BlockPos tryBreak) {
+    public static boolean canPlayerBreakBlockPos(Player player, BlockPos tryBreak) {
         BlockEvent.BreakEvent ev = new BlockEvent.BreakEvent(player.getEntityWorld(), tryBreak, player.getEntityWorld().getBlockState(tryBreak), player);
-        MinecraftForge.EVENT_BUS.post(ev);
+        NeoForge.EVENT_BUS.post(ev);
         return !ev.isCanceled();
     }
 
-    public static boolean canPlayerPlaceBlockPos(PlayerEntity player, BlockState tryPlace, BlockPos pos, Direction againstSide) {
-        World world = player.getEntityWorld();
+    public static boolean canPlayerPlaceBlockPos(Player player, BlockState tryPlace, BlockPos pos, Direction againstSide) {
+        Level world = player.getEntityWorld();
         world.captureBlockSnapshots = true;
         world.setBlockState(pos, tryPlace);
         world.captureBlockSnapshots = false;
@@ -368,22 +368,22 @@ public class MiscUtils {
         return !cancelPlacement;
     }
 
-    public static boolean isConnectionEstablished(ServerPlayerEntity player) {
+    public static boolean isConnectionEstablished(ServerPlayer player) {
         return player.connection != null && player.connection.netManager != null && player.connection.netManager.isChannelOpen();
     }
 
-    public static long getRandomWorldSeed(ISeedReader world) {
+    public static long getRandomWorldSeed(WorldGenLevel world) {
         return new Random(world.getSeed()).nextLong();
     }
 
     @Nullable
-    public static Tuple<Hand, ItemStack> getMainOrOffHand(LivingEntity entity, Item search) {
+    public static Tuple<InteractionHand, ItemStack> getMainOrOffHand(LivingEntity entity, Item search) {
         return getMainOrOffHand(entity, stack -> !stack.isEmpty() && stack.getItem().equals(search));
     }
 
     @Nullable
-    public static Tuple<Hand, ItemStack> getMainOrOffHand(LivingEntity entity, Predicate<ItemStack> acceptorFnc) {
-        Hand hand = Hand.MAIN_HAND;
+    public static Tuple<InteractionHand, ItemStack> getMainOrOffHand(LivingEntity entity, Predicate<ItemStack> acceptorFnc) {
+        InteractionHand hand = Hand.MAIN_HAND;
         ItemStack held = entity.getHeldItem(hand);
         if (held.isEmpty() || !acceptorFnc.test(held)) {
             hand = Hand.OFF_HAND;
@@ -403,24 +403,24 @@ public class MiscUtils {
     }
 
     @Nullable
-    public static <T extends Entity> T transferEntityTo(T entity, RegistryKey<World> target, BlockPos targetPos) {
+    public static <T extends Entity> T transferEntityTo(T entity, ResourceKey<Level> target, BlockPos targetPos) {
         if (entity.getEntityWorld().isRemote) {
             return null; //No transfers on clientside.
         }
         entity.setSneaking(false);
-        RegistryKey<World> src = entity.getEntityWorld().getDimensionKey();
+        ResourceKey<Level> src = entity.getEntityWorld().getDimensionKey();
         if (!src.equals(target)) {
             if (!ForgeHooks.onTravelToDimension(entity, target)) {
                 return null;
             }
 
             MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-            ServerWorld targetWorld = srv.getWorld(target);
+            ServerLevel targetWorld = srv.getWorld(target);
             if (targetWorld == null) {
                 return null;
             }
-            if (entity instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) entity).teleport(targetWorld,
+            if (entity instanceof ServerPlayer) {
+                ((ServerPlayer) entity).teleport(targetWorld,
                         targetPos.getX() + 0.5,
                         targetPos.getY() + 0.1,
                         targetPos.getZ() + 0.5,
@@ -438,8 +438,8 @@ public class MiscUtils {
     }
 
     @Nullable
-    public static BlockPos itDownTopBlock(World world, BlockPos at) {
-        IChunk chunk = world.getChunk(at);
+    public static BlockPos itDownTopBlock(Level world, BlockPos at) {
+        ChunkAccess chunk = world.getChunk(at);
         BlockPos downPos = null;
 
         for (BlockPos blockpos = new BlockPos(at.getX(), chunk.getTopFilledSegment() + 16, at.getZ()); blockpos.getY() >= 0; blockpos = downPos) {
@@ -482,50 +482,50 @@ public class MiscUtils {
     }
 
     @Nullable
-    public static BlockRayTraceResult rayTraceLookBlock(PlayerEntity player) {
+    public static BlockHitResult rayTraceLookBlock(Player player) {
         return rayTraceLookBlock(player, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
     }
 
     @Nonnull
-    public static RayTraceResult rayTraceLook(PlayerEntity player) {
+    public static HitResult rayTraceLook(Player player) {
         return rayTraceLook(player, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
     }
 
     @Nullable
-    public static BlockRayTraceResult rayTraceLookBlock(PlayerEntity player, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode) {
+    public static BlockHitResult rayTraceLookBlock(Player player, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode) {
         return rayTraceLookBlock(player, blockMode, fluidMode, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
     }
 
     @Nonnull
-    public static RayTraceResult rayTraceLook(PlayerEntity player, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode) {
+    public static HitResult rayTraceLook(Player player, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode) {
         return rayTraceLook(player, blockMode, fluidMode, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
     }
 
     @Nullable
-    public static BlockRayTraceResult rayTraceLookBlock(PlayerEntity player, double reachDst) {
+    public static BlockHitResult rayTraceLookBlock(Player player, double reachDst) {
         return rayTraceLookBlock(player, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.ANY, reachDst);
     }
 
     @Nonnull
-    public static RayTraceResult rayTraceLook(PlayerEntity player, double reachDst) {
+    public static HitResult rayTraceLook(Player player, double reachDst) {
         return rayTraceLook(player, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.ANY, reachDst);
     }
 
     @Nullable
-    public static BlockRayTraceResult rayTraceLookBlock(Entity entity, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode, double reachDst) {
-        RayTraceResult rtr = rayTraceLook(entity, blockMode, fluidMode, reachDst);
-        if (rtr.getType() == RayTraceResult.Type.BLOCK && rtr instanceof BlockRayTraceResult) {
-            return (BlockRayTraceResult) rtr;
+    public static BlockHitResult rayTraceLookBlock(Entity entity, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode, double reachDst) {
+        HitResult rtr = rayTraceLook(entity, blockMode, fluidMode, reachDst);
+        if (rtr.getType() == RayTraceResult.Type.BLOCK && rtr instanceof BlockHitResult) {
+            return (BlockHitResult) rtr;
         }
         return null;
     }
 
     @Nonnull
-    public static RayTraceResult rayTraceLook(Entity entity, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode, double reachDst) {
-        Vector3d pos = new Vector3d(entity.getPosX(), entity.getPosY() + entity.getEyeHeight(), entity.getPosZ());
-        Vector3d lookVec = entity.getLookVec();
-        Vector3d end = pos.add(lookVec.x * reachDst, lookVec.y * reachDst, lookVec.z * reachDst);
-        RayTraceContext ctx = new RayTraceContext(pos, end, blockMode, fluidMode, entity);
+    public static HitResult rayTraceLook(Entity entity, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode, double reachDst) {
+        Vec3 pos = new Vec3(entity.getPosX(), entity.getPosY() + entity.getEyeHeight(), entity.getPosZ());
+        Vec3 lookVec = entity.getLookVec();
+        Vec3 end = pos.add(lookVec.x * reachDst, lookVec.y * reachDst, lookVec.z * reachDst);
+        ClipContext ctx = new ClipContext(pos, end, blockMode, fluidMode, entity);
         return entity.world.rayTraceBlocks(ctx);
     }
 
@@ -554,28 +554,28 @@ public class MiscUtils {
         target.addZ(v.getZ() * (rand.nextBoolean() ? 1 : -1));
     }
 
-    public static void executeWithChunk(IWorldReader world, ChunkPos pos, Runnable run) {
+    public static void executeWithChunk(LevelReader world, ChunkPos pos, Runnable run) {
         executeWithChunk(world, pos.asBlockPos(), nullSupplier(run));
     }
 
-    public static void executeWithChunk(IWorldReader world, BlockPos pos, Runnable run) {
+    public static void executeWithChunk(LevelReader world, BlockPos pos, Runnable run) {
         executeWithChunk(world, pos, nullSupplier(run));
     }
 
-    public static <T> T executeWithChunk(IWorldReader world, BlockPos pos, Supplier<T> run) {
+    public static <T> T executeWithChunk(LevelReader world, BlockPos pos, Supplier<T> run) {
         return executeWithChunk(world, pos, run, (T) null);
     }
 
-    public static <T> T executeWithChunk(IWorldReader world, BlockPos pos, Supplier<T> run, T defaultValue) {
-        if (world instanceof ServerWorld && LogCategory.UNINTENDED_CHUNK_LOADING.isEnabled()) {
-            ServerChunkProvider provider = ((ServerWorld) world).getChunkProvider();
+    public static <T> T executeWithChunk(LevelReader world, BlockPos pos, Supplier<T> run, T defaultValue) {
+        if (world instanceof ServerLevel && LogCategory.UNINTENDED_CHUNK_LOADING.isEnabled()) {
+            ServerChunkCache provider = ((ServerLevel) world).getChunkProvider();
             int prev = provider.getLoadedChunkCount();
             try {
                 if (provider.isChunkLoaded(new ChunkPos(pos))) {
                     return run.get();
                 }
             } finally {
-                int current = ((ServerWorld) world).getChunkProvider().getLoadedChunkCount();
+                int current = ((ServerLevel) world).getChunkProvider().getLoadedChunkCount();
                 if (current > prev) { //We... don't really care about unloading tbh.
                     AstralSorcery.log.warn("Astral Sorcery loaded a chunk when it intended not to!");
                     AstralSorcery.log.warn("Previous chunk count: " + prev);
@@ -584,8 +584,8 @@ public class MiscUtils {
                     AstralSorcery.log.warn("Stacktrace:", new Exception());
                 }
             }
-        } else if (world instanceof IWorld) {
-            AbstractChunkProvider provider = ((IWorld) world).getChunkProvider();
+        } else if (world instanceof LevelAccessor) {
+            ChunkSource provider = ((LevelAccessor) world).getChunkProvider();
             if (provider.canTick(pos)) {
                 return run.get();
             }
@@ -597,23 +597,23 @@ public class MiscUtils {
         return defaultValue;
     }
 
-    public static <T> void executeWithChunk(IWorldReader world, BlockPos pos, T obj, Consumer<T> run) {
+    public static <T> void executeWithChunk(LevelReader world, BlockPos pos, T obj, Consumer<T> run) {
         executeWithChunk(world, pos, nullSupplier(apply(run, () -> obj)));
     }
 
-    public static <T, U> void executeWithChunk(IWorldReader world, BlockPos pos, T obj, U obj1, BiConsumer<T, U> run) {
+    public static <T, U> void executeWithChunk(LevelReader world, BlockPos pos, T obj, U obj1, BiConsumer<T, U> run) {
         executeWithChunk(world, pos, obj, apply(run, () -> obj1));
     }
 
-    public static <T, R> R executeWithChunk(IWorldReader world, BlockPos pos, T obj, Function<T, R> run) {
+    public static <T, R> R executeWithChunk(LevelReader world, BlockPos pos, T obj, Function<T, R> run) {
         return executeWithChunk(world, pos, apply(run, () -> obj));
     }
 
-    public static <T, R> R executeWithChunk(IWorldReader world, BlockPos pos, T obj, Function<T, R> run, R _default) {
+    public static <T, R> R executeWithChunk(LevelReader world, BlockPos pos, T obj, Function<T, R> run, R _default) {
         return executeWithChunk(world, pos, apply(run, () -> obj), _default);
     }
 
-    public static <T> Function<T, T> mapWithChunk(IWorldReader world, Function<T, BlockPos> posFn) {
+    public static <T> Function<T, T> mapWithChunk(LevelReader world, Function<T, BlockPos> posFn) {
         return (val) -> executeWithChunk(world, posFn.apply(val), val, Function.identity());
     }
 
@@ -642,7 +642,7 @@ public class MiscUtils {
         return Optional.empty();
     }
 
-    public static boolean isPlayerFakeMP(ServerPlayerEntity player) {
+    public static boolean isPlayerFakeMP(ServerPlayer player) {
         if (player instanceof FakePlayer) {
             return true;
         }

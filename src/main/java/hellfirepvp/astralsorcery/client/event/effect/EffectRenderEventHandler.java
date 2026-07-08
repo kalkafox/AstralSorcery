@@ -11,10 +11,10 @@ package hellfirepvp.astralsorcery.client.event.effect;
 import hellfirepvp.astralsorcery.client.effect.handler.EffectHandler;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.ChatFormatting;
+import net.neoforged.neoforge.client.event.RenderGameOverlayEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
 
 import java.util.function.Consumer;
 

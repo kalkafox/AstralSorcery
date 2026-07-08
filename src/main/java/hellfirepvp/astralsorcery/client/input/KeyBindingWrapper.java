@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.input;
 
-import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.KeyMapping;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -19,13 +19,13 @@ import net.minecraft.client.settings.KeyBinding;
  */
 public abstract class KeyBindingWrapper {
 
-    private final KeyBinding keyBinding;
+    private final KeyMapping keyBinding;
 
-    protected KeyBindingWrapper(KeyBinding keyBinding) {
+    protected KeyBindingWrapper(KeyMapping keyBinding) {
         this.keyBinding = keyBinding;
     }
 
-    public KeyBinding getKeyBinding() {
+    public KeyMapping getKeyBinding() {
         return keyBinding;
     }
 

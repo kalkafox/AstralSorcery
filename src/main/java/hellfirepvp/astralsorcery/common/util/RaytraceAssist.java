@@ -11,12 +11,12 @@ package hellfirepvp.astralsorcery.common.util;
 import hellfirepvp.astralsorcery.common.util.block.BlockPredicate;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.object.ObjectReference;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -39,7 +39,7 @@ public class RaytraceAssist {
 
     private boolean collectEntities = false;
     private final Set<Integer> collected = new HashSet<>();
-    private AxisAlignedBB collectBox = null;
+    private AABB collectBox = null;
     private boolean includeEnd = false, hitBlocks = true, hitFluids = true;
     private double stepWidth = STEP_WIDTH;
 
@@ -78,11 +78,11 @@ public class RaytraceAssist {
 
     public void setCollectEntities(double radius) {
         this.collectEntities = true;
-        this.collectBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+        this.collectBox = new AABB(0, 0, 0, 0, 0, 0);
         this.collectBox = this.collectBox.grow(radius).offset(radius, 0, radius);
     }
 
-    public boolean isClear(World world) {
+    public boolean isClear(Level world) {
         return this.forEachBlockPos(at -> {
             if (collectEntities) {
                 List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, collectBox.offset(at));
@@ -139,7 +139,7 @@ public class RaytraceAssist {
         return posHit;
     }
 
-    public List<Entity> collectedEntities(World world) {
+    public List<Entity> collectedEntities(Level world) {
         List<Entity> entities = new LinkedList<>();
         for (Integer id : collected) {
             Entity e = world.getEntityByID(id);
@@ -150,7 +150,7 @@ public class RaytraceAssist {
         return entities;
     }
 
-    private boolean isAllowed(World world, BlockPos at, BlockState state) {
+    private boolean isAllowed(Level world, BlockPos at, BlockState state) {
         return MiscUtils.contains(passable, predicate -> predicate.test(world, at, state));
     }
 

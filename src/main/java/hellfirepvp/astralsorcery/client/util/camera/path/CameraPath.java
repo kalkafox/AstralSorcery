@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.client.util.camera.path;
 import hellfirepvp.astralsorcery.client.util.camera.*;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import javax.annotation.Nullable;
 import java.util.LinkedList;

@@ -9,10 +9,10 @@
 package hellfirepvp.astralsorcery.client.util.camera;
 
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
-import net.minecraft.client.GameSettings;
+import net.minecraft.client.Options;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.PointOfView;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.CameraType;
+import net.minecraft.world.entity.player.Player;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,7 +26,7 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
     private boolean active = false;
 
     private boolean viewBobbing = false, hideGui = false, flying = false;
-    private PointOfView thirdPersonView;
+    private CameraType thirdPersonView;
 
     private Vector3 startPosition;
     private float startYaw, startPitch;
@@ -38,7 +38,7 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
         this.viewBobbing = mc.gameSettings.viewBobbing;
         this.hideGui = mc.gameSettings.hideGUI;
         this.thirdPersonView = mc.gameSettings.getPointOfView();
-        PlayerEntity player = mc.player;
+        Player player = mc.player;
         this.flying = player.abilities.isFlying;
         this.startPosition = new Vector3(player.getPosX(), player.getPosY(), player.getPosZ());
         this.startYaw = player.rotationYaw;
@@ -50,11 +50,11 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
     @Override
     public void onStopTransforming(float pTicks) {
         if (active) {
-            GameSettings settings = Minecraft.getInstance().gameSettings;
+            Options settings = Minecraft.getInstance().gameSettings;
             settings.viewBobbing = viewBobbing;
             settings.hideGUI = hideGui;
             settings.setPointOfView(thirdPersonView);
-            PlayerEntity player = Minecraft.getInstance().player;
+            Player player = Minecraft.getInstance().player;
             player.abilities.isFlying = flying;
             player.setPositionAndRotation(startPosition.getX(), startPosition.getY(), startPosition.getZ(), startYaw, startPitch);
             player.setVelocity(0, 0, 0);
@@ -68,7 +68,7 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
             return;
         }
 
-        GameSettings settings = Minecraft.getInstance().gameSettings;
+        Options settings = Minecraft.getInstance().gameSettings;
         settings.hideGUI = true;
         settings.viewBobbing = false;
         settings.setPointOfView(PointOfView.THIRD_PERSON_BACK);

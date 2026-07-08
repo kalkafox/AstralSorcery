@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.constellation.effect;
 
 import hellfirepvp.astralsorcery.common.constellation.IMinorConstellation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 
@@ -23,6 +23,6 @@ import javax.annotation.Nullable;
  */
 public interface ConstellationEffectStatus {
 
-    public abstract boolean runStatusEffect(World world, BlockPos pos, int mirrorAmount, ConstellationEffectProperties modified, @Nullable IMinorConstellation possibleTraitEffect);
+    public abstract boolean runStatusEffect(Level world, BlockPos pos, int mirrorAmount, ConstellationEffectProperties modified, @Nullable IMinorConstellation possibleTraitEffect);
 
 }

@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.screen.base.NavigationArrowScreen;
@@ -21,7 +21,7 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.lib.SoundsAS;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -104,7 +104,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
     }
 
     @Override
-    public void render(MatrixStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
         super.render(renderStack, mouseX, mouseY, pTicks);
 
         if (origin != null) {
@@ -168,7 +168,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
         this.setBlitOffset(0);
     }
 
-    private void drawNavArrows(MatrixStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    private void drawNavArrows(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
 

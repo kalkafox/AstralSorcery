@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.network.play.client;
 
 import hellfirepvp.astralsorcery.common.item.base.ItemBlockStorage;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
-import net.minecraftforge.fml.LogicalSide;
+import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
 

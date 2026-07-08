@@ -12,12 +12,12 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.input.KeyBindingWrapper;
 import hellfirepvp.astralsorcery.client.input.KeyDisablePerkAbilities;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.client.util.InputMappings;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.fml.client.registry.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashSet;
@@ -41,15 +41,15 @@ public class RegistryKeyBindings {
     public static void init() {
         DISABLE_PERK_ABILITIES = register("disable_perk_abilities", GLFW.GLFW_KEY_V, KeyDisablePerkAbilities::new);
 
-        MinecraftForge.EVENT_BUS.addListener(RegistryKeyBindings::onKeyInput);
+        NeoForge.EVENT_BUS.addListener(RegistryKeyBindings::onKeyInput);
     }
 
     private static KeyBindingWrapper register(String name, int glfwKey) {
         return register(name, glfwKey, keyBinding -> new KeyBindingWrapper(keyBinding) {});
     }
 
-    private static KeyBindingWrapper register(String name, int glfwKey, Function<KeyBinding, KeyBindingWrapper> wrapperCreator) {
-        KeyBinding keyBinding = new KeyBinding(String.format("key.%s.%s", AstralSorcery.MODID, name),
+    private static KeyBindingWrapper register(String name, int glfwKey, Function<KeyMapping, KeyBindingWrapper> wrapperCreator) {
+        KeyMapping keyBinding = new KeyMapping(String.format("key.%s.%s", AstralSorcery.MODID, name),
                 KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM, glfwKey, AstralSorcery.NAME);
         ClientRegistry.registerKeyBinding(keyBinding);
         KeyBindingWrapper wrapper = wrapperCreator.apply(keyBinding);

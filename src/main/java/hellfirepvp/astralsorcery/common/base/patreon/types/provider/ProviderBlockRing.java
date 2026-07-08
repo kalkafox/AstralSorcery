@@ -15,11 +15,11 @@ import com.google.gson.JsonParser;
 import hellfirepvp.astralsorcery.common.base.patreon.FlareColor;
 import hellfirepvp.astralsorcery.common.base.patreon.PatreonEffectProvider;
 import hellfirepvp.astralsorcery.common.base.patreon.types.TypeBlockRing;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.List;

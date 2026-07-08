@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.fluid.FluidLiquidStarlight;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.ForgeFlowingFluid;
 
 /**
  * This class is part of the Astral Sorcery Mod

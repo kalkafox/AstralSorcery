@@ -22,13 +22,13 @@ import hellfirepvp.astralsorcery.common.util.block.TreeDiscoverer;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.object.CacheReference;
 import hellfirepvp.observerlib.api.util.BlockArray;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -47,24 +47,21 @@ public class ItemInfusedCrystalAxe extends ItemCrystalAxe implements EquipmentAt
     private static final CacheReference<DynamicAttributeModifier> MINING_SPEED_MODIFIER =
             new CacheReference<>(() -> new DynamicAttributeModifier(MODIFIER_ID, PerkAttributeTypesAS.ATTR_TYPE_INC_HARVEST_SPEED, ModifierType.ADDED_MULTIPLY, 0.1F));
 
-    @Override
-    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, PlayerEntity player) {
-        World world = player.getEntityWorld();
-        if (!world.isRemote() &&
-                !player.isSneaking() &&
-                !player.getCooldownTracker().hasCooldown(itemstack.getItem()) &&
-                player instanceof ServerPlayerEntity) {
+    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, Player player) {
+        Level world = player.level();
+        if (!world.isClientSide &&
+                !player.isShiftKeyDown() &&
+                !player.getCooldowns().isOnCooldown(itemstack.getItem()) &&
+                player instanceof ServerPlayer serverPlayer) {
 
             PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
             if (prog.doPerkAbilities()) {
                 EventFlags.CHAIN_MINING.executeWithFlag(() -> {
                     BlockArray tree = TreeDiscoverer.findTreeAt(world, pos, true, 9);
                     if (!tree.getContents().isEmpty()) {
-                        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
-
                         tree.getContents().keySet().forEach(at -> {
                             BlockState currentState = world.getBlockState(at);
-                            if (serverPlayer.interactionManager.tryHarvestBlock(at)) {
+                            if (serverPlayer.gameMode.destroyBlock(at)) {
                                 PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.BLOCK_EFFECT)
                                         .addData(buf -> {
                                             ByteBufUtils.writePos(buf, at);
@@ -74,16 +71,16 @@ public class ItemInfusedCrystalAxe extends ItemCrystalAxe implements EquipmentAt
                             }
                         });
 
-                        serverPlayer.getCooldownTracker().setCooldown(itemstack.getItem(), 120);
+                        serverPlayer.getCooldowns().addCooldown(itemstack.getItem(), 120);
                     }
                 });
             }
         }
-        return super.onBlockStartBreak(itemstack, pos, player);
+        return false;
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, PlayerEntity player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
         return Collections.singletonList(MINING_SPEED_MODIFIER.get());
     }
 }

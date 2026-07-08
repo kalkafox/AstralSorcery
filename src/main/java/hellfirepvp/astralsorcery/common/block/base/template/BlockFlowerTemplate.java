@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.block.base.template;
 
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
-import net.minecraft.block.FlowerBlock;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.Effects;
+import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
 
 import javax.annotation.Nonnull;
 
@@ -30,7 +30,7 @@ public abstract class BlockFlowerTemplate extends FlowerBlock implements CustomI
 
     @Override
     @Nonnull
-    public abstract Effect getStewEffect();
+    public abstract MobEffect getStewEffect();
 
     @Override
     public abstract int getStewEffectDuration();

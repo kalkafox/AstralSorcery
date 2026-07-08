@@ -19,17 +19,17 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.block.BlockPredicate;
 import hellfirepvp.astralsorcery.common.util.block.BlockUtils;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.Direction;
 import net.minecraft.util.math.*;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -54,15 +54,15 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
     }
 
     private void onBreak(BlockEvent.BreakEvent event) {
-        IWorld world = event.getWorld();
-        PlayerEntity player = event.getPlayer();
+        LevelAccessor world = event.getWorld();
+        Player player = event.getPlayer();
 
-        if (!(world instanceof World) || world.isRemote()) {
+        if (!(world instanceof Level) || world.isRemote()) {
             return;
         }
-        if (player instanceof ServerPlayerEntity) {
+        if (player instanceof ServerPlayer) {
             PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
-            if (!prog.doPerkAbilities() || MiscUtils.isPlayerFakeMP((ServerPlayerEntity) player)) {
+            if (!prog.doPerkAbilities() || MiscUtils.isPlayerFakeMP((ServerPlayer) player)) {
                 return;
             }
             EventFlags.MINING_SIZE_BREAK.executeWithFlag(() -> {
@@ -70,7 +70,7 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_MINING_SIZE, 0);
                 size = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_MINING_SIZE, size);
                 if (size >= 1F) {
-                    BlockRayTraceResult brtr = MiscUtils.rayTraceLookBlock(player, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE);
+                    BlockHitResult brtr = MiscUtils.rayTraceLookBlock(player, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE);
                     if (brtr != null && brtr.getType() == RayTraceResult.Type.BLOCK) {
                         int levelBroken = event.getState().getHarvestLevel();
                         float hardnessBroken = event.getState().getBlockHardness(world, event.getPos());
@@ -79,9 +79,9 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
                                         stateIn.getBlockHardness(worldIn, posIn) <= hardnessBroken;
                         Direction dir = brtr.getFace();
                         if (dir.getAxis() == Direction.Axis.Y) {
-                            this.breakBlocksPlaneHorizontal((ServerPlayerEntity) player, dir, (World) world, event.getPos(), miningTest, MathHelper.floor(size));
+                            this.breakBlocksPlaneHorizontal((ServerPlayer) player, dir, (Level) world, event.getPos(), miningTest, MathHelper.floor(size));
                         } else {
-                            this.breakBlocksPlaneVertical((ServerPlayerEntity) player, dir, (World) world, event.getPos(), miningTest, MathHelper.floor(size));
+                            this.breakBlocksPlaneVertical((ServerPlayer) player, dir, (Level) world, event.getPos(), miningTest, MathHelper.floor(size));
                         }
                     }
                 }
@@ -89,7 +89,7 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
         }
     }
 
-    private void breakBlocksPlaneVertical(ServerPlayerEntity player, Direction sideBroken, World world, BlockPos at, BlockPredicate miningTest, int size) {
+    private void breakBlocksPlaneVertical(ServerPlayer player, Direction sideBroken, Level world, BlockPos at, BlockPredicate miningTest, int size) {
         if (size <= 0) {
             return;
         }
@@ -120,7 +120,7 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
         }
     }
 
-    private void breakBlocksPlaneHorizontal(ServerPlayerEntity player, Direction sideBroken, World world, BlockPos at, BlockPredicate miningTest, int size) {
+    private void breakBlocksPlaneHorizontal(ServerPlayer player, Direction sideBroken, Level world, BlockPos at, BlockPredicate miningTest, int size) {
         if (size <= 0) {
             return;
         }
@@ -150,14 +150,14 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
 
     private static class Config extends ConfigEntry {
 
-        private ForgeConfigSpec.IntValue chargeCostPerBreak;
+        private ModConfigSpec.IntValue chargeCostPerBreak;
 
         private Config(String section) {
             super(section);
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             chargeCostPerBreak = cfgBuilder
                     .comment("Defines the amount of starlight charge consumed per additional block break through this attribute.")
                     .translation(translationKey("chargeCostPerBreak"))

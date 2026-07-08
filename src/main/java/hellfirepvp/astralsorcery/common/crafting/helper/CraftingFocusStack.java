@@ -9,8 +9,8 @@
 package hellfirepvp.astralsorcery.common.crafting.helper;
 
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nullable;
 
@@ -33,7 +33,7 @@ public class CraftingFocusStack {
         this.at = at;
     }
 
-    public CraftingFocusStack(CompoundNBT nbt) {
+    public CraftingFocusStack(CompoundTag nbt) {
         this.stackIndex = nbt.getInt("stackIndex");
         this.input = WrappedIngredient.deserialize(nbt.getCompound("ingredient"));
         this.at = NBTHelper.readBlockPosFromNBT(nbt);
@@ -52,8 +52,8 @@ public class CraftingFocusStack {
         return stackIndex;
     }
 
-    public CompoundNBT serialize() {
-        CompoundNBT nbt = new CompoundNBT();
+    public CompoundTag serialize() {
+        CompoundTag nbt = new CompoundTag();
         NBTHelper.writeBlockPosToNBT(this.at, nbt);
         nbt.putInt("stackIndex", this.stackIndex);
         nbt.put("ingredient", this.input.serialize());

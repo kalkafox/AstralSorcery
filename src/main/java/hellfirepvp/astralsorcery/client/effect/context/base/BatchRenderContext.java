@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.effect.context.base;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.effect.EntityDynamicFX;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
 import hellfirepvp.astralsorcery.client.effect.handler.EffectHandler;
@@ -22,9 +22,9 @@ import hellfirepvp.astralsorcery.client.util.draw.RenderInfo;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.order.OrderSortable;
 import hellfirepvp.observerlib.client.util.RenderTypeDecorator;
-import net.minecraft.client.renderer.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -86,7 +86,7 @@ public class BatchRenderContext<T extends EntityVisualFX> extends OrderSortable 
         return sprite;
     }
 
-    public void renderAll(List<EffectHandler.PendingEffect> effects, MatrixStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
+    public void renderAll(List<EffectHandler.PendingEffect> effects, PoseStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
         //Erase type due to impossible typing
         BatchRenderContext blankCtx = this;
         effects.stream()
@@ -103,14 +103,14 @@ public class BatchRenderContext<T extends EntityVisualFX> extends OrderSortable 
                 RenderSystem.disableTexture();
             });
         }
-        IVertexBuilder buf = drawBuffer.getBuffer(drawType);
+        VertexConsumer buf = drawBuffer.getBuffer(drawType);
         effects.forEach(effect -> effect.getEffect().render(this, renderStack, buf, pTicks));
         this.drawBatched(buf, drawBuffer);
     }
 
-    private void drawBatched(IVertexBuilder buf, IDrawRenderTypeBuffer renderTypeBuffer) {
+    private void drawBatched(VertexConsumer buf, IDrawRenderTypeBuffer renderTypeBuffer) {
         if (buf instanceof BufferBuilder && this.getRenderType().getDrawMode() == GL11.GL_QUADS) {
-            Vector3d view = RenderInfo.getInstance().getARI().getProjectedView();
+            Vec3 view = RenderInfo.getInstance().getARI().getProjectedView();
             ((BufferBuilder) buf).sortVertexData((float) view.x, (float) view.y, (float) view.z);
         }
         renderTypeBuffer.draw();

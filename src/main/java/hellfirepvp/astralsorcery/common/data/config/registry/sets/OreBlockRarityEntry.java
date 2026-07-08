@@ -11,10 +11,10 @@ package hellfirepvp.astralsorcery.common.data.config.registry.sets;
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigDataSet;
 import hellfirepvp.astralsorcery.common.data.config.entry.GeneralConfig;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,11 +30,11 @@ import java.util.stream.Collectors;
  */
 public class OreBlockRarityEntry implements ConfigDataSet {
 
-    private final ITag<Block> blockTag;
+    private final Tag<Block> blockTag;
     private final ResourceLocation key;
     private final int weight;
 
-    public OreBlockRarityEntry(ITag<Block> blockTag, ResourceLocation key, int weight) {
+    public OreBlockRarityEntry(Tag<Block> blockTag, ResourceLocation key, int weight) {
         this.blockTag = blockTag;
         this.key = key;
         this.weight = weight;
@@ -63,7 +63,7 @@ public class OreBlockRarityEntry implements ConfigDataSet {
             return null;
         }
         ResourceLocation keyBlockTag = new ResourceLocation(split[0]);
-        ITag<Block> blockTag = BlockTags.getCollection().get(keyBlockTag);
+        Tag<Block> blockTag = BlockTags.getCollection().get(keyBlockTag);
         if (blockTag == null) {
             return null;
         }

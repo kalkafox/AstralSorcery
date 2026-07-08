@@ -10,10 +10,10 @@ package hellfirepvp.astralsorcery.common.world.structure;
 
 import hellfirepvp.astralsorcery.common.lib.WorldGenerationAS;
 import hellfirepvp.astralsorcery.common.world.TemplateStructure;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.feature.template.TemplateManager;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.StructureManager;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,12 +24,12 @@ import net.minecraft.world.gen.feature.template.TemplateManager;
  */
 public class DesertShrineStructure extends TemplateStructure {
 
-    public DesertShrineStructure(TemplateManager mgr, BlockPos templatePosition) {
+    public DesertShrineStructure(StructureManager mgr, BlockPos templatePosition) {
         super(WorldGenerationAS.Structures.DESERT_SHRINE_PIECE, mgr, templatePosition);
         this.setYOffset(-11);
     }
 
-    public DesertShrineStructure(TemplateManager mgr, CompoundNBT nbt) {
+    public DesertShrineStructure(StructureManager mgr, CompoundTag nbt) {
         super(WorldGenerationAS.Structures.DESERT_SHRINE_PIECE, mgr, nbt);
         this.setYOffset(-11);
     }

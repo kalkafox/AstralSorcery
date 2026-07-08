@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.mixin;
 
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

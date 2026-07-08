@@ -8,10 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.item.base.client;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,6 +23,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public interface ItemOverlayRender {
 
     @OnlyIn(Dist.CLIENT)
-    boolean renderOverlay(MatrixStack renderStack, ItemStack stack, float pTicks);
+    boolean renderOverlay(PoseStack renderStack, ItemStack stack, float pTicks);
 
 }

@@ -12,14 +12,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
-import net.minecraftforge.fluids.FluidAttributes;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
+import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,12 +84,12 @@ public class FluidIngredientSerializer implements IIngredientSerializer<FluidIng
     }
 
     @Override
-    public FluidIngredient parse(PacketBuffer buffer) {
+    public FluidIngredient parse(FriendlyByteBuf buffer) {
         return new FluidIngredient(ByteBufUtils.readList(buffer, ByteBufUtils::readFluidStack));
     }
 
     @Override
-    public void write(PacketBuffer buffer, FluidIngredient ingredient) {
+    public void write(FriendlyByteBuf buffer, FluidIngredient ingredient) {
         ByteBufUtils.writeCollection(buffer, ingredient.getFluids(), ByteBufUtils::writeFluidStack);
     }
 

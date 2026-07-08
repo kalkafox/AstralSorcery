@@ -9,11 +9,11 @@
 package hellfirepvp.astralsorcery.common.base;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.versions.forge.ForgeVersion;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.InterModComms;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.versions.forge.ForgeVersion;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -73,15 +73,16 @@ public enum Mods {
         return null;
     }
 
-    public boolean owns(IForgeRegistryEntry<?> entry) {
+    public boolean owns(Object entry) {
+        ResourceLocation name = RegistryHelper.getKey(entry);
         return this.isPresent() &&
-                entry.getRegistryName() != null &&
-                entry.getRegistryName().getNamespace().equals(this.modid);
+                name != null &&
+                name.getNamespace().equals(this.modid);
     }
 
     @Nonnull
     public ResourceLocation key(String path) {
-        return new ResourceLocation(this.getModId(), path);
+        return ResourceLocation.fromNamespaceAndPath(this.getModId(), path);
     }
 
     public void sendIMC(String method, Supplier<?> thing) {

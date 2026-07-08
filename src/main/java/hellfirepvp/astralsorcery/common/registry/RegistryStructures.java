@@ -13,6 +13,7 @@ import hellfirepvp.astralsorcery.common.structure.*;
 import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.api.util.PatternBlockArray;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
+import hellfirepvp.observerlib.common.registry.RegistryProviders;
 
 import static hellfirepvp.astralsorcery.common.lib.StructuresAS.*;
 
@@ -43,10 +44,10 @@ public class RegistryStructures {
         STRUCT_FOUNTAIN = register(new PatternFountain());
     }
 
-    private static <T extends MatchableStructure> T register(T struct) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(struct);
-        ObserverProviderStructure structureProvider = new ObserverProviderStructure(struct.getRegistryName());
-        AstralSorcery.getProxy().getRegistryPrimer().register(structureProvider);
+    private static <T extends PatternBlockArray> T register(T struct) {
+        ObserverProviderStructure structureProvider = new ObserverProviderStructure(struct);
+        AstralSorcery.getProxy().getRegistryPrimer().register(
+                RegistryProviders.REGISTRY_KEY, struct.getRegistryName(), structureProvider);
         return struct;
     }
 

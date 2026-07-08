@@ -14,13 +14,13 @@ import hellfirepvp.astralsorcery.common.perk.source.ModifierManager;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSourceProvider;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.fml.LogicalSide;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -41,8 +41,8 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
     }
 
     @Override
-    protected void update(ServerPlayerEntity playerEntity) {
-        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+    protected void update(ServerPlayer playerEntity) {
+        for (EquipmentSlot slot : EquipmentSlotType.values()) {
             //Items held in offhand will not provide modifers.
             if (slot == EquipmentSlotType.OFFHAND) {
                 continue;
@@ -55,7 +55,7 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
             if (!stack.isEmpty()) {
                 Collection<PerkAttributeModifier> modifiers = slotSource.getModifiers(playerEntity, LogicalSide.SERVER, false);
                 if (!modifiers.isEmpty()) {
-                    CompoundNBT nbt = NBTHelper.getPersistentData(stack);
+                    CompoundTag nbt = NBTHelper.getPersistentData(stack);
                     if (!nbt.hasUniqueId(KEY_MOD_IDENTIFIER)) {
                         nbt.putUniqueId(KEY_MOD_IDENTIFIER, UUID.randomUUID());
                     }
@@ -70,8 +70,8 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
     }
 
     @Override
-    protected void removeModifiers(ServerPlayerEntity playerEntity) {
-        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+    protected void removeModifiers(ServerPlayer playerEntity) {
+        for (EquipmentSlot slot : EquipmentSlotType.values()) {
             if (slot == EquipmentSlotType.OFFHAND) {
                 continue;
             }
@@ -82,14 +82,14 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
     }
 
     @Override
-    public void serialize(EquipmentModifierSource source, PacketBuffer buf) {
+    public void serialize(EquipmentModifierSource source, FriendlyByteBuf buf) {
         ByteBufUtils.writeEnumValue(buf, source.slot);
         ByteBufUtils.writeItemStack(buf, source.itemStack);
     }
 
     @Override
-    public EquipmentModifierSource deserialize(PacketBuffer buf) {
-        EquipmentSlotType type = ByteBufUtils.readEnumValue(buf, EquipmentSlotType.class);
+    public EquipmentModifierSource deserialize(FriendlyByteBuf buf) {
+        EquipmentSlot type = ByteBufUtils.readEnumValue(buf, EquipmentSlotType.class);
         ItemStack stack = ByteBufUtils.readItemStack(buf);
         return new EquipmentModifierSource(type, stack);
     }

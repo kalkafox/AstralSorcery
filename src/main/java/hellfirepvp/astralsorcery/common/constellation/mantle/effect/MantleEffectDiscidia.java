@@ -16,20 +16,20 @@ import hellfirepvp.astralsorcery.common.item.armor.ItemMantle;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.util.DamageUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.LogicalSide;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.LogicalSide;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -61,7 +61,7 @@ public class MantleEffectDiscidia extends MantleEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    protected void tickClient(PlayerEntity player) {
+    protected void tickClient(Player player) {
         super.tickClient(player);
 
         float effChance = 0.1F;
@@ -73,18 +73,18 @@ public class MantleEffectDiscidia extends MantleEffect {
 
     private void onAttack(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntityLiving();
-        World world = attacked.getEntityWorld();
+        Level world = attacked.getEntityWorld();
         DamageSource source = event.getSource();
         Entity attacker = source.getTrueSource();
 
         if (world.isRemote()) {
             return;
         }
-        if (attacker instanceof PlayerEntity) {
-            if (attacked instanceof ServerPlayerEntity && MiscUtils.isPlayerFakeMP((ServerPlayerEntity) attacked)) {
+        if (attacker instanceof Player) {
+            if (attacked instanceof ServerPlayer && MiscUtils.isPlayerFakeMP((ServerPlayer) attacked)) {
                 return;
             }
-            PlayerEntity player = (PlayerEntity) attacker;
+            Player player = (Player) attacker;
 
             MantleEffectDiscidia eff = ItemMantle.getEffect(player, ConstellationsAS.discidia);
             if (eff != null) {
@@ -103,7 +103,7 @@ public class MantleEffectDiscidia extends MantleEffect {
     }
 
     private void onHurt(LivingHurtEvent event) {
-        World world = event.getEntity().getEntityWorld();
+        Level world = event.getEntity().getEntityWorld();
         LivingEntity hurt = event.getEntityLiving();
 
         if (world.isRemote()) {
@@ -134,16 +134,16 @@ public class MantleEffectDiscidia extends MantleEffect {
 
         private final int defaultChargeCostPerAttack = 100;
 
-        public ForgeConfigSpec.DoubleValue damageMultiplier;
+        public ModConfigSpec.DoubleValue damageMultiplier;
 
-        public ForgeConfigSpec.IntValue chargeCostPerAttack;
+        public ModConfigSpec.IntValue chargeCostPerAttack;
 
         public DiscidiaConfig() {
             super("discidia");
         }
 
         @Override
-        public void createEntries(ForgeConfigSpec.Builder cfgBuilder) {
+        public void createEntries(ModConfigSpec.Builder cfgBuilder) {
             super.createEntries(cfgBuilder);
 
             this.damageMultiplier = cfgBuilder
