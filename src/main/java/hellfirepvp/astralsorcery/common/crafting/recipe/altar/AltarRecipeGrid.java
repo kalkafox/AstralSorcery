@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -278,7 +279,7 @@ public class AltarRecipeGrid {
         }
 
         for (int i = 0; i < Math.min(pattern.size(), GRID_SIZE); i++) {
-            String str = GsonHelper.getString(pattern.get(i), String.format("pattern[%s]", i));
+            String str = GsonHelper.getAsString(pattern.get(i), String.format("pattern[%s]", i));
             if (str.length() > GRID_SIZE) {
                 throw new JsonSyntaxException("Invalid pattern: too many columns, " + GRID_SIZE + " is maximum");
             }
@@ -359,7 +360,7 @@ public class AltarRecipeGrid {
         }
 
         public Builder key(Character key, Fluid fluid) {
-            return this.key(key, new FluidIngredient(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME)));
+            return this.key(key, new FluidIngredient(new FluidStack(fluid, FluidType.BUCKET_VOLUME)));
         }
 
         public Builder key(Character key, Ingredient from) {

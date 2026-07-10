@@ -54,7 +54,7 @@ public class EventHelperSpawnDeny {
             return;
         }
 
-        LivingEntity entity = event.getEntityLiving();
+        LivingEntity entity = event.getEntity();
         if (entity.getTags().contains(ConstellationEffectRegistry.ENTITY_TAG_LUCERNA_SKIP_ENTITY)) {
             return;
         }

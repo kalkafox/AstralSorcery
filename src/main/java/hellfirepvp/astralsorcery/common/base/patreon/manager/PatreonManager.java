@@ -20,9 +20,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import hellfirepvp.observerlib.common.util.tick.TickEvent;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import java.util.*;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,7 +39,7 @@ public class PatreonManager implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
             return;
         }

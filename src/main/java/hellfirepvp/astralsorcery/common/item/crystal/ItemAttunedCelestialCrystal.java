@@ -31,7 +31,7 @@ public class ItemAttunedCelestialCrystal extends ItemAttunedCrystalBase {
     public ItemAttunedCelestialCrystal() {
         super(new Properties()
                 .rarity(CommonProxy.RARITY_CELESTIAL)
-                .group(CommonProxy.ITEM_GROUP_AS_CRYSTALS));
+);
     }
 
     @Override

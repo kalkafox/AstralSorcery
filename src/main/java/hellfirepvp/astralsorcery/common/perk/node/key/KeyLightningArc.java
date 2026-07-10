@@ -40,7 +40,6 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.PacketDistributor;
 
 import java.util.List;
 
@@ -93,7 +92,7 @@ public class KeyLightningArc extends KeyPerk {
                     new RepetitiveArcEffect(player.level(),
                             player,
                             CONFIG.arcTicks.get(),
-                            event.getEntityLiving().getEntityId(),
+                            event.getEntity().getId(),
                             dmg,
                             CONFIG.arcDistance.get()).fire();
                 }
@@ -164,7 +163,7 @@ public class KeyLightningArc extends KeyPerk {
             int chainTimes = Math.round(PerkAttributeHelper.getOrCreateMap(player, LogicalSide.SERVER)
                     .modifyValue(player, ResearchHelper.getProgress(player, LogicalSide.SERVER), PerkAttributeTypesAS.ATTR_TYPE_ARC_CHAINS, arcChains));
             List<LivingEntity> visitedEntities = Lists.newArrayList();
-            Entity start = level.getEntityByID(entityStartId);
+            Entity start = level.getEntity(entityStartId);
 
             if (start instanceof LivingEntity && start.isAlive()) {
                 AABB box = new AABB(-distance, -distance, -distance, distance, distance, distance);
@@ -178,7 +177,7 @@ public class KeyLightningArc extends KeyPerk {
                     if (last != null) {
                         Vector3 from = Vector3.atEntityCenter(entity);
                         Vector3 to = Vector3.atEntityCenter(last);
-                        PacketDistributor.TargetPoint target = PacketChannel.pointFromPos(level, entity.position(), 16);
+                        PacketChannel.TargetPoint target = PacketChannel.pointFromPos(level, entity.position(), 16);
                         PacketChannel.CHANNEL.sendToAllAround(new PktPlayEffect(PktPlayEffect.Type.LIGHTNING)
                                 .addData(buf -> {
                                     ByteBufUtils.writeVector(buf, from);

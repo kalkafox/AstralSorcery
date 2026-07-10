@@ -76,6 +76,7 @@ import java.awt.Color;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -282,7 +283,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         for (Rectangle.Float r : this.slotsSocketMenu.keySet()) {
             if (r.contains(xpos, ypos)) {
                 Integer slot = this.slotsSocketMenu.get(r);
-                ItemStack in = player.inventory.getStackInSlot(slot);
+                ItemStack in = player.getInventory().getItem(slot);
                 if (!in.isEmpty()) {
                     Font fr = in.getItem().getFont(in);
                     if (fr == null) {
@@ -995,7 +996,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
 
             if (rStatStar.contains(xpos, ypos)) {
                 this.expectReinit = true;
-                mc.displayGuiScreen(new ScreenJournalOverlayPerkStatistics(this));
+                mc.setScreen(new ScreenJournalOverlayPerkStatistics(this));
                 return true;
             }
         }
@@ -1054,7 +1055,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         }
         T socketPerk = (T) perk;
 
-        ItemStack potentialStack = minecraft.player.inventory.getStackInSlot(slotId);
+        ItemStack potentialStack = minecraft.player.getInventory().getItem(slotId);
         if (!potentialStack.isEmpty() &&
                 potentialStack.getItem() instanceof GemSocketItem) {
             GemSocketItem gemItem = (GemSocketItem) potentialStack.getItem();

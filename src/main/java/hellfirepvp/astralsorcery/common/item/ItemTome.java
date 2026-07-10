@@ -56,8 +56,8 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
 
     public ItemTome() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
         if (level.isClientSide() && !player.isShiftKeyDown()) {
             AstralSorcery.getProxy().openGui(player, GuiType.TOME);
         } else if (!level.isClientSide() && player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer) {
-            new ContainerTomeProvider(player.getItemInHand(hand), player.inventory.selected)
+            new ContainerTomeProvider(player.getItemInHand(hand), player.getInventory().selected)
                     .openFor((ServerPlayer) player);
         }
         return InteractionResultHolder.success(player.getItemInHand(hand));

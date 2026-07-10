@@ -34,7 +34,6 @@ import net.minecraft.client.gui.Font;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.network.chat.FormattedText;
 import org.lwjgl.opengl.GL11;
 
@@ -44,6 +43,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -165,8 +165,8 @@ public class RenderPageStructure extends RenderablePage {
                 renderStack.pushPose();
                 renderStack.translate(switchRequiredAir.x + 13, switchRequiredAir.y + 11, blitOffset + 60);
                 renderStack.scale(7, -7, 7);
-                renderStack.mirror(Axis.XP.rotationDegrees(30));
-                renderStack.mirror(Axis.YP.rotationDegrees(225));
+                renderStack.mulPose(Axis.XP.rotationDegrees(30));
+                renderStack.mulPose(Axis.YP.rotationDegrees(225));
 
                 RenderingUtils.renderSimpleBlockModel(Blocks.BLACK_STAINED_GLASS.defaultBlockState(), renderStack, buf);
                 renderStack.popPose();

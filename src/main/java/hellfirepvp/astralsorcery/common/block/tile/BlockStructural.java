@@ -15,7 +15,7 @@ import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import net.minecraft.world.level.block.*;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +37,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.*;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -57,7 +56,7 @@ public class BlockStructural extends Block {
     private static final VoxelShape STRUCT_TELESCOPE = Shapes.create(1D / 16D, -16D / 16D, 1D / 16D, 15D / 16D, 16D / 16D, 15D / 16D);
 
     public BlockStructural() {
-        super(Block.Properties.create(Material.BARRIER, MaterialColor.AIR)
+        super(Block.Properties.create(Material.BARRIER, MapColor.NONE)
                 .sound(SoundType.GLASS));
 
         this.registerDefaultState(this.defaultBlockState().setValue(BLOCK_TYPE, BlockType.TELESCOPE));
@@ -78,17 +77,6 @@ public class BlockStructural extends Block {
                 return STRUCT_TELESCOPE;
         }
         return super.getShape(state, worldIn, pos, context);
-    }
-
-    @Nullable
-    @Override
-    public ToolType getHarvestTool(BlockState state) {
-        return state.get(BLOCK_TYPE).getSupportedState().getHarvestTool();
-    }
-
-    @Override
-    public int getLevel(BlockState state) {
-        return state.get(BLOCK_TYPE).getSupportedState().getLevel();
     }
 
     @Override

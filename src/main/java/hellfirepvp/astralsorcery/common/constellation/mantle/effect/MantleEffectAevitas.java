@@ -126,7 +126,7 @@ public class MantleEffectAevitas extends MantleEffect {
         if (entity.isOnGround()) {
             Level level = entity.getCommandSenderWorld();
             BlockPos at = entity.position().below();
-            return level.getBlockState(at).isAir(level, at);
+            return level.getBlockState(at).isAir();
         }
         return false;
     }
@@ -197,7 +197,7 @@ public class MantleEffectAevitas extends MantleEffect {
 
         @Override
         public boolean shouldAddCollisionFor(Entity entity) {
-            if (!(entity instanceof Player) || ((Player) entity).abilities.flying) {
+            if (!(entity instanceof Player) || ((Player) entity).getAbilities().flying) {
                 return false;
             }
             return ItemMantle.getEffect((LivingEntity) entity, ConstellationsAS.aevitas) != null &&

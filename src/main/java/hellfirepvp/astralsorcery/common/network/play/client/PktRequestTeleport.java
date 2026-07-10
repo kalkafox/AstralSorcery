@@ -22,9 +22,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -75,7 +75,7 @@ public class PktRequestTeleport extends ASPacket<PktRequestTeleport> {
                 Player player = context.getSender();
                 TileCelestialGateway gate = MiscUtils.getTileAt(player.level(), Vector3.atEntityCorner(player).toBlockPos(), TileCelestialGateway.class, false);
                 if (gate != null && gate.hasMultiblock() && gate.doesSeeSky()) {
-                    MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+                    MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
                     if (server != null) {
                         Level to = server.getLevel(packet.dim);
                         if (to != null) {

@@ -11,15 +11,17 @@ package hellfirepvp.astralsorcery.common.data.config.registry.sets;
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigDataSet;
 import hellfirepvp.astralsorcery.common.data.config.entry.GeneralConfig;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
+import hellfirepvp.astralsorcery.common.util.TagHelper;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Random;
 import java.util.stream.Collectors;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,18 +32,18 @@ import java.util.stream.Collectors;
  */
 public class OreBlockRarityEntry implements ConfigDataSet {
 
-    private final Tag<Block> blockTag;
+    private final TagKey<Block> blockTag;
     private final ResourceLocation key;
     private final int weight;
 
-    public OreBlockRarityEntry(Tag<Block> blockTag, ResourceLocation key, int weight) {
+    public OreBlockRarityEntry(TagKey<Block> blockTag, ResourceLocation key, int weight) {
         this.blockTag = blockTag;
         this.key = key;
         this.weight = weight;
     }
 
-    public OreBlockRarityEntry(ITag.INamedTag<Block> blockTag, int weight) {
-        this(blockTag, blockTag.getName(), weight);
+    public OreBlockRarityEntry(TagKey<Block> blockTag, int weight) {
+        this(blockTag, blockTag.location(), weight);
     }
 
     public int getWeight() {
@@ -50,9 +52,8 @@ public class OreBlockRarityEntry implements ConfigDataSet {
 
     @Nullable
     public Block getRandomBlock(Random random) {
-        return MiscUtils.getRandomEntry(this.blockTag.getValues()
-                .stream()
-                .filter(item -> !GeneralConfig.CONFIG.modidOreBlacklist.get().contains(item.getRegistryName().getNamespace()))
+        return MiscUtils.getRandomEntry(TagHelper.getBlocks(this.blockTag)
+                .filter(item -> !GeneralConfig.CONFIG.modidOreBlacklist.get().contains(RegistryHelper.getKey(item).getNamespace()))
                 .collect(Collectors.toList()), random);
     }
 
@@ -63,7 +64,7 @@ public class OreBlockRarityEntry implements ConfigDataSet {
             return null;
         }
         ResourceLocation keyBlockTag = ResourceLocation.parse(split[0]);
-        Tag<Block> blockTag = BlockTags.getAllTags().get(keyBlockTag);
+        TagKey<Block> blockTag = TagKey.create(Registries.BLOCK, keyBlockTag);
         if (blockTag == null) {
             return null;
         }

@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod

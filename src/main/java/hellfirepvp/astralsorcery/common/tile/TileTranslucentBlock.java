@@ -53,7 +53,7 @@ public class TileTranslucentBlock extends TileFakedState {
         super.writeCustomNBT(pattern);
 
         if (this.playerUUID != null) {
-            pattern.putUniqueId("playerUUID", this.playerUUID);
+            pattern.putUUID("playerUUID", this.playerUUID);
         }
     }
 }

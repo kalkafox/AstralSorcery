@@ -10,8 +10,8 @@ package hellfirepvp.astralsorcery.common.starlight.network;
 
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.event.world.ChunkEvent;
-import net.neoforged.neoforge.event.world.WorldEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.level.WorldEvent;
 import net.neoforged.bus.api.IEventBus;
 
 /**

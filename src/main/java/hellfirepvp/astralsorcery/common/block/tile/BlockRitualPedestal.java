@@ -34,7 +34,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -51,8 +50,8 @@ public class BlockRitualPedestal extends BlockStarlightNetwork implements Custom
 
     public BlockRitualPedestal() {
         super(PropertiesMarble.defaultMarble()
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
 
         this.shape = createShape();
     }
@@ -99,12 +98,12 @@ public class BlockRitualPedestal extends BlockStarlightNetwork implements Custom
         if (player.isShiftKeyDown()) {
             pedestal.tryPlaceCrystalInPedestal(ItemStack.EMPTY);
             if (player.getItemInHand(hand).isEmpty()) {
-                player.setHeldItem(hand, in);
+                player.setItemInHand(hand, in);
             } else {
-                player.inventory.hurtArmor(level, in);
+                player.getInventory().hurtArmor(level, in);
             }
         } else {
-            player.setHeldItem(hand, pedestal.tryPlaceCrystalInPedestal(heldItem));
+            player.setItemInHand(hand, pedestal.tryPlaceCrystalInPedestal(heldItem));
         }
         return InteractionResult.SUCCESS;
     }

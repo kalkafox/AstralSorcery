@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.world;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.gen.feature.structure.Structure;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

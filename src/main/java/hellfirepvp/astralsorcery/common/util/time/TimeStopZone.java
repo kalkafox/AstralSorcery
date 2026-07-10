@@ -174,14 +174,14 @@ public class TimeStopZone {
             if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getType() == EnderDragonPhase.DYING) {
                 return false;
             }
-            if (hasOwner && e.getEntityId() == ownerId) {
+            if (hasOwner && e.getId() == ownerId) {
                 return false;
             }
             return targetPlayers || !(e instanceof Player);
         }
 
         public static EntityTargetController allExcept(Entity entity) {
-            return new EntityTargetController(entity.getEntityId(), true, true);
+            return new EntityTargetController(entity.getId(), true, true);
         }
 
         public static EntityTargetController noPlayers() {

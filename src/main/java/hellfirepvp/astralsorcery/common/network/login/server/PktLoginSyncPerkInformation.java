@@ -18,11 +18,11 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -73,7 +73,7 @@ public class PktLoginSyncPerkInformation extends ASLoginPacket<PktLoginSyncPerkI
         return new Handler<PktLoginSyncPerkInformation>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktLoginSyncPerkInformation packet, NetworkEvent.Context context) {
+            public void handleClient(PktLoginSyncPerkInformation packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     PerkTreeData treeData = PerkTreeLoader.loadPerkTree(packet.rawPerkTreeData);
                     PerkTree.PERK_TREE.receivePerkTree(treeData.prepare());
@@ -83,7 +83,7 @@ public class PktLoginSyncPerkInformation extends ASLoginPacket<PktLoginSyncPerkI
             }
 
             @Override
-            public void handle(PktLoginSyncPerkInformation packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktLoginSyncPerkInformation packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

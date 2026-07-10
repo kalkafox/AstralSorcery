@@ -27,9 +27,10 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
+import net.minecraft.world.level.ClipContext;
 
 /**
  * This class is part of the Astral Sorcery Mod

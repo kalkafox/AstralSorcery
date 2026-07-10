@@ -11,7 +11,6 @@ package hellfirepvp.astralsorcery.common.block.properties;
 import hellfirepvp.astralsorcery.common.lib.MaterialsAS;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.neoforged.neoforge.common.ToolType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,18 +24,18 @@ public class PropertiesMarble {
     public static Block.Properties defaultMarble() {
         return Block.Properties.create(MaterialsAS.MARBLE)
                 .hardnessAndResistance(3F, 5F)
-                .harvestLevel(0)
+
                 .requiresCorrectToolForDrops()
-                .harvestTool(ToolType.PICKAXE)
+
                 .sound(SoundType.STONE);
     }
 
     public static Block.Properties defaultBlackMarble() {
         return Block.Properties.create(MaterialsAS.MARBLE)
                 .hardnessAndResistance(3F, 5F)
-                .harvestLevel(0)
+
                 .requiresCorrectToolForDrops()
-                .harvestTool(ToolType.PICKAXE)
+
                 .sound(SoundType.STONE);
     }
 

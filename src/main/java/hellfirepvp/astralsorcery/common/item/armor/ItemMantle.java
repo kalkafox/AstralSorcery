@@ -32,6 +32,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -68,11 +69,13 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     private static Object outerModel = null;
 
     public ItemMantle() {
-        super(CommonProxy.ARMOR_MATERIAL_IMBUED_LEATHER,
-                EquipmentSlot.CHEST,
+        // 1.21 port: Holder.direct because items are constructed before registry
+        // events fire; the material is also properly registered in CommonProxy.
+        super(Holder.direct(CommonProxy.ARMOR_MATERIAL_IMBUED_LEATHER),
+                Type.CHESTPLATE,
                 new Properties()
-                    .maxStackSize(1)
-                    .group(CommonProxy.ITEM_GROUP_AS)
+                    .stacksTo(1)
+                    .durability(486)
         );
     }
 

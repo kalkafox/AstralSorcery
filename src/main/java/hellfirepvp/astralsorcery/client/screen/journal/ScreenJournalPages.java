@@ -205,17 +205,17 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
             if (saveSite) {
                 openGuiInstance = this;
                 ScreenJournalProgression.getJournalInstance().preventRefresh();
-                Minecraft.getInstance().displayGuiScreen(null);
+                Minecraft.getInstance().setScreen(null);
             } else {
                 saveSite = true;
                 openGuiInstance = null;
-                Minecraft.getInstance().displayGuiScreen(origin);
+                Minecraft.getInstance().setScreen(origin);
             }
         } else {
             if (cameFrom != null && informPreviousClose) {
                 cameFrom.onClose();
             }
-            Minecraft.getInstance().displayGuiScreen(cameFrom);
+            Minecraft.getInstance().setScreen(cameFrom);
         }
     }
 

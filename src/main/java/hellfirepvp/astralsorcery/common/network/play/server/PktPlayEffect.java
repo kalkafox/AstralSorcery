@@ -27,10 +27,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.function.Consumer;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -89,12 +89,12 @@ public class PktPlayEffect extends ASPacket<PktPlayEffect> {
         return new Handler<PktPlayEffect>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktPlayEffect packet, NetworkEvent.Context context) {
+            public void handleClient(PktPlayEffect packet, PacketContext context) {
                 context.enqueueWork(() -> packet.type.runEffect().accept(packet));
             }
 
             @Override
-            public void handle(PktPlayEffect packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktPlayEffect packet, PacketContext context, LogicalSide direction) {}
         };
     }
 

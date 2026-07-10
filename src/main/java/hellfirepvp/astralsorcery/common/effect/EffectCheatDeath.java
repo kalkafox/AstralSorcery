@@ -49,7 +49,7 @@ public class EffectCheatDeath extends EffectCustomTexture {
     }
 
     private void onDeath(LivingDeathEvent event) {
-        LivingEntity le = event.getEntityLiving();
+        LivingEntity le = event.getEntity();
         if (!le.getCommandSenderWorld().isClientSide() && le.isPotionActive(EffectsAS.EFFECT_CHEAT_DEATH)) {
             event.setCanceled(true);
 

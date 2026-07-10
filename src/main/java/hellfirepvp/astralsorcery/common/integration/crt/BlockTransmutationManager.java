@@ -25,11 +25,11 @@ import hellfirepvp.astralsorcery.common.util.block.BlockMatchInformation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.openzen.zencode.java.ZenCodeType;
 
 import java.util.function.Consumer;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -45,7 +45,7 @@ public class BlockTransmutationManager implements IRecipeManager {
     @ZenCodeType.Method
     public void addRecipe(String name, BlockState outState, MCTag<Block> from, double starlight, @ZenCodeType.Optional("null") ResourceLocation constellationKey) {
         addTransmutation(name, outState, starlight, constellationKey, transmutation -> {
-            transmutation.addInputOption(new BlockMatchInformation((Tag<Block>) from.getInternal()));
+            transmutation.addInputOption(new BlockMatchInformation((TagKey<Block>) from.getInternal()));
         });
     }
     

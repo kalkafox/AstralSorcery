@@ -15,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,9 +45,4 @@ public class EntityItemExplosionResistant extends EntityItemHighlighted {
     public boolean hurt(DamageSource source, float amount) {
         return !source.isExplosion() && super.hurt(source, amount);
     }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

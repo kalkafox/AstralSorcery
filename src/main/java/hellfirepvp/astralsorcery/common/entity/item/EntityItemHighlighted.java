@@ -20,7 +20,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -108,9 +107,4 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
         }
         return this.getType().getSize();
     }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

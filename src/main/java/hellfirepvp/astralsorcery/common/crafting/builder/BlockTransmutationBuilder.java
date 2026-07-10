@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.registries.ForgeRegistryEntry;
@@ -27,6 +26,7 @@ import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -80,7 +80,7 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
         return this.addInputCheck(matchState, false);
     }
 
-    public BlockTransmutationBuilder addInputCheck(Tag<Block> matchTag, ItemStack display) {
+    public BlockTransmutationBuilder addInputCheck(TagKey<Block> matchTag, ItemStack display) {
         this.stateCheck.add(new BlockMatchInformation(matchTag, display));
         return this;
     }

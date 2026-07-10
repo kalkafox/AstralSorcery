@@ -25,10 +25,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -80,7 +80,7 @@ public class PktRevokeGatewayAccess extends ASPacket<PktRevokeGatewayAccess> {
                     return;
                 }
 
-                MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+                MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
                 Level level = srv.getLevel(packet.dim);
 
                 TileCelestialGateway gateway = MiscUtils.getTileAt(level, packet.pos, TileCelestialGateway.class, false);

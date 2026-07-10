@@ -114,7 +114,7 @@ public class PktPerkGemModification extends ASPacket<PktPerkGemModification> {
         }
         T socketPerk = (T) perk;
 
-        ItemStack stack = player.inventory.getStackInSlot(packet.slotId);
+        ItemStack stack = player.getInventory().getItem(packet.slotId);
         if (stack.isEmpty()) {
             return;
         }
@@ -124,7 +124,7 @@ public class PktPerkGemModification extends ASPacket<PktPerkGemModification> {
             if (socketItem.canBeInserted(toInsert, socketPerk, player, prog, LogicalSide.SERVER) &&
                     !socketPerk.hasItem(player, LogicalSide.SERVER) &&
                     socketPerk.setContainedItem(player, LogicalSide.SERVER, toInsert)) {
-                player.inventory.setItem(packet.slotId, ItemUtils.copyStackWithSize(stack, stack.getCount() - 1));
+                player.getInventory().setItem(packet.slotId, ItemUtils.copyStackWithSize(stack, stack.getCount() - 1));
             }
         }
     }

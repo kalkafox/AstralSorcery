@@ -85,7 +85,7 @@ public class ScreenJournalClusterRenderer {
             for (Rectangle r : clickableNodes.keySet()) {
                 if (r.contains(xpos, ypos)) {
                     ResearchNode clicked = clickableNodes.get(r);
-                    Minecraft.getInstance().displayGuiScreen(new ScreenJournalPages(parent, clicked));
+                    Minecraft.getInstance().setScreen(new ScreenJournalPages(parent, clicked));
                     return true;
                 }
             }

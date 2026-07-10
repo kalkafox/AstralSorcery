@@ -164,7 +164,7 @@ public class DynamicAttributeModifier extends PerkAttributeModifier {
 
     public CompoundTag serialize() {
         CompoundTag tag = new CompoundTag();
-        tag.putUniqueId("id", getUniqueId());
+        tag.putUUID("id", getUniqueId());
         tag.putString("type", getAttributeType().getRegistryName().toString());
         tag.putInt("mode", getMode().ordinal());
         tag.putFloat("baseValue", this.value);

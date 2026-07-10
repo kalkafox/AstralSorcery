@@ -42,7 +42,6 @@ import net.neoforged.neoforge.common.ForgeHooks;
 import net.neoforged.neoforge.event.ForgeEventFactory;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,6 +49,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -69,7 +69,7 @@ public class EntityUtils {
 
     @Nullable
     public static Player getPlayerServer(UUID playerUUID) {
-        MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
             return null;
         }
@@ -214,7 +214,7 @@ public class EntityUtils {
 
     @Nonnull
     public static List<ItemStack> generateLoot(LivingEntity entity, Random random, DamageSource srcDeath, @Nullable LivingEntity lastAttacker) {
-        MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
         ServerLevel sw = (ServerLevel) entity.getCommandSenderWorld();
 
         if (!sw.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {

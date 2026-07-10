@@ -20,9 +20,9 @@ import net.minecraft.ChatFormatting;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -59,10 +59,10 @@ public class PktToggleClientOption extends ASPacket<PktToggleClientOption> {
         return new Handler<PktToggleClientOption>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktToggleClientOption packet, NetworkEvent.Context context) {}
+            public void handleClient(PktToggleClientOption packet, PacketContext context) {}
 
             @Override
-            public void handleServer(PktToggleClientOption packet, NetworkEvent.Context context) {
+            public void handleServer(PktToggleClientOption packet, PacketContext context) {
                 ServerPlayer player = context.getSender();
                 switch (packet.option) {
                     case DISABLE_PERK_ABILITIES:
@@ -83,7 +83,7 @@ public class PktToggleClientOption extends ASPacket<PktToggleClientOption> {
             }
 
             @Override
-            public void handle(PktToggleClientOption packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktToggleClientOption packet, PacketContext context, LogicalSide direction) {}
         };
     }
 

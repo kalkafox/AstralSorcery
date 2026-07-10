@@ -28,7 +28,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -144,9 +143,4 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
             this.age = 0;
         }
     }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

@@ -41,7 +41,7 @@ public class DataTimeFreezeEntities extends AbstractData {
 
     public void freezeEntity(Entity e) {
         ResourceKey<Level> dim = e.getCommandSenderWorld().dimension();
-        if (this.serverActiveEntityFreeze.computeIfAbsent(dim, dimType -> new HashSet<>()).add(e.getEntityId())) {
+        if (this.serverActiveEntityFreeze.computeIfAbsent(dim, dimType -> new HashSet<>()).add(e.getId())) {
             this.serverSyncTypes.add(dim);
             this.setChanged();
         }
@@ -49,7 +49,7 @@ public class DataTimeFreezeEntities extends AbstractData {
 
     public void unfreezeEntity(Entity e) {
         ResourceKey<Level> dim = e.getCommandSenderWorld().dimension();
-        if (this.serverActiveEntityFreeze.getOrDefault(dim, Collections.emptySet()).remove(e.getEntityId())) {
+        if (this.serverActiveEntityFreeze.getOrDefault(dim, Collections.emptySet()).remove(e.getId())) {
             this.serverSyncTypes.add(dim);
             this.setChanged();
         }
@@ -57,7 +57,7 @@ public class DataTimeFreezeEntities extends AbstractData {
 
     public boolean isFrozen(Entity e) {
         ResourceKey<Level> dim = e.getCommandSenderWorld().dimension();
-        return this.serverActiveEntityFreeze.getOrDefault(dim, Collections.emptySet()).contains(e.getEntityId());
+        return this.serverActiveEntityFreeze.getOrDefault(dim, Collections.emptySet()).contains(e.getId());
     }
 
     @Override

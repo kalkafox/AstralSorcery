@@ -60,7 +60,7 @@ public class KeyProjectileProximity extends KeyPerk {
                     added *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
 
                     float capDstSq = CONFIG.capDistance.get().floatValue();
-                    float dst = -(((float) (player.getDistanceSq(event.getEntityLiving()))) - capDstSq);
+                    float dst = -(((float) (player.getDistanceSq(event.getEntity()))) - capDstSq);
                     dst /= capDstSq;
                     if (dst < 0) {
                         dst /= 10; //To make it drop a bit slower though... like. that damage reduction is... not fun :P

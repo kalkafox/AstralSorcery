@@ -16,7 +16,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 

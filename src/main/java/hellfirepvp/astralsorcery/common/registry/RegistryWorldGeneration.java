@@ -42,7 +42,7 @@ import net.minecraft.world.gen.placement.TopSolidRangeConfig;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.neoforged.neoforge.common.world.BiomeGenerationSettingsBuilder;
-import net.neoforged.neoforge.event.world.BiomeLoadingEvent;
+import net.neoforged.neoforge.event.level.BiomeLoadingEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;

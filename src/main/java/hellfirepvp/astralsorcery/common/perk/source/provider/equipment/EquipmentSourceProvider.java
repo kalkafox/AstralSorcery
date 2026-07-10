@@ -57,7 +57,7 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
                 if (!modifiers.isEmpty()) {
                     CompoundTag nbt = NBTHelper.getPersistentData(stack);
                     if (!nbt.hasUniqueId(KEY_MOD_IDENTIFIER)) {
-                        nbt.putUniqueId(KEY_MOD_IDENTIFIER, UUID.randomUUID());
+                        nbt.putUUID(KEY_MOD_IDENTIFIER, UUID.randomUUID());
                     }
                     updateSource(playerEntity, id, slotSource);
                 } else {

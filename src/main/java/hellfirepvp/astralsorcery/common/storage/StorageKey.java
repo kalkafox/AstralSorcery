@@ -13,11 +13,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

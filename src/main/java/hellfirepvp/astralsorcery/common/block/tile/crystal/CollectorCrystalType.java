@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.block.tile.crystal;
 
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 
 import java.awt.*;
 
@@ -22,13 +22,13 @@ import java.awt.*;
  */
 public enum CollectorCrystalType {
 
-    ROCK_CRYSTAL(ColorsAS.ROCK_CRYSTAL, MaterialColor.WHITE_TERRACOTTA),
-    CELESTIAL_CRYSTAL(ColorsAS.CELESTIAL_CRYSTAL, MaterialColor.CYAN);
+    ROCK_CRYSTAL(ColorsAS.ROCK_CRYSTAL, MapColor.TERRACOTTA_WHITE),
+    CELESTIAL_CRYSTAL(ColorsAS.CELESTIAL_CRYSTAL, MapColor.COLOR_CYAN);
 
     private final Color displayColor;
-    private final MaterialColor matColor;
+    private final MapColor matColor;
 
-    CollectorCrystalType(Color displayColor, MaterialColor matColor) {
+    CollectorCrystalType(Color displayColor, MapColor matColor) {
         this.displayColor = displayColor;
         this.matColor = matColor;
     }
@@ -37,7 +37,7 @@ public enum CollectorCrystalType {
         return displayColor;
     }
 
-    public MaterialColor getMaterialColor() {
+    public MapColor getMaterialColor() {
         return matColor;
     }
 }

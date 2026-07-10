@@ -46,12 +46,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,6 +56,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -69,7 +67,7 @@ import java.util.function.Function;
  */
 public class TileChalice extends TileEntityTick {
 
-    private static final int TANK_SIZE = 64 * FluidAttributes.BUCKET_VOLUME;
+    private static final int TANK_SIZE = 64 * FluidType.BUCKET_VOLUME;
 
     private final SimpleSingleFluidTank tank;
     private final FluidTankAccess access;
@@ -330,12 +328,8 @@ public class TileChalice extends TileEntityTick {
         pattern.put("tank", this.tank.fillDefaultJigsawNBT());
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
-        if (this.access.hasCapability(cap, direction)) {
-            return this.access.getCapability(direction).unwrap();
-        }
-        return super.getCapability(cap, direction);
+    @Nullable
+    public IFluidHandler getExposedFluidHandler(@Nullable Direction side) {
+        return this.access.getFluidHandler(side);
     }
 }

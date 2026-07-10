@@ -55,7 +55,7 @@ public class TypeHelmetRender extends PatreonEffect {
     public void renderPre(RenderPlayerEvent.Pre event) {
         Player player = event.getPlayer();
         if (player.getUUID().equals(playerUUID) && player.getItemStackFromSlot(EquipmentSlot.HEAD).isEmpty()) {
-            player.inventory.armor.set(EquipmentSlot.HEAD.getIndex(), ItemUtils.copyStackWithSize(helmetStack, 1));
+            player.getInventory().armor.set(EquipmentSlot.HEAD.getIndex(), ItemUtils.copyStackWithSize(helmetStack, 1));
             addedHelmet = true;
         }
     }
@@ -65,7 +65,7 @@ public class TypeHelmetRender extends PatreonEffect {
     public void renderPost(RenderPlayerEvent.Post event) {
         Player player = event.getPlayer();
         if (player.getUUID().equals(playerUUID) && addedHelmet) {
-            player.inventory.armor.set(EquipmentSlot.HEAD.getIndex(), ItemStack.EMPTY);
+            player.getInventory().armor.set(EquipmentSlot.HEAD.getIndex(), ItemStack.EMPTY);
             addedHelmet = false;
         }
     }

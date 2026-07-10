@@ -42,13 +42,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -59,7 +60,7 @@ import java.awt.*;
  */
 public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
 
-    private static final int TANK_SIZE = 2 * FluidAttributes.BUCKET_VOLUME;
+    private static final int TANK_SIZE = 2 * FluidType.BUCKET_VOLUME;
 
     private WellLiquefaction runningRecipe = null;
 
@@ -273,15 +274,13 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
         pattern.put("inventory", this.inventory.serialize());
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
-        if (this.access.hasCapability(cap, direction)) {
-            return this.access.getCapability(direction).unwrap();
-        }
-        if (this.inventory.hasCapability(cap, direction)) {
-            return this.inventory.getCapability().unwrap();
-        }
-        return super.getCapability(cap, direction);
+    @Nullable
+    public IFluidHandler getExposedFluidHandler(@Nullable Direction side) {
+        return this.access.getFluidHandler(side);
+    }
+
+    @Nullable
+    public IItemHandler getExposedItemHandler(@Nullable Direction side) {
+        return this.inventory.getItemHandler(side);
     }
 }

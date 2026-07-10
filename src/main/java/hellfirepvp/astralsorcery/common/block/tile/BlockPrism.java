@@ -44,7 +44,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -69,7 +68,7 @@ public class BlockPrism extends BlockStarlightNetwork implements CustomItemBlock
 
     public BlockPrism() {
         super(PropertiesGlass.coatedGlass()
-                .harvestTool(ToolType.PICKAXE));
+);
         registerDefaultState(this.getStateContainer().any().setValue(PLACED_AGAINST, Direction.DOWN).setValue(HAS_COLORED_LENS, false));
     }
 
@@ -98,9 +97,9 @@ public class BlockPrism extends BlockStarlightNetwork implements CustomItemBlock
                 ItemStack drop = lens.getColorType().getStack();
                 if (!player.isCreative()) {
                     if (player.getItemInHand(hand).isEmpty()) {
-                        player.setHeldItem(hand, drop);
+                        player.setItemInHand(hand, drop);
                     } else {
-                        if (!player.inventory.getArmor(drop)) {
+                        if (!player.getInventory().getArmor(drop)) {
                             ItemUtils.dropItem(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
                         }
                     }

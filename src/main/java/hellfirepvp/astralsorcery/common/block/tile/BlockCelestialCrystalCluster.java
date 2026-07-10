@@ -36,7 +36,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -61,8 +60,8 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     public BlockCelestialCrystalCluster() {
         super(Properties.create(Material.GLASS, CollectorCrystalType.CELESTIAL_CRYSTAL.getMaterialColor())
                 .hardnessAndResistance(3F, 3F)
-                .harvestTool(ToolType.PICKAXE)
-                .harvestLevel(1)
+
+
                 .sound(SoundType.GLASS)
                 .isRedstoneConductor((state) -> 8));
     }

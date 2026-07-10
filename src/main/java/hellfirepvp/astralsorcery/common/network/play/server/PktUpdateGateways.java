@@ -18,10 +18,10 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -72,12 +72,12 @@ public class PktUpdateGateways extends ASPacket<PktUpdateGateways> {
         return new Handler<PktUpdateGateways>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktUpdateGateways packet, NetworkEvent.Context context) {
+            public void handleClient(PktUpdateGateways packet, PacketContext context) {
                 context.enqueueWork(() -> CelestialGatewayHandler.INSTANCE.updateClientCache(packet.positions));
             }
 
             @Override
-            public void handle(PktUpdateGateways packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktUpdateGateways packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

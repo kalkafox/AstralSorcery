@@ -10,13 +10,15 @@ package hellfirepvp.astralsorcery.common.network.play.server;
 
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -57,17 +59,21 @@ public class PktSyncStepAssist extends ASPacket<PktSyncStepAssist> {
         return new Handler<PktSyncStepAssist>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktSyncStepAssist packet, NetworkEvent.Context context) {
+            public void handleClient(PktSyncStepAssist packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     Player player = Minecraft.getInstance().player;
                     if (player != null) {
-                        player.maxUpStep = packet.maxUpStep;
+                        // step height is an entity attribute in 1.21
+                        AttributeInstance stepHeight = player.getAttribute(Attributes.STEP_HEIGHT);
+                        if (stepHeight != null) {
+                            stepHeight.setBaseValue(packet.maxUpStep);
+                        }
                     }
                 });
             }
 
             @Override
-            public void handle(PktSyncStepAssist packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktSyncStepAssist packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

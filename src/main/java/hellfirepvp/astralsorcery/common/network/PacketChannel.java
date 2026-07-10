@@ -79,7 +79,13 @@ public final class PacketChannel {
     public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
         event.registrar(NET_COMM_VERSION)
                 .playBidirectional(Envelope.TYPE, Envelope.STREAM_CODEC,
-                        (data, context) -> data.packet().handler().accept(data.packet(), new PacketContext(context)));
+                        (data, context) -> handle(data.packet(), context));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends ASPacket<T>> void handle(ASPacket<?> packet, net.neoforged.neoforge.network.handling.IPayloadContext context) {
+        T typed = (T) packet;
+        typed.handler().accept(typed, new PacketContext(context));
     }
 
     private static void register(Supplier<? extends ASPacket<?>> factory) {

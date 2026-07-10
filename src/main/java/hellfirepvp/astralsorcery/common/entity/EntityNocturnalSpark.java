@@ -39,7 +39,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.network.NetworkHooks;
 
 import java.awt.*;
 import java.util.List;
@@ -235,9 +234,4 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
         this.setSpawning();
         this.setPosition(hit.x, hit.y, hit.z);
     }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

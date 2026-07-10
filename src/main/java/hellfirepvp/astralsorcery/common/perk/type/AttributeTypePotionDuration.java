@@ -40,14 +40,14 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
     }
 
     private void onEffect(PotionEvent.PotionAddedEvent event) {
-        if (event.getEntityLiving() instanceof Player) {
+        if (event.getEntity() instanceof Player) {
             if (event.getOldPotionEffect() == null) {
                 //New effect
-                modifyPotionDuration((Player) event.getEntityLiving(), event.getPotionEffect(), event.getPotionEffect());
+                modifyPotionDuration((Player) event.getEntity(), event.getPotionEffect(), event.getPotionEffect());
             } else {
                 //Existing effect
                 if (new MobEffectInstance(event.getOldPotionEffect()).combine(event.getPotionEffect())) {
-                    modifyPotionDuration((Player) event.getEntityLiving(), event.getPotionEffect(), event.getOldPotionEffect());
+                    modifyPotionDuration((Player) event.getEntity(), event.getPotionEffect(), event.getOldPotionEffect());
                 }
             }
         }

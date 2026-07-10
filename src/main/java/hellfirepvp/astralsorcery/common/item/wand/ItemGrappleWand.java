@@ -34,8 +34,8 @@ public class ItemGrappleWand extends Item implements AlignmentChargeConsumer {
 
     public ItemGrappleWand() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override

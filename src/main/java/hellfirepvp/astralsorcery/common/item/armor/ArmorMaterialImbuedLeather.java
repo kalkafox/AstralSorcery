@@ -8,14 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.item.armor;
 
+import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.sounds.SoundEvent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,50 +25,18 @@ import net.neoforged.api.distmarker.OnlyIn;
  * Created by HellFirePvP
  * Date: 17.02.2020 / 19:16
  */
-public class ArmorMaterialImbuedLeather implements ArmorMaterial {
+public final class ArmorMaterialImbuedLeather {
 
-    @Override
-    public int getDurabilityForSlot(EquipmentSlot slot) {
-        return 486;
-    }
+    private ArmorMaterialImbuedLeather() {}
 
-    @Override
-    public int getDefenseForSlot(EquipmentSlot slot) {
-        switch (slot) {
-            case CHEST:
-                return 7;
-        }
-        return 0;
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-        return 24;
-    }
-
-    @Override
-    public SoundEvent getSoundEvent() {
-        return ArmorMaterial.LEATHER.getSoundEvent();
-    }
-
-    @Override
-    public Ingredient getRepairIngredient() {
-        return Ingredient.valueFromJson(ItemsAS.STARDUST);
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public String getName() {
-        return "imbued_leather";
-    }
-
-    @Override
-    public float getToughness() {
-        return 1.5F;
-    }
-
-    @Override
-    public float getKnockbackResistance() {
-        return 0F;
+    public static ArmorMaterial create() {
+        return new ArmorMaterial(
+                Map.of(ArmorItem.Type.CHESTPLATE, 7),
+                24,
+                SoundEvents.ARMOR_EQUIP_LEATHER,
+                () -> Ingredient.of(ItemsAS.STARDUST),
+                List.of(new ArmorMaterial.Layer(AstralSorcery.key("imbued_leather"))),
+                1.5F,
+                0F);
     }
 }

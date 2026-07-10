@@ -47,7 +47,6 @@ import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,6 +55,8 @@ import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -115,7 +116,7 @@ public class ActiveLiquidInfusionRecipe {
 
     @OnlyIn(Dist.CLIENT)
     public void tickClient(TileInfuser infuser) {
-        FluidStack required = new FluidStack(this.getRecipeToCraft().getLiquidInput(), FluidAttributes.BUCKET_VOLUME);
+        FluidStack required = new FluidStack(this.getRecipeToCraft().getLiquidInput(), FluidType.BUCKET_VOLUME);
 
         if (orbitalLiquid == null || ((FXOrbitalInfuserLiquid) orbitalLiquid).isRemoved()) {
             ResourceLocation recipeName = this.getRecipeToCraft().getId();
@@ -284,7 +285,7 @@ public class ActiveLiquidInfusionRecipe {
     }
 
     public FluidStack getChaliceRequiredFluidInput() {
-        int amount = Math.round(FluidAttributes.BUCKET_VOLUME * recipeToCraft.getConsumptionChance());
+        int amount = Math.round(FluidType.BUCKET_VOLUME * recipeToCraft.getConsumptionChance());
         amount *= 0.75; //Bonus for using chalices
 
         amount = recipeToCraft.doesConsumeMultipleFluids() ? amount * TileInfuser.getLiquidOffsets().size() : amount;
@@ -323,7 +324,7 @@ public class ActiveLiquidInfusionRecipe {
 
     @Nullable
     public Player tryGetCraftingPlayerServer() {
-        MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
         return srv.getPlayerList().getPlayerByUUID(this.getPlayerCraftingUUID());
     }
 
@@ -370,7 +371,7 @@ public class ActiveLiquidInfusionRecipe {
 
         CompoundTag pattern = new CompoundTag();
         pattern.putString("recipeToCraft", getRecipeToCraft().getId().toString());
-        pattern.putUniqueId("playerCraftingUUID", getPlayerCraftingUUID());
+        pattern.putUUID("playerCraftingUUID", getPlayerCraftingUUID());
         pattern.putInt("ticksCrafting", getTicksCrafting());
         pattern.put("craftingData", craftingData);
         pattern.put("supportingChalices", chalicePositions);

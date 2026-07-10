@@ -47,11 +47,11 @@ public class KeyNoArmor extends KeyPerk {
     }
 
     private void onLivingHurt(LivingIncomingDamageEvent event) {
-        if (!(event.getEntityLiving() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
 
-        Player player = (Player) event.getEntityLiving();
+        Player player = (Player) event.getEntity();
         LogicalSide direction = this.getSide(player);
         PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {

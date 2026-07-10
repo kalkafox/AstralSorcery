@@ -22,7 +22,7 @@ public class ItemRockCrystal extends ItemCrystalBase {
 
     public ItemRockCrystal() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS));
+);
     }
 
     @Override

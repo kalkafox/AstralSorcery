@@ -12,10 +12,11 @@ import hellfirepvp.astralsorcery.common.data.config.base.ConfigDataSet;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

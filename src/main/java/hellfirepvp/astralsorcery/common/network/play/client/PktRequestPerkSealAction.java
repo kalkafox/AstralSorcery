@@ -22,9 +22,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -73,21 +73,21 @@ public class PktRequestPerkSealAction extends ASPacket<PktRequestPerkSealAction>
         return new Handler<PktRequestPerkSealAction>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktRequestPerkSealAction packet, NetworkEvent.Context context) {
+            public void handleClient(PktRequestPerkSealAction packet, PacketContext context) {
                 Screen current = Minecraft.getInstance().screen;
                 if (current instanceof ScreenJournalPerkTree) {
                     PerkTree.PERK_TREE.getPerk(LogicalSide.CLIENT, packet.perkKey).ifPresent(perk -> {
                         if (!packet.doSealing) {
-                            Minecraft.getInstance().enqueue(() -> ((ScreenJournalPerkTree) current).playSealBreakAnimation(perk));
+                            Minecraft.getInstance().execute(() -> ((ScreenJournalPerkTree) current).playSealBreakAnimation(perk));
                         } else {
-                            Minecraft.getInstance().enqueue(() -> ((ScreenJournalPerkTree) current).playSealApplyAnimation(perk));
+                            Minecraft.getInstance().execute(() -> ((ScreenJournalPerkTree) current).playSealApplyAnimation(perk));
                         }
                     });
                 }
             }
 
             @Override
-            public void handle(PktRequestPerkSealAction packet, NetworkEvent.Context context, LogicalSide direction) {
+            public void handle(PktRequestPerkSealAction packet, PacketContext context, LogicalSide direction) {
                 context.enqueueWork(() -> {
                     if (packet.perkKey == null) {
                         return;

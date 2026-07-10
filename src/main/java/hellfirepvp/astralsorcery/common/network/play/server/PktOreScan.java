@@ -19,11 +19,11 @@ import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -64,7 +64,7 @@ public class PktOreScan extends ASPacket<PktOreScan> {
         return new Handler<PktOreScan>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktOreScan packet, NetworkEvent.Context context) {
+            public void handleClient(PktOreScan packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     Player player = Minecraft.getInstance().player;
                     if (player == null) {
@@ -87,7 +87,7 @@ public class PktOreScan extends ASPacket<PktOreScan> {
             }
 
             @Override
-            public void handle(PktOreScan packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktOreScan packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

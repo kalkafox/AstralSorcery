@@ -17,13 +17,12 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.nbt.Tag;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -68,7 +67,7 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
         return this;
     }
 
-    public LiquidInfusionBuilder setItemInput(ITag.INamedTag<Item> tag) {
+    public LiquidInfusionBuilder setItemInput(TagKey<Item> tag) {
         this.itemInput = Ingredient.fromTag(tag);
         return this;
     }

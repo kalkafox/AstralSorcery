@@ -66,7 +66,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
                 if (!held.isEmpty()) {
                     if (!inv.getStackInSlot(0).isEmpty()) {
                         ItemStack stack = inv.getStackInSlot(0);
-                        player.inventory.hurtArmor(level, stack);
+                        player.getInventory().hurtArmor(level, stack);
                         inv.setStackInSlot(0, ItemStack.EMPTY);
                         tar.markForUpdate();
                         TileSpectralRelay.cascadeRelayProximityUpdates(level, pos);
@@ -87,7 +87,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
                 } else {
                     if (!inv.getStackInSlot(0).isEmpty()) {
                         ItemStack stack = inv.getStackInSlot(0);
-                        player.inventory.hurtArmor(level, stack);
+                        player.getInventory().hurtArmor(level, stack);
                         inv.setStackInSlot(0, ItemStack.EMPTY);
                         TileSpectralRelay.cascadeRelayProximityUpdates(level, pos);
                         tar.markForUpdate();

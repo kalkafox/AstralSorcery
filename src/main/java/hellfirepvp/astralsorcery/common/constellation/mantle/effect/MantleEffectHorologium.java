@@ -62,11 +62,11 @@ public class MantleEffectHorologium extends MantleEffect {
     }
 
     private void onHurt(LivingIncomingDamageEvent event) {
-        if (ItemMantle.getEffect(event.getEntityLiving(), ConstellationsAS.horologium) != null &&
-                event.getEntityLiving() instanceof Player &&
-                !event.getEntityLiving().getCommandSenderWorld().isClientSide() &&
+        if (ItemMantle.getEffect(event.getEntity(), ConstellationsAS.horologium) != null &&
+                event.getEntity() instanceof Player &&
+                !event.getEntity().getCommandSenderWorld().isClientSide() &&
                 !event.getSource().isFire()) {
-            Player player = (Player) event.getEntityLiving();
+            Player player = (Player) event.getEntity();
 
             if (!player.getCooldowns().isOnCooldown(ItemsAS.MANTLE) &&
                     AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFreeze.get())) {

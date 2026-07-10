@@ -24,13 +24,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,7 +53,7 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
         return new NBTCopyRecipe(other.getId(), other.getAltarType(), other.getDuration(), other.getStarlightRequirement(), other.getInputs());
     }
 
-    public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(Tag<Item> tag) {
+    public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(TagKey<Item> tag) {
         return this.addNBTCopyMatchIngredient(Ingredient.fromTag(tag));
     }
 

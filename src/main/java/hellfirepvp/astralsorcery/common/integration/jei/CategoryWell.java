@@ -29,6 +29,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -78,7 +79,7 @@ public class CategoryWell extends JEICategory<WellLiquefaction> {
         ImmutableList.Builder<List<ItemStack>> itemInputs = ImmutableList.builder();
 
         itemInputs.add(ingredientStacks(wellLiquefaction.getInput()));
-        fluidOutputs.add(Collections.singletonList(new FluidStack(wellLiquefaction.getFluidOutput(), FluidAttributes.BUCKET_VOLUME)));
+        fluidOutputs.add(Collections.singletonList(new FluidStack(wellLiquefaction.getFluidOutput(), FluidType.BUCKET_VOLUME)));
 
         ingredients.setInputLists(VanillaTypes.ITEM, itemInputs.build());
         ingredients.setOutputLists(VanillaTypes.FLUID, fluidOutputs.build());

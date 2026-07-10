@@ -66,6 +66,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -80,8 +81,8 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
 
     public ItemArchitectWand() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override

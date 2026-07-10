@@ -32,7 +32,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -129,15 +129,15 @@ public class LiquidInteraction extends CustomMatcherRecipe {
     }
 
     public static LiquidInteraction read(ResourceLocation recipeId, JsonObject json) {
-        String fluidKey1 = GsonHelper.getString(json, "reactant1");
+        String fluidKey1 = GsonHelper.getAsString(json, "reactant1");
         Fluid reactant1 = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey1));
         if (reactant1 == null) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey1);
         }
-        int amount1 = GsonHelper.getInt(json, "reactant1Amount");
+        int amount1 = GsonHelper.getAsInt(json, "reactant1Amount");
         CompoundTag tag1 = null;
         if (GsonHelper.convertToInt(json, "reactant1Tag")) {
-            String jsonTag1 = GsonHelper.getString(json, "reactant1Tag");
+            String jsonTag1 = GsonHelper.getAsString(json, "reactant1Tag");
             try {
                 tag1 = TagParser.expect(jsonTag1);
             } catch (CommandSyntaxException e) {
@@ -146,15 +146,15 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         }
         FluidStack r1 = new FluidStack(reactant1, amount1, tag1);
 
-        String fluidKey2 = GsonHelper.getString(json, "reactant2");
+        String fluidKey2 = GsonHelper.getAsString(json, "reactant2");
         Fluid reactant2 = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey2));
         if (reactant2 == null) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey2);
         }
-        int amount2 = GsonHelper.getInt(json, "reactant2Amount");
+        int amount2 = GsonHelper.getAsInt(json, "reactant2Amount");
         CompoundTag tag2 = null;
         if (GsonHelper.convertToInt(json, "reactant2Tag")) {
-            String jsonTag2 = GsonHelper.getString(json, "reactant2Tag");
+            String jsonTag2 = GsonHelper.getAsString(json, "reactant2Tag");
             try {
                 tag2 = TagParser.expect(jsonTag2);
             } catch (CommandSyntaxException e) {
@@ -163,12 +163,12 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         }
         FluidStack r2 = new FluidStack(reactant2, amount2, tag2);
 
-        float chance1 = GsonHelper.getFloat(json, "chanceConsumeReactant1");
-        float chance2 = GsonHelper.getFloat(json, "chanceConsumeReactant2");
-        int weight = GsonHelper.getInt(json, "weight");
+        float chance1 = GsonHelper.getAsFloat(json, "chanceConsumeReactant1");
+        float chance2 = GsonHelper.getAsFloat(json, "chanceConsumeReactant2");
+        int weight = GsonHelper.getAsInt(json, "weight");
 
         JsonObject ctResult = GsonHelper.getAsJsonObject(json, "result");
-        ResourceLocation id = ResourceLocation.parse(GsonHelper.getString(ctResult, "id"));
+        ResourceLocation id = ResourceLocation.parse(GsonHelper.getAsString(ctResult, "id"));
         InteractionResult result = InteractionResultRegistry.create(id);
         if (result == null) {
             throw new JsonSyntaxException("Unknown result type: " + id.toString() +

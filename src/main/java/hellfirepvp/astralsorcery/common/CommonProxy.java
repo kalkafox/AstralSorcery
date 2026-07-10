@@ -69,6 +69,7 @@ import hellfirepvp.observerlib.common.util.tick.TickManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -97,6 +98,7 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static hellfirepvp.astralsorcery.common.lib.ItemsAS.*;
 
@@ -118,29 +120,31 @@ public class CommonProxy {
     public static DamageSource DAMAGE_SOURCE_REFLECT = DamageSourceUtil.newType("thorns")
             .bypassArmor().bypassMagic();
 
-    public static final CreativeModeTab ITEM_GROUP_AS = new CreativeModeTab(AstralSorcery.MODID) {
-        @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(TOME);
-        }
-    };
-    public static final CreativeModeTab ITEM_GROUP_AS_PAPERS = new CreativeModeTab(AstralSorcery.MODID + ".papers") {
-        @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(CONSTELLATION_PAPER);
-        }
-    };
-    public static final CreativeModeTab ITEM_GROUP_AS_CRYSTALS = new CreativeModeTab(AstralSorcery.MODID + ".crystals") {
-        @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(ROCK_CRYSTAL);
-        }
-    };
+    // 1.21 port: tab contents show every registered item in the main tab for now;
+    // the old per-item group assignments (papers/crystals) still need re-curation.
+    public static final Supplier<CreativeModeTab> ITEM_GROUP_AS = AstralRegistries.CREATIVE_MODE_TABS.register(
+            AstralSorcery.MODID, () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + AstralSorcery.MODID))
+                    .icon(() -> new ItemStack(TOME))
+                    .displayItems((params, out) ->
+                            AstralRegistries.CREATIVE_NAMES.getEntries().forEach(holder -> out.accept(holder.get())))
+                    .build());
+    public static final Supplier<CreativeModeTab> ITEM_GROUP_AS_PAPERS = AstralRegistries.CREATIVE_MODE_TABS.register(
+            AstralSorcery.MODID + "_papers", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + AstralSorcery.MODID + ".papers"))
+                    .icon(() -> new ItemStack(CONSTELLATION_PAPER))
+                    .build());
+    public static final Supplier<CreativeModeTab> ITEM_GROUP_AS_CRYSTALS = AstralRegistries.CREATIVE_MODE_TABS.register(
+            AstralSorcery.MODID + "_crystals", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup." + AstralSorcery.MODID + ".crystals"))
+                    .icon(() -> new ItemStack(ROCK_CRYSTAL))
+                    .build());
     public static final Rarity RARITY_CELESTIAL = Rarity.create("AS_CELESTIAL", ChatFormatting.BLUE);
     public static final Rarity RARITY_ARTIFACT = Rarity.create("AS_ARTIFACT", ChatFormatting.GOLD);
     public static final Rarity RARITY_VESTIGE = Rarity.create("AS_VESTIGE", ChatFormatting.RED);
 
-    public static final ArmorMaterial ARMOR_MATERIAL_IMBUED_LEATHER = new ArmorMaterialImbuedLeather();
+    public static final ArmorMaterial ARMOR_MATERIAL_IMBUED_LEATHER = AstralRegistries.register(
+            AstralRegistries.ARMOR_MATERIALS, AstralSorcery.key("imbued_leather"), ArmorMaterialImbuedLeather.create());
 
     private boolean registryContentBuilt = false;
     private CommonScheduler commonScheduler;
@@ -196,6 +200,7 @@ public class CommonProxy {
 
         modEventBus.addListener(PacketChannel::registerPayloadHandlers);
         modEventBus.addListener(RegistryEntities::initAttributes);
+        modEventBus.addListener(RegistryCapabilities::attachCapabilities);
 
         this.buildRegistryContent();
         AstralRegistries.subscribe(modEventBus);
@@ -243,6 +248,8 @@ public class CommonProxy {
         RegistryPerkConverters.init();
         RegistryPerkCustomModifiers.init();
         RegistryPerkAttributeReaders.init();
+
+        RegistryCapabilities.init();
     }
 
     public void attachEventHandlers(IEventBus eventBus) {
@@ -393,7 +400,6 @@ public class CommonProxy {
     private void onCommonSetup(FMLCommonSetupEvent event) {
         this.worldData.buildConfiguration();
 
-        RegistryCapabilities.init(NeoForge.EVENT_BUS);
         StarlightNetworkRegistry.setupRegistry();
         CollisionManager.init();
 

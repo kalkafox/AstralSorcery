@@ -108,7 +108,7 @@ public class EntityFlare extends FlyingMob {
     }
 
     public EntityFlare setFollowingTarget(LivingEntity entity) {
-        this.followingEntityId = entity.getEntityId();
+        this.followingEntityId = entity.getId();
         return this;
     }
 
@@ -117,7 +117,7 @@ public class EntityFlare extends FlyingMob {
         if (this.followingEntityId == -1) {
             return null;
         }
-        Entity e = level.getEntityByID(this.followingEntityId);
+        Entity e = level.getEntity(this.followingEntityId);
         if (e == null || !e.isAlive() || !(e instanceof LivingEntity)) {
             return null;
         }
@@ -252,7 +252,7 @@ public class EntityFlare extends FlyingMob {
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.LIGHTNING)
                 .addData(buf -> {
                     ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(this).addY(getHeight() / 2F));
-                    ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(target).addY(target.getHeight() / 2F));
+                    ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(target).addY(target.getBbHeight() / 2F));
                     buf.writeInt(ColorsAS.EFFECT_LIGHTNING.getRGB());
                 });
         PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getCommandSenderWorld(), this.position(), 32));

@@ -33,6 +33,7 @@ import java.util.Collection;
 
 import static hellfirepvp.astralsorcery.common.util.NameUtil.prefixPath;
 import static hellfirepvp.astralsorcery.common.util.NameUtil.suffixPath;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

@@ -28,7 +28,6 @@ import net.minecraft.ChatFormatting;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,6 +36,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -159,7 +159,7 @@ public class ResearchHelper {
     }
 
     private static void informPlayersAboutProgressionLoss(UUID pUUID) {
-        MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
             ServerPlayer player = server.getPlayerList().getPlayerByUUID(pUUID);
             if (player != null) {

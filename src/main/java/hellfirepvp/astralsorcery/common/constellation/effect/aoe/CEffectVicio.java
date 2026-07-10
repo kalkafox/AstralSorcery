@@ -92,9 +92,9 @@ public class CEffectVicio extends ConstellationEffect implements ConstellationEf
                 if (entity instanceof ServerPlayer) {
                     ServerPlayer pl = (ServerPlayer) entity;
                     if (pl.gameMode.getGameType().isSurvival()) {
-                        boolean prev = pl.abilities.allowFlying;
-                        pl.abilities.allowFlying = false;
-                        pl.abilities.flying = false;
+                        boolean prev = pl.getAbilities().allowFlying;
+                        pl.getAbilities().allowFlying = false;
+                        pl.getAbilities().flying = false;
                         if (prev) {
                             pl.onUpdateAbilities();
                         }
@@ -109,8 +109,8 @@ public class CEffectVicio extends ConstellationEffect implements ConstellationEf
             List<ServerPlayer> entities = level.getEntitiesWithinAABB(ServerPlayer.class, BOX.offset(pos).grow(range));
             for (ServerPlayer pl : entities) {
                 if (EventHelperTemporaryFlight.allowFlight(pl)) {
-                    boolean prev = pl.abilities.allowFlying;
-                    pl.abilities.allowFlying = true;
+                    boolean prev = pl.getAbilities().allowFlying;
+                    pl.getAbilities().allowFlying = true;
                     foundPlayer = true;
                     if (!prev) {
                         pl.onUpdateAbilities();

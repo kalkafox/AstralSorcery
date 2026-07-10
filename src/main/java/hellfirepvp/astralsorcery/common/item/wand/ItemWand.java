@@ -56,10 +56,12 @@ import net.neoforged.fml.LogicalSide;
  */
 public class ItemWand extends Item implements OverrideInteractItem {
 
+    private static final java.util.Random random = new java.util.Random();
+
     public ItemWand() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override

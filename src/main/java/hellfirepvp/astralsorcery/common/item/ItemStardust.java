@@ -22,6 +22,6 @@ public class ItemStardust extends Item {
 
     public ItemStardust() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS));
+);
     }
 }

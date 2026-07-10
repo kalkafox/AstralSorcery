@@ -19,7 +19,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -44,7 +44,7 @@ public class EffectBleed extends EffectCustomTexture {
         if (entity instanceof Player &&
                 !entity.getCommandSenderWorld().isClientSide() &&
                 entity.getCommandSenderWorld() instanceof ServerLevel &&
-                !((MinecraftServer) LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER)).isPvpAllowed()) {
+                !((MinecraftServer) ServerLifecycleHooks.getCurrentServer()).isPvpAllowed()) {
             return;
         }
         DamageUtil.shotgunAttack(entity, e -> DamageUtil.hurt(e, CommonProxy.DAMAGE_SOURCE_BLEED, 0.5F * (amplifier + 1)));

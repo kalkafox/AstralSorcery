@@ -56,6 +56,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -66,13 +67,15 @@ import java.util.List;
  */
 public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
 
+    private static final java.util.Random random = new java.util.Random();
+
     private static final float COST_PER_BLINK = 700F;
     private static final float COST_PER_DASH = 850F;
 
     public ItemBlinkWand() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override
@@ -177,7 +180,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
                         AstralSorcery.getProxy().scheduleClientside(player::startFallFlying, 2);
                     }
 
-                    PktShootEntity pkt = new PktShootEntity(player.getEntityId(), motion);
+                    PktShootEntity pkt = new PktShootEntity(player.getId(), motion);
                     pkt.setEffectLength(power);
                     PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(worldIn, player.position(), 64));
 

@@ -76,13 +76,13 @@ public class AttributeConverterPerk extends ProgressGatedPerk implements Attribu
             JsonArray array = GsonHelper.getAsJsonArray(perkData, "converters");
             for (int i = 0; i < array.size(); i++) {
                 JsonObject serializedConverter = GsonHelper.getAsJsonObject(array.get(i), "converters[%s]");
-                String key = GsonHelper.getString(serializedConverter, "name");
+                String key = GsonHelper.getAsString(serializedConverter, "name");
                 PerkConverter converter = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_CONVERTERS.getValue(ResourceLocation.parse(key));
                 if (converter == null) {
                     throw new JsonParseException("Unknown converter: " + key);
                 }
                 if (serializedConverter.has("radius")) {
-                    float radius = GsonHelper.getFloat(serializedConverter, "radius");
+                    float radius = GsonHelper.getAsFloat(serializedConverter, "radius");
                     this.addRangedConverter(radius, converter);
                 } else {
                     this.addConverter(converter);

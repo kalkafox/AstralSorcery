@@ -31,8 +31,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -41,6 +39,7 @@ import net.neoforged.fml.LogicalSide;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,8 +50,8 @@ import java.util.Objects;
  */
 public class TileFountain extends TileEntityTick {
 
-    private static final int TANK_SIZE = 16 * FluidAttributes.BUCKET_VOLUME;
-    private static final int LIQUID_STARLIGHT_TANK_SIZE = 16 * FluidAttributes.BUCKET_VOLUME;
+    private static final int TANK_SIZE = 16 * FluidType.BUCKET_VOLUME;
+    private static final int LIQUID_STARLIGHT_TANK_SIZE = 16 * FluidType.BUCKET_VOLUME;
 
     private FountainEffect<?> currentEffect;
     private FountainEffect.EffectContext effectContext;
@@ -307,12 +306,8 @@ public class TileFountain extends TileEntityTick {
         }
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
-        if (this.access.hasCapability(cap, direction)) {
-            return this.access.getCapability(direction).unwrap();
-        }
-        return super.getCapability(cap, direction);
+    @Nullable
+    public IFluidHandler getExposedFluidHandler(@Nullable Direction side) {
+        return this.access.getFluidHandler(side);
     }
 }

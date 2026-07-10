@@ -17,7 +17,6 @@ import hellfirepvp.astralsorcery.common.base.patreon.PatreonEffect;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.util.Mth;
-import net.minecraft.util.math.vector.Vector3f;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
@@ -26,6 +25,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -69,7 +69,7 @@ public class TypeWraithWings extends PatreonEffect {
         float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, event.getPartialRenderTick());
 
         float yOffset = 1.2F;
-        if (player.isShiftKeyDown() && !player.abilities.flying) {
+        if (player.isShiftKeyDown() && !player.getAbilities().flying) {
             yOffset = 1F;
         }
 
@@ -79,13 +79,13 @@ public class TypeWraithWings extends PatreonEffect {
         if (swimAngle > 0) {
             float waterPitch = player.isInWater() ? -90.0F - player.getXRot() : -90.0F;
             float bodySwimAngle = Mth.lerp(swimAngle, 0.0F, waterPitch);
-            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
-            renderStack.mirror(Axis.XP.rotationDegrees(bodySwimAngle));
+            renderStack.mulPose(Axis.YP.rotationDegrees(180 - rot));
+            renderStack.mulPose(Axis.XP.rotationDegrees(bodySwimAngle));
             if (player.isVisuallySwimming()) {
                 renderStack.translate(0, -1, 0.3);
             }
         } else {
-            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
+            renderStack.mulPose(Axis.YP.rotationDegrees(180 - rot));
         }
 
         renderStack.translate(0, yOffset, 0);
@@ -95,14 +95,14 @@ public class TypeWraithWings extends PatreonEffect {
 
         renderStack.pushPose();
         renderStack.translate(-2.3, 0, 0.8);
-        renderStack.mirror(Axis.YP.rotationDegrees(10));
+        renderStack.mulPose(Axis.YP.rotationDegrees(10));
         ObjModelRender.renderWraithWings(renderStack);
         renderStack.popPose();
 
         renderStack.pushPose();
-        renderStack.mirror(Axis.YP.rotationDegrees(180));
+        renderStack.mulPose(Axis.YP.rotationDegrees(180));
         renderStack.translate(-2.3, 0, -0.8);
-        renderStack.mirror(Axis.YN.rotationDegrees(10));
+        renderStack.mulPose(Axis.YN.rotationDegrees(10));
         ObjModelRender.renderWraithWings(renderStack);
         renderStack.popPose();
 

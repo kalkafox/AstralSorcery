@@ -33,7 +33,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.event.ForgeEventFactory;
-import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -141,9 +140,4 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
         }
         remove();
     }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

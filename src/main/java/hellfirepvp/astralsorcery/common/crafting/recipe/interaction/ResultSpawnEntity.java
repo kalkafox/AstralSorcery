@@ -22,7 +22,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -64,7 +65,7 @@ public class ResultSpawnEntity extends InteractionResult {
 
     @Override
     public void read(JsonObject json) throws JsonParseException {
-        ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(json, "entityType"));
+        ResourceLocation key = ResourceLocation.parse(GsonHelper.getAsString(json, "entityType"));
         EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(key);
         if (type == null) {
             throw new JsonParseException("Unknown entity type: " + key);

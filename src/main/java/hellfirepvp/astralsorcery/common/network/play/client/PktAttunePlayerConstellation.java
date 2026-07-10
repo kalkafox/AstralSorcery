@@ -22,9 +22,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -78,8 +78,8 @@ public class PktAttunePlayerConstellation extends ASPacket<PktAttunePlayerConste
             context.enqueueWork(() -> {
                 IMajorConstellation cst = packet.attunement;
                 if (cst != null) {
-                    MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-                    if (srv.forgeGetWorldMap().containsKey(packet.level)) {
+                    MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+                    if (srv.levelKeys().contains(packet.level)) {
                         Level level = srv.getLevel(packet.level);
                         TileAttunementAltar ta = MiscUtils.getTileAt(level, packet.at, TileAttunementAltar.class, false);
                         if (ta != null && ta.getActiveRecipe() instanceof ActivePlayerAttunementRecipe) {

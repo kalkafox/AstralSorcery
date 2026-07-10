@@ -17,13 +17,13 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -60,7 +60,7 @@ public class WellRecipeBuilder extends CustomRecipeBuilder<WellLiquefaction> {
         return this;
     }
 
-    public WellRecipeBuilder setItemInput(Tag<Item> tag) {
+    public WellRecipeBuilder setItemInput(TagKey<Item> tag) {
         this.from = Ingredient.fromTag(tag);
         return this;
     }

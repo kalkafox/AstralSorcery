@@ -108,12 +108,12 @@ public class DataPatreonFlares extends AbstractData {
         ListTag entities = new ListTag();
         for (UUID playerUUID : this.entitiesServer.keySet()) {
             CompoundTag tag = new CompoundTag();
-            tag.putUniqueId("playerUUID", playerUUID);
+            tag.putUUID("playerUUID", playerUUID);
 
             ListTag entityList = new ListTag();
             for (PatreonPartialEntity entity : this.entitiesServer.get(playerUUID)) {
                 CompoundTag entityNBT = new CompoundTag();
-                entityNBT.putUniqueId("id", entity.getEffectUUID());
+                entityNBT.putUUID("id", entity.getEffectUUID());
 
                 CompoundTag data = new CompoundTag();
                 entity.save(data);
@@ -133,12 +133,12 @@ public class DataPatreonFlares extends AbstractData {
         ListTag listUpdates = new ListTag();
         for (UUID playerUUID : this.flarePlayerUpdates) {
             CompoundTag tag = new CompoundTag();
-            tag.putUniqueId("playerUUID", playerUUID);
+            tag.putUUID("playerUUID", playerUUID);
 
             ListTag entityList = new ListTag();
             for (PatreonPartialEntity entity : this.entitiesServer.get(playerUUID)) {
                 CompoundTag entityNBT = new CompoundTag();
-                entityNBT.putUniqueId("id", entity.getEffectUUID());
+                entityNBT.putUUID("id", entity.getEffectUUID());
 
                 CompoundTag data = new CompoundTag();
                 entity.save(data);
@@ -153,7 +153,7 @@ public class DataPatreonFlares extends AbstractData {
         ListTag listRemovals = new ListTag();
         for (UUID playerUUID : this.flareRemovals) {
             CompoundTag playerTag = new CompoundTag();
-            playerTag.putUniqueId("playerUUID", playerUUID);
+            playerTag.putUUID("playerUUID", playerUUID);
             listRemovals.add(playerTag);
         }
 

@@ -54,10 +54,10 @@ public class AttributeTypeThorns extends PerkAttributeType {
     }
 
     private void onThronsReflect(LivingIncomingDamageEvent event) {
-        if (!(event.getEntityLiving() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
-        Player player = (Player) event.getEntityLiving();
+        Player player = (Player) event.getEntity();
         LogicalSide direction = this.getSide(player);
         if (!hasTypeApplied(player, direction)) {
             return;
@@ -95,8 +95,8 @@ public class AttributeTypeThorns extends PerkAttributeType {
 
         if (reflectTarget != null) {
             float dmgReflected = event.getAmount() * reflectAmount;
-            if (dmgReflected > 0 && !event.getEntityLiving().equals(reflectTarget)) {
-                if (MiscUtils.canPlayerAttackServer(event.getEntityLiving(), reflectTarget)) {
+            if (dmgReflected > 0 && !event.getEntity().equals(reflectTarget)) {
+                if (MiscUtils.canPlayerAttackServer(event.getEntity(), reflectTarget)) {
                     DamageUtil.hurt(reflectTarget, CommonProxy.DAMAGE_SOURCE_REFLECT, dmgReflected, player);
                 }
             }

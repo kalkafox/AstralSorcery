@@ -17,9 +17,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -63,14 +63,14 @@ public class PktOpenGui extends ASPacket<PktOpenGui> {
         return new Handler<PktOpenGui>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktOpenGui packet, NetworkEvent.Context context) {
+            public void handleClient(PktOpenGui packet, PacketContext context) {
                 if (Minecraft.getInstance().player != null) {
                     context.enqueueWork(() -> AstralSorcery.getProxy().openGuiClient(packet.type, packet.data));
                 }
             }
 
             @Override
-            public void handle(PktOpenGui packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktOpenGui packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

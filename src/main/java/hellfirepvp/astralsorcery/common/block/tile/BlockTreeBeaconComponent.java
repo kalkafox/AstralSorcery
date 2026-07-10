@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.common.block.base.BlockFakedState;
 import hellfirepvp.astralsorcery.common.tile.TileTreeBeaconComponent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -33,7 +33,7 @@ import java.util.Random;
 public class BlockTreeBeaconComponent extends BlockFakedState {
 
     public BlockTreeBeaconComponent() {
-        super(Properties.create(Material.BARRIER, MaterialColor.AIR)
+        super(Properties.create(Material.BARRIER, MapColor.NONE)
                 .hardnessAndResistance(-1F, 3600000.0F)
                 .isRedstoneConductor(state -> 12));
     }

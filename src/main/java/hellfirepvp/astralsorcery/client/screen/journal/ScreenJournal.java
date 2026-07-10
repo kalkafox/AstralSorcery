@@ -151,7 +151,7 @@ public class ScreenJournal extends WidthHeightScreen {
             BookmarkProvider provider = drawnBookmarks.get(bookmarkRectangle);
             if (bookmarkIndex != provider.getIndex() && bookmarkRectangle.contains(xpos, ypos)) {
                 ScreenJournalProgression.resetJournal();
-                Minecraft.getInstance().displayGuiScreen(provider.getGuiScreen());
+                Minecraft.getInstance().setScreen(provider.getGuiScreen());
                 return true;
             }
         }

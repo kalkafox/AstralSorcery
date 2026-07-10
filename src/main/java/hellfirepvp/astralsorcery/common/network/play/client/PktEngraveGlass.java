@@ -20,12 +20,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -84,7 +84,7 @@ public class PktEngraveGlass extends ASPacket<PktEngraveGlass> {
         return (packet, context, direction) -> {
             context.enqueueWork(() -> {
                 //TODO 1.16.2 re-check once worlds are not all constantly loaded
-                MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+                MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
                 Level level = srv.getLevel(packet.dim);
                 TileRefractionTable tmt = MiscUtils.getTileAt(level, packet.pos, TileRefractionTable.class, false);
                 if (tmt != null && !packet.constellations.isEmpty()) {

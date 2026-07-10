@@ -38,14 +38,13 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -305,12 +304,8 @@ public class TileSpectralRelay extends TileEntityTick {
         }
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
-        if (this.inventory.hasCapability(cap, direction)) {
-            return this.inventory.getCapability().unwrap();
-        }
-        return super.getCapability(cap, direction);
+    @Nullable
+    public IItemHandler getExposedItemHandler(@Nullable Direction side) {
+        return this.inventory.getItemHandler(side);
     }
 }

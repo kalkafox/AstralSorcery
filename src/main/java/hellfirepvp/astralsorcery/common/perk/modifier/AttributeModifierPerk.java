@@ -101,26 +101,26 @@ public class AttributeModifierPerk extends AttributeConverterPerk implements Att
                 JsonObject serializedModifier = GsonHelper.getAsJsonObject(array.get(i), "modifiers[%s]");
 
                 if (serializedModifier.has("custom")) {
-                    String customKey = GsonHelper.getString(serializedModifier, "custom");
+                    String customKey = GsonHelper.getAsString(serializedModifier, "custom");
                     PerkAttributeModifier customModifier = RegistriesAS.REGISTRY_PERK_CUSTOM_MODIFIERS.getValue(ResourceLocation.parse(customKey));
                     if (customModifier == null) {
                         throw new IllegalArgumentException("Unknown specified modifier: " + customKey);
                     }
                     this.addModifier(customModifier);
                 } else {
-                    String typeKey = GsonHelper.getString(serializedModifier, "type");
+                    String typeKey = GsonHelper.getAsString(serializedModifier, "type");
                     PerkAttributeType type = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(ResourceLocation.parse(typeKey));
                     if (type == null) {
                         throw new IllegalArgumentException("Unknown modifier type: " + typeKey);
                     }
-                    String modeKey = GsonHelper.getString(serializedModifier, "mode");
+                    String modeKey = GsonHelper.getAsString(serializedModifier, "mode");
                     ModifierType mode;
                     try {
                         mode = ModifierType.valueOf(modeKey);
                     } catch (Exception exc) {
                         throw new IllegalArgumentException("Unknown mode: " + modeKey);
                     }
-                    float value = GsonHelper.getFloat(serializedModifier, "value");
+                    float value = GsonHelper.getAsFloat(serializedModifier, "value");
 
                     this.addModifier(value, mode, type);
                 }

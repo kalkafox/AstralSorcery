@@ -273,7 +273,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
         NBTHelper.writeOptional(pattern, "constellationType", this.constellationType, (nbt, cst) -> cst.save(nbt));
         NBTHelper.writeOptional(pattern, "constellationTrait", this.constellationTrait, (nbt, cst) -> cst.save(nbt));
         NBTHelper.writeEnum(pattern, "collectorType", this.collectorType);
-        NBTHelper.writeOptional(pattern, "playerUUID", this.playerUUID, (nbt, uuid) -> nbt.putUniqueId("playerUUID", uuid));
+        NBTHelper.writeOptional(pattern, "playerUUID", this.playerUUID, (nbt, uuid) -> nbt.putUUID("playerUUID", uuid));
     }
 
     @Override

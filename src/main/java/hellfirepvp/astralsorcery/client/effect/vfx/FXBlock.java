@@ -17,9 +17,9 @@ import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.client.util.BufferDecoratorBuilder;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.util.math.vector.Vector3f;
 
 import java.awt.*;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -87,9 +87,9 @@ public class FXBlock extends EntityVisualFX {
 
         renderStack.translate(0.5, 0.5, 0.5);
         renderStack.scale(scale, scale, scale);
-        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mulPose(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mulPose(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mulPose(Axis.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.translate(-0.5, -0.5, -0.5);
 
         new BufferDecoratorBuilder()

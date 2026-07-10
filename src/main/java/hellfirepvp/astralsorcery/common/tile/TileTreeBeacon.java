@@ -49,7 +49,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import hellfirepvp.astralsorcery.common.util.Constants;
-import net.neoforged.neoforge.event.world.SaplingGrowTreeEvent;
+import net.neoforged.neoforge.event.level.SaplingGrowTreeEvent;
 import net.neoforged.bus.api.Event;
 import net.neoforged.fml.LogicalSide;
 
@@ -179,7 +179,7 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
 
         Level level = this.getLevel();
         BlockState state = level.getBlockState(pos);
-        if (!state.isAir(level, pos)) {
+        if (!state.isAir()) {
             if (this.getLevel().setBlock(pos, BlocksAS.TREE_BEACON_COMPONENT.defaultBlockState(), Constants.BlockFlags.DEFAULT)) {
                 TileTreeBeaconComponent tfs = MiscUtils.getTileAt(level, pos, TileTreeBeaconComponent.class, true);
                 if (tfs == null) {
@@ -387,7 +387,7 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
         pattern.putFloat("starlight", this.starlight);
 
         if (this.playerUUID != null) {
-            pattern.putUniqueId("playerUUID", this.playerUUID);
+            pattern.putUUID("playerUUID", this.playerUUID);
         }
     }
 

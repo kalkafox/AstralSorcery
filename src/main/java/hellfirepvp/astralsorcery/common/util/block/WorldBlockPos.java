@@ -17,11 +17,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.Function;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -46,7 +46,7 @@ public class WorldBlockPos extends BlockPos {
 
     public static WorldBlockPos wrapServer(Level level, BlockPos pos) {
         return new WorldBlockPos(level.dimension(), pos, type -> {
-            MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
             return server.getLevel(type);
         });
     }

@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashMap;
 import java.util.List;

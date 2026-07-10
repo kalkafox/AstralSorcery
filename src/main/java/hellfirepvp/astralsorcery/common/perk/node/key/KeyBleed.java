@@ -56,7 +56,7 @@ public class KeyBleed extends KeyPerk {
             LogicalSide direction = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
-                LivingEntity target = event.getEntityLiving();
+                LivingEntity target = event.getEntity();
 
                 double chance = CONFIG.bleedChance.get();
                 chance = PerkAttributeHelper.getOrCreateMap(player, direction)

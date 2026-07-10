@@ -12,12 +12,9 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Rarity;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
@@ -55,11 +52,6 @@ public interface CustomItemBlockProperties extends CustomItemBlock {
 
     default boolean canItemBeRepaired() {
         return false;
-    }
-
-    @Nonnull
-    default Map<ToolType, Integer> getItemToolLevels() {
-        return Collections.emptyMap();
     }
 
     @Nullable

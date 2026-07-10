@@ -24,10 +24,11 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.util.LogicalSidedProvider;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -79,7 +80,7 @@ public class PktRotateTelescope extends ASPacket<PktRotateTelescope> {
         return new Handler<PktRotateTelescope>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktRotateTelescope packet, NetworkEvent.Context context) {
+            public void handleClient(PktRotateTelescope packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     Optional<Level> clWorld = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
                     clWorld.ifPresent(level -> {
@@ -95,10 +96,10 @@ public class PktRotateTelescope extends ASPacket<PktRotateTelescope> {
             }
 
             @Override
-            public void handle(PktRotateTelescope packet, NetworkEvent.Context context, LogicalSide direction) {
+            public void handle(PktRotateTelescope packet, PacketContext context, LogicalSide direction) {
                 context.enqueueWork(() -> {
                     //TODO 1.16.2 re-check once worlds are not all constantly loaded
-                    MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+                    MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
                     Level level = srv.getLevel(packet.dim);
 
                     TileTelescope tt = MiscUtils.getTileAt(level, packet.pos, TileTelescope.class, false);

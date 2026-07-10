@@ -57,7 +57,7 @@ public class AttuneCrystalRecipe extends AttunementRecipe<ActiveCrystalAttunemen
     @Override
     public ActiveCrystalAttunementRecipe createRecipe(TileAttunementAltar altar) {
         ItemEntity crystal = findApplicableCrystal(altar);
-        return new ActiveCrystalAttunementRecipe(this, altar.getActiveConstellation(), crystal.getEntityId());
+        return new ActiveCrystalAttunementRecipe(this, altar.getActiveConstellation(), crystal.getId());
     }
 
     @Nonnull

@@ -474,7 +474,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().displayGuiScreen(origin);
+        Minecraft.getInstance().setScreen(origin);
     }
 
     @Override
@@ -491,7 +491,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
         }
 
         if (rectBack != null && rectBack.contains(xpos, ypos)) {
-            Minecraft.getInstance().displayGuiScreen(origin);
+            Minecraft.getInstance().setScreen(origin);
             return true;
         }
         if (rectPrev != null && rectPrev.contains(xpos, ypos)) {

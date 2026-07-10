@@ -14,9 +14,6 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.common.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.fluids.capability.wrappers.FluidBucketWrapper;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -31,14 +28,11 @@ import java.util.function.Supplier;
 public class ItemLiquidStarlightBucket extends BucketItem {
 
     public ItemLiquidStarlightBucket(Supplier<? extends Fluid> fluidSupplier) {
-        super(fluidSupplier, new Item.Properties()
-                .containerItem(Items.BUCKET)
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+        super(fluidSupplier.get(), new Item.Properties()
+                .craftRemainder(Items.BUCKET)
+                .stacksTo(1));
     }
 
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-        return new FluidBucketWrapper(stack);
-    }
+    // 1.21 port: the fluid-handler capability (FluidBucketWrapper) is registered
+    // in RegistryCapabilities.attachCapabilities; creative tab placement pending.
 }

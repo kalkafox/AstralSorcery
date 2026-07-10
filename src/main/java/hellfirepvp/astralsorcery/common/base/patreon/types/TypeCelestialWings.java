@@ -25,7 +25,6 @@ import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.util.math.vector.Vector3f;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
@@ -39,6 +38,7 @@ import java.awt.*;
 import java.util.EnumSet;
 import java.util.UUID;
 import java.util.function.Consumer;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -148,7 +148,7 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
     private void renderWings(Player player, PoseStack renderStack, float pTicks) {
         float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, pTicks);
         float yOffset = 1.3F;
-        if (player.isShiftKeyDown() && !player.abilities.flying) {
+        if (player.isShiftKeyDown() && !player.getAbilities().flying) {
             yOffset = 1F;
         }
         float f = Math.abs((ClientScheduler.getSystemClientTick() % 240) - 120F) / 120F;
@@ -156,14 +156,14 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
 
         renderStack.pushPose();
         renderStack.translate(0, yOffset + offset, 0);
-        renderStack.mirror(Axis.YP.rotationDegrees(180F - rot));
+        renderStack.mulPose(Axis.YP.rotationDegrees(180F - rot));
         renderStack.scale(0.02F, 0.02F, 0.02F);
 
         RenderTypesAS.MODEL_CELESTIAL_WINGS.setupRenderState();
 
         renderStack.translate(-25, 0, 0);
         ObjModelRender.renderCelestialWings(renderStack);
-        renderStack.mirror(Axis.YP.rotationDegrees(180F));
+        renderStack.mulPose(Axis.YP.rotationDegrees(180F));
         renderStack.translate(-50, 0, 0);
         ObjModelRender.renderCelestialWings(renderStack);
         renderStack.popPose();

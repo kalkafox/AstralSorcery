@@ -17,9 +17,9 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
-import net.neoforged.fml.network.NetworkHooks;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -49,6 +49,6 @@ public abstract class CustomContainerProvider<C extends AbstractContainerMenu> i
     protected abstract void writeExtraData(FriendlyByteBuf buf);
 
     public void openFor(ServerPlayer player) {
-        NetworkHooks.openGui(player, this, this::writeExtraData);
+        player.openMenu(this, this::writeExtraData);
     }
 }

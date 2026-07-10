@@ -18,11 +18,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

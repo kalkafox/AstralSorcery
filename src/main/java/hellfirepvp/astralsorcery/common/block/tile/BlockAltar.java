@@ -33,7 +33,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
@@ -51,8 +50,8 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
 
     public BlockAltar(AltarType type) {
         super(PropertiesMarble.defaultMarble()
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
 
         this.type = type;
     }

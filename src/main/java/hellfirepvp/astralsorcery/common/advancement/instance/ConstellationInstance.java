@@ -96,13 +96,13 @@ public class ConstellationInstance extends AbstractCriterionTriggerInstance {
 
     public static ConstellationInstance deserialize(ResourceLocation id, JsonObject json) {
         ConstellationInstance instance = new ConstellationInstance(id);
-        instance.constellationMajor = GsonHelper.getBoolean(json, "major", false);
-        instance.constellationWeak  = GsonHelper.getBoolean(json, "weak", false);
-        instance.constellationMinor = GsonHelper.getBoolean(json, "minor", false);
+        instance.constellationMajor = GsonHelper.getAsBoolean(json, "major", false);
+        instance.constellationWeak  = GsonHelper.getAsBoolean(json, "weak", false);
+        instance.constellationMinor = GsonHelper.getAsBoolean(json, "minor", false);
         JsonArray constellationNames = GsonHelper.getAsJsonArray(json, "constellations", new JsonArray());
         for (int idx = 0; idx < constellationNames.size(); idx++) {
             JsonElement value = constellationNames.get(idx);
-            String key = GsonHelper.getString(value, String.format("constellations[%s]", idx));
+            String key = GsonHelper.getAsString(value, String.format("constellations[%s]", idx));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(ResourceLocation.parse(key));
             if (cst == null) {
                 throw new IllegalArgumentException(String.format("Unknown constellation: %s - at constellations[%s]", key, idx));

@@ -30,7 +30,7 @@ import net.minecraft.world.level.Level;
 public abstract class ItemUsableDust extends Item implements DispenseItemBehavior {
 
     public ItemUsableDust() {
-        super(new Properties().group(CommonProxy.ITEM_GROUP_AS));
+        super(new Properties());
     }
 
     abstract boolean dispense(BlockSource dispenser);

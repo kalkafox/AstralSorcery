@@ -60,7 +60,7 @@ public class ConstellationCopyStatsRecipe extends ConstellationBaseAverageStatsR
         super.deserializeAdditionalJson(recipeObject);
 
         if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_SLOT)) {
-            this.constellationSlot = GsonHelper.getInt(recipeObject, KEY_CONSTELLATION_SLOT);
+            this.constellationSlot = GsonHelper.getAsInt(recipeObject, KEY_CONSTELLATION_SLOT);
         }
     }
 

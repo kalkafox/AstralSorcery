@@ -20,14 +20,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.ToolType;
 import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
-import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 
@@ -54,12 +54,12 @@ public class MantleEffectPelotrio extends MantleEffect {
     }
 
     private void onHurt(LivingAttackEvent event) {
-        Level level = event.getEntityLiving().getCommandSenderWorld();
+        Level level = event.getEntity().getCommandSenderWorld();
         if (level.isClientSide()) {
             return;
         }
 
-        LivingEntity attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (attacker instanceof Player) {
             if (attacked instanceof ServerPlayer && MiscUtils.isPlayerFakeMP((ServerPlayer) attacked)) {
@@ -83,16 +83,16 @@ public class MantleEffectPelotrio extends MantleEffect {
             return;
         }
 
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if ((!(player instanceof ServerPlayer) || !MiscUtils.isPlayerFakeMP((ServerPlayer) player)) &&
                 ItemMantle.getEffect(player, ConstellationsAS.pelotrio) != null) {
 
             BlockState state = event.getState();
 
-            if ((state.getHarvestTool() == ToolType.AXE || !state.requiresCorrectToolForDrops()) &&
-                    (state.isIn(BlockTags.LOGS) || state.isIn(BlockTags.LEAVES)) &&
+            if ((state.is(BlockTags.MINEABLE_WITH_AXE) || !state.requiresCorrectToolForDrops()) &&
+                    (state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES)) &&
                     !player.getMainHandItem().isEmpty() &&
-                    player.getMainHandItem().getToolTypes().contains(ToolType.AXE)) {
+                    player.getMainHandItem().is(ItemTags.AXES)) {
 
                 if (random.nextFloat() < CONFIG.chanceSpawnAxe.get()) {
                     if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerAxe.get())) {
@@ -103,9 +103,9 @@ public class MantleEffectPelotrio extends MantleEffect {
                 }
                 return;
             }
-            if ((state.getHarvestTool() == ToolType.PICKAXE || !state.requiresCorrectToolForDrops()) &&
+            if ((state.is(BlockTags.MINEABLE_WITH_PICKAXE) || !state.requiresCorrectToolForDrops()) &&
                     !player.getMainHandItem().isEmpty() &&
-                    player.getMainHandItem().getToolTypes().contains(ToolType.PICKAXE)) {
+                    player.getMainHandItem().is(ItemTags.PICKAXES)) {
 
                 if (random.nextFloat() < CONFIG.chanceSpawnPickaxe.get()) {
                     if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerPickaxe.get())) {

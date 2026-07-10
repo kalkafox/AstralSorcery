@@ -26,7 +26,7 @@ public class ItemCelestialCrystal extends ItemCrystalBase {
 
     public ItemCelestialCrystal() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS)
+
                 .rarity(CommonProxy.RARITY_CELESTIAL));
     }
 

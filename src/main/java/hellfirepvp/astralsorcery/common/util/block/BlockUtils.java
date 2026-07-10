@@ -34,10 +34,9 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.ToolType;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -201,18 +201,8 @@ public class BlockUtils {
         if (!state.requiresCorrectToolForDrops()) {
             return true;
         }
-
-        ToolType tool = state.getHarvestTool();
-        if (stack.isEmpty() || tool == null) {
-            return !state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state);
-        }
-
-        int toolLevel = stack.getItem().getLevel(stack, tool, null, state);
-        if (toolLevel < 0) {
-            return!state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state);
-        }
-
-        return toolLevel >= state.getLevel();
+        // harvest tool/level checks are tag-driven in 1.21; the stack knows both
+        return stack.isCorrectToolForDrops(state);
     }
 
     public static boolean breakBlockWithPlayer(BlockPos pos, ServerPlayer playerMP) {

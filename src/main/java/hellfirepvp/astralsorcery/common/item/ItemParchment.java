@@ -22,6 +22,6 @@ public class ItemParchment extends Item {
 
     public ItemParchment() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS));
+);
     }
 }

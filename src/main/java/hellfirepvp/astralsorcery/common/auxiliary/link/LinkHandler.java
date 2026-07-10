@@ -22,11 +22,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.Level;
 import hellfirepvp.observerlib.common.util.tick.TickEvent;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -97,14 +97,14 @@ public class LinkHandler implements ITickHandler {
         switch (result.getType()) {
             case SELECT_START:
                 if (user.getType() == LinkType.ENTITY) {
-                    playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.start",
-                            result.getLinkingSession().getSelectedEntity().getDisplayName()).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+                    playerIn.sendSystemMessage(Component.translatable("astralsorcery.misc.link.start",
+                            result.getLinkingSession().getSelectedEntity().getDisplayName()).withStyle(ChatFormatting.GREEN));
                 } else {
                     String name = tile.getUnLocalizedDisplayName();
                     if (tile.onSelect(playerIn)) {
                         if (name != null) {
-                            playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.start",
-                                    Component.translatable(name)).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+                            playerIn.sendSystemMessage(Component.translatable("astralsorcery.misc.link.start",
+                                    Component.translatable(name)).withStyle(ChatFormatting.GREEN));
                         }
                     }
                 }
@@ -133,10 +133,10 @@ public class LinkHandler implements ITickHandler {
                         tile.onBlockLinkCreate(playerIn, pos);
                         String linkedFrom = tile.getUnLocalizedDisplayName();
                         if (linkedFrom != null) {
-                            playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.link",
+                            playerIn.sendSystemMessage(Component.translatable("astralsorcery.misc.link.link",
                                     Component.translatable(linkedFrom),
                                     Component.translatable(linkedToName))
-                                    .withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+                                    .withStyle(ChatFormatting.GREEN));
                         }
                     }
                 }
@@ -153,10 +153,10 @@ public class LinkHandler implements ITickHandler {
                     }
                     String linkedFrom = tile.getUnLocalizedDisplayName();
                     if (linkedFrom != null) {
-                        playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.unlink",
+                        playerIn.sendSystemMessage(Component.translatable("astralsorcery.misc.link.unlink",
                                 Component.translatable(linkedFrom),
                                 Component.translatable(linkedToName))
-                                .withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+                                .withStyle(ChatFormatting.GREEN));
                     }
                 }
                 break;
@@ -168,7 +168,7 @@ public class LinkHandler implements ITickHandler {
     }
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
             return;
         }
@@ -200,8 +200,8 @@ public class LinkHandler implements ITickHandler {
             }
             if (needsRemoval) {
                 iterator.remove();
-                player.sendMessage(Component.translatable("astralsorcery.misc.link.stop")
-                        .withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                player.sendSystemMessage(Component.translatable("astralsorcery.misc.link.stop")
+                        .withStyle(ChatFormatting.RED));
             }
         }
     }

@@ -38,7 +38,7 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
     public void render(TileAttunementAltar tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         renderStack.pushPose();
         renderStack.translate(0.5, 0.5, 0.5);
-        renderStack.mirror(Axis.XP.rotationDegrees(180));
+        renderStack.mulPose(Axis.XP.rotationDegrees(180));
         MODEL_ATTUNEMENT_ALTAR.render(renderStack, renderTypeBuffer, combinedLight, combinedOverlay);
         renderStack.popPose();
 
@@ -84,7 +84,7 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
 
             renderStack.pushPose();
             renderStack.translate(0.5, framePosY, 0.5);
-            renderStack.mirror(Axis.XP.rotationDegrees(180));
+            renderStack.mulPose(Axis.XP.rotationDegrees(180));
             MODEL_ATTUNEMENT_ALTAR.renderHovering(renderStack, renderTypeBuffer.getBuffer(MODEL_ATTUNEMENT_ALTAR.getGeneralType()), combinedLight, combinedOverlay, 1F, 1F, 1F, 1F, xOffset, zDist, rotation);
             renderStack.popPose();
         }

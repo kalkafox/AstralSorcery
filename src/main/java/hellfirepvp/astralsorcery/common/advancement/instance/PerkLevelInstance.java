@@ -49,7 +49,7 @@ public class PerkLevelInstance extends AbstractCriterionTriggerInstance {
 
     public static PerkLevelInstance deserialize(ResourceLocation id, JsonObject json) {
         PerkLevelInstance instance = new PerkLevelInstance(id);
-        instance.levelNeeded = GsonHelper.getInt(json, "levelNeeded");
+        instance.levelNeeded = GsonHelper.getAsInt(json, "levelNeeded");
         return instance;
     }
 

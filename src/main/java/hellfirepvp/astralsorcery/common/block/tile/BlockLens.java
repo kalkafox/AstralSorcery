@@ -38,7 +38,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -62,7 +61,7 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
 
     public BlockLens() {
         super(PropertiesGlass.coatedGlass()
-                .harvestTool(ToolType.PICKAXE));
+);
         registerDefaultState(this.getStateContainer().any().setValue(PLACED_AGAINST, Direction.DOWN));
     }
 
@@ -90,9 +89,9 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
             if (lens != null && lens.getColorType() != null) {
                 ItemStack drop = lens.getColorType().getStack();
                 if (player.getItemInHand(hand).isEmpty()) {
-                    player.setHeldItem(hand, drop);
+                    player.setItemInHand(hand, drop);
                 } else {
-                    if (!player.inventory.getArmor(drop)) {
+                    if (!player.getInventory().getArmor(drop)) {
                         ItemUtils.dropItem(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
                     }
                 }

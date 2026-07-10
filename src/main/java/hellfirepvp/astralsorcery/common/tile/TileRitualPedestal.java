@@ -53,9 +53,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.capabilities.Capability;
 import hellfirepvp.astralsorcery.common.util.Constants;
-import net.neoforged.neoforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,6 +61,7 @@ import java.awt.*;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -597,7 +596,7 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
 
         pattern.put("inventory", this.inventory.serialize());
         if (this.ownerUUID != null) {
-            pattern.putUniqueId("ownerUUID", this.ownerUUID);
+            pattern.putUUID("ownerUUID", this.ownerUUID);
         }
         if (this.ritualLinkTo != null) {
             NBTHelper.setAsSubTag(pattern, "ritualLinkTo", cmp -> NBTHelper.writeBlockPosToNBT(this.ritualLinkTo, cmp));
@@ -623,13 +622,9 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
         pattern.put("blockConfiguration", listConfigurations);
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
-        if (this.inventory.hasCapability(cap, direction)) {
-            return this.inventory.getCapability().unwrap();
-        }
-        return super.getCapability(cap, direction);
+    @Nullable
+    public IItemHandler getExposedItemHandler(@Nullable Direction side) {
+        return this.inventory.getItemHandler(side);
     }
 
     static {

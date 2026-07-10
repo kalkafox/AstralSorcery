@@ -27,8 +27,8 @@ public class EventHelperTemporaryFlight {
 
     private static final TimeoutList<Player> temporaryFlight = new TimeoutList<>(player -> {
         if (player instanceof ServerPlayer && ((ServerPlayer) player).gameMode.getGameType().isSurvival()) {
-            player.abilities.allowFlying = false;
-            player.abilities.flying = false;
+            player.getAbilities().allowFlying = false;
+            player.getAbilities().flying = false;
             player.onUpdateAbilities();
         }
     }, TickEvent.Type.SERVER);

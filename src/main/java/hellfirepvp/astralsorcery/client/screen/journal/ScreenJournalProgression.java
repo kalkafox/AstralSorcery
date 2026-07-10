@@ -459,7 +459,7 @@ public class ScreenJournalProgression extends ScreenJournal {
             }
             if (this.searchHoverNode != null) {
                 this.searchTextEntry.setText("");
-                Minecraft.getInstance().displayGuiScreen(new ScreenJournalPages(this, this.searchHoverNode));
+                Minecraft.getInstance().setScreen(new ScreenJournalPages(this, this.searchHoverNode));
                 SoundHelper.playSoundClient(SoundsAS.GUI_JOURNAL_PAGE, 1F, 1F);
                 return true;
             }

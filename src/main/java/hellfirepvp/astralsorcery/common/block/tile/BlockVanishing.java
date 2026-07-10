@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.EntityType;
@@ -41,7 +41,7 @@ import java.util.Random;
 public class BlockVanishing extends BaseEntityBlock {
 
     public BlockVanishing() {
-        super(Properties.create(Material.BARRIER, MaterialColor.AIR)
+        super(Properties.create(Material.BARRIER, MapColor.NONE)
                 .hardnessAndResistance(-1F, 3600000.0F)
                 .sound(SoundType.METAL));
     }

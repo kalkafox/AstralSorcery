@@ -29,7 +29,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -37,6 +36,7 @@ import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 import javax.annotation.Nullable;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -51,8 +51,8 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
 
     public BlockChalice() {
         super(PropertiesMisc.defaultGoldMachinery()
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
     }
 
     @Override
@@ -71,22 +71,22 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
                     FluidStack st = FluidUtil.getFluidContained(interact).orElse(FluidStack.EMPTY);
                     if (st.isEmpty()) {
                         //Fill the stack from the tile?
-                        FluidActionResult far = FluidUtil.tryFillContainer(interact, tc.getTankAccess(), FluidAttributes.BUCKET_VOLUME, player, true);
+                        FluidActionResult far = FluidUtil.tryFillContainer(interact, tc.getTankAccess(), FluidType.BUCKET_VOLUME, player, true);
                         if (far.shouldSwing()) {
                             if (!player.isCreative()) {
                                 interact.shrink(1);
-                                player.setHeldItem(hand, interact);
-                                player.inventory.hurtArmor(level, far.getObject());
+                                player.setItemInHand(hand, interact);
+                                player.getInventory().hurtArmor(level, far.getObject());
                             }
                         }
                     } else {
                         //Drain from stack into tile?
-                        FluidActionResult far = FluidUtil.tryEmptyContainer(interact, tc.getTankAccess(), FluidAttributes.BUCKET_VOLUME, player, true);
+                        FluidActionResult far = FluidUtil.tryEmptyContainer(interact, tc.getTankAccess(), FluidType.BUCKET_VOLUME, player, true);
                         if (far.shouldSwing()) {
                             if (!player.isCreative()) {
                                 interact.shrink(1);
-                                player.setHeldItem(hand, interact);
-                                player.inventory.hurtArmor(level, far.getObject());
+                                player.setItemInHand(hand, interact);
+                                player.getInventory().hurtArmor(level, far.getObject());
                             }
                         }
                     }

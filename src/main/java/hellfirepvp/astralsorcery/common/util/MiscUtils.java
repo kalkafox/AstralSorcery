@@ -42,9 +42,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.ForgeEventFactory;
-import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModLoadingContext;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -56,6 +55,8 @@ import java.util.List;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraft.world.level.ClipContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -414,7 +415,7 @@ public class MiscUtils {
                 return null;
             }
 
-            MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+            MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
             ServerLevel targetWorld = srv.getLevel(target);
             if (targetWorld == null) {
                 return null;

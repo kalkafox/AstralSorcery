@@ -22,6 +22,6 @@ public class ItemResonatingGem extends Item {
 
     public ItemResonatingGem() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS));
+);
     }
 }

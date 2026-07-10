@@ -38,7 +38,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.Util;
@@ -54,6 +53,7 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -339,11 +339,11 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
             tooltip.add(Component.translatable("astralsorcery.misc.craftInformation").withStyle(ChatFormatting.GRAY));
         }
         if (stackIngredient != null && Minecraft.getInstance().options.advancedItemTooltips) {
-            Tag<Item> itemTag = IngredientHelper.guessTag(stackIngredient);
-            if (itemTag instanceof ITag.INamedTag) {
+            TagKey<Item> itemTag = IngredientHelper.guessTag(stackIngredient);
+            if (itemTag != null) {
                 tooltip.add(MutableComponent.EMPTY);
                 tooltip.add(Component.translatable("astralsorcery.misc.input.tag",
-                        ((ITag.INamedTag<Item>) itemTag).getName().toString()).withStyle(ChatFormatting.GRAY));
+                        itemTag.location().toString()).withStyle(ChatFormatting.GRAY));
             }
             if (stackIngredient instanceof FluidIngredient) {
                 List<FluidStack> fluids = ((FluidIngredient) stackIngredient).getFluids();

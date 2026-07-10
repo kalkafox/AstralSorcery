@@ -60,7 +60,7 @@ public class KeyProjectileDistance extends KeyPerk {
                     added *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
 
                     float capDstSq = (CONFIG.capDistance.get().floatValue());
-                    float mul = ((float) (player.getDistanceSq(event.getEntityLiving()))) / capDstSq;
+                    float mul = ((float) (player.getDistanceSq(event.getEntity()))) / capDstSq;
                     added *= (mul > 1 ? 1 : mul);
 
                     float amt = event.getAmount();

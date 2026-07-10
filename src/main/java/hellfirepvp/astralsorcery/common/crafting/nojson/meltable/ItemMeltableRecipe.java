@@ -16,14 +16,14 @@ import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.Tag;
-import net.minecraft.tags.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -50,7 +50,7 @@ public class ItemMeltableRecipe extends WorldMeltableRecipe {
                 BlockPredicates.isState(stateIn), itemOut);
     }
 
-    public static ItemMeltableRecipe of(ITag.INamedTag<Block> blockTagIn, ItemStack itemOut) {
+    public static ItemMeltableRecipe of(TagKey<Block> blockTagIn, ItemStack itemOut) {
         return new ItemMeltableRecipe(AstralSorcery.key(String.format("tag_%s", blockTagIn.getName().getPath())),
                 BlockPredicates.isInTag(blockTagIn), itemOut);
     }

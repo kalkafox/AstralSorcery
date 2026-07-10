@@ -49,6 +49,6 @@ public class BookLookupInfo {
 
     @OnlyIn(Dist.CLIENT)
     public void openGui() {
-        Minecraft.getInstance().displayGuiScreen(new ScreenJournalPages(Minecraft.getInstance().screen, this.getResearchNode(), this.getPageIndex()));
+        Minecraft.getInstance().setScreen(new ScreenJournalPages(Minecraft.getInstance().screen, this.getResearchNode(), this.getPageIndex()));
     }
 }

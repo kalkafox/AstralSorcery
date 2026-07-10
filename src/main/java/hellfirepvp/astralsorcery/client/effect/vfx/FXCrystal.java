@@ -22,9 +22,9 @@ import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.client.util.BufferDecoratorBuilder;
-import net.minecraft.util.math.vector.Vector3f;
 
 import java.awt.*;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -86,9 +86,9 @@ public class FXCrystal extends EntityVisualFX implements EntityDynamicFX {
         renderStack.pushPose();
         renderStack.translate(vec.getX(), vec.getY() - 0.05F, vec.getZ());
         renderStack.scale(scale, scale, scale);
-        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mulPose(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mulPose(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mulPose(Axis.ZP.rotationDegrees((float) rotation.getZ()));
 
         BufferDecoratorBuilder.withColor((r, g, b, a) -> new int[] { c.getRed(), c.getGreen(), c.getBlue(), alpha})
                 .decorate(drawBuffer.getBuffer(ctx.getRenderType()),

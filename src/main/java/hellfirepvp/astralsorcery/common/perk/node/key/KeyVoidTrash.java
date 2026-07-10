@@ -19,6 +19,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

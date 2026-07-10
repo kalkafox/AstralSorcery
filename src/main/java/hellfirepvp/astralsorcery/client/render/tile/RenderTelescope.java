@@ -35,8 +35,8 @@ public class RenderTelescope extends CustomTileEntityRenderer<TileTelescope> {
     public void render(TileTelescope tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         renderStack.pushPose();
         renderStack.translate(0.5F, 1.5F, 0.5F);
-        renderStack.mirror(Axis.XP.rotationDegrees(180F));
-        renderStack.mirror(Axis.YP.rotationDegrees(180F + tile.getRotation().ordinal() * 45F));
+        renderStack.mulPose(Axis.XP.rotationDegrees(180F));
+        renderStack.mulPose(Axis.YP.rotationDegrees(180F + tile.getRotation().ordinal() * 45F));
 
         MODEL_TELESCOPE.render(renderStack, renderTypeBuffer, combinedLight, combinedOverlay);
 

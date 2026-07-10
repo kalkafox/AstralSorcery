@@ -54,7 +54,7 @@ public class RenderRefractionTable extends CustomTileEntityRenderer<TileRefracti
 
         renderStack.pushPose();
         renderStack.translate(0.5F, 1.5F, 0.5F);
-        renderStack.mirror(Axis.XP.rotationDegrees(180F));
+        renderStack.mulPose(Axis.XP.rotationDegrees(180F));
 
         RenderType type = MODEL_REFRACTION_TABLE.getGeneralType();
         VertexConsumer vb = renderTypeBuffer.getBuffer(type);

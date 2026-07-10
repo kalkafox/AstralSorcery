@@ -17,11 +17,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.UUID;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -75,7 +75,7 @@ public class PlayerReference {
 
     @Nullable
     public ServerPlayer getOnlinePlayer() {
-        MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
             throw new IllegalArgumentException("Called getOnlinePlayer on clientside or while no server is running!");
         }
@@ -89,7 +89,7 @@ public class PlayerReference {
     }
 
     public void save(CompoundTag tag) {
-        tag.putUniqueId("playerUUID", this.playerUUID);
+        tag.putUUID("playerUUID", this.playerUUID);
         tag.putString("playerName", Component.Serializer.getPos(this.playerName));
     }
 

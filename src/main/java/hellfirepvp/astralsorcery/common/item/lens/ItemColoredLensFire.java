@@ -47,6 +47,8 @@ import hellfirepvp.astralsorcery.common.util.Constants;
  */
 public class ItemColoredLensFire extends ItemColoredLens {
 
+    private static final java.util.Random random = new java.util.Random();
+
     private static final ColorTypeFire COLOR_TYPE_FIRE = new ColorTypeFire();
 
     public ItemColoredLensFire() {

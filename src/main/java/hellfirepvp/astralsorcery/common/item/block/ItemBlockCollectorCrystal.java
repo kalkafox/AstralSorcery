@@ -35,8 +35,8 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
 
     public ItemBlockCollectorCrystal(Block block, Properties itemProperties) {
         super(block, itemProperties
-                .group(CommonProxy.ITEM_GROUP_AS_CRYSTALS)
-                .maxStackSize(1));
+
+                .stacksTo(1));
     }
 
     @Override

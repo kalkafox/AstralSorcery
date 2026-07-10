@@ -73,14 +73,14 @@ public class CommandConstellation {
         Component targetName = target.getDisplayName();
         PlayerProgress progress = ResearchHelper.getProgress(target, LogicalSide.SERVER);
         if (!progress.isValid() || progress.hasSeenConstellation(cst)) {
-            source.sendMessage(Component.literal("Failed! ").append(targetName).append(" has already seen ").append(cst.getConstellationName())
-                    .withStyle(ChatFormatting.RED), Util.NIL_UUID);
+            source.sendSystemMessage(Component.literal("Failed! ").append(targetName).append(" has already seen ").append(cst.getConstellationName())
+                    .withStyle(ChatFormatting.RED));
             return 0;
         }
         if (ResearchManager.memorizeConstellation(cst, target)) {
             ResearchHelper.sendConstellationMemorizationMessage(target, progress, cst);
-            source.sendMessage(Component.literal("Success! ")
-                    .withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+            source.sendSystemMessage(Component.literal("Success! ")
+                    .withStyle(ChatFormatting.GREEN));
             return Command.SINGLE_SUCCESS;
         } else {
             source.sendSystemMessage(Component.literal("Failed!").withStyle(ChatFormatting.RED));
@@ -94,8 +94,8 @@ public class CommandConstellation {
         Component targetName = target.getDisplayName();
         PlayerProgress progress = ResearchHelper.getProgress(target, LogicalSide.SERVER);
         if (!progress.isValid() || progress.hasConstellationDiscovered(cst)) {
-            source.sendMessage(Component.literal("Failed! ").append(targetName).append(" has already discovered ").append(cst.getConstellationName())
-                    .withStyle(ChatFormatting.RED), Util.NIL_UUID);
+            source.sendSystemMessage(Component.literal("Failed! ").append(targetName).append(" has already discovered ").append(cst.getConstellationName())
+                    .withStyle(ChatFormatting.RED));
             return 0;
         }
         if (ResearchManager.discoverConstellation(cst, target)) {

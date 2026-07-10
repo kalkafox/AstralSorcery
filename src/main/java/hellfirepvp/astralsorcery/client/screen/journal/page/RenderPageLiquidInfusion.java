@@ -29,6 +29,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -60,7 +61,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
         this.renderExpectedIngredientInput(renderStack, renderX, renderY, z, 1.2F, 0, this.recipe.getItemInput());
 
         BlockAtlasTexture.getInstance().bindTexture();
-        TextureAtlasSprite tas = RenderingUtils.getParticleIcon(new FluidStack(this.recipe.getLiquidInput(), FluidAttributes.BUCKET_VOLUME));
+        TextureAtlasSprite tas = RenderingUtils.getParticleIcon(new FluidStack(this.recipe.getLiquidInput(), FluidType.BUCKET_VOLUME));
         RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             renderStack.pushPose();
             renderStack.translate(x, y, z);
@@ -96,7 +97,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
         this.renderHoverTooltips(renderStack, xpos, ypos, z, this.recipe.getId());
         this.renderInfoStarTooltips(renderStack, x, y, z, xpos, ypos, (toolTip) -> {
             toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.liquid",
-                    this.recipe.getLiquidInput().getAttributes().getDisplayName(new FluidStack(this.recipe.getLiquidInput(), FluidAttributes.BUCKET_VOLUME))));
+                    this.recipe.getLiquidInput().getAttributes().getDisplayName(new FluidStack(this.recipe.getLiquidInput(), FluidType.BUCKET_VOLUME))));
             toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.chance.format",
                     this.getInfuserChanceDescription(this.recipe.getConsumptionChance())));
             if (this.recipe.doesConsumeMultipleFluids()) {

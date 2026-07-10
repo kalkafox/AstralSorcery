@@ -21,9 +21,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.neoforge.common.util.LazyOptional;
+import java.util.Optional;
 import net.neoforged.neoforge.fluids.FluidActionResult;
-import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -88,12 +88,12 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
         ServerLevel level = source.getLevel();
         ItemStack singleStack = stack.copy();
         singleStack.setCount(1);
-        LazyOptional<IFluidHandlerItem> itemFluidHandler = FluidUtil.getFluidHandler(singleStack);
+        Optional<IFluidHandlerItem> itemFluidHandler = FluidUtil.getFluidHandler(singleStack);
         if (!itemFluidHandler.isPresent()) {
             return super.execute(source, stack);
         }
         FluidStack drained = itemFluidHandler
-                .map(handler -> handler.drain(FluidAttributes.BUCKET_VOLUME, IFluidHandler.FluidAction.EXECUTE))
+                .map(handler -> handler.drain(FluidType.BUCKET_VOLUME, IFluidHandler.FluidAction.EXECUTE))
                 .orElse(FluidStack.EMPTY);
         Direction dispenserFacing = source.getBlockState().get(DispenserBlock.FACING);
         BlockPos pos = source.getBlockPos().offset(dispenserFacing);

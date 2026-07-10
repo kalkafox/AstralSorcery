@@ -68,7 +68,7 @@ public class SpectralToolMeleeAttackGoal extends SpectralToolGoal {
         LivingEntity target = this.findClosestAttackableEntity();
         if (target != null) {
             this.selectedTarget = target;
-            this.getEntity().getMoveControl().setWantedPosition(selectedTarget.getX(), selectedTarget.getY() + selectedTarget.getHeight() / 2, selectedTarget.getZ(), this.getSpeedModifier());
+            this.getEntity().getMoveControl().setWantedPosition(selectedTarget.getX(), selectedTarget.getY() + selectedTarget.getBbHeight() / 2, selectedTarget.getZ(), this.getSpeedModifier());
         }
     }
 
@@ -98,7 +98,7 @@ public class SpectralToolMeleeAttackGoal extends SpectralToolGoal {
             this.selectedTarget = null;
             resetTimer = true;
         } else {
-            this.getEntity().getMoveControl().setWantedPosition(selectedTarget.getX(), selectedTarget.getY() + selectedTarget.getHeight() / 2, selectedTarget.getZ(), this.getSpeedModifier());
+            this.getEntity().getMoveControl().setWantedPosition(selectedTarget.getX(), selectedTarget.getY() + selectedTarget.getBbHeight() / 2, selectedTarget.getZ(), this.getSpeedModifier());
 
             if (Vector3.atEntityCorner(this.getEntity()).distanceSquared(this.selectedTarget) <= 16) {
                 this.actionCooldown++;

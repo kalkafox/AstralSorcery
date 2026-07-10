@@ -34,7 +34,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -46,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -145,8 +145,8 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         Blending.ADDITIVE_ALPHA.apply();
 
         renderStack.pushPose();
-        renderStack.mirror(Axis.YP.rotationDegrees(-90.0F));
-        renderStack.mirror(Axis.XP.rotationDegrees(level.getTimeOfDay(pTicks) * 360.0F));
+        renderStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+        renderStack.mulPose(Axis.XP.rotationDegrees(level.getTimeOfDay(pTicks) * 360.0F));
 
         this.renderCelestials(level, renderStack, pTicks);
         this.renderStars(level, renderStack, pTicks);
@@ -155,7 +155,7 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
 
         //Constellations
         renderStack.pushPose();
-        renderStack.mirror(Axis.XP.rotationDegrees(180));
+        renderStack.mulPose(Axis.XP.rotationDegrees(180));
 
         renderConstellationsSky(level, renderStack, pTicks);
 
@@ -320,7 +320,7 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
 
         TexturesAS.TEX_SOLAR_ECLIPSE.bindTexture();
         renderStack.pushPose();
-        renderStack.mirror(Axis.YP.rotationDegrees(-90F));
+        renderStack.mulPose(Axis.YP.rotationDegrees(-90F));
         Matrix4f matr = renderStack.last().pose();
 
         RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
@@ -374,9 +374,9 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         float f3 = Mth.sin(level.getCelestialAngleRadians(pTicks)) < 0.0F ? 180.0F : 0.0F;
 
         renderStack.pushPose();
-        renderStack.mirror(Axis.XP.rotationDegrees(90.0F));
-        renderStack.mirror(Axis.ZP.rotationDegrees(f3));
-        renderStack.mirror(Axis.ZP.rotationDegrees(90.0F));
+        renderStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        renderStack.mulPose(Axis.ZP.rotationDegrees(f3));
+        renderStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
 
         float r = duskDawnColors[0];
         float g = duskDawnColors[1];

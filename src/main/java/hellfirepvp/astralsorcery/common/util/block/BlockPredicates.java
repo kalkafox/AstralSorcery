@@ -12,19 +12,18 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.nbt.Tag;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,8 +34,8 @@ import java.util.Set;
  */
 public class BlockPredicates {
 
-    public static BlockPredicate isInTag(Tag<Block> blockTag) {
-        return (level, pos, state) -> state.isIn(blockTag);
+    public static BlockPredicate isInTag(TagKey<Block> blockTag) {
+        return (level, pos, state) -> state.is(blockTag);
     }
 
     public static BlockPredicate isBlock(Block... blocks) {
@@ -52,10 +51,10 @@ public class BlockPredicates {
     public static <T extends BlockEntity> BlockPredicate doesTileExist(T tile, boolean loadTileWorldAndChunk) {
         ResourceKey<Level> dim = tile.getLevel().dimension();
         BlockEntityType<?> tileType = tile.getType();
-        MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
 
         return (level, pos, state) -> {
-            if (loadTileWorldAndChunk || srv.forgeGetWorldMap().containsKey(dim)) {
+            if (loadTileWorldAndChunk || srv.levelKeys().contains(dim)) {
                 Level foundWorld = srv.getLevel(dim);
                 if (foundWorld == null) {
                     //If the intent was to load the world and it doesn't exist, then the tile doesn't exist either

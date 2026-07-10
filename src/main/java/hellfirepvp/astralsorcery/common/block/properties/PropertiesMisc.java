@@ -11,8 +11,7 @@ package hellfirepvp.astralsorcery.common.block.properties;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.neoforged.neoforge.common.ToolType;
+import net.minecraft.world.level.material.MapColor;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,29 +23,29 @@ import net.neoforged.neoforge.common.ToolType;
 public class PropertiesMisc {
 
     public static Block.Properties defaultAir() {
-        return Block.Properties.create(Material.AIR, MaterialColor.AIR)
+        return Block.Properties.create(Material.AIR, MapColor.NONE)
                 .doesNotBlockMovement();
     }
 
     public static Block.Properties defaultSand() {
-        return Block.Properties.create(Material.SAND, MaterialColor.SAND)
+        return Block.Properties.create(Material.SAND, MapColor.SAND)
                 .hardnessAndResistance(0.5F)
-                .harvestTool(ToolType.SHOVEL)
+
                 .sound(SoundType.SAND);
     }
 
     public static Block.Properties defaultRock() {
-        return Block.Properties.create(Material.STONE, MaterialColor.STONE)
+        return Block.Properties.create(Material.STONE, MapColor.STONE)
                 .hardnessAndResistance(1.5F, 6.0F)
-                .harvestTool(ToolType.PICKAXE)
+
                 .sound(SoundType.STONE);
     }
 
     public static Block.Properties defaultMetal(MaterialColor color) {
         return Block.Properties.create(Material.IRON, color)
                 .hardnessAndResistance(1.5F, 6.0F)
-                .harvestTool(ToolType.PICKAXE)
-                .harvestLevel(1)
+
+
                 .sound(SoundType.METAL);
     }
 
@@ -66,7 +65,7 @@ public class PropertiesMisc {
     }
 
     public static Block.Properties defaultGoldMachinery() {
-        return Block.Properties.create(Material.IRON, MaterialColor.GOLD)
+        return Block.Properties.create(Material.IRON, MapColor.GOLD)
                 .hardnessAndResistance(1.0F, 4.0F)
                 .sound(SoundType.STONE);
     }

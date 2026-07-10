@@ -21,9 +21,9 @@ import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.vector.Vector3f;
 
 import java.awt.*;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -123,9 +123,9 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
 
         renderStack.pushPose();
         renderStack.translate(translateTo.getX(), translateTo.getY(), translateTo.getZ());
-        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mulPose(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mulPose(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mulPose(Axis.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.scale(scale, scale, scale);
 
         VertexConsumer buf = drawBuffer.getBuffer(ctx.getRenderType());

@@ -41,10 +41,10 @@ public class AttributeTypeAllElementalResist extends PerkAttributeType {
     }
 
     private void onDamageTaken(LivingIncomingDamageEvent event) {
-        if (!(event.getEntityLiving() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
-        Player player = (Player) event.getEntityLiving();
+        Player player = (Player) event.getEntity();
         LogicalSide direction = this.getSide(player);
         if (!hasTypeApplied(player, direction)) {
             return;

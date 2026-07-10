@@ -11,17 +11,13 @@ package hellfirepvp.astralsorcery.common.util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.nbt.Tag;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -56,33 +52,23 @@ public class IngredientHelper {
     }
 
     @Nullable
-    public static Tag<Item> guessTag(Ingredient ingredient) {
+    public static TagKey<Item> guessTag(Ingredient ingredient) {
         ItemStack[] stacks = ingredient.getItems();
         if (stacks.length == 0) {
             return null;
         }
-        List<Tag<Item>> applicableTags = new ArrayList<>();
+        List<TagKey<Item>> applicableTags = new ArrayList<>();
         ItemStack first = stacks[0];
-        for (ResourceLocation key : first.getItem().getTags()) {
-            Tag<Item> wrapper = SerializationTags.getInstance().getItems().get(key);
-            if (wrapper == null) {
-                continue;
-            }
-
-            boolean containsAllItems = true;
-            for (Item itemInTag : wrapper.getValues()) {
-                if (!ingredient.test(new ItemStack(itemInTag))) {
-                    containsAllItems = false;
-                    break;
-                }
-            }
+        first.getTags().forEach(tagKey -> {
+            boolean containsAllItems = TagHelper.getItems(tagKey)
+                    .allMatch(itemInTag -> ingredient.test(new ItemStack(itemInTag)));
             if (containsAllItems) {
-                applicableTags.add(wrapper);
+                applicableTags.add(tagKey);
             }
-        }
+        });
 
         return applicableTags.stream()
-                .max(Comparator.comparingInt(tag -> tag.getValues().size()))
+                .max(Comparator.comparingLong(tag -> TagHelper.getItems(tag).count()))
                 .orElse(null);
     }
 

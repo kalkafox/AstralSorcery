@@ -11,10 +11,11 @@ package hellfirepvp.astralsorcery.common.capability;
 import hellfirepvp.astralsorcery.common.data.config.registry.FluidRarityRegistry;
 import hellfirepvp.astralsorcery.common.data.config.registry.sets.FluidRarityEntry;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -57,7 +58,7 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundTag> {
         FluidRarityEntry fluidEntry = FluidRarityRegistry.INSTANCE.getRandomValue(r);
         if (fluidEntry != null) {
             this.mbAmount = fluidEntry.getRandomAmount(r);
-            this.chunkFluid = new FluidStack(fluidEntry.getType(), FluidAttributes.BUCKET_VOLUME);
+            this.chunkFluid = new FluidStack(fluidEntry.getType(), FluidType.BUCKET_VOLUME);
         } else {
             this.setEmpty();
         }
@@ -83,7 +84,7 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag nbt = new CompoundTag();
         NBTHelper.setFluid(nbt, "chunkFluid", this.chunkFluid);
         nbt.putInt("mbAmount", this.mbAmount);
@@ -92,7 +93,7 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         this.chunkFluid = NBTHelper.getType(nbt, "chunkFluid");
         this.mbAmount = nbt.getInt("mbAmount");
         this.initialized = nbt.getBoolean("initialized");

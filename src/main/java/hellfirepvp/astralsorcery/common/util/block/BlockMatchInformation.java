@@ -18,13 +18,15 @@ import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.nbt.Tag;
-import net.minecraft.tags.TagCollectionManager;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import java.util.function.Predicate;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
+import hellfirepvp.astralsorcery.common.util.TagHelper;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -40,21 +42,18 @@ public class BlockMatchInformation implements Predicate<BlockState> {
     private BlockState matchState;
     private boolean matchExact;
 
-    private Tag<Block> matchTag;
+    private TagKey<Block> matchTag;
     private ResourceLocation matchTagKey;
 
-    public BlockMatchInformation(Tag<Block> matchTag) {
+    public BlockMatchInformation(TagKey<Block> matchTag) {
         this(matchTag, createDisplayStack(matchTag));
     }
 
-    public BlockMatchInformation(Tag<Block> matchTag, ItemStack display) {
+    public BlockMatchInformation(TagKey<Block> matchTag, ItemStack display) {
         this.matchTag = matchTag;
-        this.matchTagKey = SerializationTags.getInstance().getBlocks().getId(matchTag);
+        this.matchTagKey = matchTag.location();
         this.display = display;
 
-        if (this.matchTagKey == null) {
-            throw new IllegalArgumentException("Unknown block tag name!");
-        }
         if (this.display.isEmpty()) {
             throw new IllegalArgumentException("No display ItemStack passed, and unable to create valid itemstack from block tag " + this.matchTagKey.toString() + "!");
         }
@@ -74,14 +73,12 @@ public class BlockMatchInformation implements Predicate<BlockState> {
         }
     }
 
-    private static ItemStack createDisplayStack(Tag<Block> blockTag) {
-        for (Block block : blockTag.getValues()) {
-            ItemStack blockStack = ItemUtils.createBlockStack(block.defaultBlockState());
-            if (!blockStack.isEmpty()) {
-                return blockStack;
-            }
-        }
-        return ItemStack.EMPTY;
+    private static ItemStack createDisplayStack(TagKey<Block> blockTag) {
+        return TagHelper.getBlocks(blockTag)
+                .map(block -> ItemUtils.createBlockStack(block.defaultBlockState()))
+                .filter(stack -> !stack.isEmpty())
+                .findFirst()
+                .orElse(ItemStack.EMPTY);
     }
 
     public boolean isValid() {
@@ -102,7 +99,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
             return this.matchExact ? BlockUtils.matchStateExact(state, this.matchState) : state.getBlock().equals(this.matchState.getBlock());
         }
         if (this.matchTag != null) {
-            return this.matchTag.contains(state.getBlock());
+            return state.is(this.matchTag);
         }
         return false;
     }
@@ -117,7 +114,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
             }
             return new BlockMatchInformation(state, display, fullyDefined);
         } else if (object.has("tag")) {
-            Tag<Block> blockTag = SerializationTags.getInstance().getBlocks().get(ResourceLocation.parse(object.get("tag").getAsString()));
+            TagKey<Block> blockTag = TagKey.create(Registries.BLOCK, ResourceLocation.parse(object.get("tag").getAsString()));
             if (object.has("display")) {
                 ItemStack display = JsonHelper.getItemStack(object, "display");
                 return new BlockMatchInformation(blockTag, display);
@@ -148,7 +145,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
                 return new BlockMatchInformation(state, display, exactMatch);
             case 1:
                 String tagId = ByteBufUtils.readUtf(buf);
-                Tag<Block> blockTag = SerializationTags.getInstance().getBlocks().get(ResourceLocation.parse(tagId));
+                TagKey<Block> blockTag = TagKey.create(Registries.BLOCK, ResourceLocation.parse(tagId));
                 return new BlockMatchInformation(blockTag, display);
         }
         throw new IllegalArgumentException("Unknown block transmutation match type: " + type);

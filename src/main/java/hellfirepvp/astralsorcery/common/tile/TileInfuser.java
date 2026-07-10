@@ -51,9 +51,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ForgeHooks;
-import net.neoforged.neoforge.common.capabilities.Capability;
 import hellfirepvp.astralsorcery.common.util.Constants;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.fml.LogicalSide;
@@ -64,6 +62,8 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -160,7 +160,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
         if (thisInfuser != null) {
             Recipe<?> recipe = level.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_INFUSION.getType()).get(recipeName);
             if (recipe instanceof LiquidInfusion) {
-                FluidStack stack = new FluidStack(((LiquidInfusion) recipe).getLiquidInput(), FluidAttributes.BUCKET_VOLUME);
+                FluidStack stack = new FluidStack(((LiquidInfusion) recipe).getLiquidInput(), FluidType.BUCKET_VOLUME);
                 Vector3 pos = new Vector3(at).add(0.5, 1, 0.5);
                 for (int i = 0; i < 30; i++) {
                     playLiquidFinish(pos, stack);
@@ -345,12 +345,8 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
         }
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
-        if (this.inventory.hasCapability(cap, direction)) {
-            return this.inventory.getCapability().unwrap();
-        }
-        return super.getCapability(cap, direction);
+    @Nullable
+    public IItemHandler getExposedItemHandler(@Nullable Direction side) {
+        return this.inventory.getItemHandler(side);
     }
 }

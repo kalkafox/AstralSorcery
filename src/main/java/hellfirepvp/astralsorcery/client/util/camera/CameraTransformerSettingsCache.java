@@ -39,7 +39,7 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
         this.hideGui = mc.options.hideGUI;
         this.thirdPersonView = mc.options.getCameraType();
         Player player = mc.player;
-        this.isFlying = player.abilities.flying;
+        this.isFlying = player.getAbilities().flying;
         this.startPosition = new Vector3(player.getX(), player.getY(), player.getZ());
         this.startYaw = player.getYRot();
         this.startPitch = player.getXRot();
@@ -55,7 +55,7 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
             settings.hideGUI = hideGui;
             settings.setPointOfView(thirdPersonView);
             Player player = Minecraft.getInstance().player;
-            player.abilities.flying = isFlying;
+            player.getAbilities().flying = isFlying;
             player.setPositionAndRotation(startPosition.getX(), startPosition.getY(), startPosition.getZ(), startYaw, startPitch);
             player.lerpMotion(0, 0, 0);
             this.active = false;
@@ -72,7 +72,7 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
         settings.hideGUI = true;
         settings.bobView = false;
         settings.setPointOfView(CameraType.THIRD_PERSON_BACK);
-        Minecraft.getInstance().player.abilities.flying = true;
+        Minecraft.getInstance().player.getAbilities().flying = true;
         Minecraft.getInstance().player.lerpMotion(0, 0, 0);
     }
 

@@ -57,7 +57,7 @@ public abstract class ScreenJournalOverlay extends ScreenJournal {
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().displayGuiScreen(this.origin);
+        Minecraft.getInstance().setScreen(this.origin);
     }
 
     @Override
@@ -80,7 +80,7 @@ public abstract class ScreenJournalOverlay extends ScreenJournal {
         }
 
         if (Minecraft.getInstance().screen != this && Minecraft.getInstance().screen != origin) {
-            Minecraft.getInstance().displayGuiScreen(origin);
+            Minecraft.getInstance().setScreen(origin);
             return true;
         }
         return false;

@@ -127,9 +127,9 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
                             if (!player.isCreative()) {
                                 held.setCount(leftover);
                                 if (held.isEmpty()) {
-                                    player.setHeldItem(hand, ItemStack.EMPTY);
+                                    player.setItemInHand(hand, ItemStack.EMPTY);
                                 } else {
-                                    player.setHeldItem(hand, held);
+                                    player.setItemInHand(hand, held);
                                 }
                             }
                         }
@@ -141,9 +141,9 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
                         if (!player.isCreative()) {
                             held.shrink(1);
                             if (held.isEmpty()) {
-                                player.setHeldItem(hand, ItemStack.EMPTY);
+                                player.setItemInHand(hand, ItemStack.EMPTY);
                             } else {
-                                player.setHeldItem(hand, held);
+                                player.setItemInHand(hand, held);
                             }
                         }
                         return InteractionResult.PASS;
@@ -155,9 +155,9 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
                         if (!player.isCreative()) {
                             held.shrink(1);
                             if (held.isEmpty()) {
-                                player.setHeldItem(hand, ItemStack.EMPTY);
+                                player.setItemInHand(hand, ItemStack.EMPTY);
                             } else {
-                                player.setHeldItem(hand, held);
+                                player.setItemInHand(hand, held);
                             }
                         }
                     } else {

@@ -40,6 +40,7 @@ import net.neoforged.fml.LogicalSide;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,8 +53,8 @@ public class ItemKnowledgeShare extends Item {
 
     public ItemKnowledgeShare() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override
@@ -197,7 +198,7 @@ public class ItemKnowledgeShare extends Item {
         progress.storeKnowledge(knowledge);
         CompoundTag pattern = NBTHelper.getPersistentData(stack);
         pattern.putString("knowledgeOwnerName", Component.Serializer.getPos(player.getDisplayName()));
-        pattern.putUniqueId("knowledgeOwnerUUID", player.getUUID());
+        pattern.putUUID("knowledgeOwnerUUID", player.getUUID());
         pattern.put("knowledgeTag", knowledge);
     }
 

@@ -49,7 +49,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ForgeHooks;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -70,8 +69,8 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
     public BlockCollectorCrystal(CollectorCrystalType type) {
         super(Properties.create(Material.GLASS, type.getMaterialColor())
                 .hardnessAndResistance(-1F, 3600000.0F)
-                .harvestTool(ToolType.PICKAXE)
-                .harvestLevel(1)
+
+
                 .sound(SoundType.GLASS)
                 .isRedstoneConductor(state -> 11));
     }

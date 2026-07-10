@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelReader;
-import net.neoforged.neoforge.common.ToolType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,8 +27,8 @@ public class BlockRockCrystalOre extends Block implements CustomItemBlock {
 
     public BlockRockCrystalOre() {
         super(PropertiesMisc.defaultRock()
-                .harvestLevel(2)
-                .harvestTool(ToolType.PICKAXE));
+
+);
     }
 
     @Override

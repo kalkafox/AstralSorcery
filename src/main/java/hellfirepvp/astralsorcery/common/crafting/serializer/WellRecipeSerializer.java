@@ -20,9 +20,10 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.awt.*;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -40,13 +41,13 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
     @Override
     public WellLiquefaction read(ResourceLocation recipeId, JsonObject json) {
         Ingredient from = Ingredient.deserialize(GsonHelper.getAsJsonObject(json, "input"));
-        String fluidKey = GsonHelper.getString(json, "output");
+        String fluidKey = GsonHelper.getAsString(json, "output");
         Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey));
         if (fluid == null) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey);
         }
-        float productionMultiplier = GsonHelper.getFloat(json, "productionMultiplier");
-        float shatterMultiplier = GsonHelper.getFloat(json, "shatterMultiplier");
+        float productionMultiplier = GsonHelper.getAsFloat(json, "productionMultiplier");
+        float shatterMultiplier = GsonHelper.getAsFloat(json, "shatterMultiplier");
         Color color = null;
         if (json.has("color")) {
             color = JsonHelper.getColor(json, "color");

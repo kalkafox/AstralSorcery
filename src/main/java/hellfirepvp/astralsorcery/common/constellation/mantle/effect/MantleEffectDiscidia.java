@@ -72,7 +72,7 @@ public class MantleEffectDiscidia extends MantleEffect {
     }
 
     private void onAttack(LivingAttackEvent event) {
-        LivingEntity attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getEntity();
         Level level = attacked.getCommandSenderWorld();
         DamageSource source = event.getSource();
         Entity attacker = source.getEntity();
@@ -104,7 +104,7 @@ public class MantleEffectDiscidia extends MantleEffect {
 
     private void onHurt(LivingIncomingDamageEvent event) {
         Level level = event.getEntity().getCommandSenderWorld();
-        LivingEntity hurt = event.getEntityLiving();
+        LivingEntity hurt = event.getEntity();
 
         if (level.isClientSide()) {
             return;

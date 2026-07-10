@@ -26,7 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.items.CapabilityItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
 
 import java.awt.*;
 import java.util.List;
@@ -62,7 +62,7 @@ public class MantleEffectLucerna extends MantleEffect {
             this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_SPAWNER, (entity) -> entity instanceof SpawnerBlockEntity);
         }
         if (CONFIG.findChests.get() && random.nextInt(10) == 0) {
-            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (entity) -> entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent());
+            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (entity) -> entity.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, entity.getBlockPos(), null) != null);
         }
     }
 
@@ -116,7 +116,7 @@ public class MantleEffectLucerna extends MantleEffect {
             if (atEntity.distance(player) < 2) {
                 continue;
             }
-            atEntity.add(random.nextFloat() * entity.getWidth(), random.nextFloat() * entity.getHeight(), random.nextFloat() * entity.getWidth());
+            atEntity.add(random.nextFloat() * entity.getBbWidth(), random.nextFloat() * entity.getBbHeight(), random.nextFloat() * entity.getBbWidth());
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_DEPTH_PARTICLE)
                     .setOwner(player.getUUID())

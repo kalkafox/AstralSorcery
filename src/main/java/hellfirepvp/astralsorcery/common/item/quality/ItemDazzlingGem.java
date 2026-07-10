@@ -35,8 +35,8 @@ public class ItemDazzlingGem extends Item {
 
     public ItemDazzlingGem() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override

@@ -77,7 +77,7 @@ public class AttributeTypeCritChance extends PerkAttributeType {
         if (event.isVanillaCritical() || event.getObject() == Event.Result.ALLOW) {
             return;
         }
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         LogicalSide direction = this.getSide(player);
         if (!hasTypeApplied(player, direction)) {
             return;

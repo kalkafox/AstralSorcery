@@ -14,9 +14,6 @@ import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
-import net.neoforged.neoforge.items.CapabilityItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -110,12 +107,9 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
         return facing == null || applicableSides.contains(facing);
     }
 
-    public boolean hasCapability(Capability<?> state, @Nullable Direction facing) {
-        return hasHandlerForSide(facing) && CapabilityItemHandler.ITEM_HANDLER_CAPABILITY == state;
-    }
-
-    public LazyOptional<TileInventory> getCapability() {
-        return LazyOptional.of(() -> this);
+    @Nullable
+    public TileInventory getItemHandler(@Nullable Direction facing) {
+        return hasHandlerForSide(facing) ? this : null;
     }
 
     @Override

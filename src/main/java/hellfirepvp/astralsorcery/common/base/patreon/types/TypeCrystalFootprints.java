@@ -76,8 +76,8 @@ public class TypeCrystalFootprints extends PatreonEffect implements ITickHandler
     @OnlyIn(Dist.CLIENT)
     private void spawnFootprint(Player player) {
         Vector3 pos = Vector3.atEntityCorner(player)
-                .subtract(player.getWidth() / 2, 0.1, player.getWidth() / 2)
-                .add(player.getWidth() * random.nextFloat(), 0, player.getWidth() * random.nextFloat());
+                .subtract(player.getBbWidth() / 2, 0.1, player.getBbWidth() / 2)
+                .add(player.getBbWidth() * random.nextFloat(), 0, player.getBbWidth() * random.nextFloat());
 
         if (player.getCommandSenderWorld().isEmptyBlock(pos.toBlockPos())) {
             return;

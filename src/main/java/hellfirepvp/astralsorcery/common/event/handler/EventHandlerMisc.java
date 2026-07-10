@@ -29,8 +29,9 @@ import net.neoforged.neoforge.event.entity.EntityJoinWorldEvent;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerSleepInBedEvent;
-import net.neoforged.neoforge.event.world.ChunkEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.bus.api.IEventBus;
+import java.util.Optional;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -76,7 +77,7 @@ public class EventHandlerMisc {
     private static void onChunkLoad(ChunkEvent.Load event) {
         ChunkAccess ch = event.getChunk();
         if (ch instanceof LevelChunk && !event.getLevel().isClientSide()) {
-            ((LevelChunk) ch).getCapability(CapabilitiesAS.CHUNK_FLUID).ifPresent(entry -> {
+            Optional.ofNullable(((LevelChunk) ch).getData(CapabilitiesAS.CHUNK_FLUID)).ifPresent(entry -> {
                 if (!entry.isInitialized()) {
                     LevelAccessor w = event.getLevel();
                     if (w instanceof WorldGenLevel) {
@@ -94,7 +95,7 @@ public class EventHandlerMisc {
     }
 
     private static void onPlayerSleepEclipse(PlayerSleepInBedEvent event) {
-        WorldContext ctx = SkyHandler.getContext(event.getEntityLiving().getCommandSenderWorld());
+        WorldContext ctx = SkyHandler.getContext(event.getEntity().getCommandSenderWorld());
         if (ctx != null && ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {
             if (event.getResultStatus() == null) {
                 event.setResult(Player.SleepResult.NOT_POSSIBLE_NOW);

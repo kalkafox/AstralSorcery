@@ -45,12 +45,12 @@ public class MantleEffectFornax extends MantleEffect {
     }
 
     private void onHurt(LivingIncomingDamageEvent event) {
-        Level level = event.getEntityLiving().getCommandSenderWorld();
+        Level level = event.getEntity().getCommandSenderWorld();
         if (level.isClientSide()) {
             return;
         }
 
-        LivingEntity attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getEntity();
         Entity attacker = event.getSource().getEntity();
         if (attacker instanceof LivingEntity) {
             if (attacked instanceof ServerPlayer && MiscUtils.isPlayerFakeMP((ServerPlayer) attacked)) {

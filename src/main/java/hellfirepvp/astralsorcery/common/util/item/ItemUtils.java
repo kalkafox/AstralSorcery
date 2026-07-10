@@ -20,13 +20,13 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import hellfirepvp.astralsorcery.common.util.TagHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.CapabilityItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemStackHandler;
@@ -40,6 +40,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static hellfirepvp.astralsorcery.common.util.item.ItemComparator.Clause.*;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -175,13 +176,12 @@ public class ItemUtils {
 
     @Nonnull
     public static List<ItemStack> getItemsOfTag(ResourceLocation key) {
-        Tag<Item> tag = ItemTags.getAllTags().get(key);
-        return tag == null ? Collections.emptyList() : getItemsOfTag(tag);
+        return getItemsOfTag(TagKey.create(Registries.ITEM, key));
     }
 
     @Nonnull
-    public static List<ItemStack> getItemsOfTag(Tag<Item> itemTag) {
-        return itemTag.getValues().stream().map(ItemStack::new).collect(Collectors.toList());
+    public static List<ItemStack> getItemsOfTag(TagKey<Item> itemTag) {
+        return TagHelper.getItems(itemTag).map(ItemStack::new).collect(Collectors.toList());
     }
 
     public static Collection<ItemStack> scanInventoryFor(IItemHandler handler, Item i) {
@@ -198,8 +198,13 @@ public class ItemUtils {
         return findItemsInInventory(handler, match, strict);
     }
 
+    public static IItemHandler getPlayerInventoryHandler(Player player) {
+        IItemHandler handler = player.getCapability(Capabilities.ItemHandler.ENTITY);
+        return handler != null ? handler : EMPTY_INVENTORY;
+    }
+
     public static Collection<ItemStack> findItemsInPlayerInventory(Player player, ItemStack match, boolean strict) {
-        IItemHandler handler = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(EMPTY_INVENTORY);
+        IItemHandler handler = getPlayerInventoryHandler(player);
         Collection<ItemStack> results = findItemsInInventory(handler, match, strict);
 
         // 1.21 port: Botania integration is excluded from the build for now.
@@ -224,7 +229,7 @@ public class ItemUtils {
     }
 
     public static Map<Integer, ItemStack> findItemsIndexedInPlayerInventory(Player player, Predicate<ItemStack> match) {
-        return findItemsIndexedInInventory(player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(EMPTY_INVENTORY), match);
+        return findItemsIndexedInInventory(getPlayerInventoryHandler(player), match);
     }
 
     public static Map<Integer, ItemStack> findItemsIndexedInInventory(IItemHandler handler, ItemStack match, boolean strict) {
@@ -253,7 +258,7 @@ public class ItemUtils {
             return true;
         }
 
-        IItemHandlerModifiable handler = (IItemHandlerModifiable) player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElse(EMPTY_INVENTORY);
+        IItemHandlerModifiable handler = (IItemHandlerModifiable) getPlayerInventoryHandler(player);
         if (consumeFromInventory(handler, tryConsume, simulate)) {
             return true;
         }

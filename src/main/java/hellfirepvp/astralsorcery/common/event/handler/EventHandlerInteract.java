@@ -18,7 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.bus.api.IEventBus;
 
 /**

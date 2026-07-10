@@ -59,13 +59,15 @@ import java.util.List;
  */
 public class ItemIlluminationWand extends Item implements ItemDynamicColor, AlignmentChargeConsumer {
 
+    private static final java.util.Random random = new java.util.Random();
+
     private static final float COST_PER_ILLUMINATION = 650F;
     private static final float COST_PER_FLARE = 300F;
 
     public ItemIlluminationWand() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override

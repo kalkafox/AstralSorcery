@@ -27,7 +27,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -185,9 +184,4 @@ public class EntityObservatoryHelper extends Entity {
 
     @Override
     protected void writeAdditional(CompoundTag pattern) {}
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

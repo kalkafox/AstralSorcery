@@ -52,8 +52,8 @@ public class KeyCheatDeath extends KeyPerk implements CooldownPerk {
     }
 
     private void onDeath(LivingDeathEvent event) {
-        if (event.getEntityLiving() instanceof Player) {
-            Player player = (Player) event.getEntityLiving();
+        if (event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
             LogicalSide direction = this.getSide(player);
             PlayerProgress progress = ResearchHelper.getProgress(player, direction);
             if (direction.isServer() && progress.getPerkData().hasPerkEffect(this)) {

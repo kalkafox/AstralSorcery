@@ -39,7 +39,7 @@ public class KeyNoKnockback extends KeyPerk {
     }
 
     private void onKnockback(LivingKnockBackEvent event) {
-        LivingEntity attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getEntity();
         if (attacked instanceof Player) {
             Player player = (Player) attacked;
             LogicalSide direction = this.getSide(player);

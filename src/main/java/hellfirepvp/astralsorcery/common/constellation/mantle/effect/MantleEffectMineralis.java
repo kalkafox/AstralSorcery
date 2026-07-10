@@ -25,7 +25,7 @@ import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.world.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;

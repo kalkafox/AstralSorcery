@@ -52,14 +52,14 @@ public class MantleEffectVicio extends MantleEffect {
         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (prog.getPerkData().hasPerkEffect(p -> p instanceof KeyMantleFlight) &&
                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), true)) {
-            boolean prev = player.abilities.allowFlying;
-            player.abilities.allowFlying = true;
+            boolean prev = player.getAbilities().allowFlying;
+            player.getAbilities().allowFlying = true;
             if (!prev) {
                 player.onUpdateAbilities();
             }
 
             EventHelperTemporaryFlight.allowFlight(player, 20);
-            if (player.abilities.flying && !player.isOnGround() && player.tickCount % 20 == 0) {
+            if (player.getAbilities().flying && !player.isOnGround() && player.tickCount % 20 == 0) {
                 if (!PlayerAffectionFlags.isPlayerAffected(player, CEffectVicio.FLAG)) {
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                 }
@@ -72,7 +72,7 @@ public class MantleEffectVicio extends MantleEffect {
     protected void tickClient(Player player) {
         super.tickClient(player);
 
-        if (player.isFallFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.flying)) {
+        if (player.isFallFlying() || (!(player.isCreative() || player.isSpectator()) && player.getAbilities().flying)) {
             if (!Minecraft.getInstance().options.getCameraType().isMirrored()) {
                 this.playCapeSparkles(player, 0.1F);
             } else {
@@ -87,7 +87,7 @@ public class MantleEffectVicio extends MantleEffect {
     @Override
     @OnlyIn(Dist.CLIENT)
     protected FXFacingParticle spawnFacingParticle(Player player, Vector3 at) {
-        if (player.isFallFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.flying)) {
+        if (player.isFallFlying() || (!(player.isCreative() || player.isSpectator()) && player.getAbilities().flying)) {
             at.subtract(player.getDeltaMovement().mul(1.5, 1.5, 1.5));
         }
         return super.spawnFacingParticle(player, at);

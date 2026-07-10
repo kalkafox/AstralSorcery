@@ -21,7 +21,7 @@ import net.minecraft.loot.*;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.stream.Collectors;
 

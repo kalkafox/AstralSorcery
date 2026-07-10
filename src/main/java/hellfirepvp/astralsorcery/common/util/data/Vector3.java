@@ -88,7 +88,7 @@ public class Vector3 {
 
     @Deprecated
     public static Vector3 atEntityCenter(Entity entity) {
-        return atEntityCorner(entity).addY(entity.getHeight() / 2F);
+        return atEntityCorner(entity).addY(entity.getBbHeight() / 2F);
     }
 
     public static Vector3 getMin(AABB box) {

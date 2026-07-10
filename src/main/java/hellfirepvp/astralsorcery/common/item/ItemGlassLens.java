@@ -22,6 +22,6 @@ public class ItemGlassLens extends Item {
 
     public ItemGlassLens() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS));
+);
     }
 }

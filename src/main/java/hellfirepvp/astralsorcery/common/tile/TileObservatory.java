@@ -91,7 +91,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         this.getLevel().addEntity(helper);
 
         this.setEntityHelperRef(helper.getUUID());
-        this.entityIdServerRef = helper.getEntityId();
+        this.entityIdServerRef = helper.getId();
         return helper;
     }
 
@@ -102,7 +102,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         }
         for (Entity e : level.getEntitiesWithinAABB(Entity.class, new AABB(pos.add(-3, -1, -3), pos.add(3, 2, 3)))) {
             if (e.getUUID().equals(entityUUID)) {
-                this.entityIdServerRef = e.getEntityId();
+                this.entityIdServerRef = e.getId();
                 return e;
             }
         }
@@ -114,7 +114,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         if (this.getEntityHelperRef() == null || this.entityIdServerRef == null) {
             return null;
         }
-        return this.getLevel().getEntityByID(this.entityIdServerRef);
+        return this.getLevel().getEntity(this.entityIdServerRef);
     }
 
     @Nullable
@@ -156,7 +156,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         super.writeCustomNBT(pattern);
 
         if(this.entityHelperRef != null) {
-            pattern.putUniqueId("entity", this.entityHelperRef);
+            pattern.putUUID("entity", this.entityHelperRef);
         }
         pattern.putFloat("oYaw", this.observatoryYaw);
         pattern.putFloat("oPitch", this.observatoryPitch);

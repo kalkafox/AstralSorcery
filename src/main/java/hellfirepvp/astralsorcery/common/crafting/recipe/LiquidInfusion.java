@@ -32,6 +32,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

@@ -52,10 +52,12 @@ import java.util.List;
  */
 public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
 
+    private static final java.util.Random random = new java.util.Random();
+
     public ItemShiftingStar() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override
@@ -116,7 +118,7 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
         IMajorConstellation cst = this.getBaseConstellation();
         if (cst == null) {
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                    .spawn(Vector3.atEntityCorner(player).addY(player.getHeight() / 2))
+                    .spawn(Vector3.atEntityCorner(player).addY(player.getBbHeight() / 2))
                     .setDeltaMovement(new Vector3(-0.1 + random.nextFloat() * 0.2, 0.01, -0.1 + random.nextFloat() * 0.2))
                     .setScaleMultiplier(0.2F + random.nextFloat());
             if (random.nextBoolean()) {
@@ -127,7 +129,7 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
             int parts = 5;
             for (int i = 0; i < parts; i++) {
                 float angleSwirl = 75F;
-                Vector3 center = Vector3.atEntityCorner(player).addY(player.getHeight() / 2);
+                Vector3 center = Vector3.atEntityCorner(player).addY(player.getBbHeight() / 2);
                 Vector3 v = Vector3.RotAxis.X_AXIS.clone();
                 float originalAngle = (((float) i) / ((float) parts)) * 360F;
                 double angle = originalAngle + (Mth.sin(percCycle) * angleSwirl);

@@ -24,9 +24,9 @@ import net.minecraft.ChatFormatting;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -79,24 +79,24 @@ public class PktProgressionUpdate extends ASPacket<PktProgressionUpdate> {
         return new Handler<PktProgressionUpdate>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktProgressionUpdate packet, NetworkEvent.Context context) {
+            public void handleClient(PktProgressionUpdate packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     if (packet.tier != null) {
-                        Minecraft.getInstance().player.sendMessage(
+                        Minecraft.getInstance().player.sendSystemMessage(
                                 Component.translatable("astralsorcery.progress.gain.progress.chat")
-                                        .withStyle(ChatFormatting.BLUE), Util.NIL_UUID);
+                                        .withStyle(ChatFormatting.BLUE));
                     }
                     if (packet.prog != null) {
-                        Minecraft.getInstance().player.sendMessage(
+                        Minecraft.getInstance().player.sendSystemMessage(
                                 Component.translatable("astralsorcery.progress.gain.research.chat", packet.prog.getName())
-                                        .withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+                                        .withStyle(ChatFormatting.AQUA));
                     }
                     packet.refreshJournal();
                 });
             }
 
             @Override
-            public void handle(PktProgressionUpdate packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktProgressionUpdate packet, PacketContext context, LogicalSide direction) {}
         };
     }
 
@@ -105,7 +105,7 @@ public class PktProgressionUpdate extends ASPacket<PktProgressionUpdate> {
         Screen open = Minecraft.getInstance().screen;
         if (open != null) {
             if (open instanceof ScreenJournal && !(open instanceof ScreenJournalPerkTree)) {
-                Minecraft.getInstance().displayGuiScreen(null);
+                Minecraft.getInstance().setScreen(null);
             }
         }
         ScreenJournalProgression.resetJournal();

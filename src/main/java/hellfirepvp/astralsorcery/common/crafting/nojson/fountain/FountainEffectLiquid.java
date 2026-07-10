@@ -43,6 +43,7 @@ import net.neoforged.fml.LogicalSide;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -91,7 +92,7 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
 
     private void produceLiquid(TileFountain fountain) {
         LevelChunk ch = fountain.getLevel().getChunkAt(fountain.getBlockPos());
-        ch.getCapability(CapabilitiesAS.CHUNK_FLUID).ifPresent(entry -> {
+        Optional.ofNullable(ch.getData(CapabilitiesAS.CHUNK_FLUID)).ifPresent(entry -> {
             int drain = 200 + random.nextInt(400);
             FluidStack drained;
             if (!entry.isEmpty() && entry.isInitialized()) {
@@ -120,7 +121,7 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
             positions.forEach(pos -> {
                 MiscUtils.executeWithChunk(level, pos, () -> {
                     BlockState state = level.getBlockState(pos);
-                    if (!state.isAir(level, pos) &&
+                    if (!state.isAir() &&
                             level.getTileEntity(pos) == null &&
                             state.getDestroySpeed(level, pos) >= 0 &&
                             !BlockUtils.isFluidBlock(state)) {

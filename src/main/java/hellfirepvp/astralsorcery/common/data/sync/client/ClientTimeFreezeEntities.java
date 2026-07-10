@@ -33,7 +33,7 @@ public class ClientTimeFreezeEntities extends ClientData<ClientTimeFreezeEntitie
     private final Map<ResourceKey<Level>, Set<Integer>> clientActiveEntityFreeze = new HashMap<>();
 
     public boolean isFrozen(Entity e) {
-        return this.clientActiveEntityFreeze.getOrDefault(e.getCommandSenderWorld().dimension(), Collections.emptySet()).contains(e.getEntityId());
+        return this.clientActiveEntityFreeze.getOrDefault(e.getCommandSenderWorld().dimension(), Collections.emptySet()).contains(e.getId());
     }
 
     @Override

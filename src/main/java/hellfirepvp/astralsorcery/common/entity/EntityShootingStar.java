@@ -31,7 +31,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.network.NetworkHooks;
 
 import java.awt.*;
 import java.util.Random;
@@ -167,9 +166,4 @@ public class EntityShootingStar extends ThrowableProjectile {
         }
         super.setPosition(x, y, z);
     }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

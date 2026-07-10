@@ -23,10 +23,10 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.util.LogicalSidedProvider;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -86,16 +86,16 @@ public class PktShootEntity extends ASPacket<PktShootEntity> {
         return new Handler<PktShootEntity>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktShootEntity packet, NetworkEvent.Context context) {
+            public void handleClient(PktShootEntity packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     Optional<Level> level = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
-                    Entity entity = level.map(w -> w.getEntityByID(packet.entityId)).orElse(null);
+                    Entity entity = level.map(w -> w.getEntity(packet.entityId)).orElse(null);
                     if (entity != null) {
                         entity.setDeltaMovement(packet.motionVector.toVector3d());
 
                         if (packet.hasEffect) {
                             Vector3 origin = Vector3.atEntityCenter(entity)
-                                    .setY(entity.getY() + entity.getHeight());
+                                    .setY(entity.getY() + entity.getBbHeight());
                             Vector3 forwards = new Vector3(entity.getLookAngle()).normalize().mul(packet.effectLength * 18);
                             Vector3 motionReverse = forwards.clone().normalize().mul(-0.4 * packet.effectLength);
 
@@ -127,7 +127,7 @@ public class PktShootEntity extends ASPacket<PktShootEntity> {
             }
 
             @Override
-            public void handle(PktShootEntity packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktShootEntity packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

@@ -38,11 +38,11 @@ public class AttributeTypeLifeRecovery extends PerkAttributeType {
     }
 
     private void onHeal(LivingHealEvent event) {
-        if (!(event.getEntityLiving() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
 
-        Player player = (Player) event.getEntityLiving();
+        Player player = (Player) event.getEntity();
         LogicalSide direction = this.getSide(player);
         if (!hasTypeApplied(player, direction)) {
             return;

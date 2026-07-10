@@ -51,7 +51,7 @@ public class KeyDamageArmor extends KeyPerk {
     }
 
     private void onDamage(LivingIncomingDamageEvent event) {
-        LivingEntity attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getEntity();
         if (attacked instanceof Player) {
             Player player = (Player) attacked;
             LogicalSide direction = this.getSide(player);

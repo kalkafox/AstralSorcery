@@ -28,7 +28,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -48,8 +47,8 @@ public class BlockIlluminator extends BaseEntityBlock implements CustomItemBlock
     public BlockIlluminator() {
         super(PropertiesGlass.coatedGlass()
                 .isRedstoneConductor(state -> 10)
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
         this.shape = createShape();
     }
 

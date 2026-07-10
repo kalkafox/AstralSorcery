@@ -64,9 +64,9 @@ public class RenderChalice extends CustomTileEntityRenderer<TileChalice> {
 
         renderStack.pushPose();
         renderStack.translate(0.5F, 1.4F, 0.5F);
-        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mulPose(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mulPose(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mulPose(Axis.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.scale(percSize, percSize, percSize);
 
         VertexConsumer buf = renderTypeBuffer.getBuffer(RenderTypesAS.TER_CHALICE_LIQUID);

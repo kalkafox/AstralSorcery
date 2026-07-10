@@ -62,11 +62,11 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
         if (GsonHelper.convertToInt(json, "display")) {
             outputDisplay = JsonHelper.getItemStack(json, "display");
         }
-        float starlight = GsonHelper.getFloat(json, "starlight");
+        float starlight = GsonHelper.getAsFloat(json, "starlight");
 
         IWeakConstellation matchConstellation = null;
         if (json.has("constellation")) {
-            ResourceLocation cstKey = ResourceLocation.parse(GsonHelper.getString(json, "constellation"));
+            ResourceLocation cstKey = ResourceLocation.parse(GsonHelper.getAsString(json, "constellation"));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstKey);
             if (cst == null) {
                 throw new JsonSyntaxException(String.format("Unknown constellation %s!", cstKey.toString()));

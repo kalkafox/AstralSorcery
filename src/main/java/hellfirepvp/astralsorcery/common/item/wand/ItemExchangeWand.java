@@ -59,7 +59,6 @@ import net.minecraft.util.text.*;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ToolType;
 import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
@@ -67,6 +66,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -81,8 +81,8 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
 
     public ItemExchangeWand() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override
@@ -96,15 +96,8 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
         return 0;
     }
 
-    @Override
-    public int getLevel(ItemStack stack, ToolType tool, @Nullable Player player, @Nullable BlockState state) {
-        return 3;
-    }
-
-    @Override
-    public Set<ToolType> getToolTypes(ItemStack stack) {
-        return Sets.newHashSet(ToolType.PICKAXE, ToolType.AXE, ToolType.SHOVEL);
-    }
+    // 1.21 port: harvest tool/level overrides are gone; isCorrectToolForDrops
+    // below already grants full harvest capability.
 
     @Override
     public boolean isCorrectToolForDrops(BlockState blockIn) {

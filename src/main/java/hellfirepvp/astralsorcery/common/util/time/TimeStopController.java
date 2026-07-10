@@ -109,7 +109,7 @@ public class TimeStopController implements ITickHandler {
             }
             if (shouldFreeze) {
                 if (e.level().isClientSide()) {
-                    int amt = (int) Mth.sqrt(e.getWidth() * e.getHeight());
+                    int amt = (int) Mth.sqrt(e.getBbWidth() * e.getBbHeight());
                     for (int i = 0; i < amt; i++) {
                         if (e.level().random.nextInt(5) == 0) {
                             TimeStopEffectHelper.playEntityParticles(e);

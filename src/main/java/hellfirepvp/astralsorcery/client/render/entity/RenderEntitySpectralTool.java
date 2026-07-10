@@ -14,7 +14,6 @@ import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.entity.EntitySpectralTool;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -22,6 +21,7 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.client.registry.IRenderFactory;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -45,10 +45,10 @@ public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool>
 
         renderStack.pushPose();
         renderStack.translate(0, entity.getHeight() / 2, 0);
-        renderStack.mirror(Axis.YP.rotationDegrees(-entityYaw - 90));
+        renderStack.mulPose(Axis.YP.rotationDegrees(-entityYaw - 90));
         if (stack.getItem() instanceof AxeItem) {
-            renderStack.mirror(Axis.XP.rotationDegrees(180));
-            renderStack.mirror(Axis.ZP.rotationDegrees(270));
+            renderStack.mulPose(Axis.XP.rotationDegrees(180));
+            renderStack.mulPose(Axis.ZP.rotationDegrees(270));
         }
 
         RenderingUtils.renderTranslucentItemStackModelGround(stack, renderStack, ColorsAS.SPECTRAL_TOOL, Blending.CONSTANT_ALPHA, 63);

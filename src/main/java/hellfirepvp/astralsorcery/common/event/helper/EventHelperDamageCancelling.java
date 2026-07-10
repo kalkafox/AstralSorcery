@@ -50,10 +50,10 @@ public class EventHelperDamageCancelling {
     }
 
     private static void onLivingDamage(LivingIncomingDamageEvent event) {
-        if (!(event.getEntityLiving() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player)) {
             return;
         }
-        Player player = (Player) event.getEntityLiving();
+        Player player = (Player) event.getEntity();
         Set<DamageSource> sources = invulnerableTypes.getOrDefault(player.getUUID(), Collections.emptySet());
         if (sources.remove(event.getSource())) {
             if (sources.isEmpty()) {

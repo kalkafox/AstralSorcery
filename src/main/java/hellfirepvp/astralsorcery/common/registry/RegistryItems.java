@@ -184,23 +184,17 @@ public class RegistryItems {
 
     private static Item.Properties buildItemBlockProperties(Block block) {
         Item.Properties props = new Item.Properties();
-        props.group(CommonProxy.ITEM_GROUP_AS);
-        if (block instanceof CustomItemBlockProperties) {
-            CreativeModeTab group = ((CustomItemBlockProperties) block).getItemGroup();
-            if (group != null) {
-                props.group(group);
-            }
-            if (!((CustomItemBlockProperties) block).canItemBeRepaired()) {
+        if (block instanceof CustomItemBlockProperties custom) {
+            if (!custom.canItemBeRepaired()) {
                 props.setNoRepair();
             }
 
-            props.rarity(((CustomItemBlockProperties) block).getItemRarity());
-            props.maxStackSize(((CustomItemBlockProperties) block).getItemMaxStackSize());
-            props.defaultMaxDamage(((CustomItemBlockProperties) block).getItemMaxDamage());
-            props.containerItem(((CustomItemBlockProperties) block).getCraftingRemainingItem());
-            props.setISTER(((CustomItemBlockProperties) block).getItemTEISR());
-
-            ((CustomItemBlockProperties) block).getItemToolLevels().forEach(props::addToolType);
+            props.rarity(custom.getItemRarity());
+            props.stacksTo(custom.getItemMaxStackSize());
+            props.durability(custom.getItemMaxDamage());
+            props.craftRemainder(custom.getCraftingRemainingItem());
+            // 1.21 port: custom item renderers (getItemTEISR) move to
+            // IClientItemExtensions; tool levels are tag-driven now.
         }
         return props;
     }

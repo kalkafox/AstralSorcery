@@ -52,7 +52,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import org.joml.Matrix4f;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.locale.Language;
@@ -72,6 +71,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -126,7 +126,7 @@ public class RenderingUtils {
         }
         BlockPos pos = positionHint != null ? positionHint : BlockPos.ZERO;
         try {
-            if (state.isAir(level, pos)) {
+            if (state.isAir()) {
                 return null;
             }
         } catch (Exception exc) {
@@ -273,7 +273,7 @@ public class RenderingUtils {
                 le = Minecraft.getInstance().player;
             }
             float iYaw = RenderingVectorUtils.interpolate(Mth.wrapDegrees(le.yRotO), Mth.wrapDegrees(le.getYRot()), pTicks);
-            renderStack.mirror(Axis.YP.rotationDegrees(-iYaw + 180F));
+            renderStack.mulPose(Axis.YP.rotationDegrees(-iYaw + 180F));
         }
 
         Matrix4f matr = renderStack.last().pose();
@@ -319,7 +319,7 @@ public class RenderingUtils {
         float sinBobY = Mth.sin((ClientScheduler.getClientTick() + pTicks) / 10.0F) * 0.1F + 0.1F;
         renderStack.translate(0, sinBobY, 0);
         float ageRotate = ((ClientScheduler.getClientTick() + pTicks) / 20.0F);
-        renderStack.mirror(Axis.YP.rotation(ageRotate));
+        renderStack.mulPose(Axis.YP.rotation(ageRotate));
 
         renderTranslucentItemStackModelGround(stack, renderStack, overlayColor, Blending.PREALPHA, alpha);
 

@@ -27,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 import net.neoforged.fml.common.thread.EffectiveSide;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -36,6 +35,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Predicate;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -89,7 +89,7 @@ public class RecipeHelper {
         if (EffectiveSide.get() == LogicalSide.CLIENT) {
             return getClientManager();
         } else {
-            MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+            MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
             if (srv != null) {
                 return srv.getRecipeManager();
             }

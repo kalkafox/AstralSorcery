@@ -21,7 +21,6 @@ import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -30,6 +29,7 @@ import net.neoforged.neoforge.registries.ForgeRegistryEntry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -64,7 +64,7 @@ public class SimpleAltarRecipeBuilder<T extends SimpleAltarRecipe> extends Custo
         return this;
     }
 
-    public SimpleAltarRecipeBuilder<T> addRelayInput(ITag.INamedTag<Item> tag) {
+    public SimpleAltarRecipeBuilder<T> addRelayInput(TagKey<Item> tag) {
         return this.addRelayInput(Ingredient.fromTag(tag));
     }
 

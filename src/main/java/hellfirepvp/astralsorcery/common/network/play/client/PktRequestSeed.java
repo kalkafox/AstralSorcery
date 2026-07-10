@@ -22,10 +22,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -83,15 +83,15 @@ public class PktRequestSeed extends ASPacket<PktRequestSeed> {
         return new Handler<PktRequestSeed>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktRequestSeed packet, NetworkEvent.Context context) {
+            public void handleClient(PktRequestSeed packet, PacketContext context) {
                 context.enqueueWork(() -> WorldSeedCache.updateSeedCache(packet.dim, packet.user, packet.seed));
             }
 
             @Override
-            public void handle(PktRequestSeed packet, NetworkEvent.Context context, LogicalSide direction) {
+            public void handle(PktRequestSeed packet, PacketContext context, LogicalSide direction) {
                 context.enqueueWork(() -> {
                     //TODO 1.16.2 re-check once worlds are not all constantly loaded
-                    MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+                    MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
                     ServerLevel w = srv.getLevel(packet.dim);
                     if (w != null) {
                         PktRequestSeed seedResponse = new PktRequestSeed(packet.user, packet.dim);

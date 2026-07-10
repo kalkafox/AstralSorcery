@@ -17,10 +17,10 @@ import hellfirepvp.astralsorcery.common.event.EventFlags;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.ISkyRenderHandler;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -76,7 +76,7 @@ public class ChainingSkyRenderer implements ISkyRenderHandler {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alphaSubRain);
 
         renderStack.pushPose();
-        renderStack.mirror(Axis.XP.rotationDegrees(180));
+        renderStack.mulPose(Axis.XP.rotationDegrees(180));
         AstralSkyRenderer.renderConstellationsSky(level, renderStack, pTicks);
         renderStack.popPose();
 

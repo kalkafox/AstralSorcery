@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -76,7 +77,7 @@ public class CategoryInfuser extends JEICategory<LiquidInfusion> {
         itemInputs.add(Arrays.asList(liquidInfusion.getItemInput().getItems()));
         itemOutputs.add(Collections.singletonList(liquidInfusion.getOutputForRender(Collections.emptyList())));
 
-        FluidStack fInput = new FluidStack(liquidInfusion.getLiquidInput(), FluidAttributes.BUCKET_VOLUME);
+        FluidStack fInput = new FluidStack(liquidInfusion.getLiquidInput(), FluidType.BUCKET_VOLUME);
         for (int i = 0; i < 12; i++) {
             fluidInputs.add(Collections.singletonList(fInput.copy()));
         }

@@ -64,7 +64,7 @@ public class ConstellationPerk extends AttributeModifierPerk {
         this.constellation = null;
 
         if (perkData.has("constellation")) {
-            String cstKey = GsonHelper.getString(perkData, "constellation");
+            String cstKey = GsonHelper.getAsString(perkData, "constellation");
             IConstellation cst = ConstellationRegistry.getConstellation(ResourceLocation.parse(cstKey));
             if (cst == null) {
                 throw new JsonParseException("Unknown constellation: " + cstKey);

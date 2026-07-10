@@ -14,12 +14,13 @@ import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.block.BlockUtils;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.ToolType;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -50,14 +51,14 @@ public class KeyDigTypes extends KeyPerk {
             return;
         }
 
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         LogicalSide direction = this.getSide(player);
         PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {
             ItemStack heldMainHand = player.getMainHandItem();
-            if (!heldMainHand.isEmpty() && heldMainHand.getItem().getToolTypes(heldMainHand).contains(ToolType.PICKAXE)) {
-                ToolType requiredTool = event.getTargetBlock().getHarvestTool();
-                if (requiredTool == null || requiredTool.equals(ToolType.SHOVEL) || requiredTool.equals(ToolType.AXE)) {
+            if (!heldMainHand.isEmpty() && heldMainHand.is(ItemTags.PICKAXES)) {
+                BlockState target = event.getTargetBlock();
+                if (target.is(BlockTags.MINEABLE_WITH_SHOVEL) || target.is(BlockTags.MINEABLE_WITH_AXE)) {
                     event.setCanHarvest(true);
                 }
             }
@@ -65,16 +66,16 @@ public class KeyDigTypes extends KeyPerk {
     }
 
     private void onHarvestSpeed(PlayerEvent.BreakSpeed event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         LogicalSide direction = this.getSide(player);
         PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {
             BlockState broken = event.getState();
             ItemStack playerMainHand = player.getMainHandItem();
             if (!playerMainHand.isEmpty()) {
-                if (playerMainHand.getItem().getToolTypes(playerMainHand).contains(ToolType.PICKAXE)) {
-                    if (!broken.isToolEffective(ToolType.PICKAXE) &&
-                            (broken.isToolEffective(ToolType.AXE) || broken.isToolEffective(ToolType.SHOVEL))) {
+                if (playerMainHand.is(ItemTags.PICKAXES)) {
+                    if (!broken.is(BlockTags.MINEABLE_WITH_PICKAXE) &&
+                            (broken.is(BlockTags.MINEABLE_WITH_AXE) || broken.is(BlockTags.MINEABLE_WITH_SHOVEL))) {
                         EventFlags.CHECK_BREAK_SPEED.executeWithFlag(() -> {
                             MiscUtils.tryMultiple(
                                     () -> player.getDigSpeed(Blocks.STONE.defaultBlockState(), event.getBlockPos()),

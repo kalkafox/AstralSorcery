@@ -19,13 +19,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.loot.ConditionArraySerializer;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -63,7 +63,7 @@ public class AltarRecipeInstance extends AbstractCriterionTriggerInstance {
         return withOutput(Ingredient.fromStacks(outputs));
     }
 
-    public static AltarRecipeInstance withOutput(Tag<Item>... outputs) {
+    public static AltarRecipeInstance withOutput(TagKey<Item>... outputs) {
         return withOutput(Arrays.stream(outputs).map(Ingredient::fromTag).collect(Collectors.toList()));
     }
 
@@ -102,7 +102,7 @@ public class AltarRecipeInstance extends AbstractCriterionTriggerInstance {
         JsonArray recipeNames = GsonHelper.getAsJsonArray(json, "recipeNames", new JsonArray());
         for (int idx = 0; idx < recipeNames.size(); idx++) {
             JsonElement value = recipeNames.get(idx);
-            String key = GsonHelper.getString(value, String.format("recipeNames[%s]", idx));
+            String key = GsonHelper.getAsString(value, String.format("recipeNames[%s]", idx));
             instance.recipeNames.add(ResourceLocation.parse(key));
         }
         for (JsonElement value : GsonHelper.getAsJsonArray(json, "recipeOutputs", new JsonArray())) {

@@ -23,7 +23,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -43,8 +42,8 @@ public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemB
     public BlockAttunementAltar() {
         super(PropertiesMarble.defaultMarble()
                 .isRedstoneConductor((state) -> 4)
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
     }
 
     @Override

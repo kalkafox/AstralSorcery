@@ -89,7 +89,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
             return false;
         }
         Entity entity;
-        return (entity = altar.getLevel().getEntityByID(this.entityId)) != null &&
+        return (entity = altar.getLevel().getEntity(this.entityId)) != null &&
                 entity.isAlive() &&
                 entity instanceof ItemEntity &&
                 this.constellation.equals(altar.getActiveConstellation()) &&
@@ -349,7 +349,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
 
     @Nullable
     private ItemEntity getEntity(Level level) {
-        Entity entity = level.getEntityByID(this.entityId);
+        Entity entity = level.getEntity(this.entityId);
         if (entity != null && entity.isAlive() && entity instanceof ItemEntity) {
             return (ItemEntity) entity;
         }

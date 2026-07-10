@@ -31,7 +31,7 @@ public class ItemStarmetalIngot extends Item {
 
     public ItemStarmetalIngot() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS));
+);
     }
 
     @Override

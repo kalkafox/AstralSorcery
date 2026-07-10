@@ -36,7 +36,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -62,8 +61,8 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
     public BlockGemCrystalCluster() {
         super(Properties.create(Material.GLASS, CollectorCrystalType.ROCK_CRYSTAL.getMaterialColor())
                 .hardnessAndResistance(3, 3)
-                .harvestTool(ToolType.PICKAXE)
-                .harvestLevel(1)
+
+
                 .sound(SoundType.GLASS)
                 .isRedstoneConductor((state) -> 6));
     }

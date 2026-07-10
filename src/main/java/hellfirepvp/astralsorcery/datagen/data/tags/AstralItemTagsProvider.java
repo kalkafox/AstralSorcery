@@ -16,12 +16,12 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.world.item.Item;
-import net.minecraft.nbt.Tag;
 import net.minecraft.tags.ItemTags;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Items.*;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -66,7 +66,7 @@ public class AstralItemTagsProvider extends ItemTagsProvider {
                 .add(BlocksAS.ROCK_CRYSTAL_ORE.asItem());
     }
 
-    private TagsProvider.Builder<Item> tag(ITag.INamedTag<Item> tag) {
+    private TagsProvider.Builder<Item> tag(TagKey<Item> tag) {
         return this.getOrCreateBuilder(tag);
     }
 }

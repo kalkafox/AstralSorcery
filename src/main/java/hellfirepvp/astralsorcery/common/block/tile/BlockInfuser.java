@@ -31,7 +31,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -48,8 +47,8 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
 
     public BlockInfuser() {
         super(PropertiesMarble.defaultMarble()
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
     }
 
     @Override
@@ -66,7 +65,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
                 ItemStack stored = ti.getItemInput();
                 if (!held.isEmpty()) {
                     if (!stored.isEmpty()) {
-                        player.inventory.hurtArmor(level, stored);
+                        player.getInventory().hurtArmor(level, stored);
                         ti.setItemInput(ItemStack.EMPTY);
                         ti.markForUpdate();
                     }
@@ -83,7 +82,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
                     ti.markForUpdate();
                 } else {
                     if (!stored.isEmpty()) {
-                        player.inventory.hurtArmor(level, stored);
+                        player.getInventory().hurtArmor(level, stored);
                         ti.setItemInput(ItemStack.EMPTY);
                         ti.markForUpdate();
                     }

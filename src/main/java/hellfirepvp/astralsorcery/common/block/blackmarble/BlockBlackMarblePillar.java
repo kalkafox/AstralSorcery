@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.pathfinding.PathNodeType;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.StateDefinition;

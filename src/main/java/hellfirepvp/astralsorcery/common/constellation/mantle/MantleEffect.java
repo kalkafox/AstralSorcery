@@ -102,9 +102,9 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
         if (random.nextFloat() < chance) {
             Color c = this.getAssociatedConstellation().getConstellationColor();
             if (c != null) {
-                float width = player.getWidth() * 0.8F;
+                float width = player.getBbWidth() * 0.8F;
                 double x = player.getX() + random.nextFloat() * width * (random.nextBoolean() ? 1 : -1);
-                double y = player.getY() + random.nextFloat() * (player.getHeight() / 3);
+                double y = player.getY() + random.nextFloat() * (player.getBbHeight() / 3);
                 double z = player.getZ() + random.nextFloat() * width * (random.nextBoolean() ? 1 : -1);
                 Vector3 pos = new Vector3(x, y, z);
 

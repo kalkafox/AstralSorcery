@@ -57,7 +57,7 @@ public class KeyDamageEffects extends KeyPerk {
             LogicalSide direction = this.getSide(player);
             PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
-                LivingEntity attacked = event.getEntityLiving();
+                LivingEntity attacked = event.getEntity();
                 float chance = PerkAttributeHelper.getOrCreateMap(player, direction)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.applicationChance.get().floatValue());
                 if (random.nextFloat() < chance) {

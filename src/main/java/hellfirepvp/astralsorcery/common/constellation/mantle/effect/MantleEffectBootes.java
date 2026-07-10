@@ -104,7 +104,7 @@ public class MantleEffectBootes extends MantleEffect {
     }
 
     private void onAttacked(LivingAttackEvent event) {
-        LivingEntity attacked = event.getEntityLiving();
+        LivingEntity attacked = event.getEntity();
         DamageSource src = event.getSource();
         if (!attacked.getCommandSenderWorld().isClientSide() && src.getEntity() instanceof LivingEntity) {
             LivingEntity attacker = (LivingEntity) src.getEntity();
@@ -118,7 +118,7 @@ public class MantleEffectBootes extends MantleEffect {
     }
 
     private void onHurt(LivingIncomingDamageEvent event) {
-        LivingEntity hurt = event.getEntityLiving();
+        LivingEntity hurt = event.getEntity();
         if (!hurt.getCommandSenderWorld().isClientSide() && ItemMantle.getEffect(hurt, ConstellationsAS.bootes) != null) {
             Entity source = event.getSource().getEntity();
             if (source instanceof LivingEntity) {
@@ -139,7 +139,7 @@ public class MantleEffectBootes extends MantleEffect {
     protected List<EntityFlare> gatherFlares(Level level, ItemStack mantleStack) {
         List<EntityFlare> flares = new ArrayList<>();
         for (int flareId : getEntityIds(mantleStack)) {
-            Entity e = level.getEntityByID(flareId);
+            Entity e = level.getEntity(flareId);
             if (e instanceof EntityFlare && e.isAlive()) {
                 flares.add((EntityFlare) e);
             }

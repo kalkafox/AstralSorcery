@@ -21,13 +21,15 @@ import net.minecraft.core.Registry;
 import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -85,7 +87,7 @@ public class JsonHelper {
         if (fluidElement.convertToLong() && ((JsonPrimitive) fluidElement).isString()) {
             String strKey = fluidElement.getAsString();
             ResourceLocation fluidKey = ResourceLocation.parse(strKey);
-            fluidStack = new FluidStack(BuiltInRegistries.FLUID.get(fluidKey), FluidAttributes.BUCKET_VOLUME);
+            fluidStack = new FluidStack(BuiltInRegistries.FLUID.get(fluidKey), FluidType.BUCKET_VOLUME);
         } else if (fluidElement.isJsonObject()) {
             fluidStack = getFluidStack(fluidElement.getAsJsonObject(), true);
         } else {
@@ -96,7 +98,7 @@ public class JsonHelper {
 
     @Nonnull
     public static FluidStack getFluidStack(JsonObject json, boolean readNBT) {
-        String fluidName = GsonHelper.getString(json, "fluid");
+        String fluidName = GsonHelper.getAsString(json, "fluid");
         Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidName));
         if (fluid == null || fluid == Fluids.EMPTY) {
             return FluidStack.EMPTY;
@@ -109,13 +111,13 @@ public class JsonHelper {
                 if (value.isJsonObject()) {
                     nbt = TagParser.expect(GSON.getPos(value));
                 } else {
-                    nbt = TagParser.expect(GsonHelper.getString(value, "nbt"));
+                    nbt = TagParser.expect(GsonHelper.getAsString(value, "nbt"));
                 }
 
                 CompoundTag tempRead = new CompoundTag();
                 tempRead.put("Tag", nbt);
                 tempRead.putString("FluidName", fluidName);
-                tempRead.putInt("Amount", GsonHelper.getInt(json, "amount", FluidAttributes.BUCKET_VOLUME));
+                tempRead.putInt("Amount", GsonHelper.getAsInt(json, "amount", FluidType.BUCKET_VOLUME));
 
                 return FluidStack.loadFluidStackFromNBT(tempRead);
             }
@@ -124,7 +126,7 @@ public class JsonHelper {
                 throw new JsonSyntaxException("Invalid NBT Entry: " + e.toString());
             }
         }
-        return new FluidStack(fluid, GsonHelper.getInt(json, "amount", FluidAttributes.BUCKET_VOLUME));
+        return new FluidStack(fluid, GsonHelper.getAsInt(json, "amount", FluidType.BUCKET_VOLUME));
     }
 
     @Nonnull
@@ -151,7 +153,7 @@ public class JsonHelper {
         if (root.get(key).isJsonObject()) {
             itemstack = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(root, key), true);
         } else {
-            String strKey = GsonHelper.getString(root, key);
+            String strKey = GsonHelper.getAsString(root, key);
             ResourceLocation itemKey = ResourceLocation.parse(strKey);
             itemstack = new ItemStack(BuiltInRegistries.ITEM.get(itemKey));
         }
@@ -170,7 +172,7 @@ public class JsonHelper {
     }
 
     public static Color getColor(JsonObject object, String key) {
-        String value = GsonHelper.getString(object, key);
+        String value = GsonHelper.getAsString(object, key);
         if (value.startsWith("0x")) { //Assume hex color.
             String hexNbr = value.substring(2);
             try {

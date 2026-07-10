@@ -26,6 +26,7 @@ import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,7 +44,7 @@ public interface ItemBlockStorage {
             return false;
         }
         BlockState state = level.getBlockState(pos);
-        if (state.isAir(level, pos) ||
+        if (state.isAir() ||
                 state.getDestroySpeed(level, pos) == -1 ||
                 ItemUtils.createBlockStack(state).isEmpty()) {
             return false;

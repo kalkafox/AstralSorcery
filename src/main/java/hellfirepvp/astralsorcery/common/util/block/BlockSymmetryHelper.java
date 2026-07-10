@@ -42,7 +42,7 @@ public class BlockSymmetryHelper {
 
             BlockState state = level.getBlockState(at);
             if (offset.getX() == 0 || offset.getY() == 0 || offset.getZ() == 0) {
-                if (!state.isAir(level, at)) {
+                if (!state.isAir()) {
                     result.fillerBlocks.add(at);
                 }
                 continue;
@@ -59,13 +59,13 @@ public class BlockSymmetryHelper {
                         checkMirrorSymmetry(level, new Vec3i( offset.getX(), -offset.getY(),  offset.getZ()), center, result, visitedBlocks);
                         checkMirrorSymmetry(level, new Vec3i( offset.getX(),  offset.getY(), -offset.getZ()), center, result, visitedBlocks);
                     }
-                } else if (!dotState.isAir(level, dotSym)) {
+                } else if (!dotState.isAir()) {
                     result.fillerBlocks.add(at);
                     result.fillerBlocks.add(dotSym);
                 }
 
                 visitedBlocks.add(dotSym);
-            } else if (!state.isAir(level, at)) {
+            } else if (!state.isAir()) {
                 result.fillerBlocks.add(at);
             }
         }
@@ -79,7 +79,7 @@ public class BlockSymmetryHelper {
         BlockState state = level.getBlockState(at);
         visitedBlocks.add(at);
 
-        if (!state.isAir(level, at)) {
+        if (!state.isAir()) {
             result.fillerBlocks.add(at);
         }
 
@@ -87,7 +87,7 @@ public class BlockSymmetryHelper {
         BlockState dotState = level.getBlockState(dotSym);
         visitedBlocks.add(dotSym);
 
-        if (!dotState.isAir(level, dotSym)) {
+        if (!dotState.isAir()) {
             result.fillerBlocks.add(at);
         }
     }

@@ -32,6 +32,7 @@ import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
 import java.util.function.Consumer;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

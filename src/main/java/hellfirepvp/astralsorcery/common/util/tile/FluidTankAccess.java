@@ -10,11 +10,8 @@ package hellfirepvp.astralsorcery.common.util.tile;
 
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.common.capabilities.Capability;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.IFluidTank;
-import net.neoforged.neoforge.fluids.capability.CapabilityFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
@@ -49,14 +46,11 @@ public class FluidTankAccess {
         return dir == null || MiscUtils.contains(this.tanks, tank -> tank.accessibleSides.test(dir));
     }
 
-    public boolean hasCapability(Capability<?> state, @Nullable Direction facing) {
-        return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY == state && hasTanksForSide(facing);
-    }
-
-    public LazyOptional<IFluidHandler> getCapability(@Nullable Direction facing) {
+    @Nullable
+    public IFluidHandler getFluidHandler(@Nullable Direction facing) {
         Set<AccessibleTank> available = facing == null ? this.tanks :
                 this.tanks.stream().filter(t -> t.wasAccessibleSinceLastSave(facing)).collect(Collectors.toSet());
-        return available.isEmpty() ? LazyOptional.empty() : LazyOptional.of(() -> new SidedAccess(available));
+        return available.isEmpty() ? null : new SidedAccess(available);
     }
 
     private static class SidedAccess implements IFluidHandler {
@@ -79,7 +73,7 @@ public class FluidTankAccess {
         @Nonnull
         @Override
         public FluidStack getFluidInTank(int tank) {
-            return this.getTank(tank).map(t -> t.getTank().getType()).orElse(FluidStack.EMPTY);
+            return this.getTank(tank).map(t -> t.getTank().getFluid()).orElse(FluidStack.EMPTY);
         }
 
         @Override

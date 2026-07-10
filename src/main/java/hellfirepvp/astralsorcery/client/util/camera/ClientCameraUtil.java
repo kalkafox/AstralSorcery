@@ -93,7 +93,7 @@ public class ClientCameraUtil {
             //rm.setRenderPosition(x, y, z);
 
             if (mc.screen != null) {
-                mc.displayGuiScreen(null);
+                mc.setScreen(null);
             }
         }
     }

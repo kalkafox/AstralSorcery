@@ -38,15 +38,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.CapabilityFluidHandler;
+import java.util.Optional;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nullable;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -61,8 +61,8 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
 
     public BlockWell() {
         super(PropertiesMarble.defaultMarble()
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
         this.shape = createShape();
     }
 
@@ -113,16 +113,16 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
                         heldItem.shrink(1);
                     }
                     if (heldItem.getCount() <= 0) {
-                        player.setHeldItem(hand, ItemStack.EMPTY);
+                        player.setItemInHand(hand, ItemStack.EMPTY);
                     }
                 }
 
-                tw.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)
+                Optional.ofNullable(tw.getExposedFluidHandler(null))
                         .ifPresent((handler) -> {
                             FluidActionResult far = FluidUtil.tryFillContainerAndStow(heldItem,
-                                    handler, new InvWrapper(player.inventory), FluidAttributes.BUCKET_VOLUME, player, true);
+                                    handler, new InvWrapper(player.getInventory()), FluidType.BUCKET_VOLUME, player, true);
                             if (far.shouldSwing()) {
-                                player.setHeldItem(hand, far.getObject());
+                                player.setItemInHand(hand, far.getObject());
                                 SoundHelper.playSoundAround(SoundEvents.BUCKET_FILL, level, pos, 1F, 1F);
                                 tw.markForUpdate();
                             }

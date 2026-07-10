@@ -58,8 +58,8 @@ public class RenderObservatory extends CustomTileEntityRenderer<TileObservatory>
 
         renderStack.pushPose();
         renderStack.translate(0.5F, 1.5F, 0.5F);
-        renderStack.mirror(Axis.XP.rotationDegrees(180F));
-        renderStack.mirror(Axis.YP.rotationDegrees(180F));
+        renderStack.mulPose(Axis.XP.rotationDegrees(180F));
+        renderStack.mulPose(Axis.YP.rotationDegrees(180F));
         //renderStack.scale(0.0625F, 0.0625F, 0.0625F);
 
         MODEL_OBSERVATORY.setupRotations(iYawDegree, iPitchDegree);

@@ -15,15 +15,15 @@ import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.Registry;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -53,7 +53,7 @@ public class SimpleShapelessRecipeBuilder {
         return new SimpleShapelessRecipeBuilder(result, count);
     }
 
-    public SimpleShapelessRecipeBuilder addIngredient(Tag<Item> tagIn) {
+    public SimpleShapelessRecipeBuilder addIngredient(TagKey<Item> tagIn) {
         return this.addIngredient(Ingredient.fromTag(tagIn));
     }
 

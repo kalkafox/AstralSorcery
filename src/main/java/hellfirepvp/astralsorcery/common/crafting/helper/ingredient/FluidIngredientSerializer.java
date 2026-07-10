@@ -19,10 +19,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
 import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -45,35 +46,35 @@ public class FluidIngredientSerializer implements IIngredientSerializer<FluidIng
             value.getAsJsonArray().forEach(e -> {
                 if (e.isJsonObject()) {
                     JsonObject object = e.getAsJsonObject();
-                    ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(object, "fluid"));
+                    ResourceLocation key = ResourceLocation.parse(GsonHelper.getAsString(object, "fluid"));
                     if (!BuiltInRegistries.FLUID.containsKey(key)) {
                         throw new JsonSyntaxException("Unknown fluid '" + key + "'");
                     }
-                    int amount = FluidAttributes.BUCKET_VOLUME;
+                    int amount = FluidType.BUCKET_VOLUME;
                     if (object.has("amount")) {
-                        amount = GsonHelper.getInt(object, "amount");
+                        amount = GsonHelper.getAsInt(object, "amount");
                     }
                     Fluid fluid = BuiltInRegistries.FLUID.get(key);
                     foundFluids.add(new FluidStack(fluid, amount));
                 } else if (e.convertToLong()) {
-                    ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(value, "fluid"));
+                    ResourceLocation key = ResourceLocation.parse(GsonHelper.getAsString(value, "fluid"));
                     if (!BuiltInRegistries.FLUID.containsKey(key)) {
                         throw new JsonSyntaxException("Unknown fluid '" + key + "'");
                     }
                     Fluid fluid = BuiltInRegistries.FLUID.get(key);
-                    foundFluids.add(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME));
+                    foundFluids.add(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
                 } else {
                     throw new JsonSyntaxException("Value at key 'fluid' has to be a fluid name or an array of fluid names or objects containing 'fluid'.");
                 }
             });
         } else if (value.convertToLong()) {
-            ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(value, "fluid"));
+            ResourceLocation key = ResourceLocation.parse(GsonHelper.getAsString(value, "fluid"));
             if (!BuiltInRegistries.FLUID.containsKey(key)) {
                 throw new JsonSyntaxException("Unknown fluid '" + key + "'");
             }
-            int amount = FluidAttributes.BUCKET_VOLUME;
+            int amount = FluidType.BUCKET_VOLUME;
             if (json.has("amount")) {
-                amount = GsonHelper.getInt(json, "amount");
+                amount = GsonHelper.getAsInt(json, "amount");
             }
             Fluid fluid = BuiltInRegistries.FLUID.get(key);
             foundFluids.add(new FluidStack(fluid, amount));

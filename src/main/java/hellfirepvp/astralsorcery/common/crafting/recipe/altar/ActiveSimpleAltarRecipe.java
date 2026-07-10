@@ -37,13 +37,14 @@ import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.templates.VoidFluidHandler;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -109,7 +110,7 @@ public class ActiveSimpleAltarRecipe {
 
     @Nullable
     public Player tryGetCraftingPlayerServer() {
-        MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
         return srv.getPlayerList().getPlayerByUUID(this.getPlayerCraftingUUID());
     }
 
@@ -134,7 +135,7 @@ public class ActiveSimpleAltarRecipe {
             Ingredient from = grid.getIngredient(slot);
             if (from instanceof FluidIngredient) {
                 ItemStack stack = inv.getStackInSlot(slot);
-                FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidAttributes.BUCKET_VOLUME, null, true);
+                FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidType.BUCKET_VOLUME, null, true);
                 if (far.shouldSwing()) {
                     inv.setStackInSlot(slot, far.getObject());
                 }
@@ -149,7 +150,7 @@ public class ActiveSimpleAltarRecipe {
                 TileInventory tarInventory = tar.getItems();
                 if (from.getInput() != null && from.getInput().getIngredient() instanceof FluidIngredient) {
                     ItemStack stack = tarInventory.getStackInSlot(0);
-                    FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidAttributes.BUCKET_VOLUME, null, true);
+                    FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidType.BUCKET_VOLUME, null, true);
                     if (far.shouldSwing()) {
                         tarInventory.setStackInSlot(0, far.getObject());
                     }
@@ -306,7 +307,7 @@ public class ActiveSimpleAltarRecipe {
     public CompoundTag serialize() {
         CompoundTag pattern = new CompoundTag();
         pattern.putString("recipeToCraft", getRecipeToCraft().getId().toString());
-        pattern.putUniqueId("playerCraftingUUID", getPlayerCraftingUUID());
+        pattern.putUUID("playerCraftingUUID", getPlayerCraftingUUID());
         pattern.putInt("ticksCrafting", getTicksCrafting());
         pattern.putInt("totalCraftingTime", getTotalCraftingTime());
         pattern.putInt("state", getState().ordinal());

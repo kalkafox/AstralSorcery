@@ -35,8 +35,8 @@ public class ItemDazzlingFrame extends Item {
 
     public ItemDazzlingFrame() {
         super(new Item.Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override

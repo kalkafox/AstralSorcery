@@ -54,7 +54,7 @@ public class ConstellationBaseNBTCopyRecipe extends NBTCopyRecipe {
         super.deserializeAdditionalJson(recipeObject);
 
         if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION)) {
-            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getString(recipeObject, KEY_CONSTELLATION));
+            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getAsString(recipeObject, KEY_CONSTELLATION));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst != null) {
                 this.setConstellation(cst);

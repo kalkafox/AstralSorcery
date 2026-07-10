@@ -29,7 +29,7 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.locale.Language;
 import org.lwjgl.opengl.GL11;
@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -334,12 +335,12 @@ public class RenderingDrawUtils {
         renderStack.pushPose();
         for (int i = 0; i < count; i++) {
             renderStack.pushPose();
-            renderStack.mirror(Axis.XP.rotationDegrees(random.nextFloat() * 360.0F));
-            renderStack.mirror(Axis.YP.rotationDegrees(random.nextFloat() * 360.0F));
-            renderStack.mirror(Axis.ZP.rotationDegrees(random.nextFloat() * 360.0F));
-            renderStack.mirror(Axis.XP.rotationDegrees(random.nextFloat() * 360.0F));
-            renderStack.mirror(Axis.YP.rotationDegrees(random.nextFloat() * 360.0F));
-            renderStack.mirror(Axis.ZP.rotationDegrees(random.nextFloat() * 360.0F + f1 * 360.0F));
+            renderStack.mulPose(Axis.XP.rotationDegrees(random.nextFloat() * 360.0F));
+            renderStack.mulPose(Axis.YP.rotationDegrees(random.nextFloat() * 360.0F));
+            renderStack.mulPose(Axis.ZP.rotationDegrees(random.nextFloat() * 360.0F));
+            renderStack.mulPose(Axis.XP.rotationDegrees(random.nextFloat() * 360.0F));
+            renderStack.mulPose(Axis.YP.rotationDegrees(random.nextFloat() * 360.0F));
+            renderStack.mulPose(Axis.ZP.rotationDegrees(random.nextFloat() * 360.0F + f1 * 360.0F));
             Matrix4f matr = renderStack.last().pose();
 
             float fa = random.nextFloat() * 20.0F + 5.0F + f2 * 10.0F;

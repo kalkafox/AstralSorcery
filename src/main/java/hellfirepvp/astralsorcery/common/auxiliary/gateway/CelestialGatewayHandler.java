@@ -22,12 +22,12 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.event.world.WorldEvent;
+import net.neoforged.neoforge.event.level.WorldEvent;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -98,14 +98,14 @@ public class CelestialGatewayHandler {
 
     private void forceLoad(ResourceKey<Level> level) {
         //TODO re-check once worlds aren't ALL statically loaded.
-        MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
         srv.getLevel(level);
     }
 
     public void onServerStart() {
         startUp = true;
         CelestialGatewayFilter filter = getFilter();
-        MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         //TODO re-check once worlds aren't ALL statically loaded.
         //TODO gateway network startup load
         //DimensionManager.getRegistry().stream()

@@ -40,7 +40,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.world.WorldEvent;
+import net.neoforged.neoforge.event.level.WorldEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.LogicalSide;
@@ -117,11 +117,11 @@ public class EventHandlerCache {
 
     @SubscribeEvent
     public static void onPlayerConnect(PlayerEvent.PlayerLoggedInEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        ServerPlayer player = (ServerPlayer) event.getEntity();
 
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (GeneralConfig.CONFIG.giveJournalOnJoin.get() && !progress.didReceiveTome()) {
-            if (player.inventory.getArmor(new ItemStack(ItemsAS.TOME))) {
+            if (player.getInventory().getArmor(new ItemStack(ItemsAS.TOME))) {
                 ResearchManager.setTomeReceived(player);
             }
         }
@@ -132,7 +132,7 @@ public class EventHandlerCache {
 
     @SubscribeEvent
     public static void onPlayerDisconnect(PlayerEvent.PlayerLoggedOutEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        ServerPlayer player = (ServerPlayer) event.getEntity();
 
         EventHelperTemporaryFlight.onDisconnect(player);
         PerkEffectHelper.onPlayerDisconnectEvent(player);

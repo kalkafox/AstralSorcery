@@ -50,7 +50,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ForgeHooks;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -70,8 +69,8 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
         super(PropertiesGlass.coatedGlass()
                 .isRedstoneConductor((state) -> 12)
                 .hardnessAndResistance(-1F, 3600000.0F)
-                .harvestLevel(1)
-                .harvestTool(ToolType.PICKAXE));
+
+);
     }
 
     @Override

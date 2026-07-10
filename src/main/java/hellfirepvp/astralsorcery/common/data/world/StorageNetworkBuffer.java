@@ -36,6 +36,8 @@ import java.util.Map;
  */
 public class StorageNetworkBuffer extends GlobalWorldData {
 
+    private static final java.util.Random random = new java.util.Random();
+
     private final Map<BlockPos, StorageNetwork> rawNetworks = Maps.newHashMap();
     private final Map<ChunkPos, List<StorageNetwork>> availableNetworks = Maps.newHashMap();
 

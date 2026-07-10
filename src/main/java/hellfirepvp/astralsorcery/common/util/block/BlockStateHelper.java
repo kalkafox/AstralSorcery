@@ -20,13 +20,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -126,7 +127,7 @@ public class BlockStateHelper {
 
     @Nonnull
     public static <T extends Comparable<T>> BlockState deserializeObject(JsonObject object) {
-        String key = GsonHelper.getString(object, "block");
+        String key = GsonHelper.getAsString(object, "block");
         Block b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(key));
         if (b == null || b instanceof AirBlock) {
             return Blocks.AIR.defaultBlockState();
@@ -139,10 +140,10 @@ public class BlockStateHelper {
             JsonArray properties = GsonHelper.getAsJsonArray(object, "properties");
             for (JsonElement elemProperty : properties) {
                 JsonObject objProperty = GsonHelper.getAsJsonObject(elemProperty, "properties[?]");
-                String propName = GsonHelper.getString(objProperty, "name");
+                String propName = GsonHelper.getAsString(objProperty, "name");
                 Property<T> property = (Property<T>) MiscUtils.iterativeSearch(state.getProperties(), prop -> prop.getName().equalsIgnoreCase(propName));
                 if (property != null) {
-                    String propValue = GsonHelper.getString(objProperty, "value");
+                    String propValue = GsonHelper.getAsString(objProperty, "value");
                     Optional<T> value = property.getValue(propValue);
                     if (value.isPresent()) {
                         state = state.setValue(property, value.get());

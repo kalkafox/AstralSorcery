@@ -52,13 +52,13 @@ public class EventHelperEntityFreeze {
     }
 
     private static void onLivingTick(LivingEvent.LivingUpdateEvent event) {
-        if (TimeStopController.skipLivingTick(event.getEntityLiving())) {
+        if (TimeStopController.skipLivingTick(event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onLivingKnockBack(LivingKnockBackEvent event) {
-        if (TimeStopController.skipLivingTick(event.getEntityLiving())) {
+        if (TimeStopController.skipLivingTick(event.getEntity())) {
             event.setCanceled(true);
         }
     }

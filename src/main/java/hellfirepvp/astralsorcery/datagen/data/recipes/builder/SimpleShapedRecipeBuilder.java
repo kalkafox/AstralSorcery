@@ -19,16 +19,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -61,7 +61,7 @@ public class SimpleShapedRecipeBuilder {
         return new SimpleShapedRecipeBuilder(result, count);
     }
 
-    public SimpleShapedRecipeBuilder key(Character symbol, ITag.INamedTag<Item> tag) {
+    public SimpleShapedRecipeBuilder key(Character symbol, TagKey<Item> tag) {
         return this.key(symbol, Ingredient.fromTag(tag));
     }
 

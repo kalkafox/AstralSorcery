@@ -52,7 +52,7 @@ public class EffectDropModifier extends EffectCustomTexture {
     }
 
     private void onDrops(LivingDropsEvent event) {
-        LivingEntity le = event.getEntityLiving();
+        LivingEntity le = event.getEntity();
         if (le.getCommandSenderWorld().isClientSide() ||
                 !(le instanceof Mob) ||
                 !(le.getCommandSenderWorld() instanceof ServerLevel) ||

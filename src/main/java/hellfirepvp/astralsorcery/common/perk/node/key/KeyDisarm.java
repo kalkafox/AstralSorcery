@@ -66,7 +66,7 @@ public class KeyDisarm extends KeyPerk {
                     if (random.nextFloat() >= currentChance) {
                         continue;
                     }
-                    LivingEntity attacked = event.getEntityLiving();
+                    LivingEntity attacked = event.getEntity();
                     ItemStack stack = attacked.getItemStackFromSlot(slot);
                     if (!stack.isEmpty()) {
                         attacked.thunderHit(slot, ItemStack.EMPTY);

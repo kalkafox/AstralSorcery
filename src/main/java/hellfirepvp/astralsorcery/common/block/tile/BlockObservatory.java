@@ -31,7 +31,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -48,8 +47,8 @@ public class BlockObservatory extends BaseEntityBlock implements LargeBlock, Cus
 
     public BlockObservatory() {
         super(PropertiesMisc.defaultGoldMachinery()
-                .harvestTool(ToolType.PICKAXE)
-                .harvestLevel(1)
+
+
                 .notSolid()
                 .hardnessAndResistance(3F, 4F));
     }

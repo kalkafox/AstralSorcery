@@ -24,13 +24,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.util.math.vector.Vector3f;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.zip.GZIPInputStream;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -70,7 +70,7 @@ public class ClientMiscEventHandler {
 
         Vec3 motion = player.getDeltaMovement();
 
-        boolean f = player.abilities.flying;
+        boolean f = player.getAbilities().flying;
         float ma = f ? 15 : 5;
         float r = (ma * (Math.abs((ClientScheduler.getClientTick() % 80) - 40) / 40F)) +
                 ((65 - ma) * Math.max(0, Math.min(1, (float) new Vector3(motion.x, 0, motion.z).length())));
@@ -82,13 +82,13 @@ public class ClientMiscEventHandler {
         if (swimAngle > 0) {
             float waterPitch = player.isInWater() ? -90.0F - player.getXRot() : -90.0F;
             float bodySwimAngle = Mth.lerp(swimAngle, 0.0F, waterPitch);
-            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
-            renderStack.mirror(Axis.XP.rotationDegrees(bodySwimAngle));
+            renderStack.mulPose(Axis.YP.rotationDegrees(180 - rot));
+            renderStack.mulPose(Axis.XP.rotationDegrees(bodySwimAngle));
             if (player.isVisuallySwimming()) {
                 renderStack.translate(0, -1, 0.3F);
             }
         } else {
-            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
+            renderStack.mulPose(Axis.YP.rotationDegrees(180 - rot));
         }
 
         renderStack.scale(0.07F, 0.07F, 0.07F);
@@ -107,7 +107,7 @@ public class ClientMiscEventHandler {
         Minecraft.getInstance().getTextureManager().bindTexture(tex);
 
         renderStack.pushPose();
-        renderStack.mirror(Axis.YN.rotationDegrees(20 + r));
+        renderStack.mulPose(Axis.YN.rotationDegrees(20 + r));
         vboR.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
         vboR.draw(renderStack.last().pose(), GL11.GL_QUADS);
@@ -116,7 +116,7 @@ public class ClientMiscEventHandler {
         renderStack.popPose();
 
         renderStack.pushPose();
-        renderStack.mirror(Axis.YP.rotationDegrees(20 + r));
+        renderStack.mulPose(Axis.YP.rotationDegrees(20 + r));
         vboL.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
         vboL.draw(renderStack.last().pose(), GL11.GL_QUADS);

@@ -19,10 +19,10 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -75,7 +75,7 @@ public class PktLoginSyncGateway extends ASLoginPacket<PktLoginSyncGateway> {
         return new Handler<PktLoginSyncGateway>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktLoginSyncGateway packet, NetworkEvent.Context context) {
+            public void handleClient(PktLoginSyncGateway packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     CelestialGatewayHandler.INSTANCE.updateClientCache(packet.positions);
                     acknowledge(context);
@@ -83,7 +83,7 @@ public class PktLoginSyncGateway extends ASLoginPacket<PktLoginSyncGateway> {
             }
 
             @Override
-            public void handle(PktLoginSyncGateway packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktLoginSyncGateway packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

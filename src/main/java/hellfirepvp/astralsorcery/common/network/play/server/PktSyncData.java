@@ -18,11 +18,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -76,7 +76,7 @@ public class PktSyncData extends ASPacket<PktSyncData> {
         return new Handler<PktSyncData>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktSyncData packet, NetworkEvent.Context context) {
+            public void handleClient(PktSyncData packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     for (ResourceLocation key : packet.diffData.keySet()) {
                         ClientDataReader reader = SyncDataHolder.getReader(key);
@@ -89,7 +89,7 @@ public class PktSyncData extends ASPacket<PktSyncData> {
             }
 
             @Override
-            public void handle(PktSyncData packet, NetworkEvent.Context context, LogicalSide direction) {}
+            public void handle(PktSyncData packet, PacketContext context, LogicalSide direction) {}
         };
     }
 }

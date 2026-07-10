@@ -186,15 +186,15 @@ public class ScreenJournalConstellationOverview extends ScreenJournal implements
         for (Rectangle r : rectCRenderMap.keySet()) {
             if (r.contains(xpos, ypos)) {
                 IConstellation c = rectCRenderMap.get(r);
-                Minecraft.getInstance().displayGuiScreen(new ScreenJournalConstellationDetail(this, c));
+                Minecraft.getInstance().setScreen(new ScreenJournalConstellationDetail(this, c));
             }
         }
         if (rectPrev != null && rectPrev.contains(xpos, ypos)) {
-            Minecraft.getInstance().displayGuiScreen(new ScreenJournalConstellationOverview(pageId - 1, constellations));
+            Minecraft.getInstance().setScreen(new ScreenJournalConstellationOverview(pageId - 1, constellations));
             return true;
         }
         if (rectNext != null && rectNext.contains(xpos, ypos)) {
-            Minecraft.getInstance().displayGuiScreen(new ScreenJournalConstellationOverview(pageId + 1, constellations));
+            Minecraft.getInstance().setScreen(new ScreenJournalConstellationOverview(pageId + 1, constellations));
             return true;
         }
         return false;

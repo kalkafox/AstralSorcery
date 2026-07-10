@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.function.Predicate;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
  * This class is part of the Astral Sorcery Mod

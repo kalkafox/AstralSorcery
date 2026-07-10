@@ -20,9 +20,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.util.math.vector.Vector3f;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -59,8 +59,8 @@ public class JEIHandlerSpawnEntity extends JEIInteractionResultHandler {
         renderStack.pushPose();
         renderStack.translate(55, 35, 500);
         renderStack.scale(15, 15, 15);
-        renderStack.mirror(Axis.XP.rotationDegrees(180));
-        renderStack.mirror(Axis.YP.rotationDegrees(145));
+        renderStack.mulPose(Axis.XP.rotationDegrees(180));
+        renderStack.mulPose(Axis.YP.rotationDegrees(145));
         MultiBufferSource.Impl buffer = MultiBufferSource.getImpl(Tesselator.getInstance().getBuffer());
         Minecraft.getInstance().getRenderManager()
                 .renderEntityStatic(le, 0, 0, 0, 0, 0, renderStack, buffer, LightmapUtil.getPackedFullbrightCoords());

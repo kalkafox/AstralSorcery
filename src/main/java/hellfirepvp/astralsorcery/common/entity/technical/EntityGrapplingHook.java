@@ -100,7 +100,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         int idPull = this.entityData.get(PULLING_ENTITY);
         if (idPull > 0) {
             try {
-                return (LivingEntity) this.level().getEntityByID(idPull);
+                return (LivingEntity) this.level().getEntity(idPull);
             } catch (Exception exc) {}
         }
         return null;
@@ -255,7 +255,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         int id = additionalData.readInt();
         try {
             if (id > 0) {
-                this.throwingEntity = (LivingEntity) level.getEntityByID(id);
+                this.throwingEntity = (LivingEntity) level.getEntity(id);
             }
         } catch (Exception ignored) {}
     }
@@ -286,14 +286,14 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         Vector3 interpThrower = RenderingVectorUtils.interpolatePosition(thrower, partial);
         Vector3 interpHook = RenderingVectorUtils.interpolatePosition(this, partial);
         Vector3 origin = new Vector3();
-        Vector3 to = interpThrower.clone().subtract(interpHook).addY(thrower.getHeight() / 4);
+        Vector3 to = interpThrower.clone().subtract(interpHook).addY(thrower.getBbHeight() / 4);
         float lineLength = (float) (to.length() * 5);
         list.add(origin.clone());
         int iter = (int) lineLength;
         for (int xx = 1; xx < iter - 1; xx++) {
             float dist = xx * (lineLength / iter);
             double dx = (interpThrower.getX() - interpHook.getX())                            / iter * xx + Mth.sin(dist / 10.0F) * pullFactor;
-            double dy = (interpThrower.getY() - interpHook.getY() + thrower.getHeight() / 2F) / iter * xx + Mth.sin(dist / 7.0F)  * pullFactor;
+            double dy = (interpThrower.getY() - interpHook.getY() + thrower.getBbHeight() / 2F) / iter * xx + Mth.sin(dist / 7.0F)  * pullFactor;
             double dz = (interpThrower.getZ() - interpHook.getZ())                            / iter * xx + Mth.sin(dist / 2.0F)  * pullFactor;
             list.add(new Vector3(dx, dy, dz));
         }

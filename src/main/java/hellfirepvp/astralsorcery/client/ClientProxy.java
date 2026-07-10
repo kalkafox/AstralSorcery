@@ -162,7 +162,7 @@ public class ClientProxy extends CommonProxy {
     public void openGuiClient(GuiType type, CompoundTag data) {
         Screen toOpen = type.deserialize(data);
         if (toOpen != null) {
-            Minecraft.getInstance().displayGuiScreen(toOpen);
+            Minecraft.getInstance().setScreen(toOpen);
         }
     }
 

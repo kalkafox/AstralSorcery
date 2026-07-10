@@ -29,7 +29,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.neoforged.fml.network.NetworkHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -135,9 +134,4 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
         }
         return this.getType().getSize();
     }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
-}
+}

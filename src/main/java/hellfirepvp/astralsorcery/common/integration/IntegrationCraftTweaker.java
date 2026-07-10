@@ -19,6 +19,7 @@ import hellfirepvp.astralsorcery.common.constellation.*;
 import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import net.minecraft.util.text.*;
 import net.neoforged.bus.api.IEventBus;
+import net.minecraft.ChatFormatting;
 
 /**
  * This class is part of the Astral Sorcery Mod

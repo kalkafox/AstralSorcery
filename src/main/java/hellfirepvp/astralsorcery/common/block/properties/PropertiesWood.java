@@ -11,7 +11,6 @@ package hellfirepvp.astralsorcery.common.block.properties;
 import hellfirepvp.astralsorcery.common.lib.MaterialsAS;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.neoforged.neoforge.common.ToolType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,7 +24,7 @@ public class PropertiesWood {
     public static Block.Properties defaultInfusedWood() {
         return Block.Properties.create(MaterialsAS.INFUSED_WOOD)
                 .hardnessAndResistance(2.5F, 7F)
-                .harvestTool(ToolType.AXE)
+
                 .sound(SoundType.WOOD);
     }
 

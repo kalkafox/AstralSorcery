@@ -58,14 +58,14 @@ public class ConstellationItemRecipe extends SimpleAltarRecipe {
         super.deserializeAdditionalJson(recipeObject);
 
         if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_ATTUNE)) {
-            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getString(recipeObject, KEY_CONSTELLATION_ATTUNE));
+            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getAsString(recipeObject, KEY_CONSTELLATION_ATTUNE));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst instanceof IWeakConstellation) {
                 this.attunedConstellation = (IWeakConstellation) cst;
             }
         }
         if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_TRAIT)) {
-            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getString(recipeObject, KEY_CONSTELLATION_TRAIT));
+            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getAsString(recipeObject, KEY_CONSTELLATION_TRAIT));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst instanceof IMinorConstellation) {
                 this.setTraitConstellation((IMinorConstellation) cst);

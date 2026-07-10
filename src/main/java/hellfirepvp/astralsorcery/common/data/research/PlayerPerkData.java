@@ -541,7 +541,7 @@ public class PlayerPerkData {
 
             UUID newUUID = type.getLockUUID();
             CompoundTag newKeyTag = new CompoundTag();
-            newKeyTag.putUniqueId("uuid", newUUID);
+            newKeyTag.putUUID("uuid", newUUID);
 
             if (allocations.isEmpty()) {
                 if (!simulate) {

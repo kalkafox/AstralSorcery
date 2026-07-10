@@ -14,8 +14,7 @@ import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.LazyOptional;
-import net.neoforged.neoforge.items.CapabilityItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
@@ -30,14 +29,13 @@ public class ItemPerkSeal extends Item {
 
     public ItemPerkSeal() {
         super(new Properties()
-                .maxDamage(0)
-                .maxStackSize(16)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .durability(0)
+                .stacksTo(16)
+);
     }
 
     public static int getPlayerSealCount(Player player) {
-        LazyOptional<IItemHandler> cap = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
-        return getPlayerSealCount(cap.orElse(null));
+        return getPlayerSealCount(player.getCapability(Capabilities.ItemHandler.ENTITY));
     }
 
     public static int getPlayerSealCount(IItemHandler inv) {
@@ -49,7 +47,7 @@ public class ItemPerkSeal extends Item {
     }
 
     public static boolean useSeal(Player player, boolean simulate) {
-        return useSeal((IItemHandlerModifiable) player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElse(null), simulate);
+        return useSeal((IItemHandlerModifiable) player.getCapability(Capabilities.ItemHandler.ENTITY), simulate);
     }
 
     public static boolean useSeal(IItemHandlerModifiable inv, boolean simulate) {

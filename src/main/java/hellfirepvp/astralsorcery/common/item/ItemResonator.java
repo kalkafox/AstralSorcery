@@ -65,6 +65,7 @@ import net.neoforged.fml.LogicalSide;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -75,10 +76,12 @@ import java.util.List;
  */
 public class ItemResonator extends Item implements OverrideInteractItem {
 
+    private static final java.util.Random random = new java.util.Random();
+
     public ItemResonator() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override
@@ -130,7 +133,7 @@ public class ItemResonator extends Item implements OverrideInteractItem {
 
                         ChunkAccess ch = level.getChunk(pos);
                         if (ch instanceof LevelChunk) {
-                            ((LevelChunk) ch).getCapability(CapabilitiesAS.CHUNK_FLUID).ifPresent(entry -> {
+                            Optional.ofNullable(((LevelChunk) ch).getData(CapabilitiesAS.CHUNK_FLUID)).ifPresent(entry -> {
                                 FluidStack display = entry.drain(1, IFluidHandler.FluidAction.SIMULATE);
                                 if (!display.isEmpty()) {
                                     PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.LIQUID_FOUNTAIN).addData(buf -> {

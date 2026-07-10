@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.core.BlockPos;
-import net.neoforged.fml.network.IContainerFactory;
+import net.neoforged.neoforge.network.IContainerFactory;
 
 import javax.annotation.Nonnull;
 

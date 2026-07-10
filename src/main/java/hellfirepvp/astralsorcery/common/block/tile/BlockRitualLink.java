@@ -20,7 +20,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
-import net.neoforged.neoforge.common.ToolType;
 
 import javax.annotation.Nullable;
 
@@ -37,7 +36,7 @@ public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock 
 
     public BlockRitualLink() {
         super(PropertiesGlass.coatedGlass()
-                .harvestTool(ToolType.PICKAXE));
+);
     }
 
     @Override

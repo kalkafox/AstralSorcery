@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.network.IContainerFactory;
+import net.neoforged.neoforge.network.IContainerFactory;
 
 import static hellfirepvp.astralsorcery.common.lib.ContainerTypesAS.*;
 

@@ -89,7 +89,7 @@ public class MantleEffectOctans extends MantleEffect {
                 //Set aqua affinity
                 ItemStack st = new ItemStack(Items.LEATHER_HELMET);
                 st.fillItemCategory(Enchantments.AQUA_AFFINITY, 1);
-                player.inventory.armor.set(EquipmentSlot.HEAD.getIndex(), st);
+                player.getInventory().armor.set(EquipmentSlot.HEAD.getIndex(), st);
 
                 //Recalc breakspeed
                 EventFlags.CHECK_UNDERWATER_BREAK_SPEED.executeWithFlag(() -> {
@@ -98,14 +98,14 @@ public class MantleEffectOctans extends MantleEffect {
                 });
 
                 //Reset helmet
-                player.inventory.armor.set(EquipmentSlot.HEAD.getIndex(), existing);
+                player.getInventory().armor.set(EquipmentSlot.HEAD.getIndex(), existing);
             }
         }
     }
 
     private void handleUnderwaterUnwavering(LivingKnockBackEvent event) {
-        if (event.getEntityLiving().areEyesInFluid(FluidTags.WATER)) {
-            MantleEffectOctans octans = ItemMantle.getEffect(event.getEntityLiving(), ConstellationsAS.octans);
+        if (event.getEntity().areEyesInFluid(FluidTags.WATER)) {
+            MantleEffectOctans octans = ItemMantle.getEffect(event.getEntity(), ConstellationsAS.octans);
             if (octans != null) {
                 event.setCanceled(true);
             }

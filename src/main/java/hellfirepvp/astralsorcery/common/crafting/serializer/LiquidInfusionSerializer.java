@@ -22,7 +22,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.neoforged.neoforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -39,7 +39,7 @@ public class LiquidInfusionSerializer extends CustomRecipeSerializer<LiquidInfus
 
     @Override
     public LiquidInfusion read(ResourceLocation recipeId, JsonObject json) {
-        ResourceLocation fluidKey = ResourceLocation.parse(GsonHelper.getString(json, "fluidInput"));
+        ResourceLocation fluidKey = ResourceLocation.parse(GsonHelper.getAsString(json, "fluidInput"));
         Fluid fluidInput = BuiltInRegistries.FLUID.get(fluidKey);
         if (fluidInput == null || fluidInput == Fluids.EMPTY) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey);
@@ -47,12 +47,12 @@ public class LiquidInfusionSerializer extends CustomRecipeSerializer<LiquidInfus
 
         Ingredient from = CraftingHelper.getIngredient(json.get("input"));
         ItemStack output = JsonHelper.getItemStack(json.get("output"), "output");
-        float consumptionChance = GsonHelper.getFloat(json, "consumptionChance");
-        int duration = GsonHelper.getInt(json, "duration");
+        float consumptionChance = GsonHelper.getAsFloat(json, "consumptionChance");
+        int duration = GsonHelper.getAsInt(json, "duration");
 
-        boolean consumeMultipleFluids = GsonHelper.getBoolean(json, "consumeMultipleFluids", false);
-        boolean acceptChaliceInput = GsonHelper.getBoolean(json, "acceptChaliceInput", true);
-        boolean copyNBTToOutputs = GsonHelper.getBoolean(json, "copyNBTToOutputs", false);
+        boolean consumeMultipleFluids = GsonHelper.getAsBoolean(json, "consumeMultipleFluids", false);
+        boolean acceptChaliceInput = GsonHelper.getAsBoolean(json, "acceptChaliceInput", true);
+        boolean copyNBTToOutputs = GsonHelper.getAsBoolean(json, "copyNBTToOutputs", false);
         return new LiquidInfusion(recipeId, duration, fluidInput, from, output, consumptionChance, consumeMultipleFluids, acceptChaliceInput, copyNBTToOutputs);
     }
 

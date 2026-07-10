@@ -35,7 +35,7 @@ public abstract class ItemColoredLens extends Item implements ItemDynamicColor {
     private final LensColorType lensColorType;
 
     protected ItemColoredLens(LensColorType colorType) {
-        this(colorType, new Properties().group(CommonProxy.ITEM_GROUP_AS));
+        this(colorType, new Properties());
     }
 
     protected ItemColoredLens(LensColorType colorType, Properties properties) {
@@ -56,13 +56,13 @@ public abstract class ItemColoredLens extends Item implements ItemDynamicColor {
                 if (!player.isCreative()) {
                     held.setCount(held.getCount() - 1);
                     if (held.getCount() <= 0) {
-                        player.setHeldItem(ctx.getHand(), ItemStack.EMPTY);
+                        player.setItemInHand(ctx.getHand(), ItemStack.EMPTY);
                     }
                 }
 
                 SoundHelper.playSoundAround(SoundsAS.BLOCK_COLOREDLENS_ATTACH, level, ctx.getBlockPos(), 0.8F, 1.5F);
                 if (oldType != null) {
-                    player.inventory.hurtArmor(level, oldType.getStack());
+                    player.getInventory().hurtArmor(level, oldType.getStack());
                 }
             }
         }

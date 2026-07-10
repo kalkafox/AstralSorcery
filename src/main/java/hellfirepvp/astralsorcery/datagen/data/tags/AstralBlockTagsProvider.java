@@ -15,11 +15,11 @@ import net.minecraft.data.BlockTagsProvider;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.nbt.Tag;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Blocks.MARBLE;
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Blocks.ORES;
+import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -54,7 +54,7 @@ public class AstralBlockTagsProvider extends BlockTagsProvider {
                 .add(BlocksAS.ROCK_CRYSTAL_ORE);
     }
 
-    private TagsProvider.Builder<Block> tag(ITag.INamedTag<Block> tag) {
+    private TagsProvider.Builder<Block> tag(TagKey<Block> tag) {
         return this.getOrCreateBuilder(tag);
     }
 }

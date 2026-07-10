@@ -57,25 +57,25 @@ public class PerkTreeLoader extends SimpleJsonResourceReloadListener {
         int count = 0;
         for(JsonObject serializedPerkData : perkTreeObjects) {
 
-            ResourceLocation perkRegistryName = ResourceLocation.parse(GsonHelper.getString(serializedPerkData, "registry_name"));
+            ResourceLocation perkRegistryName = ResourceLocation.parse(GsonHelper.getAsString(serializedPerkData, "registry_name"));
             ResourceLocation customClass = PerkTypeHandler.DEFAULT.getKey();
             if (serializedPerkData.has("perk_class")) {
-                customClass = ResourceLocation.parse(GsonHelper.getString(serializedPerkData, "perk_class"));
+                customClass = ResourceLocation.parse(GsonHelper.getAsString(serializedPerkData, "perk_class"));
                 if (!PerkTypeHandler.hasCustomType(customClass)) {
                     throw new JsonParseException("Unknown perk_class: " + customClass.toString());
                 }
             }
 
-            float posX = GsonHelper.getFloat(serializedPerkData, "x");
-            float posY = GsonHelper.getFloat(serializedPerkData, "y");
+            float posX = GsonHelper.getAsFloat(serializedPerkData, "x");
+            float posY = GsonHelper.getAsFloat(serializedPerkData, "y");
 
             AbstractPerk perk = PerkTypeHandler.convert(perkRegistryName, posX, posY, customClass);
             if (serializedPerkData.has("name")) {
-                String name = GsonHelper.getString(serializedPerkData, "name");
+                String name = GsonHelper.getAsString(serializedPerkData, "name");
                 perk.setName(name);
             }
             if (serializedPerkData.has("hiddenUnlessAllocated")) {
-                perk.setHiddenUnlessAllocated(GsonHelper.getBoolean(serializedPerkData, "hiddenUnlessAllocated"));
+                perk.setHiddenUnlessAllocated(GsonHelper.getAsBoolean(serializedPerkData, "hiddenUnlessAllocated"));
             }
 
             if (serializedPerkData.has("data")) {
@@ -88,7 +88,7 @@ public class PerkTreeLoader extends SimpleJsonResourceReloadListener {
                 JsonArray connectionArray = GsonHelper.getAsJsonArray(serializedPerkData, "connection");
                 for (int i = 0; i < connectionArray.size(); i++) {
                     JsonElement connection = connectionArray.get(i);
-                    String connectedPerkKey = GsonHelper.getString(connection, String.format("connection[%s]", i));
+                    String connectedPerkKey = GsonHelper.getAsString(connection, String.format("connection[%s]", i));
                     connector.addConnection(ResourceLocation.parse(connectedPerkKey));
                 }
             }

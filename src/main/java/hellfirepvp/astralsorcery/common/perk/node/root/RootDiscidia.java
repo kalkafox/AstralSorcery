@@ -82,7 +82,7 @@ public class RootDiscidia extends RootPerk {
         }
 
         float mul = 4.0F;
-        CombatTracker combat = event.getEntityLiving().getCombatTracker();
+        CombatTracker combat = event.getEntity().getCombatTracker();
         if (combat.inCombat) {
             if (combat.getCombatDuration() > (2 * 60 * 20)) {
                 mul = 0.01F;

@@ -155,7 +155,7 @@ public class CEffectEvorsio extends CEffectAbstractList<ListEntries.PosEntry> {
         if (hardness < 0 || hardness >= 75) {
             return false;
         }
-        return !state.isAir(level, pos);
+        return !state.isAir();
     }
 
     private Predicate<BlockState> buildFilter(TileRitualPedestal pedestal) {

@@ -27,7 +27,7 @@ public class ItemAttunedRockCrystal extends ItemAttunedCrystalBase {
 
     public ItemAttunedRockCrystal() {
         super(new Properties()
-                .group(CommonProxy.ITEM_GROUP_AS_CRYSTALS));
+);
     }
 
     @Override

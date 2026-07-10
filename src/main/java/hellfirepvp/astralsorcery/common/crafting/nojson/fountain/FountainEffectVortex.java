@@ -92,7 +92,7 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
             if (le == null || !le.isAlive() || le instanceof Player || !TechnicalEntityRegistry.INSTANCE.canAffect(le)) {
                 continue;
             }
-            float entitySize = le.getHeight() * le.getWidth() * le.getWidth();
+            float entitySize = le.getBbHeight() * le.getBbWidth() * le.getBbWidth();
             density += entitySize;
 
             if (entitySize > boxCapacity) {
@@ -144,9 +144,9 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
 
             if (vortexAt.distanceSquared(le) <= 16) {
                 Vector3 randomRanges = new Vector3(
-                        Math.max(0, (captureBox.getXSize() - le.getWidth()) / 2),
-                        Math.max(0, (captureBox.getYSize() - le.getHeight()) / 2),
-                        Math.max(0, (captureBox.getZSize() - le.getWidth()) / 2)
+                        Math.max(0, (captureBox.getXSize() - le.getBbWidth()) / 2),
+                        Math.max(0, (captureBox.getYSize() - le.getBbHeight()) / 2),
+                        Math.max(0, (captureBox.getZSize() - le.getBbWidth()) / 2)
                 );
                 Vector3 randomPos = vortexAt.clone().add(
                         randomRanges.getX() * random.nextFloat() * (random.nextBoolean() ? 1 : -1),

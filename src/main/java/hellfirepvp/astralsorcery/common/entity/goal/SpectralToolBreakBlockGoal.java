@@ -49,7 +49,7 @@ public class SpectralToolBreakBlockGoal extends SpectralToolGoal {
         return (level, pos, state) -> {
             return MiscUtils.getTileAt(level, pos, BlockEntity.class, false) == null &&
                     pos.getY() >= this.getEntity().getStartPosition().getY() &&
-                    !state.isAir(level, pos) &&
+                    !state.isAir() &&
                     state.getDestroySpeed(level, pos) != -1 &&
                     state.getDestroySpeed(level, pos) <= 10 &&
                     BlockUtils.canToolBreakBlockWithoutPlayer(level, pos, state, new ItemStack(Items.DIAMOND_PICKAXE));

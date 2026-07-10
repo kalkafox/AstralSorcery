@@ -407,7 +407,7 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
     public void save(CompoundTag nbt) {
         super.save(nbt);
 
-        nbt.putUniqueId("playerUUID", this.playerUUID);
+        nbt.putUUID("playerUUID", this.playerUUID);
         nbt.putString("constellation", this.constellation.getRegistryName().toString());
     }
 

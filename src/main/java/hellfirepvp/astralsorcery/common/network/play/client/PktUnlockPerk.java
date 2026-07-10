@@ -21,9 +21,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.network.NetworkEvent;
 
 import javax.annotation.Nonnull;
+import hellfirepvp.astralsorcery.common.network.base.PacketContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -72,13 +72,13 @@ public class PktUnlockPerk extends ASPacket<PktUnlockPerk> {
         return new Handler<PktUnlockPerk>() {
             @Override
             @OnlyIn(Dist.CLIENT)
-            public void handleClient(PktUnlockPerk packet, NetworkEvent.Context context) {
+            public void handleClient(PktUnlockPerk packet, PacketContext context) {
                 context.enqueueWork(() -> {
                     if (packet.serverAccept) {
                         PerkTree.PERK_TREE.getPerk(LogicalSide.CLIENT, packet.perkKey).ifPresent(perk -> {
                             Screen current = Minecraft.getInstance().screen;
                             if (current instanceof ScreenJournalPerkTree) {
-                                Minecraft.getInstance().enqueue(() -> ((ScreenJournalPerkTree) current).playUnlockAnimation(perk));
+                                Minecraft.getInstance().execute(() -> ((ScreenJournalPerkTree) current).playUnlockAnimation(perk));
                             }
                         });
                     }
@@ -86,7 +86,7 @@ public class PktUnlockPerk extends ASPacket<PktUnlockPerk> {
             }
 
             @Override
-            public void handle(PktUnlockPerk packet, NetworkEvent.Context context, LogicalSide direction) {
+            public void handle(PktUnlockPerk packet, PacketContext context, LogicalSide direction) {
                 context.enqueueWork(() -> {
                     PerkTree.PERK_TREE.getPerk(direction, packet.perkKey).ifPresent(perk -> {
                         Player player = context.getSender();

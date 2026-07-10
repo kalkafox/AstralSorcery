@@ -36,6 +36,7 @@ import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -84,8 +85,8 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
         JEIInteractionResultRegistry.get(recipe.getObject().getId())
                 .ifPresent(handler -> handler.drawRecipe(recipe, renderStack, xpos, ypos));
 
-        FluidStack testMatch1 = new FluidStack(recipe.getReactant1(), FluidAttributes.BUCKET_VOLUME);
-        FluidStack testMatch2 = new FluidStack(recipe.getReactant2(), FluidAttributes.BUCKET_VOLUME);
+        FluidStack testMatch1 = new FluidStack(recipe.getReactant1(), FluidType.BUCKET_VOLUME);
+        FluidStack testMatch2 = new FluidStack(recipe.getReactant2(), FluidType.BUCKET_VOLUME);
         LiquidInteractionContext ctx = new LiquidInteractionContext(testMatch1, testMatch2);
         Collection<LiquidInteraction> sameInteractions = RecipeTypesAS.TYPE_LIQUID_INTERACTION.findMatchingRecipes(ctx);
         if (!sameInteractions.isEmpty()) {

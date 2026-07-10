@@ -22,6 +22,6 @@ public class ItemAquamarine extends Item {
 
     public ItemAquamarine() {
         super(new Properties()
-            .group(CommonProxy.ITEM_GROUP_AS));
+);
     }
 }

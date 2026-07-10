@@ -90,7 +90,7 @@ public class MantleEffectArmara extends MantleEffect {
         this.playCapeSparkles(player, 0.15F);
 
         Vector3 at = Vector3.atEntityCorner(player);
-        at.addY(player.getHeight() / 3F * 2F);
+        at.addY(player.getBbHeight() / 3F * 2F);
 
         Vector3 lookVec = new Vector3(player.getLookAngle()).normalize();
 
@@ -142,7 +142,7 @@ public class MantleEffectArmara extends MantleEffect {
 
     private void onHurt(LivingIncomingDamageEvent event) {
         Level level = event.getEntity().getCommandSenderWorld();
-        LivingEntity hurt = event.getEntityLiving();
+        LivingEntity hurt = event.getEntity();
 
         if (level.isClientSide()) {
             return;

@@ -87,7 +87,7 @@ public class RaytraceAssist {
             if (collectEntities) {
                 List<Entity> entities = level.getEntitiesWithinAABB(Entity.class, collectBox.offset(at));
                 for (Entity b : entities) {
-                    collected.add(b.getEntityId());
+                    collected.add(b.getId());
                 }
             }
 
@@ -142,7 +142,7 @@ public class RaytraceAssist {
     public List<Entity> collectedEntities(Level level) {
         List<Entity> entities = new LinkedList<>();
         for (Integer id : collected) {
-            Entity e = level.getEntityByID(id);
+            Entity e = level.getEntity(id);
             if (e != null && e.isAlive()) {
                 entities.add(e);
             }

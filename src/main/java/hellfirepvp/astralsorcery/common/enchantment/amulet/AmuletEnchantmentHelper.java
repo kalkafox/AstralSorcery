@@ -32,6 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -100,7 +101,7 @@ public class AmuletEnchantmentHelper {
         if (EffectiveSide.get() == LogicalSide.CLIENT) {
             player = resolvePlayerClient(plUUID);
         } else {
-            MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
             if (server == null) {
                 return null;
             }

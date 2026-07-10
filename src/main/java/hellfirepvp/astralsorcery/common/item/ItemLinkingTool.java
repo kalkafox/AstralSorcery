@@ -32,8 +32,8 @@ public class ItemLinkingTool extends Item implements IItemLinkingTool {
 
     public ItemLinkingTool() {
         super(new Properties()
-                .maxStackSize(1)
-                .group(CommonProxy.ITEM_GROUP_AS));
+                .stacksTo(1)
+);
     }
 
     @Override
