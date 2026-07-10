@@ -50,21 +50,21 @@ public class ItemColoredLensPush extends ItemColoredLens {
         }
 
         @Override
-        public void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
+        public void entityInBeam(Level level, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
             if (entity instanceof Player && !GeneralConfig.CONFIG.doColoredLensesAffectPlayers.get() && executor.canExecute()) {
                 return;
             }
-            Vector3 dir = target.clone().subtract(origin).normalize().multiply(0.4F);
-            Vec3 eMotion = entity.getMotion();
+            Vector3 dir = target.clone().subtract(origin).normalize().mul(0.4F);
+            Vec3 eMotion = entity.getDeltaMovement();
             Vector3 motion = new Vector3(
                     Math.min(1F, eMotion.x + dir.getX()),
                     dir.getY() + 0.04F,
                     Math.min(1F, eMotion.z + dir.getZ())
             );
-            entity.setMotion(MiscUtils.limitVelocityToMinecraftLimit(motion).toVector3d());
+            entity.setDeltaMovement(MiscUtils.limitVelocityToMinecraftLimit(motion).toVector3d());
         }
 
         @Override
-        public void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
+        public void blockInBeam(Level level, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
     }
 }

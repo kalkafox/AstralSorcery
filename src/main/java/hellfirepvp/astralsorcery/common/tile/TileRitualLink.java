@@ -49,12 +49,12 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
     public void tick() {
         super.tick();
 
-        if (getWorld().isRemote()) {
+        if (getLevel().isClientSide()) {
             playClientEffects();
         } else {
             if (linkedTo != null) {
-                MiscUtils.executeWithChunk(getWorld(), linkedTo, () -> {
-                    TileRitualLink link = MiscUtils.getTileAt(getWorld(), linkedTo, TileRitualLink.class, true);
+                MiscUtils.executeWithChunk(getLevel(), linkedTo, () -> {
+                    TileRitualLink link = MiscUtils.getTileAt(getLevel(), linkedTo, TileRitualLink.class, true);
                     if (link == null) {
                         linkedTo = null;
                         markForUpdate();
@@ -67,16 +67,16 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
     @OnlyIn(Dist.CLIENT)
     private void playClientEffects() {
         if (this.linkedTo != null) {
-            if (ticksExisted % 4 == 0) {
+            if (tickCount % 4 == 0) {
                 Collection<Vector3> positions = MiscUtils.getCirclePositions(
                         new Vector3(this).add(0.5, 0.5, 0.5),
-                        Vector3.RotAxis.Y_AXIS, 0.4F - rand.nextFloat() * 0.1F, 10 + rand.nextInt(10));
+                        Vector3.RotAxis.Y_AXIS, 0.4F - random.nextFloat() * 0.1F, 10 + random.nextInt(10));
                 for (Vector3 v : positions) {
                     FXFacingParticle particle = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                             .spawn(v)
                             .setScaleMultiplier(0.15F)
-                            .setMotion(new Vector3(0, (rand.nextBoolean() ? 1 : -1) * rand.nextFloat() * 0.01, 0));
-                    if (rand.nextBoolean()) {
+                            .setDeltaMovement(new Vector3(0, (random.nextBoolean() ? 1 : -1) * random.nextFloat() * 0.01, 0));
+                    if (random.nextBoolean()) {
                         particle.color(VFXColorFunction.WHITE);
                     }
                 }
@@ -85,7 +85,7 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(new Vector3(this).add(0.5, 0.5, 0.5))
                     .setScaleMultiplier(0.3F)
-                    .setMotion(new Vector3(0, (rand.nextBoolean() ? 1 : -1) * rand.nextFloat() * 0.015, 0))
+                    .setDeltaMovement(new Vector3(0, (random.nextBoolean() ? 1 : -1) * random.nextFloat() * 0.015, 0))
                     .color(VFXColorFunction.random());
 
         }
@@ -97,34 +97,34 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.linkedTo = NBTHelper.readFromSubTag(compound, "posLink", NBTHelper::readBlockPosFromNBT);
+        this.linkedTo = NBTHelper.readFromSubTag(pattern, "posLink", NBTHelper::readBlockPosFromNBT);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
         if (this.linkedTo != null) {
-            NBTHelper.setAsSubTag(compound, "posLink", nbt -> NBTHelper.writeBlockPosToNBT(this.linkedTo, nbt));
+            NBTHelper.setAsSubTag(pattern, "posLink", nbt -> NBTHelper.writeBlockPosToNBT(this.linkedTo, nbt));
         }
     }
 
     @Override
     public void onBlockLinkCreate(Player player, BlockPos other) {
         if (this.linkedTo != null) {
-            TileRitualLink otherLink = MiscUtils.getTileAt(player.getEntityWorld(), this.linkedTo, TileRitualLink.class, true);
+            TileRitualLink otherLink = MiscUtils.getTileAt(player.getCommandSenderWorld(), this.linkedTo, TileRitualLink.class, true);
             if (otherLink != null) {
                 otherLink.linkedTo = null;
                 otherLink.markForUpdate();
             }
         }
         this.linkedTo = other;
-        TileRitualLink otherLink = MiscUtils.getTileAt(player.getEntityWorld(), other, TileRitualLink.class, true);
+        TileRitualLink otherLink = MiscUtils.getTileAt(player.getCommandSenderWorld(), other, TileRitualLink.class, true);
         if (otherLink != null) {
-            otherLink.linkedTo = getPos();
+            otherLink.linkedTo = getBlockPos();
             otherLink.markForUpdate();
         }
 
@@ -137,8 +137,8 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
 
     @Override
     public boolean tryLinkBlock(Player player, BlockPos other) {
-        TileRitualLink otherLink = MiscUtils.getTileAt(player.getEntityWorld(), other, TileRitualLink.class, true);
-        return otherLink != null && otherLink.linkedTo == null && !other.equals(getPos());
+        TileRitualLink otherLink = MiscUtils.getTileAt(player.getCommandSenderWorld(), other, TileRitualLink.class, true);
+        return otherLink != null && otherLink.linkedTo == null && !other.equals(getBlockPos());
     }
 
     @Override
@@ -148,9 +148,9 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
 
     @Override
     public boolean tryUnlink(Player player, BlockPos other) {
-        TileRitualLink otherLink = MiscUtils.getTileAt(player.getEntityWorld(), other, TileRitualLink.class, true);
+        TileRitualLink otherLink = MiscUtils.getTileAt(player.getCommandSenderWorld(), other, TileRitualLink.class, true);
         if (otherLink == null || otherLink.linkedTo == null) return false;
-        if (otherLink.linkedTo.equals(getPos())) {
+        if (otherLink.linkedTo.equals(getBlockPos())) {
             this.linkedTo = null;
             otherLink.linkedTo = null;
             otherLink.markForUpdate();

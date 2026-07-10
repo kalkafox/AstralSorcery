@@ -13,7 +13,7 @@ import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.tile.TileCollectorCrystal;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 import java.awt.*;
 
@@ -26,8 +26,8 @@ import java.awt.*;
  */
 public class RenderCollectorCrystal extends CustomTileEntityRenderer<TileCollectorCrystal> {
 
-    public RenderCollectorCrystal(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderCollectorCrystal(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -36,9 +36,9 @@ public class RenderCollectorCrystal extends CustomTileEntityRenderer<TileCollect
             return;
         }
         Color color = tile.getCollectorType().getDisplayColor();
-        long seed = RenderingUtils.getPositionSeed(tile.getPos());
+        long seed = RenderingUtils.getPositionSeed(tile.getBlockPos());
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0.5F, 0.5F, 0.5F);
 
         RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, color, seed, 24, 24, 12);
@@ -49,6 +49,6 @@ public class RenderCollectorCrystal extends CustomTileEntityRenderer<TileCollect
         }
 
         RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, color, seed, 24, 24, 12);
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

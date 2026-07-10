@@ -61,7 +61,7 @@ public class ResearchManager {
         LinkedList<ResearchProgression> progToGive = new LinkedList<>();
         progToGive.add(prog);
         while (!progToGive.isEmpty()) {
-            ResearchProgression give = progToGive.pop();
+            ResearchProgression give = progToGive.popPose();
             if (!progress.hasResearch(give)) {
                 progress.forceGainResearch(give);
             }
@@ -288,11 +288,11 @@ public class ResearchManager {
         return true;
     }
 
-    public static boolean grantFreePerkPoint(Player player, ResourceLocation token) {
+    public static boolean grantFreePerkPoint(Player player, ResourceLocation accessToken) {
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!progress.isValid()) return false;
 
-        if (!progress.getPerkData().grantFreeAllocationPoint(token)) {
+        if (!progress.getPerkData().grantFreeAllocationPoint(accessToken)) {
             return false;
         }
 
@@ -301,11 +301,11 @@ public class ResearchManager {
         return true;
     }
 
-    public static boolean revokeFreePoint(Player player, ResourceLocation token) {
+    public static boolean revokeFreePoint(Player player, ResourceLocation accessToken) {
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!progress.isValid()) return false;
 
-        if (!progress.getPerkData().tryRevokeAllocationPoint(token)) {
+        if (!progress.getPerkData().tryRevokeAllocationPoint(accessToken)) {
             return false;
         }
 
@@ -368,7 +368,7 @@ public class ResearchManager {
         PacketChannel.CHANNEL.sendToPlayer(player, new PktSyncPerkActivity(removals));
     }
 
-    private static boolean doRemovePerk(PlayerProgress progress, Player player, LogicalSide side, AbstractPerk perk, PlayerPerkAllocation allocation, boolean sync) {
+    private static boolean doRemovePerk(PlayerProgress progress, Player player, LogicalSide direction, AbstractPerk perk, PlayerPerkAllocation allocation, boolean sync) {
         PlayerPerkData perkData = progress.getPerkData();
         if (perkData.hasPerkAllocation(perk, allocation.getType())) {
             CompoundTag data = perkData.getData(perk);
@@ -378,7 +378,7 @@ public class ResearchManager {
                     return false;
                 }
                 if (removeResult.removesPerk()) {
-                    PerkEffectHelper.modifySource(player, side, perk, PerkEffectHelper.Action.REMOVE);
+                    PerkEffectHelper.modifySource(player, direction, perk, PerkEffectHelper.Action.REMOVE);
                 }
                 if (removeResult.removesAllocationType()) {
                     perk.onRemovePerkServer(player, allocation.getType(), progress, data);
@@ -439,11 +439,11 @@ public class ResearchManager {
         return true;
     }
 
-    public static boolean setExp(Player player, long exp) {
+    public static boolean setExp(Player player, long futureXp) {
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!progress.isValid()) return false;
 
-        progress.getPerkData().setExp(exp);
+        progress.getPerkData().setExp(futureXp);
 
         AdvancementsAS.PERK_LEVEL.trigger((ServerPlayer) player);
 
@@ -452,11 +452,11 @@ public class ResearchManager {
         return true;
     }
 
-    public static boolean modifyExp(Player player, double exp) {
+    public static boolean modifyExp(Player player, double futureXp) {
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!progress.isValid()) return false;
 
-        progress.getPerkData().modifyExp(exp, player);
+        progress.getPerkData().modifyExp(futureXp, player);
 
         AdvancementsAS.PERK_LEVEL.trigger((ServerPlayer) player);
 
@@ -504,7 +504,7 @@ public class ResearchManager {
         Player crafter = recipe.tryGetCraftingPlayerServer();
         if (!(crafter instanceof ServerPlayer)) {
             AstralSorcery.log.warn("Infusion finished, player that initialized crafting could not be found!");
-            AstralSorcery.log.warn("Affected tile: " + infuser.getPos() + " in dim " + infuser.getWorld().getDimensionKey().getLocation());
+            AstralSorcery.log.warn("Affected tile: " + infuser.getBlockPos() + " in dim " + infuser.getLevel().dimension().getLocation());
             return;
         }
 
@@ -515,7 +515,7 @@ public class ResearchManager {
         Player crafter = recipe.tryGetCraftingPlayerServer();
         if (!(crafter instanceof ServerPlayer)) {
             AstralSorcery.log.warn("Crafting finished, player that initialized crafting could not be found!");
-            AstralSorcery.log.warn("Affected tile: " + altar.getPos() + " in dim " + altar.getWorld().getDimensionKey().getLocation());
+            AstralSorcery.log.warn("Affected tile: " + altar.getBlockPos() + " in dim " + altar.getLevel().dimension().getLocation());
             return;
         }
 

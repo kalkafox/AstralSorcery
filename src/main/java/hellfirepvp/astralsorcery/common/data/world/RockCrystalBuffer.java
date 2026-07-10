@@ -59,25 +59,25 @@ public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer.Buffer
     public void addOre(BlockPos pos) {
         BufferSection section = this.getOrCreateSection(pos);
         this.write(() -> section.crystalPositions.add(pos));
-        markDirty(section);
+        setChanged(section);
     }
 
     public void removeOre(BlockPos pos) {
         BufferSection section = this.getSection(pos);
         if (section != null) {
             this.write(() -> section.crystalPositions.remove(pos));
-            markDirty(section);
+            setChanged(section);
         }
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbt) {}
+    public void save(CompoundTag nbt) {}
 
     @Override
     public void readFromNBT(CompoundTag nbt) {}
 
     @Override
-    public void updateTick(Level world) {}
+    public void updateTick(Level level) {}
 
     public static class BufferSection extends WorldSection {
 
@@ -88,7 +88,7 @@ public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer.Buffer
         }
 
         @Override
-        public void writeToNBT(CompoundTag tag) {
+        public void save(CompoundTag tag) {
             ListTag posList = new ListTag();
             for (BlockPos exactPos : crystalPositions) {
                 posList.add(NBTHelper.writeBlockPosToNBT(exactPos, new CompoundTag()));

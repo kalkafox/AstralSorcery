@@ -49,27 +49,27 @@ public class LootModifierPerkVoidTrash extends LootModifier {
 
     @Nonnull
     @Override
-    protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context) {
-        if (!LootUtil.doesContextFulfillSet(context, LootParameterSets.BLOCK)) {
-            return generatedLoot;
+    protected List<ItemStack> run(List<ItemStack> lootTable, LootContext context) {
+        if (!LootUtil.doesContextFulfillSet(context, LootContextParamSets.BLOCK)) {
+            return lootTable;
         }
-        Entity e = context.get(LootParameters.THIS_ENTITY);
+        Entity e = context.get(LootContextParams.THIS_ENTITY);
         if (!(e instanceof Player)) {
-            return generatedLoot;
+            return lootTable;
         }
         Player player = (Player) e;
         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!prog.isValid() || !prog.getPerkData().hasPerkEffect(perk -> perk instanceof KeyVoidTrash)) {
-            return generatedLoot;
+            return lootTable;
         }
         if (!PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, perk -> perk instanceof KeyVoidTrash).isPresent()) {
-            return generatedLoot;
+            return lootTable;
         }
 
         double chance = KeyVoidTrash.CONFIG.getOreChance() *
-                PerkAttributeHelper.getOrCreateMap(player, LogicalSide.SERVER).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+                PerkAttributeHelper.getOrCreateMap(player, LogicalSide.SERVER).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
 
-        return generatedLoot.stream()
+        return lootTable.stream()
                 .filter(stack -> !stack.isEmpty())
                 .map(result -> {
                     if (KeyVoidTrash.CONFIG.isTrash(result)) {
@@ -91,8 +91,8 @@ public class LootModifierPerkVoidTrash extends LootModifier {
     public static class Serializer extends GlobalLootModifierSerializer<LootModifierPerkVoidTrash> {
 
         @Override
-        public LootModifierPerkVoidTrash read(ResourceLocation location, JsonObject object, LootItemCondition[] lootConditions) {
-            return new LootModifierPerkVoidTrash(lootConditions);
+        public LootModifierPerkVoidTrash read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions) {
+            return new LootModifierPerkVoidTrash(conditions);
         }
 
         @Override

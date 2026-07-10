@@ -49,15 +49,15 @@ public class BlockAltarRadiance extends BlockAltar implements LargeBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.canPlaceAt(context) ? this.getDefaultState() : null;
+        return this.canPlaceAt(context) ? this.defaultBlockState() : null;
     }
 
     protected VoxelShape createShape() {
-        VoxelShape base = Block.makeCuboidShape(0, 0, 0, 16, 4, 16);
-        VoxelShape pillar = Block.makeCuboidShape(4, 4, 4, 12, 8, 12);
-        VoxelShape head = Block.makeCuboidShape(0, 8, 0, 16, 16, 16);
+        VoxelShape base = Block.box(0, 0, 0, 16, 4, 16);
+        VoxelShape pillar = Block.box(4, 4, 4, 12, 8, 12);
+        VoxelShape head = Block.box(0, 8, 0, 16, 16, 16);
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR, base, pillar, head);
+        return VoxelUtils.combineAll(BooleanOp.OR, base, pillar, head);
     }
 
     @Override

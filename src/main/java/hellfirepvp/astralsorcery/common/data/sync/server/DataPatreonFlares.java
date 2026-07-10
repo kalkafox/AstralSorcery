@@ -47,7 +47,7 @@ public class DataPatreonFlares extends AbstractData {
     //Only actually called when there's an entity to be provided.
     @Nullable
     public PatreonPartialEntity createEntity(Player player, PatreonEffect value) {
-        UUID owner = player.getUniqueID();
+        UUID owner = player.getUUID();
         PatreonPartialEntity entity = value.createEntity(owner);
         if (entity == null) {
             return null;
@@ -58,7 +58,7 @@ public class DataPatreonFlares extends AbstractData {
 
         flareRemovals.remove(owner);
         flarePlayerUpdates.add(owner);
-        markDirty();
+        setChanged();
 
         return entity;
     }
@@ -66,13 +66,13 @@ public class DataPatreonFlares extends AbstractData {
     public void updateEntitiesOf(UUID playerUUID) {
         flareRemovals.remove(playerUUID);
         flarePlayerUpdates.add(playerUUID);
-        markDirty();
+        setChanged();
     }
 
     public void removeEntities(UUID playerUUID) {
         flarePlayerUpdates.remove(playerUUID);
         flareRemovals.add(playerUUID);
-        markDirty();
+        setChanged();
 
         this.entitiesServer.getOrDefault(playerUUID, Collections.emptySet())
                 .forEach(p -> p.setRemoved(true));
@@ -104,7 +104,7 @@ public class DataPatreonFlares extends AbstractData {
     }
 
     @Override
-    public void writeAllDataToPacket(CompoundTag compound) {
+    public void writeAllDataToPacket(CompoundTag pattern) {
         ListTag entities = new ListTag();
         for (UUID playerUUID : this.entitiesServer.keySet()) {
             CompoundTag tag = new CompoundTag();
@@ -116,7 +116,7 @@ public class DataPatreonFlares extends AbstractData {
                 entityNBT.putUniqueId("id", entity.getEffectUUID());
 
                 CompoundTag data = new CompoundTag();
-                entity.writeToNBT(data);
+                entity.save(data);
                 entityNBT.put("data", data);
 
                 entityList.add(entityNBT);
@@ -125,11 +125,11 @@ public class DataPatreonFlares extends AbstractData {
 
             entities.add(tag);
         }
-        compound.put("entities", entities);
+        pattern.put("entities", entities);
     }
 
     @Override
-    public void writeDiffDataToPacket(CompoundTag compound) {
+    public void writeDiffDataToPacket(CompoundTag pattern) {
         ListTag listUpdates = new ListTag();
         for (UUID playerUUID : this.flarePlayerUpdates) {
             CompoundTag tag = new CompoundTag();
@@ -141,7 +141,7 @@ public class DataPatreonFlares extends AbstractData {
                 entityNBT.putUniqueId("id", entity.getEffectUUID());
 
                 CompoundTag data = new CompoundTag();
-                entity.writeToNBT(data);
+                entity.save(data);
                 entityNBT.put("data", data);
 
                 entityList.add(entityNBT);
@@ -157,8 +157,8 @@ public class DataPatreonFlares extends AbstractData {
             listRemovals.add(playerTag);
         }
 
-        compound.put("updates", listUpdates);
-        compound.put("removals", listRemovals);
+        pattern.put("updates", listUpdates);
+        pattern.put("removals", listRemovals);
 
         this.flarePlayerUpdates.clear();
         this.flareRemovals.clear();

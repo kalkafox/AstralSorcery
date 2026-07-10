@@ -35,18 +35,18 @@ public class BlockTreeBeaconComponent extends BlockFakedState {
     public BlockTreeBeaconComponent() {
         super(Properties.create(Material.BARRIER, MaterialColor.AIR)
                 .hardnessAndResistance(-1F, 3600000.0F)
-                .setLightLevel(state -> 12));
+                .isRedstoneConductor(state -> 12));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
-        this.playParticles(world, pos, rand);
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+        this.showBreakingParticles(level, pos, random);
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileTreeBeaconComponent();
     }
 }

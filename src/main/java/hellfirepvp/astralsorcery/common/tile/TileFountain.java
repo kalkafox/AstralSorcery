@@ -77,7 +77,7 @@ public class TileFountain extends TileEntityTick {
     public void tick() {
         super.tick();
 
-        if (!getWorld().isRemote()) {
+        if (!getLevel().isClientSide()) {
             if (this.hasMultiblock()) {
                 this.updateFountainComponents();
                 this.drawLiquidStarlight();
@@ -104,7 +104,7 @@ public class TileFountain extends TileEntityTick {
                             ByteBufUtils.writeEnumValue(buf, segment);
                             ByteBufUtils.writeEnumValue(buf, nextSegment);
                         });
-                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, pos, 32));
+                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 32));
                     }
                     effect.tick(this, ctx, this.tickActiveFountainEffect, LogicalSide.SERVER, this.getSegment());
                 }
@@ -125,11 +125,11 @@ public class TileFountain extends TileEntityTick {
         FountainEffect.OperationSegment segment = ByteBufUtils.readEnumValue(pktPlayEffect.getExtraData(), FountainEffect.OperationSegment.class);
         FountainEffect.OperationSegment nextSegment = ByteBufUtils.readEnumValue(pktPlayEffect.getExtraData(), FountainEffect.OperationSegment.class);
 
-        Level world = Minecraft.getInstance().world;
-        if (world == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
-        TileFountain fountain = MiscUtils.getTileAt(world, at, TileFountain.class, false);
+        TileFountain fountain = MiscUtils.getTileAt(level, at, TileFountain.class, false);
         if (fountain == null) {
             return;
         }
@@ -143,11 +143,11 @@ public class TileFountain extends TileEntityTick {
     @OnlyIn(Dist.CLIENT)
     public static void replaceEffect(PktPlayEffect pktPlayEffect) {
         BlockPos at = ByteBufUtils.readPos(pktPlayEffect.getExtraData());
-        Level world = Minecraft.getInstance().world;
-        if (world == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
-        TileFountain fountain = MiscUtils.getTileAt(world, at, TileFountain.class, false);
+        TileFountain fountain = MiscUtils.getTileAt(level, at, TileFountain.class, false);
         if (fountain == null) {
             return;
         }
@@ -165,10 +165,10 @@ public class TileFountain extends TileEntityTick {
             this.tickDrawLiquidStarlight = 100;
 
             if (this.mbLiquidStarlight < (LIQUID_STARLIGHT_TANK_SIZE * 0.8F) && this.currentEffect != null) {
-                TileChalice chalice = MiscUtils.getTileAt(world, pos.up(), TileChalice.class, false);
+                TileChalice chalice = MiscUtils.getTileAt(level, pos.above(), TileChalice.class, false);
                 if (chalice != null) {
                     FluidStack fluid = chalice.getTank().drain(400, IFluidHandler.FluidAction.SIMULATE);
-                    if (!fluid.isEmpty() && fluid.getFluid() instanceof FluidLiquidStarlight) {
+                    if (!fluid.isEmpty() && fluid.getType() instanceof FluidLiquidStarlight) {
                         FluidStack drained = chalice.getTank().drain(new FluidStack(fluid, 400), IFluidHandler.FluidAction.EXECUTE);
                         this.mbLiquidStarlight += drained.getAmount();
                         this.markForUpdate();
@@ -182,7 +182,7 @@ public class TileFountain extends TileEntityTick {
         FountainEffect prevEffect = this.getCurrentEffect();
         FountainEffect.EffectContext prevContext = this.effectContext;
 
-        BlockState primeState = world.getBlockState(pos.down());
+        BlockState primeState = level.getBlockState(pos.below());
         if (primeState.getBlock() instanceof BlockFountainPrime) {
             if (this.setCurrentEffect(((BlockFountainPrime) primeState.getBlock()).provideEffect()) && prevEffect != null) {
                 this.replaceCurrentEffect(prevEffect, prevContext, this.getCurrentEffect());
@@ -198,7 +198,7 @@ public class TileFountain extends TileEntityTick {
         prevEffect.onReplace(this, prevContext, newEffect, LogicalSide.SERVER);
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.FOUNTAIN_REPLACE_EFFECT)
                 .addData(buf -> ByteBufUtils.writePos(buf, pos));
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, pos, 32));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 32));
 
     }
 
@@ -265,22 +265,22 @@ public class TileFountain extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.tickActiveFountainEffect = compound.getInt("tickActiveFountainEffect");
-        this.mbLiquidStarlight = compound.getInt("mbLiquidStarlight");
-        this.tank.readNBT(compound.getCompound("tank"));
-        if (compound.contains("currentEffect")) {
+        this.tickActiveFountainEffect = pattern.getInt("tickActiveFountainEffect");
+        this.mbLiquidStarlight = pattern.getInt("mbLiquidStarlight");
+        this.tank.load(pattern.getCompound("tank"));
+        if (pattern.contains("currentEffect")) {
             FountainEffect<?> prevEffect = this.getCurrentEffect();
-            ResourceLocation key = new ResourceLocation(compound.getString("currentEffect"));
+            ResourceLocation key = ResourceLocation.parse(pattern.getString("currentEffect"));
             this.currentEffect = FountainEffectRegistry.getEffect(key);
 
             if (this.currentEffect != null) {
                 if (!Objects.equals(this.currentEffect, prevEffect)) {
                     this.effectContext = this.currentEffect.createContext(this);
                 }
-                this.effectContext.readFromNBT(compound.getCompound("currentEffectData"));
+                this.effectContext.readFromNBT(pattern.getCompound("currentEffectData"));
             } else {
                 this.effectContext = null;
             }
@@ -291,28 +291,28 @@ public class TileFountain extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.putInt("tickActiveFountainEffect", this.tickActiveFountainEffect);
-        compound.putInt("mbLiquidStarlight", this.mbLiquidStarlight);
-        compound.put("tank", this.tank.writeNBT());
+        pattern.putInt("tickActiveFountainEffect", this.tickActiveFountainEffect);
+        pattern.putInt("mbLiquidStarlight", this.mbLiquidStarlight);
+        pattern.put("tank", this.tank.fillDefaultJigsawNBT());
         if (this.currentEffect != null) {
-            compound.putString("currentEffect", this.currentEffect.getId().toString());
+            pattern.putString("currentEffect", this.currentEffect.getId().toString());
             if (this.effectContext != null) {
                 CompoundTag tag = new CompoundTag();
-                this.effectContext.writeToNBT(tag);
-                compound.put("currentEffectData", tag);
+                this.effectContext.save(tag);
+                pattern.put("currentEffectData", tag);
             }
         }
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (this.access.hasCapability(cap, side)) {
-            return this.access.getCapability(side).cast();
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
+        if (this.access.hasCapability(cap, direction)) {
+            return this.access.getCapability(direction).unwrap();
         }
-        return super.getCapability(cap, side);
+        return super.getCapability(cap, direction);
     }
 }

@@ -36,11 +36,11 @@ public class BlockAtlasTexture extends AbstractRenderableTexture.Full {
     @Override
     public void bindTexture() {
         TextureManager mgr = Minecraft.getInstance().getTextureManager();
-        mgr.bindTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
+        mgr.bindTexture(TextureAtlas.LOCATION_BLOCKS_TEXTURE);
     }
 
     @Override
     public RenderStateShard.TextureStateShard asState() {
-        return new RenderStateShard.TextureStateShard(AtlasTexture.LOCATION_BLOCKS_TEXTURE, false, false);
+        return new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS_TEXTURE, false, false);
     }
 }

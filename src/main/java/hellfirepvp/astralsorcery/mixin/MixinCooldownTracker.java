@@ -23,14 +23,14 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(CooldownTracker.class)
+@Mixin(ItemCooldowns.class)
 public class MixinCooldownTracker {
 
-    @ModifyVariable(method = "setCooldown", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    @ModifyVariable(method = "setCooldown", at = @At("HEAD"), index = 0, argsOnly = true)
     public int fireCooldownEvent(int cooldownTicks) {
-        ItemCooldowns tracker = (ItemCooldowns)(Object) this;
-        if (tracker instanceof ServerItemCooldowns) {
-            CooldownSetEvent event = new CooldownSetEvent(((ServerItemCooldowns) tracker).player, cooldownTicks);
+        ItemCooldowns progressListener = (ItemCooldowns)(Object) this;
+        if (progressListener instanceof ServerItemCooldowns) {
+            CooldownSetEvent event = new CooldownSetEvent(((ServerItemCooldowns) progressListener).player, cooldownTicks);
             NeoForge.EVENT_BUS.post(event);
             cooldownTicks = Math.max(event.getResultCooldown(), 1);
         }

@@ -49,7 +49,7 @@ import java.util.Random;
  */
 public abstract class ConstellationEffect {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
     protected static final AABB BOX = new AABB(0, 0, 0, 1, 1, 1);
 
     private final IWeakConstellation cst;
@@ -70,19 +70,19 @@ public abstract class ConstellationEffect {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public abstract void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended);
+    public abstract void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended);
 
-    public abstract boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) ;
+    public abstract boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) ;
 
     @Nullable
-    public TileRitualPedestal getPedestal(Level world, BlockPos pos) {
-        BlockEntity te = MiscUtils.getTileAt(world, pos, TileEntity.class, false);
+    public TileRitualPedestal getPedestal(Level level, BlockPos pos) {
+        BlockEntity te = MiscUtils.getTileAt(level, pos, BlockEntity.class, false);
         if (te instanceof TileRitualLink) {
             TileRitualLink link = (TileRitualLink) te;
             pos = link.getLinkedTo();
             if (pos != null) {
                 pos = pos.subtract(TileRitualPedestal.RITUAL_ANCHOR_OFFEST);
-                return MiscUtils.getTileAt(world, pos, TileRitualPedestal.class, false);
+                return MiscUtils.getTileAt(level, pos, TileRitualPedestal.class, false);
             }
         }
         return te instanceof TileRitualPedestal ? (TileRitualPedestal) te : null;
@@ -106,7 +106,7 @@ public abstract class ConstellationEffect {
     }
 
     @Nonnull
-    public ILocatable getPos() {
+    public ILocatable getBlockPos() {
         return pos;
     }
 
@@ -114,32 +114,32 @@ public abstract class ConstellationEffect {
 
     public void readFromNBT(CompoundTag cmp) {}
 
-    public void writeToNBT(CompoundTag cmp) {}
+    public void save(CompoundTag cmp) {}
 
     @Nullable
-    public Player getOwningPlayerInWorld(Level world, BlockPos pos) {
-        TileRitualPedestal pedestal = getPedestal(world, pos);
+    public Player getOwningPlayerInWorld(Level level, BlockPos pos) {
+        TileRitualPedestal pedestal = getPedestal(level, pos);
         if (pedestal != null) {
             return pedestal.getOwner();
         }
         return null;
     }
 
-    public void sendConstellationPing(Level world, Vector3 at) {
-        sendConstellationPing(world, at, this.getConstellation());
+    public void sendConstellationPing(Level level, Vector3 at) {
+        sendConstellationPing(level, at, this.getConstellation());
     }
 
-    public static void sendConstellationPing(Level world, Vector3 at, IConstellation cst) {
+    public static void sendConstellationPing(Level level, Vector3 at, IConstellation cst) {
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.CONSTELLATION_EFFECT_PING)
                 .addData(buf -> {
                     ByteBufUtils.writeVector(buf, at);
                     ByteBufUtils.writeRegistryEntry(buf, cst);
                 });
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, at.toBlockPos(), 32));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, at.toBlockPos(), 32));
     }
 
     protected void markPlayerAffected(Player player) {
-        if (player.getEntityWorld().isRemote()) {
+        if (player.getCommandSenderWorld().isClientSide()) {
             return;
         }
         PlayerAffectionFlags.markPlayerAffected(player, this.getPlayerAffectionFlag());
@@ -152,12 +152,12 @@ public abstract class ConstellationEffect {
 
         for (int i = 0; i < 6; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                    .spawn(at.clone().add(Vector3.random().multiply(0.25F)))
-                    .setMotion(Vector3.random().multiply(0.015F))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .spawn(at.clone().add(Vector3.random().mul(0.25F)))
+                    .setDeltaMovement(Vector3.random().mul(0.015F))
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .color(VFXColorFunction.constant(cst.getConstellationColor().brighter()))
-                    .setScaleMultiplier(0.25F + rand.nextFloat() * 0.15F)
-                    .setMaxAge(35 + rand.nextInt(20));
+                    .setScaleMultiplier(0.25F + random.nextFloat() * 0.15F)
+                    .setMaxAge(35 + random.nextInt(20));
         }
     }
 

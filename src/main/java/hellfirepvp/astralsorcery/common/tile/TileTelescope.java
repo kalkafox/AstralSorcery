@@ -39,17 +39,17 @@ public class TileTelescope extends TileEntitySynchronized implements NamedInvent
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.rotation = TelescopeRotation.values()[compound.getInt("rotation")];
+        this.rotation = TelescopeRotation.values()[pattern.getInt("rotation")];
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.putInt("rotation", rotation.ordinal());
+        pattern.putInt("rotation", rotation.ordinal());
     }
 
     @Override

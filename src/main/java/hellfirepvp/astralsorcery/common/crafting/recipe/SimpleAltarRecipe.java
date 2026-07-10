@@ -155,7 +155,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
 
     @Nonnull
     @OnlyIn(Dist.CLIENT)
-    public ItemStack getOutputForRender(Iterable<ItemStack> inventoryContents) {
+    public ItemStack getOutputForRender(Iterable<ItemStack> items) {
         ItemStack first = Iterables.getFirst(this.outputs, ItemStack.EMPTY);
         return ItemUtils.copyStackWithSize(first, first.getCount());
     }
@@ -186,12 +186,12 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
         this.outputs.add(ItemUtils.copyStackWithSize(output, output.getCount()));
     }
 
-    public boolean matches(LogicalSide side, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
+    public boolean matches(LogicalSide direction, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
         if (crafter == null) {
             return false;
         }
         boolean hasProgress;
-        if (side.isClient()) {
+        if (direction.isClient()) {
             hasProgress = this.hasProgressionClient();
         } else {
             hasProgress = this.hasProgressionServer(crafter);
@@ -213,7 +213,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
             return false;
         }
 
-        return this.altarRecipeGrid.containsInputs(altar.getInventory(), true);
+        return this.altarRecipeGrid.containsInputs(altar.getItems(), true);
     }
 
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {}
@@ -236,7 +236,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
             recipe.setCustomRecipeType(customType);
         }
 
-        List<ItemStack> outputs = ByteBufUtils.readList(buffer, ByteBufUtils::readItemStack);
+        List<ItemStack> outputs = ByteBufUtils.readList(buffer, ByteBufUtils::readItem);
         outputs.forEach(recipe::addOutput);
         recipe.setFocusConstellation(ByteBufUtils.readOptional(buffer, ByteBufUtils::readRegistryEntry));
         ByteBufUtils.readList(buffer, Ingredient::read).forEach(recipe::addRelayInput);
@@ -289,11 +289,11 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
         }
 
         if (!this.getRelayInputs().isEmpty()) {
-            JsonArray inputs = new JsonArray();
+            JsonArray map = new JsonArray();
             for (WrappedIngredient traitInput : this.getRelayInputs()) {
-                inputs.add(traitInput.getIngredient().serialize());
+                map.add(traitInput.getIngredient().serialize());
             }
-            object.add("relay_inputs", inputs);
+            object.add("relay_inputs", map);
         }
 
         if (!this.getCraftingEffects().isEmpty()) {

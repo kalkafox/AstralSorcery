@@ -49,24 +49,24 @@ public abstract class TileSourceBase<T extends ITransmissionSource> extends Tile
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
         positions.clear();
 
-        if (compound.contains("linked")) {
-            ListTag list = compound.getList("linked", Constants.NBT.TAG_COMPOUND);
+        if (pattern.contains("linked")) {
+            ListTag list = pattern.getList("linked", Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag tag = list.getCompound(i);
                 positions.add(NBTHelper.readBlockPosFromNBT(tag));
             }
         }
 
-        this.linked = compound.getBoolean("wasLinkedBefore");
+        this.linked = pattern.getBoolean("wasLinkedBefore");
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
         ListTag list = new ListTag();
         for (BlockPos pos : positions) {
@@ -74,25 +74,25 @@ public abstract class TileSourceBase<T extends ITransmissionSource> extends Tile
             NBTHelper.writeBlockPosToNBT(pos, tag);
             list.add(tag);
         }
-        compound.put("linked", list);
-        compound.putBoolean("wasLinkedBefore", linked);
+        pattern.put("linked", list);
+        pattern.putBoolean("wasLinkedBefore", linked);
     }
 
     @Override
     @Nonnull
     public BlockPos getTrPos() {
-        return getPos();
+        return getBlockPos();
     }
 
     @Override
     @Nonnull
     public Level getTrWorld() {
-        return getWorld();
+        return getLevel();
     }
 
     @Override
     public void onBlockLinkCreate(Player player, BlockPos other) {
-        if (other.equals(getPos())) return;
+        if (other.equals(getBlockPos())) return;
 
         if (TransmissionNetworkHelper.createTransmissionLink(this, other)) {
             if (!this.positions.contains(other)) {
@@ -113,7 +113,7 @@ public abstract class TileSourceBase<T extends ITransmissionSource> extends Tile
 
     @Override
     public boolean tryLinkBlock(Player player, BlockPos other) {
-        return !other.equals(getPos()) && TransmissionNetworkHelper.canCreateTransmissionLink(this, other);
+        return !other.equals(getBlockPos()) && TransmissionNetworkHelper.canCreateTransmissionLink(this, other);
     }
 
     @Override
@@ -123,7 +123,7 @@ public abstract class TileSourceBase<T extends ITransmissionSource> extends Tile
 
     @Override
     public boolean tryUnlink(Player player, BlockPos other) {
-        if (other.equals(getPos())) return false;
+        if (other.equals(getBlockPos())) return false;
 
         if (TransmissionNetworkHelper.hasTransmissionLink(this, other)) {
             TransmissionNetworkHelper.removeTransmissionLink(this, other);

@@ -33,7 +33,7 @@ public class ClientTimeFreezeEntities extends ClientData<ClientTimeFreezeEntitie
     private final Map<ResourceKey<Level>, Set<Integer>> clientActiveEntityFreeze = new HashMap<>();
 
     public boolean isFrozen(Entity e) {
-        return this.clientActiveEntityFreeze.getOrDefault(e.getEntityWorld().getDimensionKey(), Collections.emptySet()).contains(e.getEntityId());
+        return this.clientActiveEntityFreeze.getOrDefault(e.getCommandSenderWorld().dimension(), Collections.emptySet()).contains(e.getEntityId());
     }
 
     @Override
@@ -49,19 +49,19 @@ public class ClientTimeFreezeEntities extends ClientData<ClientTimeFreezeEntitie
     public static class Reader extends ClientDataReader<ClientTimeFreezeEntities> {
 
         @Override
-        public void readFromIncomingFullSync(ClientTimeFreezeEntities data, CompoundTag compound) {
-            this.readEntityInformation(data, compound);
+        public void readFromIncomingFullSync(ClientTimeFreezeEntities data, CompoundTag pattern) {
+            this.readEntityInformation(data, pattern);
         }
 
         @Override
-        public void readFromIncomingDiff(ClientTimeFreezeEntities data, CompoundTag compound) {
-            this.readEntityInformation(data, compound);
+        public void readFromIncomingDiff(ClientTimeFreezeEntities data, CompoundTag pattern) {
+            this.readEntityInformation(data, pattern);
         }
 
-        private void readEntityInformation(ClientTimeFreezeEntities data, CompoundTag compound) {
-            CompoundTag dimTypes = compound.getCompound("dimTypes");
+        private void readEntityInformation(ClientTimeFreezeEntities data, CompoundTag pattern) {
+            CompoundTag dimTypes = pattern.getCompound("dimTypes");
             for (String key : dimTypes.keySet()) {
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(key));
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(key));
 
                 ListTag list = dimTypes.getList(key, Constants.NBT.TAG_INT);
                 Set<Integer> entities = new HashSet<>();

@@ -45,27 +45,27 @@ public class FXOrbitalInfuserLiquid extends FXSourceOrbital<FXFacingAtlasParticl
 
     @Override
     public void spawnOrbitalParticle(Vector3 pos, Function<Vector3, FXFacingAtlasParticle> effectRegistrar) {
-        Vector3 motion = this.getPosition().subtract(pos).crossProduct(this.getOrbitAxis()).normalize().multiply(0.2 + rand.nextFloat() * 0.04);
-        motion.add(this.getOrbitAxis().normalize().multiply(0.2 + rand.nextFloat() * 0.05));
+        Vector3 motion = this.getPosition().subtract(pos).cross(this.getOrbitAxis()).normalize().mul(0.2 + random.nextFloat() * 0.04);
+        motion.add(this.getOrbitAxis().normalize().mul(0.2 + random.nextFloat() * 0.05));
 
-        MiscUtils.applyRandomOffset(pos, rand, 0.15F);
-        if (rand.nextInt(4) != 0) {
+        MiscUtils.applyRandomOffset(pos, random, 0.15F);
+        if (random.nextInt(4) != 0) {
             effectRegistrar.apply(pos)
-                    .setSprite(RenderingUtils.getParticleTexture(display))
+                    .pickSprite(RenderingUtils.getParticleIcon(display))
                     .selectFraction(0.2F)
                     .setScaleMultiplier(0.03F)
                     .color((fx, pTicks) -> new Color(ColorUtils.getOverlayColor(display)))
-                    .alpha(VFXAlphaFunction.proximity(() -> this.infuserTarget, 2F))
+                    .alpha1arg(VFXAlphaFunction.proximity(() -> this.infuserTarget, 2F))
                     .motion(VFXMotionController.target(this.infuserTarget::clone, 0.08F))
-                    .setMotion(motion);
+                    .setDeltaMovement(motion);
         } else {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
                     .setScaleMultiplier(0.15F)
                     .setAlphaMultiplier(1F)
-                    .alpha(VFXAlphaFunction.proximity(() -> this.infuserTarget, 2F))
+                    .alpha1arg(VFXAlphaFunction.proximity(() -> this.infuserTarget, 2F))
                     .motion(VFXMotionController.target(this.infuserTarget::clone, 0.08F))
-                    .setMotion(motion);
+                    .setDeltaMovement(motion);
         }
     }
 

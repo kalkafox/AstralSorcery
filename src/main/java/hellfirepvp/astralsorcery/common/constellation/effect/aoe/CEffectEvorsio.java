@@ -59,7 +59,7 @@ public class CEffectEvorsio extends CEffectAbstractList<ListEntries.PosEntry> {
     public static EvorsioConfig CONFIG = new EvorsioConfig();
 
     public CEffectEvorsio(@Nonnull ILocatable origin) {
-        super(origin, ConstellationsAS.evorsio, 1, (world, pos, state) -> true);
+        super(origin, ConstellationsAS.evorsio, 1, (level, pos, state) -> true);
         this.excludeRitualPositions();
     }
 
@@ -77,95 +77,95 @@ public class CEffectEvorsio extends CEffectAbstractList<ListEntries.PosEntry> {
 
     @Nullable
     @Override
-    public ListEntries.PosEntry createElement(Level world, BlockPos pos) {
+    public ListEntries.PosEntry createElement(Level level, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         float addY = 1F;
-        if (!pedestal.getPos().equals(pos)) {
+        if (!pedestal.getBlockPos().equals(pos)) {
             addY = 0F;
         }
-        Vector3 motion = Vector3.random().multiply(0.1);
+        Vector3 motion = Vector3.random().mul(0.1);
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(new Vector3(pos).add(0.5, 0.5, 0.5).addY(addY))
-                .alpha(VFXAlphaFunction.FADE_OUT)
-                .setMotion(motion)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                .setDeltaMovement(motion)
                 .color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_EVORSIO))
-                .setScaleMultiplier(0.3F + rand.nextFloat() * 0.4F)
+                .setScaleMultiplier(0.3F + random.nextFloat() * 0.4F)
                 .setMaxAge(50);
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        if (!(world instanceof ServerLevel)) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        if (!(level instanceof ServerLevel)) {
             return false;
         }
 
-        return this.peekNewPosition(world, pos, properties).mapLeft(newEntry -> {
-            BlockPos at = newEntry.getPos();
+        return this.peekNewPosition(level, pos, properties).mapLeft(newEntry -> {
+            BlockPos at = newEntry.getBlockPos();
 
             if (properties.isCorrupted()) {
-                if (at.getY() < pos.getY() && world.isAirBlock(at)) {
-                    double distance = pos.distanceSq(at) / (properties.getSize() * properties.getSize());
-                    BlockState state = Blocks.COBBLESTONE.getDefaultState();
-                    if (distance >= 0.85F && rand.nextInt(4) == 0) {
-                        state = Blocks.DIRT.getDefaultState();
+                if (at.getY() < pos.getY() && level.isEmptyBlock(at)) {
+                    double distance = pos.distSqr(at) / (properties.getSize() * properties.getSize());
+                    BlockState state = Blocks.COBBLESTONE.defaultBlockState();
+                    if (distance >= 0.85F && random.nextInt(4) == 0) {
+                        state = Blocks.DIRT.defaultBlockState();
                     }
                     if (distance <= 0.25F) {
-                        state = Blocks.STONE.getDefaultState();
-                    } else if (distance <= 0.1F && rand.nextInt(5) == 0) {
-                        state = Blocks.OBSIDIAN.getDefaultState();
+                        state = Blocks.STONE.defaultBlockState();
+                    } else if (distance <= 0.1F && random.nextInt(5) == 0) {
+                        state = Blocks.OBSIDIAN.defaultBlockState();
                     }
-                    world.setBlockState(at, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+                    level.setBlock(at, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
                 }
                 return false;
             }
 
-            TileRitualPedestal pedestal = getPedestal(world, pos);
+            TileRitualPedestal pedestal = getPedestal(level, pos);
             if (pedestal != null) {
-                BlockState state = world.getBlockState(at);
-                if (this.canBreakBlock(world, at, state, buildFilter(pedestal))) {
+                BlockState state = level.getBlockState(at);
+                if (this.canBreakBlock(level, at, state, buildFilter(pedestal))) {
                     BlockDropCaptureAssist.startCapturing();
                     try {
-                        BlockUtils.breakBlockWithoutPlayer((ServerLevel) world, at, state,
+                        BlockUtils.breakBlockWithoutPlayer((ServerLevel) level, at, state,
                                 ItemStack.EMPTY, true, true);
                     } finally {
                         NonNullList<ItemStack> captured = BlockDropCaptureAssist.getCapturedStacksAndStop();
-                        captured.forEach((stack) -> ItemUtils.dropItemNaturally(world, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, stack));
+                        captured.forEach((stack) -> ItemUtils.dropItemNaturally(level, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, stack));
                     }
                     return true;
                 } else {
-                    sendConstellationPing(world, new Vector3(at).add(0.5, 0.5, 0.5));
+                    sendConstellationPing(level, new Vector3(at).add(0.5, 0.5, 0.5));
                 }
             }
             return false;
         }).ifRight(attemptedBreak -> {
-            sendConstellationPing(world, new Vector3(attemptedBreak).add(0.5, 0.5, 0.5));
+            sendConstellationPing(level, new Vector3(attemptedBreak).add(0.5, 0.5, 0.5));
         }).left().orElse(false);
     }
 
-    private boolean canBreakBlock(Level world, BlockPos pos, BlockState state, Predicate<BlockState> blacklist) {
+    private boolean canBreakBlock(Level level, BlockPos pos, BlockState state, Predicate<BlockState> blacklist) {
         if (blacklist.test(state)) {
             return false;
         }
-        float hardness = state.getBlockHardness(world, pos);
+        float hardness = state.getDestroySpeed(level, pos);
         if (hardness < 0 || hardness >= 75) {
             return false;
         }
-        return !state.isAir(world, pos);
+        return !state.isAir(level, pos);
     }
 
     private Predicate<BlockState> buildFilter(TileRitualPedestal pedestal) {
         List<Predicate<BlockState>> filteredBlocks = pedestal.getConfiguredBlockStates().stream()
-                .map(blockState -> (Predicate<BlockState>) blockState::equals)
+                .map(state -> (Predicate<BlockState>) state::equals)
                 .collect(Collectors.toList());
         this.addDefaultBreakBlacklist(filteredBlocks);
-        return blockState -> {
+        return state -> {
             for (Predicate<BlockState> filterTest : filteredBlocks) {
-                if (filterTest.test(blockState)) {
+                if (filterTest.test(state)) {
                     return true;
                 }
             }

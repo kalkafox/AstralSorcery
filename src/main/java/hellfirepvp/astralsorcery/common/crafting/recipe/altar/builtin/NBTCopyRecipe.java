@@ -61,8 +61,8 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
         return this.addNBTCopyMatchIngredient(Ingredient.fromStacks(items));
     }
 
-    public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(IItemProvider... items) {
-        return this.addNBTCopyMatchIngredient(Ingredient.fromItems(items));
+    public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(ItemLike... items) {
+        return this.addNBTCopyMatchIngredient(Ingredient.valueFromJson(items));
     }
 
     public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(Ingredient ingredient) {
@@ -74,9 +74,9 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {
         super.deserializeAdditionalJson(recipeObject);
 
-        JsonArray list = JSONUtils.getJsonArray(recipeObject, KEY_SEARCH_ITEMS, new JsonArray());
-        for (JsonElement element : list) {
-            this.searchIngredients.add(Ingredient.deserialize(element));
+        JsonArray list = GsonHelper.getAsJsonArray(recipeObject, KEY_SEARCH_ITEMS, new JsonArray());
+        for (JsonElement value : list) {
+            this.searchIngredients.add(Ingredient.deserialize(value));
         }
     }
 
@@ -97,7 +97,7 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
         List<ItemStack> outputs = super.getOutputs(altar);
 
         List<CompoundTag> foundTags = Lists.newArrayList();
-        for (ItemStack existing : altar.getInventory()) {
+        for (ItemStack existing : altar.getItems()) {
             for (Ingredient match : this.searchIngredients) {
                 if (match.test(existing) && existing.hasTag()) {
                     foundTags.add(existing.getTag().copy());

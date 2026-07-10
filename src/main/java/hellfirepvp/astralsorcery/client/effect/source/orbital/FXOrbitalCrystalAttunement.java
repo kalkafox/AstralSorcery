@@ -42,22 +42,22 @@ public class FXOrbitalCrystalAttunement extends FXSourceOrbital<FXFacingParticle
 
     @Override
     public void spawnOrbitalParticle(Vector3 pos, Function<Vector3, FXFacingParticle> effectRegistrar) {
-        Vector3 motion = this.getPosition().subtract(pos).crossProduct(this.getOrbitAxis()).normalize().multiply(0.1 + rand.nextFloat() * 0.1);
-        motion.add(this.getOrbitAxis().normalize().multiply(0.15 + rand.nextFloat() * 0.15));
+        Vector3 motion = this.getPosition().subtract(pos).cross(this.getOrbitAxis()).normalize().mul(0.1 + random.nextFloat() * 0.1);
+        motion.add(this.getOrbitAxis().normalize().mul(0.15 + random.nextFloat() * 0.15));
 
         Vector3 vortexPos = pos.clone();
-        MiscUtils.applyRandomOffset(vortexPos, rand, 0.4F);
+        MiscUtils.applyRandomOffset(vortexPos, random, 0.4F);
 
         FXFacingParticle p = effectRegistrar.apply(vortexPos)
                 .color(VFXColorFunction.WHITE)
-                .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
+                .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
                 .setAlphaMultiplier(0.75F)
-                .alpha(VFXAlphaFunction.proximity(this.targetPoint::clone, 3F))
+                .alpha1arg(VFXAlphaFunction.proximity(this.targetPoint::clone, 3F))
                 .motion(VFXMotionController.target(this.targetPoint::clone, 0.075F))
-                .setMotion(motion)
+                .setDeltaMovement(motion)
                 .setMaxAge(60);
 
-        if (rand.nextInt(3) == 0) {
+        if (random.nextInt(3) == 0) {
             p.color(VFXColorFunction.constant(cst.getConstellationColor()));
         }
     }

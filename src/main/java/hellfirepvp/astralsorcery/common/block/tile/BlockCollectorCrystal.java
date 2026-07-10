@@ -64,7 +64,7 @@ import java.util.UUID;
  */
 public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implements BlockStructureObserver, CustomItemBlock {
 
-    private static final VoxelShape SHAPE = Block.makeCuboidShape(4.5, 0, 4.5, 11.5, 16, 11.5);
+    private static final VoxelShape SHAPE = Block.box(4.5, 0, 4.5, 11.5, 16, 11.5);
     private static final float PLAYER_HARVEST_HARDNESS = 4F;
 
     public BlockCollectorCrystal(CollectorCrystalType type) {
@@ -73,7 +73,7 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
                 .harvestTool(ToolType.PICKAXE)
                 .harvestLevel(1)
                 .sound(SoundType.GLASS)
-                .setLightLevel(state -> 11));
+                .isRedstoneConductor(state -> 11));
     }
 
     @Override
@@ -81,8 +81,8 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable BlockGetter world, List<Component> toolTip, TooltipFlag flag) {
-        super.addInformation(stack, world, toolTip, flag);
+    public void appendHoverText(ItemStack stack, @Nullable BlockGetter level, List<Component> toolTip, TooltipFlag flag) {
+        super.appendHoverText(stack, level, toolTip, flag);
 
         CrystalAttributes attr = CrystalAttributes.getCrystalAttributes(stack);
         CrystalAttributes.TooltipResult result = null;
@@ -103,11 +103,11 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
             if (c != null) {
                 if (GatedKnowledge.COLLECTOR_TYPE.canSee(tier) && clientProgress.hasConstellationDiscovered(c)) {
                     toolTip.add(Component.translatable("crystal.info.astralsorcery.collect.type",
-                            c.getConstellationName().withStyle(TextFormatting.BLUE))
-                            .withStyle(TextFormatting.GRAY));
+                            c.getConstellationName().withStyle(ChatFormatting.BLUE))
+                            .withStyle(ChatFormatting.GRAY));
 
                 } else if (!addedMissing) {
-                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(ChatFormatting.GRAY));
                 }
             }
 
@@ -115,11 +115,11 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
             if (tr != null) {
                 if (GatedKnowledge.CRYSTAL_TRAIT.canSee(tier) && clientProgress.hasConstellationDiscovered(tr)) {
                     toolTip.add(Component.translatable("crystal.info.astralsorcery.trait",
-                            tr.getConstellationName().withStyle(TextFormatting.BLUE))
-                            .withStyle(TextFormatting.GRAY));
+                            tr.getConstellationName().withStyle(ChatFormatting.BLUE))
+                            .withStyle(ChatFormatting.GRAY));
 
                 } else if (!addedMissing) {
-                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(ChatFormatting.GRAY));
                 }
             }
         }
@@ -131,45 +131,45 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
     }
 
     @Override
-    public float getPlayerRelativeBlockHardness(BlockState state, Player player, BlockGetter world, BlockPos pos) {
-        TileCollectorCrystal crystal = MiscUtils.getTileAt(world, pos, TileCollectorCrystal.class, false);
+    public float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
+        TileCollectorCrystal crystal = MiscUtils.getTileAt(level, pos, TileCollectorCrystal.class, false);
         if (crystal != null && crystal.isPlayerMade()) {
-            int i = ForgeHooks.canHarvestBlock(state, player, world, pos) ? 30 : 100;
+            int i = ForgeHooks.isCorrectToolForDrops(state, player, level, pos) ? 30 : 100;
             return player.getDigSpeed(state, pos) / PLAYER_HARVEST_HARDNESS / i;
         }
-        return super.getPlayerRelativeBlockHardness(state, player, world, pos);
+        return super.getDestroyProgress(state, player, level, pos);
     }
 
     @Override
-    public void onBlockPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
-        TileCollectorCrystal tcc = MiscUtils.getTileAt(world, pos, TileCollectorCrystal.class, true);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
+        TileCollectorCrystal tcc = MiscUtils.getTileAt(level, pos, TileCollectorCrystal.class, true);
         Item i = stack.getItem();
         if (tcc != null && i instanceof ItemBlockCollectorCrystal) {
             ItemBlockCollectorCrystal ibcc = (ItemBlockCollectorCrystal) i;
             UUID playerUUID = null;
             if (entity instanceof Player) {
-                playerUUID = entity.getUniqueID();
+                playerUUID = entity.getUUID();
             }
 
-            tcc.updateData(playerUUID, ibcc.getCollectorType());
+            tcc.onSynced(playerUUID, ibcc.getCollectorType());
         }
 
-        super.onBlockPlacedBy(world, pos, state, entity, stack);
+        super.setPlacedBy(level, pos, state, entity, stack);
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState p_149645_1_) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileCollectorCrystal();
     }
 }

@@ -35,7 +35,7 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     private ChangeSubscriber<ChangeObserverStructure> structureMatch;
     private boolean hasMultiblock = false;
 
-    protected int ticksExisted = 0;
+    protected int tickCount = 0;
 
     protected TileEntityTick(BlockEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
@@ -43,11 +43,11 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
 
     @Override
     public void tick() {
-        if (ticksExisted == 0) {
+        if (tickCount == 0) {
             onFirstTick();
         }
 
-        ticksExisted++;
+        tickCount++;
     }
 
     @Nullable
@@ -65,19 +65,19 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     protected void onFirstTick() {}
 
     public int getTicksExisted() {
-        return ticksExisted;
+        return tickCount;
     }
 
     public boolean doesSeeSky() {
-        if (getWorld().isRemote()) {
+        if (getLevel().isClientSide()) {
             return this.doesSeeSky;
         }
 
-        if (lastUpdateTick == -1 || (ticksExisted - lastUpdateTick) >= 20) {
-            lastUpdateTick = ticksExisted;
+        if (lastUpdateTick == -1 || (tickCount - lastUpdateTick) >= 20) {
+            lastUpdateTick = tickCount;
 
             boolean prevSky = doesSeeSky;
-            boolean newSky = MiscUtils.canSeeSky(this.getWorld(), this.getPos().up(), true, this.seesSkyInNoSkyWorlds(), this.doesSeeSky);
+            boolean newSky = MiscUtils.canSeeSky(this.getLevel(), this.getBlockPos().above(), true, this.seesSkyInNoSkyWorlds(), this.doesSeeSky);
             if (prevSky != newSky) {
                 this.notifySkyStateUpdate(prevSky, newSky);
                 this.doesSeeSky = newSky;
@@ -88,7 +88,7 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     }
 
     public boolean hasMultiblock() {
-        if (getWorld().isRemote()) {
+        if (getLevel().isClientSide()) {
             return this.hasMultiblock;
         }
 
@@ -100,13 +100,13 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
 
         refreshMatcher();
         if (this.structureMatch == null) {
-            this.structureMatch = this.getRequiredStructureType().observe(getWorld(), getPos());
+            this.structureMatch = this.getRequiredStructureType().observe(getLevel(), getBlockPos());
         }
         boolean prevFound = this.hasMultiblock;
-        boolean found = this.structureMatch.isValid(getWorld());
+        boolean found = this.structureMatch.isValid(getLevel());
         if (prevFound != found) {
             LogCategory.STRUCTURE_MATCH.info(() ->
-                    "Structure match updated: " + this.getClass().getName() + " at " + this.getPos() +
+                    "Structure match updated: " + this.getClass().getName() + " at " + this.getBlockPos() +
                             " (" + this.hasMultiblock + " -> " + found + ")");
             this.notifyMultiblockStateUpdate(prevFound, found);
             this.hasMultiblock = found;
@@ -121,12 +121,12 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
             //Same registry name as the structure type.
             ResourceLocation key = this.structureMatch.getObserver().getProviderRegistryName();
             if (struct == null || !key.equals(struct.getRegistryName())) {
-                ObserverHelper.getHelper().removeObserver(getWorld(), getPos());
+                ObserverHelper.getHelper().removeObserver(getLevel(), getBlockPos());
                 this.structureMatch = null;
             }
         }
-        if (struct == null && ObserverHelper.getHelper().getSubscriber(getWorld(), getPos()) != null) {
-            ObserverHelper.getHelper().removeObserver(getWorld(), getPos());
+        if (struct == null && ObserverHelper.getHelper().getSubscriber(getLevel(), getBlockPos()) != null) {
+            ObserverHelper.getHelper().removeObserver(getLevel(), getBlockPos());
         }
     }
 
@@ -144,21 +144,21 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     protected void notifyMultiblockStateUpdate(boolean hadMultiblockPrev, boolean hasMultiblockNow) {}
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
         
-        this.ticksExisted = compound.getInt("ticksExisted");
-        this.doesSeeSky = compound.getBoolean("doesSeeSky");
-        this.hasMultiblock = compound.getBoolean("hasMultiblock");
+        this.tickCount = pattern.getInt("ticksExisted");
+        this.doesSeeSky = pattern.getBoolean("doesSeeSky");
+        this.hasMultiblock = pattern.getBoolean("hasMultiblock");
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.putInt("ticksExisted", this.ticksExisted);
-        compound.putBoolean("doesSeeSky", this.doesSeeSky);
-        compound.putBoolean("hasMultiblock", this.hasMultiblock);
+        pattern.putInt("ticksExisted", this.tickCount);
+        pattern.putBoolean("doesSeeSky", this.doesSeeSky);
+        pattern.putBoolean("hasMultiblock", this.hasMultiblock);
     }
 
 }

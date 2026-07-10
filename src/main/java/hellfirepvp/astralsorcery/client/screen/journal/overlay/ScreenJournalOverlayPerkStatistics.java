@@ -93,8 +93,8 @@ public class ScreenJournalOverlayPerkStatistics extends ScreenJournalOverlay {
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
-        super.render(renderStack, mouseX, mouseY, pTicks);
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
+        super.render(renderStack, xpos, ypos, pTicks);
 
         float width = 275;
         float height = 344;
@@ -103,49 +103,49 @@ public class ScreenJournalOverlayPerkStatistics extends ScreenJournalOverlay {
         TexturesAS.TEX_GUI_PARCHMENT_BLANK.bindTexture();
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
-        RenderingGuiUtils.drawRect(renderStack, guiLeft + guiWidth / 2F - width / 2F, guiTop + guiHeight / 2F - height / 2F, this.getGuiZLevel(),
+        RenderingGuiUtils.drawRect(renderStack, leftPos + guiWidth / 2F - width / 2F, topPos + guiHeight / 2F - height / 2F, this.getGuiZLevel(),
                 width, height);
         RenderSystem.disableBlend();
         this.setBlitOffset(0);
 
         drawHeader(renderStack);
-        drawPageText(renderStack, mouseX, mouseY);
+        drawPageText(renderStack, xpos, ypos);
     }
 
     private void drawHeader(PoseStack renderStack) {
         FormattedText title = Component.translatable("perk.reader.astralsorcery.gui");
-        List<FormattedCharSequence> lines = font.trimStringToWidth(title, MathHelper.floor(HEADER_WIDTH / 1.4F));
+        List<FormattedCharSequence> lines = font.split(title, Mth.floor(HEADER_WIDTH / 1.4F));
         int step = 14;
-        float offsetTop = guiTop + 15 - (lines.size() * step) / 2F;
+        float offsetTop = topPos + 15 - (lines.size() * step) / 2F;
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0, offsetTop, 0);
 
         for (int i = 0; i < lines.size(); i++) {
-            FormattedCharSequence line = lines.get(i);
-            float offsetLeft = width / 2F - (font.func_243245_a(line) * 1.4F) / 2F;
+            FormattedCharSequence lineState = lines.get(i);
+            float offsetLeft = width / 2F - (font.func_243245_a(lineState) * 1.4F) / 2F;
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(offsetLeft, i * step, 0);
             renderStack.scale(1.4F, 1.4F, 1F);
-            RenderingDrawUtils.renderStringAt(line, renderStack, font, 0xEE333333, false);
-            renderStack.pop();
+            RenderingDrawUtils.renderStringAt(lineState, renderStack, font, 0xEE333333, false);
+            renderStack.popPose();
         }
-        renderStack.pop();
+        renderStack.popPose();
     }
 
-    private void drawPageText(PoseStack renderStack, int mouseX, int mouseY) {
+    private void drawPageText(PoseStack renderStack, int xpos, int ypos) {
         if (nameStrWidth == -1 || valueStrWidth == -1 || suffixStrWidth == -1) {
             buildDisplayWidth();
         }
 
         Map<Rectangle, PerkStatistic> valueStrMap = Maps.newHashMap();
-        int offsetY = guiTop + 40;
-        int offsetX = guiLeft + guiWidth / 2 - DEFAULT_WIDTH / 2;
-        int line = 0;
+        int offsetY = topPos + 40;
+        int offsetX = leftPos + guiWidth / 2 - DEFAULT_WIDTH / 2;
+        int lineState = 0;
         for (PerkStatistic stat : statistics) {
             FormattedText statName = Component.translatable(stat.getUnlocPerkTypeName());
-            List<FormattedCharSequence> statistics = font.trimStringToWidth(statName, MathHelper.floor(HEADER_WIDTH / 1.5F));
+            List<FormattedCharSequence> statistics = font.split(statName, Mth.floor(HEADER_WIDTH / 1.5F));
             for (int i = 0; i < statistics.size(); i++) {
                 FormattedCharSequence statistic = statistics.get(i);
 
@@ -153,34 +153,34 @@ public class ScreenJournalOverlayPerkStatistics extends ScreenJournalOverlay {
                 if (i > 0) {
                     drawX += 10;
                 }
-                renderStack.push();
-                renderStack.translate(drawX, offsetY + ((line + i) * 10), this.getGuiZLevel());
+                renderStack.pushPose();
+                renderStack.translate(drawX, offsetY + ((lineState + i) * 10), this.getGuiZLevel());
                 RenderingDrawUtils.renderStringAt(statistic, renderStack, font, 0xEE333333, false);
-                renderStack.pop();
+                renderStack.popPose();
             }
 
-            renderStack.push();
-            renderStack.translate(offsetX + nameStrWidth, offsetY + (line * 10), this.getGuiZLevel());
+            renderStack.pushPose();
+            renderStack.translate(offsetX + nameStrWidth, offsetY + (lineState * 10), this.getGuiZLevel());
             RenderingDrawUtils.renderStringAt(Component.literal(stat.getPerkValue()), renderStack, font, 0xEE333333, false);
-            renderStack.pop();
+            renderStack.popPose();
 
-            int strLength = font.getStringWidth(stat.getPerkValue());
-            Rectangle rctValue = new Rectangle(offsetX + nameStrWidth, offsetY + (line * 10), strLength, 8);
+            int strLength = font.width(stat.getPerkValue());
+            Rectangle rctValue = new Rectangle(offsetX + nameStrWidth, offsetY + (lineState * 10), strLength, 8);
             valueStrMap.put(rctValue, stat);
 
-            line += statistics.size();
+            lineState += statistics.size();
             if (!stat.getSuffix().isEmpty()) {
-                renderStack.push();
-                renderStack.translate(offsetX + 25, offsetY + (line * 10), this.getGuiZLevel());
+                renderStack.pushPose();
+                renderStack.translate(offsetX + 25, offsetY + (lineState * 10), this.getGuiZLevel());
                 RenderingDrawUtils.renderStringAt(Component.literal(stat.getSuffix()), renderStack, font, 0xEE333333, false);
-                renderStack.pop();
+                renderStack.popPose();
 
-                line++;
+                lineState++;
             }
         }
 
         for (Rectangle rct : valueStrMap.keySet()) {
-            if (rct.contains(mouseX, mouseY)) {
+            if (rct.contains(xpos, ypos)) {
                 PerkStatistic stat = valueStrMap.get(rct);
                 drawCalculationDescription(renderStack, rct.x + rct.width + 2, rct.y + 15, stat);
             }
@@ -229,10 +229,10 @@ public class ScreenJournalOverlayPerkStatistics extends ScreenJournalOverlay {
         suffixStrWidth = -1;
 
         for (PerkStatistic stat : this.statistics) {
-            FormattedText typeName = Component.translatable(stat.getUnlocPerkTypeName());
-            int nameWidth = Math.min(font.getStringPropertyWidth(typeName), ((int) (HEADER_WIDTH / 1.5F)));
-            int valueWidth = font.getStringWidth(stat.getPerkValue());
-            int suffixWidth = font.getStringWidth(stat.getSuffix());
+            FormattedText name = Component.translatable(stat.getUnlocPerkTypeName());
+            int nameWidth = Math.min(font.getStringPropertyWidth(name), ((int) (HEADER_WIDTH / 1.5F)));
+            int valueWidth = font.width(stat.getPerkValue());
+            int suffixWidth = font.width(stat.getSuffix());
 
             if (nameWidth > nameStrWidth) {
                 nameStrWidth = nameWidth;

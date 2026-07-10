@@ -50,11 +50,11 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
 
     @Override
     public boolean onSelect(Player player) {
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             for (BlockPos linkTo : Lists.newArrayList(getLinkedPositions())) {
                 tryUnlink(player, linkTo);
             }
-            player.sendMessage(Component.translatable("astralsorcery.misc.link.unlink.all").withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+            player.sendSystemMessage(Component.translatable("astralsorcery.misc.link.unlink.all").withStyle(ChatFormatting.GREEN));
             return false;
         }
         return true;
@@ -63,8 +63,8 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
     public abstract boolean isSingleLink();
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
         ListTag list = new ListTag();
         for (BlockPos pos : positions) {
@@ -72,16 +72,16 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
             NBTHelper.writeBlockPosToNBT(pos, tag);
             list.add(tag);
         }
-        compound.put("linked", list);
+        pattern.put("linked", list);
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
         positions.clear();
 
-        if (compound.contains("linked")) {
-            ListTag list = compound.getList("linked", Constants.NBT.TAG_COMPOUND);
+        if (pattern.contains("linked")) {
+            ListTag list = pattern.getList("linked", Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
                 CompoundTag tag = list.getCompound(i);
                 positions.add(NBTHelper.readBlockPosFromNBT(tag));
@@ -91,7 +91,7 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
 
     @Override
     public void onBlockLinkCreate(Player player, BlockPos other) {
-        if (other.equals(getPos())) return;
+        if (other.equals(getBlockPos())) return;
 
         if (TransmissionNetworkHelper.createTransmissionLink(this, other)) {
             if (this.isSingleLink()) {
@@ -112,18 +112,18 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
     @Override
     @Nonnull
     public BlockPos getTrPos() {
-        return getPos();
+        return getBlockPos();
     }
 
     @Override
     @Nonnull
     public Level getTrWorld() {
-        return getWorld();
+        return getLevel();
     }
 
     @Override
     public boolean tryLinkBlock(Player player, BlockPos other) {
-        return !other.equals(getPos()) && TransmissionNetworkHelper.canCreateTransmissionLink(this, other);
+        return !other.equals(getBlockPos()) && TransmissionNetworkHelper.canCreateTransmissionLink(this, other);
     }
 
     @Override
@@ -133,7 +133,7 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
 
     @Override
     public boolean tryUnlink(Player player, BlockPos other) {
-        if (other.equals(getPos())) return false;
+        if (other.equals(getBlockPos())) return false;
 
         if (TransmissionNetworkHelper.hasTransmissionLink(this, other)) {
             TransmissionNetworkHelper.removeTransmissionLink(this, other);

@@ -15,10 +15,11 @@ import hellfirepvp.astralsorcery.common.entity.technical.EntityObservatoryHelper
 import hellfirepvp.astralsorcery.common.tile.TileObservatory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import org.joml.Vector3f;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,8 +32,8 @@ public class RenderObservatory extends CustomTileEntityRenderer<TileObservatory>
 
     private static final ModelObservatory MODEL_OBSERVATORY = new ModelObservatory();
 
-    public RenderObservatory(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderObservatory(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -40,30 +41,30 @@ public class RenderObservatory extends CustomTileEntityRenderer<TileObservatory>
         Entity ridden;
         Player player = Minecraft.getInstance().player;
         if (player != null &&
-                (ridden = Minecraft.getInstance().player.getRidingEntity()) != null &&
+                (ridden = Minecraft.getInstance().player.getVehicle()) != null &&
                 ridden instanceof EntityObservatoryHelper &&
                 ((EntityObservatoryHelper) ridden).getAssociatedObservatory() != null) {
             ((EntityObservatoryHelper) ridden).applyObservatoryRotationsFrom(tile, player, false);
         }
 
         float prevYaw = tile.prevObservatoryYaw;
-        float yaw = tile.observatoryYaw;
+        float yRot = tile.observatoryYaw;
         float prevPitch = tile.prevObservatoryPitch;
         float pitch = tile.observatoryPitch;
 
-        float iYawDegree = RenderingVectorUtils.interpolateRotation(prevYaw + 180, yaw + 180, pTicks);
+        float iYawDegree = RenderingVectorUtils.interpolateRotation(prevYaw + 180, yRot + 180, pTicks);
         float iPitchDegree = RenderingVectorUtils.interpolateRotation(prevPitch, pitch, pTicks);
 
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0.5F, 1.5F, 0.5F);
-        renderStack.rotate(Vector3f.XP.rotationDegrees(180F));
-        renderStack.rotate(Vector3f.YP.rotationDegrees(180F));
+        renderStack.mirror(Axis.XP.rotationDegrees(180F));
+        renderStack.mirror(Axis.YP.rotationDegrees(180F));
         //renderStack.scale(0.0625F, 0.0625F, 0.0625F);
 
         MODEL_OBSERVATORY.setupRotations(iYawDegree, iPitchDegree);
         MODEL_OBSERVATORY.render(renderStack, renderTypeBuffer, combinedLight, combinedOverlay);
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

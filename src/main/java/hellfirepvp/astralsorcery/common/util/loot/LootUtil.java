@@ -24,7 +24,7 @@ public class LootUtil {
     private LootUtil() {}
 
     public static boolean doesContextFulfillSet(LootContext ctx, LootContextParamSet set) {
-        for (LootContextParam<?> required : set.getRequiredParameters()) {
+        for (LootContextParam<?> required : set.getReferencedContextParams()) {
             if (!ctx.has(required)) {
                 return false;
             }

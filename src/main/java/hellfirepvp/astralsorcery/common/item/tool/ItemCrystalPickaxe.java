@@ -30,7 +30,7 @@ public class ItemCrystalPickaxe extends ItemCrystalTierItem implements TypeEncha
     }
 
     @Override
-    public boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type) {
+    public boolean canEnchant(ItemStack stack, AstralEnchantmentType type) {
         return type == AstralEnchantmentType.BREAKABLE || type == AstralEnchantmentType.DIGGER;
     }
 

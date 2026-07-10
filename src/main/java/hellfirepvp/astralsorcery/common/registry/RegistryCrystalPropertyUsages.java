@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.crystal.calc.PropertyUsage;
 
 import static hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS.Usages.*;
@@ -39,8 +40,7 @@ public class RegistryCrystalPropertyUsages {
     }
 
     private static <T extends PropertyUsage> T registerUsage(T usage) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(usage);
-        return usage;
+        return AstralRegistries.register(AstralRegistries.CRYSTAL_USAGES, usage);
     }
 
 }

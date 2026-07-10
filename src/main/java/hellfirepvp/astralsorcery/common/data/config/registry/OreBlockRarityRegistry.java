@@ -42,18 +42,18 @@ public class OreBlockRarityRegistry extends ConfigDataAdapter<OreBlockRarityEntr
     }
 
     @Nullable
-    public Block getRandomBlock(Random rand) {
+    public Block getRandomBlock(Random random) {
         List<OreBlockRarityEntry> entries = this.getConfiguredValues();
         Set<OreBlockRarityEntry> visitedEntires = new HashSet<>();
 
         while (visitedEntires.size() < entries.size()) {
             OreBlockRarityEntry entry = MiscUtils.getWeightedRandomEntry(entries.stream()
                     .filter(e -> !visitedEntires.contains(e))
-                    .collect(Collectors.toList()), rand, OreBlockRarityEntry::getWeight);
+                    .collect(Collectors.toList()), random, OreBlockRarityEntry::getWeight);
 
             if (entry != null) {
                 visitedEntires.add(entry);
-                Block b = entry.getRandomBlock(rand);
+                Block b = entry.getRandomBlock(random);
                 if (b != null) {
                     return b;
                 }
@@ -78,7 +78,7 @@ public class OreBlockRarityRegistry extends ConfigDataAdapter<OreBlockRarityEntr
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return this.fileName;
     }
 
@@ -88,7 +88,7 @@ public class OreBlockRarityRegistry extends ConfigDataAdapter<OreBlockRarityEntr
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 

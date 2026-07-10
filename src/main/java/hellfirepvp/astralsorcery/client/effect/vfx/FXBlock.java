@@ -30,7 +30,7 @@ import java.awt.*;
  */
 public class FXBlock extends EntityVisualFX {
 
-    private BlockState blockState = null;
+    private BlockState state = null;
 
     private Vector3 rotationDegreeAxis = new Vector3();
     private Vector3 prevRotationDegreeAxis = new Vector3();
@@ -40,14 +40,14 @@ public class FXBlock extends EntityVisualFX {
         super(pos);
     }
 
-    public FXBlock setBlockState(BlockState blockState) {
-        this.blockState = blockState;
+    public FXBlock setBlock(BlockState state) {
+        this.state = state;
         return this;
     }
 
     public FXBlock tumble() {
-        this.rotationDegreeAxis = Vector3.positiveYRandom().multiply(360);
-        this.rotationChange = Vector3.random().multiply(12);
+        this.rotationDegreeAxis = Vector3.positiveYRandom().mul(360);
+        this.rotationChange = Vector3.random().mul(12);
         return this;
     }
 
@@ -62,7 +62,7 @@ public class FXBlock extends EntityVisualFX {
     public void tick() {
         super.tick();
 
-        if (this.rotationChange.lengthSquared() > 0) {
+        if (this.rotationChange.lengthSqr() > 0) {
             this.prevRotationDegreeAxis = this.rotationDegreeAxis.clone();
             this.rotationDegreeAxis.add(this.rotationChange);
         }
@@ -70,7 +70,7 @@ public class FXBlock extends EntityVisualFX {
 
     @Override
     public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, PoseStack renderStack, VertexConsumer vb, float pTicks) {
-        if (this.blockState == null) {
+        if (this.state == null) {
             return;
         }
 
@@ -78,24 +78,24 @@ public class FXBlock extends EntityVisualFX {
         Color c = this.getColor(pTicks);
         int[] colorOverride = new int[] { c.getRed(), c.getGreen(), c.getBlue(), alpha };
 
-        Vector3 translate = this.getRenderPosition(pTicks).subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
+        Vector3 translate = this.getCameraPosition(pTicks).subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
         Vector3 rotation = this.getInterpolatedRotation(pTicks);
-        float scale = this.getScale(pTicks);
+        float scale = this.getQuadSize(pTicks);
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(translate.getX(), translate.getY(), translate.getZ());
 
         renderStack.translate(0.5, 0.5, 0.5);
         renderStack.scale(scale, scale, scale);
-        renderStack.rotate(Vector3f.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.rotate(Vector3f.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.translate(-0.5, -0.5, -0.5);
 
         new BufferDecoratorBuilder()
                 .setColorDecorator((r, g, b, a) -> colorOverride)
-                .decorate(vb, decorated -> RenderingUtils.renderSimpleBlockModel(this.blockState, renderStack, decorated));
+                .decorate(vb, decorated -> RenderingUtils.renderSimpleBlockModel(this.state, renderStack, decorated));
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

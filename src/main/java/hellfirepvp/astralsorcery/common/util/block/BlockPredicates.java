@@ -36,36 +36,36 @@ import java.util.Set;
 public class BlockPredicates {
 
     public static BlockPredicate isInTag(Tag<Block> blockTag) {
-        return (world, pos, state) -> state.isIn(blockTag);
+        return (level, pos, state) -> state.isIn(blockTag);
     }
 
     public static BlockPredicate isBlock(Block... blocks) {
         Set<Block> applicable = new HashSet<>(Arrays.asList(blocks));
-        return (world, pos, state) -> applicable.contains(state.getBlock());
+        return (level, pos, state) -> applicable.contains(state.getBlock());
     }
 
     public static BlockPredicate isState(BlockState... states) {
         Set<BlockState> applicable = new HashSet<>(Arrays.asList(states));
-        return (world, pos, state) -> applicable.contains(state);
+        return (level, pos, state) -> applicable.contains(state);
     }
 
     public static <T extends BlockEntity> BlockPredicate doesTileExist(T tile, boolean loadTileWorldAndChunk) {
-        ResourceKey<Level> dim = tile.getWorld().getDimensionKey();
+        ResourceKey<Level> dim = tile.getLevel().dimension();
         BlockEntityType<?> tileType = tile.getType();
         MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
 
-        return (world, pos, state) -> {
+        return (level, pos, state) -> {
             if (loadTileWorldAndChunk || srv.forgeGetWorldMap().containsKey(dim)) {
-                Level foundWorld = srv.getWorld(dim);
+                Level foundWorld = srv.getLevel(dim);
                 if (foundWorld == null) {
                     //If the intent was to load the world and it doesn't exist, then the tile doesn't exist either
                     //If the intent was to NOT load the world, but the world isn't there, we assume the tile still exists.
                     return !loadTileWorldAndChunk;
                 }
-                if (!loadTileWorldAndChunk && !foundWorld.getChunkProvider().isChunkLoaded(new ChunkPos(pos))) {
+                if (!loadTileWorldAndChunk && !foundWorld.getChunkSource().isChunkLoaded(new ChunkPos(pos))) {
                     return true;
                 }
-                BlockEntity te = MiscUtils.getTileAt(foundWorld, pos, TileEntity.class, true);
+                BlockEntity te = MiscUtils.getTileAt(foundWorld, pos, BlockEntity.class, true);
                 return te != null && te.getType().equals(tileType);
             }
             return true;

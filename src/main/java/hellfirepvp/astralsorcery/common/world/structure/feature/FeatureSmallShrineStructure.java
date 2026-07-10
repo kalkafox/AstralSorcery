@@ -37,18 +37,18 @@ public class FeatureSmallShrineStructure extends TemplateStructureFeature {
 
     public static class Start extends StructureStart<NoneFeatureConfiguration> {
 
-        public Start(Structure<NoneFeatureConfiguration> config, int chunkPosX, int chunkPosZ, BoundingBox bounds, int ref, long seed) {
-            super(config, chunkPosX, chunkPosZ, bounds, ref, seed);
+        public Start(Structure<NoneFeatureConfiguration> config, int chunkX, int chunkZ, BoundingBox bounds, int ref, long seed) {
+            super(config, chunkX, chunkZ, bounds, ref, seed);
         }
 
         @Override
-        public void func_230364_a_(RegistryAccess registries, ChunkGenerator gen, StructureManager mgr, int chunkX, int chunkZ, Biome biome, NoneFeatureConfiguration cfg) {
-            int x = chunkX * 16 + rand.nextInt(16);
-            int z = chunkZ * 16 + rand.nextInt(16);
+        public void generatePieces(RegistryAccess BUILTIN, ChunkGenerator gen, StructureManager mgr, int chunkX, int chunkZ, Biome biome, NoneFeatureConfiguration cfg) {
+            int x = chunkX * 16 + random.nextInt(16);
+            int z = chunkZ * 16 + random.nextInt(16);
             int y = gen.getHeight(x, z, Heightmap.Type.MOTION_BLOCKING);
             SmallShrineStructure structure = new SmallShrineStructure(mgr, new BlockPos(x, y, z));
-            this.components.add(structure);
-            this.recalculateStructureSize();
+            this.pieces.add(structure);
+            this.calculateBoundingBox();
         }
     }
 }

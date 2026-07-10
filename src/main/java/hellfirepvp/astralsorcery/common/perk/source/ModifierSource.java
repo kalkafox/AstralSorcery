@@ -30,6 +30,6 @@ public interface ModifierSource {
 
     boolean isEqual(ModifierSource other);
 
-    ResourceLocation getProviderName();
+    ResourceLocation gatherChunkSourceStats();
 
 }

@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -42,21 +42,21 @@ public class KeyLastBreath extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(this::onAttack);
         bus.addListener(this::onBreakSpeed);
     }
 
-    private void onAttack(LivingHurtEvent event) {
+    private void onAttack(LivingIncomingDamageEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-            Player player = (Player) source.getTrueSource();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        if (source.getEntity() != null && source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
-                float actIncrease = PerkAttributeHelper.getOrCreateMap(player, side)
+                float actIncrease = PerkAttributeHelper.getOrCreateMap(player, direction)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.damageMultiplier.get().floatValue());
                 float healthPerc = 1F - (player.getHealth() / player.getMaxHealth());
                 event.setAmount(event.getAmount() * (1F + (healthPerc * actIncrease)));
@@ -66,10 +66,10 @@ public class KeyLastBreath extends KeyPerk {
 
     private void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getPlayer();
-        LogicalSide side = this.getSide(player);
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        LogicalSide direction = this.getSide(player);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {
-            float actIncrease = PerkAttributeHelper.getOrCreateMap(player, side)
+            float actIncrease = PerkAttributeHelper.getOrCreateMap(player, direction)
                     .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.digSpeedMultiplier.get().floatValue());
             float healthPerc = 1F - (player.getHealth() / player.getMaxHealth());
             event.setNewSpeed(event.getNewSpeed() * (1F + (healthPerc * actIncrease)));

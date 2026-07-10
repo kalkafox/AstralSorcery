@@ -39,10 +39,10 @@ public class BatchedVertexList {
             return;
         }
 
-        BufferBuilder buf = Tessellator.getInstance().getBuffer();
+        BufferBuilder buf = Tesselator.getInstance().getBuffer();
         this.vbo = new VertexBuffer(this.vFormat);
         batchFn.accept(buf);
-        buf.finishDrawing();
+        buf.end();
         this.vbo.upload(buf);
 
         this.initialized = true;
@@ -55,9 +55,9 @@ public class BatchedVertexList {
 
         this.vbo.bindBuffer();
         this.vFormat.setupBufferState(0L);
-        this.vbo.draw(renderStack.getLast().getMatrix(), GL11.GL_QUADS);
+        this.vbo.draw(renderStack.last().pose(), GL11.GL_QUADS);
         this.vFormat.clearBufferState();
-        VertexBuffer.unbindBuffer();
+        VertexBuffer.unbind();
     }
 
     public void reset() {

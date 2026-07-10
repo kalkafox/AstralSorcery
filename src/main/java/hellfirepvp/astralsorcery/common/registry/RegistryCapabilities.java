@@ -42,7 +42,7 @@ public class RegistryCapabilities {
     public static void init(IEventBus eventBus) {
         registerDefault(ChunkFluidEntry.class, ChunkFluidEntry::new);
 
-        eventBus.addGenericListener(Chunk.class, RegistryCapabilities::attachChunkCapability);
+        eventBus.addGenericListener(LevelChunk.class, RegistryCapabilities::attachChunkCapability);
     }
 
     private static void attachChunkCapability(AttachCapabilitiesEvent<LevelChunk> chunkEvent) {
@@ -61,7 +61,7 @@ public class RegistryCapabilities {
         return new ICapabilitySerializable<CompoundTag>() {
             @Nonnull
             @Override
-            public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+            public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
                 if (cap == CHUNK_FLUID) {
                     return LazyOptional.of(() -> (T) defaultInstance);
                 }
@@ -84,12 +84,12 @@ public class RegistryCapabilities {
         return new Capability.IStorage<T>() {
             @Nullable
             @Override
-            public Tag writeNBT(Capability<T> capability, T instance, Direction side) {
+            public Tag fillDefaultJigsawNBT(Capability<T> state, T instance, Direction direction) {
                 return instance.serializeNBT();
             }
 
             @Override
-            public void readNBT(Capability<T> capability, T instance, Direction side, Tag nbt) {
+            public void load(Capability<T> state, T instance, Direction direction, Tag nbt) {
                 instance.deserializeNBT((CompoundTag) nbt);
             }
         };

@@ -8,15 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
+import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.loot.*;
 import hellfirepvp.astralsorcery.common.loot.global.LootModifierPerkVoidTrash;
 import hellfirepvp.astralsorcery.common.loot.global.LootModifierScorchingHeat;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.loot.GlobalLootModifierSerializer;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 
 import static hellfirepvp.astralsorcery.common.lib.LootAS.*;
@@ -33,23 +33,25 @@ public class RegistryLoot {
     private RegistryLoot() {}
 
     public static void init() {
-        registerGlobalModifier(new LootModifierScorchingHeat.Serializer(), AstralSorcery.key("scorching_heat"));
-        registerGlobalModifier(new LootModifierPerkVoidTrash.Serializer(), AstralSorcery.key("perk_void_trash"));
+        // TODO 1.21 loot port: the referenced CODEC constants replace the removed
+        // GlobalLootModifierSerializer / LootFunction.Serializer classes and still
+        // need to be implemented on the loot modifier and loot function classes.
+        registerGlobalModifier(LootModifierScorchingHeat.CODEC, AstralSorcery.key("scorching_heat"));
+        registerGlobalModifier(LootModifierPerkVoidTrash.CODEC, AstralSorcery.key("perk_void_trash"));
 
-        Functions.LINEAR_LUCK_BONUS = registerFunction(new LinearLuckBonus.Serializer(), AstralSorcery.key("linear_luck_bonus"));
-        Functions.RANDOM_CRYSTAL_PROPERTIES = registerFunction(new RandomCrystalProperty.Serializer(), AstralSorcery.key("random_crystal_property"));
-        Functions.COPY_CRYSTAL_PROPERTIES = registerFunction(new CopyCrystalProperties.Serializer(), AstralSorcery.key("copy_crystal_properties"));
-        Functions.COPY_CONSTELLATION = registerFunction(new CopyConstellation.Serializer(), AstralSorcery.key("copy_constellation"));
-        Functions.COPY_GATEWAY_COLOR = registerFunction(new CopyGatewayColor.Serializer(), AstralSorcery.key("copy_gateway_color"));
+        Functions.LINEAR_LUCK_BONUS = registerFunction(LinearLuckBonus.CODEC, AstralSorcery.key("linear_luck_bonus"));
+        Functions.RANDOM_CRYSTAL_PROPERTIES = registerFunction(RandomCrystalProperty.CODEC, AstralSorcery.key("random_crystal_property"));
+        Functions.COPY_CRYSTAL_PROPERTIES = registerFunction(CopyCrystalProperties.CODEC, AstralSorcery.key("copy_crystal_properties"));
+        Functions.COPY_CONSTELLATION = registerFunction(CopyConstellation.CODEC, AstralSorcery.key("copy_constellation"));
+        Functions.COPY_GATEWAY_COLOR = registerFunction(CopyGatewayColor.CODEC, AstralSorcery.key("copy_gateway_color"));
     }
 
-    private static <T extends LootItemConditionalFunction> LootItemFunctionType registerFunction(LootFunction.Serializer<T> serializer, ResourceLocation key) {
-        return LootFunctionManager.func_237451_a_(key.toString(), serializer);
+    private static <T extends LootItemConditionalFunction> LootItemFunctionType<T> registerFunction(MapCodec<T> codec, ResourceLocation key) {
+        return AstralRegistries.register(AstralRegistries.LOOT_FUNCTION_TYPES, key, new LootItemFunctionType<>(codec));
     }
 
-    private static <T extends IGlobalLootModifier> void registerGlobalModifier(GlobalLootModifierSerializer<T> modifier, ResourceLocation key) {
-        modifier.setRegistryName(key);
-        AstralSorcery.getProxy().getRegistryPrimer().register(modifier);
+    private static void registerGlobalModifier(MapCodec<? extends IGlobalLootModifier> codec, ResourceLocation key) {
+        AstralRegistries.register(AstralRegistries.GLOBAL_LOOT_MODIFIER_SERIALIZERS, key, codec);
     }
 
 }

@@ -25,7 +25,7 @@ public class RegistryEffectTypes {
 
     }
 
-    private static EffectType makeType() {
+    private static EffectType create() {
         return new EffectType();
     }
 

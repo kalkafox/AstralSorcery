@@ -62,19 +62,19 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         Vector3 playAt = new Vector3(pos).add(0.5, 0.5, 0.5);
-        if (pos.equals(pedestal.getPos())) {
+        if (pos.equals(pedestal.getBlockPos())) {
             playAt.add(
-                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1),
-                    rand.nextFloat() * 5,
-                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1));
+                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1),
+                    random.nextFloat() * 5,
+                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1));
         }
-        Vector3 motion = Vector3.random().setY(0).multiply(0.05);
+        Vector3 motion = Vector3.random().setY(0).mul(0.05);
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(playAt)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .motion(VFXMotionController.decelerate(() -> motion))
                 .color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_DISCIDIA))
                 .setScaleMultiplier(0.4F)
@@ -82,21 +82,21 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         boolean didEffect = false;
 
         float damage = CONFIG.damage.get().floatValue(); //Randomize?..
-        Player owner = this.getOwningPlayerInWorld(world, pos);
+        Player owner = this.getOwningPlayerInWorld(level, pos);
         DamageSource src = owner == null ? CommonProxy.DAMAGE_SOURCE_STELLAR :
                 DamageSourceUtil.withEntityDirect(CommonProxy.DAMAGE_SOURCE_STELLAR, owner);
-        List<LivingEntity> entities = this.collectEntities(world, pos, properties);
+        List<LivingEntity> entities = this.collectEntities(level, pos, properties);
         for (LivingEntity entity : entities) {
-            if (rand.nextInt(6) != 0) {
+            if (random.nextInt(6) != 0) {
                 continue;
             }
-            if (properties.isCorrupted() && entity instanceof Mob && entity.getClassification(false) == EntityClassification.MONSTER) {
+            if (properties.isCorrupted() && entity instanceof Mob && entity.getCategory(false) == MobCategory.MONSTER) {
                 entity.heal(damage);
-                entity.addPotionEffect(new MobEffectInstance(Effects.RESISTANCE, 30, 1));
+                entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 1));
             } else {
                 if (entity instanceof Player) {
                     continue;
@@ -104,7 +104,7 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
                 if (entity.equals(owner)) {
                     continue;
                 }
-                DamageUtil.shotgunAttack(entity, e -> DamageUtil.attackEntityFrom(entity, src, damage));
+                DamageUtil.shotgunAttack(entity, e -> DamageUtil.hurt(entity, src, damage));
             }
             if (entity instanceof Player) {
                 markPlayerAffected((Player) entity);

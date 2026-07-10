@@ -28,12 +28,12 @@ import java.util.function.Supplier;
  */
 public abstract class EntityComplexFX {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
     private static long counter = 0;
 
     private final long id;
     protected int age = 0;
-    protected int maxAge = 40;
+    protected int lifetime = 40;
     protected int ageRefreshCount = 0;
 
     protected Vector3 pos;
@@ -54,13 +54,13 @@ public abstract class EntityComplexFX {
         return id;
     }
 
-    public <T extends EntityComplexFX> T setMaxAge(int maxAge) {
-        this.maxAge = maxAge;
+    public <T extends EntityComplexFX> T setMaxAge(int lifetime) {
+        this.lifetime = lifetime;
         return (T) this;
     }
 
     public int getMaxAge() {
-        return maxAge;
+        return lifetime;
     }
 
     public int getAge() {
@@ -118,7 +118,7 @@ public abstract class EntityComplexFX {
     }
 
     public boolean canRemove() {
-        return this.age >= this.maxAge || removeRequested;
+        return this.age >= this.lifetime || removeRequested;
     }
 
     public void requestRemoval() {

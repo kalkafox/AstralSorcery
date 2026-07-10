@@ -66,7 +66,7 @@ public class SimpleShapedRecipeBuilder {
     }
 
     public SimpleShapedRecipeBuilder key(Character symbol, ItemLike item) {
-        return this.key(symbol, Ingredient.fromItems(item));
+        return this.key(symbol, Ingredient.valueFromJson(item));
     }
 
     public SimpleShapedRecipeBuilder key(Character symbol, Ingredient ingredientIn) {
@@ -94,17 +94,17 @@ public class SimpleShapedRecipeBuilder {
         return this;
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn) {
-        this.build(consumerIn, ForgeRegistries.ITEMS.getKey(this.result.getItem()));
+    public void build(Consumer<FinishedRecipe> consumerIn) {
+        this.build(consumerIn, BuiltInRegistries.ITEM.getKey(this.result.getItem()));
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
+    public void build(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
         this.validate(id);
         String path = id.getPath();
         if (this.subDirectory != null && !this.subDirectory.isEmpty()) {
             path = this.subDirectory + "/" + path;
         }
-        id = new ResourceLocation(id.getNamespace(), "shaped/" + path);
+        id = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "shaped/" + path);
         consumerIn.accept(new Result(id, this.result, this.pattern, this.key));
     }
 
@@ -134,7 +134,7 @@ public class SimpleShapedRecipeBuilder {
         }
     }
 
-    public static class Result implements IFinishedRecipe {
+    public static class Result implements FinishedRecipe {
 
         private final ResourceLocation id;
         private final ItemStack result;
@@ -165,7 +165,7 @@ public class SimpleShapedRecipeBuilder {
         }
 
         public RecipeSerializer<?> getSerializer() {
-            return IRecipeSerializer.CRAFTING_SHAPED;
+            return RecipeSerializer.SHAPED_RECIPE;
         }
 
         public ResourceLocation getID() {
@@ -173,13 +173,13 @@ public class SimpleShapedRecipeBuilder {
         }
 
         @Nullable
-        public JsonObject getAdvancementJson() {
+        public JsonObject serializeAdvancement() {
             return null;
         }
 
         @Nullable
         public ResourceLocation getAdvancementID() {
-            return new ResourceLocation("");
+            return ResourceLocation.parse("");
         }
     }
 }

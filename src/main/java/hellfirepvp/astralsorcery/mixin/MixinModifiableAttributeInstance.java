@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(ModifiableAttributeInstance.class)
+@Mixin(AttributeInstance.class)
 public class MixinModifiableAttributeInstance {
 
     @Inject(method = "computeValue", at = @At("RETURN"), cancellable = true)

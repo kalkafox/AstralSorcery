@@ -30,10 +30,10 @@ public abstract class ContainerBaseScreen<T extends BlockEntity, C extends Conta
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         this.renderBackground(renderStack);
-        super.render(renderStack, mouseX, mouseY, pTicks);
-        this.renderHoveredTooltip(renderStack, mouseX, mouseY);
+        super.render(renderStack, xpos, ypos, pTicks);
+        this.renderHoveredTooltip(renderStack, xpos, ypos);
     }
 
     @Override
@@ -41,8 +41,8 @@ public abstract class ContainerBaseScreen<T extends BlockEntity, C extends Conta
         super.tick();
 
         BlockEntity te = this.container.getTileEntity();
-        if (te.isRemoved() || !this.container.canInteractWith(Minecraft.getInstance().player)) {
-            this.closeScreen();
+        if (te.isRemoved() || !this.container.stillValid(Minecraft.getInstance().player)) {
+            this.onClose();
         }
     }
 }

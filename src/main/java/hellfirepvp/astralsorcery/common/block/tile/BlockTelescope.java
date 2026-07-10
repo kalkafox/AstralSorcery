@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
  */
 public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
 
-    private static final VoxelShape TELESCOPE = VoxelShapes.create(1D / 16D, 0D / 16D, 1D / 16D, 15D / 16D, 32D / 16D, 15D / 16D);
+    private static final VoxelShape TELESCOPE = Shapes.create(1D / 16D, 0D / 16D, 1D / 16D, 15D / 16D, 32D / 16D, 15D / 16D);
 
     public BlockTelescope() {
         super(PropertiesWood.defaultInfusedWood());
@@ -55,8 +55,8 @@ public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, Level world, BlockPos pos, ParticleEngine manager) {
-        RenderingUtils.playBlockBreakParticles(pos.up(), BlocksAS.TELESCOPE.getDefaultState(), BlocksAS.TELESCOPE.getDefaultState());
+    public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
+        RenderingUtils.playBlockBreakParticles(pos.above(), BlocksAS.TELESCOPE.defaultBlockState(), BlocksAS.TELESCOPE.defaultBlockState());
         return false;
     }
 
@@ -66,35 +66,35 @@ public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
-        if (world.isRemote()) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide()) {
             AstralSorcery.getProxy().openGui(player, GuiType.TELESCOPE, pos);
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void onBlockPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        world.setBlockState(pos.up(), BlocksAS.STRUCTURAL.getDefaultState().with(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE));
-        super.onBlockPlacedBy(world, pos, state, placer, stack);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        level.setBlock(pos.above(), BlocksAS.STRUCTURAL.defaultBlockState().setValue(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE));
+        super.setPlacedBy(level, pos, state, placer, stack);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        if (world.isAirBlock(pos.up())) {
-            world.removeBlock(pos, isMoving);
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+        if (level.isEmptyBlock(pos.above())) {
+            level.removeBlock(pos, isMoving);
         }
-        super.neighborChanged(state, world, pos, block, fromPos, isMoving);
+        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
+        return RenderShape.INVISIBLE;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileTelescope();
     }
 }

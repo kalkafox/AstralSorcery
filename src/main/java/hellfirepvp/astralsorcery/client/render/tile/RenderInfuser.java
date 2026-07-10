@@ -12,7 +12,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.tile.TileInfuser;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -24,18 +24,18 @@ import net.minecraft.world.item.ItemStack;
  */
 public class RenderInfuser extends CustomTileEntityRenderer<TileInfuser> {
 
-    public RenderInfuser(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderInfuser(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
     public void render(TileInfuser tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         ItemStack stack = tile.getItemInput();
         if (!stack.isEmpty()) {
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(0.5F, 0.75F, 0.5F);
             RenderingUtils.renderItemAsEntity(stack, renderStack, renderTypeBuffer, 0, 0, 0, combinedLight, pTicks, tile.getTicksExisted());
-            renderStack.pop();
+            renderStack.popPose();
         }
     }
 }

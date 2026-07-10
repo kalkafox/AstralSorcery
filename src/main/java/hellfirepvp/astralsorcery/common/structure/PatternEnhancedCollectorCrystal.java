@@ -37,10 +37,10 @@ public class PatternEnhancedCollectorCrystal extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        BlockState chiseled = BlocksAS.MARBLE_CHISELED.getDefaultState();
-        BlockState raw = BlocksAS.MARBLE_RAW.getDefaultState();
-        BlockState runed = BlocksAS.MARBLE_RUNED.getDefaultState();
-        BlockState engraved = BlocksAS.MARBLE_ENGRAVED.getDefaultState();
+        BlockState chiseled = BlocksAS.MARBLE_CHISELED.defaultBlockState();
+        BlockState raw = BlocksAS.MARBLE_RAW.defaultBlockState();
+        BlockState runed = BlocksAS.MARBLE_RUNED.defaultBlockState();
+        BlockState engraved = BlocksAS.MARBLE_ENGRAVED.defaultBlockState();
 
         addBlockCube(raw, -1, -5, -1, 1, -5, 1);
         for (int xx = -1; xx <= 1; xx++) {
@@ -51,10 +51,10 @@ public class PatternEnhancedCollectorCrystal extends PatternBlockArray {
             }
         }
         for (BlockPos offset : TileCollectorCrystal.OFFSETS_LIQUID_STARLIGHT) {
-            addBlock(BlocksAS.FLUID_LIQUID_STARLIGHT.getDefaultState(), offset.getX(), offset.getY(), offset.getZ());
+            addBlock(BlocksAS.FLUID_LIQUID_STARLIGHT.defaultBlockState(), offset.getX(), offset.getY(), offset.getZ());
         }
 
-        addBlock(BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL.getDefaultState(), 0, 0, 0);
+        addBlock(BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL.defaultBlockState(), 0, 0, 0);
 
         addBlock(chiseled, 0, -2, 0);
         addBlock(getPillarState(BlockMarblePillar.PillarType.MIDDLE), 0, -3, 0);
@@ -88,7 +88,7 @@ public class PatternEnhancedCollectorCrystal extends PatternBlockArray {
             @Nonnull
             @Override
             public BlockState getDescriptiveState(long tick) {
-                return BlocksAS.MARBLE_PILLAR.getDefaultState().with(BlockMarblePillar.PILLAR_TYPE, type);
+                return BlocksAS.MARBLE_PILLAR.defaultBlockState().setValue(BlockMarblePillar.PILLAR_TYPE, type);
             }
         };
     }

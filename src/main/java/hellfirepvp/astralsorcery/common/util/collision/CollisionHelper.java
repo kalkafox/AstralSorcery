@@ -30,7 +30,7 @@ import java.util.function.Consumer;
  */
 public class CollisionHelper {
 
-    public static boolean onCollision(VoxelShapeSpliterator iterator, Consumer<? super VoxelShape> action) {
+    public static boolean onCollision(CollisionSpliterator iterator, Consumer<? super VoxelShape> action) {
         if (!CollisionManager.needsCustomCollision(iterator.entity)) {
             return false;
         }
@@ -39,8 +39,8 @@ public class CollisionHelper {
             return false;
         }
 
-        VoxelShape floor = VoxelShapes.create(box);
-        if (VoxelShapes.compare(floor, VoxelShapes.create(iterator.aabb.grow(1.0E-7D)), IBooleanFunction.AND)) {
+        VoxelShape floor = Shapes.create(box);
+        if (Shapes.compare(floor, Shapes.create(iterator.aabb.grow(1.0E-7D)), BooleanOp.AND)) {
             action.accept(floor);
             return true;
         }
@@ -55,7 +55,7 @@ public class CollisionHelper {
         List<AABB> additionalBoxes = CollisionManager.getAdditionalBoundingBoxes(entity);
         AABB entityBox = entity.getBoundingBox().grow(1.0E-7D);
         for (AABB box : additionalBoxes) {
-            double newYMovement = VoxelShapes.create(box).getAllowedOffset(Direction.Axis.Y, entityBox, allowedMovement.y);
+            double newYMovement = Shapes.create(box).getAllowedOffset(Direction.Axis.Y, entityBox, allowedMovement.y);
             allowedMovement = new Vec3(allowedMovement.x, newYMovement, allowedMovement.z);
         }
 

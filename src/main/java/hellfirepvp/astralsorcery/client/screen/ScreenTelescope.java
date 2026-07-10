@@ -89,15 +89,15 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
         }
     }
 
-    private Point findEmptySpace(Random rand, TelescopeRotationDrawArea area) {
+    private Point findEmptySpace(Random random, TelescopeRotationDrawArea area) {
         int size = DEFAULT_CONSTELLATION_SIZE;
         int wdh = guiWidth  - 6 - size;
         int hgt = guiHeight - 6 - size;
-        int rX = 6 + rand.nextInt(wdh);
-        int rY = 6 + rand.nextInt(hgt);
+        int rX = 6 + random.nextInt(wdh);
+        int rY = 6 + random.nextInt(hgt);
         Rectangle constellationRect = new Rectangle(rX, rY, size, size);
         for (ConstellationDisplayInformation info : area.getDisplayMap().values()) {
-            Point offset = info.getRenderPosition();
+            Point offset = info.getCameraPosition();
             Rectangle otherRect = new Rectangle(offset.x, offset.y, size, size);
             if (otherRect.intersects(constellationRect)) {
                 return null;
@@ -107,29 +107,29 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         RenderSystem.enableDepthTest();
-        super.render(renderStack, mouseX, mouseY, pTicks);
+        super.render(renderStack, xpos, ypos, pTicks);
 
         this.drawWHRect(renderStack, TexturesAS.TEX_GUI_TELESCOPE);
 
         this.drawConstellationCell(renderStack, pTicks);
 
-        this.drawNavArrows(renderStack, mouseX, mouseY, pTicks);
+        this.drawNavArrows(renderStack, xpos, ypos, pTicks);
     }
 
-    private void drawNavArrows(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    private void drawNavArrows(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
 
-        this.rectArrowCCW = this.drawArrow(renderStack, guiLeft - 40, guiTop + (guiHeight / 2), this.getGuiZLevel(), Type.LEFT, mouseX, mouseY, pTicks);
-        this.rectArrowCW = this.drawArrow(renderStack, guiLeft + guiWidth + 10, guiTop + (guiHeight / 2), this.getGuiZLevel(), Type.RIGHT, mouseX, mouseY, pTicks);
+        this.rectArrowCCW = this.drawArrow(renderStack, leftPos - 40, topPos + (guiHeight / 2), this.getGuiZLevel(), Type.LEFT, xpos, ypos, pTicks);
+        this.rectArrowCW = this.drawArrow(renderStack, leftPos + guiWidth + 10, topPos + (guiHeight / 2), this.getGuiZLevel(), Type.RIGHT, xpos, ypos, pTicks);
 
         RenderSystem.disableBlend();
     }
 
     private void drawConstellationCell(PoseStack renderStack, float pTicks) {
-        boolean canSeeSky = this.canObserverSeeSky(this.getTile().getPos(), 1);
+        boolean canSeeSky = this.canObserverSeeSky(this.getTile().getBlockPos(), 1);
 
         RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
@@ -159,7 +159,7 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
             this.setBlitOffset(-9);
             float starSize = 5F;
             TexturesAS.TEX_STAR_1.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
                 for (int i = 0; i < 72 + gen.nextInt(108); i++) {
                     float innerOffsetX = starSize + gen.nextFloat() * (guiWidth  - starSize * 2) + this.getGuiLeft();
                     float innerOffsetY = starSize + gen.nextFloat() * (guiHeight - starSize * 2) + this.getGuiTop();
@@ -180,14 +180,14 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
                     ConstellationDisplayInformation info = area.getDisplayMap().get(cst);
                     info.getFrameDrawInformation().clear();
 
-                    Point pos = info.getRenderPosition();
+                    Point pos = info.getCameraPosition();
                     int size = (int) info.getRenderSize();
 
-                    float rainBr = 1F - Minecraft.getInstance().world.getRainStrength(pTicks);
+                    float rainBr = 1F - Minecraft.getInstance().level.getRainStrength(pTicks);
                     Map<StarLocation, Rectangle.Float> cstRenderInfo = RenderingConstellationUtils.renderConstellationIntoGUI(
                             cst, renderStack,
-                            pos.x + guiLeft,
-                            pos.y + guiTop,
+                            pos.x + leftPos,
+                            pos.y + topPos,
                             this.getGuiZLevel(),
                             size, size,
                             2.5F,
@@ -213,24 +213,24 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
     private void drawSkyBackground(PoseStack renderStack, float pTicks, boolean canSeeSky) {
         Tuple<Color, Color> rgbFromTo = SkyScreen.getSkyGradient(canSeeSky, 1F, pTicks);
         RenderingDrawUtils.drawGradientRect(renderStack, this.getGuiZLevel(),
-                this.guiLeft + 5, this.guiTop + 5,
-                this.guiLeft + this.guiWidth - 5, this.guiTop + this.guiHeight - 5,
+                this.leftPos + 5, this.topPos + 5,
+                this.leftPos + this.guiWidth - 5, this.topPos + this.guiHeight - 5,
                 rgbFromTo.getA().getRGB(), rgbFromTo.getB().getRGB());
     }
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(double xpos, double ypos, int buttonId) {
+        if (super.mouseClicked(xpos, ypos, buttonId)) {
             return true;
         }
 
-        Point p = new Point((int) mouseX, (int) mouseY);
+        Point p = new Point((int) xpos, (int) ypos);
         if (rectArrowCW != null && rectArrowCW.contains(p)) {
-            PktRotateTelescope pkt = new PktRotateTelescope(true, this.getTile().getWorld().getDimensionKey(), this.getTile().getPos());
+            PktRotateTelescope pkt = new PktRotateTelescope(true, this.getTile().getLevel().dimension(), this.getTile().getBlockPos());
             PacketChannel.CHANNEL.sendToServer(pkt);
             return true;
         }
         if (rectArrowCCW != null && rectArrowCCW.contains(p)) {
-            PktRotateTelescope pkt = new PktRotateTelescope(false, this.getTile().getWorld().getDimensionKey(), this.getTile().getPos());
+            PktRotateTelescope pkt = new PktRotateTelescope(false, this.getTile().getLevel().dimension(), this.getTile().getBlockPos());
             PacketChannel.CHANNEL.sendToServer(pkt);
             return true;
         }
@@ -247,7 +247,7 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
     }
 
     @Override
-    protected boolean shouldRightClickCloseScreen(double mouseX, double mouseY) {
+    protected boolean shouldRightClickCloseScreen(double xpos, double ypos) {
         return true;
     }
 

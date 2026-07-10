@@ -93,21 +93,21 @@ public class TileChalice extends TileEntityTick {
     public void tick() {
         super.tick();
 
-        if (getWorld().isRemote()) {
+        if (getLevel().isClientSide()) {
             if (this.rotationVec == null) {
-                this.rotationVec = Vector3.random().normalize().multiply(1.5F);
+                this.rotationVec = Vector3.random().normalize().mul(1.5F);
             }
 
             this.prevRotation = this.rotation.clone();
             this.rotation.add(this.rotationVec);
         } else {
             if (nextInteraction == -1) {
-                nextInteraction = ticksExisted + 20 + rand.nextInt(40);
+                nextInteraction = tickCount + 20 + random.nextInt(40);
             }
-            if (ticksExisted < nextInteraction) {
+            if (tickCount < nextInteraction) {
                 return;
             }
-            nextInteraction = ticksExisted + 20 + rand.nextInt(40);
+            nextInteraction = tickCount + 20 + random.nextInt(40);
 
             if (!tickLightwellDraw() && !tickFountainDraw()) {
                 tickChaliceInteractions();
@@ -116,22 +116,22 @@ public class TileChalice extends TileEntityTick {
     }
 
     private void tickChaliceInteractions() {
-        if (getWorld().isBlockPowered(pos) || getWorld().getBlockState(getPos().down()).getBlock() instanceof BlockFountain) {
+        if (getLevel().hasNeighborSignal(pos) || getLevel().getBlockState(getBlockPos().below()).getBlock() instanceof BlockFountain) {
             return;
         }
-        FluidStack thisFluid = this.getTank().getFluid();
+        FluidStack thisFluid = this.getTank().getType();
         if (thisFluid.isEmpty()) {
             return;
         }
 
-        List<BlockPos> chalicePositions = ChaliceHelper.findNearbyChalices(getWorld(), getPos(), 16);
-        Collections.shuffle(chalicePositions, rand);
+        List<BlockPos> chalicePositions = ChaliceHelper.findNearbyChalices(getLevel(), getBlockPos(), 16);
+        Collections.shuffle(chalicePositions, random);
         for (BlockPos otherChalicePos : chalicePositions) {
-            TileChalice otherChalice = MiscUtils.getTileAt(getWorld(), otherChalicePos, TileChalice.class, false);
+            TileChalice otherChalice = MiscUtils.getTileAt(getLevel(), otherChalicePos, TileChalice.class, false);
             if (otherChalice == null) {
                 continue;
             }
-            FluidStack otherFluid = otherChalice.getTank().getFluid();
+            FluidStack otherFluid = otherChalice.getTank().getType();
             if (otherFluid.isEmpty()) {
                 continue;
             }
@@ -145,7 +145,7 @@ public class TileChalice extends TileEntityTick {
                     Vector3 otherChaliceV = new Vector3(otherChalicePos).add(0.5, 1.5, 0.5);
                     Vector3 target = thisChaliceV.getMidpoint(otherChaliceV);
 
-                    recipe.getResult().doResult(getWorld(), target.clone());
+                    recipe.getObject().doResult(getLevel(), target.clone());
 
                     PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.LIQUID_INTERACTION_LINE).addData(buf -> {
                         ByteBufUtils.writeVector(buf, thisChaliceV);
@@ -155,7 +155,7 @@ public class TileChalice extends TileEntityTick {
                         ByteBufUtils.writeVector(buf, target);
                         ByteBufUtils.writeFluidStack(buf, otherFluid);
                     });
-                    PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(getWorld(), target.toBlockPos(), 32));
+                    PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(getLevel(), target.toBlockPos(), 32));
                     return;
                 }
                 recipes.remove(recipe);
@@ -165,22 +165,22 @@ public class TileChalice extends TileEntityTick {
     }
 
     private boolean tickFountainDraw() {
-        if (getWorld().isBlockPowered(pos)) {
+        if (getLevel().hasNeighborSignal(pos)) {
             return false;
         }
 
         Vector3 thisVector = new Vector3(this).add(0.5, 1.5, 0.5);
-        List<BlockPos> fountains = BlockDiscoverer.searchForBlocksAround(world, pos, 16,
+        List<BlockPos> fountains = BlockDiscoverer.searchForBlocksAround(level, pos, 16,
                 BlockPredicates.isBlock(BlocksAS.FOUNTAIN));
         fountains.removeIf(pos -> {
             Vector3 fountainVec = new Vector3(pos).add(0.5, 0.5, 0.5);
             RaytraceAssist assist = new RaytraceAssist(thisVector, fountainVec);
-            return !assist.isClear(world);
+            return !assist.isClear(level);
         });
-        Collections.shuffle(fountains, rand);
+        Collections.shuffle(fountains, random);
 
         for (BlockPos wellPos : fountains) {
-            TileFountain fountain = MiscUtils.getTileAt(world, wellPos, TileFountain.class, true);
+            TileFountain fountain = MiscUtils.getTileAt(level, wellPos, TileFountain.class, true);
             if (fountain != null) {
                 FluidStack drained = fountain.getTank().drain(400, IFluidHandler.FluidAction.SIMULATE);
                 if (drained.getAmount() > 100) {
@@ -196,7 +196,7 @@ public class TileChalice extends TileEntityTick {
                             ByteBufUtils.writeVector(buf, thisVector);
                             ByteBufUtils.writeFluidStack(buf, actual);
                         });
-                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(getWorld(), wellVec.toBlockPos(), 32));
+                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(getLevel(), wellVec.toBlockPos(), 32));
                         return true;
                     }
                 }
@@ -206,29 +206,29 @@ public class TileChalice extends TileEntityTick {
     }
 
     private boolean tickLightwellDraw() {
-        if (getWorld().isBlockPowered(pos)) {
+        if (getLevel().hasNeighborSignal(pos)) {
             return false;
         }
-        FluidStack thisFluid = this.getTank().getFluid();
-        if (!thisFluid.isEmpty() && (!(thisFluid.getFluid() instanceof FluidLiquidStarlight) || thisFluid.getAmount() + 100 >= TANK_SIZE)) {
+        FluidStack thisFluid = this.getTank().getType();
+        if (!thisFluid.isEmpty() && (!(thisFluid.getType() instanceof FluidLiquidStarlight) || thisFluid.getAmount() + 100 >= TANK_SIZE)) {
             return false;
         }
 
         Vector3 thisVector = new Vector3(this).add(0.5, 1.5, 0.5);
-        List<BlockPos> wellPositions = BlockDiscoverer.searchForBlocksAround(world, pos, 16,
+        List<BlockPos> wellPositions = BlockDiscoverer.searchForBlocksAround(level, pos, 16,
                 BlockPredicates.isBlock(BlocksAS.WELL));
         wellPositions.removeIf(pos -> {
             Vector3 wellVec = new Vector3(pos).add(0.5, 0.5, 0.5);
             RaytraceAssist assist = new RaytraceAssist(thisVector, wellVec);
-            return !assist.isClear(world);
+            return !assist.isClear(level);
         });
-        Collections.shuffle(wellPositions, rand);
+        Collections.shuffle(wellPositions, random);
 
         for (BlockPos wellPos : wellPositions) {
-            TileWell well = MiscUtils.getTileAt(world, wellPos, TileWell.class, true);
+            TileWell well = MiscUtils.getTileAt(level, wellPos, TileWell.class, true);
             if (well != null) {
                 FluidStack drained = well.getTank().drain(400, IFluidHandler.FluidAction.SIMULATE);
-                if (drained.getFluid() instanceof FluidLiquidStarlight && drained.getAmount() > 100) {
+                if (drained.getType() instanceof FluidLiquidStarlight && drained.getAmount() > 100) {
                     int maxFillable = this.getTank().getMaxAddable(drained.getAmount());
                     if (maxFillable > 0) {
                         FluidStack actual = well.getTank().drain(new FluidStack(drained, maxFillable), IFluidHandler.FluidAction.EXECUTE);
@@ -241,7 +241,7 @@ public class TileChalice extends TileEntityTick {
                             ByteBufUtils.writeVector(buf, thisVector);
                             ByteBufUtils.writeFluidStack(buf, actual);
                         });
-                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(getWorld(), wellVec.toBlockPos(), 32));
+                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(getLevel(), wellVec.toBlockPos(), 32));
                         return true;
                     }
                     return false; //Cannot fill from any other either in this case.
@@ -260,9 +260,9 @@ public class TileChalice extends TileEntityTick {
             FluidStack fluid = ByteBufUtils.readFluidStack(pktPlayEffect.getExtraData());
             VFXColorFunction<?> colorFn = VFXColorFunction.constant(ColorizationHelper.getColor(fluid).orElse(Color.WHITE).brighter());
 
-            playLineGenericParticles(from, to, 0.1F + rand.nextFloat() * 0.2F, colorFn);
-            playLineGenericParticles(from, to, 0.1F + rand.nextFloat() * 0.2F, colorFn);
-            playLineFluidParticles(from, to, 0.25F + rand.nextFloat() * 0.2F, fluid);
+            playLineGenericParticles(from, to, 0.1F + random.nextFloat() * 0.2F, colorFn);
+            playLineGenericParticles(from, to, 0.1F + random.nextFloat() * 0.2F, colorFn);
+            playLineFluidParticles(from, to, 0.25F + random.nextFloat() * 0.2F, fluid);
         }
     }
 
@@ -271,24 +271,24 @@ public class TileChalice extends TileEntityTick {
         playLineParticles(from, to, width, at -> EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(at)
                 .color(colorFn)
-                .alpha(VFXAlphaFunction.FADE_OUT)
-                .setMotion(Vector3.random().multiply(0.01F))
-                .setScaleMultiplier(0.15F + rand.nextFloat() * 0.25F)
-                .setMaxAge(20 + rand.nextInt(35)));
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                .setDeltaMovement(Vector3.random().mul(0.01F))
+                .setScaleMultiplier(0.15F + random.nextFloat() * 0.25F)
+                .setMaxAge(20 + random.nextInt(35)));
     }
 
     @OnlyIn(Dist.CLIENT)
     private static void playLineFluidParticles(Vector3 from, Vector3 to, float width, FluidStack fluid) {
-        Color c = new Color(fluid.getFluid().getAttributes().getColor(fluid));
+        Color c = new Color(fluid.getType().getAttributes().getColor(fluid));
         playLineParticles(from, to, width, at -> EffectHelper.of(EffectTemplatesAS.CUBE_TRANSLUCENT_ATLAS)
                 .spawn(at)
-                .setTextureAtlasSprite(RenderingUtils.getParticleTexture(fluid))
+                .setTextureAtlasSprite(RenderingUtils.getParticleIcon(fluid))
                 .tumble()
                 .color(VFXColorFunction.constant(c))
-                .setMotion(Vector3.random().multiply(0.01F))
-                .setScaleMultiplier(0.2F + rand.nextFloat() * 0.05F)
+                .setDeltaMovement(Vector3.random().mul(0.01F))
+                .setScaleMultiplier(0.2F + random.nextFloat() * 0.05F)
                 .scale(VFXScaleFunction.SHRINK)
-                .setMaxAge(10 + rand.nextInt(15)));
+                .setMaxAge(10 + random.nextInt(15)));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -317,25 +317,25 @@ public class TileChalice extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.tank.readNBT(compound.getCompound("tank"));
+        this.tank.load(pattern.getCompound("tank"));
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.put("tank", this.tank.writeNBT());
+        pattern.put("tank", this.tank.fillDefaultJigsawNBT());
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (this.access.hasCapability(cap, side)) {
-            return this.access.getCapability(side).cast();
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
+        if (this.access.hasCapability(cap, direction)) {
+            return this.access.getCapability(direction).unwrap();
         }
-        return super.getCapability(cap, side);
+        return super.getCapability(cap, direction);
     }
 }

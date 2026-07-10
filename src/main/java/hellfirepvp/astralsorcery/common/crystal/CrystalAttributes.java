@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  */
 public final class CrystalAttributes {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     private LinkedList<Attribute> crystalAttributes = Lists.newLinkedList();
 
@@ -120,13 +120,13 @@ public final class CrystalAttributes {
     @Nonnull
     @OnlyIn(Dist.CLIENT)
     public TooltipResult addTooltip(List<Component> tooltip) {
-        return addTooltip(tooltip, CalculationContext.Builder.newBuilder().build());
+        return addTooltip(tooltip, CalculationContext.Builder.properties().build());
     }
 
     @Nonnull
     @OnlyIn(Dist.CLIENT)
     public TooltipResult addTooltip(List<Component> tooltip, PlayerProgress progress) {
-        return addTooltip(tooltip, progress, CalculationContext.Builder.newBuilder().build());
+        return addTooltip(tooltip, progress, CalculationContext.Builder.properties().build());
     }
 
     @Nonnull
@@ -152,20 +152,20 @@ public final class CrystalAttributes {
                 if (!prop.canSee(progress) || !attr.isDiscovered()) {
                     missing = true;
                 } else {
-                    MutableComponent enchantmentLevel = Component.translatable(String.format("enchantment.level.%s", attr.getTier()))
-                            .withStyle(TextFormatting.GOLD);
-                    MutableComponent propertyName = prop.getName(attr.getTier()).withStyle(TextFormatting.GRAY);
+                    MutableComponent level = Component.translatable(String.format("enchantment.level.%s", attr.getTier()))
+                            .withStyle(ChatFormatting.GOLD);
+                    MutableComponent name = prop.getName(attr.getTier()).withStyle(ChatFormatting.GRAY);
 
-                    tooltip.add(propertyName
+                    tooltip.add(name
                             .append(Component.literal(" "))
-                            .append(enchantmentLevel));
+                            .append(level));
                     addedAtLeastOne = true;
                 }
             }
         }
 
         if (missing) {
-            tooltip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(TextFormatting.GRAY));
+            tooltip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(ChatFormatting.GRAY));
         }
         return missing && !addedAtLeastOne ? TooltipResult.ALL_MISSING :
                 missing ?  TooltipResult.ADDED_ALL_WITH_MISSING : TooltipResult.ADDED_ALL;
@@ -180,11 +180,11 @@ public final class CrystalAttributes {
         if (otherAttributes.isEmpty()) {
             return this.copy();
         }
-        Builder builder = Builder.newBuilder(ignoreTierMax);
+        Builder builder = Builder.properties(ignoreTierMax);
         builder.addAll(this.copy());
         for (Attribute otherAttr : otherAttributes) {
             for (int i = 0; i < otherAttr.getTier(); i++) {
-                if (rand.nextFloat() <= mergeChance) {
+                if (random.nextFloat() <= mergeChance) {
                     builder.addProperty(otherAttr.getProperty(), 1);
                 }
             }
@@ -199,7 +199,7 @@ public final class CrystalAttributes {
     public CrystalAttributes modifyLevel(CrystalProperty prop, int change, boolean ignoreTierMax) {
         Attribute existing = getAttribute(prop);
         if (existing != null && change != 0) {
-            int newTier = MathHelper.clamp(existing.getTier() + change, 0,
+            int newTier = Mth.clamp(existing.getTier() + change, 0,
                     ignoreTierMax ? Integer.MAX_VALUE : prop.getMaxTier());
             if (newTier <= 0) {
                 return transform(Function.identity(), Lists.newArrayList(), Lists.newArrayList(prop));
@@ -213,7 +213,7 @@ public final class CrystalAttributes {
             }
         } else if (change > 0) {
             return transform(Function.identity(),
-                    Lists.newArrayList(new Attribute(prop, MathHelper.clamp(change, 0, prop.getMaxTier()))),
+                    Lists.newArrayList(new Attribute(prop, Mth.clamp(change, 0, prop.getMaxTier()))),
                     Lists.newArrayList());
         }
         return this;
@@ -230,17 +230,17 @@ public final class CrystalAttributes {
         for (Attribute attr : this.getCrystalAttributes()) {
             current.add(new Attribute(attr.getProperty(), attr.getTier()));
         }
-        List<Attribute> modified = current.stream().map(modify).collect(Collectors.toList());
+        List<Attribute> isDirty = current.stream().map(modify).collect(Collectors.toList());
         for (Attribute added : additions) {
             Attribute existing;
-            if ((existing = MiscUtils.iterativeSearch(modified, tpl -> tpl.getProperty().equals(added.getProperty()))) != null) {
+            if ((existing = MiscUtils.iterativeSearch(isDirty, tpl -> tpl.getProperty().equals(added.getProperty()))) != null) {
                 existing.tier += added.getTier();
             } else {
-                modified.add(new Attribute(added.getProperty(), added.getTier()));
+                isDirty.add(new Attribute(added.getProperty(), added.getTier()));
             }
         }
-        modified.removeIf(attr -> removals.contains(attr.getProperty()));
-        return new CrystalAttributes(modified.stream().collect(Collectors.toMap(Attribute::getProperty, Attribute::getTier)));
+        isDirty.removeIf(attr -> removals.contains(attr.getProperty()));
+        return new CrystalAttributes(isDirty.stream().collect(Collectors.toMap(Attribute::getProperty, Attribute::getTier)));
     }
 
     public CrystalAttributes copy() {
@@ -250,7 +250,7 @@ public final class CrystalAttributes {
     public CrystalAttributes clampMaxTier() {
         CrystalAttributes attributes = this.copy();
         for (Attribute attr : attributes.crystalAttributes) {
-            attr.tier = MathHelper.clamp(attr.getTier(), 0, attr.getProperty().getMaxTier());
+            attr.tier = Mth.clamp(attr.getTier(), 0, attr.getProperty().getMaxTier());
         }
         return attributes;
     }
@@ -345,7 +345,7 @@ public final class CrystalAttributes {
             this.ignoreTierCap = ignoreTierCap;
         }
 
-        public static Builder newBuilder(boolean ignoreTierCap) {
+        public static Builder properties(boolean ignoreTierCap) {
             return new Builder(ignoreTierCap);
         }
 
@@ -353,7 +353,7 @@ public final class CrystalAttributes {
             for (Attribute attr : other.getCrystalAttributes()) {
                 CrystalProperty property = attr.getProperty();
                 int cTier = this.properties.getOrDefault(property, 0);
-                cTier = MathHelper.clamp(cTier + attr.getTier(),
+                cTier = Mth.clamp(cTier + attr.getTier(),
                         0, this.ignoreTierCap ? Integer.MAX_VALUE : property.getMaxTier());
                 this.properties.put(property, cTier);
             }
@@ -362,7 +362,7 @@ public final class CrystalAttributes {
 
         public Builder addProperty(CrystalProperty property, int tier) {
             int cTier = this.properties.getOrDefault(property, 0);
-            cTier = MathHelper.clamp(cTier + tier,
+            cTier = Mth.clamp(cTier + tier,
                     0, this.ignoreTierCap ? Integer.MAX_VALUE : property.getMaxTier());
             this.properties.remove(property);
             if (cTier > 0) {
@@ -383,7 +383,7 @@ public final class CrystalAttributes {
         public CrystalAttributes buildAverage(int count) {
             Map<CrystalProperty, Integer> average = new HashMap<>();
             for (CrystalProperty prop : this.properties.keySet()) {
-                int newLevel = MathHelper.ceil(this.properties.getOrDefault(prop, 0) / (float) count);
+                int newLevel = Mth.ceil(this.properties.getOrDefault(prop, 0) / (float) count);
                 if (newLevel > 0) {
                     average.put(prop, newLevel);
                 }
@@ -445,7 +445,7 @@ public final class CrystalAttributes {
 
         @Nullable
         private static Attribute deserialize(CompoundTag tag) {
-            ResourceLocation key = new ResourceLocation(tag.getString("property"));
+            ResourceLocation key = ResourceLocation.parse(tag.getString("property"));
             CrystalProperty prop = RegistriesAS.REGISTRY_CRYSTAL_PROPERTIES.getValue(key);
             if (prop == null) {
                 return null;

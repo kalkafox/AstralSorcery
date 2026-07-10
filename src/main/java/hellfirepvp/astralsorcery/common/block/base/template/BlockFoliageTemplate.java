@@ -32,23 +32,23 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
         super(properties);
     }
 
-    protected abstract boolean isValidGround(BlockState state, BlockGetter worldIn, BlockPos pos);
+    protected abstract boolean mayPlaceOn(BlockState state, BlockGetter worldIn, BlockPos pos);
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
-        if (!state.isValidPosition(world, pos)) {
-            return Blocks.AIR.getDefaultState();
+    public BlockState updateShape(BlockState state, Direction dir, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
+        if (!state.isValidPosition(level, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
-        return super.updatePostPlacement(state, dir, facingState, world, pos, facingPos);
+        return super.updateShape(state, dir, facingState, level, pos, facingPos);
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
-        BlockPos blockpos = pos.down();
+    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+        BlockPos blockpos = pos.below();
         if (state.getBlock() == this) {
-            return world.getBlockState(blockpos).canSustainPlant(world, blockpos, Direction.UP, this);
+            return level.getBlockState(blockpos).canSustainPlant(level, blockpos, Direction.UP, this);
         }
-        return this.isValidGround(world.getBlockState(blockpos), world, blockpos);
+        return this.mayPlaceOn(level.getBlockState(blockpos), level, blockpos);
     }
 
     @Override
@@ -57,10 +57,10 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
     }
 
     @Override
-    public BlockState getPlant(BlockGetter world, BlockPos pos) {
-        BlockState state = world.getBlockState(pos);
+    public BlockState getPlant(BlockGetter level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
         if (state.getBlock() != this) {
-            return this.getDefaultState();
+            return this.defaultBlockState();
         }
         return state;
     }

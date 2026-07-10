@@ -32,8 +32,8 @@ public class KeyNoKnockback extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(this::onKnockback);
     }
@@ -42,8 +42,8 @@ public class KeyNoKnockback extends KeyPerk {
         LivingEntity attacked = event.getEntityLiving();
         if (attacked instanceof Player) {
             Player player = (Player) attacked;
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 event.setCanceled(true);
             }

@@ -25,7 +25,7 @@ import java.util.Random;
  */
 public interface VFXColorFunction<T extends EntityVisualFX> {
 
-    static final Random rand = new Random();
+    static final Random random = new Random();
 
     public static VFXColorFunction<? extends EntityVisualFX> WHITE = constant(Color.WHITE);
     public static VFXColorFunction<? extends EntityVisualFX> BLACK = constant(Color.BLACK);
@@ -47,7 +47,7 @@ public interface VFXColorFunction<T extends EntityVisualFX> {
     public static <T extends EntityVisualFX> VFXColorFunction<T> randomBetween(Color c1, Color c2) {
         float[] hsb1 = Color.RGBtoHSB(c1.getRed(), c1.getGreen(), c1.getBlue(), null);
         float[] hsb2 = Color.RGBtoHSB(c2.getRed(), c2.getGreen(), c2.getBlue(), null);
-        float degree = rand.nextFloat();
+        float degree = random.nextFloat();
         return new VFXColorFunction<T>() {
             @Nonnull
             @Override
@@ -61,7 +61,7 @@ public interface VFXColorFunction<T extends EntityVisualFX> {
     }
 
     public static <T extends EntityVisualFX> VFXColorFunction<T> random() {
-        Color c = Color.getHSBColor(rand.nextFloat(), 1F, 1F);
+        Color c = Color.getHSBColor(random.nextFloat(), 1F, 1F);
         return new VFXColorFunction<T>() {
             @Nonnull
             @Override

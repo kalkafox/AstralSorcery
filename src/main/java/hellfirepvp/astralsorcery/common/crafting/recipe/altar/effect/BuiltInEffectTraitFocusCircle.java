@@ -37,38 +37,38 @@ public class BuiltInEffectTraitFocusCircle extends AltarRecipeEffect {
             double scale = getRandomPillarOffset(altar.getAltarType()).getX();
             double edgeScale = (scale * 2 + 1);
 
-            if (rand.nextInt(4) == 0) {
-                Vector3 at = altarPos.clone().add(-scale + rand.nextFloat() * edgeScale, 0.01, -scale + rand.nextFloat() * edgeScale);
+            if (random.nextInt(4) == 0) {
+                Vector3 at = altarPos.clone().add(-scale + random.nextFloat() * edgeScale, 0.01, -scale + random.nextFloat() * edgeScale);
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .color(VFXColorFunction.WHITE)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setScaleMultiplier(0.15F + rand.nextFloat() * 0.2F);
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setScaleMultiplier(0.15F + random.nextFloat() * 0.2F);
             }
             for (int i = 0; i < 1; i++) {
                 Vector3 r = Vector3.random()
                         .setY(0)
                         .normalize()
-                        .multiply(1.3F + rand.nextFloat() * 0.5F)
-                        .add(new Vector3(altarPos).add(0.5, 2F + rand.nextFloat() * 0.4F, 0.5));
+                        .mul(1.3F + random.nextFloat() * 0.5F)
+                        .add(new Vector3(altarPos).add(0.5, 2F + random.nextFloat() * 0.4F, 0.5));
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(r)
                         .color(VFXColorFunction.WHITE)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setScaleMultiplier(0.1F + rand.nextFloat() * 0.2F);
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setScaleMultiplier(0.1F + random.nextFloat() * 0.2F);
             }
             for (int i = 0; i < 2; i++) {
                 Vector3 r = Vector3.random()
                         .setY(0)
                         .normalize()
-                        .multiply(2F + rand.nextFloat() * 0.5F)
-                        .add(new Vector3(altarPos).add(0.5, 1.1F + rand.nextFloat() * 0.4F, 0.5));
+                        .mul(2F + random.nextFloat() * 0.5F)
+                        .add(new Vector3(altarPos).add(0.5, 1.1F + random.nextFloat() * 0.4F, 0.5));
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(r)
                         .color(VFXColorFunction.WHITE)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setScaleMultiplier(0.1F + rand.nextFloat() * 0.2F);
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setScaleMultiplier(0.1F + random.nextFloat() * 0.2F);
             }
         }
     }

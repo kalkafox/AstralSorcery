@@ -73,7 +73,7 @@ public class EngravingEffect extends AbstractAstralRegistryEntry<EngravingEffect
 
         public boolean supports(@Nonnull ItemStack stack);
 
-        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random rand);
+        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random random);
 
     }
 
@@ -113,13 +113,13 @@ public class EngravingEffect extends AbstractAstralRegistryEntry<EngravingEffect
             }
             if (this.applicableTypes.isEmpty()) {
                 for (AstralEnchantmentType type : AstralEnchantmentType.values()) {
-                    if (type.canEnchantItem(stack)) {
+                    if (type.canEnchant(stack)) {
                         return true;
                     }
                 }
             }
             for (AstralEnchantmentType type : this.applicableTypes) {
-                if (type.canEnchantItem(stack)) {
+                if (type.canEnchant(stack)) {
                     return true;
                 }
             }
@@ -127,7 +127,7 @@ public class EngravingEffect extends AbstractAstralRegistryEntry<EngravingEffect
         }
 
         @Override
-        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random rand) {
+        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random random) {
             float rValue = percent * (Math.max(0, this.max - this.min));
             if (this.formatToInteger) {
                 rValue = Math.round(rValue);
@@ -191,7 +191,7 @@ public class EngravingEffect extends AbstractAstralRegistryEntry<EngravingEffect
         }
 
         @Override
-        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random rand) {
+        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random random) {
             Optional<Holder.Reference<Enchantment>> holder = EnchantmentHelperAS.getHolder(this.enchantment.get());
             if (holder.isEmpty()) {
                 return stack;
@@ -250,17 +250,17 @@ public class EngravingEffect extends AbstractAstralRegistryEntry<EngravingEffect
         }
 
         @Override
-        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random rand) {
+        public ItemStack apply(@Nonnull ItemStack stack, float percent, Random random) {
             PotionContents contents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
             Holder<MobEffect> effect = this.effect.get();
             if (!containsEffect(contents, effect)) {
                 int amp = this.min + Math.round(percent * (Math.max(0, this.max - this.min)));
-                int dur = 3 * 60 * 20 + Math.round(rand.nextFloat() * 4 * 60 * 20);
+                int dur = 3 * 60 * 20 + Math.round(random.nextFloat() * 4 * 60 * 20);
                 contents = contents.withEffectAdded(new MobEffectInstance(effect, dur, amp, true, false, true));
             }
             Holder<MobEffect> cheatDeath = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_CHEAT_DEATH);
-            if (!containsEffect(contents, cheatDeath) && rand.nextInt(30) == 0) {
-                contents = contents.withEffectAdded(new MobEffectInstance(cheatDeath, 3 * 60 * 20 + Math.round(rand.nextFloat() * 4 * 60 * 20), 0, true, false, true));
+            if (!containsEffect(contents, cheatDeath) && random.nextInt(30) == 0) {
+                contents = contents.withEffectAdded(new MobEffectInstance(cheatDeath, 3 * 60 * 20 + Math.round(random.nextFloat() * 4 * 60 * 20), 0, true, false, true));
             }
             stack.set(DataComponents.POTION_CONTENTS, new PotionContents(contents.potion(), Optional.of(ColorsAS.DYE_ORANGE.getRGB()), contents.customEffects()));
             stack.set(DataComponents.CUSTOM_NAME, Component.translatable("potion.astralsorcery.crafted.name").withStyle(ChatFormatting.GOLD));

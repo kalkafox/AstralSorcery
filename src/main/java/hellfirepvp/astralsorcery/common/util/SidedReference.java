@@ -24,15 +24,15 @@ public class SidedReference<T> {
     private T clientData = null;
     private T serverData = null;
 
-    public Optional<T> getData(LogicalSide side) {
-        if (side.isClient()) {
+    public Optional<T> getData(LogicalSide direction) {
+        if (direction.isClient()) {
             return Optional.ofNullable(this.clientData);
         }
         return Optional.ofNullable(this.serverData);
     }
 
-    public void setData(LogicalSide side, T data) {
-        if (side.isClient()) {
+    public void setData(LogicalSide direction, T data) {
+        if (direction.isClient()) {
             this.clientData = data;
         } else {
             this.serverData = data;

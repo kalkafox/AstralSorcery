@@ -49,7 +49,7 @@ public class CategoryTransmutation extends JEICategory<BlockTransmutation> {
     }
 
     @Override
-    public IDrawable getBackground() {
+    public IDrawable getNoItemIcon() {
         return this.background;
     }
 
@@ -77,11 +77,11 @@ public class CategoryTransmutation extends JEICategory<BlockTransmutation> {
 
     @Override
     public void setRecipe(IRecipeLayout recipeLayout, BlockTransmutation transmutation, IIngredients ingredients) {
-        IGuiItemStackGroup itemStacks = recipeLayout.getItemStacks();
+        IGuiItemStackGroup items = recipeLayout.getItems();
 
-        itemStacks.init(0, true, 22, 17);
-        itemStacks.init(1, false, 94, 18);
+        items.init(0, true, 22, 17);
+        items.init(1, false, 94, 18);
 
-        itemStacks.set(ingredients);
+        items.set(ingredients);
     }
 }

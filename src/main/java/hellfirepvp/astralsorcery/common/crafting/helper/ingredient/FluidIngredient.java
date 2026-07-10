@@ -58,12 +58,12 @@ public class FluidIngredient extends Ingredient {
     }
 
     @Override
-    public ItemStack[] getMatchingStacks() {
+    public ItemStack[] getItems() {
         if (itemArray == null || this.cacheItemStacks != this.fluids.size()) {
             NonNullList<ItemStack> lst = NonNullList.create();
 
             for (FluidStack fluid : this.fluids) {
-                lst.add(FluidUtil.getFilledBucket(fluid));
+                lst.add(FluidUtil.getBucket(fluid));
             }
 
             this.itemArray = lst.toArray(new ItemStack[lst.size()]);
@@ -73,13 +73,13 @@ public class FluidIngredient extends Ingredient {
     }
 
     @Override
-    public IntList getValidItemStacksPacked() {
+    public IntList getStackingIds() {
         if (this.itemIds == null || this.cacheItemIds != fluids.size()) {
             this.itemIds = new IntArrayList(this.fluids.size());
 
             for (FluidStack fluid : this.fluids) {
-                ItemStack bucketFluid = FluidUtil.getFilledBucket(fluid);
-                this.itemIds.add(RecipeItemHelper.pack(bucketFluid));
+                ItemStack bucketFluid = FluidUtil.getBucket(fluid);
+                this.itemIds.add(StackedContents.pack(bucketFluid));
             }
 
             this.itemIds.sort(IntComparators.NATURAL_COMPARATOR);
@@ -90,13 +90,13 @@ public class FluidIngredient extends Ingredient {
     }
 
     @Override
-    public boolean test(@Nullable ItemStack input) {
-        if (input == null) {
+    public boolean test(@Nullable ItemStack from) {
+        if (from == null) {
             return false;
         }
 
-        FluidStack contained = FluidUtil.getFluidContained(input).orElse(FluidStack.EMPTY);
-        if (contained.isEmpty() || contained.getFluid() == null || contained.getAmount() <= 0) {
+        FluidStack contained = FluidUtil.getFluidContained(from).orElse(FluidStack.EMPTY);
+        if (contained.isEmpty() || contained.getType() == null || contained.getAmount() <= 0) {
             return false;
         }
 
@@ -109,7 +109,7 @@ public class FluidIngredient extends Ingredient {
     }
 
     @Override
-    public boolean hasNoMatchingItems() {
+    public boolean isEmpty() {
         return this.fluids.isEmpty();
     }
 
@@ -134,7 +134,7 @@ public class FluidIngredient extends Ingredient {
         JsonArray array = new JsonArray();
         for (FluidStack stack : this.fluids) {
             JsonObject fluidStackObject = new JsonObject();
-            fluidStackObject.addProperty("fluid", stack.getFluid().getRegistryName().toString());
+            fluidStackObject.addProperty("fluid", stack.getType().getRegistryName().toString());
             fluidStackObject.addProperty("amount", stack.getAmount());
 
             array.add(fluidStackObject);

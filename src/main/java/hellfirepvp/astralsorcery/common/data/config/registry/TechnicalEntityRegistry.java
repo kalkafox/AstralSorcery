@@ -36,7 +36,7 @@ public class TechnicalEntityRegistry extends ConfigDataAdapter<EntityTechnicalEn
     }
 
     public boolean canAffect(EntityType<?> type) {
-        return !MiscUtils.contains(this.getConfiguredValues(), e -> e.getEntityType().equals(type));
+        return !MiscUtils.contains(this.getConfiguredValues(), e -> e.getType().equals(type));
     }
 
     private TechnicalEntityRegistry() {}
@@ -56,7 +56,7 @@ public class TechnicalEntityRegistry extends ConfigDataAdapter<EntityTechnicalEn
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return "technical_entities";
     }
 
@@ -68,7 +68,7 @@ public class TechnicalEntityRegistry extends ConfigDataAdapter<EntityTechnicalEn
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 

@@ -51,7 +51,7 @@ public class PktLoginAcknowledge extends ASLoginPacket<PktLoginAcknowledge> {
             }
 
             @Override
-            public void handle(PktLoginAcknowledge packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktLoginAcknowledge packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

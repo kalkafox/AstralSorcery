@@ -36,15 +36,15 @@ public class ItemHeldEffectRenderer {
     }
 
     private void onHeldRender(RenderWorldLastEvent event) {
-        float pTicks = event.getPartialTicks();
+        float pTicks = event.advanceTime();
         PoseStack renderStack = event.getPoseStack();
 
-        if (Minecraft.getInstance().player == null || Minecraft.getInstance().world == null) {
+        if (Minecraft.getInstance().player == null || Minecraft.getInstance().level == null) {
             return;
         }
 
 
-        for (EquipmentSlot type : EquipmentSlotType.values()) {
+        for (EquipmentSlot type : EquipmentSlot.values()) {
             if (doHeldRender(Minecraft.getInstance().player.getItemStackFromSlot(type), renderStack, pTicks)) {
                 break;
             }

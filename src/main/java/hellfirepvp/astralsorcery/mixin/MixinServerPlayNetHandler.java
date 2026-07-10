@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(ServerPlayNetHandler.class)
+@Mixin(ServerGamePacketListenerImpl.class)
 public class MixinServerPlayNetHandler {
 
     @Shadow public ServerPlayer player;
@@ -51,10 +51,10 @@ public class MixinServerPlayNetHandler {
             cancellable = true
     )
     public void allowInteractableEntity(ServerboundInteractPacket packet, CallbackInfo ci) {
-        ServerLevel world = this.player.getServerWorld();
-        Entity interacted = packet.getEntityFromWorld(world);
+        ServerLevel level = this.player.getLevel();
+        Entity interacted = packet.getEntityFromWorld(level);
         if (interacted instanceof InteractableEntity) {
-            this.player.attackTargetEntityWithCurrentItem(interacted);
+            this.player.attack(interacted);
             ci.cancel();
         }
     }

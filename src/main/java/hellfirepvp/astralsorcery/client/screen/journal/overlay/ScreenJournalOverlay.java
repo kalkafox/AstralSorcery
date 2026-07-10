@@ -44,25 +44,25 @@ public abstract class ScreenJournalOverlay extends ScreenJournal {
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
-        super.render(renderStack, mouseX, mouseY, pTicks);
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
+        super.render(renderStack, xpos, ypos, pTicks);
 
         origin.render(renderStack, 0, 0, pTicks);
     }
 
     @Override
-    protected boolean shouldRightClickCloseScreen(double mouseX, double mouseY) {
+    protected boolean shouldRightClickCloseScreen(double xpos, double ypos) {
         return true;
     }
 
     @Override
-    public void closeScreen() {
+    public void onClose() {
         Minecraft.getInstance().displayGuiScreen(this.origin);
     }
 
     @Override
-    public void onClose() {
-        super.onClose();
+    public void removed() {
+        super.removed();
 
         if (origin instanceof ScreenJournalProgression) {
             ((ScreenJournalProgression) origin).expectReInit();
@@ -79,7 +79,7 @@ public abstract class ScreenJournalOverlay extends ScreenJournal {
             return true;
         }
 
-        if (Minecraft.getInstance().currentScreen != this && Minecraft.getInstance().currentScreen != origin) {
+        if (Minecraft.getInstance().screen != this && Minecraft.getInstance().screen != origin) {
             Minecraft.getInstance().displayGuiScreen(origin);
             return true;
         }

@@ -70,29 +70,29 @@ public class ScreenJournal extends WidthHeightScreen {
     }
 
     protected FormattedCharSequence localize(FormattedText txt) {
-        return LanguageMap.getInstance().func_241870_a(txt);
+        return Language.getInstance().getVisualOrder(txt);
     }
 
-    protected void drawDefault(PoseStack renderStack, AbstractRenderableTexture texture, int mouseX, int mouseY) {
+    protected void drawDefault(PoseStack renderStack, AbstractRenderableTexture texture, int xpos, int ypos) {
         this.setBlitOffset(100);
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
         drawWHRect(renderStack, texture);
         RenderSystem.disableBlend();
 
-        drawBookmarks(renderStack, mouseX, mouseY);
+        drawBookmarks(renderStack, xpos, ypos);
         this.setBlitOffset(0);
     }
 
-    private void drawBookmarks(PoseStack renderStack, int mouseX, int mouseY) {
+    private void drawBookmarks(PoseStack renderStack, int xpos, int ypos) {
         drawnBookmarks.clear();
 
         int bookmarkWidth  = 67;
         int bookmarkHeight = 15;
         float bookmarkGap    = 18;
 
-        float offsetX = guiLeft + guiWidth - 17.25F;
-        float offsetY = guiTop  + 20;
+        float offsetX = leftPos + guiWidth - 17.25F;
+        float offsetY = topPos  + 20;
 
         bookmarks.sort(Comparator.comparing(BookmarkProvider::getIndex));
 
@@ -103,7 +103,7 @@ public class ScreenJournal extends WidthHeightScreen {
                         bookmarkWidth, bookmarkHeight,
                         bookmarkWidth + (bookmarkIndex == bookmarkProvider.getIndex() ? 0 : 5),
                         this.getGuiZLevel(),
-                        bookmarkProvider.getUnlocalizedName(), 0xDDDDDDDD, mouseX, mouseY,
+                        bookmarkProvider.getUnlocalizedName(), 0xDDDDDDDD, xpos, ypos,
                         bookmarkProvider.getTextureBookmark(), bookmarkProvider.getTextureBookmarkStretched());
                 drawnBookmarks.put(r, bookmarkProvider);
                 offsetY += bookmarkGap;
@@ -113,43 +113,43 @@ public class ScreenJournal extends WidthHeightScreen {
 
     private Rectangle drawBookmark(PoseStack renderStack,
                                    float offsetX, float offsetY, int width, int height, int mouseOverWidth,
-                                   float zLevel, MutableComponent title, int titleRGBColor, int mouseX, int mouseY,
+                                   float blitOffset, MutableComponent title, int titleRGBColor, int xpos, int ypos,
                                    AbstractRenderableTexture texture, AbstractRenderableTexture textureStretched) {
         texture.bindTexture();
 
-        Rectangle r = new Rectangle(MathHelper.floor(offsetX), MathHelper.floor(offsetY), MathHelper.floor(width), MathHelper.floor(height));
-        if (r.contains(mouseX, mouseY)) {
+        Rectangle r = new Rectangle(Mth.floor(offsetX), Mth.floor(offsetY), Mth.floor(width), Mth.floor(height));
+        if (r.contains(xpos, ypos)) {
             if (mouseOverWidth > width) {
                 textureStretched.bindTexture();
             }
             width = mouseOverWidth;
-            r = new Rectangle(MathHelper.floor(offsetX), MathHelper.floor(offsetY), MathHelper.floor(width), MathHelper.floor(height));
+            r = new Rectangle(Mth.floor(offsetX), Mth.floor(offsetY), Mth.floor(width), Mth.floor(height));
         }
 
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
         int actualWidth = width;
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX, buf -> {
-            RenderingGuiUtils.rect(buf, renderStack, offsetX, offsetY, zLevel, actualWidth, height).draw();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+            RenderingGuiUtils.rect(buf, renderStack, offsetX, offsetY, blitOffset, actualWidth, height).draw();
         });
         RenderSystem.disableBlend();
 
-        renderStack.push();
-        renderStack.translate(offsetX + 2, offsetY + 4, zLevel + 50);
+        renderStack.pushPose();
+        renderStack.translate(offsetX + 2, offsetY + 4, blitOffset + 50);
         renderStack.scale(0.7F, 0.7F, 0.7F);
         RenderingDrawUtils.renderStringAt(null, renderStack, title, titleRGBColor);
-        renderStack.pop();
+        renderStack.popPose();
         return r;
     }
 
-    protected boolean handleBookmarkClick(double mouseX, double mouseY) {
-        return handleJournalNavigationBookmarkClick(mouseX, mouseY);
+    protected boolean handleBookmarkClick(double xpos, double ypos) {
+        return handleJournalNavigationBookmarkClick(xpos, ypos);
     }
 
-    private boolean handleJournalNavigationBookmarkClick(double mouseX, double mouseY) {
+    private boolean handleJournalNavigationBookmarkClick(double xpos, double ypos) {
         for (Rectangle bookmarkRectangle : drawnBookmarks.keySet()) {
             BookmarkProvider provider = drawnBookmarks.get(bookmarkRectangle);
-            if (bookmarkIndex != provider.getIndex() && bookmarkRectangle.contains(mouseX, mouseY)) {
+            if (bookmarkIndex != provider.getIndex() && bookmarkRectangle.contains(xpos, ypos)) {
                 ScreenJournalProgression.resetJournal();
                 Minecraft.getInstance().displayGuiScreen(provider.getGuiScreen());
                 return true;

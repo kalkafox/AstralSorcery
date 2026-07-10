@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.IEventBus;
 
 /**
@@ -44,25 +44,25 @@ public class MantleEffectFornax extends MantleEffect {
         bus.addListener(this::onHurt);
     }
 
-    private void onHurt(LivingHurtEvent event) {
-        Level world = event.getEntityLiving().getEntityWorld();
-        if (world.isRemote()) {
+    private void onHurt(LivingIncomingDamageEvent event) {
+        Level level = event.getEntityLiving().getCommandSenderWorld();
+        if (level.isClientSide()) {
             return;
         }
 
         LivingEntity attacked = event.getEntityLiving();
-        Entity attacker = event.getSource().getTrueSource();
+        Entity attacker = event.getSource().getEntity();
         if (attacker instanceof LivingEntity) {
             if (attacked instanceof ServerPlayer && MiscUtils.isPlayerFakeMP((ServerPlayer) attacked)) {
                 return;
             }
 
-            if (attacker.isBurning() && ItemMantle.getEffect((LivingEntity) attacker, ConstellationsAS.fornax) != null) {
+            if (attacker.isOnFire() && ItemMantle.getEffect((LivingEntity) attacker, ConstellationsAS.fornax) != null) {
                 event.setAmount((float) (event.getAmount() * CONFIG.damageIncreaseInFire.get()));
             }
         }
 
-        if (event.getSource().isFireDamage() && ItemMantle.getEffect(attacked, ConstellationsAS.fornax) != null) {
+        if (event.getSource().isFire() && ItemMantle.getEffect(attacked, ConstellationsAS.fornax) != null) {
             if (CONFIG.healPercentFromFireDamage.get() > 0) {
                 attacked.heal((float) (event.getAmount() * CONFIG.healPercentFromFireDamage.get()));
             }
@@ -76,7 +76,7 @@ public class MantleEffectFornax extends MantleEffect {
     protected void tickClient(Player player) {
         super.tickClient(player);
 
-        if (player.isBurning()) {
+        if (player.isOnFire()) {
             this.playCapeSparkles(player, 0.75F);
         } else {
             this.playCapeSparkles(player, 0.25F);

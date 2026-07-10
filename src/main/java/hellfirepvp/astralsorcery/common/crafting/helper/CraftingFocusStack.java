@@ -24,24 +24,24 @@ import javax.annotation.Nullable;
 public class CraftingFocusStack {
 
     private final int stackIndex;
-    private final WrappedIngredient input;
+    private final WrappedIngredient from;
     private final BlockPos at;
 
-    public CraftingFocusStack(int stackIndex, WrappedIngredient input, BlockPos at) {
+    public CraftingFocusStack(int stackIndex, WrappedIngredient from, BlockPos at) {
         this.stackIndex = stackIndex;
-        this.input = input;
+        this.from = from;
         this.at = at;
     }
 
     public CraftingFocusStack(CompoundTag nbt) {
         this.stackIndex = nbt.getInt("stackIndex");
-        this.input = WrappedIngredient.deserialize(nbt.getCompound("ingredient"));
+        this.from = WrappedIngredient.deserialize(nbt.getCompound("ingredient"));
         this.at = NBTHelper.readBlockPosFromNBT(nbt);
     }
 
     @Nullable
     public WrappedIngredient getInput() {
-        return input;
+        return from;
     }
 
     public BlockPos getRealPosition() {
@@ -56,7 +56,7 @@ public class CraftingFocusStack {
         CompoundTag nbt = new CompoundTag();
         NBTHelper.writeBlockPosToNBT(this.at, nbt);
         nbt.putInt("stackIndex", this.stackIndex);
-        nbt.put("ingredient", this.input.serialize());
+        nbt.put("ingredient", this.from.serialize());
         return nbt;
     }
 

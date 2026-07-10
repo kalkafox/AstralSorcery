@@ -57,16 +57,16 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
             }
         }
 
-        BlockState output = BlockStateHelper.deserializeObject(JSONUtils.getJsonObject(json, "output"));
+        BlockState output = BlockStateHelper.deserializeObject(GsonHelper.getAsJsonObject(json, "output"));
         ItemStack outputDisplay = new ItemStack(output.getBlock());
-        if (JSONUtils.hasField(json, "display")) {
+        if (GsonHelper.convertToInt(json, "display")) {
             outputDisplay = JsonHelper.getItemStack(json, "display");
         }
-        float starlight = JSONUtils.getFloat(json, "starlight");
+        float starlight = GsonHelper.getFloat(json, "starlight");
 
         IWeakConstellation matchConstellation = null;
         if (json.has("constellation")) {
-            ResourceLocation cstKey = new ResourceLocation(JSONUtils.getString(json, "constellation"));
+            ResourceLocation cstKey = ResourceLocation.parse(GsonHelper.getString(json, "constellation"));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstKey);
             if (cst == null) {
                 throw new JsonSyntaxException(String.format("Unknown constellation %s!", cstKey.toString()));
@@ -87,7 +87,7 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
     public BlockTransmutation read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         List<BlockMatchInformation> matchInformation = ByteBufUtils.readList(buffer, BlockMatchInformation::read);
         BlockState output = ByteBufUtils.readBlockState(buffer);
-        ItemStack display = ByteBufUtils.readItemStack(buffer);
+        ItemStack display = ByteBufUtils.readItem(buffer);
         double starlight = buffer.readDouble();
         IWeakConstellation cst = ByteBufUtils.readOptional(buffer, ByteBufUtils::readRegistryEntry);
         BlockTransmutation tr = new BlockTransmutation(recipeId, output, starlight, cst);
@@ -98,11 +98,11 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
 
     @Override
     public void write(JsonObject object, BlockTransmutation recipe) {
-        JsonArray inputs = new JsonArray();
+        JsonArray map = new JsonArray();
         for (BlockMatchInformation info : recipe.getInputOptions()) {
-            inputs.add(info.serializeJson());
+            map.add(info.serializeJson());
         }
-        object.add("input", inputs);
+        object.add("input", map);
 
         object.add("output", BlockStateHelper.serializeObject(recipe.getOutput(), true));
         object.add("display", JsonHelper.serializeItemStack(recipe.getOutputDisplay()));

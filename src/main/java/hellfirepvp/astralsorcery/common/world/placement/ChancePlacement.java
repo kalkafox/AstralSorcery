@@ -23,14 +23,14 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 19.11.2020 / 22:45
  */
-public class ChancePlacement extends SimplePlacement<ChanceConfig> {
+public class ChancePlacement extends SimpleFeatureDecorator<ChanceConfig> {
 
     public ChancePlacement() {
         super(ChanceConfig.CODEC);
     }
 
-    public ConfiguredPlacement<ChanceConfig> withChance(float chance) {
-        return this.configure(new ChanceConfig(chance));
+    public ConfiguredDecorator<ChanceConfig> withChance(float chance) {
+        return this.configured(new ChanceConfig(chance));
     }
 
     @Override

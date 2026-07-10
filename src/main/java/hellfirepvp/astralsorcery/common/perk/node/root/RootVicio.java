@@ -54,36 +54,36 @@ public class RootVicio extends RootPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void removePerkLogic(Player player, LogicalSide side) {
-        super.removePerkLogic(player, side);
+    public void removePerkLogic(Player player, LogicalSide direction) {
+        super.removePerkLogic(player, direction);
 
-        if (side.isServer()) {
-            this.moveTrackMap.computeIfAbsent(Stats.WALK_ONE_CM, s -> new HashMap<>()).remove(player.getUniqueID());
-            this.moveTrackMap.computeIfAbsent(Stats.SPRINT_ONE_CM, s -> new HashMap<>()).remove(player.getUniqueID());
-            this.moveTrackMap.computeIfAbsent(Stats.FLY_ONE_CM, s -> new HashMap<>()).remove(player.getUniqueID());
-            this.moveTrackMap.computeIfAbsent(Stats.AVIATE_ONE_CM, s -> new HashMap<>()).remove(player.getUniqueID());
-            this.moveTrackMap.computeIfAbsent(Stats.SWIM_ONE_CM, s -> new HashMap<>()).remove(player.getUniqueID());
+        if (direction.isServer()) {
+            this.moveTrackMap.computeIfAbsent(Stats.WALK_ONE_CM, s -> new HashMap<>()).remove(player.getUUID());
+            this.moveTrackMap.computeIfAbsent(Stats.SPRINT_ONE_CM, s -> new HashMap<>()).remove(player.getUUID());
+            this.moveTrackMap.computeIfAbsent(Stats.FLY_ONE_CM, s -> new HashMap<>()).remove(player.getUUID());
+            this.moveTrackMap.computeIfAbsent(Stats.AVIATE_ONE_CM, s -> new HashMap<>()).remove(player.getUUID());
+            this.moveTrackMap.computeIfAbsent(Stats.SWIM_ONE_CM, s -> new HashMap<>()).remove(player.getUUID());
         }
     }
 
     @Override
-    public void clearCaches(LogicalSide side) {
-        super.clearCaches(side);
+    public void clearCaches(LogicalSide direction) {
+        super.clearCaches(direction);
 
-        if (side.isServer()) {
+        if (direction.isServer()) {
             this.moveTrackMap.clear();
         }
     }
 
     @Override
-    public void onPlayerTick(Player player, LogicalSide side) {
-        if (!side.isServer() || !(player instanceof ServerPlayer)) {
+    public void onPlayerTick(Player player, LogicalSide direction) {
+        if (!direction.isServer() || !(player instanceof ServerPlayer)) {
             return;
         }
 
-        UUID uuid = player.getUniqueID();
+        UUID uuid = player.getUUID();
         ServerPlayer sPlayer = (ServerPlayer) player;
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
 
         StatsCounter mgr = sPlayer.getStats();
         int walked = mgr.getValue(Stats.CUSTOM.get(Stats.WALK_ONE_CM));
@@ -136,8 +136,8 @@ public class RootVicio extends RootPerk implements PlayerTickPerk {
             added *= 0.02F;
             added *= this.getExpMultiplier();
             added *= this.getDiminishingReturns(player);
-            added *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
-            added *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
+            added *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+            added *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
             added = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP, added);
 
             ResearchManager.modifyExp(player, added);

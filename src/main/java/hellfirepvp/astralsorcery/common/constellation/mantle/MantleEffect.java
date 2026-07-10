@@ -53,7 +53,7 @@ import java.util.function.Consumer;
  */
 public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEffect> implements ITickHandler {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
 
     private final PlayerAffectionFlags.AffectionFlag playerAffectionFlag;
     private final IWeakConstellation constellation;
@@ -61,7 +61,7 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
     public MantleEffect(IWeakConstellation constellation) {
         this.constellation = constellation;
         this.setRegistryName(this.constellation.getRegistryName());
-        this.playerAffectionFlag = new PlayerAffectionFlags.NoOpAffectionFlag(AstralSorcery.key("mantle_effect_" + constellation.getSimpleName()));
+        this.playerAffectionFlag = new PlayerAffectionFlags.NoOpAffectionFlag(AstralSorcery.key("mantle_effect_" + constellation.getName()));
 
         this.attachEventListeners(NeoForge.EVENT_BUS);
         this.attachTickHandlers(AstralSorcery.getProxy().getTickManager()::register);
@@ -96,33 +96,33 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
 
     @OnlyIn(Dist.CLIENT)
     protected void playCapeSparkles(Player player, float chance) {
-        if (player == Minecraft.getInstance().player && Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a()) {
+        if (player == Minecraft.getInstance().player && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
             chance *= 0.1F;
         }
-        if (rand.nextFloat() < chance) {
+        if (random.nextFloat() < chance) {
             Color c = this.getAssociatedConstellation().getConstellationColor();
             if (c != null) {
                 float width = player.getWidth() * 0.8F;
-                double x = player.getPosX() + rand.nextFloat() * width * (rand.nextBoolean() ? 1 : -1);
-                double y = player.getPosY() + rand.nextFloat() * (player.getHeight() / 3);
-                double z = player.getPosZ() + rand.nextFloat() * width * (rand.nextBoolean() ? 1 : -1);
+                double x = player.getX() + random.nextFloat() * width * (random.nextBoolean() ? 1 : -1);
+                double y = player.getY() + random.nextFloat() * (player.getHeight() / 3);
+                double z = player.getZ() + random.nextFloat() * width * (random.nextBoolean() ? 1 : -1);
                 Vector3 pos = new Vector3(x, y, z);
 
                 FXFacingParticle fx = this.spawnFacingParticle(player, pos)
                         .color(VFXColorFunction.constant(c))
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setScaleMultiplier(0.4F + rand.nextFloat() * 0.4F)
-                        .setMaxAge(20 + rand.nextInt(10));
-                if (rand.nextInt(3) == 0) {
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setScaleMultiplier(0.4F + random.nextFloat() * 0.4F)
+                        .setMaxAge(20 + random.nextInt(10));
+                if (random.nextInt(3) == 0) {
                     fx.color(VFXColorFunction.constant(this.getAssociatedConstellation().getTierRenderColor()));
                 }
 
-                if (rand.nextFloat() > 0.35F) {
+                if (random.nextFloat() > 0.35F) {
                     this.spawnFacingParticle(player, pos)
                             .color(VFXColorFunction.WHITE)
-                            .alpha(VFXAlphaFunction.FADE_OUT)
-                            .setScaleMultiplier(0.2F + rand.nextFloat() * 0.2F)
-                            .setMaxAge(10 + rand.nextInt(10));
+                            .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                            .setScaleMultiplier(0.2F + random.nextFloat() * 0.2F)
+                            .setMaxAge(10 + random.nextInt(10));
                 }
             }
         }
@@ -132,7 +132,7 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
     @OnlyIn(Dist.CLIENT)
     protected FXFacingParticle spawnFacingParticle(Player player, Vector3 at) {
         return EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                .setOwner(player.getUniqueID())
+                .setOwner(player.getUUID())
                 .spawn(at);
     }
 
@@ -143,13 +143,13 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
         }
 
         Player pl = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
         boolean hasMantle = ItemMantle.getEffect(pl, this.getAssociatedConstellation()) != null;
         if (!hasMantle) {
             return;
         }
 
-        if (side.isServer()) {
+        if (direction.isServer()) {
             if (!(pl instanceof ServerPlayer) || MiscUtils.isPlayerFakeMP((ServerPlayer) pl)) {
                 return;
             }
@@ -165,7 +165,7 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
         if (entity == null) {
             return new CompoundTag();
         }
-        ItemStack stack = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
+        ItemStack stack = entity.getItemStackFromSlot(EquipmentSlot.CHEST);
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemMantle)) {
             return new CompoundTag();
         }
@@ -178,8 +178,8 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

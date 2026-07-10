@@ -41,15 +41,15 @@ public abstract class BlockFountainPrime extends Block implements CustomItemBloc
     public abstract FountainEffect<?> provideEffect();
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, world, pos)) {
-            return Blocks.AIR.getDefaultState();
+    public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
+        if (!this.isValidPosition(state, level, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
-        return world.getBlockState(pos.up()).getBlock() instanceof BlockFountain;
+    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+        return level.getBlockState(pos.above()).getBlock() instanceof BlockFountain;
     }
 }

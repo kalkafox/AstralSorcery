@@ -50,8 +50,8 @@ public class TickTokenMap<K, V extends TickTokenMap.TickMapToken<?>> extends Tok
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class TickTokenMap<K, V extends TickTokenMap.TickMapToken<?>> extends Tok
             return timeout;
         }
 
-        public void setTimeout(int timeout) {
+        public void setIdleTimeout(int timeout) {
             this.timeout = timeout;
         }
 

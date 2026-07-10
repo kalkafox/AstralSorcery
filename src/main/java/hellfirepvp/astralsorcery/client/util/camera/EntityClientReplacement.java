@@ -24,7 +24,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 public class EntityClientReplacement extends AbstractClientPlayer {
 
     public EntityClientReplacement() {
-        super(Minecraft.getInstance().world, Minecraft.getInstance().player.getGameProfile());
+        super(Minecraft.getInstance().level, Minecraft.getInstance().player.getGameProfile());
     }
 
     @OnlyIn(Dist.CLIENT)

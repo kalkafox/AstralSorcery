@@ -63,9 +63,9 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player player = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
 
-        if (side.isClient() && shouldDoEffect(player)) {
+        if (direction.isClient() && shouldDoEffect(player)) {
             spawnHaloParticles(player);
         }
     }
@@ -76,17 +76,17 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
 
         for (int i = 0; i < 3; i++) {
             Vector3 offset = MiscUtils.getRandomCirclePosition(new Vector3(), Vector3.RotAxis.Y_AXIS, 0.3F);
-            float scale = 0.16F + rand.nextFloat() * 0.12F;
-            int age = 20 + rand.nextInt(10);
-            MiscUtils.applyRandomOffset(offset, rand, 0.02F);
+            float scale = 0.16F + random.nextFloat() * 0.12F;
+            int age = 20 + random.nextInt(10);
+            MiscUtils.applyRandomOffset(offset, random, 0.02F);
 
             FXFacingParticle particle = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(headPos.clone().addY(0.4F).add(offset))
                     .setAlphaMultiplier(0.8F)
-                    .alpha(((VFXAlphaFunction<EntityVisualFX>) (fx, alphaIn, pTicks) -> {
-                        if (shouldDoEffect(player) && Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a()) {
-                            if (player.rotationPitch < -30) {
-                                return MathHelper.clamp(1F - (Math.abs(player.rotationPitch) - 30F) / 15F, 0, 1F) * alphaIn;
+                    .alpha1arg(((VFXAlphaFunction<EntityVisualFX>) (fx, alphaIn, pTicks) -> {
+                        if (shouldDoEffect(player) && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+                            if (player.getXRot() < -30) {
+                                return Mth.clamp(1F - (Math.abs(player.getXRot()) - 30F) / 15F, 0, 1F) * alphaIn;
                             }
                         }
                         return alphaIn;
@@ -94,20 +94,20 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
                     .color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_TYPE_WEAK))
                     .setScaleMultiplier(scale)
                     .setMaxAge(age);
-            if (rand.nextInt(3) == 0) {
+            if (random.nextInt(3) == 0) {
                 particle.color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_VICIO));
             }
 
             FXFacingParticle starParticle = null;
-            if (rand.nextInt(5) == 0) {
+            if (random.nextInt(5) == 0) {
                 starParticle = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(headPos.clone().addY(0.4F).add(offset))
                         .setAlphaMultiplier(0.8F)
                         .color(VFXColorFunction.WHITE)
-                        .alpha(((VFXAlphaFunction<EntityVisualFX>) (fx, alphaIn, pTicks) -> {
-                            if (shouldDoEffect(player) && Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a()) {
-                                if (player.rotationPitch < -30) {
-                                    return MathHelper.clamp(1F - (Math.abs(player.rotationPitch) - 30F) / 15F, 0, 1F) * alphaIn;
+                        .alpha1arg(((VFXAlphaFunction<EntityVisualFX>) (fx, alphaIn, pTicks) -> {
+                            if (shouldDoEffect(player) && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+                                if (player.getXRot() < -30) {
+                                    return Mth.clamp(1F - (Math.abs(player.getXRot()) - 30F) / 15F, 0, 1F) * alphaIn;
                                 }
                             }
                             return alphaIn;
@@ -116,13 +116,13 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
                         .setMaxAge(age);
             }
 
-            if (rand.nextInt(4) != 0) {
+            if (random.nextInt(4) != 0) {
                 particle.position(new VFXPositionController<EntityVisualFX>() {
                     @Nonnull
                     @Override
-                    public Vector3 updatePosition(@Nonnull EntityVisualFX fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved) {
+                    public Vector3 finalizePosition(@Nonnull EntityVisualFX fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved) {
                         if (shouldDoEffect(player)) {
-                            Vector3 diff = new Vector3(player.prevPosX - player.getPosX(), player.prevPosY - player.getPosY(), player.prevPosZ - player.getPosZ());
+                            Vector3 diff = new Vector3(player.xo - player.getX(), player.yo - player.getY(), player.zo - player.getZ());
                             diff.divide(4);
                             return Vector3.atEntityCorner(player).add(diff).addY(player.getEyeHeight(player.getPose()))
                                     .addY(0.4F)
@@ -135,9 +135,9 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
                     starParticle.position(new VFXPositionController<EntityVisualFX>() {
                         @Nonnull
                         @Override
-                        public Vector3 updatePosition(@Nonnull EntityVisualFX fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved) {
+                        public Vector3 finalizePosition(@Nonnull EntityVisualFX fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved) {
                             if (shouldDoEffect(player)) {
-                                Vector3 diff = new Vector3(player.prevPosX - player.getPosX(), player.prevPosY - player.getPosY(), player.prevPosZ - player.getPosZ());
+                                Vector3 diff = new Vector3(player.xo - player.getX(), player.yo - player.getY(), player.zo - player.getZ());
                                 diff.divide(4);
                                 return Vector3.atEntityCorner(player).add(diff).addY(player.getEyeHeight(player.getPose()))
                                         .addY(0.4F)
@@ -152,9 +152,9 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
     }
 
     private boolean shouldDoEffect(Player player) {
-        return player.getUniqueID().equals(playerUUID) &&
+        return player.getUUID().equals(playerUUID) &&
                 (player.getPose() == Pose.STANDING || player.getPose() == Pose.CROUCHING) &&
-                !player.isPotionActive(Effects.INVISIBILITY);
+                !player.isPotionActive(MobEffects.INVISIBILITY);
     }
 
     @Override
@@ -163,8 +163,8 @@ public class TypeStarHalo extends PatreonEffect implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

@@ -45,6 +45,6 @@ public class TypeStarryPlayerLayer extends PatreonEffect {
 
     @OnlyIn(Dist.CLIENT)
     private void registerPlayerLayer() {
-        StarryLayerRenderer.addRender((player, slot) -> this.playerUUID.equals(player.getUniqueID()));
+        StarryLayerRenderer.addRender((player, slot) -> this.playerUUID.equals(player.getUUID()));
     }
 }

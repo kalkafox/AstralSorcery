@@ -21,12 +21,12 @@ import net.minecraft.world.entity.player.Player;
  */
 public class ContainerObservatory extends ContainerTileEntity<TileObservatory> {
 
-    public ContainerObservatory(TileObservatory observatory, int windowId) {
-        super(observatory, ContainerTypesAS.OBSERVATORY, windowId);
+    public ContainerObservatory(TileObservatory observatory, int containerId) {
+        super(observatory, ContainerTypesAS.OBSERVATORY, containerId);
     }
 
     @Override
-    public boolean canInteractWith(Player playerIn) {
+    public boolean stillValid(Player playerIn) {
         return true;
     }
 }

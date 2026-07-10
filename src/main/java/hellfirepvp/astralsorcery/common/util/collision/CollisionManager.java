@@ -28,9 +28,9 @@ public class CollisionManager {
 
     private static final List<CustomCollisionHandler> customHandlers = new ArrayList<>();
 
-    private static final int maxCacheSize = 20;
-    private static final LinkedList<VoxelShapeSpliterator> accessList = new LinkedList<>();
-    private static final Map<VoxelShapeSpliterator, List<AABB>> instanceFlags = new HashMap<>();
+    private static final int maxCache = 20;
+    private static final LinkedList<CollisionSpliterator> accessList = new LinkedList<>();
+    private static final Map<CollisionSpliterator, List<AABB>> instanceFlags = new HashMap<>();
 
     public static void init() {
         register(new MantleEffectAevitas.PlayerWalkableAir());
@@ -41,7 +41,7 @@ public class CollisionManager {
     }
 
     @Nullable
-    public static AABB getIteratorBoundingBoxes(VoxelShapeSpliterator iterator, @Nullable Entity entity) {
+    public static AABB getIteratorBoundingBoxes(CollisionSpliterator iterator, @Nullable Entity entity) {
         if (!instanceFlags.containsKey(iterator)) {
             List<AABB> additionalBoundingBoxes = getAdditionalBoundingBoxes(entity);
             if (additionalBoundingBoxes.isEmpty()) {
@@ -78,8 +78,8 @@ public class CollisionManager {
     }
 
     private static void removeOldestEntry() {
-        if (accessList.size() >= maxCacheSize) {
-            VoxelShapeSpliterator oldest;
+        if (accessList.size() >= maxCache) {
+            CollisionSpliterator oldest;
             //Apparently the list can be both >= 20 elements in size AND empty at the same time.
             try {
                 oldest = accessList.removeLast();
@@ -99,7 +99,7 @@ public class CollisionManager {
         }
     }
 
-    private static void markActive(VoxelShapeSpliterator it) {
+    private static void markActive(CollisionSpliterator it) {
         if (accessList.remove(it)) {
             accessList.addFirst(it);
         }

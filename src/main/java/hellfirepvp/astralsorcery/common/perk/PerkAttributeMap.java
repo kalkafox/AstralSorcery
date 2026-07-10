@@ -38,16 +38,16 @@ import java.util.stream.Collectors;
 public class PerkAttributeMap implements ReadWriteLockable {
 
     private final ReadWriteLock accessLock = new ReentrantReadWriteLock(true);
-    private final LogicalSide side;
+    private final LogicalSide direction;
     private final Map<PerkAttributeType, List<PerkAttributeModifier>> modifiers = Collections.synchronizedMap(new HashMap<>());
     private final List<PerkConverter> converters = new ArrayList<>();
 
-    PerkAttributeMap(LogicalSide side) {
-        this.side = side;
+    PerkAttributeMap(LogicalSide direction) {
+        this.direction = direction;
     }
 
-    Collection<PerkAttributeModifier> applyModifier(@Nonnull Player player, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
-        PlayerProgress prog = ResearchHelper.getProgress(player, this.side);
+    Collection<PerkAttributeModifier> addModifier(@Nonnull Player player, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
+        PlayerProgress prog = ResearchHelper.getProgress(player, this.direction);
         List<PerkAttributeModifier> added = new ArrayList<>();
 
         List<PerkAttributeModifier> modify = Lists.newArrayList();
@@ -79,13 +79,13 @@ public class PerkAttributeMap implements ReadWriteLockable {
         }
 
         if (noModifiers) {
-            type.onModeApply(player, modifier.getMode(), side);
+            type.onModeApply(player, modifier.getMode(), direction);
         }
         return modifiers.add(modifier);
     }
 
     Collection<PerkAttributeModifier> removeModifier(@Nonnull Player player, @Nonnull PerkAttributeModifier modifier, @Nullable ModifierSource owningSource) {
-        PlayerProgress prog = ResearchHelper.getProgress(player, this.side);
+        PlayerProgress prog = ResearchHelper.getProgress(player, this.direction);
         List<PerkAttributeModifier> removed = new ArrayList<>();
 
         List<PerkAttributeModifier> modify = Lists.newArrayList();
@@ -113,7 +113,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         if (modifiers.computeIfAbsent(type, t -> Lists.newArrayList()).remove(modifier)) {
             boolean completelyRemoved = modifiers.get(type).isEmpty();
             if (getModifiersByType(type, modifier.getMode()).isEmpty()) {
-                type.onModeRemove(player, modifier.getMode(), side, completelyRemoved);
+                type.onModeRemove(player, modifier.getMode(), direction, completelyRemoved);
             }
             return true;
         }
@@ -140,14 +140,14 @@ public class PerkAttributeMap implements ReadWriteLockable {
     boolean applyConverter(Player player, PerkConverter converter) {
         assertConvertersModifiable();
 
-        LogCategory.PERKS.info(() -> "Try adding converter " + converter.getRegistryName() + " on " + this.side.name());
+        LogCategory.PERKS.info(() -> "Try adding converter " + converter.getRegistryName() + " on " + this.direction.name());
 
         if (converters.contains(converter)) {
             return false;
         }
 
         converters.add(converter);
-        converter.onApply(player, side);
+        converter.onApply(player, direction);
 
         LogCategory.PERKS.info(() -> "Added converter " + converter.getRegistryName());
         return true;
@@ -156,10 +156,10 @@ public class PerkAttributeMap implements ReadWriteLockable {
     boolean removeConverter(Player player, PerkConverter converter) {
         assertConvertersModifiable();
 
-        LogCategory.PERKS.info(() -> "Try removing converter " + converter.getRegistryName() + " on " + this.side.name());
+        LogCategory.PERKS.info(() -> "Try removing converter " + converter.getRegistryName() + " on " + this.direction.name());
 
         if (converters.remove(converter)) {
-            converter.onRemove(player, side);
+            converter.onRemove(player, direction);
 
             LogCategory.PERKS.info(() -> "Removed converter " + converter.getRegistryName());
             return true;
@@ -174,7 +174,7 @@ public class PerkAttributeMap implements ReadWriteLockable {
         }
         if (appliedModifiers > 0) {
 
-            LogCategory.PERKS.warn(() -> "Following modifiers are still applied on " + this.side.name() + " while trying to modify converters:");
+            LogCategory.PERKS.warn(() -> "Following modifiers are still applied on " + this.direction.name() + " while trying to modify converters:");
             for (List<PerkAttributeModifier> modifiers : this.modifiers.values()) {
                 for (PerkAttributeModifier modifier : modifiers) {
                     LogCategory.PERKS.warn(() -> "Modifier: " + modifier.getComparisonKey());
@@ -195,18 +195,18 @@ public class PerkAttributeMap implements ReadWriteLockable {
                 .collect(Collectors.toList());
     }
 
-    public float getModifier(Player player, PlayerProgress progress, PerkAttributeType type) {
-        return getModifier(player, progress, type, EnumSet.allOf(ModifierType.class));
+    public float getAttributeInstance(Player player, PlayerProgress progress, PerkAttributeType type) {
+        return getAttributeInstance(player, progress, type, EnumSet.allOf(ModifierType.class));
     }
 
-    public float getModifier(Player player, PlayerProgress progress, PerkAttributeType type, ModifierType mode) {
-        return getModifier(player, progress, type, EnumSet.of(mode));
+    public float getAttributeInstance(Player player, PlayerProgress progress, PerkAttributeType type, ModifierType mode) {
+        return getAttributeInstance(player, progress, type, EnumSet.of(mode));
     }
 
-    public float getModifier(Player player, PlayerProgress progress, PerkAttributeType type, Collection<ModifierType> applicableModes) {
+    public float getAttributeInstance(Player player, PlayerProgress progress, PerkAttributeType type, Collection<ModifierType> applicableModes) {
         float perkEffectModifier;
         if (!type.equals(PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT)) {
-            perkEffectModifier = getModifier(player, progress, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+            perkEffectModifier = getAttributeInstance(player, progress, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
         } else {
             perkEffectModifier = 1F;
         }

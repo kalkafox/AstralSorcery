@@ -37,15 +37,15 @@ public final class AstralLootTableProvider extends LootTableProvider {
     @Override
     protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
         return Lists.newArrayList(
-                Pair.of(BlockLootTableProvider::new, LootParameterSets.BLOCK),
-                Pair.of(EntityLootTableProvider::new, LootParameterSets.ENTITY),
-                Pair.of(ChestLootTableProvider::new, LootParameterSets.CHEST),
-                Pair.of(GameplayLootTableProvider::new, LootParameterSets.GIFT)
+                Pair.of(BlockLootTableProvider::new, LootContextParamSets.BLOCK),
+                Pair.of(EntityLootTableProvider::new, LootContextParamSets.ENTITY),
+                Pair.of(ChestLootTableProvider::new, LootContextParamSets.CHEST),
+                Pair.of(GameplayLootTableProvider::new, LootContextParamSets.GIFT)
         );
     }
 
     @Override
-    protected void validate(Map<ResourceLocation, LootTable> tables, ValidationTracker tracker) {
-        tables.forEach((key, table) -> LootTableManager.validateLootTable(tracker, key, table));
+    protected void validate(Map<ResourceLocation, LootTable> tables, ValidationContext progressListener) {
+        tables.forEach((key, name) -> LootTables.validateLootTable(progressListener, key, name));
     }
 }

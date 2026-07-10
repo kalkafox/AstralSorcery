@@ -47,11 +47,11 @@ public class PerkAttributeInterpreter {
     @Nullable
     public PerkStatistic getValue(PerkAttributeType type) {
         if (attributeReaderOverrides.containsKey(type)) {
-            return attributeReaderOverrides.get(type).getStatistics(attributeMap, player);
+            return attributeReaderOverrides.get(type).countParticles(attributeMap, player);
         } else {
             PerkAttributeReader reader = type.getReader();
             if (reader != null) {
-                return reader.getStatistics(attributeMap, player);
+                return reader.countParticles(attributeMap, player);
             }
         }
         return null;
@@ -65,7 +65,7 @@ public class PerkAttributeInterpreter {
             this.reader = new PerkAttributeInterpreter(null, player);
         }
 
-        public static Builder newBuilder(Player player) {
+        public static Builder properties(Player player) {
             return new Builder(player);
         }
 

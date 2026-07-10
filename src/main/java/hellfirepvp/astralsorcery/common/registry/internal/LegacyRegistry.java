@@ -30,7 +30,7 @@ public final class LegacyRegistry<T> implements Iterable<T> {
         return registry.stream().toList();
     }
 
-    public Set<ResourceLocation> getKeys() {
+    public Set<ResourceLocation> getUserList() {
         return registry.keySet();
     }
 

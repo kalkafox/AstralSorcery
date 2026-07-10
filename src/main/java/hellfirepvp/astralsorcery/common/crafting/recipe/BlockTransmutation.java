@@ -65,7 +65,7 @@ public class BlockTransmutation extends CustomMatcherRecipe implements GatedReci
         return ResearchProgression.ATTUNEMENT;
     }
 
-    public boolean matches(@Nonnull LevelAccessor world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull IWeakConstellation constellation) {
+    public boolean matches(@Nonnull LevelAccessor level, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull IWeakConstellation constellation) {
         if (this.matcher == null) {
             this.matcher = PredicateBuilder.joinOr(stateCheck);
         }

@@ -26,7 +26,7 @@ public class FullScreenDrawArea extends ConstellationDiscoveryScreen.DrawArea {
     }
 
     @Override
-    public boolean contains(double mouseX, double mouseY) {
+    public boolean contains(double xpos, double ypos) {
         return true; //Yes.
     }
 }

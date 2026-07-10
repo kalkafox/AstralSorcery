@@ -63,7 +63,7 @@ public class PerkTreeConstellation<T extends AbstractPerk> extends PerkTreePoint
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderAt(AllocationStatus status, PoseStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float zLevel, float scale) {
+    public void renderAt(AllocationStatus status, PoseStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float blitOffset, float scale) {
         if (this.associatedConstellation == null) {
             return;
         }
@@ -91,7 +91,7 @@ public class PerkTreeConstellation<T extends AbstractPerk> extends PerkTreePoint
     @OnlyIn(Dist.CLIENT)
     public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, PoseStack renderStack,
                                              AllocationStatus status, long spriteOffsetTick, float pTicks,
-                                             float x, float y, float zLevel, float scale) {
+                                             float x, float y, float blitOffset, float scale) {
         SpriteSheetResource tex = status.getPerkTreeHaloSprite();
         BatchPerkContext.TextureObjectGroup grp = PerkPointHaloRenderGroup.INSTANCE.getGroup(tex);
         if (grp == null) {
@@ -106,12 +106,12 @@ public class PerkTreeConstellation<T extends AbstractPerk> extends PerkTreePoint
 
         Tuple<Float, Float> frameUV = tex.getUVOffset(spriteOffsetTick);
 
-        RenderingGuiUtils.rect(buf, renderStack, x - haloSize, y - haloSize, zLevel, haloSize * 2F, haloSize * 2F)
+        RenderingGuiUtils.rect(buf, renderStack, x - haloSize, y - haloSize, blitOffset, haloSize * 2F, haloSize * 2F)
                 .color(1F, 1F, 1F, 0.85F)
                 .tex(frameUV.getA(), frameUV.getB(), tex.getULength(), tex.getVLength())
                 .draw();
 
-        super.renderPerkAtBatch(drawCtx, renderStack, status, spriteOffsetTick, pTicks, x, y, zLevel, scale);
+        super.renderPerkAtBatch(drawCtx, renderStack, status, spriteOffsetTick, pTicks, x, y, blitOffset, scale);
 
         float actualSize = perkSpriteSize * scale;
         return new Rectangle.Float(-actualSize, -actualSize, actualSize * 2, actualSize * 2);

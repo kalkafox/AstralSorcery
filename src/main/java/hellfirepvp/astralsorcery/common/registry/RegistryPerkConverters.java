@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkConverter;
@@ -66,7 +67,6 @@ public class RegistryPerkConverters {
     }
 
     private static <T extends PerkConverter> T register(T converter) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(converter);
-        return converter;
+        return AstralRegistries.register(AstralRegistries.PERK_ATTRIBUTE_CONVERTERS, converter);
     }
 }

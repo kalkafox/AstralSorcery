@@ -42,18 +42,18 @@ public class TileTranslucentBlock extends TileFakedState {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.playerUUID = NBTHelper.getUUID(compound, "playerUUID", null);
+        this.playerUUID = NBTHelper.getUUID(pattern, "playerUUID", null);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
         if (this.playerUUID != null) {
-            compound.putUniqueId("playerUUID", this.playerUUID);
+            pattern.putUniqueId("playerUUID", this.playerUUID);
         }
     }
 }

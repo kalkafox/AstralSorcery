@@ -51,7 +51,7 @@ public class DiminishingMultiplier {
         if (times > 0) {
             this.lastGain = now;
             this.recoveryStack = Math.min(this.recoveryStack + 1, 3);
-            this.multiplier = MathHelper.clamp(this.multiplier + times * gainRate, this.min, 1F);
+            this.multiplier = Mth.clamp(this.multiplier + times * gainRate, this.min, 1F);
         } else {
             this.multiplier = Math.max(this.multiplier - this.dropRate, this.min);
             this.recoveryStack = 0;

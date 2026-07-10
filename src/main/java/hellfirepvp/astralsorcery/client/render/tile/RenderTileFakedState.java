@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
 import java.awt.*;
 
@@ -33,8 +33,8 @@ import java.awt.*;
  */
 public class RenderTileFakedState extends CustomTileEntityRenderer<TileFakedState> {
 
-    public RenderTileFakedState(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderTileFakedState(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RenderTileFakedState extends CustomTileEntityRenderer<TileFakedStat
         Color blendColor = tile.getOverlayColor();
         int[] color = new int[] { blendColor.getRed(), blendColor.getGreen(), blendColor.getBlue(), 128 };
 
-        RenderType type = RenderTypeLookup.func_239221_b_(fakedState);
+        RenderType type = ItemBlockRenderTypes.func_239221_b_(fakedState);
         RenderTypeDecorator decorated = RenderTypeDecorator.wrapSetup(type, () -> {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -58,6 +58,6 @@ public class RenderTileFakedState extends CustomTileEntityRenderer<TileFakedStat
         });
         BufferDecoratorBuilder decorator = BufferDecoratorBuilder.withColor(((r, g, b, a) -> color));
         VertexConsumer buf = renderTypeBuffer.getBuffer(decorated);
-        RenderingUtils.renderSimpleBlockModel(fakedState, renderStack, decorator.decorate(buf), tile.getPos(), tile, true);
+        RenderingUtils.renderSimpleBlockModel(fakedState, renderStack, decorator.decorate(buf), tile.getBlockPos(), tile, true);
     }
 }

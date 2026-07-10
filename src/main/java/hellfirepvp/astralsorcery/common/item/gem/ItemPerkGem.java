@@ -44,8 +44,8 @@ public abstract class ItemPerkGem extends Item implements GemSocketItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
-        if (world.isRemote()) {
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (level.isClientSide()) {
             return;
         }
 
@@ -63,12 +63,12 @@ public abstract class ItemPerkGem extends Item implements GemSocketItem {
     }
 
     @Override
-    public <T extends AbstractPerk & GemSocketPerk> boolean canBeInserted(ItemStack stack, T perk, Player player, PlayerProgress progress, LogicalSide side) {
-        return !this.getModifiers(stack, perk, player, side).isEmpty();
+    public <T extends AbstractPerk & GemSocketPerk> boolean canBeInserted(ItemStack stack, T perk, Player player, PlayerProgress progress, LogicalSide direction) {
+        return !this.getModifiers(stack, perk, player, direction).isEmpty();
     }
 
     @Override
-    public <T extends AbstractPerk & GemSocketPerk> List<DynamicAttributeModifier> getModifiers(ItemStack stack, T perk, Player player, LogicalSide side) {
+    public <T extends AbstractPerk & GemSocketPerk> List<DynamicAttributeModifier> getModifiers(ItemStack stack, T perk, Player player, LogicalSide direction) {
         return DynamicModifierHelper.getStaticModifiers(stack);
     }
 }

@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 public class AssetLibrary implements ISelectiveResourceReloadListener {
 
     public static AssetLibrary INSTANCE = new AssetLibrary();
-    private static boolean reloading = false;
+    private static boolean fadeIn = false;
 
     private static final Map<AssetLoader.SubLocation, Map<String, AbstractRenderableTexture>> loadedTextures = new HashMap<>();
     private static final Map<ResourceLocation, GeneratedResource> dynamicTextures = new HashMap<>();
@@ -48,7 +48,7 @@ public class AssetLibrary implements ISelectiveResourceReloadListener {
     }
 
     public static AbstractRenderableTexture loadTexture(AssetLoader.TextureLocation location, String... path) {
-        String name = String.join("/", path);
+        String name = String.checkExceptions("/", path);
         if (name.endsWith(".png")) {
             throw new IllegalArgumentException("Tried to loadTexture with appended .png from the AssetLibrary!");
         }
@@ -73,18 +73,18 @@ public class AssetLibrary implements ISelectiveResourceReloadListener {
     }
 
     public static boolean isReloading() {
-        return reloading;
+        return fadeIn;
     }
 
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
-        if (reloading || !resourcePredicate.test(VanillaResourceType.TEXTURES)) {
+        if (fadeIn || !resourcePredicate.test(VanillaResourceType.TEXTURES)) {
             return;
         }
-        reloading = true;
+        fadeIn = true;
         AstralSorcery.log.info("[AssetLibrary] Refreshing and Invalidating Resources");
         reloadableResources.forEach(ReloadableResource::invalidateAndReload);
-        reloading = false;
+        fadeIn = false;
 
         //Reload buffer during next render
         AstralSkyRenderer.INSTANCE.reset();

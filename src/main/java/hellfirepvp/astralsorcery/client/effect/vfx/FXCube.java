@@ -63,8 +63,8 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
     }
 
     public FXCube tumble() {
-        this.rotationDegreeAxis = Vector3.positiveYRandom().multiply(360);
-        this.rotationChange = Vector3.random().multiply(12);
+        this.rotationDegreeAxis = Vector3.positiveYRandom().mul(360);
+        this.rotationChange = Vector3.random().mul(12);
         return this;
     }
 
@@ -79,9 +79,9 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
     public void tick() {
         super.tick();
 
-        if (this.tumbleIntensityMultiplier > 0 && this.rotationChange.lengthSquared() > 0) {
+        if (this.tumbleIntensityMultiplier > 0 && this.rotationChange.lengthSqr() > 0) {
             Vector3 degAxis = rotationDegreeAxis.clone();
-            Vector3 modify = this.rotationChange.clone().multiply(tumbleIntensityMultiplier);
+            Vector3 modify = this.rotationChange.clone().mul(tumbleIntensityMultiplier);
             this.prevRotationDegreeAxis = this.rotationDegreeAxis.clone();
             this.rotationDegreeAxis.add(modify);
 
@@ -102,10 +102,10 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
     public <T extends EntityVisualFX & EntityDynamicFX> void renderNow(BatchRenderContext<T> ctx, PoseStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
         float u, v, uLength, vLength;
         if (this.tas != null) {
-            u = this.tas.getMinU();
-            v = this.tas.getMinV();
-            uLength = (this.tas.getMaxU() - u) * this.textureSubSizePercentage;
-            vLength = (this.tas.getMaxV() - v) * this.textureSubSizePercentage;
+            u = this.tas.getU0();
+            v = this.tas.getV0();
+            uLength = (this.tas.getU1() - u) * this.textureSubSizePercentage;
+            vLength = (this.tas.getV1() - v) * this.textureSubSizePercentage;
         } else {
             SpriteSheetResource ssr = ctx.getSprite();
             Tuple<Float, Float> uv = ssr.getUVOffset(this.getAge());
@@ -117,15 +117,15 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
 
         int alpha = this.getAlpha(pTicks);
         Color c = this.getColor(pTicks);
-        Vector3 translateTo = this.getRenderPosition(pTicks).subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
+        Vector3 translateTo = this.getCameraPosition(pTicks).subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
         Vector3 rotation = getInterpolatedRotation(pTicks);
-        float scale = this.getScale(pTicks);
+        float scale = this.getQuadSize(pTicks);
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(translateTo.getX(), translateTo.getY(), translateTo.getZ());
-        renderStack.rotate(Vector3f.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.rotate(Vector3f.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.scale(scale, scale, scale);
 
         VertexConsumer buf = drawBuffer.getBuffer(ctx.getRenderType());
@@ -134,6 +134,6 @@ public class FXCube extends EntityVisualFX implements EntityDynamicFX {
                 c.getRed(), c.getGreen(), c.getBlue(), alpha,
                 LightmapUtil.getPackedFullbrightCoords());
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

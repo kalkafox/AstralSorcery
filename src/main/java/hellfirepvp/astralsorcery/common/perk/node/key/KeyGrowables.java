@@ -51,36 +51,36 @@ public class KeyGrowables extends KeyPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(Player player, LogicalSide side) {
-        if (!side.isServer()) {
+    public void onPlayerTick(Player player, LogicalSide direction) {
+        if (!direction.isServer()) {
             return;
         }
 
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
-        float cChance = PerkAttributeHelper.getOrCreateMap(player, side)
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
+        float cChance = PerkAttributeHelper.getOrCreateMap(player, direction)
                 .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.chanceToBonemeal.get().floatValue());
-        if (rand.nextFloat() < cChance && AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), true)) {
-            float fRadius = PerkAttributeHelper.getOrCreateMap(player, side)
+        if (random.nextFloat() < cChance && AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), true)) {
+            float fRadius = PerkAttributeHelper.getOrCreateMap(player, direction)
                     .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.radius.get());
-            int rRadius = Math.max(MathHelper.floor(fRadius), 1);
+            int rRadius = Math.max(Mth.floor(fRadius), 1);
 
-            BlockPos pos = player.getPosition().add(
-                    rand.nextInt(rRadius * 2) + 1 - rRadius,
-                    rand.nextInt(rRadius * 2) + 1 - rRadius,
-                    rand.nextInt(rRadius * 2) + 1 - rRadius);
-            Level w = player.getEntityWorld();
+            BlockPos pos = player.position().add(
+                    random.nextInt(rRadius * 2) + 1 - rRadius,
+                    random.nextInt(rRadius * 2) + 1 - rRadius,
+                    random.nextInt(rRadius * 2) + 1 - rRadius);
+            Level w = player.getCommandSenderWorld();
             CropHelper.GrowablePlant plant = CropHelper.wrapPlant(w, pos);
             PktPlayEffect pkt = null;
             if (plant != null) {
-                if (plant.tryGrow(w, rand)) {
+                if (plant.tryGrow(w, random)) {
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                     pkt = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
                         .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(pos)));
                 }
             } else {
                 BlockState at = w.getBlockState(pos);
-                if (at.getBlock().equals(Blocks.DIRT) && w.isAirBlock(pos.up())) {
-                    if (w.setBlockState(pos, Blocks.GRASS_BLOCK.getDefaultState())) {
+                if (at.getBlock().equals(Blocks.DIRT) && w.isEmptyBlock(pos.above())) {
+                    if (w.setBlock(pos, Blocks.GRASS_BLOCK.defaultBlockState())) {
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                         pkt = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
                                 .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(pos)));

@@ -38,7 +38,7 @@ import java.util.Random;
  */
 public class MiscPlayEffect {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     @OnlyIn(Dist.CLIENT)
     public static void fireLightning(PktPlayEffect effect) {
@@ -59,10 +59,10 @@ public class MiscPlayEffect {
         EffectHelper.of(EffectTemplatesAS.BLOCK_TRANSLUCENT_IGNORE_DEPTH)
                 .spawn(at.clone())
                 .tumble()
-                .setBlockState(displayState)
-                .setMotion(new Vector3(0, 0.035, 0))
+                .setBlock(displayState)
+                .setDeltaMovement(new Vector3(0, 0.035, 0))
                 .scale(VFXScaleFunction.SHRINK_EXP)
-                .setMaxAge(40 + rand.nextInt(10));
+                .setMaxAge(40 + random.nextInt(10));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -76,10 +76,10 @@ public class MiscPlayEffect {
         EffectHelper.of(EffectTemplatesAS.BLOCK_TRANSLUCENT)
                 .spawn(vec)
                 .tumble()
-                .setBlockState(state)
-                .setMotion(new Vector3(0, 0.035, 0))
+                .setBlock(state)
+                .setDeltaMovement(new Vector3(0, 0.035, 0))
                 .scale(VFXScaleFunction.SHRINK_EXP)
-                .setMaxAge(20 + rand.nextInt(15));
+                .setMaxAge(20 + random.nextInt(15));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -96,13 +96,13 @@ public class MiscPlayEffect {
         Vector3 vec = new Vector3(pos).add(0.5F, 0.5F, 0.5F);
         for (int i = 0; i < 6; i++) {
             Vector3 at = vec.add(
-                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1),
-                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1),
-                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1));
+                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1),
+                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1),
+                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1));
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
-                    .setMotion(Vector3.random().multiply(0.045F))
-                    .setScaleMultiplier(0.25F + rand.nextFloat() * 0.1F)
+                    .setDeltaMovement(Vector3.random().mul(0.045F))
+                    .setScaleMultiplier(0.25F + random.nextFloat() * 0.1F)
                     .color(VFXColorFunction.WHITE);
         }
     }
@@ -111,7 +111,7 @@ public class MiscPlayEffect {
     public static void liquidFountain(PktPlayEffect event) {
         FluidStack stack = ByteBufUtils.readFluidStack(event.getExtraData());
         Vector3 at = ByteBufUtils.readVector(event.getExtraData())
-                .add(rand.nextFloat(), 0, rand.nextFloat());
+                .add(random.nextFloat(), 0, random.nextFloat());
 
         EffectHelper.spawnSource(new FXSourceLiquidFountain(at, stack));
     }
@@ -121,7 +121,7 @@ public class MiscPlayEffect {
         Vector3 vec = ByteBufUtils.readVector(event.getExtraData());
 
         BatchRenderContext<? extends FXFacingParticle> ctx;
-        switch (rand.nextInt(3)) {
+        switch (random.nextInt(3)) {
             case 2:
                 ctx = EffectTemplatesAS.CRYSTAL_BURST_3;
                 break;

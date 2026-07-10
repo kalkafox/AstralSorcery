@@ -48,48 +48,48 @@ import java.util.Random;
 public class BlockFlareLight extends Block {
 
     public static final EnumProperty<DyeColor> COLOR = EnumProperty.create("color", DyeColor.class);
-    private static final VoxelShape SHAPE = VoxelShapes.create(6F / 16F, 3F / 16F, 6F / 16F, 10F / 16F, 7F / 16F, 10F / 16F);
+    private static final VoxelShape SHAPE = Shapes.create(6F / 16F, 3F / 16F, 6F / 16F, 10F / 16F, 7F / 16F, 10F / 16F);
 
     public BlockFlareLight() {
         super(PropertiesMisc.defaultAir()
-                .setLightLevel(state -> 15));
-        setDefaultState(this.getStateContainer().getBaseState().with(COLOR, DyeColor.YELLOW));
+                .isRedstoneConductor(state -> 15));
+        registerDefaultState(this.getStateContainer().any().setValue(COLOR, DyeColor.YELLOW));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
         Color c = ColorUtils.flareColorFromDye(state.get(COLOR));
         for (int i = 0; i < 2; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(new Vector3(pos)
                             .add(0.5, 0.2, 0.5)
-                            .add(rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1),
-                                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1),
-                                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1)))
-                    .setScaleMultiplier(0.4F + rand.nextFloat() * 0.1F)
+                            .add(random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1),
+                                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1),
+                                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1)))
+                    .setScaleMultiplier(0.4F + random.nextFloat() * 0.1F)
                     .setAlphaMultiplier(0.35F)
-                    .setMotion(new Vector3(0, rand.nextFloat() * 0.01F, 0))
+                    .setDeltaMovement(new Vector3(0, random.nextFloat() * 0.01F, 0))
                     .color(VFXColorFunction.constant(c))
-                    .setMaxAge(50 + rand.nextInt(20));
+                    .setMaxAge(50 + random.nextInt(20));
         }
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(new Vector3(pos)
                             .add(0.5, 0.3, 0.5)
-                            .add(rand.nextFloat() * 0.02 * (rand.nextBoolean() ? 1 : -1),
-                                    rand.nextFloat() * 0.1 * (rand.nextBoolean() ? 1 : -1),
-                                    rand.nextFloat() * 0.02 * (rand.nextBoolean() ? 1 : -1)))
-                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                    .setMotion(new Vector3(0, rand.nextFloat() * 0.01F, 0))
+                            .add(random.nextFloat() * 0.02 * (random.nextBoolean() ? 1 : -1),
+                                    random.nextFloat() * 0.1 * (random.nextBoolean() ? 1 : -1),
+                                    random.nextFloat() * 0.02 * (random.nextBoolean() ? 1 : -1)))
+                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                    .setDeltaMovement(new Vector3(0, random.nextFloat() * 0.01F, 0))
                     .color(VFXColorFunction.WHITE)
-                    .setMaxAge(25 + rand.nextInt(10));
+                    .setMaxAge(25 + random.nextInt(10));
         }
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, Level world, BlockPos pos, ParticleEngine manager) {
+    public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
         return true;
     }
 
@@ -101,7 +101,7 @@ public class BlockFlareLight extends Block {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addRunningEffects(BlockState state, Level world, BlockPos pos, Entity entity) {
+    public boolean addRunningEffects(BlockState state, Level level, BlockPos pos, Entity entity) {
         return true;
     }
 
@@ -112,32 +112,32 @@ public class BlockFlareLight extends Block {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
         return SHAPE;
     }
 
     @Override
-    public boolean isAir(BlockState state, BlockGetter world, BlockPos pos) {
+    public boolean isAir(BlockState state, BlockGetter level, BlockPos pos) {
         return false;
     }
 
     @Override
-    public boolean canBeReplacedByLogs(BlockState state, LevelReader world, BlockPos pos) {
+    public boolean canBeReplacedByLogs(BlockState state, LevelReader level, BlockPos pos) {
         return true;
     }
 
     @Override
-    public boolean canBeReplacedByLeaves(BlockState state, LevelReader world, BlockPos pos) {
+    public boolean canBeReplacedByLeaves(BlockState state, LevelReader level, BlockPos pos) {
         return true;
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> ct) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> ct) {
         ct.add(COLOR);
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.INVISIBLE;
+        return RenderShape.INVISIBLE;
     }
 }

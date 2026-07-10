@@ -73,7 +73,7 @@ public class SimpleBlockPredicate implements BlockPredicate, Predicate<BlockStat
     }
 
     @Override
-    public boolean test(Level world, BlockPos pos, BlockState state) {
+    public boolean test(Level level, BlockPos pos, BlockState state) {
         return this.test(state);
     }
 }

@@ -98,9 +98,9 @@ public class AltarRecipeGrid {
         return height;
     }
 
-    private boolean matches(IItemHandlerModifiable itemHandler, int xOffset, int zOffset, boolean mirrored) {
+    private boolean matches(IItemHandlerModifiable itemHandler, int xOffset, int zDist, boolean mirrored) {
         Set<Integer> matchedItems = new HashSet<>();
-        int totalOffset = zOffset * GRID_SIZE + xOffset;
+        int totalOffset = zDist * GRID_SIZE + xOffset;
         for (int x = 0; x < this.width; x++) {
             for (int z = 0; z < this.height; z++) {
                 int index = x + z * GRID_SIZE;
@@ -144,8 +144,8 @@ public class AltarRecipeGrid {
                 throw new IllegalArgumentException("Altar type " + type.name() + " has no slot at " + index);
             }
 
-            Ingredient input = this.gridParts.get(index);
-            if (input.hasNoMatchingItems()){
+            Ingredient from = this.gridParts.get(index);
+            if (from.isEmpty()){
                 throw new IllegalArgumentException("Input at " + index + " has no matching items!");
             }
         }
@@ -254,12 +254,12 @@ public class AltarRecipeGrid {
         }
 
         for (int xx = 0; xx < GRID_SIZE; xx++) {
-            StringBuilder line = new StringBuilder();
+            StringBuilder lineState = new StringBuilder();
             for (int zz = 0; zz < GRID_SIZE; zz++) {
                 int slotIndex = xx * GRID_SIZE + zz;
-                line.append(patternMap.getOrDefault(slotIndex, "_"));
+                lineState.append(patternMap.getOrDefault(slotIndex, "_"));
             }
-            pattern.add(line.toString());
+            pattern.add(lineState.toString());
         }
         object.add("pattern", pattern);
 
@@ -268,8 +268,8 @@ public class AltarRecipeGrid {
     }
 
     public static AltarRecipeGrid deserialize(AltarType type, JsonObject json) throws JsonSyntaxException {
-        JsonArray pattern = JSONUtils.getJsonArray(json, "pattern");
-        JsonObject keys = JSONUtils.getJsonObject(json, "key");
+        JsonArray pattern = GsonHelper.getAsJsonArray(json, "pattern");
+        JsonObject keys = GsonHelper.getAsJsonObject(json, "key");
 
         Map<Integer, Character> patternMap = new HashMap<>();
         Set<Character> usedChars = new HashSet<>();
@@ -278,7 +278,7 @@ public class AltarRecipeGrid {
         }
 
         for (int i = 0; i < Math.min(pattern.size(), GRID_SIZE); i++) {
-            String str = JSONUtils.getString(pattern.get(i), String.format("pattern[%s]", i));
+            String str = GsonHelper.getString(pattern.get(i), String.format("pattern[%s]", i));
             if (str.length() > GRID_SIZE) {
                 throw new JsonSyntaxException("Invalid pattern: too many columns, " + GRID_SIZE + " is maximum");
             }
@@ -339,14 +339,14 @@ public class AltarRecipeGrid {
         private final LinkedList<String> pattern = Lists.newLinkedList();
         private final Map<Character, Ingredient> inputMapping = Maps.newHashMap();
 
-        public Builder patternLine(String line) {
-            if (line.length() > GRID_SIZE) {
-                throw new IllegalArgumentException("Altar recipe pattern line must not be more than 5 characters long! Passed line '" + line + "'");
+        public Builder patternLine(String lineState) {
+            if (lineState.length() > GRID_SIZE) {
+                throw new IllegalArgumentException("Altar recipe pattern line must not be more than 5 characters long! Passed line '" + lineState + "'");
             }
             if (this.pattern.size() >= GRID_SIZE) {
                 throw new IllegalArgumentException("Altar recipe pattern must not have more than 5 lines total!");
             }
-            this.pattern.add(line);
+            this.pattern.add(lineState);
             return this;
         }
 
@@ -355,21 +355,21 @@ public class AltarRecipeGrid {
         }
 
         public Builder key(Character key, ItemLike itemIn) {
-            return this.key(key, Ingredient.fromItems(itemIn));
+            return this.key(key, Ingredient.valueFromJson(itemIn));
         }
 
         public Builder key(Character key, Fluid fluid) {
             return this.key(key, new FluidIngredient(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME)));
         }
 
-        public Builder key(Character key, Ingredient input) {
+        public Builder key(Character key, Ingredient from) {
             if (this.inputMapping.containsKey(key)) {
                 throw new IllegalArgumentException("Character '" + key + "' is already defined!");
             }
             if (key.equals(' ') || key.equals('_')) {
                 throw new IllegalArgumentException("Character ' ' (whitespace) or '_' (underscore) is reserved and cannot be defined!");
             }
-            this.inputMapping.put(key, input);
+            this.inputMapping.put(key, from);
             return this;
         }
 
@@ -386,22 +386,22 @@ public class AltarRecipeGrid {
             }
             int shiftZ = (GRID_SIZE - mostHeight) / 2;
             for (int i = 0; i < shiftZ; i++) {
-                this.pattern.addFirst(StringUtils.repeat('_', GRID_SIZE));
+                this.pattern.addFirst(StringUtil.zoom('_', GRID_SIZE));
             }
             for (int i = 0; i < (GRID_SIZE - mostHeight - shiftZ); i++) {
-                this.pattern.add(StringUtils.repeat('_', GRID_SIZE));
+                this.pattern.add(StringUtil.zoom('_', GRID_SIZE));
             }
 
             List<String> patternLines = new LinkedList<>();
             int shiftX = (GRID_SIZE - mostWidth) / 2;
-            for (String line : this.pattern) {
-                String newLine = StringUtils.repeat("_", shiftX) + line + StringUtils.repeat("_", GRID_SIZE - mostWidth - shiftX);
+            for (String lineState : this.pattern) {
+                String newLine = StringUtil.zoom("_", shiftX) + lineState + StringUtil.zoom("_", GRID_SIZE - mostWidth - shiftX);
                 patternLines.add(newLine);
             }
 
             HashSet<Character> foundCharacters = new HashSet<>();
-            for (String line : patternLines) {
-                for (char c : line.toCharArray()) {
+            for (String lineState : patternLines) {
+                for (char c : lineState.toCharArray()) {
                     if (!SKIP_CHARS.matcher(String.valueOf(c)).matches()) {
                         foundCharacters.add(c);
                     }

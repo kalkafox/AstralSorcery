@@ -49,7 +49,7 @@ public class CrystalCalculations {
     }
 
     private static double getRitualEffectRangeFactor(Ritual pedestalSrc, CrystalAttributes attributes) {
-        CalculationContext ctx = CalculationContext.Builder.newBuilder()
+        CalculationContext ctx = CalculationContext.Builder.properties()
                 .fromSource(pedestalSrc)
                 .addUsage(USE_RITUAL_RANGE)
                 .build();
@@ -59,7 +59,7 @@ public class CrystalCalculations {
     // Range: 1.0 - 5.985
     public static double getRitualCostReductionFactor(StarlightReceiverRitualPedestal pedestal,
                                                       CrystalAttributes attributes) {
-        CalculationContext ctx = CalculationContext.Builder.newBuilder()
+        CalculationContext ctx = CalculationContext.Builder.properties()
                 .fromSource(SOURCE_RITUAL_PEDESTAL.createInstance(pedestal))
                 .addUsage(USE_RITUAL_EFFECT)
                 .build();
@@ -79,7 +79,7 @@ public class CrystalCalculations {
 
     // Range: 1.0 - 11.0131125
     public static float getCollectorCrystalCollectionRate(IndependentCrystalSource collectorSource) {
-        CalculationContext ctx = CalculationContext.Builder.newBuilder()
+        CalculationContext ctx = CalculationContext.Builder.properties()
                 .fromSource(SOURCE_COLLECTOR_CRYSTAL.createInstance(collectorSource))
                 .addUsage(USE_COLLECTOR_CRYSTAL)
                 .build();
@@ -89,7 +89,7 @@ public class CrystalCalculations {
 
     // Range: 1.0 - 8.471625
     public static float getCrystalCollectionRate(CrystalAttributes attributes) {
-        CalculationContext ctx = CalculationContext.Builder.newBuilder()
+        CalculationContext ctx = CalculationContext.Builder.properties()
                 .addUsage(USE_COLLECTOR_CRYSTAL)
                 .build();
         return (float) calculate(1.0, attributes, ctx);
@@ -97,18 +97,18 @@ public class CrystalCalculations {
 
     // Range: 0.75 - 1.0
     public static float getThroughputMultiplier(CrystalAttributes attributes) {
-        CalculationContext ctx = CalculationContext.Builder.newBuilder()
+        CalculationContext ctx = CalculationContext.Builder.properties()
                 .addUsage(USE_LENS_TRANSFER)
                 .build();
-        return MathHelper.clamp((float) calculate(1F, attributes, ctx), 0F, 1F);
+        return Mth.clamp((float) calculate(1F, attributes, ctx), 0F, 1F);
     }
 
     // Range: 1.0 - 1.6
     public static float getThroughputEffectMultiplier(CrystalAttributes attributes) {
-        CalculationContext ctx = CalculationContext.Builder.newBuilder()
+        CalculationContext ctx = CalculationContext.Builder.properties()
                 .addUsage(USE_LENS_EFFECT)
                 .build();
-        return MathHelper.clamp((float) calculate(1F, attributes, ctx), 0F, 1F);
+        return Mth.clamp((float) calculate(1F, attributes, ctx), 0F, 1F);
     }
 
     // Range: 1.0 - 11.56 (Multiplier)
@@ -116,7 +116,7 @@ public class CrystalCalculations {
         if (tool.getItem() instanceof CrystalAttributeItem) {
             CrystalAttributes attr = ((CrystalAttributeItem) tool.getItem()).getAttributes(tool);
             if (attr != null) {
-                CalculationContext ctx = CalculationContext.Builder.newBuilder()
+                CalculationContext ctx = CalculationContext.Builder.properties()
                         .addUsage(USE_TOOL_DURABILITY)
                         .build();
                 durability = (int) Math.round(durability * calculate(1.0, attr, ctx));
@@ -128,17 +128,17 @@ public class CrystalCalculations {
     // Range: 1.0 - 3.895 (Multiplier)
     // Current speed value: 16 (-> 16 - 62.32)
     // Current damage value: 5.5 (-> 5.5 - 21.4225)
-    public static float getToolEfficiency(float efficiency, ItemStack tool) {
+    public static float getToolEfficiency(float speed, ItemStack tool) {
         if (tool.getItem() instanceof CrystalAttributeItem) {
             CrystalAttributes attr = ((CrystalAttributeItem) tool.getItem()).getAttributes(tool);
             if (attr != null) {
-                CalculationContext ctx = CalculationContext.Builder.newBuilder()
+                CalculationContext ctx = CalculationContext.Builder.properties()
                         .addUsage(USE_TOOL_EFFECTIVENESS)
                         .build();
-                efficiency *= calculate(1.0, attr, ctx);
+                speed *= calculate(1.0, attr, ctx);
             }
         }
-        return efficiency;
+        return speed;
     }
 
 }

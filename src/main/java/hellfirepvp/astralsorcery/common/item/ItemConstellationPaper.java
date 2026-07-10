@@ -61,7 +61,7 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
     }
 
     @Override
-    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (this.isInGroup(group)) {
             items.add(new ItemStack(this, 1));
 
@@ -75,26 +75,26 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level world, List<Component> toolTip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> toolTip, TooltipFlag flag) {
         IConstellation c = getConstellation(stack);
         if (c != null && c.canDiscover(Minecraft.getInstance().player, ResearchHelper.getClientProgress())) {
-            toolTip.add(c.getConstellationName().withStyle(TextFormatting.BLUE));
+            toolTip.add(c.getConstellationName().withStyle(ChatFormatting.BLUE));
         } else {
-            toolTip.add(Component.translatable("astralsorcery.misc.noinformation").withStyle(TextFormatting.GRAY));
+            toolTip.add(Component.translatable("astralsorcery.misc.noinformation").withStyle(ChatFormatting.GRAY));
         }
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
-        ItemStack held = player.getHeldItem(hand);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
         if (held.isEmpty()) {
-            return ActionResult.resultSuccess(held);
+            return InteractionResultHolder.success(held);
         }
-        if (world.isRemote() && getConstellation(held) != null) {
+        if (level.isClientSide() && getConstellation(held) != null) {
             SoundHelper.playSoundClient(SoundsAS.GUI_JOURNAL_PAGE, 1F, 1F);
             AstralSorcery.getProxy().openGui(player, GuiType.CONSTELLATION_PAPER, getConstellation(held));
         }
-        return ActionResult.resultSuccess(held);
+        return InteractionResultHolder.success(held);
     }
 
     @Override
@@ -104,8 +104,8 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
 
     @Nullable
     @Override
-    public Entity createEntity(Level world, Entity location, ItemStack itemstack) {
-        EntityItemExplosionResistant res = new EntityItemExplosionResistant(EntityTypesAS.ITEM_EXPLOSION_RESISTANT, world, location.getPosX(), location.getPosY(), location.getPosZ(), itemstack);
+    public Entity createEntity(Level level, Entity location, ItemStack itemstack) {
+        EntityItemExplosionResistant res = new EntityItemExplosionResistant(EntityTypesAS.ITEM_EXPLOSION_RESISTANT, level, location.getX(), location.getY(), location.getZ(), itemstack);
         res.read(location.writeWithoutTypeId(new CompoundTag()));
         if (itemstack.getItem() instanceof ItemConstellationPaper) {
             IConstellation cst = getConstellation(itemstack);
@@ -120,8 +120,8 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean isSelected) {
-        if (world.isRemote || !(entity instanceof Player)) {
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean isSelected) {
+        if (level.isClientSide || !(entity instanceof Player)) {
             return;
         }
 
@@ -149,7 +149,7 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
                 }
             }
 
-            IConstellation constellation = MiscUtils.getRandomEntry(constellations, world.rand);
+            IConstellation constellation = MiscUtils.getRandomEntry(constellations, level.random);
             if (constellation != null) {
                 setConstellation(stack, constellation);
             }
@@ -175,7 +175,7 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
             }
         }
 
-        super.inventoryTick(stack, world, entity, slot, isSelected);
+        super.inventoryTick(stack, level, entity, slot, isSelected);
     }
 
     @Override
@@ -199,7 +199,7 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
     }
 
     public boolean setConstellation(ItemStack stack, @Nullable IConstellation constellation) {
-        constellation.writeToNBT(NBTHelper.getPersistentData(stack));
+        constellation.save(NBTHelper.getPersistentData(stack));
         return true;
     }
 }

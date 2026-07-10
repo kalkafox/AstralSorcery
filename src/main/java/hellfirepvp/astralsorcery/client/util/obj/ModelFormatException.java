@@ -22,16 +22,16 @@ public class ModelFormatException extends RuntimeException {
         super();
     }
 
-    public ModelFormatException(String message, Throwable cause) {
-        super(message, cause);
+    public ModelFormatException(String message, Throwable exception) {
+        super(message, exception);
     }
 
     public ModelFormatException(String message) {
         super(message);
     }
 
-    public ModelFormatException(Throwable cause) {
-        super(cause);
+    public ModelFormatException(Throwable exception) {
+        super(exception);
     }
 
 }

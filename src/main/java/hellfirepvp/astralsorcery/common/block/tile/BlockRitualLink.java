@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
  */
 public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock {
 
-    private static final VoxelShape RITUAL_LINK = VoxelShapes.create(6D / 16D, 2D / 16D, 6D / 16D, 10D / 16D, 14D / 16D, 10D / 16D);
+    private static final VoxelShape RITUAL_LINK = Shapes.create(6D / 16D, 2D / 16D, 6D / 16D, 10D / 16D, 14D / 16D, 10D / 16D);
 
     public BlockRitualLink() {
         super(PropertiesGlass.coatedGlass()
@@ -47,12 +47,12 @@ public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock 
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileRitualLink();
     }
 }

@@ -34,11 +34,11 @@ public class InteractionResultRegistry {
 
     private InteractionResultRegistry() {}
 
-    public static void register(ResourceLocation key, Supplier<InteractionResult> supplier) {
-        interactionRegistry.put(key, supplier);
+    public static void register(ResourceLocation key, Supplier<InteractionResult> factory) {
+        interactionRegistry.put(key, factory);
     }
 
-    public static Collection<ResourceLocation> getKeys() {
+    public static Collection<ResourceLocation> getUserList() {
         return interactionRegistry.keySet();
     }
 

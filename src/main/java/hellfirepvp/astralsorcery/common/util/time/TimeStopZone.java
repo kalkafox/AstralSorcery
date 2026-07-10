@@ -43,18 +43,18 @@ public class TimeStopZone {
 
     final float range;
     final BlockPos offset;
-    private final Level world;
+    private final Level level;
     private int ticksToLive;
 
     private boolean active = true;
 
     private final List<BlockEntity> cachedTiles = new LinkedList<>();
 
-    TimeStopZone(EntityTargetController ctrl, float range, BlockPos offset, Level world, int tickLivespan) {
+    TimeStopZone(EntityTargetController ctrl, float range, BlockPos offset, Level level, int tickLivespan) {
         this.targetController = ctrl;
         this.range = range;
         this.offset = offset;
-        this.world = world;
+        this.level = level;
         this.ticksToLive = tickLivespan;
     }
 
@@ -62,22 +62,22 @@ public class TimeStopZone {
         if (!active) return;
         this.ticksToLive--;
 
-        int minX = MathHelper.floor((offset.getX() - range) / 16.0D);
-        int maxX = MathHelper.floor((offset.getX() + range) / 16.0D);
-        int minZ = MathHelper.floor((offset.getZ() - range) / 16.0D);
-        int maxZ = MathHelper.floor((offset.getZ() + range) / 16.0D);
+        int minX = Mth.floor((offset.getX() - range) / 16.0D);
+        int maxX = Mth.floor((offset.getX() + range) / 16.0D);
+        int minZ = Mth.floor((offset.getZ() - range) / 16.0D);
+        int maxZ = Mth.floor((offset.getZ() + range) / 16.0D);
 
         for (int xx = minX; xx <= maxX; ++xx) {
             for (int zz = minZ; zz <= maxZ; ++zz) {
-                LevelChunk ch = world.getChunk(xx, zz);
+                LevelChunk ch = level.getChunk(xx, zz);
                 if (!ch.isEmpty()) {
-                    Map<BlockPos, BlockEntity> map = ch.getTileEntityMap();
+                    Map<BlockPos, BlockEntity> map = ch.getBlockEntities();
                     for (Map.Entry<BlockPos, BlockEntity> teEntry : map.entrySet()) {
                         BlockEntity te = teEntry.getValue();
                         if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) &&
-                                te.getPos().withinDistance(offset, range) &&
-                                world.tickableTileEntities.contains(te)) {
-                            world.tickableTileEntities.remove(te);
+                                te.getBlockPos().distSqr(offset, range) &&
+                                level.tickableBlockEntities.contains(te)) {
+                            level.tickableBlockEntities.remove(te);
                             safeCacheTile(te);
                         }
                     }
@@ -90,7 +90,7 @@ public class TimeStopZone {
         if (te == null) return;
 
         for (BlockEntity tile : cachedTiles) {
-            if (tile.getPos().equals(te.getPos())) {
+            if (tile.getBlockPos().equals(te.getBlockPos())) {
                 return;
             }
         }
@@ -103,11 +103,11 @@ public class TimeStopZone {
 
     void stopEffect() {
         for (BlockEntity cached : cachedTiles) {
-            BlockState state = world.getBlockState(cached.getPos());
+            BlockState state = level.getBlockState(cached.getBlockPos());
             if (state.getBlock().hasTileEntity(state)) {
-                BlockEntity te = state.getBlock().createTileEntity(state, world);
+                BlockEntity te = state.getBlock().createTileEntity(state, level);
                 if (te != null && te.getClass().isAssignableFrom(cached.getClass())) {
-                    world.tickableTileEntities.add(cached);
+                    level.tickableBlockEntities.add(cached);
                 }
             }
         }
@@ -128,29 +128,29 @@ public class TimeStopZone {
         if (e.hurtTime > 0) {
             e.hurtTime--;
         }
-        if (e.hurtResistantTime > 0) {
-            e.hurtResistantTime--;
+        if (e.invulnerableTime > 0) {
+            e.invulnerableTime--;
         }
-        e.prevPosX = e.getPosX();
-        e.prevPosY = e.getPosY();
-        e.prevPosZ = e.getPosZ();
-        e.prevLimbSwingAmount = e.limbSwingAmount;
-        e.prevRenderYawOffset = e.renderYawOffset;
-        e.prevRotationPitch = e.rotationPitch;
-        e.prevRotationYaw = e.rotationYaw;
-        e.prevRotationYawHead = e.rotationYawHead;
-        e.prevSwingProgress = e.swingProgress;
-        e.prevDistanceWalkedModified = e.distanceWalkedModified;
+        e.xo = e.getX();
+        e.yo = e.getY();
+        e.zo = e.getZ();
+        e.animationSpeedOld = e.animationSpeed;
+        e.yBodyRotO = e.yBodyRot;
+        e.xRotO = e.getXRot();
+        e.yRotO = e.getYRot();
+        e.yHeadRotO = e.yHeadRot;
+        e.oAttackAnim = e.swingProgress;
+        e.walkDistO = e.walkDist;
 
-        if (!e.getEntityWorld().isRemote()) {
-            e.travel(Vector3d.ZERO);
+        if (!e.getCommandSenderWorld().isClientSide()) {
+            e.travel(Vec3.ZERO);
         }
 
         if (e instanceof EnderDragon) {
-            DragonPhaseInstance phase = ((EnderDragon) e).getPhaseManager().getCurrentPhase();
-            if (phase.getType() != PhaseType.HOLDING_PATTERN &&
-                    phase.getType() != PhaseType.DYING) {
-                ((EnderDragon) e).getPhaseManager().setPhase(PhaseType.HOLDING_PATTERN);
+            DragonPhaseInstance currentPhase = ((EnderDragon) e).getPhaseManager().getCurrentPhase();
+            if (currentPhase.getType() != EnderDragonPhase.HOLDING_PATTERN &&
+                    currentPhase.getType() != EnderDragonPhase.DYING) {
+                ((EnderDragon) e).getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
             }
         }
     }
@@ -171,7 +171,7 @@ public class TimeStopZone {
             if (!e.isAlive() || e.getHealth() <= 0) {
                 return false;
             }
-            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getType() == PhaseType.DYING) {
+            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getType() == EnderDragonPhase.DYING) {
                 return false;
             }
             if (hasOwner && e.getEntityId() == ownerId) {

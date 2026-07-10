@@ -38,13 +38,13 @@ public abstract class TileReceiverBase<T extends ITransmissionReceiver> extends 
     @Override
     @Nonnull
     public BlockPos getTrPos() {
-        return getPos();
+        return getBlockPos();
     }
 
     @Override
     @Nonnull
     public Level getTrWorld() {
-        return getWorld();
+        return getLevel();
     }
 
     @Override

@@ -40,16 +40,16 @@ public abstract class BlockCrystalContainer extends BaseEntityBlock {
     }
 
     @Override
-    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
-        ItemStack stack = super.getPickBlock(state, target, world, pos, player);
+    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+        ItemStack stack = super.getPickBlock(state, target, level, pos, player);
         if (stack.getItem() instanceof CrystalAttributeItem) {
-            CrystalAttributeTile cat = MiscUtils.getTileAt(world, pos, CrystalAttributeTile.class, true);
+            CrystalAttributeTile cat = MiscUtils.getTileAt(level, pos, CrystalAttributeTile.class, true);
             if (cat != null) {
                 ((CrystalAttributeItem) stack.getItem()).setAttributes(stack, cat.getAttributes());
             }
         }
         if (stack.getItem() instanceof ConstellationItem) {
-            ConstellationTile ct = MiscUtils.getTileAt(world, pos, ConstellationTile.class, true);
+            ConstellationTile ct = MiscUtils.getTileAt(level, pos, ConstellationTile.class, true);
             if (ct != null) {
                 ((ConstellationItem) stack.getItem()).setAttunedConstellation(stack, ct.getAttunedConstellation());
                 ((ConstellationItem) stack.getItem()).setTraitConstellation(stack, ct.getTraitConstellation());
@@ -59,16 +59,16 @@ public abstract class BlockCrystalContainer extends BaseEntityBlock {
     }
 
     @Override
-    public void onBlockPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         Item i = stack.getItem();
         if (i instanceof CrystalAttributeItem) {
-            CrystalAttributeTile cat = MiscUtils.getTileAt(world, pos, CrystalAttributeTile.class, true);
+            CrystalAttributeTile cat = MiscUtils.getTileAt(level, pos, CrystalAttributeTile.class, true);
             if (cat != null) {
                 cat.setAttributes(((CrystalAttributeItem) i).getAttributes(stack));
             }
         }
         if (i instanceof ConstellationItem) {
-            ConstellationTile ct = MiscUtils.getTileAt(world, pos, ConstellationTile.class, true);
+            ConstellationTile ct = MiscUtils.getTileAt(level, pos, ConstellationTile.class, true);
             if (ct != null) {
                 ct.setAttunedConstellation(((ConstellationItem) i).getAttunedConstellation(stack));
                 ct.setTraitConstellation(((ConstellationItem) i).getTraitConstellation(stack));

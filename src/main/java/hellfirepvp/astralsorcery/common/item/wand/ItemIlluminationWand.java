@@ -70,8 +70,8 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
 
         DyeColor color = getConfiguredColor(stack);
         tooltip.add(ColorUtils.getTranslation(color).withStyle(ColorUtils.textFormattingForDye(color)));
@@ -79,7 +79,7 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
 
     @Override
     public float getAlignmentChargeCost(Player player, ItemStack stack) {
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             return COST_PER_ILLUMINATION;
         } else {
             return COST_PER_FLARE;
@@ -87,86 +87,86 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
     }
 
     @Override
-    public InteractionResult onItemUse(UseOnContext context) {
-        Level world = context.getWorld();
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
         Direction dir = context.getFace();
-        BlockPos pos = context.getPos();
+        BlockPos pos = context.getBlockPos();
         Player player = context.getPlayer();
         ItemStack stack = context.getItem();
 
-        if (world.isRemote() || player == null || stack.isEmpty() || !(stack.getItem() instanceof ItemIlluminationWand)) {
-            return ActionResultType.SUCCESS;
+        if (level.isClientSide() || player == null || stack.isEmpty() || !(stack.getItem() instanceof ItemIlluminationWand)) {
+            return InteractionResult.SUCCESS;
         }
 
-        BlockState state = world.getBlockState(pos);
+        BlockState state = level.getBlockState(pos);
 
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             if (state.getBlock() instanceof BlockTranslucentBlock) {
-                TileTranslucentBlock tb = MiscUtils.getTileAt(world, pos, TileTranslucentBlock.class, true);
-                if (tb != null && (tb.getPlayerUUID() == null || tb.getPlayerUUID().equals(player.getUniqueID()))) {
+                TileTranslucentBlock tb = MiscUtils.getTileAt(level, pos, TileTranslucentBlock.class, true);
+                if (tb != null && (tb.getPlayerUUID() == null || tb.getPlayerUUID().equals(player.getUUID()))) {
                     if (tb.revert()) {
-                        SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_UNHIGHLIGHT, SoundCategory.BLOCKS, world, pos, 0.6F, 0.9F + random.nextFloat() * 0.2F);
+                        SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_UNHIGHLIGHT, SoundSource.BLOCKS, level, pos, 0.6F, 0.9F + random.nextFloat() * 0.2F);
                     }
                 }
             } else {
-                BlockEntity tile = MiscUtils.getTileAt(world, pos, TileEntity.class, true);
+                BlockEntity tile = MiscUtils.getTileAt(level, pos, BlockEntity.class, true);
                 if (tile == null &&
                         !state.hasTileEntity() &&
-                        player.canPlayerEdit(pos, dir, stack) &&
-                        VoxelShapes.fullCube().equals(world.getBlockState(pos).getShape(world, pos))) {
+                        player.mayUseItemAt(pos, dir, stack) &&
+                        Shapes.block().equals(level.getBlockState(pos).getShape(level, pos))) {
                     if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_ILLUMINATION, false)) {
-                        if (world.setBlockState(pos, BlocksAS.TRANSLUCENT_BLOCK.getDefaultState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
-                            SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_HIGHLIGHT, SoundCategory.BLOCKS, world, pos, 0.6F, 0.9F + random.nextFloat() * 0.2F);
-                            TileTranslucentBlock tb = MiscUtils.getTileAt(world, pos, TileTranslucentBlock.class, true);
+                        if (level.setBlock(pos, BlocksAS.TRANSLUCENT_BLOCK.defaultBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
+                            SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_HIGHLIGHT, SoundSource.BLOCKS, level, pos, 0.6F, 0.9F + random.nextFloat() * 0.2F);
+                            TileTranslucentBlock tb = MiscUtils.getTileAt(level, pos, TileTranslucentBlock.class, true);
                             if (tb != null) {
                                 tb.setFakedState(state);
                                 tb.setOverlayColor(ColorUtils.flareColorFromDye(getConfiguredColor(stack)));
-                                tb.setPlayerUUID(player.getUniqueID());
+                                tb.setPlayerUUID(player.getUUID());
                             } else {
                                 //Abort, we didn't get a tileentity... for some reason.
-                                world.setBlockState(pos, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+                                level.setBlock(pos, state, Constants.BlockFlags.DEFAULT_AND_RERENDER);
                             }
                         }
                     }
                 }
             }
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        TileIlluminator illum = MiscUtils.getTileAt(world, pos, TileIlluminator.class, true);
+        TileIlluminator illum = MiscUtils.getTileAt(level, pos, TileIlluminator.class, true);
         if (illum != null) {
             illum.onWandUsed(stack);
-            SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundCategory.BLOCKS, world, pos, 0.6F, 1F);
-            return ActionResultType.SUCCESS;
+            SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundSource.BLOCKS, level, pos, 0.6F, 1F);
+            return InteractionResult.SUCCESS;
         }
 
-        CollisionContext selContext = ISelectionContext.forEntity(player);
+        CollisionContext selContext = CollisionContext.forEntity(player);
         BlockPos placePos = pos;
         BlockState placeState = getPlacingState(stack);
-        if (!BlockUtils.isReplaceable(world, pos)) {
+        if (!BlockUtils.isReplaceable(level, pos)) {
             placePos = placePos.offset(dir);
         }
 
-        if (!BlockUtils.isReplaceable(world, placePos)) {
-            return ActionResultType.SUCCESS;
+        if (!BlockUtils.isReplaceable(level, placePos)) {
+            return InteractionResult.SUCCESS;
         }
 
-        if (player.canPlayerEdit(placePos, dir, stack)) {
-            if (world.getBlockState(placePos).equals(placeState)) {
-                if (world.setBlockState(placePos, Blocks.AIR.getDefaultState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
-                    SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundCategory.BLOCKS, world, pos, 0.6F, 1F);
+        if (player.mayUseItemAt(placePos, dir, stack)) {
+            if (level.getBlockState(placePos).equals(placeState)) {
+                if (level.setBlock(placePos, Blocks.AIR.defaultBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
+                    SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundSource.BLOCKS, level, pos, 0.6F, 1F);
                 }
-            } else if (placeState.isValidPosition(world, placePos) &&
-                    world.placedBlockCollides(placeState, placePos, selContext)) {
+            } else if (placeState.isValidPosition(level, placePos) &&
+                    level.noBlockCollision(placeState, placePos, selContext)) {
                 if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_FLARE, false)) {
-                    if (world.setBlockState(placePos, placeState, Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
-                        SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundCategory.BLOCKS, world, pos, 0.6F, 1F);
+                    if (level.setBlock(placePos, placeState, Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
+                        SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundSource.BLOCKS, level, pos, 0.6F, 1F);
                     }
                 }
             }
         }
 
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -193,6 +193,6 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
 
     @Nonnull
     public static BlockState getPlacingState(ItemStack wand) {
-        return BlocksAS.FLARE_LIGHT.getDefaultState().with(BlockFlareLight.COLOR, getConfiguredColor(wand));
+        return BlocksAS.FLARE_LIGHT.defaultBlockState().setValue(BlockFlareLight.COLOR, getConfiguredColor(wand));
     }
 }

@@ -129,7 +129,7 @@ public class AttributeEvent {
     public static double postProcessVanilla(double value, AttributeInstance attribute) {
         AttributeEvent.PostProcessVanilla event = new AttributeEvent.PostProcessVanilla(attribute, value);
         NeoForge.EVENT_BUS.post(event);
-        return event.getAttribute().clampValue(event.getValue());
+        return event.getAttribute().sanitizeValue(event.getValue());
     }
 
     @Nullable

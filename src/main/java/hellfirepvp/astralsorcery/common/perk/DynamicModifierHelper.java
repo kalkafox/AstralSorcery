@@ -59,13 +59,13 @@ public class DynamicModifierHelper {
         tag.put(KEY_MODIFIERS, modifierList);
     }
 
-    public static List<PerkAttributeModifier> getDynamicModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
+    public static List<PerkAttributeModifier> getDynamicModifiers(ItemStack stack, Player player, LogicalSide direction, boolean ignoreRequirements) {
         List<PerkAttributeModifier> modifiers = Lists.newArrayList();
         if (stack.getItem() instanceof AttributeModifierProvider) {
-            modifiers.addAll(((AttributeModifierProvider) stack.getItem()).getModifiers(player, side, ignoreRequirements));
+            modifiers.addAll(((AttributeModifierProvider) stack.getItem()).getModifiers(player, direction, ignoreRequirements));
         }
         if (stack.getItem() instanceof EquipmentAttributeModifierProvider) {
-            modifiers.addAll(((EquipmentAttributeModifierProvider) stack.getItem()).getModifiers(stack.copy(), player, side, ignoreRequirements));
+            modifiers.addAll(((EquipmentAttributeModifierProvider) stack.getItem()).getModifiers(stack.copy(), player, direction, ignoreRequirements));
         }
         modifiers.addAll(getStaticModifiers(stack));
         return modifiers;
@@ -93,8 +93,8 @@ public class DynamicModifierHelper {
         for (PerkAttributeModifier mod : DynamicModifierHelper.getDynamicModifiers(stack, Minecraft.getInstance().player, LogicalSide.CLIENT, false)) {
             if (mod.hasDisplayString()) {
                 tooltip.add(Component.literal(mod.getLocalizedDisplayString())
-                        .withStyle(TextFormatting.GRAY)
-                        .withStyle(TextFormatting.ITALIC));
+                        .withStyle(ChatFormatting.GRAY)
+                        .withStyle(ChatFormatting.ITALIC));
             }
         }
     }

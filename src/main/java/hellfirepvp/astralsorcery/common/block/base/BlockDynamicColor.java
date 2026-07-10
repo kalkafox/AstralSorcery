@@ -26,6 +26,6 @@ import javax.annotation.Nullable;
 public interface BlockDynamicColor {
 
     @OnlyIn(Dist.CLIENT)
-    public int getColor(BlockState state, @Nullable BlockAndTintGetter world, @Nullable BlockPos pos, int tintIndex);
+    public int getColor(BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, int tintIndex);
 
 }

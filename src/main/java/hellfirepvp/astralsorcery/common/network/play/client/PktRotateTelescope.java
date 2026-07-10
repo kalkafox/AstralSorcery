@@ -82,26 +82,26 @@ public class PktRotateTelescope extends ASPacket<PktRotateTelescope> {
             public void handleClient(PktRotateTelescope packet, NetworkEvent.Context context) {
                 context.enqueueWork(() -> {
                     Optional<Level> clWorld = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
-                    clWorld.ifPresent(world -> {
-                        TileTelescope tt = MiscUtils.getTileAt(world, packet.pos, TileTelescope.class, false);
+                    clWorld.ifPresent(level -> {
+                        TileTelescope tt = MiscUtils.getTileAt(level, packet.pos, TileTelescope.class, false);
                         if(tt != null) {
                             tt.setRotation(packet.isClockwise ? tt.getRotation().nextClockWise() : tt.getRotation().nextCounterClockWise());
                         }
                     });
-                    if (Minecraft.getInstance().currentScreen instanceof ScreenTelescope) {
-                        ((ScreenTelescope) Minecraft.getInstance().currentScreen).handleRotationChange(packet.isClockwise);
+                    if (Minecraft.getInstance().screen instanceof ScreenTelescope) {
+                        ((ScreenTelescope) Minecraft.getInstance().screen).handleRotationChange(packet.isClockwise);
                     }
                 });
             }
 
             @Override
-            public void handle(PktRotateTelescope packet, NetworkEvent.Context context, LogicalSide side) {
+            public void handle(PktRotateTelescope packet, NetworkEvent.Context context, LogicalSide direction) {
                 context.enqueueWork(() -> {
                     //TODO 1.16.2 re-check once worlds are not all constantly loaded
                     MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-                    Level world = srv.getWorld(packet.dim);
+                    Level level = srv.getLevel(packet.dim);
 
-                    TileTelescope tt = MiscUtils.getTileAt(world, packet.pos, TileTelescope.class, false);
+                    TileTelescope tt = MiscUtils.getTileAt(level, packet.pos, TileTelescope.class, false);
                     if(tt != null) {
                         tt.setRotation(packet.isClockwise ? tt.getRotation().nextClockWise() : tt.getRotation().nextCounterClockWise());
                         packet.replyWith(new PktRotateTelescope(packet.isClockwise, packet.dim, packet.pos), context);

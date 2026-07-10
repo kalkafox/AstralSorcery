@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * Created by HellFirePvP
  * Date: 07.03.2020 / 07:51
  */
-public class EntityLootTableProvider extends EntityLootTables {
+public class EntityLootTableProvider extends EntityLoot {
 
     @Override
     protected void addTables() {
@@ -31,7 +31,7 @@ public class EntityLootTableProvider extends EntityLootTables {
 
     @Override
     protected Iterable<EntityType<?>> getKnownEntities() {
-        return ForgeRegistries.ENTITIES.getValues().stream()
+        return BuiltInRegistries.ENTITY_TYPE.getValues().stream()
                 .filter(Mods.ASTRAL_SORCERY::owns)
                 .collect(Collectors.toList());
     }

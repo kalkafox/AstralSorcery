@@ -38,7 +38,7 @@ public class CameraTransformerPlayerFocus extends CameraTransformerSettingsCache
 
         EntityClientReplacement repl = new EntityClientReplacement();
         repl.read(Minecraft.getInstance().player.writeWithoutTypeId(new CompoundTag()));
-        Minecraft.getInstance().world.addPlayer(repl.getEntityId(), repl);
+        Minecraft.getInstance().level.updatePlayer(repl.getEntityId(), repl);
         this.clientEntity = repl;
 
         entity.setAsRenderViewEntity();
@@ -49,19 +49,19 @@ public class CameraTransformerPlayerFocus extends CameraTransformerSettingsCache
         super.onStopTransforming(pTicks);
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.world != null) {
-            mc.world.removeEntityFromWorld(this.clientEntity.getEntityId());
+        if (mc.level != null) {
+            mc.level.removeEntityFromWorld(this.clientEntity.getEntityId());
         }
 
         if (mc.player != null) {
             Player player = mc.player;
-            player.setPositionAndRotation(this.clientEntity.getPosX(), this.clientEntity.getPosY(), this.clientEntity.getPosZ(), this.clientEntity.rotationYaw, this.clientEntity.rotationPitch);
-            player.setVelocity(0, 0, 0);
+            player.setPositionAndRotation(this.clientEntity.getX(), this.clientEntity.getY(), this.clientEntity.getZ(), this.clientEntity.getYRot(), this.clientEntity.getXRot());
+            player.lerpMotion(0, 0, 0);
         }
 
         ClientCameraUtil.resetCamera();
 
-        if (mc.world != null) {
+        if (mc.level != null) {
             entity.onStopTransforming();
         }
     }
@@ -88,10 +88,10 @@ public class CameraTransformerPlayerFocus extends CameraTransformerSettingsCache
 
     @Override
     public void onClientTick() {
-        entity.ticksExisted++;
+        entity.tickCount++;
 
         if (clientEntity != null) {
-            entity.moveEntityTick(entity, clientEntity, entity.ticksExisted);
+            entity.moveEntityTick(entity, clientEntity, entity.tickCount);
         }
     }
 }

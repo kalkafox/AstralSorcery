@@ -78,36 +78,36 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
         this.thisFrameInfoStar = null;
     }
 
-    public void renderRecipeGrid(PoseStack renderStack, float offsetX, float offsetY, float zLevel, AbstractRenderableTexture tex) {
+    public void renderRecipeGrid(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, AbstractRenderableTexture tex) {
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
         tex.bindTexture();
-        RenderingGuiUtils.drawRect(renderStack, offsetX + 25, offsetY, zLevel, 129, 202);
+        RenderingGuiUtils.drawRect(renderStack, offsetX + 25, offsetY, blitOffset, 129, 202);
         RenderSystem.disableBlend();
     }
 
-    public void renderExpectedIngredientInput(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float scale, long tickOffset, Ingredient ingredient) {
+    public void renderExpectedIngredientInput(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float scale, long tickOffset, Ingredient ingredient) {
         ItemStack expected = IngredientHelper.getRandomVisibleStack(ingredient, ClientScheduler.getClientTick() + tickOffset);
         if (!expected.isEmpty()) {
             BlockAtlasTexture.getInstance().bindTexture();
 
-            this.renderItemStack(renderStack, offsetX, offsetY, zLevel, scale, expected);
+            this.renderItemStack(renderStack, offsetX, offsetY, blitOffset, scale, expected);
             this.thisFrameInputStacks.put(new Rectangle((int) offsetX, (int) offsetY, (int) (16 * scale), (int) (16 * scale)), new Tuple<>(expected, ingredient));
         }
     }
 
-    public void renderExpectedIngredientInput(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float scale, long tickOffset, List<ItemStack> displayOptions) {
+    public void renderExpectedIngredientInput(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float scale, long tickOffset, List<ItemStack> displayOptions) {
         int mod = (int) (((ClientScheduler.getClientTick() + tickOffset) / 20L) % displayOptions.size());
-        ItemStack expected = displayOptions.get(MathHelper.clamp(mod, 0, displayOptions.size() - 1));
+        ItemStack expected = displayOptions.get(Mth.clamp(mod, 0, displayOptions.size() - 1));
         if (!expected.isEmpty()) {
             BlockAtlasTexture.getInstance().bindTexture();
 
-            this.renderItemStack(renderStack, offsetX, offsetY, zLevel, scale, expected);
+            this.renderItemStack(renderStack, offsetX, offsetY, blitOffset, scale, expected);
             this.thisFrameInputStacks.put(new Rectangle((int) offsetX, (int) offsetY, (int) (16 * scale), (int) (16 * scale)), new Tuple<>(expected, null));
         }
     }
 
-    public void renderExpectedRelayInputs(PoseStack renderStack, float offsetX, float offsetY, float zLevel, SimpleAltarRecipe altarRecipe) {
+    public void renderExpectedRelayInputs(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, SimpleAltarRecipe altarRecipe) {
         float centerX = offsetX + 80;
         float centerY = offsetY + 128;
 
@@ -117,54 +117,54 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
         int amt = ingredients.size();
         for (int i = 0; i < ingredients.size(); i++) {
             double part = ((double) i) / ((double) amt) * 2.0 * Math.PI; //Shift by half a period
-            part = MathHelper.clamp(part, 0, 2.0 * Math.PI);
+            part = Mth.clamp(part, 0, 2.0 * Math.PI);
             part += (2.0 * Math.PI * perc) + Math.PI;
             double xAdd = Math.sin(part) * 75.0;
             double yAdd = Math.cos(part) * 75.0;
 
-            renderExpectedIngredientInput(renderStack, (float) (centerX + xAdd), (float) (centerY + yAdd), zLevel, 1F, i * 20, ingredients.get(i).getIngredient());
+            renderExpectedIngredientInput(renderStack, (float) (centerX + xAdd), (float) (centerY + yAdd), blitOffset, 1F, i * 20, ingredients.get(i).getIngredient());
         }
     }
 
-    public void renderExpectedItemStackOutput(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float scale, ItemStack stack) {
+    public void renderExpectedItemStackOutput(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float scale, ItemStack stack) {
         if (!stack.isEmpty()) {
             BlockAtlasTexture.getInstance().bindTexture();
 
-            this.renderItemStack(renderStack, offsetX, offsetY, zLevel, scale, stack);
+            this.renderItemStack(renderStack, offsetX, offsetY, blitOffset, scale, stack);
             this.thisFrameOuputStack = new Tuple<>(new Rectangle((int) offsetX, (int) offsetY, (int) (16 * scale), (int) (16 * scale)), stack);
         }
     }
 
-    protected void renderItemStack(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float scale, ItemStack stack) {
+    protected void renderItemStack(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float scale, ItemStack stack) {
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        RenderHelper.enableStandardItemLighting();
+        Lighting.turnBackOn();
 
-        renderStack.push();
-        renderStack.translate(offsetX, offsetY, zLevel);
+        renderStack.pushPose();
+        renderStack.translate(offsetX, offsetY, blitOffset);
         renderStack.scale(scale, scale, 1);
         RenderingUtils.renderItemStackGUI(renderStack, stack, null);
-        renderStack.pop();
+        renderStack.popPose();
 
-        RenderHelper.disableStandardItemLighting();
+        Lighting.turnOff();
         RenderSystem.depthMask(false);
     }
 
-    public boolean handleRecipeNameCopyClick(double mouseX, double mouseZ, SimpleAltarRecipe recipe) {
-        if (Minecraft.getInstance().gameSettings.showDebugInfo &&
+    public boolean handleRecipeNameCopyClick(double xpos, double mouseZ, SimpleAltarRecipe recipe) {
+        if (Minecraft.getInstance().options.renderDebug &&
                 Screen.hasControlDown() &&
-                this.thisFrameOuputStack.getA().contains(mouseX, mouseZ)) {
+                this.thisFrameOuputStack.getA().contains(xpos, mouseZ)) {
             String recipeName = recipe.getId().toString();
-            Minecraft.getInstance().keyboardListener.setClipboardString(recipeName);
-            Minecraft.getInstance().player.sendMessage(Component.translatable("astralsorcery.misc.ctrlcopy.copied", recipeName), Util.DUMMY_UUID);
+            Minecraft.getInstance().keyboardHandler.setClipboardString(recipeName);
+            Minecraft.getInstance().player.sendSystemMessage(Component.translatable("astralsorcery.misc.ctrlcopy.copied", recipeName));
             return true;
         }
         return false;
     }
 
-    public boolean handleBookLookupClick(double mouseX, double mouseZ) {
+    public boolean handleBookLookupClick(double xpos, double mouseZ) {
         for (Rectangle r : thisFrameInputStacks.keySet()) {
-            if (r.contains(mouseX, mouseZ)) {
+            if (r.contains(xpos, mouseZ)) {
                 ItemStack stack = thisFrameInputStacks.get(r).getA();
                 BookLookupInfo info = BookLookupRegistry.findPage(Minecraft.getInstance().player, LogicalSide.CLIENT, stack);
                 if (info != null &&
@@ -176,7 +176,7 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
             }
         }
         if (this.thisFrameOuputStack != null) {
-            if (this.thisFrameOuputStack.getA().contains(mouseX, mouseZ)) {
+            if (this.thisFrameOuputStack.getA().contains(xpos, mouseZ)) {
                 ItemStack stack = this.thisFrameOuputStack.getB();
                 BookLookupInfo info = BookLookupRegistry.findPage(Minecraft.getInstance().player, LogicalSide.CLIENT, stack);
                 if (info != null &&
@@ -190,49 +190,49 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
         return false;
     }
 
-    public void renderInfoStar(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float pTicks) {
-        renderStack.push();
-        renderStack.translate(offsetX + 140, offsetY + 20, zLevel);
+    public void renderInfoStar(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float pTicks) {
+        renderStack.pushPose();
+        renderStack.translate(offsetX + 140, offsetY + 20, blitOffset);
         this.thisFrameInfoStar = RenderingDrawUtils.drawInfoStar(renderStack, IDrawRenderTypeBuffer.defaultBuffer(), 15F, pTicks);
         this.thisFrameInfoStar.translate((int) (offsetX + 140), (int) (offsetY + 20));
-        renderStack.pop();
+        renderStack.popPose();
     }
 
-    public void renderRequiredConstellation(PoseStack renderStack, float offsetX, float offsetY, float zLevel, @Nullable IConstellation constellation) {
+    public void renderRequiredConstellation(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, @Nullable IConstellation constellation) {
         if (constellation != null) {
             RenderSystem.enableBlend();
             Blending.DEFAULT.apply();
             RenderingConstellationUtils.renderConstellationIntoGUI(new Color(0xEEEEEE), constellation, renderStack,
-                    Math.round(offsetX + 30), Math.round(offsetY + 78), zLevel,
+                    Math.round(offsetX + 30), Math.round(offsetY + 78), blitOffset,
                     125, 125, 2F, () -> 0.4F, true, false);
             RenderSystem.disableBlend();
         }
     }
 
-    public void renderInfoStarTooltips(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float mouseX, float mouseY, Consumer<List<FormattedText>> tooltipProvider) {
+    public void renderInfoStarTooltips(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float xpos, float ypos, Consumer<List<FormattedText>> tooltipProvider) {
         if (this.thisFrameInfoStar == null) {
             return;
         }
 
-        if (this.thisFrameInfoStar.contains(mouseX, mouseY)) {
+        if (this.thisFrameInfoStar.contains(xpos, ypos)) {
             List<FormattedText> toolTip = new ArrayList<>();
             tooltipProvider.accept(toolTip);
             if (!toolTip.isEmpty()) {
-                zLevel += 600;
-                RenderingDrawUtils.renderBlueTooltipComponents(renderStack, offsetX, offsetY, zLevel, toolTip, RenderablePage.getFontRenderer(), false);
-                zLevel -= 600;
+                blitOffset += 600;
+                RenderingDrawUtils.renderBlueTooltipComponents(renderStack, offsetX, offsetY, blitOffset, toolTip, RenderablePage.getFont(), false);
+                blitOffset -= 600;
             }
         }
     }
 
-    public void renderHoverTooltips(PoseStack renderStack, float mouseX, float mouseY, float zLevel, ResourceLocation recipeName) {
+    public void renderHoverTooltips(PoseStack renderStack, float xpos, float ypos, float blitOffset, ResourceLocation recipeName) {
         List<FormattedText> toolTip = new LinkedList<>();
-        addStackTooltip(mouseX, mouseY, recipeName, toolTip);
+        addStackTooltip(xpos, ypos, recipeName, toolTip);
 
         if (!toolTip.isEmpty()) {
-            zLevel += 800;
-            RenderingDrawUtils.renderBlueTooltipComponents(renderStack, mouseX, mouseY, zLevel, toolTip, RenderablePage.getFontRenderer(), true);
-            zLevel -= 800;
+            blitOffset += 800;
+            RenderingDrawUtils.renderBlueTooltipComponents(renderStack, xpos, ypos, blitOffset, toolTip, RenderablePage.getFont(), true);
+            blitOffset -= 800;
         }
     }
 
@@ -305,45 +305,45 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
         return Component.translatable(base);
     }
 
-    protected void addStackTooltip(float mouseX, float mouseY, ResourceLocation recipeName, List<FormattedText> tooltip) {
+    protected void addStackTooltip(float xpos, float ypos, ResourceLocation recipeName, List<FormattedText> tooltip) {
         for (Rectangle rect : thisFrameInputStacks.keySet()) {
-            if (rect.contains(mouseX, mouseY)) {
+            if (rect.contains(xpos, ypos)) {
                 Tuple<ItemStack, Ingredient> inputInfo = thisFrameInputStacks.get(rect);
                 addInputInformation(inputInfo.getA(), inputInfo.getB(), tooltip);
                 return;
             }
         }
-        if (this.thisFrameOuputStack.getA().contains(mouseX, mouseY)) {
+        if (this.thisFrameOuputStack.getA().contains(xpos, ypos)) {
             ItemStack stack = this.thisFrameOuputStack.getB();
             addInputInformation(stack, null, tooltip);
 
-            if (Minecraft.getInstance().gameSettings.showDebugInfo) {
+            if (Minecraft.getInstance().options.renderDebug) {
                 tooltip.add(MutableComponent.EMPTY);
-                tooltip.add(Component.translatable("astralsorcery.misc.recipename", recipeName.toString()).withStyle(TextFormatting.LIGHT_PURPLE).withStyle(TextFormatting.ITALIC));
-                tooltip.add(Component.translatable("astralsorcery.misc.ctrlcopy", recipeName.toString()).withStyle(TextFormatting.LIGHT_PURPLE).withStyle(TextFormatting.ITALIC));
+                tooltip.add(Component.translatable("astralsorcery.misc.recipename", recipeName.toString()).withStyle(ChatFormatting.LIGHT_PURPLE).withStyle(ChatFormatting.ITALIC));
+                tooltip.add(Component.translatable("astralsorcery.misc.ctrlcopy", recipeName.toString()).withStyle(ChatFormatting.LIGHT_PURPLE).withStyle(ChatFormatting.ITALIC));
             }
         }
     }
 
     protected void addInputInformation(ItemStack stack, @Nullable Ingredient stackIngredient, List<FormattedText> tooltip) {
         try {
-            tooltip.addAll(stack.getTooltip(Minecraft.getInstance().player, Minecraft.getInstance().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL));
+            tooltip.addAll(stack.getTooltipLines(Minecraft.getInstance().player, Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.TooltipFlags.ADVANCED : TooltipFlag.TooltipFlags.NORMAL));
         } catch (Exception exc) {
-            tooltip.add(Component.translatable("astralsorcery.misc.tooltipError").withStyle(TextFormatting.RED));
+            tooltip.add(Component.translatable("astralsorcery.misc.tooltipError").withStyle(ChatFormatting.RED));
         }
         BookLookupInfo info = BookLookupRegistry.findPage(Minecraft.getInstance().player, LogicalSide.CLIENT, stack);
         if (info != null &&
                 info.canSee(ResearchHelper.getProgress(Minecraft.getInstance().player, LogicalSide.CLIENT)) &&
                 !info.getResearchNode().equals(this.getResearchNode())) {
             tooltip.add(MutableComponent.EMPTY);
-            tooltip.add(Component.translatable("astralsorcery.misc.craftInformation").withStyle(TextFormatting.GRAY));
+            tooltip.add(Component.translatable("astralsorcery.misc.craftInformation").withStyle(ChatFormatting.GRAY));
         }
-        if (stackIngredient != null && Minecraft.getInstance().gameSettings.advancedItemTooltips) {
+        if (stackIngredient != null && Minecraft.getInstance().options.advancedItemTooltips) {
             Tag<Item> itemTag = IngredientHelper.guessTag(stackIngredient);
             if (itemTag instanceof ITag.INamedTag) {
                 tooltip.add(MutableComponent.EMPTY);
                 tooltip.add(Component.translatable("astralsorcery.misc.input.tag",
-                        ((ITag.INamedTag<Item>) itemTag).getName().toString()).withStyle(TextFormatting.GRAY));
+                        ((ITag.INamedTag<Item>) itemTag).getName().toString()).withStyle(ChatFormatting.GRAY));
             }
             if (stackIngredient instanceof FluidIngredient) {
                 List<FluidStack> fluids = ((FluidIngredient) stackIngredient).getFluids();
@@ -352,13 +352,13 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
                     FormattedText cmp = null;
                     for (FluidStack f : fluids) {
                         if (cmp == null) {
-                            cmp = f.getFluid().getAttributes().getDisplayName(f);
+                            cmp = f.getType().getAttributes().getDisplayName(f);
                         } else {
-                            cmp = Component.translatable("astralsorcery.misc.input.fluid.chain", cmp, f.getFluid().getAttributes().getDisplayName(f)).withStyle(TextFormatting.GRAY);
+                            cmp = Component.translatable("astralsorcery.misc.input.fluid.chain", cmp, f.getType().getAttributes().getDisplayName(f)).withStyle(ChatFormatting.GRAY);
                         }
                     }
                     tooltip.add(MutableComponent.EMPTY);
-                    tooltip.add(Component.translatable("astralsorcery.misc.input.fluid", cmp).withStyle(TextFormatting.GRAY));
+                    tooltip.add(Component.translatable("astralsorcery.misc.input.fluid", cmp).withStyle(ChatFormatting.GRAY));
                 }
             }
         }

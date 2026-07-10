@@ -40,7 +40,7 @@ public class ColorUtils {
     }
 
     public static int blendColors(int color1, int color2, float color1Ratio) {
-        float ratio1 = MathHelper.clamp(color1Ratio, 0F, 1F);
+        float ratio1 = Mth.clamp(color1Ratio, 0F, 1F);
         float ratio2 = 1F - ratio1;
 
         int a1 = (color1 & 0xFF000000) >> 24;
@@ -53,10 +53,10 @@ public class ColorUtils {
         int g2 = (color2 & 0x0000FF00) >>  8;
         int b2 = (color2 & 0x000000FF);
 
-        int a = MathHelper.clamp(Math.round(a1 * ratio1 + a2 * ratio2), 0, 255);
-        int r = MathHelper.clamp(Math.round(r1 * ratio1 + r2 * ratio2), 0, 255);
-        int g = MathHelper.clamp(Math.round(g1 * ratio1 + g2 * ratio2), 0, 255);
-        int b = MathHelper.clamp(Math.round(b1 * ratio1 + b2 * ratio2), 0, 255);
+        int a = Mth.clamp(Math.round(a1 * ratio1 + a2 * ratio2), 0, 255);
+        int r = Mth.clamp(Math.round(r1 * ratio1 + r2 * ratio2), 0, 255);
+        int g = Mth.clamp(Math.round(g1 * ratio1 + g2 * ratio2), 0, 255);
+        int b = Mth.clamp(Math.round(b1 * ratio1 + b2 * ratio2), 0, 255);
 
         return a << 24 | r << 16 | g << 8 | b;
     }
@@ -87,7 +87,7 @@ public class ColorUtils {
         if (stack.isEmpty()) {
             return 0xFFFFFFFF;
         }
-        return stack.getFluid().getAttributes().getColor(stack);
+        return stack.getType().getAttributes().getColor(stack);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -108,7 +108,7 @@ public class ColorUtils {
 
     @Nonnull
     public static MutableComponent getTranslation(DyeColor color) {
-        return Component.translatable(String.format("color.minecraft.%s", color.getTranslationKey()));
+        return Component.translatable(String.format("color.minecraft.%s", color.getDescriptionId()));
     }
 
     @Nonnull
@@ -120,39 +120,39 @@ public class ColorUtils {
     public static ChatFormatting textFormattingForDye(DyeColor color) {
         switch (color) {
             case WHITE:
-                return TextFormatting.WHITE;
+                return ChatFormatting.WHITE;
             case ORANGE:
-                return TextFormatting.GOLD;
+                return ChatFormatting.GOLD;
             case MAGENTA:
-                return TextFormatting.DARK_PURPLE;
+                return ChatFormatting.DARK_PURPLE;
             case LIGHT_BLUE:
-                return TextFormatting.DARK_AQUA;
+                return ChatFormatting.DARK_AQUA;
             case YELLOW:
-                return TextFormatting.YELLOW;
+                return ChatFormatting.YELLOW;
             case LIME:
-                return TextFormatting.GREEN;
+                return ChatFormatting.GREEN;
             case PINK:
-                return TextFormatting.LIGHT_PURPLE;
+                return ChatFormatting.LIGHT_PURPLE;
             case GRAY:
-                return TextFormatting.DARK_GRAY;
+                return ChatFormatting.DARK_GRAY;
             case LIGHT_GRAY:
-                return TextFormatting.GRAY;
+                return ChatFormatting.GRAY;
             case CYAN:
-                return TextFormatting.BLUE;
+                return ChatFormatting.BLUE;
             case PURPLE:
-                return TextFormatting.DARK_PURPLE;
+                return ChatFormatting.DARK_PURPLE;
             case BLUE:
-                return TextFormatting.DARK_BLUE;
+                return ChatFormatting.DARK_BLUE;
             case BROWN:
-                return TextFormatting.GOLD;
+                return ChatFormatting.GOLD;
             case GREEN:
-                return TextFormatting.DARK_GREEN;
+                return ChatFormatting.DARK_GREEN;
             case RED:
-                return TextFormatting.DARK_RED;
+                return ChatFormatting.DARK_RED;
             case BLACK:
-                return TextFormatting.DARK_GRAY; //Black is unreadable. fck that.
+                return ChatFormatting.DARK_GRAY; //Black is unreadable. fck that.
             default:
-                return TextFormatting.WHITE;
+                return ChatFormatting.WHITE;
         }
     }
 }

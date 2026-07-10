@@ -53,12 +53,12 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
     }
 
     private void resolvePhases() {
-        WorldContext ctx = SkyHandler.getContext(Minecraft.getInstance().world, LogicalSide.CLIENT);
+        WorldContext ctx = SkyHandler.getContext(Minecraft.getInstance().level, LogicalSide.CLIENT);
         if (ctx != null) {
             phases = new ArrayList<>();
-            for (MoonPhase phase : MoonPhase.values()) {
-                if (ctx.getConstellationHandler().isActiveInPhase(this.constellation, phase)) {
-                    phases.add(phase);
+            for (MoonPhase currentPhase : MoonPhase.values()) {
+                if (ctx.getConstellationHandler().isActiveInPhase(this.constellation, currentPhase)) {
+                    phases.add(currentPhase);
                 }
             }
         }
@@ -71,7 +71,7 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
     }
 
     @Override
-    protected boolean shouldRightClickCloseScreen(double mouseX, double mouseY) {
+    protected boolean shouldRightClickCloseScreen(double xpos, double ypos) {
         return true;
     }
 
@@ -81,7 +81,7 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         RenderSystem.enableDepthTest();
         drawWHRect(renderStack, TexturesAS.TEX_GUI_CONSTELLATION_PAPER);
         drawHeader(renderStack);
@@ -93,13 +93,13 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
         MutableComponent name = this.constellation.getConstellationName();
         float length = font.getStringPropertyWidth(name) * 1.8F;
         double offsetLeft = (width >> 1) - (length / 2);
-        int offsetTop = guiTop + 45;
+        int offsetTop = topPos + 45;
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(offsetLeft + 2, offsetTop, this.getGuiZLevel());
         renderStack.scale(1.8F, 1.8F, 1F);
         RenderingDrawUtils.renderStringAt(name, renderStack, font, 0xAA4D4D4D, false);
-        renderStack.pop();
+        renderStack.popPose();
     }
 
     private void drawConstellation(PoseStack renderStack) {
@@ -108,7 +108,7 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
 
         RenderingConstellationUtils.renderConstellationIntoGUI(ColorsAS.CONSTELLATION_TYPE_BLANK,
                 constellation, renderStack,
-                width / 2F - 145 / 2F, guiTop + 84,
+                width / 2F - 145 / 2F, topPos + 84,
                 this.getGuiZLevel(),
                 145, 145, 2F, () -> 0.5F,
                 true, false);
@@ -124,13 +124,13 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
         List<MoonPhase> phases = this.phases == null ? Collections.emptyList() : this.phases;
         if (phases.isEmpty()) {
             FormattedText text = Component.translatable("astralsorcery.journal.constellation.unknown");
-            RenderingDrawUtils.renderStringCentered(Minecraft.getInstance().fontRenderer, renderStack,
-                    text, guiLeft + guiWidth / 2 + 25, guiTop + 239,
+            RenderingDrawUtils.renderStringCentered(Minecraft.getInstance().font, renderStack,
+                    text, leftPos + guiWidth / 2 + 25, topPos + 239,
                     1.8F, 0xAA4D4D4D);
         } else {
             int size = 16;
             int offsetX = (width / 2) - (phases.size() * (size + 2)) / 2;
-            int offsetY = guiTop + 237;
+            int offsetY = topPos + 237;
             for (int i = 0; i < phases.size(); i++) {
                 phases.get(i).getTexture().bindTexture();
                 RenderSystem.enableBlend();

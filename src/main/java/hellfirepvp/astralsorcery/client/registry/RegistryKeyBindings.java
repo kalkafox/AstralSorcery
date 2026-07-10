@@ -50,7 +50,7 @@ public class RegistryKeyBindings {
 
     private static KeyBindingWrapper register(String name, int glfwKey, Function<KeyMapping, KeyBindingWrapper> wrapperCreator) {
         KeyMapping keyBinding = new KeyMapping(String.format("key.%s.%s", AstralSorcery.MODID, name),
-                KeyConflictContext.IN_GAME, InputMappings.Type.KEYSYM, glfwKey, AstralSorcery.NAME);
+                KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, glfwKey, AstralSorcery.NAME);
         ClientRegistry.registerKeyBinding(keyBinding);
         KeyBindingWrapper wrapper = wrapperCreator.apply(keyBinding);
         watchedKeyBindings.add(wrapper);
@@ -58,10 +58,10 @@ public class RegistryKeyBindings {
     }
 
     private static void onKeyInput(InputEvent.KeyInputEvent event) {
-        InputMappings.Input input = InputMappings.getInputByCode(event.getKey(), event.getScanCode());
-        KeyBindingWrapper eventKey = MiscUtils.iterativeSearch(watchedKeyBindings, keyBinding -> keyBinding.getKeyBinding().getKey().equals(input));
+        InputConstants.Input from = InputConstants.getInputByCode(event.getKey(), event.getScanCode());
+        KeyBindingWrapper eventKey = MiscUtils.iterativeSearch(watchedKeyBindings, keyBinding -> keyBinding.getKeyBinding().getKey().equals(from));
         if (eventKey != null) {
-            boolean isPressed = eventKey.getKeyBinding().isKeyDown();
+            boolean isPressed = eventKey.getKeyBinding().isDown();
             boolean wasPressed = bindingsPressed.contains(eventKey);
             if (isPressed != wasPressed) {
                 if (isPressed) {

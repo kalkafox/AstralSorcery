@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
  */
 public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
 
-    private static final VoxelShape CHALICE = VoxelShapes.create(2D / 16D, 0D / 16D, 2D / 16D, 14D / 16D, 14D / 16D, 14D / 16D);
+    private static final VoxelShape CHALICE = Shapes.create(2D / 16D, 0D / 16D, 2D / 16D, 14D / 16D, 14D / 16D, 14D / 16D);
 
     public BlockChalice() {
         super(PropertiesMisc.defaultGoldMachinery()
@@ -61,69 +61,69 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult brtr) {
-        ItemStack interact = player.getHeldItem(hand);
-        TileChalice tc = MiscUtils.getTileAt(world, pos, TileChalice.class, true);
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult brtr) {
+        ItemStack interact = player.getItemInHand(hand);
+        TileChalice tc = MiscUtils.getTileAt(level, pos, TileChalice.class, true);
         if (tc != null) {
             IFluidHandlerItem handlerItem = FluidUtil.getFluidHandler(interact).orElse(null);
             if (handlerItem != null) {
-                if (!world.isRemote()) {
+                if (!level.isClientSide()) {
                     FluidStack st = FluidUtil.getFluidContained(interact).orElse(FluidStack.EMPTY);
                     if (st.isEmpty()) {
                         //Fill the stack from the tile?
                         FluidActionResult far = FluidUtil.tryFillContainer(interact, tc.getTankAccess(), FluidAttributes.BUCKET_VOLUME, player, true);
-                        if (far.isSuccess()) {
+                        if (far.shouldSwing()) {
                             if (!player.isCreative()) {
                                 interact.shrink(1);
                                 player.setHeldItem(hand, interact);
-                                player.inventory.placeItemBackInInventory(world, far.getResult());
+                                player.inventory.hurtArmor(level, far.getObject());
                             }
                         }
                     } else {
                         //Drain from stack into tile?
                         FluidActionResult far = FluidUtil.tryEmptyContainer(interact, tc.getTankAccess(), FluidAttributes.BUCKET_VOLUME, player, true);
-                        if (far.isSuccess()) {
+                        if (far.shouldSwing()) {
                             if (!player.isCreative()) {
                                 interact.shrink(1);
                                 player.setHeldItem(hand, interact);
-                                player.inventory.placeItemBackInInventory(world, far.getResult());
+                                player.inventory.hurtArmor(level, far.getObject());
                             }
                         }
                     }
                 }
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public boolean hasComparatorInputOverride(BlockState p_149740_1_) {
+    public boolean hasAnalogOutputSignal(BlockState p_149740_1_) {
         return true;
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, Level world, BlockPos pos) {
-        TileChalice tc = MiscUtils.getTileAt(world, pos, TileChalice.class, false);
+    public int getComparatorInputOverride(BlockState state, Level level, BlockPos pos) {
+        TileChalice tc = MiscUtils.getTileAt(level, pos, TileChalice.class, false);
         if (tc != null) {
-            return MathHelper.ceil(tc.getTank().getPercentageFilled() * 15F);
+            return Mth.ceil(tc.getTank().getPercentageFilled() * 15F);
         }
         return 0;
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileChalice();
     }
 }

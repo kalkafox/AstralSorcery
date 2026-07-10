@@ -23,14 +23,14 @@ public class FluidFreezingRecipe extends BlockFreezingRecipe {
 
     public FluidFreezingRecipe() {
         super(AstralSorcery.key("all_fluids_freezing"),
-                (world, pos, state) -> state.getFluidState().isSource() &&
+                (level, pos, state) -> state.getFluidState().isSource() &&
                         state.getFluidState().getBlockState().equals(state),
-                (worldPos, state) -> {
-                    FluidAttributes fAttr = state.getFluidState().getFluid().getAttributes();
-                    if (fAttr.getTemperature(worldPos.getWorld(), worldPos) <= 300) {
-                        return Blocks.ICE.getDefaultState();
-                    } else if (fAttr.getTemperature(worldPos.getWorld(), worldPos) >= 500) {
-                        return Blocks.OBSIDIAN.getDefaultState();
+                (access, state) -> {
+                    FluidAttributes fAttr = state.getFluidState().getType().getAttributes();
+                    if (fAttr.getTemperature(access.getLevel(), access) <= 300) {
+                        return Blocks.ICE.defaultBlockState();
+                    } else if (fAttr.getTemperature(access.getLevel(), access) >= 500) {
+                        return Blocks.OBSIDIAN.defaultBlockState();
                     }
                     return state;
                 });

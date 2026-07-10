@@ -37,7 +37,7 @@ public class BlockFreezingRecipe extends WorldFreezingRecipe {
     private final BiFunction<WorldBlockPos, BlockState, BlockState> outputGenerator;
 
     public BlockFreezingRecipe(ResourceLocation key, BlockPredicate matcher, BlockState output) {
-        this(key, matcher, (worldPos, state) -> output);
+        this(key, matcher, (access, state) -> output);
     }
 
     public BlockFreezingRecipe(ResourceLocation key, BlockPredicate matcher, BiFunction<WorldBlockPos, BlockState, BlockState> outputGenerator) {
@@ -46,12 +46,12 @@ public class BlockFreezingRecipe extends WorldFreezingRecipe {
     }
 
     public static BlockFreezingRecipe of(BlockState stateIn, BlockState stateOut) {
-        return new BlockFreezingRecipe(AstralSorcery.key(stateIn.getBlock().getRegistryName().getPath()),
+        return new BlockFreezingRecipe(AstralSorcery.key(RegistryHelper.getKey(stateIn.getBlock()).getPath()),
                 BlockPredicates.isState(stateIn), stateOut);
     }
 
     public static BlockFreezingRecipe of(Block blockIn, BlockState stateOut) {
-        return new BlockFreezingRecipe(AstralSorcery.key(blockIn.getRegistryName().getPath()),
+        return new BlockFreezingRecipe(AstralSorcery.key(RegistryHelper.getKey(blockIn).getPath()),
                 BlockPredicates.isBlock(blockIn), stateOut);
     }
 
@@ -61,10 +61,10 @@ public class BlockFreezingRecipe extends WorldFreezingRecipe {
     }
 
     @Override
-    public void doOutput(Level world, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
-        BlockState generated = this.outputGenerator.apply(WorldBlockPos.wrapServer(world, pos), state);
+    public void doOutput(Level level, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
+        BlockState generated = this.outputGenerator.apply(WorldBlockPos.wrapServer(level, pos), state);
         if (generated != state) {
-            world.setBlockState(pos, generated, Constants.BlockFlags.DEFAULT_AND_RERENDER);
+            level.setBlock(pos, generated, Constants.BlockFlags.DEFAULT_AND_RERENDER);
         }
     }
 

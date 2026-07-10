@@ -24,10 +24,10 @@ import java.util.Random;
 public interface IFocusEffect {
 
     @Nonnull
-    default Color getFocusColor(IConstellation cst, Random rand) {
+    default Color getFocusColor(IConstellation cst, Random random) {
         Color c = Color.WHITE;
-        if (cst != null && rand.nextInt(4) == 0) {
-            if (rand.nextInt(3) == 0) {
+        if (cst != null && random.nextInt(4) == 0) {
+            if (random.nextInt(3) == 0) {
                 c = cst.getConstellationColor().brighter();
             } else {
                 c = cst.getConstellationColor();

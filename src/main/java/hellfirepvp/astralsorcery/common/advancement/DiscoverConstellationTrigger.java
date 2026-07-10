@@ -26,14 +26,14 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class DiscoverConstellationTrigger extends ListenerCriterionTrigger<ConstellationInstance> {
 
-    public static final ResourceLocation ID = new ResourceLocation(AstralSorcery.MODID, "find_constellation");
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(AstralSorcery.MODID, "find_constellation");
 
     public DiscoverConstellationTrigger() {
         super(ID);
     }
 
     @Override
-    public ConstellationInstance deserialize(JsonObject object, ConditionArrayParser conditions) {
+    public ConstellationInstance deserialize(JsonObject object, DeserializationContext conditions) {
         return ConstellationInstance.deserialize(getId(), object);
     }
 

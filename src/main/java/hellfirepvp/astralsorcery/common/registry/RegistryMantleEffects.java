@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.constellation.mantle.MantleEffect;
 import hellfirepvp.astralsorcery.common.constellation.mantle.effect.*;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 
 import static hellfirepvp.astralsorcery.common.lib.MantleEffectsAS.*;
 
@@ -41,7 +41,6 @@ public class RegistryMantleEffects {
     }
 
     private static <T extends MantleEffect> T register(T effect) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(effect);
-        return effect;
+        return AstralRegistries.register(AstralRegistries.MANTLE_EFFECTS, effect);
     }
 }

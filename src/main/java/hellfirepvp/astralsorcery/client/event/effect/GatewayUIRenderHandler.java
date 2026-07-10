@@ -61,11 +61,11 @@ public class GatewayUIRenderHandler implements ITickHandler {
         return INSTANCE;
     }
 
-    public GatewayUI getOrCreateUI(Level world, BlockPos pos, Vector3 renderPos) {
+    public GatewayUI getOrCreateUI(Level level, BlockPos pos, Vector3 renderPos) {
         if (currentUI == null ||
-                !currentUI.getDimType().equals(world.getDimensionKey()) ||
-                !currentUI.getPos().equals(pos)) {
-            currentUI = GatewayUI.create(world, pos, renderPos, 5.5D);
+                !currentUI.getDimType().equals(level.dimension()) ||
+                !currentUI.getBlockPos().equals(pos)) {
+            currentUI = GatewayUI.create(level, pos, renderPos, 5.5D);
         }
         if (currentUI != null) {
             currentUI.refreshView();
@@ -81,12 +81,12 @@ public class GatewayUIRenderHandler implements ITickHandler {
         if (this.currentUI == null) {
             return true;
         }
-        Level world = Minecraft.getInstance().world;
+        Level level = Minecraft.getInstance().level;
         TileCelestialGateway gateway;
-        if (world == null ||
+        if (level == null ||
                 this.currentUI.getVisibleTicks() <= 0 ||
-                !this.currentUI.getDimType().equals(world.getDimensionKey()) ||
-                (gateway = MiscUtils.getTileAt(world, this.currentUI.getPos(), TileCelestialGateway.class, true)) == null ||
+                !this.currentUI.getDimType().equals(level.dimension()) ||
+                (gateway = MiscUtils.getTileAt(level, this.currentUI.getBlockPos(), TileCelestialGateway.class, true)) == null ||
                 !gateway.doesSeeSky() ||
                 !gateway.hasMultiblock()) {
             this.currentUI = null;
@@ -98,7 +98,7 @@ public class GatewayUIRenderHandler implements ITickHandler {
         if (this.validate()) {
             return;
         }
-        float pTicks = event.getPartialTicks();
+        float pTicks = event.advanceTime();
         PoseStack renderStack = event.getPoseStack();
         Vector3 renderOffset = this.currentUI.getRenderCenter();
 
@@ -108,10 +108,10 @@ public class GatewayUIRenderHandler implements ITickHandler {
             return;
         }
 
-        if (Minecraft.isFabulousGraphicsEnabled()) {
+        if (Minecraft.useShaderTransparency()) {
             //If you found this while wanting to report seeing stars behind blocks on the gateway:
             //Yes i am aware of it, it'd need a ton of work to fix. So i'll fix it eventually, not right now.
-            RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.IS_RUNNING_ON_MAC);
+            RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         }
 
         this.renderGatewayShieldOverlay(renderStack, renderOffset, dst, pTicks);
@@ -124,20 +124,20 @@ public class GatewayUIRenderHandler implements ITickHandler {
         if (node == null || !node.isLocked() || node.getOwner() == null || node.getAllowedUsers().isEmpty()) {
             return;
         }
-        UUID currentUUID = Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUniqueID() : null;
-        HitResult mouseOverRtr = Minecraft.getInstance().objectMouseOver;
+        UUID currentUUID = Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUUID() : null;
+        HitResult mouseOverRtr = Minecraft.getInstance().hitResult;
         BlockPos blockSelected;
-        if (mouseOverRtr != null && mouseOverRtr.getType() == RayTraceResult.Type.BLOCK && mouseOverRtr instanceof BlockHitResult) {
-            blockSelected = ((BlockHitResult) mouseOverRtr).getPos().up();
+        if (mouseOverRtr != null && mouseOverRtr.getType() == HitResult.Type.BLOCK && mouseOverRtr instanceof BlockHitResult) {
+            blockSelected = ((BlockHitResult) mouseOverRtr).getBlockPos().above();
         } else {
             blockSelected = null;
         }
 
         Color c = ColorsAS.CONSTELLATION_TYPE_MAJOR;
-        float alpha = MathHelper.clamp(1F - ((float) (distance / 2D)), 0F, 1F);
+        float alpha = Mth.clamp(1F - ((float) (distance / 2D)), 0F, 1F);
 
         node.getAllowedUsers().forEach((index, playerRef) -> {
-            BlockPos drawPos = TileCelestialGateway.getAllowedUserOffset(index).add(node.getPos());
+            BlockPos drawPos = TileCelestialGateway.getAllowedUserOffset(index).offset(node.getBlockPos());
             Vector3 at = new Vector3(drawPos)
                     .add(0.5, 0.001, 0.5)
                     .subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
@@ -147,7 +147,7 @@ public class GatewayUIRenderHandler implements ITickHandler {
 
                 UUID targetUUID = playerRef.getPlayerUUID();
                 if ((node.getOwner().getPlayerUUID().equals(currentUUID) || targetUUID.equals(currentUUID)) && drawPos.equals(blockSelected)) {
-                    RenderingUtils.renderInWorldText(playerRef.getPlayerName(), c, 1 / 48F, at.clone().addY(0.2),
+                    RenderingUtils.renderInWorldText(playerRef.getOwner(), c, 1 / 48F, at.clone().addY(0.2),
                             renderStack, pTicks, true);
                 }
             }
@@ -156,7 +156,7 @@ public class GatewayUIRenderHandler implements ITickHandler {
 
     private void renderGatewayFocusedEntry(PoseStack renderStack, Vector3 renderOffset, float pTicks) {
         Player player = Minecraft.getInstance().player;
-        GatewayUI.GatewayEntry entry = findMatchingEntry(MathHelper.wrapDegrees(player.rotationYaw), MathHelper.wrapDegrees(player.rotationPitch));
+        GatewayUI.GatewayEntry entry = findMatchingEntry(Mth.wrapDegrees(player.getYRot()), Mth.wrapDegrees(player.getXRot()));
         if (entry != null) {
             Component display = entry.getNode().getDisplayName();
             if (display != null && !display.getString().isEmpty()) {
@@ -177,17 +177,17 @@ public class GatewayUIRenderHandler implements ITickHandler {
     }
 
     private void renderGatewayShieldOverlay(PoseStack renderStack, Vector3 renderOffset, double distance, float pTicks) {
-        float alpha = MathHelper.clamp(1F - ((float) (distance / 2D)), 0F, 1F);
+        float alpha = Mth.clamp(1F - ((float) (distance / 2D)), 0F, 1F);
         Color c = ColorsAS.CONSTELLATION_SINGLE_STAR;
         int red = c.getRed();
         int green = c.getGreen();
         int blue = c.getBlue();
 
         long seed = 0xA781B4F01C771923L;
-        seed |= ((long) this.currentUI.getPos().getX()) << 48;
-        seed |= ((long) this.currentUI.getPos().getY()) << 24;
-        seed |= ((long) this.currentUI.getPos().getZ());
-        Random rand = new Random(seed);
+        seed |= ((long) this.currentUI.getBlockPos().getX()) << 48;
+        seed |= ((long) this.currentUI.getBlockPos().getY()) << 24;
+        seed |= ((long) this.currentUI.getBlockPos().getZ());
+        Random random = new Random(seed);
 
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
@@ -196,14 +196,14 @@ public class GatewayUIRenderHandler implements ITickHandler {
         RenderSystem.depthMask(false);
 
         TexturesAS.TEX_STAR_1.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             for (int i = 0; i < 300; i++) {
-                Vector3 at = Vector3.random(rand).normalize().multiply(this.currentUI.getSphereRadius() * 0.9).add(renderOffset);
-                if (at.getY() >= this.currentUI.getPos().getY()) {
-                    float a = RenderingConstellationUtils.conCFlicker(ClientScheduler.getClientTick(), pTicks, rand.nextInt(7) + 6);
+                Vector3 at = Vector3.random(random).normalize().mul(this.currentUI.getSphereRadius() * 0.9).add(renderOffset);
+                if (at.getY() >= this.currentUI.getBlockPos().getY()) {
+                    float a = RenderingConstellationUtils.conCFlicker(ClientScheduler.getClientTick(), pTicks, random.nextInt(7) + 6);
                     a *= alpha;
                     RenderingDrawUtils.renderFacingFullQuadVB(buf, renderStack, at.getX(), at.getY(), at.getZ(),
-                            0.07F, rand.nextFloat(), 255, 255, 255, (int) (a * 255F));
+                            0.07F, random.nextFloat(), 255, 255, 255, (int) (a * 255F));
                 }
             }
             for (GatewayUI.GatewayEntry entry : this.currentUI.getGatewayEntries()) {
@@ -220,7 +220,7 @@ public class GatewayUIRenderHandler implements ITickHandler {
                     g = ovr.getGreen();
                     b = ovr.getBlue();
                 }
-                float a = RenderingConstellationUtils.conCFlicker(ClientScheduler.getClientTick(), pTicks, rand.nextInt(7) + 6);
+                float a = RenderingConstellationUtils.conCFlicker(ClientScheduler.getClientTick(), pTicks, random.nextInt(7) + 6);
                 a = 0.4F + (0.6F * a);
                 a *= alpha;
                 RenderingDrawUtils.renderFacingFullQuadVB(buf, renderStack,
@@ -237,11 +237,11 @@ public class GatewayUIRenderHandler implements ITickHandler {
     }
 
     @Nullable
-    public GatewayUI.GatewayEntry findMatchingEntry(float yaw, float pitch) {
+    public GatewayUI.GatewayEntry findMatchingEntry(float yRot, float pitch) {
         float matchAccurancy = 4;
         for (GatewayUI.GatewayEntry entry : this.currentUI.getGatewayEntries()) {
             if(Math.abs(entry.getPitch() - pitch) < matchAccurancy &&
-                    (Math.abs(entry.getYaw() - yaw) <= matchAccurancy || Math.abs(entry.getYaw() - yaw - 360F) <= matchAccurancy)) {
+                    (Math.abs(entry.getYaw() - yRot) <= matchAccurancy || Math.abs(entry.getYaw() - yRot - 360F) <= matchAccurancy)) {
                 return entry;
             }
         }
@@ -261,8 +261,8 @@ public class GatewayUIRenderHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

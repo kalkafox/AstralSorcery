@@ -64,7 +64,7 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
     }
 
     public LiquidInfusionBuilder setItemInput(ItemLike item) {
-        this.itemInput = Ingredient.fromItems(item);
+        this.itemInput = Ingredient.valueFromJson(item);
         return this;
     }
 
@@ -73,8 +73,8 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
         return this;
     }
 
-    public LiquidInfusionBuilder setItemInput(Ingredient input) {
-        this.itemInput = input;
+    public LiquidInfusionBuilder setItemInput(Ingredient from) {
+        this.itemInput = from;
         return this;
     }
 
@@ -123,7 +123,7 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
         if (this.liquidInput == null) {
             throw new IllegalArgumentException("No fluid input defined!");
         }
-        if (this.itemInput.hasNoMatchingItems()) {
+        if (this.itemInput.isEmpty()) {
             throw new IllegalArgumentException("No valid item for input found!");
         }
         if (this.output.isEmpty()) {

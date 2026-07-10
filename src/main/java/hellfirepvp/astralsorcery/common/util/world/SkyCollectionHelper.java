@@ -37,8 +37,8 @@ public class SkyCollectionHelper {
         return WorldSeedCache.getSeedIfPresent(dim).map(seed -> getDistributionInternal(seed, pos));
     }
 
-    public static float getSkyNoiseDistribution(WorldGenLevel world, BlockPos pos) {
-        return getDistributionInternal(MiscUtils.getRandomWorldSeed(world), pos);
+    public static float getSkyNoiseDistribution(WorldGenLevel level, BlockPos pos) {
+        return getDistributionInternal(MiscUtils.getRandomWorldSeed(level), pos);
     }
 
     private static float getDistributionInternal(long seed, BlockPos pos) {
@@ -48,18 +48,18 @@ public class SkyCollectionHelper {
                 (int) Math.floor((float) pos.getZ() / accuracy) * accuracy);
         float layer0 = getNoiseDistribution(seed,
                 lowerAnchorPoint,
-                lowerAnchorPoint.add(accuracy, 0, 0),
-                lowerAnchorPoint.add(0, 0, accuracy),
-                lowerAnchorPoint.add(accuracy, 0, accuracy),
+                lowerAnchorPoint.offset(accuracy, 0, 0),
+                lowerAnchorPoint.offset(0, 0, accuracy),
+                lowerAnchorPoint.offset(accuracy, 0, accuracy),
                 pos);
         return layer0 * layer0;
     }
 
     private static float getNoiseDistribution(long seed, BlockPos lXlZ, BlockPos hXlZ, BlockPos lXhZ, BlockPos hXhZ, BlockPos exact) {
-        float nll = getNoise(seed, lXlZ.getX(), lXlZ.getZ());
-        float nhl = getNoise(seed, hXlZ.getX(), hXlZ.getZ());
-        float nlh = getNoise(seed, lXhZ.getX(), lXhZ.getZ());
-        float nhh = getNoise(seed, hXhZ.getX(), hXhZ.getZ());
+        float nll = noiseSettings(seed, lXlZ.getX(), lXlZ.getZ());
+        float nhl = noiseSettings(seed, hXlZ.getX(), hXlZ.getZ());
+        float nlh = noiseSettings(seed, lXhZ.getX(), lXhZ.getZ());
+        float nhh = noiseSettings(seed, hXhZ.getX(), hXhZ.getZ());
 
         float xPart = Math.abs(((float) (exact.getX() - lXlZ.getX()) ) / accuracy);
         float zPart = Math.abs(((float) (exact.getZ() - lXlZ.getZ()) ) / accuracy);
@@ -68,12 +68,12 @@ public class SkyCollectionHelper {
     }
 
     private static float cosInterpolate(float l, float h, float partial) {
-        float t2 = (1F - MathHelper.cos((float) (partial * Math.PI))) / 2F;
+        float t2 = (1F - Mth.cos((float) (partial * Math.PI))) / 2F;
         return (l * (1F - t2) + h * t2);
     }
 
-    private static float getNoise(long seed, int posX, int posZ) {
-        sharedRand.setSeed(
+    private static float noiseSettings(long seed, int posX, int posZ) {
+        sharedRand.initNoise(
                 simple_hash(new int[] {
                         (int) (seed),
                         (int) (seed >> 32),

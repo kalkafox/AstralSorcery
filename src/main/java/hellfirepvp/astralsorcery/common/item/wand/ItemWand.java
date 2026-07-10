@@ -63,30 +63,30 @@ public class ItemWand extends Item implements OverrideInteractItem {
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
-        boolean active = isSelected || (entity instanceof Player && ((Player) entity).getHeldItemOffhand() == stack);
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        boolean active = isSelected || (entity instanceof Player && ((Player) entity).getOffhandItem() == stack);
 
-        if (!world.isRemote()) {
+        if (!level.isClientSide()) {
             if (active) {
                 if (entity instanceof ServerPlayer) {
-                    RockCrystalBuffer buf = DataAS.DOMAIN_AS.getData(world, DataAS.KEY_ROCK_CRYSTAL_BUFFER);
+                    RockCrystalBuffer buf = DataAS.DOMAIN_AS.getData(level, DataAS.KEY_ROCK_CRYSTAL_BUFFER);
 
-                    ChunkPos pos = new ChunkPos(entity.getPosition());
+                    ChunkPos pos = new ChunkPos(entity.position());
                     for (BlockPos rPos : buf.collectPositions(pos, 6)) {
-                        MiscUtils.executeWithChunk(world, rPos, () -> {
-                            BlockState state = world.getBlockState(rPos);
+                        MiscUtils.executeWithChunk(level, rPos, () -> {
+                            BlockState state = level.getBlockState(rPos);
                             if (!(state.getBlock() instanceof BlockRockCrystalOre)) {
                                 buf.removeOre(rPos);
                                 return;
                             }
-                            if (!DayTimeHelper.isDay(world) && random.nextInt(600) == 0) {
+                            if (!DayTimeHelper.isDay(level) && random.nextInt(600) == 0) {
                                 PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.ROCK_CRYSTAL_COLUMN)
-                                        .addData(b -> ByteBufUtils.writeVector(b, new Vector3(rPos.up())));
+                                        .addData(b -> ByteBufUtils.writeVector(b, new Vector3(rPos.above())));
                                 PacketChannel.CHANNEL.sendToPlayer((Player) entity, pkt);
                             }
                             if (random.nextInt(800) == 0) {
                                 PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.ROCK_CRYSTAL_SPARKS)
-                                        .addData(b -> ByteBufUtils.writeVector(b, new Vector3(rPos.up())));
+                                        .addData(b -> ByteBufUtils.writeVector(b, new Vector3(rPos.above())));
                                 PacketChannel.CHANNEL.sendToPlayer((Player) entity, pkt);
                             }
                         });
@@ -97,37 +97,37 @@ public class ItemWand extends Item implements OverrideInteractItem {
     }
 
     @Override
-    public boolean shouldInterceptBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, Direction face) {
+    public boolean shouldInterceptBlockInteract(LogicalSide direction, Player player, InteractionHand hand, BlockPos pos, Direction face) {
         return true;
     }
 
     @Override
-    public boolean doBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, Direction face) {
-        Level world = player.getEntityWorld();
-        BlockState state = world.getBlockState(pos);
+    public boolean doBlockInteract(LogicalSide direction, Player player, InteractionHand hand, BlockPos pos, Direction face) {
+        Level level = player.getCommandSenderWorld();
+        BlockState state = level.getBlockState(pos);
         Block b = state.getBlock();
         if (b instanceof WandInteractable) {
-            if (((WandInteractable) b).onInteract(world, pos, player, face, player.isSneaking())) {
+            if (((WandInteractable) b).onInteract(level, pos, player, face, player.isShiftKeyDown())) {
                 return true;
             }
         }
-        WandInteractable wandTe = MiscUtils.getTileAt(world, pos, WandInteractable.class, true);
+        WandInteractable wandTe = MiscUtils.getTileAt(level, pos, WandInteractable.class, true);
         if (wandTe != null) {
-            if (wandTe.onInteract(world, pos, player, face, player.isSneaking())) {
+            if (wandTe.onInteract(level, pos, player, face, player.isShiftKeyDown())) {
                 return true;
             }
         }
-        TileRequiresMultiblock mbTe = MiscUtils.getTileAt(world, pos, TileRequiresMultiblock.class, true);
+        TileRequiresMultiblock mbTe = MiscUtils.getTileAt(level, pos, TileRequiresMultiblock.class, true);
         if (mbTe != null) {
             if (mbTe.getRequiredStructureType() != null &&
-                    mbTe.getRequiredStructureType().getStructure() instanceof MatchableStructure &&
-                    !((MatchableStructure) mbTe.getRequiredStructureType().getStructure()).matches(world, pos)) {
-                if (world.isRemote()) {
-                    this.displayClientStructurePreview(world, pos, mbTe.getRequiredStructureType());
+                    mbTe.getRequiredStructureType().getFeature() instanceof MatchableStructure &&
+                    !((MatchableStructure) mbTe.getRequiredStructureType().getFeature()).matches(level, pos)) {
+                if (level.isClientSide()) {
+                    this.displayClientStructurePreview(level, pos, mbTe.getRequiredStructureType());
                 } else if (player.isCrouching() && player.isCreative()) {
-                    BlockArray structure = mbTe.getRequiredStructureType().getStructure();
+                    BlockArray structure = mbTe.getRequiredStructureType().getFeature();
                     structure.getContents().forEach((offset, rState) -> {
-                        world.setBlockState(pos.add(offset), rState.getDescriptiveState(0));
+                        level.setBlock(pos.offset(offset), rState.getDescriptiveState(0));
                     });
                 }
                 return true;
@@ -137,12 +137,12 @@ public class ItemWand extends Item implements OverrideInteractItem {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void displayClientStructurePreview(Level world, BlockPos pos, StructureType type) {
-        StructurePreview.newBuilder(world.dimension(), pos, (MatchableStructure) type.getStructure())
+    private void displayClientStructurePreview(Level level, BlockPos pos, StructureType type) {
+        StructurePreview.properties(level.dimension(), pos, (MatchableStructure) type.getFeature())
                 .removeIfOutInDifferentWorld()
                 .andPersistOnlyIf((inWorld, at) -> {
-                    return MiscUtils.executeWithChunk(world, pos, () -> {
-                        TileRequiresMultiblock tileFound = MiscUtils.getTileAt(world, pos, TileRequiresMultiblock.class, true);
+                    return MiscUtils.executeWithChunk(level, pos, () -> {
+                        TileRequiresMultiblock tileFound = MiscUtils.getTileAt(level, pos, TileRequiresMultiblock.class, true);
                         if (tileFound == null) {
                             return false;
                         }
@@ -150,7 +150,7 @@ public class ItemWand extends Item implements OverrideInteractItem {
                                 tileFound.getRequiredStructureType().equals(type);
                     }, true);
                 })
-                .andPersistOnlyIf((inWorld, at) -> !((MatchableStructure) type.getStructure()).matches(world, pos))
+                .andPersistOnlyIf((inWorld, at) -> !((MatchableStructure) type.getFeature()).matches(level, pos))
                 .showBar(type.getDisplayName())
                 .buildAndSet();
     }
@@ -159,12 +159,12 @@ public class ItemWand extends Item implements OverrideInteractItem {
     public static void playUndergroundEffect(PktPlayEffect effect) {
         Vector3 at = ByteBufUtils.readVector(effect.getExtraData());
 
-        Level world = Minecraft.getInstance().world;
-        if (world == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
 
-        float dstr = 0.4F + 0.6F * DayTimeHelper.getCurrentDaytimeDistribution(world);
+        float dstr = 0.4F + 0.6F * DayTimeHelper.getCurrentDaytimeDistribution(level);
         Vector3 plVec = Vector3.atEntityCorner(Minecraft.getInstance().player);
         float dst = (float) at.distance(plVec);
         float dstMul = dst <= 25 ? 1F : (dst >= 50 ? 0F : (1F - (dst - 25F) / 25F));
@@ -175,7 +175,7 @@ public class ItemWand extends Item implements OverrideInteractItem {
                         .color(VFXColorFunction.constant(ColorsAS.ROCK_CRYSTAL))
                         .setScaleMultiplier(0.4F)
                         .setAlphaMultiplier(((150F * dstr) / 255F) * dstMul)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .setMaxAge(30 + random.nextInt(10));
             }
         }
@@ -185,13 +185,13 @@ public class ItemWand extends Item implements OverrideInteractItem {
     public static void playEffect(PktPlayEffect effect) {
         Vector3 pos = ByteBufUtils.readVector(effect.getExtraData());
 
-        Level world = Minecraft.getInstance().world;
-        if (world == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
 
         BlockPos at = pos.toBlockPos();
-        BlockPos top = world.getHeight(Heightmap.Type.WORLD_SURFACE, at);
+        BlockPos top = level.getHeight(Heightmap.Type.WORLD_SURFACE, at);
 
         Vector3 columnDisplay = new Vector3(top);
         MiscUtils.applyRandomOffset(columnDisplay, random, 2F);
@@ -199,18 +199,18 @@ public class ItemWand extends Item implements OverrideInteractItem {
         double mX = random.nextFloat() * 0.01F * (random.nextBoolean() ? 1 : -1);
         double mY = random.nextFloat() * 0.5F;
         double mZ = random.nextFloat() * 0.01F * (random.nextBoolean() ? 1 : -1);
-        float dstr = DayTimeHelper.getCurrentDaytimeDistribution(world);
+        float dstr = DayTimeHelper.getCurrentDaytimeDistribution(level);
         for (int i = 0; i < 8 + random.nextInt(10); i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(columnDisplay)
-                    .setMotion(new Vector3(
+                    .setDeltaMovement(new Vector3(
                             mX * (0.2 + 0.8 * random.nextFloat()),
                             mY * (random.nextFloat()),
                             mZ * (0.2 + 0.8 * random.nextFloat())
                     ))
                     .color(VFXColorFunction.constant(ColorsAS.ROCK_CRYSTAL))
                     .setAlphaMultiplier((150 * dstr) / 255F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .setScaleMultiplier(0.3F + 0.3F * random.nextFloat())
                     .setMaxAge(25 + random.nextInt(30));
         }

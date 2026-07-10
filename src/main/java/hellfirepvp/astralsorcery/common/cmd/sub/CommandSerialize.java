@@ -43,7 +43,7 @@ public class CommandSerialize {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("serialize")
-                .requires(cs -> cs.hasPermissionLevel(2))
+                .requires(cs -> cs.hasPermission(2))
                 .then(Commands.literal("hand")
                         .executes(CommandSerialize::serializeHand))
                 .then(Commands.literal("look")
@@ -51,33 +51,33 @@ public class CommandSerialize {
     }
 
     private static int serializeHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Player player = context.getSource().asPlayer();
-        ItemStack held = player.getHeldItemMainhand();
+        Player player = context.getSource().getPlayerOrException();
+        ItemStack held = player.getMainHandItem();
         String serialized = JsonHelper.serializeItemStack(held).toString();
 
         MutableComponent msg = Component.literal(serialized);
-        Style s = Style.EMPTY.setFormatting(TextFormatting.GREEN)
+        Style s = Style.EMPTY.setFormatting(ChatFormatting.GREEN)
                 .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
                 .setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
         msg.setStyle(s);
 
-        context.getSource().sendFeedback(msg, true);
+        context.getSource().customSuggestion(msg, true);
         return Command.SINGLE_SUCCESS;
     }
 
     private static int serializeLook(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Player player = context.getSource().asPlayer();
+        Player player = context.getSource().getPlayerOrException();
         BlockHitResult result = MiscUtils.rayTraceLookBlock(player);
-        BlockState state = result == null ? Blocks.AIR.getDefaultState() : player.getEntityWorld().getBlockState(result.getPos());
+        BlockState state = result == null ? Blocks.AIR.defaultBlockState() : player.getCommandSenderWorld().getBlockState(result.getBlockPos());
         String serialized = BlockStateHelper.serialize(state);
 
         MutableComponent msg = Component.literal(serialized);
-        Style s = Style.EMPTY.setFormatting(TextFormatting.GREEN)
+        Style s = Style.EMPTY.setFormatting(ChatFormatting.GREEN)
                 .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
                 .setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
         msg.setStyle(s);
 
-        context.getSource().sendFeedback(msg, true);
+        context.getSource().customSuggestion(msg, true);
         return Command.SINGLE_SUCCESS;
     }
 }

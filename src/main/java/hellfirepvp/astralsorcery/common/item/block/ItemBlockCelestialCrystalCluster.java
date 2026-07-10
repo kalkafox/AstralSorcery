@@ -46,8 +46,8 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean isSelected) {
-        if (!world.isRemote()) {
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean isSelected) {
+        if (!level.isClientSide()) {
             CrystalAttributes attributes = getAttributes(stack);
 
             if (attributes == null && stack.getItem() instanceof CrystalAttributeGenItem) {
@@ -59,8 +59,8 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
             attr.addTooltip(tooltip);
@@ -68,11 +68,11 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
     }
 
     @Override
-    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (isInGroup(group)) {
-            for (int stage : BlockCelestialCrystalCluster.STAGE.getAllowedValues()) {
+            for (int stage : BlockCelestialCrystalCluster.STAGE.getPossibleValues()) {
                 ItemStack cluster = new ItemStack(this);
-                this.setDamage(cluster, stage);
+                this.setBaseDamage(cluster, stage);
                 items.add(cluster);
             }
         }
@@ -83,7 +83,7 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
     protected BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState toPlace = super.getStateForPlacement(context);
         if (toPlace != null) {
-            return toPlace.with(BlockCelestialCrystalCluster.STAGE, this.getDamage(context.getItem()));
+            return toPlace.setValue(BlockCelestialCrystalCluster.STAGE, this.getDamage(context.getItem()));
         }
         return null;
     }

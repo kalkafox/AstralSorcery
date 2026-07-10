@@ -72,12 +72,12 @@ public class CelestialGatewayFilter {
 
     private void loadCache() {
         try {
-            CompoundTag tag = CompressedStreamTools.read(this.gatewayFilter);
+            CompoundTag tag = NbtIo.read(this.gatewayFilter);
             ListTag list = tag.getList("list", Constants.NBT.TAG_STRING);
             this.cache = new HashSet<>();
             for (int i = 0; i < list.size(); i++) {
-                ResourceLocation location = new ResourceLocation(list.getString(i));
-                this.cache.add(RegistryKey.getOrCreateKey(Registry.WORLD_KEY, location));
+                ResourceLocation location = ResourceLocation.parse(list.getString(i));
+                this.cache.add(ResourceKey.create(Registry.DIMENSION_REGISTRY, location));
             }
         } catch (IOException ignored) {
             this.cache = new HashSet<>();
@@ -88,11 +88,11 @@ public class CelestialGatewayFilter {
         try {
             ListTag list = new ListTag();
             for (ResourceKey<Level> dimType : cache) {
-                list.add(StringNBT.valueOf(dimType.getLocation().toString()));
+                list.add(StringTag.valueOf(dimType.getLocation().toString()));
             }
             CompoundTag cmp = new CompoundTag();
             cmp.put("list", list);
-            CompressedStreamTools.write(cmp, this.gatewayFilter);
+            NbtIo.write(cmp, this.gatewayFilter);
         } catch (IOException ignored) {}
     }
 }

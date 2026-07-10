@@ -30,7 +30,7 @@ public class ASMHookEndpoint {
     //Kept as JS since mixins might clash if multiple mods are targeting the 36.0 constant
     public static double getOverriddenSeenEntityReachMaximum(ServerGamePacketListenerImpl handler, double original) {
         Player player = handler.player;
-        PlayerProgress prog = ResearchHelper.getProgress(player, player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER);
+        PlayerProgress prog = ResearchHelper.getProgress(player, player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER);
         if (prog.isValid() && prog.getPerkData().hasPerkEffect(perk -> perk instanceof KeyEntityReach)) {
             return 999_999_999.0;
         }
@@ -41,7 +41,7 @@ public class ASMHookEndpoint {
     public static double getOverriddenCreativeEntityReach(double defaultExtendedReach) {
         PlayerProgress prog = ResearchHelper.getProgress(Minecraft.getInstance().player, LogicalSide.CLIENT);
         if (prog.isValid() && prog.getPerkData().hasPerkEffect(perk -> perk instanceof KeyEntityReach)) {
-            return Math.max(defaultExtendedReach, Minecraft.getInstance().playerController.getBlockReachDistance());
+            return Math.max(defaultExtendedReach, Minecraft.getInstance().gameMode.getPickRange());
         }
         return defaultExtendedReach;
     }

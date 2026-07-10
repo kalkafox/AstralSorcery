@@ -62,12 +62,12 @@ public class ResearchNode {
     }
 
     public ResearchNode(ItemStack itemStack, String unlocName, float renderPosX, float renderPosZ) {
-        this(NodeRenderType.ITEMSTACK, unlocName, renderPosX, renderPosZ);
+        this(NodeRenderType.ITEM_STACK, unlocName, renderPosX, renderPosZ);
         this.renderItemStacks = new ItemStack[] { itemStack };
     }
 
     public ResearchNode(ItemLike[] items, String unlocName, float renderPosX, float renderPosZ) {
-        this(NodeRenderType.ITEMSTACK, unlocName, renderPosX, renderPosZ);
+        this(NodeRenderType.ITEM_STACK, unlocName, renderPosX, renderPosZ);
         this.renderItemStacks = new ItemStack[items.length];
         for (int i = 0; i < items.length; i++) {
             this.renderItemStacks[i] = new ItemStack(items[i]);
@@ -75,7 +75,7 @@ public class ResearchNode {
     }
 
     public ResearchNode(ItemStack[] stacks, String unlocName, float renderPosX, float renderPosZ) {
-        this(NodeRenderType.ITEMSTACK, unlocName, renderPosX, renderPosZ);
+        this(NodeRenderType.ITEM_STACK, unlocName, renderPosX, renderPosZ);
         this.renderItemStacks = stacks;
     }
 
@@ -183,7 +183,7 @@ public class ResearchNode {
 
     public static enum NodeRenderType {
 
-        ITEMSTACK, TEXTURE_SPRITE
+        ITEM_STACK, TEXTURE_SPRITE
 
     }
 

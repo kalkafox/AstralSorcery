@@ -47,11 +47,11 @@ public class FXSpritePlane extends EntityVisualFX implements EntityDynamicFX {
         super(pos);
     }
 
-    public FXSpritePlane setSprite(AbstractRenderableTexture tex) {
-        return this.setSprite(new SpriteSheetResource(tex));
+    public FXSpritePlane pickSprite(AbstractRenderableTexture tex) {
+        return this.pickSprite(new SpriteSheetResource(tex));
     }
 
-    public FXSpritePlane setSprite(SpriteSheetResource sprite) {
+    public FXSpritePlane pickSprite(SpriteSheetResource sprite) {
         this.sprite = sprite;
         return this;
     }
@@ -85,9 +85,9 @@ public class FXSpritePlane extends EntityVisualFX implements EntityDynamicFX {
         SpriteSheetResource ssr = this.sprite != null ? this.sprite : ctx.getSprite();
         Tuple<Float, Float> uvOffset = ssr.getUVOffset(this, pTicks, spriteDisplayFactor);
 
-        Vector3 vec = this.getRenderPosition(pTicks);
+        Vector3 vec = this.getCameraPosition(pTicks);
         vec.subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
-        float scale = this.getScale(pTicks);
+        float scale = this.getQuadSize(pTicks);
 
         int alpha = this.getAlpha(pTicks);
         Color color = this.getColor(pTicks);

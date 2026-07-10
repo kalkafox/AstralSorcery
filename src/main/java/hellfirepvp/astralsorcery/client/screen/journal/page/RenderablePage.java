@@ -33,11 +33,11 @@ public abstract class RenderablePage {
         this.nodePage = nodePage;
     }
 
-    public abstract void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY);
+    public abstract void render(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos);
 
-    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {}
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {}
 
-    public boolean propagateMouseClick(double mouseX, double mouseZ) {
+    public boolean propagateMouseClick(double xpos, double mouseZ) {
         return false;
     }
 
@@ -45,8 +45,8 @@ public abstract class RenderablePage {
         return false;
     }
 
-    public static Font getFontRenderer() {
-        return Minecraft.getInstance().fontRenderer;
+    public static Font getFont() {
+        return Minecraft.getInstance().font;
     }
 
     @Nullable

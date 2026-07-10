@@ -29,18 +29,18 @@ import java.util.Random;
  */
 public class BlockLayerPositionGenerator extends BlockPositionGenerator {
 
-    private int layer = 0;
+    private int layeringState = 0;
 
     private final LinkedList<BlockPos> currentPositions = new LinkedList<>();
 
     @Override
     protected BlockPos genNext(Vector3 offset, double radius) {
-        int size = MathHelper.floor(radius);
+        int size = Mth.floor(radius);
 
         while (currentPositions.isEmpty()) {
             generatePositions(size);
         }
-        return this.currentPositions.pop();
+        return this.currentPositions.popPose();
     }
 
     private void generatePositions(int maxLayers) {
@@ -48,22 +48,22 @@ public class BlockLayerPositionGenerator extends BlockPositionGenerator {
             this.currentPositions.add(BlockPos.ZERO);
             return;
         }
-        this.layer++;
-        if (this.layer > maxLayers) {
-            this.layer = -maxLayers;
+        this.layeringState++;
+        if (this.layeringState > maxLayers) {
+            this.layeringState = -maxLayers;
         }
         Collection<BlockPos> positions = BlockGeometry.getPlane(Direction.UP, maxLayers);
-        positions.forEach(pos -> this.currentPositions.add(pos.add(0, this.layer, 0)));
+        positions.forEach(pos -> this.currentPositions.offset(pos.add(0, this.layeringState, 0)));
         Collections.shuffle(this.currentPositions, new Random(0xF518E23A05B27C19L));
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbt) {
-        nbt.putInt("layer", this.layer);
+    public void save(CompoundTag nbt) {
+        nbt.putInt("layer", this.layeringState);
     }
 
     @Override
     public void readFromNBT(CompoundTag nbt) {
-        this.layer = nbt.getInt("layer");
+        this.layeringState = nbt.getInt("layer");
     }
 }

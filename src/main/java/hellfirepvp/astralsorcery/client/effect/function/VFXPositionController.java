@@ -25,6 +25,6 @@ public interface VFXPositionController<T extends EntityVisualFX> {
     VFXPositionController<?> CONSTANT = (fx, position, motionToBeMoved) -> position.add(motionToBeMoved);
 
     @Nonnull
-    public Vector3 updatePosition(@Nonnull T fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved);
+    public Vector3 finalizePosition(@Nonnull T fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved);
 
 }

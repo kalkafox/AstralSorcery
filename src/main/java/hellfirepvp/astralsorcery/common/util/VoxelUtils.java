@@ -24,17 +24,17 @@ import java.util.List;
  */
 public class VoxelUtils {
 
-    public static VoxelShape combineAll(BooleanOp fct, VoxelShape... shapes) {
-        return combineAll(fct, Arrays.asList(shapes));
+    public static VoxelShape combineAll(BooleanOp fct, VoxelShape... shapeByIndex) {
+        return combineAll(fct, Arrays.asList(shapeByIndex));
     }
 
-    public static VoxelShape combineAll(BooleanOp fct, List<VoxelShape> shapes) {
-        if (shapes.isEmpty()) {
-            return VoxelShapes.empty();
+    public static VoxelShape combineAll(BooleanOp fct, List<VoxelShape> shapeByIndex) {
+        if (shapeByIndex.isEmpty()) {
+            return Shapes.empty();
         }
-        VoxelShape first = shapes.get(0);
-        for (int i = 1; i < shapes.size(); i++) {
-            first = VoxelShapes.combine(first, shapes.get(i), fct);
+        VoxelShape first = shapeByIndex.get(0);
+        for (int i = 1; i < shapeByIndex.size(); i++) {
+            first = Shapes.combine(first, shapeByIndex.get(i), fct);
         }
         return first;
     }

@@ -66,15 +66,15 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
     private static boolean corruptedSkipWaterCheck = false;
 
     public CEffectOctans(@Nonnull ILocatable origin) {
-        super(origin, ConstellationsAS.octans, CONFIG.maxAmount.get(), (world, pos, state) -> {
+        super(origin, ConstellationsAS.octans, CONFIG.maxAmount.get(), (level, pos, state) -> {
             if (!corruptedSkipWaterCheck) {
-                pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).down();
+                pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).below();
             }
             return corruptedSkipWaterCheck || (
-                    world.isAirBlock(pos.up()) &&
+                    level.isEmptyBlock(pos.above()) &&
                             (state.getBlock() instanceof LiquidBlock &&
                                     state.getMaterial() == Material.WATER &&
-                                    state.get(FlowingFluidBlock.LEVEL) == 0) ||
+                                    state.get(LiquidBlock.LEVEL) == 0) ||
                             state.getBlock() instanceof BubbleColumnBlock
                     );
         });
@@ -89,69 +89,69 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
 
     @Nullable
     @Override
-    public ListEntries.CounterMaxEntry createElement(Level world, BlockPos pos) {
-        pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).down();
+    public ListEntries.CounterMaxEntry createElement(Level level, BlockPos pos) {
+        pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).below();
         return new ListEntries.CounterMaxEntry(pos, 1);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
         Vector3 at = new Vector3(pos).add(0.5, 0.5, 0.5);
         at.addY(prop.getSize() * 0.75F);
         for (int i = 0; i < Math.max(1, prop.getSize() / 6); i++) {
-            Vector3 vec = at.clone().add(Vector3.random().setY(0).multiply(rand.nextFloat() * prop.getSize()));
+            Vector3 vec = at.clone().add(Vector3.random().setY(0).mul(random.nextFloat() * prop.getSize()));
 
-            Color c = MiscUtils.eitherOf(rand,
+            Color c = MiscUtils.eitherOf(random,
                     () -> ColorsAS.CONSTELLATION_OCTANS,
                     () -> ColorsAS.CONSTELLATION_OCTANS.darker());
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(vec)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .color(VFXColorFunction.constant(c))
-                    .setScaleMultiplier(0.6F + rand.nextFloat() * 0.3F)
-                    .setGravityStrength(0.0004F + rand.nextFloat() * 0.0008F)
-                    .setMaxAge(100 + rand.nextInt(60));
+                    .setScaleMultiplier(0.6F + random.nextFloat() * 0.3F)
+                    .setGravityStrength(0.0004F + random.nextFloat() * 0.0008F)
+                    .setMaxAge(100 + random.nextInt(60));
         }
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        if (!(world instanceof ServerLevel)) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        if (!(level instanceof ServerLevel)) {
             return false;
         }
 
         boolean update = false;
         if (properties.isCorrupted()) {
             corruptedSkipWaterCheck = true;
-            Either<ListEntries.CounterMaxEntry, BlockPos> newEntry = this.peekNewPosition(world, pos, properties);
+            Either<ListEntries.CounterMaxEntry, BlockPos> newEntry = this.peekNewPosition(level, pos, properties);
             corruptedSkipWaterCheck = false;
             return newEntry.mapLeft(entry -> {
-                BlockState state = world.getBlockState(entry.getPos());
-                BlockPos offset = entry.getPos().subtract(pos);
-                if (world.isAirBlock(entry.getPos()) &&
+                BlockState state = level.getBlockState(entry.getBlockPos());
+                BlockPos offset = entry.getBlockPos().subtract(pos);
+                if (level.isEmptyBlock(entry.getBlockPos()) &&
                         (this.isLinkedRitual || Math.abs(offset.getX()) > 5 || Math.abs(offset.getZ()) > 5 || offset.getY() < 0)) {
-                    if (!world.getDimensionType().isUltrawarm()) {
-                        if (world.setBlockState(entry.getPos(), Blocks.WATER.getDefaultState())) {
+                    if (!level.dimensionType().ultraWarm()) {
+                        if (level.setBlock(entry.getBlockPos(), Blocks.WATER.defaultBlockState())) {
                             for (int i = 0; i < 3; i++) {
-                                spawnFishingDropsAt((ServerLevel) world, entry.getPos());
+                                spawnFishingDropsAt((ServerLevel) level, entry.getBlockPos());
                             }
-                            world.neighborChanged(entry.getPos(), Blocks.WATER, entry.getPos());
+                            level.neighborChanged(entry.getBlockPos(), Blocks.WATER, entry.getBlockPos());
                         }
                     }
                 } else if (BlockUtils.isFluidBlock(state)) {
                     if (state.getBlock() == Blocks.WATER) {
-                        if (rand.nextInt(100) == 0) {
-                            spawnFishingDropsAt((ServerLevel) world, entry.getPos());
+                        if (random.nextInt(100) == 0) {
+                            spawnFishingDropsAt((ServerLevel) level, entry.getBlockPos());
                         }
                     } else {
-                        world.setBlockState(entry.getPos(), Blocks.SAND.getDefaultState());
+                        level.setBlock(entry.getBlockPos(), Blocks.SAND.defaultBlockState());
                     }
                 } else if (state.getBlock() instanceof BubbleColumnBlock) {
-                    if (rand.nextInt(70) == 0) {
-                        spawnFishingDropsAt((ServerLevel) world, entry.getPos());
+                    if (random.nextInt(70) == 0) {
+                        spawnFishingDropsAt((ServerLevel) level, entry.getBlockPos());
                     }
                 }
                 return true;
@@ -160,11 +160,11 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
 
         ListEntries.CounterMaxEntry entry = getRandomElementChanced();
         if (entry != null) {
-            if (MiscUtils.canEntityTickAt(world, entry.getPos())) {
-                if (!isValid(world, entry)) {
+            if (MiscUtils.canEntityTickAt(level, entry.getBlockPos())) {
+                if (!isValid(level, entry)) {
                     removeElement(entry);
                 } else {
-                    sendConstellationPing(world, new Vector3(entry.getPos()).add(0.5, 1, 0.5));
+                    sendConstellationPing(level, new Vector3(entry.getBlockPos()).add(0.5, 1, 0.5));
                     int count = entry.getCounter();
                     count++;
                     entry.setCounter(count);
@@ -174,45 +174,45 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
                         int max = Math.max(CONFIG.minFishTickTime.get(), CONFIG.maxFishTickTime.get());
 
                         int diff = Math.max(1, max - min + 1);
-                        entry.setMaxCount(min + rand.nextInt(diff));
+                        entry.setMaxCount(min + random.nextInt(diff));
                         entry.setCounter(0);
 
-                        spawnFishingDropsAt((ServerLevel) world, entry.getPos());
+                        spawnFishingDropsAt((ServerLevel) level, entry.getBlockPos());
                     }
                 }
                 update = true;
             }
         }
 
-        if (findNewPosition(world, pos, properties)
-                .ifRight(attemptedPos -> sendConstellationPing(world, new Vector3(world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, attemptedPos).down()).add(0.5, 0.5, 0.5)))
+        if (findNewPosition(level, pos, properties)
+                .ifRight(attemptedPos -> sendConstellationPing(level, new Vector3(level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, attemptedPos).below()).add(0.5, 0.5, 0.5)))
                 .left().isPresent()) {
             update = true;
         }
         return update;
     }
 
-    private void spawnFishingDropsAt(ServerLevel world, BlockPos pos) {
+    private void spawnFishingDropsAt(ServerLevel level, BlockPos pos) {
         Vector3 dropLoc = new Vector3(pos).add(0.5, 0.85, 0.5);
         ItemStack tool = new ItemStack(Items.FISHING_ROD);
-        tool.addEnchantment(Enchantments.LUCK_OF_THE_SEA, 2);
+        tool.fillItemCategory(Enchantments.LUCK_OF_THE_SEA, 2);
 
-        ResourceLocation fromTable = LootTables.GAMEPLAY_FISHING_FISH;
-        if (rand.nextFloat() < 0.1F) {
-            fromTable = LootTables.GAMEPLAY_FISHING_TREASURE;
+        ResourceLocation fromTable = BuiltInLootTables.FISHING_FISH;
+        if (random.nextFloat() < 0.1F) {
+            fromTable = BuiltInLootTables.FISHING_TREASURE;
         }
 
-        LootContext.Builder builder = new LootContext.Builder(world);
-        builder.withLuck(rand.nextInt(2) * rand.nextFloat());
-        builder.withRandom(rand);
-        builder.withParameter(LootParameters.TOOL, tool);
-        builder.withParameter(LootParameters.field_237457_g_, Vector3d.copyCentered(pos));
-        LootTable lootTable = world.getServer().getLootTableManager().getLootTableFromLocation(fromTable);
-        for (ItemStack loot : lootTable.generate(builder.build(LootParameterSets.FISHING))) {
-            ItemEntity ei = ItemUtils.dropItemNaturally(world, dropLoc.getX(), dropLoc.getY(), dropLoc.getZ(), loot);
-            Vector3 motion = new Vector3(ei.getMotion());
+        LootContext.Builder builder = new LootContext.Builder(level);
+        builder.withLuck(random.nextInt(2) * random.nextFloat());
+        builder.create(random);
+        builder.withParameter(LootContextParams.TOOL, tool);
+        builder.withParameter(LootContextParams.ORIGIN, Vec3.copyCentered(pos));
+        LootTable lootTable = level.getServer().getLootTables().serialize(fromTable);
+        for (ItemStack loot : lootTable.place(builder.build(LootContextParamSets.FISHING))) {
+            ItemEntity ei = ItemUtils.dropItemNaturally(level, dropLoc.getX(), dropLoc.getY(), dropLoc.getZ(), loot);
+            Vector3 motion = new Vector3(ei.getDeltaMovement());
             motion.setY(Math.abs(motion.getY()));
-            ei.setMotion(motion.toVector3d());
+            ei.setDeltaMovement(motion.toVector3d());
         }
     }
 

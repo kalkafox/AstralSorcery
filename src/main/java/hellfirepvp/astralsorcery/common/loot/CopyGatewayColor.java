@@ -35,18 +35,18 @@ public class CopyGatewayColor extends LootItemConditionalFunction {
     }
 
     @Override
-    public Set<LootContextParam<?>> getRequiredParameters() {
-        return Sets.newHashSet(LootParameters.BLOCK_ENTITY);
+    public Set<LootContextParam<?>> getReferencedContextParams() {
+        return Sets.newHashSet(LootContextParams.BLOCK_ENTITY);
     }
 
     @Override
-    public LootItemFunctionType getFunctionType() {
+    public LootItemFunctionType getType() {
         return LootAS.Functions.COPY_GATEWAY_COLOR;
     }
 
     @Override
-    protected ItemStack doApply(ItemStack stack, LootContext context) {
-        BlockEntity tile = context.get(LootParameters.BLOCK_ENTITY);
+    protected ItemStack run(ItemStack stack, LootContext context) {
+        BlockEntity tile = context.get(LootContextParams.BLOCK_ENTITY);
         if (tile instanceof TileCelestialGateway) {
             ((TileCelestialGateway) tile).getColor().ifPresent(color -> {
                 BlockCelestialGateway.setColor(stack, color);
@@ -55,11 +55,11 @@ public class CopyGatewayColor extends LootItemConditionalFunction {
         return stack;
     }
 
-    public static LootFunction.Builder<?> builder() {
+    public static LootItemConditionalFunction.Builder<?> builder() {
         return builder(CopyGatewayColor::new);
     }
 
-    public static class Serializer extends LootFunction.Serializer<CopyGatewayColor> {
+    public static class Serializer extends LootItemConditionalFunction.Serializer<CopyGatewayColor> {
 
         @Override
         public CopyGatewayColor deserialize(JsonObject object, JsonDeserializationContext deserializationContext, LootItemCondition[] conditions) {

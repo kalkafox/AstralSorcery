@@ -79,11 +79,11 @@ public final class PacketChannel {
     public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
         event.registrar(NET_COMM_VERSION)
                 .playBidirectional(Envelope.TYPE, Envelope.STREAM_CODEC,
-                        (payload, context) -> payload.packet().handler().accept(payload.packet(), new PacketContext(context)));
+                        (data, context) -> data.packet().handler().accept(data.packet(), new PacketContext(context)));
     }
 
-    private static void register(Supplier<? extends ASPacket<?>> supplier) {
-        ASPacket<?> packet = supplier.get();
+    private static void register(Supplier<? extends ASPacket<?>> factory) {
+        ASPacket<?> packet = factory.get();
         int id = PACKETS_BY_ID.size();
         PACKETS_BY_ID.put(id, packet);
         IDS_BY_CLASS.put(packet.getClass(), id);
@@ -113,12 +113,12 @@ public final class PacketChannel {
         return new Envelope(id, (ASPacket<?>) prototype.decoder().apply(buffer));
     }
 
-    public static TargetPoint pointFromPos(Level world, Vec3i pos, double range) {
-        return pointFromPos(world.dimension(), pos, range);
+    public static TargetPoint pointFromPos(Level level, Vec3i pos, double range) {
+        return pointFromPos(level.dimension(), pos, range);
     }
 
-    public static TargetPoint pointFromPos(ResourceKey<Level> world, Vec3i pos, double range) {
-        return new TargetPoint(pos.getX(), pos.getY(), pos.getZ(), range, world);
+    public static TargetPoint pointFromPos(ResourceKey<Level> level, Vec3i pos, double range) {
+        return new TargetPoint(pos.getX(), pos.getY(), pos.getZ(), range, level);
     }
 
     public record TargetPoint(double x, double y, double z, double range, ResourceKey<Level> dimension) {}

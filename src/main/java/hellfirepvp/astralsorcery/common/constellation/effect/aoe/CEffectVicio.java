@@ -53,23 +53,23 @@ public class CEffectVicio extends ConstellationEffect implements ConstellationEf
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
-        if (rand.nextInt(3) == 0) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+        if (random.nextInt(3) == 0) {
             Vector3 r = new Vector3(
-                    pos.getX() + rand.nextFloat() * 4 * (rand.nextBoolean() ? 1 : -1) + 0.5,
-                    pos.getY() + rand.nextFloat() * 2 + 0.5,
-                    pos.getZ() + rand.nextFloat() * 4 * (rand.nextBoolean() ? 1 : -1) + 0.5);
+                    pos.getX() + random.nextFloat() * 4 * (random.nextBoolean() ? 1 : -1) + 0.5,
+                    pos.getY() + random.nextFloat() * 2 + 0.5,
+                    pos.getZ() + random.nextFloat() * 4 * (random.nextBoolean() ? 1 : -1) + 0.5);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(r)
-                    .setMotion(Vector3.random().setY(0).multiply(0.03F))
+                    .setDeltaMovement(Vector3.random().setY(0).mul(0.03F))
                     .setScaleMultiplier(0.45F)
                     .color(VFXColorFunction.constant(ColorsAS.RITUAL_CONSTELLATION_VICIO))
                     .setGravityStrength(-0.002F)
                     .setMaxAge(40);
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(r)
-                    .setMotion(new Vector3(0, rand.nextFloat() * 0.03F, 0))
+                    .setDeltaMovement(new Vector3(0, random.nextFloat() * 0.03F, 0))
                     .setScaleMultiplier(0.45F)
                     .color(VFXColorFunction.constant(ColorsAS.RITUAL_CONSTELLATION_VICIO))
                     .setGravityStrength(-0.002F)
@@ -78,42 +78,42 @@ public class CEffectVicio extends ConstellationEffect implements ConstellationEf
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         return false;
     }
 
     @Override
-    public boolean runStatusEffect(Level world, BlockPos pos, int mirrorAmount, ConstellationEffectProperties modified, @Nullable IMinorConstellation possibleTraitEffect) {
+    public boolean runStatusEffect(Level level, BlockPos pos, int mirrorAmount, ConstellationEffectProperties isDirty, @Nullable IMinorConstellation possibleTraitEffect) {
         boolean foundPlayer = false;
-        double range = modified.getSize();
-        if (modified.isCorrupted()) {
-            List<LivingEntity> entities = world.getEntitiesWithinAABB(LivingEntity.class, BOX.offset(pos).grow(range));
+        double range = isDirty.getSize();
+        if (isDirty.isCorrupted()) {
+            List<LivingEntity> entities = level.getEntitiesWithinAABB(LivingEntity.class, BOX.offset(pos).grow(range));
             for (LivingEntity entity : entities) {
                 if (entity instanceof ServerPlayer) {
                     ServerPlayer pl = (ServerPlayer) entity;
-                    if (pl.interactionManager.getGameType().isSurvivalOrAdventure()) {
+                    if (pl.gameMode.getGameType().isSurvival()) {
                         boolean prev = pl.abilities.allowFlying;
                         pl.abilities.allowFlying = false;
-                        pl.abilities.isFlying = false;
+                        pl.abilities.flying = false;
                         if (prev) {
-                            pl.sendPlayerAbilities();
+                            pl.onUpdateAbilities();
                         }
                     }
                     markPlayerAffected(pl);
                 }
                 foundPlayer = true;
-                entity.addPotionEffect(new MobEffectInstance(Effects.SLOWNESS, 200, 9));
-                entity.addPotionEffect(new MobEffectInstance(Effects.MINING_FATIGUE, 200, 9));
+                entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 9));
+                entity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 200, 9));
             }
         } else {
-            List<ServerPlayer> entities = world.getEntitiesWithinAABB(ServerPlayerEntity.class, BOX.offset(pos).grow(range));
+            List<ServerPlayer> entities = level.getEntitiesWithinAABB(ServerPlayer.class, BOX.offset(pos).grow(range));
             for (ServerPlayer pl : entities) {
                 if (EventHelperTemporaryFlight.allowFlight(pl)) {
                     boolean prev = pl.abilities.allowFlying;
                     pl.abilities.allowFlying = true;
                     foundPlayer = true;
                     if (!prev) {
-                        pl.sendPlayerAbilities();
+                        pl.onUpdateAbilities();
                     }
                 }
                 markPlayerAffected(pl);

@@ -22,14 +22,14 @@ public class PerkStatistic {
     private final PerkAttributeType type;
     private final String unlocPerkTypeName;
     private final String perkValue;
-    private final String suffix;
+    private final String playerSuffix;
     private final String postProcessInfo;
 
-    public PerkStatistic(PerkAttributeType type, String perkValue, String suffix, String postProcessInfo) {
+    public PerkStatistic(PerkAttributeType type, String perkValue, String playerSuffix, String postProcessInfo) {
         this.type = type;
         this.unlocPerkTypeName = type.getUnlocalizedName();
         this.perkValue = perkValue;
-        this.suffix = suffix;
+        this.playerSuffix = playerSuffix;
         this.postProcessInfo = postProcessInfo;
     }
 
@@ -46,7 +46,7 @@ public class PerkStatistic {
     }
 
     public String getSuffix() {
-        return suffix;
+        return playerSuffix;
     }
 
     public String getPostProcessInfo() {

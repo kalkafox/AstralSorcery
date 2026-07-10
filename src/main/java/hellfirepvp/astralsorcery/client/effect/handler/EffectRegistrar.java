@@ -39,7 +39,7 @@ public final class EffectRegistrar {
     }
 
     private static void register(FXSource<?, ?> src) {
-        if (Minecraft.getInstance().isGamePaused() ||
+        if (Minecraft.getInstance().isPaused() ||
                 Minecraft.getInstance().player == null) {
             return;
         }
@@ -55,7 +55,7 @@ public final class EffectRegistrar {
     private static <T extends EntityVisualFX> void register(T effect, EffectProperties<T> properties) {
         if (AssetLibrary.isReloading() ||
                 effect == null ||
-                Minecraft.getInstance().isGamePaused() ||
+                Minecraft.getInstance().isPaused() ||
                 Minecraft.getInstance().player == null ||
                 !RenderingUtils.canEffectExist(effect)) {
             return;

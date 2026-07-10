@@ -121,15 +121,15 @@ public class PreparedPerkTreeData {
             perkHash[i] = ((long) treePoint.getPerk().hashCode()) << 32 ^ treePoint.getOffset().hashCode();
         }
         long hash = 1L;
-        for (long element : perkHash) {
-            long elementHash = element ^ (element >>> 32);
+        for (long value : perkHash) {
+            long elementHash = value ^ (value >>> 32);
             hash = 31 * hash + elementHash;
         }
         return hash;
     }
 
-    public void clearPerkCache(LogicalSide side) {
-        this.treePoints.stream().map(PerkTreePoint::getPerk).forEach(p -> p.clearCaches(side));
+    public void clearPerkCache(LogicalSide direction) {
+        this.treePoints.stream().map(PerkTreePoint::getPerk).forEach(p -> p.clearCaches(direction));
     }
 
     public class PointConnector {

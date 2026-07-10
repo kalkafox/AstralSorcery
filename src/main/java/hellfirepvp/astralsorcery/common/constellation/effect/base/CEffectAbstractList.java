@@ -81,8 +81,8 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
 
     protected void selectSphericalPositions() {
         this.positionStrategy.andFilter((pos, radius) -> {
-            double dst = new Vector3(this.getPos().getLocationPos()).add(0.5, 0.5, 0.5)
-                    .distanceSquared(new Vector3(pos).add(this.getPos().getLocationPos()).add(0.5, 0.5, 0.5));
+            double dst = new Vector3(this.getBlockPos().getLocationPos()).add(0.5, 0.5, 0.5)
+                    .distanceSquared(new Vector3(pos).add(this.getBlockPos().getLocationPos()).add(0.5, 0.5, 0.5));
             return dst <= radius * radius;
         });
     }
@@ -91,7 +91,7 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
     public abstract T recreateElement(CompoundTag tag, BlockPos pos);
 
     @Nullable
-    public abstract T createElement(Level world, BlockPos pos);
+    public abstract T createElement(Level level, BlockPos pos);
 
     @Nonnull
     protected BlockPositionGenerator createPositionStrategy() {
@@ -110,10 +110,10 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
                                 !pos.equals(TileRitualPedestal.RITUAL_ANCHOR_OFFEST) && (
                                         pos.getY() >= 3 || ( //Anything above the ritual is fine aswell
                                                 !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos) && //actual Ritual layer
-                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.down()) && //Pillars & config
-                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.down(2)) &&  //uh... consistency?
-                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.down(3)) && //Lenses
-                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.down(4))))); //Another layer of lenses
+                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.below()) && //Pillars & config
+                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.below(2)) &&  //uh... consistency?
+                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.below(3)) && //Lenses
+                                                        !StructuresAS.STRUCT_RITUAL_PEDESTAL.hasBlockAt(pos.below(4))))); //Another layer of lenses
     }
 
     private Predicate<BlockPos> createExcludeRitualColumnPredicate() {
@@ -129,13 +129,13 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
         this.elements.clear();
     }
 
-    public boolean isValid(Level world, T element) {
-        return this.verifier.test(world, element.getPos(), world.getBlockState(element.getPos()));
+    public boolean isValid(Level level, T value) {
+        return this.verifier.test(level, value.getBlockPos(), level.getBlockState(value.getBlockPos()));
     }
 
     @Nullable
     public T getRandomElement() {
-        return MiscUtils.getRandomEntry(this.elements, rand);
+        return MiscUtils.getRandomEntry(this.elements, random);
     }
 
     @Nullable
@@ -145,17 +145,17 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
         }
         float perc = 1F - (((float) this.getCount()) / this.maxAmount);
         perc = 0.1F / ((perc / 2F) + 0.1F);
-        if (rand.nextFloat() < perc) {
+        if (random.nextFloat() < perc) {
             return getRandomElement();
         }
         return null;
     }
 
     @Nonnull
-    public Either<T, BlockPos> peekNewPosition(Level world, BlockPos pos, ConstellationEffectProperties prop) {
+    public Either<T, BlockPos> peekNewPosition(Level level, BlockPos pos, ConstellationEffectProperties prop) {
         if (this.excludesRitual || this.excludeRitualColumn) {
-            MiscUtils.executeWithChunk(world, pos, () -> {
-                this.isLinkedRitual = MiscUtils.getTileAt(world, pos, TileRitualLink.class, true) != null;
+            MiscUtils.executeWithChunk(level, pos, () -> {
+                this.isLinkedRitual = MiscUtils.getTileAt(level, pos, TileRitualLink.class, true) != null;
             });
         }
         BlockPositionGenerator gen = this.selectPositionStrategy(this.positionStrategy, prop);
@@ -163,18 +163,18 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
             gen.copyFilterFrom(this.positionStrategy);
         }
         BlockPos at = gen.generateNextPosition(new Vector3(0.5, 0.5, 0.5), prop.getSize());
-        BlockPos actual = at.add(pos);
+        BlockPos actual = at.offset(pos);
 
         if (this.getCount() >= this.maxAmount) {
             return Either.right(actual);
         }
-        return MiscUtils.executeWithChunk(world, actual, () -> {
-            if (this.verifier.test(world, actual, world.getBlockState(actual))) {
-                T element = this.createElement(world, actual);
-                if (element == null) {
+        return MiscUtils.executeWithChunk(level, actual, () -> {
+            if (this.verifier.test(level, actual, level.getBlockState(actual))) {
+                T value = this.createElement(level, actual);
+                if (value == null) {
                     return Either.right(actual);
                 } else {
-                    return Either.left(element);
+                    return Either.left(value);
                 }
             }
             return Either.right(actual);
@@ -182,24 +182,24 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
     }
 
     @Nonnull
-    public Either<T, BlockPos> findNewPosition(Level world, BlockPos pos, ConstellationEffectProperties prop) {
-        return this.peekNewPosition(world, pos, prop).ifLeft(entry -> {
-            if (!this.hasElement(entry.getPos())) {
+    public Either<T, BlockPos> findNewPosition(Level level, BlockPos pos, ConstellationEffectProperties prop) {
+        return this.peekNewPosition(level, pos, prop).ifLeft(entry -> {
+            if (!this.hasElement(entry.getBlockPos())) {
                 this.elements.add(entry);
             }
         });
     }
 
     public boolean removeElement(T entry) {
-        return removeElement(entry.getPos());
+        return removeElement(entry.getBlockPos());
     }
 
     public boolean removeElement(BlockPos pos) {
-        return this.elements.removeIf(e -> e.getPos().equals(pos));
+        return this.elements.removeIf(e -> e.getBlockPos().equals(pos));
     }
 
     public boolean hasElement(BlockPos pos) {
-        return MiscUtils.contains(this.elements, e -> e.getPos().equals(pos));
+        return MiscUtils.contains(this.elements, e -> e.getBlockPos().equals(pos));
     }
 
     @Override
@@ -213,25 +213,25 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
             CompoundTag tag = (CompoundTag) nbt;
             BlockPos pos = NBTHelper.readBlockPosFromNBT(tag);
             CompoundTag tagData = tag.getCompound("data");
-            T element = this.recreateElement(tagData, pos);
-            if (element != null) {
-                element.readFromNBT(tagData);
-                this.elements.add(element);
+            T value = this.recreateElement(tagData, pos);
+            if (value != null) {
+                value.readFromNBT(tagData);
+                this.elements.add(value);
             }
         }
     }
 
     @Override
-    public void writeToNBT(CompoundTag cmp) {
-        super.writeToNBT(cmp);
+    public void save(CompoundTag cmp) {
+        super.save(cmp);
 
         ListTag list = new ListTag();
-        for (T element : this.elements) {
+        for (T value : this.elements) {
             CompoundTag tag = new CompoundTag();
-            NBTHelper.writeBlockPosToNBT(element.getPos(), tag);
+            NBTHelper.writeBlockPosToNBT(value.getBlockPos(), tag);
 
             CompoundTag dataTag = new CompoundTag();
-            element.writeToNBT(dataTag);
+            value.save(dataTag);
             tag.put("data", dataTag);
 
             list.add(tag);
@@ -241,9 +241,9 @@ public abstract class CEffectAbstractList<T extends CEffectAbstractList.ListEntr
 
     public static interface ListEntry {
 
-        public BlockPos getPos();
+        public BlockPos getBlockPos();
 
-        public void writeToNBT(CompoundTag nbt);
+        public void save(CompoundTag nbt);
 
         public void readFromNBT(CompoundTag nbt);
 

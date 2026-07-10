@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  */
 public class PatreonEffect {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
 
     private final FlareColor flareColor;
     private final UUID effectUUID;

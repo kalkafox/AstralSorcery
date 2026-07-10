@@ -8,10 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.effect.*;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.common.NeoForge;
 
 import static hellfirepvp.astralsorcery.common.lib.EffectsAS.*;
@@ -36,7 +35,6 @@ public class RegistryEffects {
     private static <T extends EffectCustomTexture> T register(T effect) {
         var name = NameUtil.fromClass(effect, "Effect");
         effect.attachEventListeners(NeoForge.EVENT_BUS);
-        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.MOB_EFFECT, name, effect);
-        return effect;
+        return AstralRegistries.register(AstralRegistries.MOB_EFFECTS, name, effect);
     }
 }

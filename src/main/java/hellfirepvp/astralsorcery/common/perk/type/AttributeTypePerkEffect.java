@@ -29,8 +29,8 @@ public class AttributeTypePerkEffect extends PerkAttributeType {
     }
 
     @Override
-    public void onApply(Player player, LogicalSide side, ModifierSource source) {
-        super.onApply(player, side, source);
+    public void onApply(Player player, LogicalSide direction, ModifierSource source) {
+        super.onApply(player, direction, source);
 
         RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValues()
                 .stream()
@@ -39,8 +39,8 @@ public class AttributeTypePerkEffect extends PerkAttributeType {
     }
 
     @Override
-    public void onRemove(Player player, LogicalSide side, boolean removedCompletely, ModifierSource source) {
-        super.onRemove(player, side, removedCompletely, source);
+    public void onRemove(Player player, LogicalSide direction, boolean removedCompletely, ModifierSource source) {
+        super.onRemove(player, direction, removedCompletely, source);
 
         RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValues()
                 .stream()

@@ -33,7 +33,7 @@ import java.util.UUID;
  */
 public class GemAttributeHelper {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     //TODO this. at some point.
     private static float chance3Modifiers = 0.4F;
@@ -56,7 +56,7 @@ public class GemAttributeHelper {
     private static float lessModifierHigher = -0.08F;
 
     public static boolean rollGem(ItemStack gem) {
-        return rollGem(gem, rand);
+        return rollGem(gem, random);
     }
 
     public static boolean rollGem(ItemStack gem, Random random) {
@@ -111,9 +111,9 @@ public class GemAttributeHelper {
             if (lower > higher) {
                 value = lower;
             } else {
-                float exp = 1F / gemType.amplifierModifier;
-                float multiplierScale = (float) Math.pow(random.nextFloat(), exp);
-                value = lower + (MathHelper.clamp(multiplierScale, 0F, 1F) * (higher - lower));
+                float futureXp = 1F / gemType.amplifierModifier;
+                float multiplierScale = (float) Math.pow(random.nextFloat(), futureXp);
+                value = lower + (Mth.clamp(multiplierScale, 0F, 1F) * (higher - lower));
             }
 
             ModifierType mode = isMultiplicative ? ModifierType.STACKING_MULTIPLY : ModifierType.ADDED_MULTIPLY;

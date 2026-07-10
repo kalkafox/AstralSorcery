@@ -54,22 +54,22 @@ public class MantleEffectPelotrio extends MantleEffect {
     }
 
     private void onHurt(LivingAttackEvent event) {
-        Level world = event.getEntityLiving().getEntityWorld();
-        if (world.isRemote()) {
+        Level level = event.getEntityLiving().getCommandSenderWorld();
+        if (level.isClientSide()) {
             return;
         }
 
         LivingEntity attacked = event.getEntityLiving();
-        Entity attacker = event.getSource().getTrueSource();
+        Entity attacker = event.getSource().getEntity();
         if (attacker instanceof Player) {
             if (attacked instanceof ServerPlayer && MiscUtils.isPlayerFakeMP((ServerPlayer) attacked)) {
                 return;
             }
             Player player = (Player) attacker;
 
-            if (ItemMantle.getEffect(player, ConstellationsAS.pelotrio) != null && rand.nextFloat() < CONFIG.chanceSpawnSword.get()) {
+            if (ItemMantle.getEffect(player, ConstellationsAS.pelotrio) != null && random.nextFloat() < CONFIG.chanceSpawnSword.get()) {
                 if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerSword.get())) {
-                    if (world.addEntity(new EntitySpectralTool(world, player.getPosition().up(), player, EntitySpectralTool.ToolTask.createAttackTask()))) {
+                    if (level.addEntity(new EntitySpectralTool(level, player.position().above(), player, EntitySpectralTool.ToolTask.createAttackTask()))) {
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerSword.get(), false);
                     }
                 }
@@ -78,8 +78,8 @@ public class MantleEffectPelotrio extends MantleEffect {
     }
 
     private void onBreak(BlockEvent.BreakEvent event) {
-        LevelAccessor world = event.getWorld();
-        if (world.isRemote() || !(world instanceof Level)) {
+        LevelAccessor level = event.getLevel();
+        if (level.isClientSide() || !(level instanceof Level)) {
             return;
         }
 
@@ -89,27 +89,27 @@ public class MantleEffectPelotrio extends MantleEffect {
 
             BlockState state = event.getState();
 
-            if ((state.getHarvestTool() == ToolType.AXE || !state.getRequiresTool()) &&
+            if ((state.getHarvestTool() == ToolType.AXE || !state.requiresCorrectToolForDrops()) &&
                     (state.isIn(BlockTags.LOGS) || state.isIn(BlockTags.LEAVES)) &&
-                    !player.getHeldItemMainhand().isEmpty() &&
-                    player.getHeldItemMainhand().getToolTypes().contains(ToolType.AXE)) {
+                    !player.getMainHandItem().isEmpty() &&
+                    player.getMainHandItem().getToolTypes().contains(ToolType.AXE)) {
 
-                if (rand.nextFloat() < CONFIG.chanceSpawnAxe.get()) {
+                if (random.nextFloat() < CONFIG.chanceSpawnAxe.get()) {
                     if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerAxe.get())) {
-                        if (world.addEntity(new EntitySpectralTool((Level) world, player.getPosition(), player, EntitySpectralTool.ToolTask.createLogTask()))) {
+                        if (level.addEntity(new EntitySpectralTool((Level) level, player.position(), player, EntitySpectralTool.ToolTask.createLogTask()))) {
                             AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerAxe.get(), false);
                         }
                     }
                 }
                 return;
             }
-            if ((state.getHarvestTool() == ToolType.PICKAXE || !state.getRequiresTool()) &&
-                    !player.getHeldItemMainhand().isEmpty() &&
-                    player.getHeldItemMainhand().getToolTypes().contains(ToolType.PICKAXE)) {
+            if ((state.getHarvestTool() == ToolType.PICKAXE || !state.requiresCorrectToolForDrops()) &&
+                    !player.getMainHandItem().isEmpty() &&
+                    player.getMainHandItem().getToolTypes().contains(ToolType.PICKAXE)) {
 
-                if (rand.nextFloat() < CONFIG.chanceSpawnPickaxe.get()) {
+                if (random.nextFloat() < CONFIG.chanceSpawnPickaxe.get()) {
                     if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerPickaxe.get())) {
-                        if (world.addEntity(new EntitySpectralTool((Level) world, player.getPosition(), player, EntitySpectralTool.ToolTask.createPickaxeTask()))) {
+                        if (level.addEntity(new EntitySpectralTool((Level) level, player.position(), player, EntitySpectralTool.ToolTask.createPickaxeTask()))) {
                             AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerPickaxe.get(), false);
                         }
                     }

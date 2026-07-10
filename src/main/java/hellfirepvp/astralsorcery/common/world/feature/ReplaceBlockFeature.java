@@ -33,14 +33,14 @@ public class ReplaceBlockFeature extends Feature<ReplaceBlockConfig> {
     }
 
     @Override
-    public boolean generate(WorldGenLevel reader, ChunkGenerator generator, Random rand, BlockPos pos, ReplaceBlockConfig config) {
-        if (config.target.test(reader.getBlockState(pos), rand)) {
-            return setBlockState(reader, pos, config.state);
+    public boolean place(WorldGenLevel reader, ChunkGenerator generator, Random random, BlockPos pos, ReplaceBlockConfig config) {
+        if (config.target.test(reader.getBlockState(pos), random)) {
+            return setBlock(reader, pos, config.state);
         }
         return true;
     }
 
-    protected boolean setBlockState(ServerLevelAccessor world, BlockPos pos, BlockState state) {
-        return world.setBlockState(pos, state, Constants.BlockFlags.BLOCK_UPDATE);
+    protected boolean setBlock(ServerLevelAccessor level, BlockPos pos, BlockState state) {
+        return level.setBlock(pos, state, Constants.BlockFlags.BLOCK_UPDATE);
     }
 }

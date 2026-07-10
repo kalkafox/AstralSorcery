@@ -28,27 +28,27 @@ import java.util.function.Function;
  */
 public class FXOrbitalCollector extends FXSourceOrbital<FXFacingParticle, BatchRenderContext<FXFacingParticle>> {
 
-    private final VFXColorFunction<FXFacingParticle> primaryColor, secondaryColor;
+    private final VFXColorFunction<FXFacingParticle> color1, color2;
 
     public FXOrbitalCollector(Vector3 pos, Color color) {
         super(pos, EffectTemplatesAS.GENERIC_PARTICLE);
-        this.primaryColor = VFXColorFunction.constant(color);
-        this.secondaryColor = VFXColorFunction.constant(color.brighter());
+        this.color1 = VFXColorFunction.constant(color);
+        this.color2 = VFXColorFunction.constant(color.brighter());
     }
 
     @Override
     public void spawnOrbitalParticle(Vector3 pos, Function<Vector3, FXFacingParticle> effectRegistrar) {
-        if (rand.nextInt(2) == 0) {
+        if (random.nextInt(2) == 0) {
             effectRegistrar.apply(pos)
-                    .color(primaryColor)
+                    .color(color1)
                     .setScaleMultiplier(0.15F)
                     .setMaxAge(15);
         }
-        if (rand.nextInt(5) == 0) {
+        if (random.nextInt(5) == 0) {
             effectRegistrar.apply(pos)
-                    .color(secondaryColor)
-                    .setMotion(Vector3.random().normalize().multiply(0.02F + rand.nextFloat() * 0.01F))
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.1F)
+                    .color(color2)
+                    .setDeltaMovement(Vector3.random().normalize().mul(0.02F + random.nextFloat() * 0.01F))
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.1F)
                     .setMaxAge(25);
         }
     }

@@ -77,7 +77,7 @@ public class PktUpdateGateways extends ASPacket<PktUpdateGateways> {
             }
 
             @Override
-            public void handle(PktUpdateGateways packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktUpdateGateways packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

@@ -54,7 +54,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
     public void tick() {
         super.tick();
 
-        if (!this.getWorld().isRemote()) {
+        if (!this.getLevel().isClientSide()) {
             if (this.entityHelperRef == null) {
                 this.createNewObservatoryEntity();
             } else {
@@ -66,31 +66,31 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         }
     }
 
-    public boolean isUsable() {
+    public boolean isFlyEnabled() {
         for (int xx = -1; xx <= 1; xx++) {
             for (int zz = -1; zz <= 1; zz++) {
                 if (xx == 0 && zz == 0) {
                     continue;
                 }
                 BlockPos other = pos.add(xx, 0, zz);
-                if (!MiscUtils.canSeeSky(this.getWorld(), other, false, true)) {
+                if (!MiscUtils.canSeeSky(this.getLevel(), other, false, true)) {
                     return false;
                 }
             }
         }
-        return MiscUtils.canSeeSky(this.getWorld(), this.getPos().up(), true, false);
+        return MiscUtils.canSeeSky(this.getLevel(), this.getBlockPos().above(), true, false);
     }
 
     private Entity createNewObservatoryEntity() {
         this.setEntityHelperRef(null);
         this.entityIdServerRef = null;
 
-        EntityObservatoryHelper helper = EntityTypesAS.OBSERVATORY_HELPER.create(this.getWorld());
-        helper.setFixedObservatoryPos(this.getPos());
+        EntityObservatoryHelper helper = EntityTypesAS.OBSERVATORY_HELPER.create(this.getLevel());
+        helper.setFixedObservatoryPos(this.getBlockPos());
         helper.setPositionAndRotation(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5, 0,0);
-        this.getWorld().addEntity(helper);
+        this.getLevel().addEntity(helper);
 
-        this.setEntityHelperRef(helper.getUniqueID());
+        this.setEntityHelperRef(helper.getUUID());
         this.entityIdServerRef = helper.getEntityId();
         return helper;
     }
@@ -100,8 +100,8 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         if (entityUUID == null) {
             return null;
         }
-        for (Entity e : world.getEntitiesWithinAABB(Entity.class, new AABB(pos.add(-3, -1, -3), pos.add(3, 2, 3)))) {
-            if (e.getUniqueID().equals(entityUUID)) {
+        for (Entity e : level.getEntitiesWithinAABB(Entity.class, new AABB(pos.add(-3, -1, -3), pos.add(3, 2, 3)))) {
+            if (e.getUUID().equals(entityUUID)) {
                 this.entityIdServerRef = e.getEntityId();
                 return e;
             }
@@ -114,7 +114,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         if (this.getEntityHelperRef() == null || this.entityIdServerRef == null) {
             return null;
         }
-        return this.getWorld().getEntityByID(this.entityIdServerRef);
+        return this.getLevel().getEntityByID(this.entityIdServerRef);
     }
 
     @Nullable
@@ -127,40 +127,40 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         markForUpdate();
     }
 
-    public void updatePitchYaw(float pitch, float prevPitch, float yaw, float prevYaw) {
+    public void updatePitchYaw(float pitch, float prevPitch, float yRot, float prevYaw) {
         this.observatoryPitch = pitch;
         this.prevObservatoryPitch = prevPitch;
-        this.observatoryYaw = yaw;
+        this.observatoryYaw = yRot;
         this.prevObservatoryYaw = prevYaw;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public AABB getRenderBoundingBox() {
+    public AABB getBoundingBoxForCulling() {
         return TileObservatory.INFINITE_EXTENT_AABB;
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.entityHelperRef = NBTHelper.getUUID(compound, "entity", null);
-        this.observatoryYaw = compound.getFloat("oYaw");
-        this.observatoryPitch = compound.getFloat("oPitch");
-        this.prevObservatoryYaw = compound.getFloat("oYawPrev");
-        this.prevObservatoryPitch = compound.getFloat("oPitchPrev");
+        this.entityHelperRef = NBTHelper.getUUID(pattern, "entity", null);
+        this.observatoryYaw = pattern.getFloat("oYaw");
+        this.observatoryPitch = pattern.getFloat("oPitch");
+        this.prevObservatoryYaw = pattern.getFloat("oYawPrev");
+        this.prevObservatoryPitch = pattern.getFloat("oPitchPrev");
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
         if(this.entityHelperRef != null) {
-            compound.putUniqueId("entity", this.entityHelperRef);
+            pattern.putUniqueId("entity", this.entityHelperRef);
         }
-        compound.putFloat("oYaw", this.observatoryYaw);
-        compound.putFloat("oPitch", this.observatoryPitch);
-        compound.putFloat("oYawPrev", this.prevObservatoryYaw);
-        compound.putFloat("oPitchPrev", this.prevObservatoryPitch);
+        pattern.putFloat("oYaw", this.observatoryYaw);
+        pattern.putFloat("oPitch", this.observatoryPitch);
+        pattern.putFloat("oYawPrev", this.prevObservatoryYaw);
+        pattern.putFloat("oPitchPrev", this.prevObservatoryPitch);
     }
 }

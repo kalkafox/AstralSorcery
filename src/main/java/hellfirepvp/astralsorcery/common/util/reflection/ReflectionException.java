@@ -23,16 +23,16 @@ public class ReflectionException extends RuntimeException {
         super(message);
     }
 
-    public ReflectionException(String message, Throwable cause) {
-        super(message, cause);
+    public ReflectionException(String message, Throwable exception) {
+        super(message, exception);
     }
 
-    public ReflectionException(Throwable cause) {
-        super(cause);
+    public ReflectionException(Throwable exception) {
+        super(exception);
     }
 
-    public ReflectionException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    public ReflectionException(String message, Throwable exception, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, exception, enableSuppression, writableStackTrace);
     }
 
 }

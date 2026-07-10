@@ -26,7 +26,7 @@ public class PropertiesMarble {
         return Block.Properties.create(MaterialsAS.MARBLE)
                 .hardnessAndResistance(3F, 5F)
                 .harvestLevel(0)
-                .setRequiresTool()
+                .requiresCorrectToolForDrops()
                 .harvestTool(ToolType.PICKAXE)
                 .sound(SoundType.STONE);
     }
@@ -35,7 +35,7 @@ public class PropertiesMarble {
         return Block.Properties.create(MaterialsAS.MARBLE)
                 .hardnessAndResistance(3F, 5F)
                 .harvestLevel(0)
-                .setRequiresTool()
+                .requiresCorrectToolForDrops()
                 .harvestTool(ToolType.PICKAXE)
                 .sound(SoundType.STONE);
     }

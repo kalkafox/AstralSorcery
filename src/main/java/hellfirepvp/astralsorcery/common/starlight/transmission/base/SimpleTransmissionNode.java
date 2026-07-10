@@ -55,12 +55,12 @@ public class SimpleTransmissionNode implements ITransmissionNode {
         return thisPos;
     }
 
-    public void updateIgnoreBlockCollisionState(Level world, boolean ignoreBlockCollision) {
+    public void updateIgnoreBlockCollisionState(Level level, boolean ignoreBlockCollision) {
         this.ignoreBlockCollision = ignoreBlockCollision;
-        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(world);
+        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(level);
         if (assistNext != null && handle != null) {
             boolean oldState = this.nextReachable;
-            this.nextReachable = ignoreBlockCollision || assistNext.isClear(world);
+            this.nextReachable = ignoreBlockCollision || assistNext.isClear(level);
             if (nextReachable != oldState) {
                 handle.notifyTransmissionNodeChange(this);
             }
@@ -72,7 +72,7 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public boolean notifyUnlink(Level world, BlockPos to) {
+    public boolean notifyUnlink(Level level, BlockPos to) {
         if (to.equals(nextPos)) { //cleanup
             this.nextPos = null;
             this.assistNext = null;
@@ -84,44 +84,44 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public void notifyLink(Level world, BlockPos pos) {
-        addLink(world, pos, true, false);
+    public void notifyLink(Level level, BlockPos pos) {
+        addLink(level, pos, true, false);
     }
 
-    private void addLink(Level world, BlockPos pos, boolean doRayTest, boolean oldRayState) {
+    private void addLink(Level level, BlockPos pos, boolean doRayTest, boolean oldRayState) {
         this.nextPos = pos;
         this.assistNext = new RaytraceAssist(thisPos, nextPos);
         if (doRayTest) {
-            this.nextReachable = this.ignoreBlockCollision || assistNext.isClear(world);
+            this.nextReachable = this.ignoreBlockCollision || assistNext.isClear(level);
         } else {
             this.nextReachable = oldRayState;
         }
-        this.dstToNextSq = pos.distanceSq(Vector3d.copy(thisPos), false);
+        this.dstToNextSq = pos.distSqr(Vec3.copy(thisPos), false);
     }
 
     @Override
-    public boolean notifyBlockChange(Level world, BlockPos at) {
+    public boolean notifyBlockChange(Level level, BlockPos at) {
         if (nextPos == null) {
             return false;
         }
-        Vec3 bPosAt = Vector3d.copy(at);
-        double dstStart = thisPos.distanceSq(bPosAt, false);
-        double dstEnd = nextPos.distanceSq(bPosAt, false);
+        Vec3 bPosAt = Vec3.copy(at);
+        double dstStart = thisPos.distSqr(bPosAt, false);
+        double dstEnd = nextPos.distSqr(bPosAt, false);
         if (dstStart > dstToNextSq || dstEnd > dstToNextSq) {
             return false; //out of range
         }
         boolean oldState = this.nextReachable;
-        this.nextReachable = ignoreBlockCollision || assistNext.isClear(world);
+        this.nextReachable = ignoreBlockCollision || assistNext.isClear(level);
         return this.nextReachable != oldState;
     }
 
     @Override
-    public void notifySourceLink(Level world, BlockPos source) {
+    public void notifySourceLink(Level level, BlockPos source) {
         sourcesToThis.add(source);
     }
 
     @Override
-    public void notifySourceUnlink(Level world, BlockPos source) {
+    public void notifySourceUnlink(Level level, BlockPos source) {
         sourcesToThis.remove(source);
     }
 
@@ -144,18 +144,18 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {
-        this.thisPos = NBTHelper.readBlockPosFromNBT(compound);
+    public void readFromNBT(CompoundTag pattern) {
+        this.thisPos = NBTHelper.readBlockPosFromNBT(pattern);
         this.sourcesToThis.clear();
-        this.ignoreBlockCollision = compound.getBoolean("ignoreBlockCollision");
+        this.ignoreBlockCollision = pattern.getBoolean("ignoreBlockCollision");
 
-        ListTag list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
+        ListTag list = pattern.getList("sources", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             sourcesToThis.add(NBTHelper.readBlockPosFromNBT(list.getCompound(i)));
         }
 
-        if (compound.contains("nextPos")) {
-            CompoundTag tag = compound.getCompound("nextPos");
+        if (pattern.contains("nextPos")) {
+            CompoundTag tag = pattern.getCompound("nextPos");
             BlockPos next = NBTHelper.readBlockPosFromNBT(tag);
             boolean oldRay = tag.getBoolean("rayState");
             addLink(null, next, false, oldRay);
@@ -163,9 +163,9 @@ public class SimpleTransmissionNode implements ITransmissionNode {
     }
 
     @Override
-    public void writeToNBT(CompoundTag compound) {
-        NBTHelper.writeBlockPosToNBT(thisPos, compound);
-        compound.putBoolean("ignoreBlockCollision", this.ignoreBlockCollision);
+    public void save(CompoundTag pattern) {
+        NBTHelper.writeBlockPosToNBT(thisPos, pattern);
+        pattern.putBoolean("ignoreBlockCollision", this.ignoreBlockCollision);
 
         ListTag sources = new ListTag();
         for (BlockPos source : sourcesToThis) {
@@ -173,13 +173,13 @@ public class SimpleTransmissionNode implements ITransmissionNode {
             NBTHelper.writeBlockPosToNBT(source, comp);
             sources.add(comp);
         }
-        compound.put("sources", sources);
+        pattern.put("sources", sources);
 
         if (nextPos != null) {
             CompoundTag pos = new CompoundTag();
             NBTHelper.writeBlockPosToNBT(nextPos, pos);
             pos.putBoolean("rayState", nextReachable);
-            compound.put("nextPos", pos);
+            pattern.put("nextPos", pos);
         }
     }
 

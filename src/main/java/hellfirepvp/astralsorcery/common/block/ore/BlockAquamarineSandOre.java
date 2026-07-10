@@ -24,7 +24,7 @@ import net.minecraft.world.level.LevelReader;
 public class BlockAquamarineSandOre extends BlockSandTemplate {
 
     @Override
-    public int getExpDrop(BlockState state, LevelReader world, BlockPos pos, int fortune, int silktouch) {
-        return silktouch == 0 ? fortune * MathHelper.nextInt(RANDOM, 2, 5) : 0;
+    public int getExpDrop(BlockState state, LevelReader level, BlockPos pos, int fortune, int silktouch) {
+        return silktouch == 0 ? fortune * Mth.nextInt(RANDOM, 2, 5) : 0;
     }
 }

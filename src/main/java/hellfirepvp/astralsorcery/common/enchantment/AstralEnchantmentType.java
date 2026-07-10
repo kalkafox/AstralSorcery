@@ -66,14 +66,14 @@ public enum AstralEnchantmentType {
         this.enchantments = new HashSet<>(Arrays.asList(enchantments));
     }
 
-    public boolean canEnchantItem(ItemStack stack) {
+    public boolean canEnchant(ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
         if (this.itemTag != null && stack.is(this.itemTag)) {
             return true;
         }
-        return stack.getItem() instanceof TypeEnchantableItem custom && custom.canEnchantItem(stack, this);
+        return stack.getItem() instanceof TypeEnchantableItem custom && custom.canEnchant(stack, this);
     }
 
     public boolean contains(Holder<Enchantment> enchantment) {
@@ -82,7 +82,7 @@ public enum AstralEnchantmentType {
 
     public static boolean anyCanEnchant(ItemStack stack) {
         for (AstralEnchantmentType type : values()) {
-            if (type.canEnchantItem(stack)) {
+            if (type.canEnchant(stack)) {
                 return true;
             }
         }

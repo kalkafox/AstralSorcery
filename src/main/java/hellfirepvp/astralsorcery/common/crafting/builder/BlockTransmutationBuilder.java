@@ -39,7 +39,7 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
 
     private final ResourceLocation id;
 
-    private BlockState outputState = Blocks.AIR.getDefaultState();
+    private BlockState outputState = Blocks.AIR.defaultBlockState();
     private double starlight = 200.0D;
     private IWeakConstellation constellation = null;
     private ItemStack outputDisplay = ItemStack.EMPTY;
@@ -73,7 +73,7 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
     }
 
     public BlockTransmutationBuilder addInputCheck(Block matchBlock) {
-        return this.addInputCheck(matchBlock.getDefaultState());
+        return this.addInputCheck(matchBlock.defaultBlockState());
     }
 
     public BlockTransmutationBuilder addInputCheck(BlockState matchState) {
@@ -99,7 +99,7 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
     }
 
     public BlockTransmutationBuilder setOutput(Block output) {
-        return this.setOutput(output.getDefaultState());
+        return this.setOutput(output.defaultBlockState());
     }
 
     public BlockTransmutationBuilder setOutput(BlockState outputState) {

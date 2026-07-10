@@ -41,12 +41,12 @@ public class PatreonManagerClient implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        Level clWorld = Minecraft.getInstance().world;
+        Level clWorld = Minecraft.getInstance().level;
         Player thisPlayer = Minecraft.getInstance().player;
         if (clWorld == null || thisPlayer == null) {
             return;
         }
-        ResourceKey<Level> clientWorld = clWorld.getDimensionKey();
+        ResourceKey<Level> clientWorld = clWorld.dimension();
         Vector3 thisPlayerPos = Vector3.atEntityCenter(thisPlayer);
 
         SyncDataHolder.executeClient(SyncDataHolder.DATA_PATREON_FLARES, ClientPatreonFlares.class, data -> {
@@ -55,7 +55,7 @@ public class PatreonManagerClient implements ITickHandler {
                     if (entity.getLastTickedDimension() == null || !entity.getLastTickedDimension().equals(clientWorld)) {
                         continue;
                     }
-                    if (entity.getPos().distanceSquared(thisPlayerPos) <= RenderingConfig.CONFIG.getMaxEffectRenderDistanceSq()) {
+                    if (entity.getBlockPos().distanceSquared(thisPlayerPos) <= RenderingConfig.CONFIG.getMaxEffectRenderDistanceSq()) {
                         entity.tickClient();
                     }
                     entity.tick(clWorld);
@@ -65,7 +65,7 @@ public class PatreonManagerClient implements ITickHandler {
 
         SyncDataHolder.executeClient(SyncDataHolder.DATA_PATREON_FLARES, ClientPatreonFlares.class, data -> {
             for (Player player : clWorld.getPlayers()) {
-                for (PatreonEffect effect : PatreonEffectHelper.getPatreonEffects(LogicalSide.CLIENT, player.getUniqueID())) {
+                for (PatreonEffect effect : PatreonEffectHelper.getPatreonEffects(LogicalSide.CLIENT, player.getUUID())) {
                     effect.doClientEffect(player);
                 }
             }
@@ -78,8 +78,8 @@ public class PatreonManagerClient implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

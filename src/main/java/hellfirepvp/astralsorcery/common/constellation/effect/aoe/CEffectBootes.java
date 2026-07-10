@@ -61,38 +61,38 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
-        if (rand.nextInt(3) == 0) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+        if (random.nextInt(3) == 0) {
             ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
             Vector3 playAt = new Vector3(pos).add(0.5, 0.5, 0.5).add(
-                    rand.nextFloat() * (prop.getSize() / 2F) * (rand.nextBoolean() ? 1 : -1),
-                    rand.nextFloat() * (prop.getSize() / 4F),
-                    rand.nextFloat() * (prop.getSize() / 2F) * (rand.nextBoolean() ? 1 : -1));
-            Vector3 motion = Vector3.random().multiply(0.015);
+                    random.nextFloat() * (prop.getSize() / 2F) * (random.nextBoolean() ? 1 : -1),
+                    random.nextFloat() * (prop.getSize() / 4F),
+                    random.nextFloat() * (prop.getSize() / 2F) * (random.nextBoolean() ? 1 : -1));
+            Vector3 motion = Vector3.random().mul(0.015);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(playAt)
-                    .setMotion(motion)
+                    .setDeltaMovement(motion)
                     .color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_BOOTES))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .setScaleMultiplier(0.5F)
-                    .setMaxAge(30 + rand.nextInt(20));
+                    .setMaxAge(30 + random.nextInt(20));
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(playAt)
-                    .setMotion(motion.clone().negate())
+                    .setDeltaMovement(motion.clone().negate())
                     .color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_BOOTES))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .setScaleMultiplier(0.5F)
-                    .setMaxAge(30 + rand.nextInt(20));
+                    .setMaxAge(30 + random.nextInt(20));
         }
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         boolean didEffect = false;
 
-        List<LivingEntity> entities = this.collectEntities(world, pos, properties);
+        List<LivingEntity> entities = this.collectEntities(level, pos, properties);
         Collections.shuffle(entities);
         entities.subList(0, Math.min(25, entities.size()));
         for (LivingEntity entity : entities) {
@@ -102,18 +102,18 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
             }
 
             if (properties.isCorrupted()) {
-                entity.hurtResistantTime = 0;
-                entity.addPotionEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 1000, 5));
-                if (DamageUtil.attackEntityFrom(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, 5_000)) {
+                entity.invulnerableTime = 0;
+                entity.addEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 1000, 5));
+                if (DamageUtil.hurt(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, 5_000)) {
                     didEffect = true;
                 }
                 continue;
             }
 
-            if (rand.nextFloat() < CONFIG.herdingChance.get()) {
-                didEffect = MiscUtils.executeWithChunk(world, entity.getPosition(), didEffect, (didEffectFlag) -> {
+            if (random.nextFloat() < CONFIG.herdingChance.get()) {
+                didEffect = MiscUtils.executeWithChunk(level, entity.position(), didEffect, (didEffectFlag) -> {
 
-                    List<ItemStack> rawDrops = EntityUtils.generateLoot(entity, rand, CommonProxy.DAMAGE_SOURCE_STELLAR, null);
+                    List<ItemStack> rawDrops = EntityUtils.generateLoot(entity, random, CommonProxy.DAMAGE_SOURCE_STELLAR, null);
                     List<ItemStack> drops = new ArrayList<>();
                     rawDrops.forEach(drop -> {
                         for (int i = 0; i < drop.getCount(); i++) {
@@ -121,15 +121,15 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
                         }
                     });
                     for (ItemStack drop : drops) {
-                        if (rand.nextFloat() < CONFIG.herdingLootChance.get() &&
-                                ItemUtils.dropItemNaturally(world, entity.getPosX(), entity.getPosY(), entity.getPosZ(), drop) != null) {
+                        if (random.nextFloat() < CONFIG.herdingLootChance.get() &&
+                                ItemUtils.dropItemNaturally(level, entity.getX(), entity.getY(), entity.getZ(), drop) != null) {
 
                             didEffectFlag = true;
                         }
                     }
                     return didEffectFlag;
                 }, false);
-                sendConstellationPing(world, Vector3.atEntityCorner(entity));
+                sendConstellationPing(level, Vector3.atEntityCorner(entity));
             }
         }
 

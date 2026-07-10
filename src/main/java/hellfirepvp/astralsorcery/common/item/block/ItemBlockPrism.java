@@ -40,11 +40,11 @@ public class ItemBlockPrism extends ItemBlockCustom implements CrystalAttributeI
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
-            attr.addTooltip(tooltip, CalculationContext.Builder.newBuilder()
+            attr.addTooltip(tooltip, CalculationContext.Builder.properties()
                     .addUsage(CrystalPropertiesAS.Usages.USE_LENS_EFFECT)
                     .addUsage(CrystalPropertiesAS.Usages.USE_LENS_TRANSFER)
                     .build());
@@ -52,7 +52,7 @@ public class ItemBlockPrism extends ItemBlockCustom implements CrystalAttributeI
     }
 
     @Override
-    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (isInGroup(group)) {
             ItemStack prism = new ItemStack(this);
             this.setAttributes(prism, CrystalPropertiesAS.LENS_PRISM_CREATIVE_ATTRIBUTES);

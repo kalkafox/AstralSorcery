@@ -71,10 +71,10 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
     public void tick() {
         super.tick();
 
-        if (this.getWorld().isRemote()) {
+        if (this.getLevel().isClientSide()) {
             playEngravingEffects();
         } else {
-            if (DayTimeHelper.isNight(getWorld()) &&
+            if (DayTimeHelper.isNight(getLevel()) &&
                     this.doesSeeSky() &&
                     isValidGlassStack(this.getGlassStack())) {
 
@@ -87,10 +87,10 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
                     if (runTick > RUN_TIME) {
                         this.setInputStack(starMap.applyEffects(this.getInputStack()));
                         ItemStack glassStack = this.getGlassStack();
-                        if (glassStack.attemptDamageItem(1, rand, null)) {
+                        if (glassStack.attemptDamageItem(1, random, null)) {
                             glassStack.shrink(1);
                             this.setGlassStack(glassStack);
-                            SoundHelper.playSoundAround(SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS, this.getWorld(), this.getPos(), rand.nextFloat() * 0.5F + 1F, rand.nextFloat() * 0.2F + 0.8F);
+                            SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, SoundSource.BLOCKS, this.getLevel(), this.getBlockPos(), random.nextFloat() * 0.5F + 1F, random.nextFloat() * 0.2F + 0.8F);
                         }
                         this.resetWorkTick();
                     }
@@ -116,33 +116,33 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
         if (this.effectHalo == null) {
             this.effectHalo = EffectHelper.of(EffectTemplatesAS.TEXTURE_SPRITE)
                     .spawn(new Vector3(this).add(0.5, 0.8, 0.5))
-                    .setSprite(SpritesAS.SPR_HALO_INFUSION)
+                    .pickSprite(SpritesAS.SPR_HALO_INFUSION)
                     .setAxis(Vector3.RotAxis.Y_AXIS)
                     .setNoRotation(0)
                     .setScaleMultiplier(0.8F)
                     .setAlphaMultiplier(0.8F)
-                    .alpha(((fx, alpha, pTicks) -> MathHelper.clamp(alpha * getRunProgress(), 0F, 1F)))
+                    .alpha1arg(((fx, alpha, pTicks) -> Mth.clamp(alpha * getRunProgress(), 0F, 1F)))
                     .refresh(RefreshFunction.tileExistsAnd(this, (thisTile, fx) -> thisTile.getRunProgress() > 0));
         }
 
         Vector3 offset = new Vector3(-5.0 / 16.0, 1.505, -3.0 / 16.0);
-        int random = rand.nextInt(ColorsAS.REFRACTION_TABLE_COLORS.length);
+        int random = random.nextInt(ColorsAS.REFRACTION_TABLE_COLORS.length);
         if (random >= ColorsAS.REFRACTION_TABLE_COLORS.length / 2) { //0-5 is left, 6-11 is right
             offset.addX(24.0 / 16.0);
         }
         offset.addZ((random % (ColorsAS.REFRACTION_TABLE_COLORS.length / 2)) * (4.0 / 16.0));
-        offset.add(rand.nextFloat() * 0.1, 0, rand.nextFloat() * 0.1).add(pos);
+        offset.add(random.nextFloat() * 0.1, 0, random.nextFloat() * 0.1).add(pos);
         Color color = ColorsAS.REFRACTION_TABLE_COLORS[random];
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(offset)
                 .setGravityStrength(-0.002F)
-                .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.constant(color))
-                .setMaxAge(30 + rand.nextInt(30));
+                .setMaxAge(30 + random.nextInt(30));
 
-        if (rand.nextFloat() < (getRunProgress() * 2F)) {
+        if (random.nextFloat() < (getRunProgress() * 2F)) {
             Vector3 target = new Vector3(this).add(0.5, 0.9, 0.5);
 
             EffectHelper.of(EffectTemplatesAS.LIGHTNING)
@@ -152,34 +152,34 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
 
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
-                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                    .alpha(VFXAlphaFunction.proximity(target::clone, 1F))
+                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                    .alpha1arg(VFXAlphaFunction.proximity(target::clone, 1F))
                     .color(VFXColorFunction.constant(color))
                     .setMaxAge(45);
 
-            Vector3 mov = target.clone().subtract(offset).normalize().multiply(0.05 * rand.nextFloat());
-            p.setMotion(mov);
+            Vector3 mov = target.clone().subtract(offset).normalize().mul(0.05 * random.nextFloat());
+            p.setDeltaMovement(mov);
         }
 
-        if (rand.nextInt(3) == 0) {
+        if (random.nextInt(3) == 0) {
             EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                     .spawn(offset)
-                    .setup(offset.clone().addY(0.56F + rand.nextFloat() * 0.2F), 0.25F, 0.25F)
+                    .setup(offset.clone().addY(0.56F + random.nextFloat() * 0.2F), 0.25F, 0.25F)
                     .color(VFXColorFunction.constant(color));
         }
 
-        if (rand.nextInt(4) == 0) {
-            Color beamColor = MiscUtils.eitherOf(rand,
+        if (random.nextInt(4) == 0) {
+            Color beamColor = MiscUtils.eitherOf(random,
                     ColorsAS.CONSTELLATION_TYPE_MAJOR,
                     ColorsAS.CONSTELLATION_TYPE_WEAK,
                     ColorsAS.CONSTELLATION_TYPE_MINOR);
 
-            Vector3 beamOffset = new Vector3(this).add(0.1 + rand.nextFloat() * 0.8, 0.8, 0.1 + rand.nextFloat() * 0.8F);
+            Vector3 beamOffset = new Vector3(this).add(0.1 + random.nextFloat() * 0.8, 0.8, 0.1 + random.nextFloat() * 0.8F);
             EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                     .spawn(beamOffset)
-                    .setup(beamOffset.clone().addY(1 + rand.nextFloat() * 0.5), 0.5F, 0.5F)
+                    .setup(beamOffset.clone().addY(1 + random.nextFloat() * 0.5), 0.5F, 0.5F)
                     .color(VFXColorFunction.constant(beamColor))
-                    .setMaxAge(25 + rand.nextInt(5));
+                    .setMaxAge(25 + random.nextInt(5));
         }
     }
 
@@ -212,7 +212,7 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
     public void engraveGlass(List<DrawnConstellation> constellations) {
         if (this.hasParchment() && this.hasUnengravedGlass()) {
             this.parchmentCount--;
-            ItemInfusedGlass.setEngraving(this.getGlassStack(), EngravedStarMap.buildStarMap(this.getWorld(), constellations));
+            ItemInfusedGlass.setEngraving(this.getGlassStack(), EngravedStarMap.buildStarMap(this.getLevel(), constellations));
             this.markForUpdate();
         }
     }
@@ -260,17 +260,17 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
     }
 
     public float getRunProgress() {
-        return MathHelper.clamp(this.runTick / RUN_TIME, 0F, 1F);
+        return Mth.clamp(this.runTick / RUN_TIME, 0F, 1F);
     }
 
     public void dropContents() {
         Vector3 at = new Vector3(this).add(0.5, 0.5, 0.5);
         if (!this.getGlassStack().isEmpty()) {
-            ItemUtils.dropItemNaturally(this.getWorld(), at.getX(), at.getY(), at.getZ(), this.getGlassStack());
+            ItemUtils.dropItemNaturally(this.getLevel(), at.getX(), at.getY(), at.getZ(), this.getGlassStack());
             this.setGlassStack(ItemStack.EMPTY);
         }
         if (!this.getInputStack().isEmpty()) {
-            ItemUtils.dropItemNaturally(this.getWorld(), at.getX(), at.getY(), at.getZ(), this.getInputStack());
+            ItemUtils.dropItemNaturally(this.getLevel(), at.getX(), at.getY(), at.getZ(), this.getInputStack());
             this.setInputStack(ItemStack.EMPTY);
         }
         this.markForUpdate();
@@ -282,24 +282,24 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.runTick = compound.getInt("runTick");
+        this.runTick = pattern.getInt("runTick");
 
-        this.parchmentCount = compound.getInt("parchmentCount");
-        this.inputStack = NBTHelper.getStack(compound, "inputStack");
-        this.glassStack = NBTHelper.getStack(compound, "glassStack");
+        this.parchmentCount = pattern.getInt("parchmentCount");
+        this.inputStack = NBTHelper.getStack(pattern, "inputStack");
+        this.glassStack = NBTHelper.getStack(pattern, "glassStack");
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.putInt("runTick", this.runTick);
+        pattern.putInt("runTick", this.runTick);
 
-        compound.putInt("parchmentCount", this.parchmentCount);
-        NBTHelper.setStack(compound, "inputStack", this.inputStack);
-        NBTHelper.setStack(compound, "glassStack", this.glassStack);
+        pattern.putInt("parchmentCount", this.parchmentCount);
+        NBTHelper.setStack(pattern, "inputStack", this.inputStack);
+        NBTHelper.setStack(pattern, "glassStack", this.glassStack);
     }
 }

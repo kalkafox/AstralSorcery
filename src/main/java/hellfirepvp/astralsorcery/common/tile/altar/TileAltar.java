@@ -97,7 +97,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     public void tick() {
         super.tick();
 
-        if (!getWorld().isRemote()) {
+        if (!getLevel().isClientSide()) {
             this.doesSeeSky();
             this.hasMultiblock();
 
@@ -119,7 +119,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
 
     @OnlyIn(Dist.CLIENT)
     private void doCraftSound() {
-        if (SoundHelper.getSoundVolume(SoundCategory.BLOCKS) > 0) {
+        if (SoundHelper.getSoundVolume(SoundSource.BLOCKS) > 0) {
             ActiveSimpleAltarRecipe activeRecipe = this.getActiveRecipe();
             AltarType type = this.getAltarType();
 
@@ -143,7 +143,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
                         1F,
                         false,
                         (s) -> isRemoved() ||
-                                SoundHelper.getSoundVolume(SoundCategory.BLOCKS) <= 0 ||
+                                SoundHelper.getSoundVolume(SoundSource.BLOCKS) <= 0 ||
                                 this.getActiveRecipe() == null)
                         .setFadeInTicks(40)
                         .setFadeOutTicks(20);
@@ -154,7 +154,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
                 if (clientWaitSound == null || ((PositionedLoopSound) clientWaitSound).hasStoppedPlaying()) {
                     clientWaitSound = SoundHelper.playSoundLoopFadeInClient(SoundsAS.ALTAR_CRAFT_LOOP_T4_WAITING, new Vector3(this).add(0.5, 0.5, 0.5), 0.7F, 1F, false,
                             (s) -> isRemoved() ||
-                                    SoundHelper.getSoundVolume(SoundCategory.BLOCKS) <= 0 ||
+                                    SoundHelper.getSoundVolume(SoundSource.BLOCKS) <= 0 ||
                                     this.getActiveRecipe() == null ||
                                     this.getActiveRecipe().getState() != ActiveSimpleAltarRecipe.CraftingState.WAITING)
                             .setFadeInTicks(30)
@@ -177,14 +177,14 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         BlockPos at = ByteBufUtils.readPos(pkt.getExtraData());
         boolean isChaining = pkt.getExtraData().readBoolean();
 
-        Level world = Minecraft.getInstance().world;
-        if (world == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
 
-        TileAltar thisAltar = MiscUtils.getTileAt(world, at, TileAltar.class, false);
+        TileAltar thisAltar = MiscUtils.getTileAt(level, at, TileAltar.class, false);
         if (thisAltar != null) {
-            Recipe<?> recipe = world.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).get(recipeName);
+            Recipe<?> recipe = level.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).get(recipeName);
             if (recipe instanceof SimpleAltarRecipe) {
                 ((SimpleAltarRecipe) recipe).getCraftingEffects().forEach(effect -> {
                     effect.onCraftingFinish(thisAltar, isChaining);
@@ -228,16 +228,16 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         if (!(isChaining = finishedRecipe.matches(this, false, true))) {
             this.abortCrafting();
 
-            EntityFlare.spawnAmbientFlare(getWorld(), getPos().add(-3 + rand.nextInt(7), 1 + rand.nextInt(3), -3 + rand.nextInt(7)));
-            EntityFlare.spawnAmbientFlare(getWorld(), getPos().add(-3 + rand.nextInt(7), 1 + rand.nextInt(3), -3 + rand.nextInt(7)));
+            EntityFlare.spawnAmbientFlare(getLevel(), getBlockPos().offset(-3 + random.nextInt(7), 1 + random.nextInt(3), -3 + random.nextInt(7)));
+            EntityFlare.spawnAmbientFlare(getLevel(), getBlockPos().offset(-3 + random.nextInt(7), 1 + random.nextInt(3), -3 + random.nextInt(7)));
         }
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.ALTAR_RECIPE_FINISH)
                 .addData(buf -> {
                     ByteBufUtils.writeResourceLocation(buf, recipeName);
-                    ByteBufUtils.writePos(buf, this.getPos());
+                    ByteBufUtils.writePos(buf, this.getBlockPos());
                     buf.writeBoolean(isChaining);
                 });
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getWorld(), this.getPos(), 32));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getLevel(), this.getBlockPos(), 32));
 
         this.knownRecipes.add(recipeName);
         markForUpdate();
@@ -260,16 +260,16 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
 
         int divisor = Math.max(0, this.getAltarType().ordinal() - recipe.getAltarType().ordinal());
         divisor = (int) Math.round(Math.pow(2, divisor));
-        this.activeRecipe = new ActiveSimpleAltarRecipe(recipe, divisor, crafter.getUniqueID());
+        this.activeRecipe = new ActiveSimpleAltarRecipe(recipe, divisor, crafter.getUUID());
         markForUpdate();
 
-        SoundHelper.playSoundAround(SoundsAS.ALTAR_CRAFT_START, SoundCategory.BLOCKS, this.world, new Vector3(this).add(0.5, 0.5, 0.5), 0.6F, 1F);
+        SoundHelper.playSoundAround(SoundsAS.ALTAR_CRAFT_START, SoundSource.BLOCKS, this.level, new Vector3(this).add(0.5, 0.5, 0.5), 0.6F, 1F);
         return true;
     }
 
     @Override
-    public boolean onInteract(Level world, BlockPos pos, Player player, Direction side, boolean sneak) {
-        if (!world.isRemote() && this.hasMultiblock()) {
+    public boolean onInteract(Level level, BlockPos pos, Player player, Direction direction, boolean sneak) {
+        if (!level.isClientSide() && this.hasMultiblock()) {
             if (this.getActiveRecipe() != null) {
                 if (this.getActiveRecipe().matches(this, false, false)) {
                     return true;
@@ -288,7 +288,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     private void gatherStarlight() {
         this.tickStarlightCollectionMap.clear();
 
-        WorldContext ctx = SkyHandler.getContext(getWorld());
+        WorldContext ctx = SkyHandler.getContext(getLevel());
         if (ctx == null) {
             if (this.starlightNextTick > 0) {
                 this.starlightNextTick = 0;
@@ -301,19 +301,19 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         if (this.doesSeeSky()) {
             int altarTier = this.getAltarType().ordinal() + 1;
 
-            float heightAmount = MathHelper.clamp((float) Math.pow(getPos().getY() / 7F, 1.5F) / 65F, 0F, 1F);
-            heightAmount *= DayTimeHelper.getCurrentDaytimeDistribution(getWorld());
+            float heightAmount = Mth.clamp((float) Math.pow(getBlockPos().getY() / 7F, 1.5F) / 65F, 0F, 1F);
+            heightAmount *= DayTimeHelper.getCurrentDaytimeDistribution(getLevel());
             this.collectStarlight(heightAmount * altarTier * 60F, AltarCollectionCategory.HEIGHT);
 
             if (posDistribution == -1) {
-                if (world instanceof WorldGenLevel) {
-                    posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) world, pos);
+                if (level instanceof WorldGenLevel) {
+                    posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) level, pos);
                 } else {
                     posDistribution = 0.3F;
                 }
             }
-            float fieldAmount = MathHelper.sqrt(posDistribution);
-            fieldAmount *= DayTimeHelper.getCurrentDaytimeDistribution(getWorld());
+            float fieldAmount = Mth.sqrt(posDistribution);
+            fieldAmount *= DayTimeHelper.getCurrentDaytimeDistribution(getLevel());
             this.collectStarlight(fieldAmount * altarTier * 65F, AltarCollectionCategory.FOSIC_FIELD);
         }
 
@@ -321,8 +321,8 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     public void collectStarlight(float percent, AltarCollectionCategory category) {
-        int collectable = MathHelper.floor(Math.min(percent, getRemainingCollectionCapacity(category)));
-        this.starlightNextTick = MathHelper.clamp(this.starlightNextTick + collectable, 0, this.getAltarType().getStarlightCapacity());
+        int collectable = Mth.floor(Math.min(percent, getRemainingCollectionCapacity(category)));
+        this.starlightNextTick = Mth.clamp(this.starlightNextTick + collectable, 0, this.getAltarType().getStarlightCapacity());
         this.tickStarlightCollectionMap.computeIfPresent(category, (cat, remaining) -> Math.max(remaining - collectable, 0));
         this.markForUpdate();
         this.preventNetworkSync();
@@ -346,9 +346,9 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
                 }
 
                 BlockPos offset = new BlockPos(xx, 0, zz);
-                TileSpectralRelay tar = MiscUtils.getTileAt(getWorld(), getPos().add(offset), TileSpectralRelay.class, true);
+                TileSpectralRelay tar = MiscUtils.getTileAt(getLevel(), getBlockPos().offset(offset), TileSpectralRelay.class, true);
                 if (tar != null) {
-                    eligableRelayOffsets.add(getPos().add(offset));
+                    eligableRelayOffsets.offset(getBlockPos().add(offset));
                 }
             }
         }
@@ -359,9 +359,9 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     public void onBreak() {
         super.onBreak();
 
-        if (!getWorld().isRemote() && !getFocusItem().isEmpty()) {
-            ItemUtils.dropItemNaturally(getWorld(),
-                    getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5,
+        if (!getLevel().isClientSide() && !getFocusItem().isEmpty()) {
+            ItemUtils.dropItemNaturally(getLevel(),
+                    getBlockPos().getX() + 0.5, getBlockPos().getY() + 0.5, getBlockPos().getZ() + 0.5,
                     this.focusItem);
 
             this.focusItem = ItemStack.EMPTY;
@@ -376,10 +376,10 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     private void updateNearbyRelayLinkStates() {
-        Set<BlockPos> relayPositions = BlockDiscoverer.searchForTileEntitiesAround(getWorld(), getPos(), 16, tile -> tile instanceof TileSpectralRelay);
+        Set<BlockPos> relayPositions = BlockDiscoverer.searchForTileEntitiesAround(getLevel(), getBlockPos(), 16, tile -> tile instanceof TileSpectralRelay);
 
         for (BlockPos relayPos : relayPositions) {
-            TileSpectralRelay tsr = MiscUtils.getTileAt(getWorld(), relayPos, TileSpectralRelay.class, true);
+            TileSpectralRelay tsr = MiscUtils.getTileAt(getLevel(), relayPos, TileSpectralRelay.class, true);
             if (tsr != null) {
                 tsr.updateAltarLinkState();
             }
@@ -429,14 +429,14 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     @Nonnull
-    public TileInventoryFiltered getInventory() {
+    public TileInventoryFiltered getItems() {
         return inventory;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public AABB getRenderBoundingBox() {
-        AABB box = super.getRenderBoundingBox().expand(0, 5, 0);
+    public AABB getBoundingBoxForCulling() {
+        AABB box = super.getBoundingBoxForCulling().expand(0, 5, 0);
         if (this.getAltarType().isThisGEThan(AltarType.RADIANCE)) {
             box = box.grow(3, 0, 3);
         }
@@ -462,46 +462,46 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     @Override
-    public void readNetNBT(CompoundTag compound) {
-        super.readNetNBT(compound);
+    public void readNetNBT(CompoundTag pattern) {
+        super.readNetNBT(pattern);
 
-        this.starlightStorage.readNBT(compound);
+        this.starlightStorage.load(pattern);
     }
 
     @Override
-    public void writeNetNBT(CompoundTag compound) {
-        super.writeNetNBT(compound);
+    public void writeNetNBT(CompoundTag pattern) {
+        super.writeNetNBT(pattern);
 
-        this.starlightStorage.writeNBT(compound);
+        this.starlightStorage.fillDefaultJigsawNBT(pattern);
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.altarType = AltarType.values()[compound.getInt("altarType")];
-        this.inventory = this.inventory.deserialize(compound.getCompound("inventory"));
-        this.focusItem = NBTHelper.getStack(compound, "focusItem");
-        this.knownRecipes = NBTHelper.readSet(compound, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> new ResourceLocation(nbt.getString()));
+        this.altarType = AltarType.values()[pattern.getInt("altarType")];
+        this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
+        this.focusItem = NBTHelper.getStack(pattern, "focusItem");
+        this.knownRecipes = NBTHelper.readSet(pattern, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> ResourceLocation.parse(nbt.getString()));
 
-        if (compound.contains("activeRecipe", Constants.NBT.TAG_COMPOUND)) {
-            this.activeRecipe = ActiveSimpleAltarRecipe.deserialize(compound.getCompound("activeRecipe"), this.activeRecipe);
+        if (pattern.contains("activeRecipe", Constants.NBT.TAG_COMPOUND)) {
+            this.activeRecipe = ActiveSimpleAltarRecipe.deserialize(pattern.getCompound("activeRecipe"), this.activeRecipe);
         } else {
             this.activeRecipe = null;
         }
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.putInt("altarType", this.altarType.ordinal());
-        compound.put("inventory", this.inventory.serialize());
-        NBTHelper.setStack(compound, "focusItem", this.focusItem);
-        NBTHelper.writeList(compound, "knownRecipes", this.knownRecipes, key -> StringNBT.valueOf(key.toString()));
+        pattern.putInt("altarType", this.altarType.ordinal());
+        pattern.put("inventory", this.inventory.serialize());
+        NBTHelper.setStack(pattern, "focusItem", this.focusItem);
+        NBTHelper.writeList(pattern, "knownRecipes", this.knownRecipes, key -> StringTag.valueOf(key.toString()));
 
         if (this.activeRecipe != null) {
-            compound.put("activeRecipe", this.activeRecipe.serialize());
+            pattern.put("activeRecipe", this.activeRecipe.serialize());
         }
     }
 

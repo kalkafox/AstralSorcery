@@ -36,40 +36,40 @@ public class EffectLiquidBurst extends AltarRecipeEffect {
     public void onTick(TileAltar altar, ActiveSimpleAltarRecipe.CraftingState state) {
         if (state == ActiveSimpleAltarRecipe.CraftingState.ACTIVE &&
                 getClientTick() % 10 == 0 &&
-                rand.nextBoolean()) {
+                random.nextBoolean()) {
 
             float height = 5;
 
             Vector3 position = new Vector3(altar).add(
-                    0.5 + rand.nextFloat() * 3 * (rand.nextBoolean() ? 1 : -1),
+                    0.5 + random.nextFloat() * 3 * (random.nextBoolean() ? 1 : -1),
                     0,
-                    0.5 + rand.nextFloat() * 3 * (rand.nextBoolean() ? 1 : -1));
+                    0.5 + random.nextFloat() * 3 * (random.nextBoolean() ? 1 : -1));
             Vector3 target = position.clone().addY(height);
 
             EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                     .spawn(position)
                     .setup(target, 0.8F, 0.8F)
                     .setAlphaMultiplier(1F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .setMaxAge(20);
 
             for (int i = 0; i < 170; i++) {
-                float perc = rand.nextFloat();
+                float perc = random.nextFloat();
 
                 Vector3 mot = new Vector3(
-                        rand.nextFloat() * 0.08 * (rand.nextBoolean() ? 1 : -1) * (1 - perc),
+                        random.nextFloat() * 0.08 * (random.nextBoolean() ? 1 : -1) * (1 - perc),
                         0,
-                        rand.nextFloat() * 0.08 * (rand.nextBoolean() ? 1 : -1) * (1 - perc)
+                        random.nextFloat() * 0.08 * (random.nextBoolean() ? 1 : -1) * (1 - perc)
                 );
 
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(position.clone().addY(height * perc))
-                        .setMotion(mot)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .setDeltaMovement(mot)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .setAlphaMultiplier(1F)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                        .setMaxAge(20 + rand.nextInt(5));
-                if (rand.nextBoolean()) {
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                        .setMaxAge(20 + random.nextInt(5));
+                if (random.nextBoolean()) {
                      p.color(VFXColorFunction.WHITE);
                 } else {
                     p.color(VFXColorFunction.constant(ColorsAS.DEFAULT_GENERIC_PARTICLE));

@@ -39,31 +39,31 @@ public class SpectralToolBreakLogGoal extends SpectralToolGoal {
 
     private BlockPos selectedBreakPos = null;
 
-    public SpectralToolBreakLogGoal(EntitySpectralTool entity, double speed) {
-        super(entity, speed);
+    public SpectralToolBreakLogGoal(EntitySpectralTool entity, double speedModifier) {
+        super(entity, speedModifier);
     }
 
     private BlockPredicate breakableLogs() {
-        return (world, pos, state) -> {
-            return MiscUtils.getTileAt(world, pos, TileEntity.class, false) == null &&
+        return (level, pos, state) -> {
+            return MiscUtils.getTileAt(level, pos, BlockEntity.class, false) == null &&
                     pos.getY() >= this.getEntity().getStartPosition().getY() &&
-                    !state.isAir(world, pos) &&
-                    state.getBlockHardness(world, pos) != -1 &&
-                    state.getBlockHardness(world, pos) <= 10 &&
+                    !state.isAir(level, pos) &&
+                    state.getDestroySpeed(level, pos) != -1 &&
+                    state.getDestroySpeed(level, pos) <= 10 &&
                     (state.isIn(BlockTags.LOGS) || state.isIn(BlockTags.LEAVES)) &&
-                    BlockUtils.canToolBreakBlockWithoutPlayer(world, pos, state, new ItemStack(Items.DIAMOND_AXE));
+                    BlockUtils.canToolBreakBlockWithoutPlayer(level, pos, state, new ItemStack(Items.DIAMOND_AXE));
         };
     }
 
     @Override
-    public boolean shouldExecute() {
-        MoveControl ctrl = this.getEntity().getMoveHelper();
+    public boolean canUse() {
+        MoveControl ctrl = this.getEntity().getMoveControl();
 
-        if (!ctrl.isUpdating()) {
+        if (!ctrl.hasWanted()) {
             return true;
         } else {
             BlockPos validPos = BlockDiscoverer.searchAreaForFirst(
-                    this.getEntity().getEntityWorld(),
+                    this.getEntity().getCommandSenderWorld(),
                     this.getEntity().getStartPosition(),
                     8,
                     Vector3.atEntityCorner(this.getEntity()),
@@ -73,16 +73,16 @@ public class SpectralToolBreakLogGoal extends SpectralToolGoal {
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         return this.selectedBreakPos != null;
     }
 
     @Override
-    public void startExecuting() {
-        super.startExecuting();
+    public void start() {
+        super.start();
 
         BlockPos validPos = BlockDiscoverer.searchAreaForFirst(
-                this.getEntity().getEntityWorld(),
+                this.getEntity().getCommandSenderWorld(),
                 this.getEntity().getStartPosition(),
                 10,
                 Vector3.atEntityCorner(this.getEntity()),
@@ -91,17 +91,17 @@ public class SpectralToolBreakLogGoal extends SpectralToolGoal {
         if (validPos != null) {
             this.selectedBreakPos = validPos;
 
-            this.getEntity().getMoveHelper().setMoveTo(
+            this.getEntity().getMoveControl().setWantedPosition(
                     this.selectedBreakPos.getX() + 0.5,
                     this.selectedBreakPos.getY() + 0.5,
                     this.selectedBreakPos.getZ() + 0.5,
-                    this.getSpeed());
+                    this.getSpeedModifier());
         }
     }
 
     @Override
-    public void resetTask() {
-        super.resetTask();
+    public void stop() {
+        super.stop();
 
         this.selectedBreakPos = null;
         this.actionCooldown = 0;
@@ -111,7 +111,7 @@ public class SpectralToolBreakLogGoal extends SpectralToolGoal {
     public void tick() {
         super.tick();
 
-        if (!shouldContinueExecuting()) {
+        if (!canContinueToUse()) {
             return;
         }
 
@@ -119,30 +119,30 @@ public class SpectralToolBreakLogGoal extends SpectralToolGoal {
             this.actionCooldown = 0; //lol. wtf.
         }
 
-        Level world = this.getEntity().getEntityWorld();
+        Level level = this.getEntity().getCommandSenderWorld();
         boolean resetTimer = false;
 
-        if (world.isAirBlock(this.selectedBreakPos)) {
+        if (level.isEmptyBlock(this.selectedBreakPos)) {
             this.selectedBreakPos = null;
             resetTimer = true;
         } else {
-            this.getEntity().getMoveHelper().setMoveTo(
+            this.getEntity().getMoveControl().setWantedPosition(
                     this.selectedBreakPos.getX() + 0.5,
                     this.selectedBreakPos.getY() + 0.5,
                     this.selectedBreakPos.getZ() + 0.5,
-                    this.getSpeed());
+                    this.getSpeedModifier());
 
             if (Vector3.atEntityCorner(this.getEntity()).distanceSquared(this.selectedBreakPos) <= 9) {
                 this.actionCooldown++;
-                if (this.actionCooldown >= MantleEffectPelotrio.CONFIG.ticksPerAxeLogBreak.get() && world instanceof ServerLevel) {
+                if (this.actionCooldown >= MantleEffectPelotrio.CONFIG.ticksPerAxeLogBreak.get() && level instanceof ServerLevel) {
                     LivingEntity owner = this.getEntity().getOwningEntity();
                     if (owner instanceof Player) {
                         BlockDropCaptureAssist.startCapturing();
                     }
                     if (BlockUtils.breakBlockWithoutPlayer(
-                            (ServerLevel) world,
+                            (ServerLevel) level,
                             this.selectedBreakPos,
-                            world.getBlockState(this.selectedBreakPos),
+                            level.getBlockState(this.selectedBreakPos),
                             this.getEntity().getItem(),
                             true,
                             true,
@@ -153,7 +153,7 @@ public class SpectralToolBreakLogGoal extends SpectralToolGoal {
                         for (ItemStack dropped : BlockDropCaptureAssist.getCapturedStacksAndStop()) {
                             ItemStack remainder = ItemUtils.dropItemToPlayer((Player) owner, dropped);
                             if (!remainder.isEmpty()) {
-                                ItemUtils.dropItemNaturally(world, owner.getPosX(), owner.getPosY(), owner.getPosZ(), remainder);
+                                ItemUtils.dropItemNaturally(level, owner.getX(), owner.getY(), owner.getZ(), remainder);
                             }
                         }
                     }

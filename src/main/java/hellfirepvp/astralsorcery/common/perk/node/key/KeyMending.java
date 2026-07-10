@@ -40,19 +40,19 @@ public class KeyMending extends KeyPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(Player player, LogicalSide side) {
-        if (side.isServer()) {
+    public void onPlayerTick(Player player, LogicalSide direction) {
+        if (direction.isServer()) {
             int repairChance = CONFIG.chanceToRepair.get();
-            repairChance /= PerkAttributeHelper.getOrCreateMap(player, side)
-                    .getModifier(player, ResearchHelper.getProgress(player, side), PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+            repairChance /= PerkAttributeHelper.getOrCreateMap(player, direction)
+                    .getAttributeInstance(player, ResearchHelper.getProgress(player, direction), PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
             repairChance = Math.max(repairChance, 1);
-            for (ItemStack armor : player.getArmorInventoryList()) {
-                if (rand.nextInt(repairChance) != 0) {
+            for (ItemStack itemStack : player.getArmorSlots()) {
+                if (random.nextInt(repairChance) != 0) {
                     continue;
                 }
-                if (!armor.isEmpty() && armor.isDamageable() && armor.isDamaged()) {
+                if (!itemStack.isEmpty() && itemStack.isDamageable() && itemStack.isDamaged()) {
                     if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false)) {
-                        armor.setDamage(armor.getDamage() - 1);
+                        itemStack.setBaseDamage(itemStack.getDamage() - 1);
                     }
                 }
             }

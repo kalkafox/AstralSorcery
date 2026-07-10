@@ -70,7 +70,7 @@ public class PatreonDataManager {
                 }
 
                 try {
-                    PatreonEffect pe = type.getProvider().buildEffect(plUuid, entry.getParameters());
+                    PatreonEffect pe = type.getProvider().buildEffect(plUuid, entry.writeToString());
 
                     pe.initialize();
                     pe.attachEventListeners(NeoForge.EVENT_BUS);

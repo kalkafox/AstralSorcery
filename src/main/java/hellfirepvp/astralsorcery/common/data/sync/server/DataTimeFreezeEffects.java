@@ -48,7 +48,7 @@ public class DataTimeFreezeEffects extends AbstractData {
         List<TimeStopEffectHelper> zones = serverActiveFreezeZones.computeIfAbsent(dim, (id) -> new LinkedList<>());
         zones.add(effectHelper);
         scheduledServerSyncChanges.add(new ServerSyncAction(ServerSyncAction.ActionType.ADD, dim, effectHelper));
-        markDirty();
+        setChanged();
     }
 
     public void removeEffect(ResourceKey<Level> dim, TimeStopEffectHelper effectHelper) {
@@ -56,7 +56,7 @@ public class DataTimeFreezeEffects extends AbstractData {
             serverActiveFreezeZones.get(dim).remove(effectHelper);
         }
         scheduledServerSyncChanges.add(new ServerSyncAction(ServerSyncAction.ActionType.REMOVE, dim, effectHelper));
-        markDirty();
+        setChanged();
     }
 
     @Override
@@ -71,25 +71,25 @@ public class DataTimeFreezeEffects extends AbstractData {
     }
 
     @Override
-    public void writeAllDataToPacket(CompoundTag compound) {
+    public void writeAllDataToPacket(CompoundTag pattern) {
         CompoundTag dimTag = new CompoundTag();
         for (ResourceKey<Level> dim : this.serverActiveFreezeZones.keySet()) {
-            ListTag tagList = new ListTag();
+            ListTag list = new ListTag();
             for (TimeStopEffectHelper effect : this.serverActiveFreezeZones.get(dim)) {
-                tagList.add(effect.serializeNBT());
+                list.add(effect.serializeNBT());
             }
-            dimTag.put(dim.getLocation().toString(), tagList);
+            dimTag.put(dim.getLocation().toString(), list);
         }
-        compound.put("dimTypes", dimTag);
+        pattern.put("dimTypes", dimTag);
     }
 
     @Override
-    public void writeDiffDataToPacket(CompoundTag compound) {
+    public void writeDiffDataToPacket(CompoundTag pattern) {
         ListTag changes = new ListTag();
         for (ServerSyncAction action : this.scheduledServerSyncChanges) {
             changes.add(action.serializeNBT());
         }
-        compound.put("changes", changes);
+        pattern.put("changes", changes);
 
         this.scheduledServerSyncChanges.clear();
     }
@@ -123,7 +123,7 @@ public class DataTimeFreezeEffects extends AbstractData {
         public static ServerSyncAction deserializeNBT(CompoundTag cmp) {
             ActionType type = MiscUtils.getEnumEntry(ActionType.class, cmp.getInt("type"));
             String dimKey = cmp.getString("dimType");
-            ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+            ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
             TimeStopEffectHelper helper = null;
             switch (type) {
                 case ADD:

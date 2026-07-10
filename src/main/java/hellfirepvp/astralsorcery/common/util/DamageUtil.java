@@ -25,22 +25,22 @@ import java.util.function.Consumer;
  */
 public class DamageUtil {
 
-    public static boolean attackEntityFrom(@Nonnull Entity attacked, @Nonnull DamageSource type, float amount) {
-        return attacked.attackEntityFrom(type, amount);
+    public static boolean hurt(@Nonnull Entity attacked, @Nonnull DamageSource type, float amount) {
+        return attacked.hurt(type, amount);
     }
 
-    public static boolean attackEntityFrom(@Nonnull Entity attacked, @Nonnull DamageSource type, float amount, @Nullable Entity newSource) {
+    public static boolean hurt(@Nonnull Entity attacked, @Nonnull DamageSource type, float amount, @Nullable Entity newSource) {
         DamageSource newType = DamageSourceUtil.withEntityDirect(type, newSource);
-        return attackEntityFrom(attacked, newType != null ? newType : type, amount);
+        return hurt(attacked, newType != null ? newType : type, amount);
     }
 
     public static <T extends LivingEntity> void shotgunAttack(T targeted, Consumer<T> fn) {
-        int hurtTime = targeted.hurtResistantTime;
-        targeted.hurtResistantTime = 0;
+        int hurtTime = targeted.invulnerableTime;
+        targeted.invulnerableTime = 0;
         try {
             fn.accept(targeted);
         } finally {
-            targeted.hurtResistantTime = hurtTime;
+            targeted.invulnerableTime = hurtTime;
         }
     }
 }

@@ -35,7 +35,7 @@ public abstract class AltarRecipeEffect extends AbstractAstralRegistryEntry<Alta
     protected static final int INDEX_NOISE_PLANE_LAYER2 = 1;
     protected static final int INDEX_CRAFT_FLARE = 2;
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
     private static final Vector3[] offsetPillarsT2 = new Vector3[] {
             new Vector3( 2, 0,  2),
             new Vector3(-2, 0,  2),
@@ -52,10 +52,10 @@ public abstract class AltarRecipeEffect extends AbstractAstralRegistryEntry<Alta
     protected static Vector3 getRandomPillarOffset(AltarType type) {
         switch (type) {
             case ATTUNEMENT:
-                return offsetPillarsT2[rand.nextInt(offsetPillarsT2.length)].clone();
+                return offsetPillarsT2[random.nextInt(offsetPillarsT2.length)].clone();
             case CONSTELLATION:
             case RADIANCE:
-                return offsetPillarsT3[rand.nextInt(offsetPillarsT3.length)].clone();
+                return offsetPillarsT3[random.nextInt(offsetPillarsT3.length)].clone();
         }
         return new Vector3();
     }

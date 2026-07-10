@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.data.ASDataSerializers;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.neoforged.neoforge.registries.DataSerializerEntry;
 
 import java.util.Locale;
 
@@ -35,10 +35,8 @@ public class RegistryDataSerializers {
     }
 
     private static <V, T extends EntityDataSerializer<V>> T register(T dataSerializer, String name) {
-        DataSerializerEntry entry = new DataSerializerEntry(dataSerializer);
-        entry.setRegistryName(AstralSorcery.key(name.toLowerCase(Locale.ROOT)));
-        AstralSorcery.getProxy().getRegistryPrimer().register(entry);
-        return dataSerializer;
+        return AstralRegistries.register(AstralRegistries.ENTITY_DATA_SERIALIZERS,
+                AstralSorcery.key(name.toLowerCase(Locale.ROOT)), dataSerializer);
     }
 
 }

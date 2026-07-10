@@ -58,13 +58,13 @@ import java.util.Random;
 public class AstralSkyRenderer implements ISkyRenderHandler {
 
     private static final Random RAND = new Random();
-    private static final ResourceLocation REF_TEX_MOON_PHASES = new ResourceLocation("textures/environment/moon_phases.png");
-    private static final ResourceLocation REF_TEX_SUN =         new ResourceLocation("textures/environment/sun.png");
+    private static final ResourceLocation REF_TEX_MOON_PHASES = ResourceLocation.parse("textures/environment/moon_phases.png");
+    private static final ResourceLocation REF_TEX_SUN =         ResourceLocation.parse("textures/environment/sun.png");
 
     public static AstralSkyRenderer INSTANCE = new AstralSkyRenderer();
 
-    private final BatchedVertexList sky = new BatchedVertexList(DefaultVertexFormats.POSITION);
-    private final BatchedVertexList skyHorizon = new BatchedVertexList(DefaultVertexFormats.POSITION);
+    private final BatchedVertexList sky = new BatchedVertexList(DefaultVertexFormat.POSITION);
+    private final BatchedVertexList skyHorizon = new BatchedVertexList(DefaultVertexFormat.POSITION);
     private final List<StarDrawList> starLists = new LinkedList<>();
 
     private boolean initialized = false;
@@ -81,14 +81,14 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
     }
 
     private void initialize() {
-        sky.batch(AstralSkyRendererSetup::generateSky);
+        sky.batch(AstralSkyRendererSetup::createLightSky);
         skyHorizon.batch(AstralSkyRendererSetup::generateSkyHorizon);
         for (int i = 0; i < 20; i++) {
             AbstractRenderableTexture starTexture = (i % 2 == 0 ? TexturesAS.TEX_STAR_1 : TexturesAS.TEX_STAR_2);
             int flicker = 12 + RAND.nextInt(5);
 
             StarDrawList starList = new StarDrawList(starTexture, flicker);
-            starList.batch(buf -> AstralSkyRendererSetup.generateStars(buf, 60 + RAND.nextInt(60), 1.1F + RAND.nextFloat() * 0.3F));
+            starList.batch(buf -> AstralSkyRendererSetup.createStars(buf, 60 + RAND.nextInt(60), 1.1F + RAND.nextFloat() * 0.3F));
             starLists.add(starList);
         }
 
@@ -96,7 +96,7 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
     }
 
     @Override
-    public void render(int ticks, float pTicks, PoseStack renderStack, ClientLevel world, Minecraft mc) {
+    public void render(int ticks, float pTicks, PoseStack renderStack, ClientLevel level, Minecraft mc) {
         if (AssetLibrary.isReloading()) {
             return;
         }
@@ -104,11 +104,11 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
             initialize();
         }
 
-        Vec3 color = world.getSkyColor(mc.gameRenderer.getActiveRenderInfo().getBlockPos(), pTicks);
+        Vec3 color = level.getSkyColor(mc.gameRenderer.getMainCamera().getBlockPos(), pTicks);
         float skyR = (float) color.x;
         float skyG = (float) color.y;
         float skyB = (float) color.z;
-        WorldContext ctx = SkyHandler.getContext(world, LogicalSide.CLIENT);
+        WorldContext ctx = SkyHandler.getContext(level, LogicalSide.CLIENT);
 
         if (ctx != null && ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {
             float perc = ctx.getCelestialEventHandler().getSolarEclipsePercent();
@@ -121,7 +121,7 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
 
         //Sky
         RenderSystem.disableTexture();
-        FogRenderer.applyFog();
+        FogRenderer.levelFogColor();
         RenderSystem.depthMask(false);
         RenderSystem.enableFog();
         RenderSystem.color4f(skyR, skyG, skyB, 1F);
@@ -134,9 +134,9 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         Blending.DEFAULT.apply();
 
         RenderSystem.shadeModel(GL11.GL_SMOOTH);
-        float[] duskDawnColors = world.func_239132_a_().func_230492_a_(world.func_242415_f(pTicks), pTicks);
+        float[] duskDawnColors = level.effects().func_230492_a_(level.getTimeOfDay(pTicks), pTicks);
         if (duskDawnColors != null) {
-            this.renderDuskDawn(duskDawnColors, renderStack, world, pTicks);
+            this.renderDuskDawn(duskDawnColors, renderStack, level, pTicks);
         }
         RenderSystem.shadeModel(GL11.GL_FLAT);
 
@@ -144,22 +144,22 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         RenderSystem.enableTexture();
         Blending.ADDITIVE_ALPHA.apply();
 
-        renderStack.push();
-        renderStack.rotate(Vector3f.YP.rotationDegrees(-90.0F));
-        renderStack.rotate(Vector3f.XP.rotationDegrees(world.func_242415_f(pTicks) * 360.0F));
+        renderStack.pushPose();
+        renderStack.mirror(Axis.YP.rotationDegrees(-90.0F));
+        renderStack.mirror(Axis.XP.rotationDegrees(level.getTimeOfDay(pTicks) * 360.0F));
 
-        this.renderCelestials(world, renderStack, pTicks);
-        this.renderStars(world, renderStack, pTicks);
+        this.renderCelestials(level, renderStack, pTicks);
+        this.renderStars(level, renderStack, pTicks);
 
-        renderStack.pop();
+        renderStack.popPose();
 
         //Constellations
-        renderStack.push();
-        renderStack.rotate(Vector3f.XP.rotationDegrees(180));
+        renderStack.pushPose();
+        renderStack.mirror(Axis.XP.rotationDegrees(180));
 
-        renderConstellationsSky(world, renderStack, pTicks);
+        renderConstellationsSky(level, renderStack, pTicks);
 
-        renderStack.pop();
+        renderStack.popPose();
 
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -169,12 +169,12 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         RenderSystem.disableTexture();
 
         RenderSystem.color4f(0F, 0F, 0F, 1F);
-        double horizonDiff = Minecraft.getInstance().player.getEyePosition(pTicks).y - world.getWorldInfo().getVoidFogHeight();
+        double horizonDiff = Minecraft.getInstance().player.getWantedY(pTicks).y - level.getLevelData().getHorizonHeight();
         if (horizonDiff < 0D) {
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(0, 12, 0);
             this.skyHorizon.render(renderStack);
-            renderStack.pop();
+            renderStack.popPose();
         }
         RenderSystem.color4f(1F, 1F, 1F, 1F);
 
@@ -230,19 +230,19 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
     }
     */
 
-    public static void renderConstellationsSky(ClientLevel world, PoseStack renderStack, float pTicks) {
-        WorldContext ctx = SkyHandler.getContext(world, LogicalSide.CLIENT);
+    public static void renderConstellationsSky(ClientLevel level, PoseStack renderStack, float pTicks) {
+        WorldContext ctx = SkyHandler.getContext(level, LogicalSide.CLIENT);
         if (ctx == null) {
             return;
         }
 
         int dayLength = GeneralConfig.CONFIG.dayLength.get();
-        long wTime = ((world.getDayTime() % dayLength) + dayLength) % dayLength;
+        long wTime = ((level.getDayTime() % dayLength) + dayLength) % dayLength;
         if (wTime < (dayLength / 2F)) {
             return; //Daytime.
         }
-        float rainDim = 1.0F - world.getRainStrength(pTicks);
-        float brightness = world.getStarBrightness(pTicks) * rainDim;
+        float rainDim = 1.0F - level.getRainStrength(pTicks);
+        float brightness = level.getStarBrightness(pTicks) * rainDim;
         if (brightness <= 0.0F) {
             return;
         }
@@ -253,7 +253,7 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         Map<IConstellation, ActiveCelestialsHandler.RenderPosition> constellations = ctx.getActiveCelestialsHandler().getCurrentRenderPositions();
         for (IConstellation cst : constellations.keySet()) {
             if (!clientProgress.hasConstellationDiscovered(cst) ||
-                    !ctx.getConstellationHandler().isActiveCurrently(cst, MoonPhase.fromWorld(world))) {
+                    !ctx.getConstellationHandler().isActiveCurrently(cst, MoonPhase.fromWorld(level))) {
                 continue;
             }
             ActiveCelestialsHandler.RenderPosition pos = constellations.get(cst);
@@ -263,8 +263,8 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         }
     }
 
-    private void renderStars(ClientLevel world, PoseStack renderStack, float pTicks) {
-        float starBrightness = world.getStarBrightness(pTicks) * (1.0F - world.getRainStrength(pTicks));
+    private void renderStars(ClientLevel level, PoseStack renderStack, float pTicks) {
+        float starBrightness = level.getStarBrightness(pTicks) * (1.0F - level.getRainStrength(pTicks));
         if (starBrightness > 0) {
             this.starLists.forEach((list) -> {
                 float br = RenderingConstellationUtils.stdFlicker(ClientScheduler.getClientTick(), pTicks, list.flickerSpeed) * starBrightness;
@@ -275,10 +275,10 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         }
     }
 
-    private void renderCelestials(ClientLevel world, PoseStack renderStack, float pTicks) {
-        WorldContext ctx = SkyHandler.getContext(world, LogicalSide.CLIENT);
+    private void renderCelestials(ClientLevel level, PoseStack renderStack, float pTicks) {
+        WorldContext ctx = SkyHandler.getContext(level, LogicalSide.CLIENT);
 
-        float rainAlpha = 1F - world.getRainStrength(pTicks);
+        float rainAlpha = 1F - level.getRainStrength(pTicks);
         RenderSystem.color4f(1F, 1F, 1F, rainAlpha);
 
         if (ctx != null && ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {
@@ -298,9 +298,9 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
             }
             float perc = ((float) eclTick) / lunarHalf;
             RenderSystem.color4f(1F, 0.4F + (0.6F * perc), 0.4F + (0.6F * perc), rainAlpha);
-            this.renderMoon(renderStack, world);
+            this.renderMoon(renderStack, level);
         } else {
-            this.renderMoon(renderStack, world);
+            this.renderMoon(renderStack, level);
         }
         RenderSystem.color4f(1F, 1F, 1F, 1F);
     }
@@ -319,81 +319,81 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         float uOffset = u;
 
         TexturesAS.TEX_SOLAR_ECLIPSE.bindTexture();
-        renderStack.push();
-        renderStack.rotate(Vector3f.YP.rotationDegrees(-90F));
-        Matrix4f matr = renderStack.getLast().getMatrix();
+        renderStack.pushPose();
+        renderStack.mirror(Axis.YP.rotationDegrees(-90F));
+        Matrix4f matr = renderStack.last().pose();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX, buf -> {
-            buf.pos(matr, -sunSize, 100, -sunSize).tex( uOffset      / 7F, 0).endVertex();
-            buf.pos(matr,  sunSize, 100, -sunSize).tex((uOffset + 1) / 7F, 0).endVertex();
-            buf.pos(matr,  sunSize, 100,  sunSize).tex((uOffset + 1) / 7F, 1).endVertex();
-            buf.pos(matr, -sunSize, 100,  sunSize).tex( uOffset      / 7F, 1).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+            buf.vertex(matr, -sunSize, 100, -sunSize).tex( uOffset      / 7F, 0).endVertex();
+            buf.vertex(matr,  sunSize, 100, -sunSize).tex((uOffset + 1) / 7F, 0).endVertex();
+            buf.vertex(matr,  sunSize, 100,  sunSize).tex((uOffset + 1) / 7F, 1).endVertex();
+            buf.vertex(matr, -sunSize, 100,  sunSize).tex( uOffset      / 7F, 1).endVertex();
         });
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 
     private void renderSun(PoseStack renderStack) {
         float sunSize = 30F;
 
-        Matrix4f matr = renderStack.getLast().getMatrix();
+        Matrix4f matr = renderStack.last().pose();
 
         Minecraft.getInstance().getTextureManager().bindTexture(REF_TEX_SUN);
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX, buf -> {
-            buf.pos(matr, -sunSize, 100, -sunSize).tex(0, 0).endVertex();
-            buf.pos(matr,  sunSize, 100, -sunSize).tex(1, 0).endVertex();
-            buf.pos(matr,  sunSize, 100,  sunSize).tex(1, 1).endVertex();
-            buf.pos(matr, -sunSize, 100,  sunSize).tex(0, 1).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+            buf.vertex(matr, -sunSize, 100, -sunSize).tex(0, 0).endVertex();
+            buf.vertex(matr,  sunSize, 100, -sunSize).tex(1, 0).endVertex();
+            buf.vertex(matr,  sunSize, 100,  sunSize).tex(1, 1).endVertex();
+            buf.vertex(matr, -sunSize, 100,  sunSize).tex(0, 1).endVertex();
         });
     }
 
-    private void renderMoon(PoseStack renderStack, Level world) {
+    private void renderMoon(PoseStack renderStack, Level level) {
         float moonSize = 20F;
 
         //Don't ask me.. i'm just copying this and be done with it
-        int moonPhase = world.getMoonPhase();
+        int moonPhase = level.getMoonPhase();
         int i = moonPhase % 4;
         int j = moonPhase / 4 % 2;
-        float minU = (i) / 4F;
-        float minV = (j) / 2F;
-        float maxU = (i + 1) / 4F;
-        float maxV = (j + 1) / 2F;
+        float u0 = (i) / 4F;
+        float v0 = (j) / 2F;
+        float u1 = (i + 1) / 4F;
+        float v1 = (j + 1) / 2F;
 
-        Matrix4f matr = renderStack.getLast().getMatrix();
+        Matrix4f matr = renderStack.last().pose();
 
         Minecraft.getInstance().getTextureManager().bindTexture(REF_TEX_MOON_PHASES);
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX, buf -> {
-            buf.pos(matr, -moonSize, -100,  moonSize).tex(maxU, maxV).endVertex();
-            buf.pos(matr,  moonSize, -100,  moonSize).tex(minU, maxV).endVertex();
-            buf.pos(matr,  moonSize, -100, -moonSize).tex(minU, minV).endVertex();
-            buf.pos(matr, -moonSize, -100, -moonSize).tex(maxU, minV).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+            buf.vertex(matr, -moonSize, -100,  moonSize).tex(u1, v1).endVertex();
+            buf.vertex(matr,  moonSize, -100,  moonSize).tex(u0, v1).endVertex();
+            buf.vertex(matr,  moonSize, -100, -moonSize).tex(u0, v0).endVertex();
+            buf.vertex(matr, -moonSize, -100, -moonSize).tex(u1, v0).endVertex();
         });
     }
 
-    private void renderDuskDawn(float[] duskDawnColors, PoseStack renderStack, ClientLevel world, float pTicks) {
-        float f3 = MathHelper.sin(world.getCelestialAngleRadians(pTicks)) < 0.0F ? 180.0F : 0.0F;
+    private void renderDuskDawn(float[] duskDawnColors, PoseStack renderStack, ClientLevel level, float pTicks) {
+        float f3 = Mth.sin(level.getCelestialAngleRadians(pTicks)) < 0.0F ? 180.0F : 0.0F;
 
-        renderStack.push();
-        renderStack.rotate(Vector3f.XP.rotationDegrees(90.0F));
-        renderStack.rotate(Vector3f.ZP.rotationDegrees(f3));
-        renderStack.rotate(Vector3f.ZP.rotationDegrees(90.0F));
+        renderStack.pushPose();
+        renderStack.mirror(Axis.XP.rotationDegrees(90.0F));
+        renderStack.mirror(Axis.ZP.rotationDegrees(f3));
+        renderStack.mirror(Axis.ZP.rotationDegrees(90.0F));
 
         float r = duskDawnColors[0];
         float g = duskDawnColors[1];
         float b = duskDawnColors[2];
         float a = duskDawnColors[3];
 
-        RenderingUtils.draw(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR, buf -> {
-            buf.pos(0, 100, 0).color(r, g, b, a).endVertex();
+        RenderingUtils.draw(GL11.GL_TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR, buf -> {
+            buf.vertex(0, 100, 0).color(r, g, b, a).endVertex();
             for (int i = 0; i <= 16; i++) {
                 float f6 = (float) i * ((float) Math.PI * 2F) / 16F;
-                float f7 = MathHelper.sin(f6);
-                float f8 = MathHelper.cos(f6);
-                buf.pos(f7 * 120F, f8 * 120F, -f8 * 40F * a).color(r, g, b, 0F).endVertex();
+                float f7 = Mth.sin(f6);
+                float f8 = Mth.cos(f6);
+                buf.vertex(f7 * 120F, f8 * 120F, -f8 * 40F * a).color(r, g, b, 0F).endVertex();
             }
         });
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 
     private static class StarDrawList extends BatchedVertexList {
@@ -402,7 +402,7 @@ public class AstralSkyRenderer implements ISkyRenderHandler {
         private final int flickerSpeed;
 
         private StarDrawList(AbstractRenderableTexture texture, int flickerSpeed) {
-            super(DefaultVertexFormats.POSITION_TEX);
+            super(DefaultVertexFormat.POSITION_TEX);
 
             this.texture = texture;
             this.flickerSpeed = flickerSpeed;

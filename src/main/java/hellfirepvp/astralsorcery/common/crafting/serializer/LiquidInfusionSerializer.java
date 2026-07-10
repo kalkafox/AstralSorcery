@@ -39,21 +39,21 @@ public class LiquidInfusionSerializer extends CustomRecipeSerializer<LiquidInfus
 
     @Override
     public LiquidInfusion read(ResourceLocation recipeId, JsonObject json) {
-        ResourceLocation fluidKey = new ResourceLocation(JSONUtils.getString(json, "fluidInput"));
-        Fluid fluidInput = ForgeRegistries.FLUIDS.getValue(fluidKey);
+        ResourceLocation fluidKey = ResourceLocation.parse(GsonHelper.getString(json, "fluidInput"));
+        Fluid fluidInput = BuiltInRegistries.FLUID.get(fluidKey);
         if (fluidInput == null || fluidInput == Fluids.EMPTY) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey);
         }
 
-        Ingredient input = CraftingHelper.getIngredient(json.get("input"));
+        Ingredient from = CraftingHelper.getIngredient(json.get("input"));
         ItemStack output = JsonHelper.getItemStack(json.get("output"), "output");
-        float consumptionChance = JSONUtils.getFloat(json, "consumptionChance");
-        int duration = JSONUtils.getInt(json, "duration");
+        float consumptionChance = GsonHelper.getFloat(json, "consumptionChance");
+        int duration = GsonHelper.getInt(json, "duration");
 
-        boolean consumeMultipleFluids = JSONUtils.getBoolean(json, "consumeMultipleFluids", false);
-        boolean acceptChaliceInput = JSONUtils.getBoolean(json, "acceptChaliceInput", true);
-        boolean copyNBTToOutputs = JSONUtils.getBoolean(json, "copyNBTToOutputs", false);
-        return new LiquidInfusion(recipeId, duration, fluidInput, input, output, consumptionChance, consumeMultipleFluids, acceptChaliceInput, copyNBTToOutputs);
+        boolean consumeMultipleFluids = GsonHelper.getBoolean(json, "consumeMultipleFluids", false);
+        boolean acceptChaliceInput = GsonHelper.getBoolean(json, "acceptChaliceInput", true);
+        boolean copyNBTToOutputs = GsonHelper.getBoolean(json, "copyNBTToOutputs", false);
+        return new LiquidInfusion(recipeId, duration, fluidInput, from, output, consumptionChance, consumeMultipleFluids, acceptChaliceInput, copyNBTToOutputs);
     }
 
     @Override

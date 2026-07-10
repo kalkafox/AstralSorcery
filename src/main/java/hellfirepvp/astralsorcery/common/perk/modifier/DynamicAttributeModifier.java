@@ -173,7 +173,7 @@ public class DynamicAttributeModifier extends PerkAttributeModifier {
 
     @Nullable
     public static DynamicAttributeModifier deserialize(CompoundTag tag) {
-        PerkAttributeType attrType = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(new ResourceLocation(tag.getString("type")));
+        PerkAttributeType attrType = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(ResourceLocation.parse(tag.getString("type")));
         if (attrType == null) {
             return null;
         }

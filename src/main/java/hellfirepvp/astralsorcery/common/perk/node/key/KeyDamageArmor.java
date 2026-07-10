@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -44,22 +44,22 @@ public class KeyDamageArmor extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOW, this::onDamage);
     }
 
-    private void onDamage(LivingHurtEvent event) {
+    private void onDamage(LivingIncomingDamageEvent event) {
         LivingEntity attacked = event.getEntityLiving();
         if (attacked instanceof Player) {
             Player player = (Player) attacked;
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 int armorPieces = 0;
-                for (ItemStack armor : player.getArmorInventoryList()) {
-                    if (!armor.isEmpty()) {
+                for (ItemStack itemStack : player.getArmorSlots()) {
+                    if (!itemStack.isEmpty()) {
                         armorPieces++;
                     }
                 }
@@ -69,13 +69,13 @@ public class KeyDamageArmor extends KeyPerk {
 
                 double dmgArmor = CONFIG.damagePerArmor.get();
                 float dmg = event.getAmount();
-                dmg *= ((dmgArmor * armorPieces) * PerkAttributeHelper.getOrCreateMap(player, side)
-                        .getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT));
+                dmg *= ((dmgArmor * armorPieces) * PerkAttributeHelper.getOrCreateMap(player, direction)
+                        .getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT));
                 event.setAmount(Math.max(event.getAmount() - dmg, 0));
 
-                int armorDmg = MathHelper.ceil(dmg * 1.3F);
-                for (ItemStack stack : player.getArmorInventoryList()) {
-                    stack.damageItem(armorDmg, player, (pl) -> pl.sendBreakAnimation(EquipmentSlotType.MAINHAND));
+                int armorDmg = Mth.ceil(dmg * 1.3F);
+                for (ItemStack stack : player.getArmorSlots()) {
+                    stack.damageItem(armorDmg, player, (pl) -> pl.sendBreakAnimation(EquipmentSlot.MAINHAND));
                 }
             }
         }

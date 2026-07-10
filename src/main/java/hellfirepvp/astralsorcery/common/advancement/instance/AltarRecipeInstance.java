@@ -34,13 +34,13 @@ import java.util.stream.Collectors;
  * Created by HellFirePvP
  * Date: 11.05.2020 / 20:28
  */
-public class AltarRecipeInstance extends CriterionInstance {
+public class AltarRecipeInstance extends AbstractCriterionTriggerInstance {
 
     private final Set<ResourceLocation> recipeNames = new HashSet<>();
     private final List<Ingredient> recipeOutputs = new ArrayList<>();
 
     private AltarRecipeInstance(ResourceLocation id) {
-        super(id, EntityPredicate.AndPredicate.ANY_AND);
+        super(id, EntityPredicate.AndPredicate.ANY);
     }
 
     public static AltarRecipeInstance craftRecipe(ResourceLocation... recipeIds) {
@@ -55,8 +55,8 @@ public class AltarRecipeInstance extends CriterionInstance {
         return instance;
     }
 
-    public static AltarRecipeInstance withOutput(IItemProvider... outputs) {
-        return withOutput(Ingredient.fromItems(outputs));
+    public static AltarRecipeInstance withOutput(ItemLike... outputs) {
+        return withOutput(Ingredient.valueFromJson(outputs));
     }
 
     public static AltarRecipeInstance withOutput(ItemStack... outputs) {
@@ -78,7 +78,7 @@ public class AltarRecipeInstance extends CriterionInstance {
     }
 
     @Override
-    public JsonObject serialize(ConditionArraySerializer conditions) {
+    public JsonObject serialize(SerializationContext conditions) {
         JsonObject out = super.serialize(conditions);
         if (!this.recipeNames.isEmpty()) {
             JsonArray names = new JsonArray();
@@ -99,14 +99,14 @@ public class AltarRecipeInstance extends CriterionInstance {
 
     public static AltarRecipeInstance deserialize(ResourceLocation id, JsonObject json) {
         AltarRecipeInstance instance = new AltarRecipeInstance(id);
-        JsonArray recipeNames = JSONUtils.getJsonArray(json, "recipeNames", new JsonArray());
+        JsonArray recipeNames = GsonHelper.getAsJsonArray(json, "recipeNames", new JsonArray());
         for (int idx = 0; idx < recipeNames.size(); idx++) {
-            JsonElement element = recipeNames.get(idx);
-            String key = JSONUtils.getString(element, String.format("recipeNames[%s]", idx));
-            instance.recipeNames.add(new ResourceLocation(key));
+            JsonElement value = recipeNames.get(idx);
+            String key = GsonHelper.getString(value, String.format("recipeNames[%s]", idx));
+            instance.recipeNames.add(ResourceLocation.parse(key));
         }
-        for (JsonElement element : JSONUtils.getJsonArray(json, "recipeOutputs", new JsonArray())) {
-            instance.recipeOutputs.add(Ingredient.deserialize(element));
+        for (JsonElement value : GsonHelper.getAsJsonArray(json, "recipeOutputs", new JsonArray())) {
+            instance.recipeOutputs.add(Ingredient.deserialize(value));
         }
         return instance;
     }

@@ -21,10 +21,10 @@ import net.minecraft.world.level.Level;
 public interface IConstellationSpecialShowup extends IConstellation {
 
     //Will be called on either side.
-    public boolean doesShowUp(Level world, long day);
+    public boolean doesShowUp(Level level, long day);
 
     //Fed directly into the worldSkyHandler's distribution, only use values 0-1.
-    public float getDistribution(Level world, long day, boolean showingUp);
+    public float getDistribution(Level level, long day, boolean showingUp);
 
     default public long dayToWorldTime(long day) {
         return day * GeneralConfig.CONFIG.dayLength.get();

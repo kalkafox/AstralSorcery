@@ -51,7 +51,7 @@ public class RenderPageBlockTransmutation extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
         this.clearFrameRectangles();
 
         RenderSystem.depthMask(false);
@@ -74,7 +74,7 @@ public class RenderPageBlockTransmutation extends RenderPageRecipeTemplate {
         RenderSystem.enableBlend();
         Blending.ADDITIVE_ALPHA.apply();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, renderX - 15, renderY + 10, z, 50, 120)
                     .tex(SpritesAS.SPR_LIGHTBEAM)
                     .draw();
@@ -86,13 +86,13 @@ public class RenderPageBlockTransmutation extends RenderPageRecipeTemplate {
 
         RenderSystem.disableDepthTest();
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(renderX + 11, renderY + 11, z);
         renderStack.scale(40, 40, 0);
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR, buf -> {
             RenderingDrawUtils.renderLightRayFan(renderStack, (renderType) -> buf, ColorsAS.ROCK_CRYSTAL, getNodePage(), 9, 9, 20);
         });
-        renderStack.pop();
+        renderStack.popPose();
 
         this.renderItemStack(renderStack, renderX - 4, renderY - 4, z, 1.75F, new ItemStack(BlocksAS.ROCK_COLLECTOR_CRYSTAL));
 
@@ -100,14 +100,14 @@ public class RenderPageBlockTransmutation extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public boolean propagateMouseClick(double mouseX, double mouseZ) {
-        return this.handleBookLookupClick(mouseX, mouseZ);
+    public boolean propagateMouseClick(double xpos, double mouseZ) {
+        return this.handleBookLookupClick(xpos, mouseZ);
     }
 
     @Override
-    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
-        this.renderHoverTooltips(renderStack, mouseX, mouseY, z, this.recipe.getId());
-        this.renderInfoStarTooltips(renderStack, x, y, z, mouseX, mouseY, (toolTip) -> {
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
+        this.renderHoverTooltips(renderStack, xpos, ypos, z, this.recipe.getId());
+        this.renderInfoStarTooltips(renderStack, x, y, z, xpos, ypos, (toolTip) -> {
             this.addConstellationInfoTooltip(this.recipe.getRequiredConstellation(), toolTip);
         });
     }

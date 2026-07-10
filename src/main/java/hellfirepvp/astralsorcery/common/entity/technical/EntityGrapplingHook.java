@@ -52,8 +52,8 @@ import java.util.List;
  */
 public class EntityGrapplingHook extends ThrowableProjectile implements IEntityAdditionalSpawnData {
 
-    private static final EntityDataAccessor<Integer> PULLING_ENTITY = EntityDataManager.createKey(EntityGrapplingHook.class, DataSerializers.VARINT);
-    private static final EntityDataAccessor<Boolean> PULLING = EntityDataManager.createKey(EntityGrapplingHook.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> PULLING_ENTITY = SynchedEntityData.createKey(EntityGrapplingHook.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> PULLING = SynchedEntityData.createKey(EntityGrapplingHook.class, EntityDataSerializers.BOOLEAN);
 
     private boolean launchedThrower = false;
 
@@ -66,41 +66,41 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
 
     private LivingEntity throwingEntity;
 
-    public EntityGrapplingHook(Level world) {
-        super(EntityTypesAS.GRAPPLING_HOOK, world);
+    public EntityGrapplingHook(Level level) {
+        super(EntityTypesAS.GRAPPLING_HOOK, level);
     }
 
-    public EntityGrapplingHook(LivingEntity thrower, Level world) {
-        super(EntityTypesAS.GRAPPLING_HOOK, thrower, world);
-        this.shoot(Vector3.directionFromYawPitch(thrower.rotationYaw, thrower.rotationPitch), 1.5F);
+    public EntityGrapplingHook(LivingEntity thrower, Level level) {
+        super(EntityTypesAS.GRAPPLING_HOOK, thrower, level);
+        this.shoot(Vector3.directionFromYawPitch(thrower.getYRot(), thrower.getXRot()), 1.5F);
         this.throwingEntity = thrower;
     }
 
     public static EntityType.IFactory<EntityGrapplingHook> factory() {
-        return (spawnEntity, world) -> new EntityGrapplingHook(world);
+        return (spawnEntity, level) -> new EntityGrapplingHook(level);
     }
 
     @Override
-    protected void registerData() {
-        this.dataManager.register(PULLING, false);
-        this.dataManager.register(PULLING_ENTITY, -1);
+    protected void defineSynchedData() {
+        this.entityData.register(PULLING, false);
+        this.entityData.register(PULLING_ENTITY, -1);
     }
 
     public void setPulling(boolean pull, @Nullable LivingEntity hit) {
-        this.dataManager.set(PULLING, pull);
-        this.dataManager.set(PULLING_ENTITY, hit == null ? -1 : hit.getEntityId());
+        this.entityData.set(PULLING, pull);
+        this.entityData.set(PULLING_ENTITY, hit == null ? -1 : hit.getEntityId());
     }
 
     public boolean isPulling() {
-        return this.dataManager.get(PULLING);
+        return this.entityData.get(PULLING);
     }
 
     @Nullable
     public LivingEntity getPulling() {
-        int idPull = this.dataManager.get(PULLING_ENTITY);
+        int idPull = this.entityData.get(PULLING_ENTITY);
         if (idPull > 0) {
             try {
-                return (LivingEntity) this.world.getEntityByID(idPull);
+                return (LivingEntity) this.level().getEntityByID(idPull);
             } catch (Exception exc) {}
         }
         return null;
@@ -110,7 +110,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
     public float despawnPercentage(float partial) {
         float p = despawning - (1 - partial);
         p /= 10;
-        return MathHelper.clamp(p, 0, 1);
+        return Mth.clamp(p, 0, 1);
     }
 
     public boolean isDespawning() {
@@ -132,12 +132,12 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
 
     @Nullable
     @Override
-    public Entity func_234616_v_() {
-        return this.throwingEntity != null ? this.throwingEntity : super.func_234616_v_();
+    public Entity getOwner() {
+        return this.throwingEntity != null ? this.throwingEntity : super.getOwner();
     }
 
     @Override
-    protected float getGravityVelocity() {
+    protected float getGravity() {
         return this.isPulling() ? 0 : 0.03F;
     }
 
@@ -145,14 +145,14 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
     public void tick() {
         super.tick();
 
-        if (func_234616_v_() == null || !func_234616_v_().isAlive()) {
+        if (getOwner() == null || !getOwner().isAlive()) {
             setDespawning();
         }
-        if (!isPulling() && ticksExisted >= 30) {
+        if (!isPulling() && tickCount >= 30) {
             setDespawning();
         }
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             if (!isPulling()) {
                 this.pullFactor += 0.02F;
             } else {
@@ -163,26 +163,26 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         if (isDespawning()) {
             despawnTick();
 
-            if (world.isRemote() && this.despawning == 3) {
+            if (level.isClientSide() && this.despawning == 3) {
                 this.playDespawnSparkles();
             }
         } else {
-            Entity thrower = func_234616_v_();
+            Entity thrower = getOwner();
             double dist = Math.max(0.01, thrower.getDistance(this));
             if (isAlive() && isPulling()) {
                 if (getPulling() != null) {
                     LivingEntity at = getPulling();
-                    this.setPosition(at.getPosX(), at.getPosY(), at.getPosZ());
+                    this.setPosition(at.getX(), at.getY(), at.getZ());
                 }
 
-                if (((getPulling() != null && ticksExisted > 60 && dist < 2) || (getPulling() == null && ticksExisted > 15 && dist < 2)) || timeout > 15) {
+                if (((getPulling() != null && tickCount > 60 && dist < 2) || (getPulling() == null && tickCount > 15 && dist < 2)) || timeout > 15) {
                     setDespawning();
                 } else {
                     thrower.fallDistance = -2F;
 
-                    double mx = this.getPosX() - thrower.getPosX();
-                    double my = this.getPosY() - thrower.getPosY();
-                    double mz = this.getPosZ() - thrower.getPosZ();
+                    double mx = this.getX() - thrower.getX();
+                    double my = this.getY() - thrower.getY();
+                    double mz = this.getZ() - thrower.getZ();
                     mx /= dist * 5.0D;
                     my /= dist * 5.0D;
                     mz /= dist * 5.0D;
@@ -193,13 +193,13 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
                         my = v2.y / 4.0D;
                         mz = v2.z / 4.0D;
                     }
-                    Vec3 motion = thrower.getMotion();
+                    Vec3 motion = thrower.getDeltaMovement();
                     motion = motion.add(mx, my + 0.04F, mz);
                     if (!launchedThrower) {
                         motion = motion.add(0, 0.4F, 0);
                         launchedThrower = true;
                     }
-                    thrower.setMotion(motion);
+                    thrower.setDeltaMovement(motion);
 
                     if (thrower instanceof Player) {
                         EventHelperDamageCancelling.markInvulnerableToNextDamage((Player) thrower, DamageSource.FALL);
@@ -223,17 +223,17 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
             Vector3 ePos = RenderingVectorUtils.interpolatePosition(this, 1F);
             List<Vector3> positions = buildLine(1F);
             for (Vector3 pos : positions) {
-                if (rand.nextBoolean()) {
-                    Vector3 motion = Vector3.random().multiply(0.005F);
+                if (random.nextBoolean()) {
+                    Vector3 motion = Vector3.random().mul(0.005F);
                     Vector3 at = pos.add(ePos);
                     FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                             .spawn(at)
-                            .setScaleMultiplier(0.3F + rand.nextFloat() * 0.3F)
-                            .alpha(VFXAlphaFunction.FADE_OUT)
+                            .setScaleMultiplier(0.3F + random.nextFloat() * 0.3F)
+                            .alpha1arg(VFXAlphaFunction.FADE_OUT)
                             .color(VFXColorFunction.constant(ColorsAS.DEFAULT_GENERIC_PARTICLE))
-                            .setMotion(motion)
-                            .setMaxAge(25 + rand.nextInt(20));
-                    if (rand.nextBoolean()) {
+                            .setDeltaMovement(motion)
+                            .setMaxAge(25 + random.nextInt(20));
+                    if (random.nextBoolean()) {
                         p.color(VFXColorFunction.WHITE);
                     }
                 }
@@ -255,15 +255,15 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         int id = additionalData.readInt();
         try {
             if (id > 0) {
-                this.throwingEntity = (LivingEntity) world.getEntityByID(id);
+                this.throwingEntity = (LivingEntity) level.getEntityByID(id);
             }
         } catch (Exception ignored) {}
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean isInRangeToRenderDist(double distance) {
-        double d0 = this.getBoundingBox().getAverageEdgeLength() * 64D;
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        double d0 = this.getBoundingBox().getSize() * 64D;
         if (Double.isNaN(d0)) {
             d0 = 64D;
         }
@@ -272,12 +272,12 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
     }
 
     @Override
-    public AABB getRenderBoundingBox() {
-        return TileEntity.INFINITE_EXTENT_AABB;
+    public AABB getBoundingBoxForCulling() {
+        return BlockEntity.INFINITE_EXTENT_AABB;
     }
 
     public List<Vector3> buildLine(float partial) {
-        Entity thrower = func_234616_v_();
+        Entity thrower = getOwner();
         if (thrower == null) {
             return Collections.emptyList();
         }
@@ -292,9 +292,9 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         int iter = (int) lineLength;
         for (int xx = 1; xx < iter - 1; xx++) {
             float dist = xx * (lineLength / iter);
-            double dx = (interpThrower.getX() - interpHook.getX())                            / iter * xx + MathHelper.sin(dist / 10.0F) * pullFactor;
-            double dy = (interpThrower.getY() - interpHook.getY() + thrower.getHeight() / 2F) / iter * xx + MathHelper.sin(dist / 7.0F)  * pullFactor;
-            double dz = (interpThrower.getZ() - interpHook.getZ())                            / iter * xx + MathHelper.sin(dist / 2.0F)  * pullFactor;
+            double dx = (interpThrower.getX() - interpHook.getX())                            / iter * xx + Mth.sin(dist / 10.0F) * pullFactor;
+            double dy = (interpThrower.getY() - interpHook.getY() + thrower.getHeight() / 2F) / iter * xx + Mth.sin(dist / 7.0F)  * pullFactor;
+            double dz = (interpThrower.getZ() - interpHook.getZ())                            / iter * xx + Mth.sin(dist / 2.0F)  * pullFactor;
             list.add(new Vector3(dx, dy, dz));
         }
         list.add(to.clone());
@@ -302,39 +302,39 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         return list;
     }
 
-    public void shoot(Vector3 dir, float velocity) {
-        super.shoot(dir.getX(), dir.getY(), dir.getZ(), velocity, 0F);
+    public void shoot(Vector3 dir, float ap) {
+        super.shoot(dir.getX(), dir.getY(), dir.getZ(), ap, 0F);
     }
 
     @Override
-    public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
-        super.shoot(x, y, z, velocity, 0F);
+    public void shoot(double x, double y, double z, float ap, float inaccuracy) {
+        super.shoot(x, y, z, ap, 0F);
     }
 
     @Override
-    protected void onImpact(HitResult result) {
+    protected void onHit(HitResult result) {
         Vec3 hit = result.getHitVec();
         switch (result.getType()) {
             case BLOCK:
                 setPulling(true, null);
                 break;
             case ENTITY:
-                Entity e = ((EntityRayTraceResult) result).getEntity();
-                if (!(e instanceof LivingEntity) || (func_234616_v_() != null && e.equals(func_234616_v_()))) {
+                Entity e = ((EntityHitResult) result).getEntity();
+                if (!(e instanceof LivingEntity) || (getOwner() != null && e.equals(getOwner()))) {
                     return;
                 }
-                setPulling(true, (LivingEntity) ((EntityRayTraceResult) result).getEntity());
-                hit = new Vec3(hit.x, hit.y + ((EntityRayTraceResult) result).getEntity().getHeight() * 3 / 4, hit.z);
+                setPulling(true, (LivingEntity) ((EntityHitResult) result).getEntity());
+                hit = new Vec3(hit.x, hit.y + ((EntityHitResult) result).getEntity().getHeight() * 3 / 4, hit.z);
                 break;
             default:
                 break;
         }
-        this.setMotion(0, 0, 0);
+        this.setDeltaMovement(0, 0, 0);
         this.setPosition(hit.x, hit.y, hit.z);
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

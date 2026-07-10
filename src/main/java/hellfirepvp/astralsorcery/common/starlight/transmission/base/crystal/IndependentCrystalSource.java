@@ -61,33 +61,33 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
     private boolean enhanced = false;
 
     @Override
-    public float produceStarlightTick(ServerLevel world, BlockPos pos) {
+    public float produceStarlightTick(ServerLevel level, BlockPos pos) {
         if (!doesSeeSky || crystalAttributes == null) {
             return 0F;
         }
         IWeakConstellation cst = getStarlightType();
-        WorldContext ctx = SkyHandler.getContext(world, LogicalSide.SERVER);
+        WorldContext ctx = SkyHandler.getContext(level, LogicalSide.SERVER);
         if (ctx == null || cst == null) {
             return 0F;
         }
 
         if (posDistribution == -1) {
-            posDistribution = SkyCollectionHelper.getSkyNoiseDistribution(world, pos);
+            posDistribution = SkyCollectionHelper.getSkyNoiseDistribution(level, pos);
         }
 
-        if (closestOtherCollector != null && rand.nextInt(40) == 0) {
+        if (closestOtherCollector != null && random.nextInt(40) == 0) {
             PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.LIGHTNING)
                     .addData(buf -> {
                         ByteBufUtils.writeVector(buf, new Vector3(pos).add(0.5, 0.5, 0.5));
                         ByteBufUtils.writeVector(buf, new Vector3(closestOtherCollector).add(0.5, 0.5, 0.5));
                         buf.writeInt(this.constellation.getConstellationColor().darker().getRGB());
                     });
-            PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, pos, 32));
+            PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 32));
         }
 
         Function<Float, Float> distrFunction = getDistributionFunc();
         float perc = CrystalCalculations.getCollectorCrystalCollectionRate(this);
-        perc *= distrFunction.apply(0.3F + (0.7F * DayTimeHelper.getCurrentDaytimeDistribution(world)));
+        perc *= distrFunction.apply(0.3F + (0.7F * DayTimeHelper.getCurrentDaytimeDistribution(level)));
         perc *= collectionDstMultiplier;
         perc *= 1 + (0.3 * posDistribution);
         perc *= 0.4 + 0.6 * ctx.getDistributionHandler().getDistribution(cst);
@@ -129,7 +129,7 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
             if (other.equals(thisPos)) {
                 continue;
             }
-            double dstSq = thisPos.distanceSq(Vector3d.copy(other), false);
+            double dstSq = thisPos.distSqr(Vec3.copy(other), false);
             if (dstSq < minDstSq) {
                 minDstSq = dstSq;
                 closest = other;
@@ -161,33 +161,33 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {
-        this.constellation = NBTHelper.readOptional(compound, "constellation", (nbt) -> {
+    public void readFromNBT(CompoundTag pattern) {
+        this.constellation = NBTHelper.readOptional(pattern, "constellation", (nbt) -> {
             IConstellation cst = IConstellation.readFromNBT(nbt);
             if (cst instanceof IWeakConstellation) {
                 return (IWeakConstellation) cst;
             }
             return null;
         });
-        this.crystalAttributes = CrystalAttributes.getCrystalAttributes(compound);
-        this.doesSeeSky = compound.getBoolean("doesSeeSky");
-        this.doesAutoLink = compound.getBoolean("doesAutoLink");
-        this.collectionDstMultiplier = compound.getDouble("collectionDstMultiplier");
-        this.closestOtherCollector = NBTHelper.readOptional(compound, "closestOtherCollector", NBTHelper::readBlockPosFromNBT);
-        this.enhanced = compound.getBoolean("enhanced");
+        this.crystalAttributes = CrystalAttributes.getCrystalAttributes(pattern);
+        this.doesSeeSky = pattern.getBoolean("doesSeeSky");
+        this.doesAutoLink = pattern.getBoolean("doesAutoLink");
+        this.collectionDstMultiplier = pattern.getDouble("collectionDstMultiplier");
+        this.closestOtherCollector = NBTHelper.readOptional(pattern, "closestOtherCollector", NBTHelper::readBlockPosFromNBT);
+        this.enhanced = pattern.getBoolean("enhanced");
     }
 
     @Override
-    public void writeToNBT(CompoundTag compound) {
+    public void save(CompoundTag pattern) {
         if (crystalAttributes != null) {
-            crystalAttributes.store(compound);
+            crystalAttributes.store(pattern);
         }
-        NBTHelper.writeOptional(compound, "constellation", this.constellation, (nbt, cst) -> cst.writeToNBT(nbt));
-        compound.putBoolean("doesSeeSky", doesSeeSky);
-        compound.putBoolean("doesAutoLink", doesAutoLink);
-        compound.putDouble("collectionDstMultiplier", collectionDstMultiplier);
-        NBTHelper.writeOptional(compound, "closestOtherCollector", this.closestOtherCollector, (nbt, pos) -> NBTHelper.writeBlockPosToNBT(pos, nbt));
-        compound.putBoolean("enhanced", enhanced);
+        NBTHelper.writeOptional(pattern, "constellation", this.constellation, (nbt, cst) -> cst.save(nbt));
+        pattern.putBoolean("doesSeeSky", doesSeeSky);
+        pattern.putBoolean("doesAutoLink", doesAutoLink);
+        pattern.putDouble("collectionDstMultiplier", collectionDstMultiplier);
+        NBTHelper.writeOptional(pattern, "closestOtherCollector", this.closestOtherCollector, (nbt, pos) -> NBTHelper.writeBlockPosToNBT(pos, nbt));
+        pattern.putBoolean("enhanced", enhanced);
     }
 
     public static class Provider implements SourceClassRegistry.SourceProvider {

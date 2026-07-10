@@ -64,7 +64,7 @@ public class ItemInfusedCrystalSword extends ItemCrystalSword implements Equipme
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide direction, boolean ignoreRequirements) {
         return Collections.singletonList(BASECRIT_MODIFIER.get());
     }
 }

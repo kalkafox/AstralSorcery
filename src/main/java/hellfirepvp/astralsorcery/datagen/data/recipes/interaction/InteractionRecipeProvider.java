@@ -32,7 +32,7 @@ import java.util.function.Consumer;
  */
 public class InteractionRecipeProvider {
 
-    public static void registerLiquidInteractionRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerLiquidInteractionRecipes(Consumer<FinishedRecipe> registrar) {
         // Lava/Water
         LiquidInteractionBuilder.builder(AstralSorcery.key("water_lava_cobblestone"))
                 .setReactant1(new FluidStack(Fluids.WATER, 10))

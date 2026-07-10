@@ -35,7 +35,7 @@ public class RaytraceAssist {
     private static final Vector3 CENTRALIZE = new Vector3(0.5, 0.5, 0.5);
 
     private final Vector3 start, target;
-    private final BlockPos startPos, targetPos;
+    private final BlockPos minCorner, targetPos;
 
     private boolean collectEntities = false;
     private final Set<Integer> collected = new HashSet<>();
@@ -52,7 +52,7 @@ public class RaytraceAssist {
     public RaytraceAssist(Vector3 start, Vector3 target) {
         this.start = start.clone();
         this.target = target.clone();
-        this.startPos = this.start.toBlockPos();
+        this.minCorner = this.start.toBlockPos();
         this.targetPos = this.target.toBlockPos();
     }
 
@@ -82,22 +82,22 @@ public class RaytraceAssist {
         this.collectBox = this.collectBox.grow(radius).offset(radius, 0, radius);
     }
 
-    public boolean isClear(Level world) {
+    public boolean isClear(Level level) {
         return this.forEachBlockPos(at -> {
             if (collectEntities) {
-                List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, collectBox.offset(at));
+                List<Entity> entities = level.getEntitiesWithinAABB(Entity.class, collectBox.offset(at));
                 for (Entity b : entities) {
                     collected.add(b.getEntityId());
                 }
             }
 
-            return MiscUtils.executeWithChunk(world, at, () -> {
-                if (!isStartEnd(at) && !world.isAirBlock(at)) {
-                    if (this.hitFluids && !world.getFluidState(at).isEmpty()) {
+            return MiscUtils.executeWithChunk(level, at, () -> {
+                if (!isStartEnd(at) && !level.isEmptyBlock(at)) {
+                    if (this.hitFluids && !level.getFluidState(at).isEmpty()) {
                         posHit = at;
                         return false;
                     }
-                    if ((this.hitBlocks || this.hitFluids) && !isAllowed(world, at, world.getBlockState(at))) {
+                    if ((this.hitBlocks || this.hitFluids) && !isAllowed(level, at, level.getBlockState(at))) {
                         posHit = at;
                         return false;
                     }
@@ -109,7 +109,7 @@ public class RaytraceAssist {
 
     public boolean forEachStep(Predicate<Vector3> raystepFn) {
         Vector3 aim = start.vectorFromHereTo(target);
-        Vector3 stepAim = aim.clone().normalize().multiply(this.stepWidth);
+        Vector3 stepAim = aim.clone().normalize().mul(this.stepWidth);
         double distance = aim.length();
         Vector3 prevVec = start.clone();
 
@@ -139,10 +139,10 @@ public class RaytraceAssist {
         return posHit;
     }
 
-    public List<Entity> collectedEntities(Level world) {
+    public List<Entity> collectedEntities(Level level) {
         List<Entity> entities = new LinkedList<>();
         for (Integer id : collected) {
-            Entity e = world.getEntityByID(id);
+            Entity e = level.getEntityByID(id);
             if (e != null && e.isAlive()) {
                 entities.add(e);
             }
@@ -150,12 +150,12 @@ public class RaytraceAssist {
         return entities;
     }
 
-    private boolean isAllowed(Level world, BlockPos at, BlockState state) {
-        return MiscUtils.contains(passable, predicate -> predicate.test(world, at, state));
+    private boolean isAllowed(Level level, BlockPos at, BlockState state) {
+        return MiscUtils.contains(passable, predicate -> predicate.test(level, at, state));
     }
 
     private boolean isStartEnd(BlockPos hit) {
-        return hit.equals(startPos) || (!includeEnd && hit.equals(targetPos));
+        return hit.equals(minCorner) || (!includeEnd && hit.equals(targetPos));
     }
 
     public static void addPassable(BlockPredicate predicate) {
@@ -163,7 +163,7 @@ public class RaytraceAssist {
     }
 
     static {
-        addPassable(((world, pos, state) -> state.getFluidState().isEmpty() && state.getMaterial().equals(Material.GLASS)));
+        addPassable(((level, pos, state) -> state.getFluidState().isEmpty() && state.getMaterial().equals(Material.GLASS)));
     }
 
 }

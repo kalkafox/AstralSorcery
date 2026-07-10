@@ -37,29 +37,29 @@ public class ReaderBreakSpeed extends ReaderFlatAttribute {
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide direction) {
         AttributeTypeBreakSpeed.evaluateBreakSpeedWithoutPerks = true;
-        double speed;
+        double speedModifier;
         try {
-            speed = player.getDigSpeed(Blocks.COBBLESTONE.getDefaultState(), BlockPos.ZERO);
+            speedModifier = player.getDigSpeed(Blocks.COBBLESTONE.defaultBlockState(), BlockPos.ZERO);
         } finally {
             AttributeTypeBreakSpeed.evaluateBreakSpeedWithoutPerks = false;
         }
-        return speed;
+        return speedModifier;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public PerkStatistic getStatistics(PerkAttributeMap statMap, Player player) {
+    public PerkStatistic countParticles(PerkAttributeMap statMap, Player player) {
         String limitStr = "";
         Double limit = null;
         if (PerkAttributeLimiter.hasLimit(this.getType())) {
-            Pair<Double, Double> limits = PerkAttributeLimiter.getLimit(this.getType());
+            Pair<Double, Double> limits = PerkAttributeLimiter.getMaxResults(this.getType());
             limit = limits.getRight();
-            limitStr = I18n.format("perk.reader.astralsorcery.limit.percent", MathHelper.floor(limit * 100));
+            limitStr = I18n.format("perk.reader.astralsorcery.limit.percent", Mth.floor(limit * 100));
         }
 
-        double value = player.getDigSpeed(Blocks.COBBLESTONE.getDefaultState(), BlockPos.ZERO);
+        double value = player.getDigSpeed(Blocks.COBBLESTONE.defaultBlockState(), BlockPos.ZERO);
 
         String postProcess = "";
         double post = AttributeEvent.postProcessModded(player, this.getType(), value);

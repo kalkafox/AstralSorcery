@@ -37,26 +37,26 @@ public class FXOrbitalPelotrio extends FXSourceOrbital<FXFacingParticle, BatchRe
 
     @Override
     public void spawnOrbitalParticle(Vector3 pos, Function<Vector3, FXFacingParticle> effectRegistrar) {
-        if (rand.nextInt(4) == 0) {
+        if (random.nextInt(4) == 0) {
             effectRegistrar.apply(pos)
                     .color(pelotrioColor)
-                    .setScaleMultiplier(0.3F + rand.nextFloat() * 0.2F)
-                    .setMotion(new Vector3(
-                            (rand.nextFloat() * 0.02F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.02F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.02F) * (rand.nextBoolean() ? 1 : -1)
+                    .setScaleMultiplier(0.3F + random.nextFloat() * 0.2F)
+                    .setDeltaMovement(new Vector3(
+                            (random.nextFloat() * 0.02F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.02F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.02F) * (random.nextBoolean() ? 1 : -1)
                     ))
                     .setMaxAge(45);
         }
 
-        if (rand.nextInt(4) == 0) {
+        if (random.nextInt(4) == 0) {
             effectRegistrar.apply(pos)
                     .color(VFXColorFunction.WHITE)
-                    .setScaleMultiplier(0.3F + rand.nextFloat() * 0.2F)
-                    .setMotion(new Vector3(
-                            (rand.nextFloat() * 0.025F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.025F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.025F) * (rand.nextBoolean() ? 1 : -1)
+                    .setScaleMultiplier(0.3F + random.nextFloat() * 0.2F)
+                    .setDeltaMovement(new Vector3(
+                            (random.nextFloat() * 0.025F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.025F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.025F) * (random.nextBoolean() ? 1 : -1)
                     ))
                     .setMaxAge(30);
         }

@@ -34,48 +34,48 @@ public class RenderingGuiUtils {
     private static final PoseStack EMPTY = new PoseStack();
 
     @Deprecated
-    public static void drawTexturedRectAtCurrentPos(float width, float height, float zLevel, float uFrom, float vFrom, float uWidth, float vWidth) {
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            rect(buf, 0, 0, zLevel, width, height)
+    public static void drawTexturedRectAtCurrentPos(float width, float height, float blitOffset, float uFrom, float vFrom, float uWidth, float vWidth) {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            rect(buf, 0, 0, blitOffset, width, height)
                     .tex(uFrom, vFrom, uWidth, vWidth)
                     .draw();
         });
     }
 
     @Deprecated
-    public static void drawTexturedRectAtCurrentPos(float width, float height, float zLevel) {
-        drawTexturedRectAtCurrentPos(width, height, zLevel, 0, 0, 1, 1);
+    public static void drawTexturedRectAtCurrentPos(float width, float height, float blitOffset) {
+        drawTexturedRectAtCurrentPos(width, height, blitOffset, 0, 0, 1, 1);
     }
 
     @Deprecated
-    public static void drawRect(float offsetX, float offsetY, float zLevel, float width, float height) {
-        drawRect(new PoseStack(), offsetX, offsetY, zLevel, width, height);
+    public static void drawRect(float offsetX, float offsetY, float blitOffset, float width, float height) {
+        drawRect(new PoseStack(), offsetX, offsetY, blitOffset, width, height);
     }
 
-    public static void drawRect(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height) {
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            rect(buf, renderStack, offsetX, offsetY, zLevel, width, height)
+    public static void drawRect(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float width, float height) {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            rect(buf, renderStack, offsetX, offsetY, blitOffset, width, height)
                     .draw();
         });
     }
 
-    public static void drawTexturedRect(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height, AbstractRenderableTexture tex) {
+    public static void drawTexturedRect(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float width, float height, AbstractRenderableTexture tex) {
         Tuple<Float, Float> uv = tex.getUVOffset();
-        drawTexturedRect(renderStack, offsetX, offsetY, zLevel, width, height, uv.getA(), uv.getB(), tex.getUWidth(), tex.getVWidth());
+        drawTexturedRect(renderStack, offsetX, offsetY, blitOffset, width, height, uv.getA(), uv.getB(), tex.getUWidth(), tex.getVWidth());
     }
 
     @Deprecated
-    public static void drawTexturedRect(float offsetX, float offsetY, float zLevel, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
-        drawTexturedRect(EMPTY, offsetX, offsetY, zLevel, width, height, uFrom, vFrom, uWidth, vWidth);
+    public static void drawTexturedRect(float offsetX, float offsetY, float blitOffset, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
+        drawTexturedRect(EMPTY, offsetX, offsetY, blitOffset, width, height, uFrom, vFrom, uWidth, vWidth);
     }
 
     public static void drawTexturedRect(PoseStack renderStack, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
         drawTexturedRect(renderStack, 0, 0, 0, width, height, uFrom, vFrom, uWidth, vWidth);
     }
 
-    public static void drawTexturedRect(PoseStack renderStack, float offsetX, float offsetY, float zLevel, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            rect(buf, renderStack, offsetX, offsetY, zLevel, width, height)
+    public static void drawTexturedRect(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            rect(buf, renderStack, offsetX, offsetY, blitOffset, width, height)
                     .tex(uFrom, vFrom, uWidth, vWidth)
                     .draw();
         });
@@ -138,7 +138,7 @@ public class RenderingGuiUtils {
         }
 
         public DrawBuilder tex(TextureAtlasSprite tas) {
-            return this.tex(tas.getMinU(), tas.getMinV(), tas.getMaxU() - tas.getMinU(), tas.getMaxV() - tas.getMinV());
+            return this.tex(tas.getU0(), tas.getV0(), tas.getU1() - tas.getU0(), tas.getV1() - tas.getV0());
         }
 
         public DrawBuilder tex(AbstractRenderableTexture texture) {
@@ -181,11 +181,11 @@ public class RenderingGuiUtils {
             int g = this.color.getGreen();
             int b = this.color.getBlue();
             int a = this.color.getAlpha();
-            Matrix4f offset = this.renderStack.getLast().getMatrix();
-            buf.pos(offset, offsetX,         offsetY + height, offsetZ).color(r, g, b, a).tex(u, v + vWidth).endVertex();
-            buf.pos(offset, offsetX + width, offsetY + height, offsetZ).color(r, g, b, a).tex(u + uWidth, v + vWidth).endVertex();
-            buf.pos(offset, offsetX + width, offsetY,          offsetZ).color(r, g, b, a).tex(u + uWidth, v).endVertex();
-            buf.pos(offset, offsetX,         offsetY,          offsetZ).color(r, g, b, a).tex(u, v).endVertex();
+            Matrix4f offset = this.renderStack.last().pose();
+            buf.vertex(offset, offsetX,         offsetY + height, offsetZ).color(r, g, b, a).tex(u, v + vWidth).endVertex();
+            buf.vertex(offset, offsetX + width, offsetY + height, offsetZ).color(r, g, b, a).tex(u + uWidth, v + vWidth).endVertex();
+            buf.vertex(offset, offsetX + width, offsetY,          offsetZ).color(r, g, b, a).tex(u + uWidth, v).endVertex();
+            buf.vertex(offset, offsetX,         offsetY,          offsetZ).color(r, g, b, a).tex(u, v).endVertex();
             return this;
         }
     }

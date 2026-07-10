@@ -89,7 +89,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
             return false;
         }
         Entity entity;
-        return (entity = altar.getWorld().getEntityByID(this.entityId)) != null &&
+        return (entity = altar.getLevel().getEntityByID(this.entityId)) != null &&
                 entity.isAlive() &&
                 entity instanceof ItemEntity &&
                 this.constellation.equals(altar.getActiveConstellation()) &&
@@ -108,13 +108,13 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
 
     @Override
     public void finishRecipe(TileAttunementAltar altar) {
-        ItemEntity crystal = this.getEntity(altar.getWorld());
+        ItemEntity crystal = this.getEntity(altar.getLevel());
         if (crystal != null) {
             ItemStack stack = crystal.getItem();
             if (!(stack.getItem() instanceof ConstellationItem) && stack.getItem() instanceof ItemCrystalBase) {
                 CompoundTag tag = stack.getTag();
                 stack = new ItemStack(((ItemCrystalBase) stack.getItem()).getTunedItemVariant(), stack.getCount());
-                stack.setTag(tag);
+                stack.setRepairCost(tag);
             }
             if (stack.getItem() instanceof ConstellationItem) {
                 IWeakConstellation attuned = ((ConstellationItem) stack.getItem()).getAttunedConstellation(stack);
@@ -130,9 +130,9 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
                 }
                 crystal.setItem(stack);
 
-                UUID throwerUUID = crystal.getThrowerId();
+                UUID throwerUUID = crystal.getThrower();
                 if (throwerUUID != null) {
-                    Player thrower = altar.getWorld().getPlayerByUuid(throwerUUID);
+                    Player thrower = altar.getLevel().getPlayerByUuid(throwerUUID);
                     if (thrower instanceof ServerPlayer) {
                         AdvancementsAS.ATTUNE_CRYSTAL.trigger((ServerPlayer) thrower, altar.getActiveConstellation());
                     }
@@ -142,20 +142,20 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     }
 
     @Override
-    public void doTick(LogicalSide side, TileAttunementAltar altar) {
-        ItemEntity crystal = this.getEntity(altar.getWorld());
+    public void doTick(LogicalSide direction, TileAttunementAltar altar) {
+        ItemEntity crystal = this.getEntity(altar.getLevel());
         if (crystal == null) {
             return;
         }
 
         Vector3 crystalHoverPos = new Vector3(altar).add(0.5, 1.4, 0.5);
         crystal.setPosition(crystalHoverPos.getX(), crystalHoverPos.getY(), crystalHoverPos.getZ());
-        crystal.prevPosX = crystalHoverPos.getX();
-        crystal.prevPosY = crystalHoverPos.getY();
-        crystal.prevPosZ = crystalHoverPos.getZ();
-        crystal.setMotion(0, 0, 0);
+        crystal.xo = crystalHoverPos.getX();
+        crystal.yo = crystalHoverPos.getY();
+        crystal.zo = crystalHoverPos.getZ();
+        crystal.setDeltaMovement(0, 0, 0);
 
-        if (side.isClient()) {
+        if (direction.isClient()) {
             doClientTick(altar);
         }
     }
@@ -174,14 +174,14 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         }
 
         if (this.getTick() == 0) {
-            SoundHelper.playSoundClientWorld(SoundsAS.ATTUNEMENT_ATLAR_ITEM_START, altar.getPos(), 1F, 1F);
+            SoundHelper.playSoundClientWorld(SoundsAS.ATTUNEMENT_ATLAR_ITEM_START, altar.getBlockPos(), 1F, 1F);
         }
 
         if (this.getTick() >= 80) {
             if (attunementFlare == null || ((EntityComplexFX) attunementFlare).isRemoved()) {
                 attunementFlare = EffectHelper.of(EffectTemplatesAS.FACING_SPRITE)
                         .spawn(new Vector3(altar).add(0.5, 1.75, 0.5))
-                        .setSprite(SpritesAS.SPR_ATTUNEMENT_FLARE)
+                        .pickSprite(SpritesAS.SPR_ATTUNEMENT_FLARE)
                         .setScaleMultiplier(2.5F)
                         .refresh(fx -> altar.canPlayConstellationActiveEffects() &&
                                 altar.getActiveRecipe() == this);
@@ -204,7 +204,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         if (getTick() >= 80 && getTick() % 40 == 0) {
             for (BlockPos pos : altar.getConstellationPositions(this.constellation)) {
                 Vector3 from = new Vector3(pos).add(0.5, 0, 0.5);
-                MiscUtils.applyRandomOffset(from, rand, 0.1F);
+                MiscUtils.applyRandomOffset(from, random, 0.1F);
                 EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                         .spawn(from)
                         .setup(from.clone().addY(6), 1.2, 1.2)
@@ -224,27 +224,27 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         for (int i = 0; i < parts; i++) {
             Vector3 v = Vector3.RotAxis.X_AXIS.clone();
             float originalAngle = (((float) i) / ((float) parts)) * 360F;
-            double angle = originalAngle + (MathHelper.sin(percCycle) * angleSwirl);
-            v.rotate(-Math.toRadians(angle), Vector3.RotAxis.Y_AXIS).normalize().multiply(dst);
+            double angle = originalAngle + (Mth.sin(percCycle) * angleSwirl);
+            v.mirror(-Math.toRadians(angle), Vector3.RotAxis.Y_AXIS).normalize().mul(dst);
             Vector3 pos = center.clone();
-            Vector3 mot = center.clone().subtract(pos.clone().add(v)).normalize().multiply(0.14);
+            Vector3 mot = center.clone().subtract(pos.clone().add(v)).normalize().mul(0.14);
 
-            int age = 20 + rand.nextInt(30);
-            float size = 0.2F + rand.nextFloat() * 0.7F;
+            int age = 20 + random.nextInt(30);
+            float size = 0.2F + random.nextFloat() * 0.7F;
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
                     .setScaleMultiplier(size)
-                    .setMotion(mot)
+                    .setDeltaMovement(mot)
                     .color(VFXColorFunction.WHITE)
                     .setMaxAge(age);
 
-            if (rand.nextInt(6) == 0) {
+            if (random.nextInt(6) == 0) {
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
                         .setScaleMultiplier(size * 1.4F)
-                        .setMotion(mot)
+                        .setDeltaMovement(mot)
                         .color(VFXColorFunction.constant(this.constellation.getConstellationColor()))
-                        .setGravityStrength(-0.0004F + rand.nextFloat() * -0.00015F)
+                        .setGravityStrength(-0.0004F + random.nextFloat() * -0.00015F)
                         .setMaxAge(age + 30);
             }
         }
@@ -253,19 +253,19 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         double edgeScale = (scale * 2 + 1);
         for (int i = 0; i < 7; i++) {
             Vector3 offset = new Vector3(altar).add(-scale, 0.1, -scale);
-            if (rand.nextBoolean()) {
-                offset.add(edgeScale * (rand.nextBoolean() ? 1 : 0), 0, rand.nextFloat() * edgeScale);
+            if (random.nextBoolean()) {
+                offset.add(edgeScale * (random.nextBoolean() ? 1 : 0), 0, random.nextFloat() * edgeScale);
             } else {
-                offset.add(rand.nextFloat() * edgeScale, 0, edgeScale * (rand.nextBoolean() ? 1 : 0));
+                offset.add(random.nextFloat() * edgeScale, 0, edgeScale * (random.nextBoolean() ? 1 : 0));
             }
             FXFacingParticle particle = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setGravityStrength(-0.0002F + rand.nextFloat() * -0.0001F)
-                    .setScaleMultiplier(0.3F + rand.nextFloat() * 0.15F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setGravityStrength(-0.0002F + random.nextFloat() * -0.0001F)
+                    .setScaleMultiplier(0.3F + random.nextFloat() * 0.15F)
                     .color(VFXColorFunction.WHITE)
-                    .setMaxAge(40 + rand.nextInt(10));
-            if (rand.nextBoolean()) {
+                    .setMaxAge(40 + random.nextInt(10));
+            if (random.nextBoolean()) {
                 particle.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
             }
         }
@@ -273,23 +273,23 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         if (this.getTick() >= 200) {
             for (int i = 0; i < 3; i++) {
                 Vector3 at = new Vector3(altar).add(0.5, 0, 0.5);
-                at.addX(rand.nextFloat() * 7F * (rand.nextBoolean() ? 1 : -1));
-                at.addZ(rand.nextFloat() * 7F * (rand.nextBoolean() ? 1 : -1));
+                at.addX(random.nextFloat() * 7F * (random.nextBoolean() ? 1 : -1));
+                at.addZ(random.nextFloat() * 7F * (random.nextBoolean() ? 1 : -1));
 
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .setAlphaMultiplier(0.75F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setGravityStrength(-0.001F + rand.nextFloat() * -0.0005F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setGravityStrength(-0.001F + random.nextFloat() * -0.0005F)
                         .color(VFXColorFunction.WHITE)
-                        .setScaleMultiplier(0.3F + rand.nextFloat() * 0.1F)
-                        .setMaxAge(20 + rand.nextInt(10));
+                        .setScaleMultiplier(0.3F + random.nextFloat() * 0.1F)
+                        .setMaxAge(20 + random.nextInt(10));
 
-                if (rand.nextBoolean()) {
+                if (random.nextBoolean()) {
                     p.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
                 }
                 if (getTick() >= 400) {
-                    p.setScaleMultiplier(0.3F + rand.nextFloat() * 0.15F);
+                    p.setScaleMultiplier(0.3F + random.nextFloat() * 0.15F);
                 }
             }
         }
@@ -297,12 +297,12 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         if (getTick() >= 460) {
             if (getTick() % 5 == 0) {
                 Vector3 from = new Vector3(altar).add(0.5, 0, 0.5);
-                MiscUtils.applyRandomOffset(from, rand, 0.25F);
+                MiscUtils.applyRandomOffset(from, random, 0.25F);
                 EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                         .spawn(from)
                         .setup(from.clone().addY(8), 2.4, 2)
                         .setAlphaMultiplier(0.8F)
-                        .setMaxAge(30 + rand.nextInt(15));
+                        .setMaxAge(30 + random.nextInt(15));
             }
         }
 
@@ -310,18 +310,18 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
             for (int i = 0; i < 25; i++) {
                 Vector3 at = new Vector3(altar)
                         .add(0.5, 0, 0.5)
-                        .addY(rand.nextFloat() * 0.5 + rand.nextFloat() * 0.5);
+                        .addY(random.nextFloat() * 0.5 + random.nextFloat() * 0.5);
 
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .color(VFXColorFunction.WHITE)
-                        .setMotion(Vector3.random().setY(0).normalize().multiply(0.025 + rand.nextFloat() * 0.075))
+                        .setDeltaMovement(Vector3.random().setY(0).normalize().mul(0.025 + random.nextFloat() * 0.075))
                         .setAlphaMultiplier(0.75F)
-                        .setScaleMultiplier(0.25F + rand.nextFloat() * 0.15F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMaxAge(60 + rand.nextInt(40));
+                        .setScaleMultiplier(0.25F + random.nextFloat() * 0.15F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setMaxAge(60 + random.nextInt(40));
 
-                if (rand.nextBoolean()) {
+                if (random.nextBoolean()) {
                     p.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
                 }
             }
@@ -337,7 +337,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     @OnlyIn(Dist.CLIENT)
     public void stopEffects(TileAttunementAltar altar) {
         if (isFinished(altar)) {
-            SoundHelper.playSoundClientWorld(SoundsAS.ATTUNEMENT_ATLAR_ITEM_FINISH, altar.getPos().up(), 1F, 1F);
+            SoundHelper.playSoundClientWorld(SoundsAS.ATTUNEMENT_ATLAR_ITEM_FINISH, altar.getBlockPos().above(), 1F, 1F);
         }
         if (innerOrbital1 != null) {
             ((EntityComplexFX) innerOrbital1).requestRemoval();
@@ -348,8 +348,8 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     }
 
     @Nullable
-    private ItemEntity getEntity(Level world) {
-        Entity entity = world.getEntityByID(this.entityId);
+    private ItemEntity getEntity(Level level) {
+        Entity entity = level.getEntityByID(this.entityId);
         if (entity != null && entity.isAlive() && entity instanceof ItemEntity) {
             return (ItemEntity) entity;
         }
@@ -357,8 +357,8 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbt) {
-        super.writeToNBT(nbt);
+    public void save(CompoundTag nbt) {
+        super.save(nbt);
 
         nbt.putString("constellation", this.constellation.getRegistryName().toString());
         nbt.putInt("entityId", this.entityId);
@@ -368,7 +368,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
     protected void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
-        this.constellation = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(new ResourceLocation(nbt.getString("constellation")));
+        this.constellation = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(ResourceLocation.parse(nbt.getString("constellation")));
         this.entityId = nbt.getInt("entityId");
     }
 }

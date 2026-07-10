@@ -23,6 +23,12 @@ sourceSets.main.resources {
     exclude 'src/generated/**/.cache'
 }
 
+sourceSets.main.java {
+    // 1.21 port: optional-mod integrations (JEI, CraftTweaker, Curios, Botania) are
+    // excluded until the mod itself compiles and their 1.21 APIs are brought back.
+    exclude 'hellfirepvp/astralsorcery/common/integration/**'
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -93,6 +99,11 @@ neoForge {
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
+}
+
+// Porting aid: show every compile error instead of javac's first 100.
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.addAll(['-Xmaxerrs', '10000'])
 }
 
 dependencies {

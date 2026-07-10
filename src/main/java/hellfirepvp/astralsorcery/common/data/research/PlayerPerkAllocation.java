@@ -21,7 +21,7 @@ import java.util.UUID;
  */
 public class PlayerPerkAllocation {
 
-    private static final UUID UNLOCK_UUID = Util.DUMMY_UUID;
+    private static final UUID UNLOCK_UUID = Util.NIL_UUID;
 
     private final PerkAllocationType type;
     private final UUID lockUUID;

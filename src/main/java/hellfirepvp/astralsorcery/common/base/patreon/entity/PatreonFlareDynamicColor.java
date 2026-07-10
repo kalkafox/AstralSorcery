@@ -50,7 +50,7 @@ public class PatreonFlareDynamicColor extends PatreonFlare {
         }
 
         Color color = ((TypeFlareColor) effect).getColorProvider().get();
-        return rand.nextInt(3) == 0 ? color : color.brighter();
+        return random.nextInt(3) == 0 ? color : color.brighter();
     }
 
     @Override

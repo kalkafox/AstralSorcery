@@ -34,52 +34,52 @@ import java.awt.*;
  */
 public class EntityItemHighlighted extends EntityCustomItemReplacement {
 
-    private static final EntityDataAccessor<Integer> DATA_COLOR = EntityDataManager.createKey(EntityItemHighlighted.class, DataSerializers.VARINT);
+    private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.createKey(EntityItemHighlighted.class, EntityDataSerializers.INT);
     private static final int NO_COLOR = 0xFF000000;
 
-    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level world) {
-        super(type, world);
+    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level level) {
+        super(type, level);
         ReflectionHelper.setSkipItemPhysicsRender(this);
-        recalculateSize();
+        refreshDimensions();
     }
 
-    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
-        this(type, world);
+    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z) {
+        this(type, level);
         this.setPosition(x, y, z);
-        this.rotationYaw = this.rand.nextFloat() * 360.0F;
-        this.setMotion(this.rand.nextDouble() * 0.2D - 0.1D, 0.2D, this.rand.nextDouble() * 0.2D - 0.1D);
+        this.setYRot(this.random.nextFloat() * 360.0F);
+        this.setDeltaMovement(this.random.nextDouble() * 0.2D - 0.1D, 0.2D, this.random.nextDouble() * 0.2D - 0.1D);
     }
 
-    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
-        this(type, world, x, y, z);
+    public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z, ItemStack stack) {
+        this(type, level, x, y, z);
         this.setItem(stack);
-        this.lifespan = stack.isEmpty() ? 6000 : stack.getEntityLifespan(world);
+        this.timeout = stack.isEmpty() ? 6000 : stack.getEntityLifespan(level);
     }
 
     public static EntityType.IFactory<EntityItemHighlighted> factoryHighlighted() {
-        return (spawnEntity, world) -> new EntityItemHighlighted(EntityTypesAS.ITEM_HIGHLIGHT, world);
+        return (spawnEntity, level) -> new EntityItemHighlighted(EntityTypesAS.ITEM_HIGHLIGHT, level);
     }
 
     @Override
-    protected void registerData() {
-        super.registerData();
-        this.getDataManager().register(DATA_COLOR, NO_COLOR);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.getEntityData().register(DATA_COLOR, NO_COLOR);
     }
 
     public void applyColor(@Nullable Color color) {
-        this.getDataManager().set(DATA_COLOR, color == null ? NO_COLOR : (color.getRGB() & 0x00FFFFFF));
+        this.getEntityData().set(DATA_COLOR, color == null ? NO_COLOR : (color.getRGB() & 0x00FFFFFF));
     }
 
-    public boolean hasColor() {
-        return this.getDataManager().get(DATA_COLOR) != NO_COLOR;
+    public boolean hasCustomColor() {
+        return this.getEntityData().get(DATA_COLOR) != NO_COLOR;
     }
 
     @Nullable
     public Color getHighlightColor() {
-        if (!hasColor()) {
+        if (!hasCustomColor()) {
             return null;
         }
-        int colorInt = this.getDataManager().get(DATA_COLOR);
+        int colorInt = this.getEntityData().get(DATA_COLOR);
         return new Color(colorInt, false);
     }
 
@@ -88,7 +88,7 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
         boolean onGround = this.isOnGround();
         super.tick();
         if (this.isOnGround() != onGround) {
-            recalculateSize();
+            refreshDimensions();
         }
     }
 
@@ -97,7 +97,7 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
         boolean updateSize = isOnGround() != grounded;
         super.setOnGround(grounded);
         if (updateSize) {
-            recalculateSize();
+            refreshDimensions();
         }
     }
 
@@ -110,7 +110,7 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

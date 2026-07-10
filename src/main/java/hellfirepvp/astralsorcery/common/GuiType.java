@@ -69,7 +69,7 @@ public enum GuiType {
     @Nullable
     @OnlyIn(Dist.CLIENT)
     public Screen deserialize(CompoundTag data) {
-        Level clWorld = Minecraft.getInstance().world;
+        Level clWorld = Minecraft.getInstance().level;
         Player clPlayer = Minecraft.getInstance().player;
         if (clWorld == null || clPlayer == null) {
             return null;
@@ -79,7 +79,7 @@ public enum GuiType {
         try {
             switch (this) {
                 case CONSTELLATION_PAPER:
-                    return new ScreenConstellationPaper(RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(new ResourceLocation(data.getString("cst"))));
+                    return new ScreenConstellationPaper(RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(ResourceLocation.parse(data.getString("cst"))));
                 case TOME:
                     return ScreenJournalProgression.getOpenJournalInstance();
                 case REFRACTION_TABLE:

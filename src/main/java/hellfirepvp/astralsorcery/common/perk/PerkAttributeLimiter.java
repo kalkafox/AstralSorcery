@@ -48,7 +48,7 @@ public class PerkAttributeLimiter {
     }
 
     @Nonnull
-    public static Pair<Double, Double> getLimit(PerkAttributeType type) {
+    public static Pair<Double, Double> getMaxResults(PerkAttributeType type) {
         return LIMITS.getOrDefault(type, ANY).asPair();
     }
 
@@ -76,7 +76,7 @@ public class PerkAttributeLimiter {
         }
 
         protected double limit(double value) {
-            return MathHelper.clamp(value, min.get(), max.get());
+            return Mth.clamp(value, min.get(), max.get());
         }
 
         private Pair<Double, Double> asPair() {

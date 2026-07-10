@@ -46,8 +46,8 @@ public class BlockBreakHelper {
 
     private static final Map<ResourceKey<Level>, TickTokenMap<BlockPos, BreakEntry>> breakMap = new HashMap<>();
 
-    public static void addProgress(Level world, BlockPos pos, float percStrength, Supplier<Float> expectedHardness) {
-        TickTokenMap<BlockPos, BreakEntry> map = breakMap.computeIfAbsent(world.getDimensionKey(), key -> {
+    public static void addProgress(Level level, BlockPos pos, float percStrength, Supplier<Float> expectedHardness) {
+        TickTokenMap<BlockPos, BreakEntry> map = breakMap.computeIfAbsent(level.dimension(), key -> {
             TickTokenMap<BlockPos, BreakEntry> tkMap = new TickTokenMap<>(TickEvent.Type.SERVER);
             AstralSorcery.getProxy().getTickManager().register(tkMap);
             return tkMap;
@@ -59,7 +59,7 @@ public class BlockBreakHelper {
             if (hardness == null) {
                 return;
             }
-            breakProgress = new BreakEntry(expectedHardness.get(), world, pos, world.getBlockState(pos));
+            breakProgress = new BreakEntry(expectedHardness.get(), level, pos, level.getBlockState(pos));
             map.put(pos, breakProgress);
         }
 
@@ -85,15 +85,15 @@ public class BlockBreakHelper {
     public static class BreakEntry implements TickTokenMap.TickMapToken<Float>, CEffectAbstractList.ListEntry {
 
         private float breakProgress;
-        private final LevelAccessor world;
+        private final LevelAccessor level;
         private BlockPos pos;
         private BlockState expected;
 
         private int idleTimeout;
 
-        public BreakEntry(@Nonnull Float value, LevelAccessor world, BlockPos at, BlockState expectedToBreak) {
+        public BreakEntry(@Nonnull Float value, LevelAccessor level, BlockPos at, BlockState expectedToBreak) {
             this.breakProgress = value;
-            this.world = world;
+            this.level = level;
             this.pos = at;
             this.expected = expectedToBreak;
         }
@@ -114,9 +114,9 @@ public class BlockBreakHelper {
                 return;
             }
 
-            BlockState nowAt = world.getBlockState(pos);
-            if (world instanceof ServerLevel && BlockUtils.matchStateExact(expected, nowAt)) {
-                BlockUtils.breakBlockWithoutPlayer((ServerLevel) world, pos, world.getBlockState(pos), ItemStack.EMPTY,
+            BlockState nowAt = level.getBlockState(pos);
+            if (level instanceof ServerLevel && BlockUtils.matchStateExact(expected, nowAt)) {
+                BlockUtils.breakBlockWithoutPlayer((ServerLevel) level, pos, level.getBlockState(pos), ItemStack.EMPTY,
                         true, true);
             }
         }
@@ -127,7 +127,7 @@ public class BlockBreakHelper {
         }
 
         @Override
-        public BlockPos getPos() {
+        public BlockPos getBlockPos() {
             return pos;
         }
 
@@ -139,7 +139,7 @@ public class BlockBreakHelper {
         }
 
         @Override
-        public void writeToNBT(CompoundTag nbt) {
+        public void save(CompoundTag nbt) {
             nbt.putFloat("breakProgress", this.breakProgress);
             NBTHelper.writeBlockPosToNBT(this.pos, nbt);
             nbt.putInt("expectedStateId", Block.getStateId(this.expected));

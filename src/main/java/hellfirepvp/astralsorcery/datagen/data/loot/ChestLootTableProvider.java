@@ -28,24 +28,24 @@ import java.util.function.BiConsumer;
  * Created by HellFirePvP
  * Date: 02.05.2020 / 15:37
  */
-public class ChestLootTableProvider extends ChestLootTables {
+public class ChestLootTableProvider extends ChestLoot {
 
     @Override
     public void accept(BiConsumer<ResourceLocation, LootTable.Builder> registrar) {
         registrar.accept(LootAS.SHRINE_CHEST,
                 LootTable.builder()
                     .addLootPool(LootPool.builder()
-                            .rolls(RandomValueRange.of(3, 5))
+                            .rolls(RandomValueBounds.of(3, 5))
                             .bonusRolls(1, 2)
-                            .addEntry(ItemLootEntry.builder(ItemsAS.CONSTELLATION_PAPER).weight(18))
-                            .addEntry(ItemLootEntry.builder(ItemsAS.AQUAMARINE).weight(12).acceptFunction(SetCount.builder(RandomValueRange.of(1, 3))))
-                            .addEntry(ItemLootEntry.builder(Items.BONE).weight(10).acceptFunction(SetCount.builder(RandomValueRange.of(1, 3))))
-                            .addEntry(ItemLootEntry.builder(Items.GOLD_INGOT).weight(5).acceptFunction(SetCount.builder(RandomValueRange.of(1, 2))))
-                            .addEntry(ItemLootEntry.builder(Items.IRON_INGOT).weight(15).acceptFunction(SetCount.builder(RandomValueRange.of(1, 3))))
-                            .addEntry(ItemLootEntry.builder(Items.DIAMOND).weight(2))
-                            .addEntry(ItemLootEntry.builder(Items.GLOWSTONE_DUST).weight(8).acceptFunction(SetCount.builder(RandomValueRange.of(1, 3))))
-                            .addEntry(ItemLootEntry.builder(Items.EMERALD).weight(1))
-                            .addEntry(ItemLootEntry.builder(Items.ENDER_PEARL).weight(2))
+                            .addEntry(LootItem.builder(ItemsAS.CONSTELLATION_PAPER).weight(18))
+                            .addEntry(LootItem.builder(ItemsAS.AQUAMARINE).weight(12).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
+                            .addEntry(LootItem.builder(Items.BONE).weight(10).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
+                            .addEntry(LootItem.builder(Items.GOLD_INGOT).weight(5).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 2))))
+                            .addEntry(LootItem.builder(Items.IRON_INGOT).weight(15).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
+                            .addEntry(LootItem.builder(Items.DIAMOND).weight(2))
+                            .addEntry(LootItem.builder(Items.GLOWSTONE_DUST).weight(8).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
+                            .addEntry(LootItem.builder(Items.EMERALD).weight(1))
+                            .addEntry(LootItem.builder(Items.ENDER_PEARL).weight(2))
                     )
         );
     }

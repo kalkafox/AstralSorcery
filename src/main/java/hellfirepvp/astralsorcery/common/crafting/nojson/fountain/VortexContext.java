@@ -25,8 +25,8 @@ public class VortexContext extends FountainEffect.EffectContext {
     public List<Object> ctrlEffectNoise = null;
 
     @Override
-    public void readFromNBT(CompoundTag compound) {}
+    public void readFromNBT(CompoundTag pattern) {}
 
     @Override
-    public void writeToNBT(CompoundTag compound) {}
+    public void save(CompoundTag pattern) {}
 }

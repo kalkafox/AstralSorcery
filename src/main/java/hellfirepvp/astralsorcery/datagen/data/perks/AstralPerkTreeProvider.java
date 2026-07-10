@@ -118,7 +118,7 @@ public class AstralPerkTreeProvider extends PerkDataProvider {
                 .build(registrar);
         PerkDataBuilder.ofType(KEY_ADD_ENCHANTMENT)
                 .create(key("evorsio_outer_luck_3"), 10, 19)
-                .modify(perk -> perk.addEnchantment(Enchantments.FORTUNE, 1))
+                .modify(perk -> perk.fillItemCategory(Enchantments.FORTUNE, 1))
                 .setName(name("key.luck"))
                 .connect(key("evorsio_outer_luck_2"))
                 .build(registrar);
@@ -1351,7 +1351,7 @@ public class AstralPerkTreeProvider extends PerkDataProvider {
                 .build(registrar);
         PerkDataBuilder.ofType(KEY_ADD_ENCHANTMENT)
                 .create(key("core_unbreaking_3"), 34, 46)
-                .modify(perk -> perk.addEnchantment(Enchantments.UNBREAKING, 1))
+                .modify(perk -> perk.fillItemCategory(Enchantments.UNBREAKING, 1))
                 .setName(name("key.enduring"))
                 .connect(key("core_unbreaking_2"))
                 .build(registrar);
@@ -1462,7 +1462,7 @@ public class AstralPerkTreeProvider extends PerkDataProvider {
                 .build(registrar);
         PerkDataBuilder.ofType(KEY_ADD_ENCHANTMENT)
                 .create(key("core_smite_2"), 37, 41)
-                .modify(perk -> perk.addEnchantment(Enchantments.SMITE, 1))
+                .modify(perk -> perk.fillItemCategory(Enchantments.SMITE, 1))
                 .setName(name("key.undead_bane"))
                 .connect(key("core_smite_1"))
                 .build(registrar);
@@ -1475,7 +1475,7 @@ public class AstralPerkTreeProvider extends PerkDataProvider {
                 .build(registrar);
         PerkDataBuilder.ofType(KEY_ADD_ENCHANTMENT)
                 .create(key("core_infinity_2"), 43, 41)
-                .modify(perk -> perk.addEnchantment(Enchantments.INFINITY, 1))
+                .modify(perk -> perk.fillItemCategory(Enchantments.INFINITY, 1))
                 .setName(name("key.endless_munitions"))
                 .connect(key("core_infinity_1"))
                 .build(registrar);

@@ -31,13 +31,13 @@ public interface ITransmissionReceiver extends IPrismTransmissionNode {
     }
 
     @Override
-    default public void notifyLink(Level world, BlockPos to) {}
+    default public void notifyLink(Level level, BlockPos to) {}
 
     @Override
-    default public boolean notifyUnlink(Level world, BlockPos to) {
+    default public boolean notifyUnlink(Level level, BlockPos to) {
         return false;
     }
 
-    public void onStarlightReceive(Level world, IWeakConstellation type, double amount);
+    public void onStarlightReceive(Level level, IWeakConstellation type, double amount);
 
 }

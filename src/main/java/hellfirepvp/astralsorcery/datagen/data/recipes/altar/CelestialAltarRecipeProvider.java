@@ -32,12 +32,12 @@ import java.util.function.Consumer;
  */
 public class CelestialAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
         registerRecipes(registrar);
         registerColoredLensRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<IFinishedRecipe> registrar) {
+    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.ALTAR_UPGRADE_TRAIT)
                 .createRecipe(BlocksAS.ALTAR_RADIANCE, AltarType.CONSTELLATION)
                 .setStarlightRequirement(0.8F)
@@ -136,7 +136,7 @@ public class CelestialAltarRecipeProvider {
                 .build(registrar);
 
         SimpleAltarRecipeBuilder.builder()
-                .createRecipe(NameUtil.suffixPath(ItemsAS.ENCHANTMENT_AMULET.getRegistryName(), "_init"), AltarType.CONSTELLATION)
+                .createRecipe(NameUtil.suffixPath(RegistryHelper.getKey(ItemsAS.ENCHANTMENT_AMULET), "_init"), AltarType.CONSTELLATION)
                 .setStarlightRequirement(0.7F)
                 .setInputs(AltarRecipeGrid.builder()
                         .patternLine("     ")
@@ -155,7 +155,7 @@ public class CelestialAltarRecipeProvider {
                 .build(registrar);
 
         SimpleAltarRecipeBuilder.builder()
-                .createRecipe(NameUtil.suffixPath(ItemsAS.ENCHANTMENT_AMULET.getRegistryName(), "_reroll"), AltarType.CONSTELLATION)
+                .createRecipe(NameUtil.suffixPath(RegistryHelper.getKey(ItemsAS.ENCHANTMENT_AMULET), "_reroll"), AltarType.CONSTELLATION)
                 .setStarlightRequirement(0.7F)
                 .setInputs(AltarRecipeGrid.builder()
                         .patternLine("     ")
@@ -263,7 +263,7 @@ public class CelestialAltarRecipeProvider {
                 .build(registrar);
     }
 
-    private static void registerColoredLensRecipes(Consumer<IFinishedRecipe> registrar) {
+    private static void registerColoredLensRecipes(Consumer<FinishedRecipe> registrar) {
         SimpleAltarRecipeBuilder.builder()
                 .createRecipe(ItemsAS.COLORED_LENS_SPECTRAL, AltarType.CONSTELLATION)
                 .setStarlightRequirement(0.5F)

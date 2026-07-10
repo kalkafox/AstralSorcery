@@ -39,44 +39,44 @@ public class BlockGlowFlower extends BlockFlowerTemplate implements IPlantable {
 
     public BlockGlowFlower() {
         super(PropertiesMisc.defaultTickingPlant()
-                .setLightLevel(state -> 5));
+                .isRedstoneConductor(state -> 5));
         this.shape = createShape();
     }
 
     private VoxelShape createShape() {
-        return Block.makeCuboidShape(1.5, 0, 1.5, 14.5, 13, 14.5);
+        return Block.box(1.5, 0, 1.5, 14.5, 13, 14.5);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
-        Vec3 offset = state.getOffset(world, pos);
-        return this.shape.withOffset(offset.x, offset.y, offset.z);
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+        Vec3 offset = state.getOffset(level, pos);
+        return this.shape.offset(offset.x, offset.y, offset.z);
     }
 
     @Nonnull
     @Override
     public MobEffect getStewEffect() {
-        return Effects.LUCK;
+        return MobEffects.LUCK;
     }
 
     @Override
-    public int getStewEffectDuration() {
+    public int getEffectDuration() {
         return 40;
     }
 
     @Override
-    public int getExpDrop(BlockState state, LevelReader world, BlockPos pos, int fortune, int silktouch) {
+    public int getExpDrop(BlockState state, LevelReader level, BlockPos pos, int fortune, int silktouch) {
         if (silktouch == 0) {
             return 0;
         }
         if (fortune > 0) {
-            return fortune * MathHelper.nextInt(RANDOM, 2, 5);
+            return fortune * Mth.nextInt(RANDOM, 2, 5);
         }
-        return MathHelper.nextInt(RANDOM, 1, 2);
+        return Mth.nextInt(RANDOM, 1, 2);
     }
 
     @Override
-    public PlantType getPlantType(BlockGetter world, BlockPos pos) {
+    public PlantType getPlantType(BlockGetter level, BlockPos pos) {
         return PlantType.CAVE;
     }
 

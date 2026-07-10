@@ -103,7 +103,7 @@ public class PktSyncModifierSource extends ASPacket<PktSyncModifierSource> {
             }
 
             @Override
-            public void handle(PktSyncModifierSource packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktSyncModifierSource packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 

@@ -50,12 +50,12 @@ public class DamageSourceUtil {
 
     @Nullable
     public static DamageSource setToFireDamage(@Nonnull DamageSource src) {
-        return changeAttribute(src, DamageSource::setFireDamage);
+        return changeAttribute(src, DamageSource::setIsFire);
     }
 
     @Nullable
     public static DamageSource setToBypassArmor(@Nonnull DamageSource src) {
-        return changeAttribute(src, DamageSource::setDamageBypassesArmor);
+        return changeAttribute(src, DamageSource::bypassArmor);
     }
 
     @Nullable
@@ -85,25 +85,25 @@ public class DamageSourceUtil {
         }
         DamageSource dst;
         if (src.getClass().equals(DamageSource.class)) {
-            dst = new DamageSource(src.getDamageType());
+            dst = new DamageSource(src.getMsgId());
         } else if (src.getClass().equals(EntityDamageSource.class)) {
-            dst = new EntityDamageSource(src.getDamageType(),
-                    directSource != null ? directSource : src.getImmediateSource());
+            dst = new EntityDamageSource(src.getMsgId(),
+                    directSource != null ? directSource : src.getDirectEntity());
         } else { // equals EntityDamageSourceIndirect.class
-            dst = new IndirectEntityDamageSource(src.getDamageType(),
-                    directSource != null ? directSource : src.getImmediateSource(),
-                    trueSource != null ? trueSource : (directSource != null ? directSource : src.getTrueSource()));
+            dst = new IndirectEntityDamageSource(src.getMsgId(),
+                    directSource != null ? directSource : src.getDirectEntity(),
+                    trueSource != null ? trueSource : (directSource != null ? directSource : src.getEntity()));
         }
         copy(src, dst);
         return dst;
     }
 
     private static void copy(DamageSource src, DamageSource dest) {
-        if (src.canHarmInCreative()) {
-            dest.setDamageAllowedInCreativeMode();
+        if (src.isBypassInvul()) {
+            dest.bypassInvul();
         }
-        if (src.isDamageAbsolute()) {
-            dest.setDamageIsAbsolute();
+        if (src.isBypassMagic()) {
+            dest.bypassMagic();
         }
         if (src.isProjectile()) {
             dest.setProjectile();
@@ -111,14 +111,14 @@ public class DamageSourceUtil {
         if (src.isExplosion()) {
             dest.setExplosion();
         }
-        if (src.isFireDamage()) {
-            dest.setFireDamage();
+        if (src.isFire()) {
+            dest.setIsFire();
         }
-        if (src.isMagicDamage()) {
-            dest.setMagicDamage();
+        if (src.isMagic()) {
+            dest.setMagic();
         }
-        if (src.isDifficultyScaled()) {
-            dest.setDifficultyScaled();
+        if (src.scalesWithDifficulty()) {
+            dest.setScalesWithDifficulty();
         }
     }
 

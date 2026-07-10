@@ -32,16 +32,16 @@ public class KeyVorux extends FocusPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
         bus.addListener(this::onExpGain);
     }
 
     public void onExpGain(AttributeEvent.PostProcessModded ev) {
         if (ev.getType().equals(PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP)) {
             Player player = ev.getPlayer();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 ev.setValue(0);
             }

@@ -65,11 +65,11 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     private static final CacheReference<DynamicAttributeModifier> MINING_SIZE_MODIFIER =
             new CacheReference<>(() -> new DynamicAttributeModifier(MODIFIER_ID, PerkAttributeTypesAS.ATTR_TYPE_MINING_SIZE, ModifierType.ADDITION, 2F));
 
-    private static Object modelArmor = null;
+    private static Object outerModel = null;
 
     public ItemMantle() {
         super(CommonProxy.ARMOR_MATERIAL_IMBUED_LEATHER,
-                EquipmentSlotType.CHEST,
+                EquipmentSlot.CHEST,
                 new Properties()
                     .maxStackSize(1)
                     .group(CommonProxy.ITEM_GROUP_AS)
@@ -77,7 +77,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     }
 
     @Override
-    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (this.isInGroup(group)) {
             items.add(new ItemStack(this));
             for (IConstellation cst : RegistriesAS.REGISTRY_CONSTELLATIONS.getValues()) {
@@ -110,15 +110,15 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         IConstellation cst = this.getConstellation(stack);
         if (cst instanceof IWeakConstellation) {
-            tooltip.add(cst.getConstellationName().withStyle(TextFormatting.BLUE));
+            tooltip.add(cst.getConstellationName().withStyle(ChatFormatting.BLUE));
         }
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide direction, boolean ignoreRequirements) {
         if (ItemMantle.getEffect(stack, ConstellationsAS.evorsio) == null) {
             return Collections.emptyList();
         }
@@ -142,16 +142,16 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     @Nullable
     @OnlyIn(Dist.CLIENT)
     public <A extends HumanoidModel<?>> A getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, A _default) {
-        if (modelArmor == null) {
-            modelArmor = new ModelArmorMantle();
+        if (outerModel == null) {
+            outerModel = new ModelArmorMantle();
         }
-        return (A) modelArmor;
+        return (A) outerModel;
     }
 
     @Override
     @Nullable
     @OnlyIn(Dist.CLIENT)
-    public String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
+    public String getTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
         return AstralSorcery.key("textures/model/armor/mantle.png").toString();
     }
 
@@ -165,7 +165,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
         if (entity == null) {
             return null;
         }
-        ItemStack stack = entity.getItemStackFromSlot(EquipmentSlotType.CHEST);
+        ItemStack stack = entity.getItemStackFromSlot(EquipmentSlot.CHEST);
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemMantle)) {
             return null;
         }
@@ -208,7 +208,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
         if (cst == null) {
             NBTHelper.getPersistentData(stack).remove(IConstellation.getDefaultSaveKey());
         } else {
-            cst.writeToNBT(NBTHelper.getPersistentData(stack), IConstellation.getDefaultSaveKey());
+            cst.save(NBTHelper.getPersistentData(stack), IConstellation.getDefaultSaveKey());
         }
         return true;
     }

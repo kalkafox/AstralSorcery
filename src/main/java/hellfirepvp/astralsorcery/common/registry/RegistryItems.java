@@ -33,6 +33,7 @@ import hellfirepvp.astralsorcery.common.item.useables.*;
 import hellfirepvp.astralsorcery.common.item.wand.*;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import hellfirepvp.astralsorcery.common.util.dispenser.FluidContainerDispenseBehavior;
 import net.minecraft.world.level.block.Block;
@@ -145,36 +146,36 @@ public class RegistryItems {
     }
 
     public static void registerItemProperties() {
-        ItemModelsProperties.registerProperty(INFUSED_GLASS, new ResourceLocation("engraved"), (stack, world, entity) -> {
+        ItemProperties.registerProperty(INFUSED_GLASS, ResourceLocation.parse("engraved"), (stack, level, entity) -> {
             return ItemInfusedGlass.getEngraving(stack) != null ? 1 : 0;
         });
-        ItemModelsProperties.registerProperty(KNOWLEDGE_SHARE, new ResourceLocation("written"), (stack, world, entity) -> {
+        ItemProperties.registerProperty(KNOWLEDGE_SHARE, ResourceLocation.parse("written"), (stack, level, entity) -> {
             return ItemKnowledgeShare.isCreative(stack) || ItemKnowledgeShare.getKnowledge(stack) != null ? 1 : 0;
         });
-        ItemModelsProperties.registerProperty(RESONATOR, new ResourceLocation("upgrade"), (stack, world, entity) -> {
+        ItemProperties.registerProperty(RESONATOR, ResourceLocation.parse("upgrade"), (stack, level, entity) -> {
             if (!(entity instanceof Player)) {
                 return ItemResonator.ResonatorUpgrade.STARLIGHT.ordinal() / (float) ItemResonator.ResonatorUpgrade.values().length;
             }
             ItemResonator.ResonatorUpgrade current = ItemResonator.getCurrentUpgrade((Player) entity, stack);
             return current.ordinal() / (float) ItemResonator.ResonatorUpgrade.values().length;
         });
-        ItemModelsProperties.registerProperty(Item.getItemFromBlock(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER), new ResourceLocation("stage"), (stack, world, entity) -> {
-            return ((float) stack.getDamage()) / BlockCelestialCrystalCluster.STAGE.getAllowedValues().size();
+        ItemProperties.registerProperty(Item.canBeHurtBy(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER), ResourceLocation.parse("stage"), (stack, level, entity) -> {
+            return ((float) stack.getDamage()) / BlockCelestialCrystalCluster.STAGE.getPossibleValues().size();
         });
-        ItemModelsProperties.registerProperty(Item.getItemFromBlock(BlocksAS.GEM_CRYSTAL_CLUSTER), new ResourceLocation("stage"), (stack, world, entity) -> {
-            return ((float) stack.getDamage()) / BlockGemCrystalCluster.STAGE.getAllowedValues().size();
+        ItemProperties.registerProperty(Item.canBeHurtBy(BlocksAS.GEM_CRYSTAL_CLUSTER), ResourceLocation.parse("stage"), (stack, level, entity) -> {
+            return ((float) stack.getDamage()) / BlockGemCrystalCluster.STAGE.getPossibleValues().size();
         });
     }
 
     private static void registerItemBlock(CustomItemBlock block) {
         BlockItem itemBlock = block.createItemBlock(buildItemBlockProperties((Block) block));
-        ResourceLocation name = AstralSorcery.getProxy().getRegistryPrimer().getName(itemBlock.getBlock());
-        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.ITEM, name, itemBlock);
+        ResourceLocation name = RegistryBlocks.getName(itemBlock.getBlock());
+        AstralRegistries.register(AstralRegistries.CREATIVE_NAMES, name, itemBlock);
     }
 
     private static <T extends Item> T registerItem(T item) {
         ResourceLocation name = NameUtil.fromClass(item, "Item");
-        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.ITEM, name, item);
+        AstralRegistries.register(AstralRegistries.CREATIVE_NAMES, name, item);
         if (item instanceof ItemDynamicColor) {
             colorItems.add((ItemDynamicColor) item);
         }
@@ -196,7 +197,7 @@ public class RegistryItems {
             props.rarity(((CustomItemBlockProperties) block).getItemRarity());
             props.maxStackSize(((CustomItemBlockProperties) block).getItemMaxStackSize());
             props.defaultMaxDamage(((CustomItemBlockProperties) block).getItemMaxDamage());
-            props.containerItem(((CustomItemBlockProperties) block).getContainerItem());
+            props.containerItem(((CustomItemBlockProperties) block).getCraftingRemainingItem());
             props.setISTER(((CustomItemBlockProperties) block).getItemTEISR());
 
             ((CustomItemBlockProperties) block).getItemToolLevels().forEach(props::addToolType);

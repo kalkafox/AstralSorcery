@@ -28,7 +28,7 @@ public class ClientCameraManager implements ITickHandler {
 
     public static final ClientCameraManager INSTANCE = new ClientCameraManager();
 
-    private final TreeSet<ICameraTransformer> transformers = new TreeSet<>(Comparator.comparingInt(ICameraTransformer::getPriority));
+    private final TreeSet<ICameraTransformer> filters = new TreeSet<>(Comparator.comparingInt(ICameraTransformer::getPriority));
     private ICameraTransformer lastTransformer = null;
 
     @Override
@@ -45,10 +45,10 @@ public class ClientCameraManager implements ITickHandler {
                     prio.onStartTransforming(pTicks);
                     lastTransformer = prio;
                 }
-                prio.transformRenderView(Minecraft.getInstance().isGamePaused() ? 0F : pTicks);
-                if (prio.getPersistencyFunction().isExpired()) {
+                prio.transformRenderView(Minecraft.getInstance().isPaused() ? 0F : pTicks);
+                if (prio.getPersistencyFunction().timedOut()) {
                     prio.onStopTransforming(pTicks);
-                    transformers.remove(prio);
+                    filters.remove(prio);
                 }
             } else {
                 //Clean up remaining transformer
@@ -57,7 +57,7 @@ public class ClientCameraManager implements ITickHandler {
                     lastTransformer = null;
                 }
             }
-        } else if (!Minecraft.getInstance().isGamePaused()) {
+        } else if (!Minecraft.getInstance().isPaused()) {
             //Client Tick
             if (this.hasActiveTransformer()) {
                 this.getActiveTransformer().onClientTick();
@@ -67,29 +67,29 @@ public class ClientCameraManager implements ITickHandler {
 
     public void removeAllAndCleanup() {
         if (this.hasActiveTransformer()) {
-            transformers.last().onStopTransforming(0);
+            filters.last().onStopTransforming(0);
         }
-        this.transformers.clear();
+        this.filters.clear();
     }
 
-    public void addTransformer(ICameraTransformer transformer) {
-        this.transformers.add(transformer);
+    public void run(ICameraTransformer transformer) {
+        this.filters.add(transformer);
     }
 
     public void removeTransformer(ICameraTransformer transformer) {
-        this.transformers.remove(transformer);
+        this.filters.remove(transformer);
     }
 
     @Nullable
     public ICameraTransformer getActiveTransformer() {
         if (this.hasActiveTransformer()) {
-            return this.transformers.last();
+            return this.filters.last();
         }
         return null;
     }
 
     public boolean hasActiveTransformer() {
-        return !this.transformers.isEmpty();
+        return !this.filters.isEmpty();
     }
 
     @Override
@@ -98,8 +98,8 @@ public class ClientCameraManager implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.START;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.START;
     }
 
     @Override

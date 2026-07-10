@@ -45,22 +45,22 @@ public class RenderStateUtil {
 
     public static class WriteMaskState extends RenderStateShard.WriteMaskStateShard {
 
-        private final boolean colorMask;
-        private final boolean depthMask;
+        private final boolean writeColor;
+        private final boolean writeDepth;
 
-        public WriteMaskState(boolean colorMask, boolean depthMask) {
-            super(colorMask, depthMask);
-            this.colorMask = colorMask;
-            this.depthMask = depthMask;
+        public WriteMaskState(boolean writeColor, boolean writeDepth) {
+            super(writeColor, writeDepth);
+            this.writeColor = writeColor;
+            this.writeDepth = writeDepth;
         }
 
         @Override
         public void setupRenderState() {
             super.setupRenderState();
-            if (depthMask) {
+            if (writeDepth) {
                 RenderSystem.depthMask(true);
             }
-            if (colorMask) {
+            if (writeColor) {
                 RenderSystem.colorMask(true, true, true, true);
             }
         }
@@ -68,10 +68,10 @@ public class RenderStateUtil {
         @Override
         public void clearRenderState() {
             super.clearRenderState();
-            if (depthMask) {
+            if (writeDepth) {
                 RenderSystem.depthMask(true);
             }
-            if (colorMask) {
+            if (writeColor) {
                 RenderSystem.colorMask(true, true, true, true);
             }
         }

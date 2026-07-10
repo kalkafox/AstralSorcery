@@ -54,7 +54,7 @@ public class TimeoutList<V> implements ITickHandler, Iterable<V> {
         this.tickEntries.add(new TimeoutEntry<>(timeout, value));
     }
 
-    public boolean setTimeout(int timeout, @Nonnull V value) {
+    public boolean setIdleTimeout(int timeout, @Nonnull V value) {
         for (TimeoutEntry<V> entry : tickEntries) {
             if (entry.value.equals(value)) {
                 entry.timeout = timeout;
@@ -69,7 +69,7 @@ public class TimeoutList<V> implements ITickHandler, Iterable<V> {
             add(timeout, value);
             return true;
         } else {
-            return setTimeout(timeout, value);
+            return setIdleTimeout(timeout, value);
         }
     }
 
@@ -159,8 +159,8 @@ public class TimeoutList<V> implements ITickHandler, Iterable<V> {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

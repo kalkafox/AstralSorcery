@@ -54,11 +54,11 @@ public class EquipmentModifierSource implements ModifierSource, AttributeModifie
     public void onApply(Player player, LogicalSide dist) {}
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide direction, boolean ignoreRequirements) {
         if (this.itemStack.isEmpty()) {
             return Collections.emptyList();
         }
-        return DynamicModifierHelper.getDynamicModifiers(this.itemStack, player, side, ignoreRequirements);
+        return DynamicModifierHelper.getDynamicModifiers(this.itemStack, player, direction, ignoreRequirements);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class EquipmentModifierSource implements ModifierSource, AttributeModifie
     }
 
     @Override
-    public ResourceLocation getProviderName() {
+    public ResourceLocation gatherChunkSourceStats() {
         return ModifierManager.EQUIPMENT_PROVIDER_KEY;
     }
 
@@ -77,12 +77,12 @@ public class EquipmentModifierSource implements ModifierSource, AttributeModifie
         if (o == null || getClass() != o.getClass()) return false;
         EquipmentModifierSource that = (EquipmentModifierSource) o;
         return slot == that.slot &&
-                NBTHelper.getUUID(NBTHelper.getPersistentData(itemStack), EquipmentSourceProvider.KEY_MOD_IDENTIFIER, Util.DUMMY_UUID)
-                        .equals(NBTHelper.getUUID(NBTHelper.getPersistentData(that.itemStack), EquipmentSourceProvider.KEY_MOD_IDENTIFIER, Util.DUMMY_UUID));
+                NBTHelper.getUUID(NBTHelper.getPersistentData(itemStack), EquipmentSourceProvider.KEY_MOD_IDENTIFIER, Util.NIL_UUID)
+                        .equals(NBTHelper.getUUID(NBTHelper.getPersistentData(that.itemStack), EquipmentSourceProvider.KEY_MOD_IDENTIFIER, Util.NIL_UUID));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(slot, NBTHelper.getUUID(NBTHelper.getPersistentData(itemStack), EquipmentSourceProvider.KEY_MOD_IDENTIFIER, Util.DUMMY_UUID));
+        return Objects.hash(slot, NBTHelper.getUUID(NBTHelper.getPersistentData(itemStack), EquipmentSourceProvider.KEY_MOD_IDENTIFIER, Util.NIL_UUID));
     }
 }

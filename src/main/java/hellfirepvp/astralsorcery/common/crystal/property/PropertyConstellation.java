@@ -31,7 +31,7 @@ public class PropertyConstellation extends CrystalProperty {
     private final IWeakConstellation cst;
 
     public PropertyConstellation(IWeakConstellation cst) {
-        super(AstralSorcery.key("constellation." + cst.getSimpleName()));
+        super(AstralSorcery.key("constellation." + cst.getName()));
         this.cst = cst;
         this.setRequiredResearch(ResearchProgression.ATTUNEMENT);
 

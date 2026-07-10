@@ -44,26 +44,26 @@ public class KeyCullingAttack extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOW, this::onDamage);
     }
 
     private void onDamage(LivingDamageEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-            Player player = (Player) source.getTrueSource();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
-            if (side.isServer() && prog.getPerkData().hasPerkEffect(this)) {
+        if (source.getEntity() != null && source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
+            if (direction.isServer() && prog.getPerkData().hasPerkEffect(this)) {
                 LivingEntity attacked = event.getEntityLiving();
-                float actCull = PerkAttributeHelper.getOrCreateMap(player, side)
+                float actCull = PerkAttributeHelper.getOrCreateMap(player, direction)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.cullHealth.get().floatValue());
                 float lifePerc = attacked.getHealth() / attacked.getMaxHealth();
                 if (lifePerc < actCull && AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false)) {
                     attacked.setHealth(0); // Try faithfully...
-                    attacked.getDataManager().set(LivingEntity.HEALTH, 0F); // ... then set just it forcefully.
+                    attacked.getEntityData().set(LivingEntity.HEALTH, 0F); // ... then set just it forcefully.
                 }
             }
         }

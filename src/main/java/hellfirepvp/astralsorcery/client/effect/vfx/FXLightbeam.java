@@ -53,7 +53,7 @@ public class FXLightbeam extends EntityVisualFX {
         int g = c.getGreen();
         int b = c.getBlue();
         int a = this.getAlpha(pTicks);
-        float scale = this.getScale(pTicks);
+        float scale = this.getQuadSize(pTicks);
         Vector3 renderOffset = RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks);
 
         renderCurrentTextureAroundAxis(vb, renderStack, ctx, renderOffset, Math.toRadians(0F), scale, r, g, b, a);
@@ -62,9 +62,9 @@ public class FXLightbeam extends EntityVisualFX {
     }
 
     private <T extends EntityVisualFX> void renderCurrentTextureAroundAxis(VertexConsumer vb, PoseStack renderStack, BatchRenderContext<T> ctx, Vector3 renderOffset, double angle, float scale, int r, int g, int b, int a) {
-        Vector3 perp = aimPerp.clone().rotate(angle, aim).normalize();
-        Vector3 perpTo = perp.clone().multiply(toSize * scale);
-        Vector3 perpFrom = perp.multiply(fromSize * scale);
+        Vector3 perp = aimPerp.clone().mirror(angle, aim).normalize();
+        Vector3 perpTo = perp.clone().mul(toSize * scale);
+        Vector3 perpFrom = perp.mul(fromSize * scale);
 
         SpriteSheetResource ssr = ctx.getSprite();
         Tuple<Float, Float> uvOffset = ssr.getUVOffset(age);
@@ -73,14 +73,14 @@ public class FXLightbeam extends EntityVisualFX {
         float uWidth = ssr.getULength();
         float vHeight = ssr.getVLength();
 
-        Matrix4f matr = renderStack.getLast().getMatrix();
-        Vector3 vec = to.clone().add(perpTo.clone().multiply(-1)).subtract(renderOffset);
+        Matrix4f matr = renderStack.last().pose();
+        Vector3 vec = to.clone().add(perpTo.clone().mul(-1)).subtract(renderOffset);
         vec.drawPos(matr, vb).color(r, g, b, a).tex(u, v + vHeight).endVertex();
         vec = to.clone().add(perpTo).subtract(renderOffset);
         vec.drawPos(matr, vb).color(r, g, b, a).tex(u + uWidth, v + vHeight).endVertex();
         vec = from.clone().add(perpFrom).subtract(renderOffset);
         vec.drawPos(matr, vb).color(r, g, b, a).tex(u + uWidth, v).endVertex();
-        vec = from.clone().add(perpFrom.clone().multiply(-1)).subtract(renderOffset);
+        vec = from.clone().add(perpFrom.clone().mul(-1)).subtract(renderOffset);
         vec.drawPos(matr, vb).color(r, g, b, a).tex(u, v).endVertex();
     }
 

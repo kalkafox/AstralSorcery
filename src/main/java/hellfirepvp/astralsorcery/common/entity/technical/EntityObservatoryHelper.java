@@ -41,38 +41,38 @@ import java.util.UUID;
  */
 public class EntityObservatoryHelper extends Entity {
 
-    private static final EntityDataAccessor<BlockPos> FIXED = EntityDataManager.createKey(EntityObservatoryHelper.class, DataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<BlockPos> FIXED = SynchedEntityData.createKey(EntityObservatoryHelper.class, EntityDataSerializers.BLOCK_POS);
 
     public EntityObservatoryHelper(Level worldIn) {
         super(EntityTypesAS.OBSERVATORY_HELPER, worldIn);
     }
 
     public static EntityType.IFactory<EntityObservatoryHelper> factory() {
-        return (spawnEntity, world) -> new EntityObservatoryHelper(world);
+        return (spawnEntity, level) -> new EntityObservatoryHelper(level);
     }
 
     @Override
-    protected void registerData() {
-        this.dataManager.register(FIXED, BlockPos.ZERO);
+    protected void defineSynchedData() {
+        this.entityData.register(FIXED, BlockPos.ZERO);
     }
 
     public void setFixedObservatoryPos(BlockPos pos) {
-        this.dataManager.set(FIXED, pos);
+        this.entityData.set(FIXED, pos);
     }
 
     public BlockPos getFixedObservatoryPos() {
-        return this.dataManager.get(FIXED);
+        return this.entityData.get(FIXED);
     }
 
     @Nullable
     public TileObservatory getAssociatedObservatory() {
         BlockPos at = this.getFixedObservatoryPos();
-        TileObservatory observatory = MiscUtils.getTileAt(this.world, at, TileObservatory.class, true);
+        TileObservatory observatory = MiscUtils.getTileAt(this.level(), at, TileObservatory.class, true);
         if (observatory == null) {
             return null;
         }
         UUID helperRef = observatory.getEntityHelperRef();
-        if (helperRef == null || !helperRef.equals(this.getUniqueID())) {
+        if (helperRef == null || !helperRef.equals(this.getUUID())) {
             return null;
         }
         return observatory;
@@ -82,62 +82,62 @@ public class EntityObservatoryHelper extends Entity {
     public void tick() {
         super.tick();
 
-        this.noClip = true;
+        this.noPhysics = true;
 
         TileObservatory observatory;
         if ((observatory = this.getAssociatedObservatory()) == null) {
-            if (!this.world.isRemote()) {
+            if (!this.level().isClientSide()) {
                 this.remove();
             }
             return;
         }
 
-        Entity riding = Iterables.getFirst(this.getPassengers(), null);
-        if (riding instanceof Player) {
-            this.applyObservatoryRotationsFrom(observatory, (Player) riding, true);
+        Entity wasRiding = Iterables.getFirst(this.getPassengers(), null);
+        if (wasRiding instanceof Player) {
+            this.applyObservatoryRotationsFrom(observatory, (Player) wasRiding, true);
         } else {
-            this.prevRotationYaw = this.rotationYaw;
-            this.prevRotationPitch = this.rotationPitch;
+            this.yRotO = this.getYRot();
+            this.xRotO = this.getXRot();
         }
-        if (!observatory.isUsable()) {
-            this.removePassengers();
+        if (!observatory.isFlyEnabled()) {
+            this.ejectPassengers();
         }
     }
 
-    public void applyObservatoryRotationsFrom(TileObservatory to, Player riding, boolean updateTile) {
-        if (riding.openContainer instanceof ContainerObservatory) {
+    public void applyObservatoryRotationsFrom(TileObservatory to, Player wasRiding, boolean updateTile) {
+        if (wasRiding.containerMenu instanceof ContainerObservatory) {
             //Adjust observatory pitch and jaw to player head
-            this.rotationYaw = riding.rotationYawHead;
-            this.prevRotationYaw = riding.prevRotationYawHead;
-            this.rotationPitch = riding.rotationPitch;
-            this.prevRotationPitch = riding.prevRotationPitch;
+            this.setYRot(wasRiding.yHeadRot);
+            this.yRotO = wasRiding.yHeadRotO;
+            this.setXRot(wasRiding.getXRot());
+            this.xRotO = wasRiding.xRotO;
         } else  {
             //Adjust observatory to player-body
-            this.rotationYaw = riding.renderYawOffset;
-            this.prevRotationYaw = riding.prevRenderYawOffset;
+            this.setYRot(wasRiding.yBodyRot);
+            this.yRotO = wasRiding.yBodyRotO;
         }
 
-        to.updatePitchYaw(this.rotationPitch, this.prevRotationPitch, this.rotationYaw, this.prevRotationYaw);
+        to.updatePitchYaw(this.getXRot(), this.xRotO, this.getYRot(), this.yRotO);
         if (updateTile) {
             to.markForUpdate();
         }
 
         double xOffset = -0.85;
-        double zOffset = 0.15;
+        double zDist = 0.15;
         double yawRad = -Math.toRadians(to.observatoryYaw);
-        double xComp = 0.5F + Math.sin(yawRad) * xOffset - Math.cos(yawRad) * zOffset;
-        double zComp = 0.5F + Math.cos(yawRad) * xOffset + Math.sin(yawRad) * zOffset;
-        Vector3 pos = new Vector3(to.getPos()).add(xComp, 0.4F, zComp);
-        this.forceSetPosition(pos.getX(), pos.getY(), pos.getZ());
+        double xComp = 0.5F + Math.sin(yawRad) * xOffset - Math.cos(yawRad) * zDist;
+        double zComp = 0.5F + Math.cos(yawRad) * xOffset + Math.sin(yawRad) * zDist;
+        Vector3 pos = new Vector3(to.getBlockPos()).add(xComp, 0.4F, zComp);
+        this.setPosAndOldPos(pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
-    protected boolean canBeRidden(Entity entityIn) {
-        if (!super.canBeRidden(entityIn)) {
+    protected boolean canRide(Entity entityIn) {
+        if (!super.canRide(entityIn)) {
             return false;
         }
         TileObservatory observatory = this.getAssociatedObservatory();
-        return observatory != null && observatory.isUsable();
+        return observatory != null && observatory.isFlyEnabled();
     }
 
     @Override
@@ -146,7 +146,7 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    public boolean isBurning() {
+    public boolean isOnFire() {
         return false;
     }
 
@@ -156,22 +156,22 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    public boolean isPushedByWater() {
+    public boolean isPushedByFluid() {
         return false;
     }
 
     @Override
-    public boolean isImmuneToExplosions() {
+    public boolean ignoreExplosion() {
         return true;
     }
 
     @Override
-    protected boolean canTriggerWalking() {
+    protected boolean isMovementNoisy() {
         return false;
     }
 
     @Override
-    public boolean canPassengerSteer() {
+    public boolean isControlledByLocalInstance() {
         return false;
     }
 
@@ -181,13 +181,13 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    protected void readAdditional(CompoundTag compound) {}
+    protected void readAdditional(CompoundTag pattern) {}
 
     @Override
-    protected void writeAdditional(CompoundTag compound) {}
+    protected void writeAdditional(CompoundTag pattern) {}
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

@@ -35,9 +35,9 @@ public class FXFacingParticle extends EntityVisualFX {
     @Override
     public <T extends EntityVisualFX> void render(BatchRenderContext<T> ctx, PoseStack renderStack, VertexConsumer vb, float pTicks) {
         SpriteSheetResource ssr = ctx.getSprite();
-        Vector3 vec = this.getRenderPosition(pTicks);
+        Vector3 vec = this.getCameraPosition(pTicks);
         int alpha = this.getAlpha(pTicks);
-        float fScale = this.getScale(pTicks);
+        float fScale = this.getQuadSize(pTicks);
         Color col = this.getColor(pTicks);
         Tuple<Float, Float> uvOffset = ssr.getUVOffset(this.getAge());
 

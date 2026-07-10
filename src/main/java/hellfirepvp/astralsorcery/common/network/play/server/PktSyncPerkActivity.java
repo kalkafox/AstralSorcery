@@ -135,7 +135,7 @@ public class PktSyncPerkActivity extends ASPacket<PktSyncPerkActivity> {
             }
 
             @Override
-            public void handle(PktSyncPerkActivity packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktSyncPerkActivity packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 

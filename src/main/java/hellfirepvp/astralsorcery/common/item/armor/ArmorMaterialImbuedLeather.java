@@ -27,12 +27,12 @@ import net.neoforged.api.distmarker.OnlyIn;
 public class ArmorMaterialImbuedLeather implements ArmorMaterial {
 
     @Override
-    public int getDurability(EquipmentSlot slot) {
+    public int getDurabilityForSlot(EquipmentSlot slot) {
         return 486;
     }
 
     @Override
-    public int getDamageReductionAmount(EquipmentSlot slot) {
+    public int getDefenseForSlot(EquipmentSlot slot) {
         switch (slot) {
             case CHEST:
                 return 7;
@@ -41,7 +41,7 @@ public class ArmorMaterialImbuedLeather implements ArmorMaterial {
     }
 
     @Override
-    public int getEnchantability() {
+    public int getEnchantmentValue() {
         return 24;
     }
 
@@ -51,8 +51,8 @@ public class ArmorMaterialImbuedLeather implements ArmorMaterial {
     }
 
     @Override
-    public Ingredient getRepairMaterial() {
-        return Ingredient.fromItems(ItemsAS.STARDUST);
+    public Ingredient getRepairIngredient() {
+        return Ingredient.valueFromJson(ItemsAS.STARDUST);
     }
 
     @Override

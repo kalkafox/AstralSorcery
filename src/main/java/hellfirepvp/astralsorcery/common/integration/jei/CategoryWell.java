@@ -53,7 +53,7 @@ public class CategoryWell extends JEICategory<WellLiquefaction> {
     }
 
     @Override
-    public IDrawable getBackground() {
+    public IDrawable getNoItemIcon() {
         return this.background;
     }
 
@@ -63,7 +63,7 @@ public class CategoryWell extends JEICategory<WellLiquefaction> {
     }
 
     @Override
-    public void draw(WellLiquefaction recipe, PoseStack renderStack, double mouseX, double mouseY) {
+    public void draw(WellLiquefaction recipe, PoseStack renderStack, double xpos, double ypos) {
         this.icon.draw(renderStack, 46, 20);
     }
 
@@ -86,13 +86,13 @@ public class CategoryWell extends JEICategory<WellLiquefaction> {
 
     @Override
     public void setRecipe(IRecipeLayout recipeLayout, WellLiquefaction wellLiquefaction, IIngredients ingredients) {
-        IGuiItemStackGroup itemStacks = recipeLayout.getItemStacks();
+        IGuiItemStackGroup items = recipeLayout.getItems();
         IGuiFluidStackGroup fluidStacks = recipeLayout.getFluidStacks();
 
-        itemStacks.init(0, true, 2, 18);
+        items.init(0, true, 2, 18);
         initFluidOutput(fluidStacks, 1, 94, 18);
 
-        itemStacks.set(ingredients);
+        items.set(ingredients);
         fluidStacks.set(ingredients);
     }
 }

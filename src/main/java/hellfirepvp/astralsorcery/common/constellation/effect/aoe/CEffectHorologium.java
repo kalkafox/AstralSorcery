@@ -54,7 +54,7 @@ public class CEffectHorologium extends CEffectAbstractList<ListEntries.PosEntry>
     public static HorologiumConfig CONFIG = new HorologiumConfig();
 
     public CEffectHorologium(@Nonnull ILocatable origin) {
-        super(origin, ConstellationsAS.horologium, CONFIG.maxAmount.get(), (world, pos, state) -> TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(MiscUtils.getTileAt(world, pos, TileEntity.class, false)));
+        super(origin, ConstellationsAS.horologium, CONFIG.maxAmount.get(), (level, pos, state) -> TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(MiscUtils.getTileAt(level, pos, BlockEntity.class, false)));
     }
 
     @Nonnull
@@ -71,31 +71,31 @@ public class CEffectHorologium extends CEffectAbstractList<ListEntries.PosEntry>
 
     @Nullable
     @Override
-    public ListEntries.PosEntry createElement(Level world, BlockPos pos) {
+    public ListEntries.PosEntry createElement(Level level, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
         for (int i = 0; i < 2; i++) {
-            Color c = MiscUtils.eitherOf(rand,
+            Color c = MiscUtils.eitherOf(random,
                     () -> Color.WHITE,
                     () -> ColorsAS.CONSTELLATION_HOROLOGIUM);
-            Vector3 at = Vector3.random().normalize().multiply(rand.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
+            Vector3 at = Vector3.random().normalize().mul(random.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .color(VFXColorFunction.constant(c))
-                    .setScaleMultiplier(0.3F + rand.nextFloat() * 0.5F)
-                    .setMaxAge(40 + rand.nextInt(20));
+                    .setScaleMultiplier(0.3F + random.nextFloat() * 0.5F)
+                    .setMaxAge(40 + random.nextInt(20));
         }
 
-        if (rand.nextInt(16) == 0) {
-            Vector3 rand1 = Vector3.random().normalize().multiply(rand.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
-            Vector3 rand2 = Vector3.random().normalize().multiply(rand.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
+        if (random.nextInt(16) == 0) {
+            Vector3 rand1 = Vector3.random().normalize().mul(random.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
+            Vector3 rand2 = Vector3.random().normalize().mul(random.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
             EffectHelper.of(EffectTemplatesAS.LIGHTNING)
                     .spawn(rand1)
                     .makeDefault(rand2)
@@ -104,13 +104,13 @@ public class CEffectHorologium extends CEffectAbstractList<ListEntries.PosEntry>
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         boolean changed = false;
 
         if (properties.isCorrupted()) {
-            TimeStopZone zone = TimeStopController.tryGetZoneAt(world, pos);
+            TimeStopZone zone = TimeStopController.tryGetZoneAt(level, pos);
             if (zone == null) {
-                zone = TimeStopController.freezeWorldAt(TimeStopZone.EntityTargetController.noPlayers(), world, pos, (float) properties.getSize(), 100);
+                zone = TimeStopController.freezeWorldAt(TimeStopZone.EntityTargetController.noPlayers(), level, pos, (float) properties.getSize(), 100);
             }
             zone.setTicksToLive(100);
             return true;
@@ -118,14 +118,14 @@ public class CEffectHorologium extends CEffectAbstractList<ListEntries.PosEntry>
 
         ListEntries.PosEntry entry = this.getRandomElementChanced();
         if (entry != null) {
-            if (MiscUtils.executeWithChunk(world, entry.getPos(), () -> {
-                BlockEntity tile = MiscUtils.getTileAt(world, entry.getPos(), TileEntity.class, true);
-                if (tile != null && isValid(world, entry)) {
-                    sendConstellationPing(world, new Vector3(entry.getPos()).add(Vector3.positiveRandom()));
-                    sendConstellationPing(world, new Vector3(entry.getPos()).add(Vector3.positiveRandom()));
+            if (MiscUtils.executeWithChunk(level, entry.getBlockPos(), () -> {
+                BlockEntity tile = MiscUtils.getTileAt(level, entry.getBlockPos(), BlockEntity.class, true);
+                if (tile != null && isValid(level, entry)) {
+                    sendConstellationPing(level, new Vector3(entry.getBlockPos()).add(Vector3.positiveRandom()));
+                    sendConstellationPing(level, new Vector3(entry.getBlockPos()).add(Vector3.positiveRandom()));
                     try {
                         long startNs = System.nanoTime();
-                        int times = 4 + rand.nextInt(2);
+                        int times = 4 + random.nextInt(2);
                         while (times > 0) {
                             ((TickableBlockEntity) tile).tick();
                             if ((System.nanoTime() - startNs) >= 80_000) {
@@ -150,8 +150,8 @@ public class CEffectHorologium extends CEffectAbstractList<ListEntries.PosEntry>
             }
         }
 
-        if (this.findNewPosition(world, pos, properties)
-                .ifRight(attemptedPos -> sendConstellationPing(world, new Vector3(attemptedPos).add(0.5, 0.5, 0.5)))
+        if (this.findNewPosition(level, pos, properties)
+                .ifRight(attemptedPos -> sendConstellationPing(level, new Vector3(attemptedPos).add(0.5, 0.5, 0.5)))
                 .left().isPresent()) {
             changed = true;
         }

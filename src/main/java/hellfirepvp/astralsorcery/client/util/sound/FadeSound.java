@@ -26,26 +26,26 @@ public class FadeSound extends SimpleSoundInstance implements TickableSoundInsta
     private boolean hasStoppedPlaying = false;
     private float volumeMultiplier = 1F;
 
-    private float fadeInTicks = 40;
+    private float fade = 40;
     private float fadeOutTicks = 1;
 
     private int tick = 0;
     private int stopTick = 0;
 
     public FadeSound(CategorizedSoundEvent sound, float volume, float pitch, Vector3 pos, boolean isGlobal) {
-        this(sound, sound.getCategory(), volume, pitch, pos, isGlobal);
+        this(sound.getSoundEvent(), sound.getCategory(), volume, pitch, pos, isGlobal);
     }
 
     public FadeSound(SoundEvent sound, SoundSource category, float volume, float pitch, Vector3 pos, boolean isGlobal) {
-        super(sound.getName(), category, volume, pitch, true, 0, AttenuationType.LINEAR, (float) pos.getX(), (float) pos.getY(), (float) pos.getZ(), isGlobal);
+        super(sound.getLocation(), category, volume, pitch, SoundInstance.createUnseededRandom(), true, 0, SoundInstance.Attenuation.LINEAR, pos.getX(), pos.getY(), pos.getZ(), isGlobal);
     }
 
     public void setRefreshFunction(Predicate<FadeSound> func) {
         this.func = func;
     }
 
-    public <T extends FadeSound> T setFadeInTicks(float fadeInTicks) {
-        this.fadeInTicks = fadeInTicks;
+    public <T extends FadeSound> T setFadeInTicks(float fade) {
+        this.fade = fade;
         return (T) this;
     }
 
@@ -55,22 +55,22 @@ public class FadeSound extends SimpleSoundInstance implements TickableSoundInsta
     }
 
     @Override
-    public boolean isDonePlaying() {
+    public boolean isStopped() {
         return (this.hasStoppedPlaying = (func == null || func.test(this))) && this.stopTick > this.fadeOutTicks;
     }
 
     public boolean hasStoppedPlaying() {
-        return hasStoppedPlaying || !Minecraft.getInstance().getSoundHandler().isPlaying(this);
+        return hasStoppedPlaying || !Minecraft.getInstance().getSoundManager().isActive(this);
     }
 
     public void setVolumeMultiplier(float volumeMultiplier) {
-        this.volumeMultiplier = MathHelper.clamp(volumeMultiplier, 0F, 1F);
+        this.volumeMultiplier = Mth.clamp(volumeMultiplier, 0F, 1F);
     }
 
     @Override
     public float getVolume() {
-        float mulFadeIn = MathHelper.clamp(this.tick / this.fadeInTicks, 0F, 1F);
-        float mulFadeOut = MathHelper.clamp(1F - this.stopTick / this.fadeOutTicks, 0F, 1F);
+        float mulFadeIn = Mth.clamp(this.tick / this.fade, 0F, 1F);
+        float mulFadeOut = Mth.clamp(1F - this.stopTick / this.fadeOutTicks, 0F, 1F);
         return mulFadeIn * mulFadeOut * super.getVolume()* volumeMultiplier;
     }
 
@@ -83,7 +83,7 @@ public class FadeSound extends SimpleSoundInstance implements TickableSoundInsta
     }
 
     @Override
-    public boolean canBeSilent() {
+    public boolean canStartSilent() {
         return true;
     }
 }

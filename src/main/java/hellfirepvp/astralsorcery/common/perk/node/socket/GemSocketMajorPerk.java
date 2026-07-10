@@ -49,11 +49,11 @@ public class GemSocketMajorPerk extends MajorPerk implements GemSocketPerk {
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
-        Collection<PerkAttributeModifier> mods = super.getModifiers(player, side, ignoreRequirements);
-        ItemStack contained = getContainedItem(player, side);
+    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide direction, boolean ignoreRequirements) {
+        Collection<PerkAttributeModifier> mods = super.getModifiers(player, direction, ignoreRequirements);
+        ItemStack contained = getContainedItem(player, direction);
         if (!contained.isEmpty() && contained.getItem() instanceof GemSocketItem) {
-            mods.addAll(((GemSocketItem) contained.getItem()).getModifiers(contained, this, player, side));
+            mods.addAll(((GemSocketItem) contained.getItem()).getModifiers(contained, this, player, direction));
         }
         return mods;
     }

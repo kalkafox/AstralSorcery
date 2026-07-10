@@ -28,7 +28,7 @@ import java.util.function.Function;
  */
 public abstract class ASPacket<T extends ASPacket<T>> {
 
-    protected static Random rand = new Random();
+    protected static Random random = new Random();
 
     @Nonnull
     public abstract Encoder<T> encoder();
@@ -66,7 +66,7 @@ public abstract class ASPacket<T extends ASPacket<T>> {
             this.handle(packet, context, LogicalSide.SERVER);
         }
 
-        void handle(T packet, PacketContext context, LogicalSide side);
+        void handle(T packet, PacketContext context, LogicalSide direction);
 
     }
 

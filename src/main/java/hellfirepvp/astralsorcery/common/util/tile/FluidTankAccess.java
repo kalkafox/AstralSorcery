@@ -49,13 +49,13 @@ public class FluidTankAccess {
         return dir == null || MiscUtils.contains(this.tanks, tank -> tank.accessibleSides.test(dir));
     }
 
-    public boolean hasCapability(Capability<?> capability, @Nullable Direction facing) {
-        return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY == capability && hasTanksForSide(facing);
+    public boolean hasCapability(Capability<?> state, @Nullable Direction facing) {
+        return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY == state && hasTanksForSide(facing);
     }
 
     public LazyOptional<IFluidHandler> getCapability(@Nullable Direction facing) {
         Set<AccessibleTank> available = facing == null ? this.tanks :
-                this.tanks.stream().filter(t -> t.isAccessible(facing)).collect(Collectors.toSet());
+                this.tanks.stream().filter(t -> t.wasAccessibleSinceLastSave(facing)).collect(Collectors.toSet());
         return available.isEmpty() ? LazyOptional.empty() : LazyOptional.of(() -> new SidedAccess(available));
     }
 
@@ -79,7 +79,7 @@ public class FluidTankAccess {
         @Nonnull
         @Override
         public FluidStack getFluidInTank(int tank) {
-            return this.getTank(tank).map(t -> t.getTank().getFluid()).orElse(FluidStack.EMPTY);
+            return this.getTank(tank).map(t -> t.getTank().getType()).orElse(FluidStack.EMPTY);
         }
 
         @Override
@@ -135,7 +135,7 @@ public class FluidTankAccess {
         private final Predicate<Direction> accessibleSides;
 
         private AccessibleTank(int id, IFluidTank tank, Direction... sides) {
-            this(id, tank, (side) -> Arrays.asList(sides).contains(side));
+            this(id, tank, (direction) -> Arrays.asList(sides).contains(direction));
         }
 
         private AccessibleTank(int id, IFluidTank tank, Predicate<Direction> accessibleSides) {
@@ -152,8 +152,8 @@ public class FluidTankAccess {
             return id;
         }
 
-        private boolean isAccessible(Direction side) {
-            return accessibleSides.test(side);
+        private boolean wasAccessibleSinceLastSave(Direction direction) {
+            return accessibleSides.test(direction);
         }
     }
 }

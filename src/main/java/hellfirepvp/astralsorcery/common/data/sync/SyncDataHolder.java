@@ -104,18 +104,18 @@ public class SyncDataHolder implements ITickHandler {
         }
     }
 
-    public static void clearWorld(Level world) {
-        ResourceKey<Level> dim = world.getDimensionKey();
+    public static void clearWorld(Level level) {
+        ResourceKey<Level> dim = level.dimension();
         for (ResourceLocation key : SyncDataRegistry.getKnownKeys()) {
-            if (!world.isRemote()) {
+            if (!level.isClientSide()) {
                 executeServer(key, AbstractData.class, data -> data.clear(dim));
             }
         }
     }
 
-    public static void clear(LogicalSide side) {
+    public static void clear(LogicalSide direction) {
         for (ResourceLocation key : SyncDataRegistry.getKnownKeys()) {
-            if (side.isClient()) {
+            if (direction.isClient()) {
                 executeClient(key, ClientData.class, ClientData::clearClient);
             } else {
                 executeServer(key, AbstractData.class, AbstractData::clearServer);
@@ -158,8 +158,8 @@ public class SyncDataHolder implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

@@ -60,10 +60,10 @@ public class ReflectionHelper {
         }
     }
 
-    private static Function<Object[], Object> resolveConstructor(Class<?> owningClass, Class<?>... parameters) {
+    private static Function<Object[], Object> resolveConstructor(Class<?> owningClass, Class<?>... params) {
         return (invokeParams) -> {
             try {
-                Constructor<?> ctor = owningClass.getDeclaredConstructor(parameters);
+                Constructor<?> ctor = owningClass.getDeclaredConstructor(params);
                 ctor.setAccessible(true);
                 return ctor.newInstance(invokeParams);
             } catch (Exception e) {
@@ -72,10 +72,10 @@ public class ReflectionHelper {
         };
     }
 
-    private static BiFunction<Object, Object[], Object> resolveMethod(Class<?> owningClass, String methodName, Class<?>... parameters) {
+    private static BiFunction<Object, Object[], Object> resolveMethod(Class<?> owningClass, String methodName, Class<?>... params) {
         return (owningObject, invokeParams) -> {
             try {
-                Method m = owningClass.getDeclaredMethod(methodName, parameters);
+                Method m = owningClass.getDeclaredMethod(methodName, params);
                 m.setAccessible(true);
                 return m.invoke(owningObject, invokeParams);
             } catch (Exception e) {

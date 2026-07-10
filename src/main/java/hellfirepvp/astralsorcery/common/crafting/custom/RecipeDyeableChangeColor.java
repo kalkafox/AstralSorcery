@@ -55,7 +55,7 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingContainer inv) {
+    public ItemStack assemble(CraftingContainer inv) {
         Tuple<DyeColor, ItemStack> itemColorTpl = tryFindValidRecipeAndDye(inv);
         if (itemColorTpl == null) {
             return ItemStack.EMPTY;
@@ -71,7 +71,7 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
         DyeColor dyeColorFound = null;
         int nonEmptyItemsFound = 0;
 
-        for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
+        for (int slot = 0; slot < inv.getContainerSize(); slot++) {
             ItemStack in = inv.getStackInSlot(slot);
             if (!in.isEmpty()) {
                 nonEmptyItemsFound++;
@@ -95,7 +95,7 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
     }
 
     @Override
-    public boolean canFit(int width, int height) {
+    public boolean canCraftInDimensions(int width, int height) {
         return width * height >= 2;
     }
 
@@ -104,7 +104,7 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
         return this.serializer.get();
     }
 
-    public static class IlluminationWandColorSerializer extends SpecialRecipeSerializer<RecipeDyeableChangeColor> {
+    public static class IlluminationWandColorSerializer extends SimpleRecipeSerializer<RecipeDyeableChangeColor> {
 
         public IlluminationWandColorSerializer() {
             super(id -> new RecipeDyeableChangeColor(id, () -> RecipeSerializersAS.CUSTOM_CHANGE_WAND_COLOR_SERIALIZER,
@@ -113,11 +113,11 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
         }
     }
 
-    public static class CelestialGatewayColorSerializer extends SpecialRecipeSerializer<RecipeDyeableChangeColor> {
+    public static class CelestialGatewayColorSerializer extends SimpleRecipeSerializer<RecipeDyeableChangeColor> {
 
         public CelestialGatewayColorSerializer() {
             super(id -> new RecipeDyeableChangeColor(id, () -> RecipeSerializersAS.CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER,
-                    Item.getItemFromBlock(BlocksAS.GATEWAY), BlockCelestialGateway::setColor));
+                    Item.canBeHurtBy(BlocksAS.GATEWAY), BlockCelestialGateway::setColor));
             this.setRegistryName(RecipeSerializersAS.CUSTOM_CHANGE_GATEWAY_COLOR);
         }
     }

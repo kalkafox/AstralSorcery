@@ -27,10 +27,10 @@ public interface IDrawRenderTypeBuffer extends MultiBufferSource {
     public void draw(RenderType type);
 
     public static IDrawRenderTypeBuffer defaultBuffer() {
-        return of(IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer()));
+        return of(MultiBufferSource.getImpl(Tesselator.getInstance().getBuffer()));
     }
 
-    public static IDrawRenderTypeBuffer of(IRenderTypeBuffer.Impl drawBuffer) {
+    public static IDrawRenderTypeBuffer of(MultiBufferSource.Impl drawBuffer) {
         return new IDrawRenderTypeBuffer() {
             @Override
             public void draw() {

@@ -36,7 +36,7 @@ import java.util.Random;
  */
 public abstract class FountainEffect<E extends FountainEffect.EffectContext> {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
 
     private final ResourceLocation id;
 
@@ -54,44 +54,44 @@ public abstract class FountainEffect<E extends FountainEffect.EffectContext> {
     @Nonnull
     public abstract E createContext(TileFountain fountain);
 
-    public abstract void tick(TileFountain fountain, E context, int operationTick, LogicalSide side, OperationSegment currentSegment);
+    public abstract void tick(TileFountain fountain, E context, int operationTick, LogicalSide direction, OperationSegment currentSegment);
 
-    public abstract void transition(TileFountain fountain, E context, LogicalSide side, OperationSegment prevSegment, OperationSegment nextSegment);
+    public abstract void transition(TileFountain fountain, E context, LogicalSide direction, OperationSegment prevSegment, OperationSegment nextSegment);
 
-    public abstract void onReplace(TileFountain fountain, E context, @Nullable FountainEffect<?> newEffect, LogicalSide side);
+    public abstract void onReplace(TileFountain fountain, E context, @Nullable FountainEffect<?> newEffect, LogicalSide direction);
 
     @OnlyIn(Dist.CLIENT)
     protected void playFountainVortexParticles(Vec3i pos, float chance) {
         Vector3 at = new Vector3(pos).add(0.5, 0.5, 0.5);
         for (int i = 0; i < 18; i++) {
-            if (rand.nextFloat() >= chance) {
+            if (random.nextFloat() >= chance) {
                 continue;
             }
             Vector3 particlePos = new Vector3(
-                    pos.getX() - 3   + rand.nextFloat() * 7,
-                    pos.getY()       + rand.nextFloat(),
-                    pos.getZ() - 3   + rand.nextFloat() * 7
+                    pos.getX() - 3   + random.nextFloat() * 7,
+                    pos.getY()       + random.nextFloat(),
+                    pos.getZ() - 3   + random.nextFloat() * 7
             );
             Vector3 motion = particlePos.clone().vectorFromHereTo(at).normalize().divide(30);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(particlePos)
-                    .setMotion(motion)
+                    .setDeltaMovement(motion)
                     .setAlphaMultiplier(1F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
                     .color(VFXColorFunction.WHITE)
-                    .setMaxAge(20 + rand.nextInt(40));
+                    .setMaxAge(20 + random.nextInt(40));
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     protected void playFountainArcs(Vec3i pos, float chance) {
-        if (rand.nextFloat() < chance && rand.nextInt(8) == 0) {
+        if (random.nextFloat() < chance && random.nextInt(8) == 0) {
             Vector3 at = new Vector3(pos).add(0.5, 0.5, 0.5);
 
-            Vector3 pos1 = Vector3.random().setY(0).normalize().multiply(4).add(at);
-            Vector3 pos2 = Vector3.random().setY(0).normalize().multiply(4).add(at);
+            Vector3 pos1 = Vector3.random().setY(0).normalize().mul(4).add(at);
+            Vector3 pos2 = Vector3.random().setY(0).normalize().mul(4).add(at);
 
             EffectHelper.of(EffectTemplatesAS.LIGHTNING)
                     .spawn(pos1)
@@ -147,9 +147,9 @@ public abstract class FountainEffect<E extends FountainEffect.EffectContext> {
 
     public abstract static class EffectContext {
 
-        public abstract void readFromNBT(CompoundTag compound);
+        public abstract void readFromNBT(CompoundTag pattern);
 
-        public abstract void writeToNBT(CompoundTag compound);
+        public abstract void save(CompoundTag pattern);
 
     }
 

@@ -32,17 +32,19 @@ import hellfirepvp.astralsorcery.common.block.tile.crystal.BlockRockCollectorCry
 import hellfirepvp.astralsorcery.common.block.tile.fountain.BlockFountainPrimeLiquid;
 import hellfirepvp.astralsorcery.common.block.tile.fountain.BlockFountainPrimeOre;
 import hellfirepvp.astralsorcery.common.block.tile.fountain.BlockFountainPrimeVortex;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.ColorHandlerEvent;
 
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static hellfirepvp.astralsorcery.common.lib.BlocksAS.*;
 
@@ -56,6 +58,7 @@ import static hellfirepvp.astralsorcery.common.lib.BlocksAS.*;
 public class RegistryBlocks {
 
     private static final List<BlockDynamicColor> COLOR_BLOCKS = Lists.newArrayList();
+    private static final Map<Block, ResourceLocation> BLOCK_NAMES = new IdentityHashMap<>();
     static final List<CustomItemBlock> ITEM_BLOCKS = new LinkedList<>();
 
     private RegistryBlocks() {}
@@ -68,8 +71,8 @@ public class RegistryBlocks {
         MARBLE_PILLAR         = registerBlock(new BlockMarblePillar());
         MARBLE_RAW            = registerBlock(new BlockMarbleRaw());
         MARBLE_RUNED          = registerBlock(new BlockMarbleRuned());
-        MARBLE_STAIRS         = makeStairs(MARBLE_BRICKS.getDefaultState(), "marble_stairs");
-        MARBLE_SLAB           = makeSlab(MARBLE_BRICKS.getDefaultState(), "marble_slab");
+        MARBLE_STAIRS         = makeStairs(MARBLE_BRICKS.defaultBlockState(), "marble_stairs");
+        MARBLE_SLAB           = makeSlab(MARBLE_BRICKS.defaultBlockState(), "marble_slab");
         BLACK_MARBLE_ARCH     = registerBlock(new BlockBlackMarbleArch());
         BLACK_MARBLE_BRICKS   = registerBlock(new BlockBlackMarbleBricks());
         BLACK_MARBLE_CHISELED = registerBlock(new BlockBlackMarbleChiseled());
@@ -77,8 +80,8 @@ public class RegistryBlocks {
         BLACK_MARBLE_PILLAR   = registerBlock(new BlockBlackMarblePillar());
         BLACK_MARBLE_RAW      = registerBlock(new BlockBlackMarbleRaw());
         BLACK_MARBLE_RUNED    = registerBlock(new BlockBlackMarbleRuned());
-        BLACK_MARBLE_STAIRS   = makeStairs(BLACK_MARBLE_BRICKS.getDefaultState(), "black_marble_stairs");
-        BLACK_MARBLE_SLAB     = makeSlab(BLACK_MARBLE_BRICKS.getDefaultState(), "black_marble_slab");
+        BLACK_MARBLE_STAIRS   = makeStairs(BLACK_MARBLE_BRICKS.defaultBlockState(), "black_marble_stairs");
+        BLACK_MARBLE_SLAB     = makeSlab(BLACK_MARBLE_BRICKS.defaultBlockState(), "black_marble_slab");
         INFUSED_WOOD          = registerBlock(new BlockInfusedWood());
         INFUSED_WOOD_ARCH     = registerBlock(new BlockInfusedWoodArch());
         INFUSED_WOOD_COLUMN   = registerBlock(new BlockInfusedWoodColumn());
@@ -86,8 +89,8 @@ public class RegistryBlocks {
         INFUSED_WOOD_ENRICHED = registerBlock(new BlockInfusedWoodEnriched());
         INFUSED_WOOD_INFUSED  = registerBlock(new BlockInfusedWoodInfused());
         INFUSED_WOOD_PLANKS   = registerBlock(new BlockInfusedWoodPlanks());
-        INFUSED_WOOD_STAIRS   = makeStairs(INFUSED_WOOD_PLANKS.getDefaultState(), "infused_wood_stairs");
-        INFUSED_WOOD_SLAB     = makeSlab(INFUSED_WOOD_PLANKS.getDefaultState(), "infused_wood_slab");
+        INFUSED_WOOD_STAIRS   = makeStairs(INFUSED_WOOD_PLANKS.defaultBlockState(), "infused_wood_stairs");
+        INFUSED_WOOD_SLAB     = makeSlab(INFUSED_WOOD_PLANKS.defaultBlockState(), "infused_wood_slab");
 
         AQUAMARINE_SAND_ORE   = registerBlock(new BlockAquamarineSandOre());
         ROCK_CRYSTAL_ORE      = registerBlock(new BlockRockCrystalOre());
@@ -139,18 +142,18 @@ public class RegistryBlocks {
         COLOR_BLOCKS.forEach(block -> blockColorEvent.getBlockColors().register(block::getColor, (Block) block));
     }
 
+    static ResourceLocation getName(Block block) {
+        return BLOCK_NAMES.get(block);
+    }
+
     private static BlockSlabTemplate makeSlab(BlockState base, String name) {
         BlockSlabTemplate slabs = new BlockSlabTemplate(base, Block.Properties.from(base.getBlock()));
-        ResourceLocation slabsName = AstralSorcery.getProxy().getRegistryPrimer().getName(base.getBlock());
-        slabsName = new ResourceLocation(slabsName.getNamespace(), name);
-        return registerBlock(slabs, slabsName);
+        return registerBlock(slabs, AstralSorcery.key(name));
     }
 
     private static BlockStairsTemplate makeStairs(BlockState base, String name) {
         BlockStairsTemplate stairs = new BlockStairsTemplate(base, Block.Properties.from(base.getBlock()));
-        ResourceLocation stairsName = AstralSorcery.getProxy().getRegistryPrimer().getName(base.getBlock());
-        stairsName = new ResourceLocation(stairsName.getNamespace(), name);
-        return registerBlock(stairs, stairsName);
+        return registerBlock(stairs, AstralSorcery.key(name));
     }
 
     private static <T extends Block> T registerBlock(T block) {
@@ -158,7 +161,8 @@ public class RegistryBlocks {
     }
 
     private static <T extends Block> T registerBlock(T block, ResourceLocation name) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.BLOCK, name, block);
+        AstralRegistries.register(AstralRegistries.BLOCKS, name, block);
+        BLOCK_NAMES.put(block, name);
         if (block instanceof CustomItemBlock) {
             ITEM_BLOCKS.add((CustomItemBlock) block);
         }

@@ -59,7 +59,7 @@ public class ArgumentTypeConstellation implements ArgumentType<IConstellation> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return ISuggestionProvider.suggestIterable(
+        return SharedSuggestionProvider.suggestResource(
                 ConstellationRegistry.getAllConstellations()
                         .stream()
                         .filter(this.filter)

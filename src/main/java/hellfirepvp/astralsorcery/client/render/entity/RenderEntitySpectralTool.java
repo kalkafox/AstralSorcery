@@ -32,33 +32,33 @@ import net.neoforged.fml.client.registry.IRenderFactory;
  */
 public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool> {
 
-    protected RenderEntitySpectralTool(EntityRenderDispatcher renderManager) {
-        super(renderManager);
+    protected RenderEntitySpectralTool(EntityRenderDispatcher entityRenderDispatcher) {
+        super(entityRenderDispatcher);
     }
 
     @Override
-    public void render(EntitySpectralTool entity, float entityYaw, float partialTicks, PoseStack renderStack, MultiBufferSource buffer, int packedLight) {
+    public void render(EntitySpectralTool entity, float entityYaw, float a, PoseStack renderStack, MultiBufferSource buffer, int packedLight) {
         ItemStack stack = entity.getItem();
         if (stack.isEmpty() || !entity.isAlive()) {
             return;
         }
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0, entity.getHeight() / 2, 0);
-        renderStack.rotate(Vector3f.YP.rotationDegrees(-entityYaw - 90));
+        renderStack.mirror(Axis.YP.rotationDegrees(-entityYaw - 90));
         if (stack.getItem() instanceof AxeItem) {
-            renderStack.rotate(Vector3f.XP.rotationDegrees(180));
-            renderStack.rotate(Vector3f.ZP.rotationDegrees(270));
+            renderStack.mirror(Axis.XP.rotationDegrees(180));
+            renderStack.mirror(Axis.ZP.rotationDegrees(270));
         }
 
         RenderingUtils.renderTranslucentItemStackModelGround(stack, renderStack, ColorsAS.SPECTRAL_TOOL, Blending.CONSTANT_ALPHA, 63);
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 
     @Override
-    public ResourceLocation getEntityTexture(EntitySpectralTool entity) {
-        return AtlasTexture.LOCATION_BLOCKS_TEXTURE;
+    public ResourceLocation getTextureLocation(EntitySpectralTool entity) {
+        return TextureAtlas.LOCATION_BLOCKS_TEXTURE;
     }
 
     public static class Factory implements IRenderFactory<EntitySpectralTool> {

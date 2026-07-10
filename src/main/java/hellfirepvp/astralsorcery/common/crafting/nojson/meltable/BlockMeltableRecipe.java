@@ -37,7 +37,7 @@ public class BlockMeltableRecipe extends WorldMeltableRecipe {
     private final BiFunction<WorldBlockPos, BlockState, BlockState> outputGenerator;
 
     public BlockMeltableRecipe(ResourceLocation key, BlockPredicate matcher, BlockState output) {
-        this(key, matcher, (worldPos, state) -> output);
+        this(key, matcher, (access, state) -> output);
     }
 
     public BlockMeltableRecipe(ResourceLocation key, BlockPredicate matcher, BiFunction<WorldBlockPos, BlockState, BlockState> outputGenerator) {
@@ -46,7 +46,7 @@ public class BlockMeltableRecipe extends WorldMeltableRecipe {
     }
 
     public static BlockMeltableRecipe of(BlockState stateIn, BlockState stateOut) {
-        return new BlockMeltableRecipe(AstralSorcery.key(stateIn.getBlock().getRegistryName().getPath()),
+        return new BlockMeltableRecipe(AstralSorcery.key(RegistryHelper.getKey(stateIn.getBlock()).getPath()),
                 BlockPredicates.isState(stateIn), stateOut);
     }
 
@@ -56,10 +56,10 @@ public class BlockMeltableRecipe extends WorldMeltableRecipe {
     }
 
     @Override
-    public void doOutput(Level world, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
-        BlockState generated = this.outputGenerator.apply(WorldBlockPos.wrapServer(world, pos), state);
+    public void doOutput(Level level, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
+        BlockState generated = this.outputGenerator.apply(WorldBlockPos.wrapServer(level, pos), state);
         if (generated != state) {
-            world.setBlockState(pos, generated, Constants.BlockFlags.DEFAULT);
+            level.setBlock(pos, generated, Constants.BlockFlags.DEFAULT);
         }
     }
 }

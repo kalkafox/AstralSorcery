@@ -20,8 +20,8 @@ public class EntityCustomItemReplacement extends ItemEntity {
     @Nullable
     private ItemEntity replacedEntity;
 
-    public EntityCustomItemReplacement(EntityType<? extends ItemEntity> type, Level world) {
-        super(type, world);
+    public EntityCustomItemReplacement(EntityType<? extends ItemEntity> type, Level level) {
+        super(type, level);
     }
 
     public EntityCustomItemReplacement(Level worldIn, double x, double y, double z) {
@@ -40,17 +40,17 @@ public class EntityCustomItemReplacement extends ItemEntity {
     public void tick() {
         super.tick();
 
-        if (getEntityWorld().isRemote()) {
+        if (getCommandSenderWorld().isClientSide()) {
             return;
         }
 
         //If the replaced item seems to be a fake-item, remove this one as well.
         //See ItemEntity#makeFakeItem
         if (this.replacedEntity != null &&
-                this.ticksExisted < 5 &&
+                this.tickCount < 5 &&
                 !this.replacedEntity.isAlive() &&
                 this.replacedEntity.pickupDelay == Short.MAX_VALUE &&
-                replacedEntity.age == getItem().getEntityLifespan(getEntityWorld()) - 1) {
+                replacedEntity.age == getItem().getEntityLifespan(getCommandSenderWorld()) - 1) {
             this.remove();
         }
     }

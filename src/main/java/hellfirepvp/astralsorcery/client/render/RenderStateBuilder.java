@@ -34,7 +34,7 @@ public class RenderStateBuilder {
     }
 
     public static RenderStateBuilder builder() {
-        return new RenderStateBuilder(RenderType.State.getBuilder());
+        return new RenderStateBuilder(RenderType.State.builder());
     }
 
     public RenderStateBuilder texture(AbstractRenderableTexture texture) {
@@ -86,7 +86,7 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder enableLighting() {
-        this.builder.lightmap(new RenderStateShard.LightmapStateShard(true));
+        this.builder.uv2(new RenderStateShard.LightmapStateShard(true));
         return this;
     }
 
@@ -96,7 +96,7 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder enableOverlay() {
-        this.builder.overlay(new RenderStateShard.OverlayStateShard(true));
+        this.builder.overlayCoords(new RenderStateShard.OverlayStateShard(true));
         return this;
     }
 
@@ -105,13 +105,13 @@ public class RenderStateBuilder {
         return this;
     }
 
-    public RenderStateBuilder alpha(float alphaThreshold) {
-        this.builder.alpha(new RenderStateShard.AlphaState(alphaThreshold));
+    public RenderStateBuilder alpha1arg(float alphaThreshold) {
+        this.builder.alpha1arg(new RenderStateShard.AlphaState(alphaThreshold));
         return this;
     }
 
     public RenderStateBuilder defaultAlpha() {
-        return alpha(1F / 255F);
+        return alpha1arg(1F / 255F);
     }
 
     public RenderStateBuilder particleShaderTarget() {
@@ -137,11 +137,11 @@ public class RenderStateBuilder {
 
         private ParticleTarget() {
             super("as_particle_target", () -> {
-                if (Minecraft.isFabulousGraphicsEnabled()) {
-                    Minecraft.getInstance().worldRenderer.func_239230_s_().bindFramebuffer(false);
+                if (Minecraft.useShaderTransparency()) {
+                    Minecraft.getInstance().worldRenderer.getParticlesTarget().bindFramebuffer(false);
                 }
             }, () -> {
-                if (Minecraft.isFabulousGraphicsEnabled()) {
+                if (Minecraft.useShaderTransparency()) {
                     Minecraft.getInstance().getFramebuffer().bindFramebuffer(false);
                 }
             });

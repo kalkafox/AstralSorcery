@@ -32,12 +32,12 @@ import static hellfirepvp.astralsorcery.common.lib.TagsAS.Items.*;
  */
 public class AstralItemTagsProvider extends ItemTagsProvider {
 
-    public AstralItemTagsProvider(DataGenerator dataGenerator, BlockTagsProvider blockTagsProvider, ExistingFileHelper fileHelper) {
-        super(dataGenerator, blockTagsProvider, AstralSorcery.MODID, fileHelper);
+    public AstralItemTagsProvider(DataGenerator generator, BlockTagsProvider blockTagsProvider, ExistingFileHelper fileHelper) {
+        super(generator, blockTagsProvider, AstralSorcery.MODID, fileHelper);
     }
 
     @Override
-    protected void registerTags() {
+    protected void addTags() {
         this.tag(ItemTags.LECTERN_BOOKS)
                 .add(ItemsAS.TOME);
 

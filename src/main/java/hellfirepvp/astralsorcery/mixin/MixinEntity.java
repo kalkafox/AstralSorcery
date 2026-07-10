@@ -31,8 +31,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Entity.class)
 public class MixinEntity {
 
-    @Inject(method = "collideBoundingBoxHeuristically", at = @At(value = "RETURN", ordinal = 1), cancellable = true)
-    private static void addCustomCollision(Entity entity, Vec3 vec, AABB collisionBox, Level world, CollisionContext context, ReuseableStream<VoxelShape> potentialHits, CallbackInfoReturnable<Vec3> cir) {
+    @Inject(method = "collideBoundingBoxHeuristically", at = @At(value = "RETURN", index = 1), cancellable = true)
+    private static void addCustomCollision(Entity entity, Vec3 vec, AABB collisionBoxRenderer, Level level, CollisionContext context, RewindableStream<VoxelShape> potentialHits, CallbackInfoReturnable<Vec3> cir) {
         if (entity == null) {
             return;
         }

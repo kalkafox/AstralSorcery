@@ -62,10 +62,10 @@ public class ClientPatreonFlares extends ClientData<ClientPatreonFlares> {
     public static class Reader extends ClientDataReader<ClientPatreonFlares> {
 
         @Override
-        public void readFromIncomingFullSync(ClientPatreonFlares data, CompoundTag compound) {
+        public void readFromIncomingFullSync(ClientPatreonFlares data, CompoundTag pattern) {
             data.entitiesClient.clear();
 
-            ListTag entities = compound.getList("entities", Constants.NBT.TAG_COMPOUND);
+            ListTag entities = pattern.getList("entities", Constants.NBT.TAG_COMPOUND);
             for (Tag iNBT : entities) {
                 CompoundTag tag = (CompoundTag) iNBT;
 
@@ -98,8 +98,8 @@ public class ClientPatreonFlares extends ClientData<ClientPatreonFlares> {
         }
 
         @Override
-        public void readFromIncomingDiff(ClientPatreonFlares data, CompoundTag compound) {
-            ListTag entities = compound.getList("updates", Constants.NBT.TAG_COMPOUND);
+        public void readFromIncomingDiff(ClientPatreonFlares data, CompoundTag pattern) {
+            ListTag entities = pattern.getList("updates", Constants.NBT.TAG_COMPOUND);
             for (Tag iNBT : entities) {
                 CompoundTag tag = (CompoundTag) iNBT;
 
@@ -134,7 +134,7 @@ public class ClientPatreonFlares extends ClientData<ClientPatreonFlares> {
                 }
             }
 
-            ListTag removals = compound.getList("removals", Constants.NBT.TAG_COMPOUND);
+            ListTag removals = pattern.getList("removals", Constants.NBT.TAG_COMPOUND);
             for (Tag iNBT : removals) {
                 CompoundTag tag = (CompoundTag) iNBT;
 

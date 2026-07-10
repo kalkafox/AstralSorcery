@@ -28,13 +28,13 @@ public abstract class RandomWordGenerator {
 
     @Nonnull
     public static RandomWordGenerator getGenerator() {
-        String lang = Minecraft.getInstance().gameSettings.language;
-        if (lang == null) {
+        String language = Minecraft.getInstance().options.languageCode;
+        if (language == null) {
             return fallback;
         }
-        lang = lang.toLowerCase();
+        language = language.toLowerCase();
         RandomWordGenerator gen;
-        if ((gen = localizedProviders.get(lang)) == null) {
+        if ((gen = localizedProviders.get(language)) == null) {
             gen = fallback;
         }
         return gen;

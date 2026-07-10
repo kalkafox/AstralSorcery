@@ -35,7 +35,7 @@ public class CommandProgress {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("progress")
-                .requires(cs -> cs.hasPermissionLevel(2))
+                .requires(cs -> cs.hasPermission(2))
                 .then(Commands.argument("player", EntityArgument.player())
                         /*.then(Commands.literal("next")
                                 .executes(ctx -> {
@@ -47,7 +47,7 @@ public class CommandProgress {
                                 }))*/
                         .then(Commands.argument("progress", EnumArgument.enumArgument(ProgressionTier.class))
                                 .executes(ctx -> {
-                                    Player src = ctx.getSource().asPlayer();
+                                    Player src = ctx.getSource().getPlayerOrException();
                                     Player target = EntityArgument.getPlayer(ctx, "player");
                                     ProgressionTier goal = ctx.getArgument("progress", ProgressionTier.class);
                                     return pushPlayerToProgress(src, target, goal);
@@ -59,7 +59,7 @@ public class CommandProgress {
         PlayerProgress progress = ResearchHelper.getProgress(target, LogicalSide.SERVER);
         if (!progress.isValid() || progress.getTierReached().isThisLaterOrEqual(goal)) {
             src.sendMessage(Component.literal("Failed! ").append(targetName).append("'s progress is higher or equal to ").append(goal.name())
-                    .withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+                    .withStyle(ChatFormatting.RED), Util.NIL_UUID);
             return 0;
         }
         ResearchProgression research = null;
@@ -86,13 +86,13 @@ public class CommandProgress {
                 break;
         }
         if (research == null) {
-            src.sendMessage(Component.literal("Invalid progression tier: " + goal.name()).withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+            src.sendSystemMessage(Component.literal("Invalid progression tier: " + goal.name()).withStyle(ChatFormatting.RED));
         }
         if (ResearchManager.grantProgress(target, goal) && ResearchManager.grantResearch(target, research)) {
-            src.sendMessage(Component.literal("Success!").withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+            src.sendSystemMessage(Component.literal("Success!").withStyle(ChatFormatting.GREEN));
             return Command.SINGLE_SUCCESS;
         } else {
-            src.sendMessage(Component.literal("Failed!").withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+            src.sendSystemMessage(Component.literal("Failed!").withStyle(ChatFormatting.RED));
             return 0;
         }
     }

@@ -49,11 +49,11 @@ public class OreItemRarityEntry implements ConfigDataSet {
     }
 
     @Nullable
-    public Item getRandomItem(Random rand) {
-        return MiscUtils.getRandomEntry(this.itemTag.getAllElements()
+    public Item getRandomItem(Random random) {
+        return MiscUtils.getRandomEntry(this.itemTag.getValues()
                 .stream()
                 .filter(item -> !GeneralConfig.CONFIG.modidOreBlacklist.get().contains(item.getRegistryName().getNamespace()))
-                .collect(Collectors.toList()), rand);
+                .collect(Collectors.toList()), random);
     }
 
     @Nullable
@@ -62,8 +62,8 @@ public class OreItemRarityEntry implements ConfigDataSet {
         if (split.length != 2) {
             return null;
         }
-        ResourceLocation keyItemTag = new ResourceLocation(split[0]);
-        Tag<Item> itemTag = ItemTags.getCollection().get(keyItemTag);
+        ResourceLocation keyItemTag = ResourceLocation.parse(split[0]);
+        Tag<Item> itemTag = ItemTags.getAllTags().get(keyItemTag);
         if (itemTag == null) {
             return null;
         }

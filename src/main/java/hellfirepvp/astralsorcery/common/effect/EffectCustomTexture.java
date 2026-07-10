@@ -38,7 +38,7 @@ import java.util.Random;
  */
 public abstract class EffectCustomTexture extends MobEffect {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
     private final Color colorAsObj;
 
     public EffectCustomTexture(MobEffectCategory type, Color color) {
@@ -64,7 +64,7 @@ public abstract class EffectCustomTexture extends MobEffect {
         ssr.bindTexture();
 
         Tuple<Float, Float> uvTpl = ssr.getUVOffset(ClientScheduler.getClientTick());
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetX, offsetY, z, wh, wh)
                     .color(red, green, blue, 1F)
                     .tex(uvTpl.getA(), uvTpl.getB(), ssr.getUWidth(), ssr.getVWidth())
@@ -74,7 +74,7 @@ public abstract class EffectCustomTexture extends MobEffect {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderHUDEffect(MobEffectInstance effect, AbstractGui gui, PoseStack renderStack, int x, int y, float z, float alpha) {
+    public void renderHUDEffect(MobEffectInstance effect, GuiComponent gui, PoseStack renderStack, int x, int y, float z, float alpha) {
         float wh = 18;
         float offsetX = x + 3;
         float offsetY = y + 3;
@@ -86,7 +86,7 @@ public abstract class EffectCustomTexture extends MobEffect {
         ssr.bindTexture();
 
         Tuple<Float, Float> uvTpl = ssr.getUVOffset(ClientScheduler.getClientTick());
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetX, offsetY, z, wh, wh)
                     .color(red, green, blue, 1F)
                     .tex(uvTpl.getA(), uvTpl.getB(), ssr.getUWidth(), ssr.getVWidth())

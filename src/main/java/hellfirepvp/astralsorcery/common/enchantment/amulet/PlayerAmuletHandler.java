@@ -34,11 +34,11 @@ public class PlayerAmuletHandler implements ITickHandler {
     private PlayerAmuletHandler() {}
 
     public static void onEnchantmentAdd(DynamicEnchantmentEvent.Add event) {
-        if (!DynamicEnchantmentHelper.canHaveDynamicEnchantment(event.getEnchantedItemStack())) {
+        if (!DynamicEnchantmentHelper.canHaveDynamicEnchantment(event.createForEnchantment())) {
             return;
         }
 
-        Tuple<ItemStack, Player> linkedAmulet = AmuletEnchantmentHelper.getWornAmulet(event.getEnchantedItemStack());
+        Tuple<ItemStack, Player> linkedAmulet = AmuletEnchantmentHelper.getWornAmulet(event.createForEnchantment());
         if (linkedAmulet == null ||
                 linkedAmulet.getA().isEmpty() ||
                 linkedAmulet.getB() == null) {
@@ -71,8 +71,8 @@ public class PlayerAmuletHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

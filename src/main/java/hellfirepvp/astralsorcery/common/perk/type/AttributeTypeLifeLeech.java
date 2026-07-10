@@ -50,13 +50,13 @@ public class AttributeTypeLifeLeech extends PerkAttributeType {
 
     private void onLeech(LivingDamageEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-            Player player = (Player) source.getTrueSource();
-            LogicalSide side = this.getSide(player);
-            if (side.isServer() && hasTypeApplied(player, side)) {
+        if (source.getEntity() != null && source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
+            LogicalSide direction = this.getSide(player);
+            if (direction.isServer() && hasTypeApplied(player, direction)) {
 
-                float leechPerc = PerkAttributeHelper.getOrCreateMap(player, side)
-                        .modifyValue(player, ResearchHelper.getProgress(player, side), this, 0F);
+                float leechPerc = PerkAttributeHelper.getOrCreateMap(player, direction)
+                        .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 0F);
                 leechPerc /= 100.0F;
                 leechPerc = AttributeEvent.postProcessModded(player, this, leechPerc);
                 if (leechPerc > 0) {

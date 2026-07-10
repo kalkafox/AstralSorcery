@@ -51,23 +51,23 @@ public class ItemColoredLensDamage extends ItemColoredLens {
         }
 
         @Override
-        public void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
-            if (world.isRemote() || !(entity instanceof LivingEntity)) {
+        public void entityInBeam(Level level, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
+            if (level.isClientSide() || !(entity instanceof LivingEntity)) {
                 return;
             }
             executor.executeAll(() -> {
                 if (entity instanceof Player) {
                     if (!GeneralConfig.CONFIG.doColoredLensesAffectPlayers.get() ||
                             entity.getServer() == null ||
-                            !entity.getServer().isPVPEnabled()) {
+                            !entity.getServer().isPvpAllowed()) {
                         return;
                     }
                 }
-                DamageUtil.attackEntityFrom(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, 1.5F);
+                DamageUtil.hurt(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, 1.5F);
             });
         }
 
         @Override
-        public void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
+        public void blockInBeam(Level level, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
     }
 }

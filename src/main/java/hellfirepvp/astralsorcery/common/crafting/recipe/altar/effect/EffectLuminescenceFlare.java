@@ -44,11 +44,11 @@ public class EffectLuminescenceFlare extends AltarRecipeEffect {
             FXSpritePlane spr = recipe.getEffectContained(INDEX_CRAFT_FLARE, i -> {
                 return EffectHelper.of(EffectTemplatesAS.TEXTURE_SPRITE)
                         .spawn(new Vector3(altar).add(0.5, 0.04, 0.5))
-                        .setSprite(SpritesAS.SPR_CRAFT_FLARE)
+                        .pickSprite(SpritesAS.SPR_CRAFT_FLARE)
                         .setAxis(Vector3.RotAxis.Y_AXIS)
                         .setNoRotation(0)
                         .color(VFXColorFunction.constant(ColorsAS.EFFECT_CRAFT_FLARE))
-                        .alpha(VFXAlphaFunction.fadeIn(30))
+                        .alpha1arg(VFXAlphaFunction.fadeIn(30))
                         .setScaleMultiplier(9F)
                         .setAlphaMultiplier(0.65F)
                         .refresh(RefreshFunction.tileExistsAnd(altar,

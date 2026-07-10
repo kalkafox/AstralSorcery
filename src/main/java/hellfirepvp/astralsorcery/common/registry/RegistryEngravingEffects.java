@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.constellation.engraving.EngravingEffect;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
@@ -235,8 +236,7 @@ public class RegistryEngravingEffects {
     }
 
     private static <T extends EngravingEffect> T register(T effect) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(effect);
-        return effect;
+        return AstralRegistries.register(AstralRegistries.ENGRAVING_EFFECTS, effect);
     }
 
 }

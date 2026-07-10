@@ -79,7 +79,7 @@ public class PktSyncCharge extends ASPacket<PktSyncCharge> {
             }
 
             @Override
-            public void handle(PktSyncCharge packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktSyncCharge packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

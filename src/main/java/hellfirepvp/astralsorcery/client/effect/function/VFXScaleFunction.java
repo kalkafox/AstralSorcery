@@ -32,13 +32,13 @@ public interface VFXScaleFunction<T extends EntityVisualFX> {
     };
 
     VFXScaleFunction<EntityVisualFX> SHRINK_EXP = (fx, scaleIn, pTicks) -> {
-        return MathHelper.sqrt(SHRINK.getScale(fx, scaleIn, pTicks));
+        return Mth.sqrt(SHRINK.getQuadSize(fx, scaleIn, pTicks));
     };
 
-    public float getScale(@Nonnull T fx, float scaleIn, float pTicks);
+    public float getQuadSize(@Nonnull T fx, float scaleIn, float pTicks);
 
     default public VFXScaleFunction<T> andThen(VFXScaleFunction<T> multiplied) {
         VFXScaleFunction<T> existing = this;
-        return (fx, scaleIn, pTicks) -> multiplied.getScale(fx, existing.getScale(fx, scaleIn, pTicks), pTicks);
+        return (fx, scaleIn, pTicks) -> multiplied.getQuadSize(fx, existing.getQuadSize(fx, scaleIn, pTicks), pTicks);
     }
 }

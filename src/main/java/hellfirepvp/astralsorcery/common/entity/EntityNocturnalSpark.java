@@ -55,38 +55,38 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
 
     private static final AABB NO_DUPE_BOX = new AABB(0, 0, 0, 1, 1, 1).grow(15);
 
-    private static final EntityDataAccessor<Boolean> SPAWNING = EntityDataManager.createKey(EntityNocturnalSpark.class, DataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SPAWNING = SynchedEntityData.createKey(EntityNocturnalSpark.class, EntityDataSerializers.BOOLEAN);
     private int ticksSpawning = 0;
 
-    public EntityNocturnalSpark(Level world) {
-        super(EntityTypesAS.NOCTURNAL_SPARK, world);
+    public EntityNocturnalSpark(Level level) {
+        super(EntityTypesAS.NOCTURNAL_SPARK, level);
     }
 
-    public EntityNocturnalSpark(double x, double y, double z, Level world) {
-        super(EntityTypesAS.NOCTURNAL_SPARK, x, y, z, world);
+    public EntityNocturnalSpark(double x, double y, double z, Level level) {
+        super(EntityTypesAS.NOCTURNAL_SPARK, x, y, z, level);
     }
 
-    public EntityNocturnalSpark(LivingEntity thrower, Level world) {
-        super(EntityTypesAS.NOCTURNAL_SPARK, thrower, world);
-        this.func_234612_a_(thrower, thrower.rotationPitch, thrower.rotationYaw, 0F, 0.7F, 0.9F);
+    public EntityNocturnalSpark(LivingEntity thrower, Level level) {
+        super(EntityTypesAS.NOCTURNAL_SPARK, thrower, level);
+        this.shootFromRotation(thrower, thrower.getXRot(), thrower.getYRot(), 0F, 0.7F, 0.9F);
     }
 
     public static EntityType.IFactory<EntityNocturnalSpark> factory() {
-        return (type, world) -> new EntityNocturnalSpark(world);
+        return (type, level) -> new EntityNocturnalSpark(level);
     }
 
     @Override
-    protected void registerData() {
-        this.dataManager.register(SPAWNING, false);
+    protected void defineSynchedData() {
+        this.entityData.register(SPAWNING, false);
     }
 
     public void setSpawning() {
-        this.setMotion(Vector3d.ZERO);
-        this.dataManager.set(SPAWNING, true);
+        this.setDeltaMovement(Vec3.ZERO);
+        this.entityData.set(SPAWNING, true);
     }
 
     public boolean isSpawning() {
-        return this.dataManager.get(SPAWNING);
+        return this.entityData.get(SPAWNING);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             return;
         }
 
-        if (!world.isRemote()) {
+        if (!level.isClientSide()) {
             removeLights();
             if (isSpawning()) {
                 ticksSpawning++;
@@ -114,13 +114,13 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
     }
 
     private void removeLights() {
-        if (this.getEntityWorld() instanceof ServerLevel) {
-            ServerLevel sWorld = (ServerLevel) this.getEntityWorld();
-            if (this.ticksExisted % 5 == 0) {
-                List<BlockPos> lightPositions = BlockDiscoverer.searchForBlocksAround(
-                        sWorld, this.getPosition(), 8,
-                        (world, pos, state) -> !(state.getBlock() instanceof AirBlock) && state.getBlockHardness(world, pos) != -1 && state.getLightValue(world, pos) > 3);
-                for (BlockPos light : lightPositions) {
+        if (this.getCommandSenderWorld() instanceof ServerLevel) {
+            ServerLevel sWorld = (ServerLevel) this.getCommandSenderWorld();
+            if (this.tickCount % 5 == 0) {
+                List<BlockPos> lights = BlockDiscoverer.searchForBlocksAround(
+                        sWorld, this.position(), 8,
+                        (level, pos, state) -> !(state.getBlock() instanceof AirBlock) && state.getDestroySpeed(level, pos) != -1 && state.getLightEmission(level, pos) > 3);
+                for (BlockPos light : lights) {
                     if (!BlockUtils.breakBlockWithoutPlayer(sWorld, light, sWorld.getBlockState(light), ItemStack.EMPTY, true, true)) {
                         sWorld.removeBlock(light, false);
                     }
@@ -130,7 +130,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
     }
 
     private void removeDuplicates() {
-        List<EntityNocturnalSpark> sparks = world.getEntitiesWithinAABB(EntityNocturnalSpark.class, NO_DUPE_BOX.offset(getPosition()));
+        List<EntityNocturnalSpark> sparks = level.getEntitiesWithinAABB(EntityNocturnalSpark.class, NO_DUPE_BOX.offset(getPosition()));
         for (EntityNocturnalSpark spark : sparks) {
             if (this.equals(spark)) {
                 continue;
@@ -147,21 +147,21 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
         if (isSpawning()) {
             for (int i = 0; i < 15; i++) {
                 Vector3 thisPos = Vector3.atEntityCorner(this).addY(1);
-                MiscUtils.applyRandomOffset(thisPos, rand, 2 + rand.nextInt(4));
+                MiscUtils.applyRandomOffset(thisPos, random, 2 + random.nextInt(4));
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(thisPos)
                         .setScaleMultiplier(4)
-                        .alpha(VFXAlphaFunction.PYRAMID)
+                        .alpha1arg(VFXAlphaFunction.PYRAMID)
                         .setAlphaMultiplier(0.7F)
                         .color(VFXColorFunction.constant(Color.BLACK));
-                if (rand.nextInt(5) == 0) {
+                if (random.nextInt(5) == 0) {
                     randomizeColor(p);
                 }
-                if (rand.nextInt(20) == 0) {
+                if (random.nextInt(20) == 0) {
                     Vector3 at = Vector3.atEntityCorner(this);
-                    MiscUtils.applyRandomOffset(at, rand, 2);
+                    MiscUtils.applyRandomOffset(at, random, 2);
                     Vector3 to = Vector3.atEntityCorner(this);
-                    MiscUtils.applyRandomOffset(to, rand, 2);
+                    MiscUtils.applyRandomOffset(to, random, 2);
 
                     EffectHelper.of(EffectTemplatesAS.LIGHTNING)
                             .spawn(at)
@@ -174,10 +174,10 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             for (int i = 0; i < 6; i++) {
                 p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(Vector3.atEntityCorner(this))
-                        .setMotion(new Vector3(
-                            0.04F - rand.nextFloat() * 0.08F,
-                            0.04F - rand.nextFloat() * 0.08F,
-                            0.04F - rand.nextFloat() * 0.08F
+                        .setDeltaMovement(new Vector3(
+                            0.04F - random.nextFloat() * 0.08F,
+                            0.04F - random.nextFloat() * 0.08F,
+                            0.04F - random.nextFloat() * 0.08F
                         ))
                         .setScaleMultiplier(0.25F);
                 randomizeColor(p);
@@ -189,29 +189,29 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             randomizeColor(p);
 
             p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                    .spawn(Vector3.atEntityCorner(this).add(getMotion().mul(0.5, 0.5, 0.5)));
+                    .spawn(Vector3.atEntityCorner(this).add(getDeltaMovement().mul(0.5, 0.5, 0.5)));
             p.setScaleMultiplier(0.6F);
             randomizeColor(p);
         }
     }
 
     private void spawnCycle() {
-        if (rand.nextInt(12) == 0 && world instanceof ServerLevel) {
+        if (random.nextInt(12) == 0 && level instanceof ServerLevel) {
             BlockPos pos = getPosition();
-            pos.add(rand.nextInt(2) - rand.nextInt(2), 1, rand.nextInt(2) - rand.nextInt(2));
-            pos = BlockUtils.firstSolidDown(world, pos).up();
+            pos.offset(random.nextInt(2) - random.nextInt(2), 1, random.nextInt(2) - random.nextInt(2));
+            pos = BlockUtils.firstSolidDown(level, pos).above();
 
-            if (pos.distanceSq(this.getPosition()) >= 16) {
+            if (pos.distSqr(this.position()) >= 16) {
                 return;
             }
-            EntityUtils.performWorldSpawningAt((ServerLevel) world, pos, EntityClassification.MONSTER, SpawnReason.SPAWNER, true,
+            EntityUtils.performWorldSpawningAt((ServerLevel) level, pos, MobCategory.MONSTER, MobSpawnType.SPAWNER, true,
                     EntityUtils.SpawnConditionFlags.IGNORE_SPAWN_CONDITIONS | EntityUtils.SpawnConditionFlags.IGNORE_ENTITY_COLLISION);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void randomizeColor(FXFacingParticle p) {
-        switch (rand.nextInt(3)) {
+        switch (random.nextInt(3)) {
             case 0:
                 p.color(VFXColorFunction.constant(ColorsAS.NOCTURNAL_POWDER_1));
                 break;
@@ -227,8 +227,8 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
     }
 
     @Override
-    protected void onImpact(HitResult result) {
-        if (RayTraceResult.Type.ENTITY.equals(result.getType())) {
+    protected void onHit(HitResult result) {
+        if (HitResult.Type.ENTITY.equals(result.getType())) {
             return;
         }
         Vec3 hit = result.getHitVec();
@@ -237,7 +237,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

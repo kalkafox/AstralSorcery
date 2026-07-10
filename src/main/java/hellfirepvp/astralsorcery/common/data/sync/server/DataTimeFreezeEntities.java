@@ -40,23 +40,23 @@ public class DataTimeFreezeEntities extends AbstractData {
     }
 
     public void freezeEntity(Entity e) {
-        ResourceKey<Level> dim = e.getEntityWorld().getDimensionKey();
+        ResourceKey<Level> dim = e.getCommandSenderWorld().dimension();
         if (this.serverActiveEntityFreeze.computeIfAbsent(dim, dimType -> new HashSet<>()).add(e.getEntityId())) {
             this.serverSyncTypes.add(dim);
-            this.markDirty();
+            this.setChanged();
         }
     }
 
     public void unfreezeEntity(Entity e) {
-        ResourceKey<Level> dim = e.getEntityWorld().getDimensionKey();
+        ResourceKey<Level> dim = e.getCommandSenderWorld().dimension();
         if (this.serverActiveEntityFreeze.getOrDefault(dim, Collections.emptySet()).remove(e.getEntityId())) {
             this.serverSyncTypes.add(dim);
-            this.markDirty();
+            this.setChanged();
         }
     }
 
     public boolean isFrozen(Entity e) {
-        ResourceKey<Level> dim = e.getEntityWorld().getDimensionKey();
+        ResourceKey<Level> dim = e.getCommandSenderWorld().dimension();
         return this.serverActiveEntityFreeze.getOrDefault(dim, Collections.emptySet()).contains(e.getEntityId());
     }
 
@@ -72,17 +72,17 @@ public class DataTimeFreezeEntities extends AbstractData {
     }
 
     @Override
-    public void writeAllDataToPacket(CompoundTag compound) {
-        this.writeEntityInformation(compound, this.serverActiveEntityFreeze);
+    public void writeAllDataToPacket(CompoundTag pattern) {
+        this.writeEntityInformation(pattern, this.serverActiveEntityFreeze);
     }
 
     @Override
-    public void writeDiffDataToPacket(CompoundTag compound) {
+    public void writeDiffDataToPacket(CompoundTag pattern) {
         Map<ResourceKey<Level>, Set<Integer>> entities = new HashMap<>();
         this.serverSyncTypes.forEach(type -> {
             entities.put(type, this.serverActiveEntityFreeze.getOrDefault(type, new HashSet<>()));
         });
-        this.writeEntityInformation(compound, entities);
+        this.writeEntityInformation(pattern, entities);
         this.serverSyncTypes.clear();
     }
 
@@ -90,7 +90,7 @@ public class DataTimeFreezeEntities extends AbstractData {
         CompoundTag dimTag = new CompoundTag();
         entities.forEach((dim, entityIds) -> {
             ListTag nbtEntities = new ListTag();
-            entityIds.forEach(id -> nbtEntities.add(IntNBT.valueOf(id)));
+            entityIds.forEach(id -> nbtEntities.add(IntTag.valueOf(id)));
             dimTag.put(dim.getLocation().toString(), nbtEntities);
         });
         out.put("dimTypes", dimTag);

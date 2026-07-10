@@ -61,7 +61,7 @@ public class AltarManager implements IRecipeManager {
             }
         }
 
-        SimpleAltarRecipe recipe = new SimpleAltarRecipe(new ResourceLocation(name), AltarType.valueOf(altarType.toUpperCase()), duration, starlightRequired, builder.build());
+        SimpleAltarRecipe recipe = new SimpleAltarRecipe(ResourceLocation.parse(name), AltarType.valueOf(altarType.toUpperCase()), duration, starlightRequired, builder.build());
         recipe.addOutput(output.getInternal());
         CraftTweakerAPI.apply(new ActionAddRecipe(this, recipe));
     }
@@ -87,7 +87,7 @@ public class AltarManager implements IRecipeManager {
             builder.key(character.charAt(0), ingredients.get(character).asVanillaIngredient());
         }
 
-        SimpleAltarRecipe recipe = new SimpleAltarRecipe(new ResourceLocation(name), AltarType.valueOf(altarType.toUpperCase()), duration, starlightRequired, builder.build());
+        SimpleAltarRecipe recipe = new SimpleAltarRecipe(ResourceLocation.parse(name), AltarType.valueOf(altarType.toUpperCase()), duration, starlightRequired, builder.build());
         recipe.addOutput(output.getInternal());
         CraftTweakerAPI.apply(new ActionAddRecipe(this, recipe));
     }

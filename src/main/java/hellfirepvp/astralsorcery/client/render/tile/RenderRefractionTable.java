@@ -17,10 +17,11 @@ import hellfirepvp.astralsorcery.common.tile.TileRefractionTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemStack;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,27 +34,27 @@ public class RenderRefractionTable extends CustomTileEntityRenderer<TileRefracti
 
     private static final ModelRefractionTable MODEL_REFRACTION_TABLE = new ModelRefractionTable();
 
-    public RenderRefractionTable(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderRefractionTable(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
     public void render(TileRefractionTable tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         if (!tile.hasParchment() && !tile.getInputStack().isEmpty()) {
-            ItemStack input = tile.getInputStack();
+            ItemStack from = tile.getInputStack();
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(0.5F, 0.85F, 0.5F);
             renderStack.scale(0.625F, 0.625F, 0.625F);
 
-            Minecraft.getInstance().getItemRenderer().renderItem(input, ItemCameraTransforms.TransformType.GROUND, combinedLight, combinedOverlay, renderStack, renderTypeBuffer);
+            Minecraft.getInstance().getItemRenderer().render(from, ItemTransforms.TransformType.GROUND, combinedLight, combinedOverlay, renderStack, renderTypeBuffer);
 
-            renderStack.pop();
+            renderStack.popPose();
         }
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0.5F, 1.5F, 0.5F);
-        renderStack.rotate(Vector3f.XP.rotationDegrees(180F));
+        renderStack.mirror(Axis.XP.rotationDegrees(180F));
 
         RenderType type = MODEL_REFRACTION_TABLE.getGeneralType();
         VertexConsumer vb = renderTypeBuffer.getBuffer(type);
@@ -69,6 +70,6 @@ public class RenderRefractionTable extends CustomTileEntityRenderer<TileRefracti
             RenderingUtils.refreshDrawing(vb, type);
         }
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

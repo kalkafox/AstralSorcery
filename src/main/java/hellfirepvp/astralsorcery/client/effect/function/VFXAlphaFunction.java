@@ -33,7 +33,7 @@ public interface VFXAlphaFunction<T extends EntityVisualFX> {
     };
 
     public static <T extends EntityVisualFX> VFXAlphaFunction<T> proximity(Supplier<Vector3> targetSupplier, float distance) {
-        return (fx, alpha, pTicks) -> alpha * MathHelper.clamp(((float) fx.getRenderPosition(pTicks).distance(targetSupplier.get())) / distance, 0F, 1F);
+        return (fx, alpha, pTicks) -> alpha * Mth.clamp(((float) fx.getCameraPosition(pTicks).distance(targetSupplier.get())) / distance, 0F, 1F);
     }
 
     public float getAlpha(T fx, float alphaIn, float pTicks);
@@ -43,12 +43,12 @@ public interface VFXAlphaFunction<T extends EntityVisualFX> {
         return (fx, alphaIn, pTicks) -> multiplied.getAlpha(fx, existing.getAlpha(fx, alphaIn, pTicks), pTicks);
     }
 
-    public static <T extends EntityVisualFX> VFXAlphaFunction<T> fadeIn(float fadeInTicks) {
+    public static <T extends EntityVisualFX> VFXAlphaFunction<T> fadeIn(float fade) {
         return (fx, alphaIn, pTicks) -> {
             if (fx.getAgeRefreshCount() > 0) {
                 return alphaIn;
             }
-            float mul = MathHelper.clamp((fadeInTicks - (fx.getAge() + pTicks)) / fadeInTicks, 0F, 1F);
+            float mul = Mth.clamp((fade - (fx.getAge() + pTicks)) / fade, 0F, 1F);
             return alphaIn * mul;
         };
     }

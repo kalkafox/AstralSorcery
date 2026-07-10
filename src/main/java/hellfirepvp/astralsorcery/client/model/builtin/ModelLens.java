@@ -35,17 +35,17 @@ public class ModelLens extends CustomModel {
         this.textureWidth = 64;
         this.textureHeight = 32;
         this.base = new ModelPart(this, 0, 13);
-        this.base.setRotationPoint(0.0F, 16.0F, 0.0F);
+        this.base.setPos(0.0F, 16.0F, 0.0F);
         this.base.addBox(-6.0F, 4.0F, -6.0F, 12, 2, 12, 0.0F);
         this.frame1 = new ModelPart(this, 0, 13);
-        this.frame1.setRotationPoint(0.0F, 16.0F, 0.0F);
+        this.frame1.setPos(0.0F, 16.0F, 0.0F);
         this.frame1.addBox(-8.0F, -4.0F, -1.0F, 2, 10, 2, 0.0F);
         this.frame2 = new ModelPart(this, 0, 13);
         this.frame2.mirror = true;
-        this.frame2.setRotationPoint(0.0F, 16.0F, 0.0F);
+        this.frame2.setPos(0.0F, 16.0F, 0.0F);
         this.frame2.addBox(6.0F, -4.0F, -1.0F, 2, 10, 2, 0.0F);
         this.lens = new ModelPart(this, 0, 0);
-        this.lens.setRotationPoint(0.0F, 14.0F, 0.0F);
+        this.lens.setPos(0.0F, 14.0F, 0.0F);
         this.lens.addBox(-6.0F, -6.0F, -0.5F, 12, 12, 1, 0.0F);
     }
 
@@ -61,7 +61,7 @@ public class ModelLens extends CustomModel {
         VertexConsumer vb = buffer.getBuffer(RenderTypesAS.MODEL_LENS_GLASS);
         this.lens.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 
-        this.lens.rotateAngleX = 0;
+        this.lens.xRot = 0;
         RenderingUtils.refreshDrawing(vb, RenderTypesAS.MODEL_LENS_GLASS);
     }
 

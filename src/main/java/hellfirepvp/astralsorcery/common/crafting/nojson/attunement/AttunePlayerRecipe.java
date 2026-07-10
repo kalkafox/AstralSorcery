@@ -49,8 +49,8 @@ public class AttunePlayerRecipe extends AttunementRecipe<ActivePlayerAttunementR
 
     @Override
     public boolean canStartCrafting(TileAttunementAltar altar) {
-        Level world = altar.getWorld();
-        if (DayTimeHelper.isNight(world)) {
+        Level level = altar.getLevel();
+        if (DayTimeHelper.isNight(level)) {
             return findEligiblePlayer(altar) != null;
         }
         return false;
@@ -60,7 +60,7 @@ public class AttunePlayerRecipe extends AttunementRecipe<ActivePlayerAttunementR
     @Nonnull
     public ActivePlayerAttunementRecipe createRecipe(TileAttunementAltar altar) {
         ServerPlayer player = findEligiblePlayer(altar);
-        return new ActivePlayerAttunementRecipe(this, (IMajorConstellation) altar.getActiveConstellation(), player.getUniqueID());
+        return new ActivePlayerAttunementRecipe(this, (IMajorConstellation) altar.getActiveConstellation(), player.getUUID());
     }
 
     @Override
@@ -79,12 +79,12 @@ public class AttunePlayerRecipe extends AttunementRecipe<ActivePlayerAttunementR
         if (!(altar.getActiveConstellation() instanceof IMajorConstellation)) {
             return null;
         }
-        AABB boxAt = BOX.offset(altar.getPos().up()).grow(1);
+        AABB boxAt = BOX.offset(altar.getBlockPos().above()).grow(1);
 
         Vector3 thisVec = new Vector3(altar).add(0.5, 1.5, 0.5);
-        List<ServerPlayer> players = altar.getWorld().getEntitiesWithinAABB(ServerPlayerEntity.class, boxAt);
+        List<ServerPlayer> players = altar.getLevel().getEntitiesWithinAABB(ServerPlayer.class, boxAt);
         if (!players.isEmpty()) {
-            ServerPlayer pl = EntityUtils.selectClosest(players, (player) -> thisVec.distanceSquared(player.getPositionVec()));
+            ServerPlayer pl = EntityUtils.selectClosest(players, (player) -> thisVec.distanceSquared(player.position()));
             if (isEligablePlayer(pl, altar.getActiveConstellation())) {
                 return pl;
             }
@@ -93,7 +93,7 @@ public class AttunePlayerRecipe extends AttunementRecipe<ActivePlayerAttunementR
     }
 
     public static boolean isEligablePlayer(ServerPlayer player, IConstellation attuneTo) {
-        if (player != null && player.isAlive() && !MiscUtils.isPlayerFakeMP(player) && !player.isSneaking()) {
+        if (player != null && player.isAlive() && !MiscUtils.isPlayerFakeMP(player) && !player.isShiftKeyDown()) {
             PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
 
             return prog.isValid() &&

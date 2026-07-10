@@ -60,26 +60,26 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
         IConstellation cst = this.getBaseConstellation();
         if (cst != null) {
             if (ResearchHelper.getClientProgress().hasConstellationDiscovered(cst)) {
-                tooltip.add(cst.getConstellationName().withStyle(TextFormatting.BLUE));
+                tooltip.add(cst.getConstellationName().withStyle(ChatFormatting.BLUE));
             } else {
-                tooltip.add(Component.translatable("astralsorcery.misc.noinformation").withStyle(TextFormatting.GRAY));
+                tooltip.add(Component.translatable("astralsorcery.misc.noinformation").withStyle(ChatFormatting.GRAY));
             }
         }
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level worldIn, Player playerIn, InteractionHand handIn) {
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
         playerIn.setActiveHand(handIn);
-        return super.onItemRightClick(worldIn, playerIn, handIn);
+        return super.use(worldIn, playerIn, handIn);
     }
 
     @Override
     public ItemStack onItemUseFinish(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
-        if (!worldIn.isRemote() && entityLiving instanceof ServerPlayer) {
+        if (!worldIn.isClientSide() && entityLiving instanceof ServerPlayer) {
             ServerPlayer player = (ServerPlayer) entityLiving;
             IMajorConstellation cst = this.getBaseConstellation();
             if (cst != null) {
@@ -90,14 +90,14 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
 
                 double perkExp = prog.getPerkData().getPerkExp();
                 if (ResearchManager.setAttunedConstellation(player, cst)) {
-                    ResearchManager.setExp(player, MathHelper.lfloor(perkExp));
-                    player.sendMessage(Component.translatable("astralsorcery.progress.switch.attunement").withStyle(TextFormatting.BLUE), Util.DUMMY_UUID);
-                    SoundHelper.playSoundAround(SoundEvents.BLOCK_GLASS_BREAK, worldIn, entityLiving.getPosition(), 1F, 1F);
+                    ResearchManager.setExp(player, Mth.lfloor(perkExp));
+                    player.sendSystemMessage(Component.translatable("astralsorcery.progress.switch.attunement").withStyle(ChatFormatting.BLUE));
+                    SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, worldIn, entityLiving.position(), 1F, 1F);
                     return ItemStack.EMPTY;
                 }
             } else if (ResearchManager.setAttunedConstellation(player, null)) {
-                player.sendMessage(Component.translatable("astralsorcery.progress.remove.attunement").withStyle(TextFormatting.BLUE), Util.DUMMY_UUID);
-                SoundHelper.playSoundAround(SoundEvents.BLOCK_GLASS_BREAK, worldIn, entityLiving.getPosition(), 1F, 1F);
+                player.sendSystemMessage(Component.translatable("astralsorcery.progress.remove.attunement").withStyle(ChatFormatting.BLUE));
+                SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, worldIn, entityLiving.position(), 1F, 1F);
                 return ItemStack.EMPTY;
             }
         }
@@ -106,7 +106,7 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
 
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
-        if (player.getEntityWorld().isRemote()) {
+        if (player.getCommandSenderWorld().isClientSide()) {
             this.playUseEffects(player, getUseDuration(stack) - count, getUseDuration(stack));
         }
     }
@@ -117,7 +117,7 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
         if (cst == null) {
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(Vector3.atEntityCorner(player).addY(player.getHeight() / 2))
-                    .setMotion(new Vector3(-0.1 + random.nextFloat() * 0.2, 0.01, -0.1 + random.nextFloat() * 0.2))
+                    .setDeltaMovement(new Vector3(-0.1 + random.nextFloat() * 0.2, 0.01, -0.1 + random.nextFloat() * 0.2))
                     .setScaleMultiplier(0.2F + random.nextFloat());
             if (random.nextBoolean()) {
                 p.color(VFXColorFunction.WHITE);
@@ -130,15 +130,15 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
                 Vector3 center = Vector3.atEntityCorner(player).addY(player.getHeight() / 2);
                 Vector3 v = Vector3.RotAxis.X_AXIS.clone();
                 float originalAngle = (((float) i) / ((float) parts)) * 360F;
-                double angle = originalAngle + (MathHelper.sin(percCycle) * angleSwirl);
-                v.rotate(-Math.toRadians(angle), Vector3.RotAxis.Y_AXIS).normalize().multiply(4);
+                double angle = originalAngle + (Mth.sin(percCycle) * angleSwirl);
+                v.mirror(-Math.toRadians(angle), Vector3.RotAxis.Y_AXIS).normalize().mul(4);
                 Vector3 pos = center.clone().add(v);
-                Vector3 mot = center.clone().subtract(pos).normalize().multiply(0.1);
+                Vector3 mot = center.clone().subtract(pos).normalize().mul(0.1);
 
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
                         .setScaleMultiplier(0.25F + random.nextFloat() * 0.4F)
-                        .setMotion(mot)
+                        .setDeltaMovement(mot)
                         .setMaxAge(50);
                 if (random.nextInt(4) == 0) {
                     p.color(VFXColorFunction.WHITE);
@@ -157,8 +157,8 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
     }
 
     @Override
-    public UseAnim getUseAction(ItemStack stack) {
-        return UseAction.BOW;
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.BOW;
     }
 
     @Nullable

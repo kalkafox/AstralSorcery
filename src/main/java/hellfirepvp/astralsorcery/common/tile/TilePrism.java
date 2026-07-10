@@ -44,19 +44,19 @@ public class TilePrism extends TileLens {
     @Override
     public LensColorType setColorType(@Nullable LensColorType colorType) {
         LensColorType returned = super.setColorType(colorType);
-        BlockState thisState = getWorld().getBlockState(getPos());
+        BlockState thisState = getLevel().getBlockState(getBlockPos());
 
         if (thisState.get(BlockPrism.HAS_COLORED_LENS) && colorType == null && returned != null) {
-            getWorld().setBlockState(getPos(), thisState.with(BlockPrism.HAS_COLORED_LENS, false), Constants.BlockFlags.DEFAULT_AND_RERENDER);
+            getLevel().setBlock(getBlockPos(), thisState.setValue(BlockPrism.HAS_COLORED_LENS, false), Constants.BlockFlags.DEFAULT_AND_RERENDER);
         } else if (!thisState.get(BlockPrism.HAS_COLORED_LENS) && colorType != null && returned == null) {
-            getWorld().setBlockState(getPos(), thisState.with(BlockPrism.HAS_COLORED_LENS, true), Constants.BlockFlags.DEFAULT_AND_RERENDER);
+            getLevel().setBlock(getBlockPos(), thisState.setValue(BlockPrism.HAS_COLORED_LENS, true), Constants.BlockFlags.DEFAULT_AND_RERENDER);
         }
         return returned;
     }
 
     @Override
     public Direction getPlacedAgainst() {
-        BlockState state = world.getBlockState(getPos());
+        BlockState state = level.getBlockState(getBlockPos());
         if (!(state.getBlock() instanceof BlockPrism)) {
             return Direction.DOWN;
         }
@@ -68,7 +68,7 @@ public class TilePrism extends TileLens {
     protected void onDataReceived() {
         super.onDataReceived();
 
-        getWorld().notifyBlockUpdate(getPos(), getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER);
+        getLevel().findNearestBiome(getBlockPos(), getBlockState(), getBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER);
     }
 
     @Nonnull

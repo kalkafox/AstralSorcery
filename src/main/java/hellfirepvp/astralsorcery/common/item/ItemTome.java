@@ -61,24 +61,24 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
-        if (world.isRemote() && !player.isSneaking()) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (level.isClientSide() && !player.isShiftKeyDown()) {
             AstralSorcery.getProxy().openGui(player, GuiType.TOME);
-        } else if (!world.isRemote() && player.isSneaking() && hand == Hand.MAIN_HAND && player instanceof ServerPlayer) {
-            new ContainerTomeProvider(player.getHeldItem(hand), player.inventory.currentItem)
+        } else if (!level.isClientSide() && player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer) {
+            new ContainerTomeProvider(player.getItemInHand(hand), player.inventory.selected)
                     .openFor((ServerPlayer) player);
         }
-        return ActionResult.resultSuccess(player.getHeldItem(hand));
+        return InteractionResultHolder.success(player.getItemInHand(hand));
     }
 
     @Override
-    public InteractionResult onItemUse(UseOnContext context) {
-        Level world = context.getWorld();
-        BlockState blockstate = world.getBlockState(context.getPos());
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
+        BlockState blockstate = level.getBlockState(context.getBlockPos());
         if (blockstate.getBlock() instanceof LecternBlock) {
-            return LecternBlock.tryPlaceBook(world, context.getPos(), blockstate, context.getItem()) ? ActionResultType.SUCCESS : ActionResultType.PASS;
+            return LecternBlock.tryPlaceBook(level, context.getBlockPos(), blockstate, context.getItem()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         } else {
-            return ActionResultType.PASS;
+            return InteractionResult.PASS;
         }
     }
 
@@ -97,7 +97,7 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
     public static List<IConstellation> getStoredConstellations(ItemStack stack, Player player) {
         LinkedList<IConstellation> out = new LinkedList<>();
 
-        PlayerProgress prog = ResearchHelper.getProgress(player, player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER);
+        PlayerProgress prog = ResearchHelper.getProgress(player, player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER);
         if (prog.isValid()) {
             prog.getStoredConstellationPapers().stream()
                     .map(ConstellationRegistry::getConstellation)

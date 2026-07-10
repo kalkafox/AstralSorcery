@@ -50,18 +50,18 @@ public class BlockTransmutationHandler implements StarlightNetworkRegistry.IStar
     private static final Map<WorldBlockPos, ActiveTransmutation> runningTransmutations = new HashMap<>();
 
     @Override
-    public boolean isApplicable(Level world, BlockPos pos, BlockState state, IWeakConstellation starlightType) {
-        return RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.findRecipe(new BlockTransmutationContext(world, pos, state, starlightType)) != null;
+    public boolean isApplicable(Level level, BlockPos pos, BlockState state, IWeakConstellation starlightType) {
+        return RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.findRecipe(new BlockTransmutationContext(level, pos, state, starlightType)) != null;
     }
 
     @Override
-    public void receiveStarlight(Level world, Random rand, BlockPos pos, BlockState state, IWeakConstellation starlightType, double amount) {
-        BlockTransmutation recipe = RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.findRecipe(new BlockTransmutationContext(world, pos, state, starlightType));
+    public void receiveStarlight(Level level, Random random, BlockPos pos, BlockState state, IWeakConstellation starlightType, double amount) {
+        BlockTransmutation recipe = RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.findRecipe(new BlockTransmutationContext(level, pos, state, starlightType));
         if (recipe == null) {
             return; //Wait what
         }
 
-        WorldBlockPos at = WorldBlockPos.wrapServer(world, pos);
+        WorldBlockPos at = WorldBlockPos.wrapServer(level, pos);
         ActiveTransmutation activeRecipe = runningTransmutations.get(at);
         if (activeRecipe == null || !activeRecipe.recipe.equals(recipe)) {
             activeRecipe = new ActiveTransmutation(recipe);
@@ -72,26 +72,26 @@ public class BlockTransmutationHandler implements StarlightNetworkRegistry.IStar
 
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.BLOCK_TRANSMUTATION_TICK)
                 .addData(buf -> ByteBufUtils.writePos(buf, pos));
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, pos, 24));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 24));
 
-        if (activeRecipe.isFinished() && activeRecipe.finish(world, pos)) {
+        if (activeRecipe.isFinished() && activeRecipe.finish(level, pos)) {
             runningTransmutations.remove(at);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void playTransmutation(PktPlayEffect effect) {
-        Random rand = new Random();
+        Random random = new Random();
         BlockPos pos = ByteBufUtils.readPos(effect.getExtraData());
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                .spawn(new Vector3(pos).add(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()))
+                .spawn(new Vector3(pos).add(random.nextFloat(), random.nextFloat(), random.nextFloat()))
                 .setAlphaMultiplier(1F)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.constant(ColorsAS.ROCK_CRYSTAL))
-                .setScaleMultiplier(0.2F + rand.nextFloat() * 0.15F)
+                .setScaleMultiplier(0.2F + random.nextFloat() * 0.15F)
                 .setGravityStrength(-0.0014F)
-                .setMaxAge(40 + rand.nextInt(20));
+                .setMaxAge(40 + random.nextInt(20));
     }
 
     private static class ActiveTransmutation {
@@ -122,13 +122,13 @@ public class BlockTransmutationHandler implements StarlightNetworkRegistry.IStar
             return this.accumulatedStarlight >= this.recipe.getStarlightRequired();
         }
 
-        private boolean finish(LevelAccessor world, BlockPos pos) {
+        private boolean finish(LevelAccessor level, BlockPos pos) {
             BlockState out = this.recipe.getOutput();
-            if (world.setBlockState(pos, out, Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
+            if (level.setBlock(pos, out, Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
 
                 ItemStack stack = ItemUtils.createBlockStack(out);
                 if (!stack.isEmpty()) {
-                    world.getPlayers().stream()
+                    level.getPlayers().stream()
                             .filter(player -> player.getDistanceSq(pos.getX(), pos.getY(), pos.getZ()) <= 225)
                             .forEach(player -> ResearchManager.informCrafted(player, stack));
                 }

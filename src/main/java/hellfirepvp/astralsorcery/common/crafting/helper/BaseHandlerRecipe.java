@@ -29,7 +29,7 @@ public abstract class BaseHandlerRecipe<I extends IItemHandler> implements IHand
         this.recipeId = recipeId;
     }
 
-    public void setGroup(String group) {
+    public void group(String group) {
         this.group = group;
     }
 
@@ -39,7 +39,7 @@ public abstract class BaseHandlerRecipe<I extends IItemHandler> implements IHand
     }
 
     @Override
-    public boolean isDynamic() {
+    public boolean isSpecial() {
         return true;
     }
 

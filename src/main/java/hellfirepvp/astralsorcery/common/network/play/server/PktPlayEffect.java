@@ -94,7 +94,7 @@ public class PktPlayEffect extends ASPacket<PktPlayEffect> {
             }
 
             @Override
-            public void handle(PktPlayEffect packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktPlayEffect packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 
@@ -138,7 +138,7 @@ public class PktPlayEffect extends ASPacket<PktPlayEffect> {
                 case GEM_CRYSTAL_BREAK:
                     return MiscPlayEffect::gemCrystalBurst;
                 case CROP_GROWTH:
-                    return CEffectAevitas::playParticles;
+                    return CEffectAevitas::showBreakingParticles;
                 case TIME_FREEZE_EFFECT:
                     return TimeStopEffectHelper::playEntityParticles;
                 case BEAM_BREAK:
@@ -148,7 +148,7 @@ public class PktPlayEffect extends ASPacket<PktPlayEffect> {
                 case BLOCK_EFFECT_TUMBLE:
                     return MiscPlayEffect::playTumbleBlockEffects;
                 case MELT_BLOCK:
-                    return ItemColoredLensFire::playParticles;
+                    return ItemColoredLensFire::showBreakingParticles;
                 case CELESTIAL_STRIKE:
                     return CelestialStrike::playEffect;
                 case ALTAR_RECIPE_FINISH:

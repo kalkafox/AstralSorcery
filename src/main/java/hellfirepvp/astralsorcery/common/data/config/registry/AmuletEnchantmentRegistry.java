@@ -35,7 +35,7 @@ import java.util.function.Predicate;
  */
 public class AmuletEnchantmentRegistry extends ConfigDataAdapter<AmuletEnchantmentEntry> {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
     public static final AmuletEnchantmentRegistry INSTANCE = new AmuletEnchantmentRegistry();
 
     private AmuletEnchantmentRegistry() {}
@@ -64,7 +64,7 @@ public class AmuletEnchantmentRegistry extends ConfigDataAdapter<AmuletEnchantme
         if (cfgValues.isEmpty()) {
             return null;
         }
-        AmuletEnchantmentEntry entry = MiscUtils.getWeightedRandomEntry(cfgValues, rand, AmuletEnchantmentEntry::getWeight);
+        AmuletEnchantmentEntry entry = MiscUtils.getWeightedRandomEntry(cfgValues, random, AmuletEnchantmentEntry::getWeight);
         if (entry == null) {
             return null;
         }
@@ -85,7 +85,7 @@ public class AmuletEnchantmentRegistry extends ConfigDataAdapter<AmuletEnchantme
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return "amulet_enchantments";
     }
 
@@ -96,7 +96,7 @@ public class AmuletEnchantmentRegistry extends ConfigDataAdapter<AmuletEnchantme
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 

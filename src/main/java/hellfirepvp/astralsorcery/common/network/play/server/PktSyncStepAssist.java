@@ -27,18 +27,18 @@ import javax.annotation.Nonnull;
  */
 public class PktSyncStepAssist extends ASPacket<PktSyncStepAssist> {
 
-    private float stepHeight;
+    private float maxUpStep;
 
     public PktSyncStepAssist() {}
 
-    public PktSyncStepAssist(float stepHeight) {
-        this.stepHeight = stepHeight - 0.4F;
+    public PktSyncStepAssist(float maxUpStep) {
+        this.maxUpStep = maxUpStep - 0.4F;
     }
 
     @Nonnull
     @Override
     public Encoder<PktSyncStepAssist> encoder() {
-        return (packet, buffer) -> buffer.writeFloat(packet.stepHeight);
+        return (packet, buffer) -> buffer.writeFloat(packet.maxUpStep);
     }
 
     @Nonnull
@@ -46,7 +46,7 @@ public class PktSyncStepAssist extends ASPacket<PktSyncStepAssist> {
     public Decoder<PktSyncStepAssist> decoder() {
         return buffer -> {
             PktSyncStepAssist pkt = new PktSyncStepAssist();
-            pkt.stepHeight = buffer.readFloat();
+            pkt.maxUpStep = buffer.readFloat();
             return pkt;
         };
     }
@@ -61,13 +61,13 @@ public class PktSyncStepAssist extends ASPacket<PktSyncStepAssist> {
                 context.enqueueWork(() -> {
                     Player player = Minecraft.getInstance().player;
                     if (player != null) {
-                        player.stepHeight = packet.stepHeight;
+                        player.maxUpStep = packet.maxUpStep;
                     }
                 });
             }
 
             @Override
-            public void handle(PktSyncStepAssist packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktSyncStepAssist packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

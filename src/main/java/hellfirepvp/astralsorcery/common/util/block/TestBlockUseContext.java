@@ -31,22 +31,22 @@ public class TestBlockUseContext extends BlockPlaceContext {
 
     private final Entity entity;
 
-    private TestBlockUseContext(Level worldIn, @Nullable Entity usingEntity, InteractionHand hand, ItemStack stack, BlockPos at, Direction side) {
-        super(worldIn, null, hand, stack, new BlockHitResult(Vector3d.copyCentered(at), side, at, false));
+    private TestBlockUseContext(Level worldIn, @Nullable Entity usingEntity, InteractionHand hand, ItemStack stack, BlockPos at, Direction direction) {
+        super(worldIn, null, hand, stack, new BlockHitResult(Vec3.copyCentered(at), direction, at, false));
         this.entity = usingEntity;
     }
 
-    public static BlockPlaceContext getHandContext(Level worldIn, @Nullable Entity usingEntity, InteractionHand usedHand, BlockPos at, Direction side) {
-        return getHandContextWithItem(worldIn, usingEntity, usedHand, ItemStack.EMPTY, at, side);
+    public static BlockPlaceContext getHandContext(Level worldIn, @Nullable Entity usingEntity, InteractionHand usedHand, BlockPos at, Direction direction) {
+        return getHandContextWithItem(worldIn, usingEntity, usedHand, ItemStack.EMPTY, at, direction);
     }
 
-    public static BlockPlaceContext getHandContextWithItem(Level worldIn, @Nullable Entity usingEntity, InteractionHand usedHand, ItemStack stack, BlockPos at, Direction side) {
-        return new TestBlockUseContext(worldIn, usingEntity, usedHand, stack, at, side);
+    public static BlockPlaceContext getHandContextWithItem(Level worldIn, @Nullable Entity usingEntity, InteractionHand usedHand, ItemStack stack, BlockPos at, Direction direction) {
+        return new TestBlockUseContext(worldIn, usingEntity, usedHand, stack, at, direction);
     }
 
     @Override
-    public Direction getPlacementHorizontalFacing() {
-        return this.entity == null ? Direction.NORTH : Direction.fromAngle(this.entity.rotationYaw);
+    public Direction getHorizontalDirection() {
+        return this.entity == null ? Direction.NORTH : Direction.fromAngle(this.entity.getYRot());
     }
 
     @Override
@@ -77,12 +77,12 @@ public class TestBlockUseContext extends BlockPlaceContext {
     }
 
     @Override
-    public boolean hasSecondaryUseForPlayer() {
+    public boolean isSecondaryUseActive() {
         return false;
     }
 
     @Override
-    public float getPlacementYaw() {
+    public float getRotation() {
         return 0F;
     }
 }

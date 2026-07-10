@@ -50,10 +50,10 @@ public abstract class TemplateStructure extends TemplateStructurePiece {
     }
 
     private void loadTemplate(StructureManager mgr) {
-        StructureTemplate tpl = mgr.getTemplateDefaulted(this.getStructureName());
+        StructureTemplate tpl = mgr.readStructure(this.getFeatureName());
         StructurePlaceSettings settings = new StructurePlaceSettings()
-                .setIgnoreEntities(true)
-                .addProcessor(BlockIgnoreStructureProcessor.STRUCTURE_BLOCK);
+                .addProcessor(true)
+                .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
         this.setup(tpl, this.templatePosition, settings);
     }
 
@@ -62,28 +62,28 @@ public abstract class TemplateStructure extends TemplateStructurePiece {
         return (T) this;
     }
 
-    public abstract ResourceLocation getStructureName();
+    public abstract ResourceLocation getFeatureName();
 
     @Override
-    public boolean func_230383_a_(WorldGenLevel world, StructureManager mgr, ChunkGenerator gen, Random rand, BoundingBox box, ChunkPos chunkPos, BlockPos structCenter) {
+    public boolean postProcess(WorldGenLevel level, StructureManager mgr, ChunkGenerator gen, Random random, BoundingBox box, ChunkPos chunkPos, BlockPos structCenter) {
         BoundingBox genBox = new BoundingBox(box);
         genBox.offset(0, this.yOffset, 0);
 
         BlockPos original = this.templatePosition;
-        this.templatePosition = original.up(this.yOffset);
+        this.templatePosition = original.above(this.yOffset);
         try {
-            return super.func_230383_a_(world, mgr, gen, rand, genBox, chunkPos, structCenter.up(yOffset));
+            return super.postProcess(level, mgr, gen, random, genBox, chunkPos, structCenter.above(yOffset));
         } finally {
             this.templatePosition = original;
             this.placeSettings.setBoundingBox(box);
-            this.boundingBox = this.template.getMutableBoundingBox(this.placeSettings, this.templatePosition);
+            this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
         }
     }
 
     @Override
-    protected void handleDataMarker(String function, BlockPos pos, ServerLevelAccessor worldIn, Random rand, BoundingBox sbb) {
-        if (sbb.isVecInside(pos)) {
-            MarkerManagerAS.handleMarker(function, pos, worldIn, rand, boundingBox);
+    protected void handleDataMarker(String function, BlockPos pos, ServerLevelAccessor worldIn, Random random, BoundingBox sbb) {
+        if (sbb.isInside(pos)) {
+            MarkerManagerAS.handleMarker(function, pos, worldIn, random, boundingBox);
         }
     }
 }

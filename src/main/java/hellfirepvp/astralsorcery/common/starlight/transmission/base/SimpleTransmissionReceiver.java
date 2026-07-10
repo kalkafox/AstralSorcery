@@ -40,10 +40,10 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
     }
 
     @Override
-    public void update(Level world) {
+    public void update(Level level) {
         if (this.needsTileSync) {
-            T tile = getTileAtPos(world);
-            if (tile != null && this.syncTileData(world, tile)) {
+            T tile = getTileAtPos(level);
+            if (tile != null && this.syncTileData(level, tile)) {
                 this.needsTileSync = false;
             }
         }
@@ -53,7 +53,7 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
         this.needsTileSync = true;
     }
 
-    public abstract boolean syncTileData(Level world, T tile);
+    public abstract boolean syncTileData(Level level, T tile);
 
     public abstract Class<T> getTileClass();
 
@@ -63,17 +63,17 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
     }
 
     @Override
-    public void notifySourceLink(Level world, BlockPos source) {
+    public void notifySourceLink(Level level, BlockPos source) {
         sourcesToThis.add(source);
     }
 
     @Override
-    public void notifySourceUnlink(Level world, BlockPos source) {
+    public void notifySourceUnlink(Level level, BlockPos source) {
         sourcesToThis.remove(source);
     }
 
     @Override
-    public boolean notifyBlockChange(Level world, BlockPos changed) {
+    public boolean notifyBlockChange(Level level, BlockPos changed) {
         return false;
     }
 
@@ -83,27 +83,27 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
     }
 
     @Nullable
-    public T getTileAtPos(Level world) {
-        return MiscUtils.getTileAt(world, getLocationPos(), this.getTileClass(), false);
+    public T getTileAtPos(Level level) {
+        return MiscUtils.getTileAt(level, getLocationPos(), this.getTileClass(), false);
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {
+    public void readFromNBT(CompoundTag pattern) {
         this.sourcesToThis.clear();
 
-        this.thisPos = NBTHelper.readBlockPosFromNBT(compound);
-        this.needsTileSync = compound.getBoolean("needsTileSync");
+        this.thisPos = NBTHelper.readBlockPosFromNBT(pattern);
+        this.needsTileSync = pattern.getBoolean("needsTileSync");
 
-        ListTag list = compound.getList("sources", Constants.NBT.TAG_COMPOUND);
+        ListTag list = pattern.getList("sources", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             sourcesToThis.add(NBTHelper.readBlockPosFromNBT(list.getCompound(i)));
         }
     }
 
     @Override
-    public void writeToNBT(CompoundTag compound) {
-        NBTHelper.writeBlockPosToNBT(thisPos, compound);
-        compound.putBoolean("needsTileSync", this.needsTileSync);
+    public void save(CompoundTag pattern) {
+        NBTHelper.writeBlockPosToNBT(thisPos, pattern);
+        pattern.putBoolean("needsTileSync", this.needsTileSync);
 
         ListTag sources = new ListTag();
         for (BlockPos source : sourcesToThis) {
@@ -111,7 +111,7 @@ public abstract class SimpleTransmissionReceiver<T extends TileReceiverBase<?>> 
             NBTHelper.writeBlockPosToNBT(source, comp);
             sources.add(comp);
         }
-        compound.put("sources", sources);
+        pattern.put("sources", sources);
     }
 
     @Override

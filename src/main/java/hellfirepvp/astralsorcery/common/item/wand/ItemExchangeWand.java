@@ -87,8 +87,8 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        tooltip.add(getSizeMode(stack).getDisplay().withStyle(TextFormatting.GOLD));
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        tooltip.add(getSizeMode(stack).getDisplay().withStyle(ChatFormatting.GOLD));
     }
 
     @Override
@@ -97,7 +97,7 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
     }
 
     @Override
-    public int getHarvestLevel(ItemStack stack, ToolType tool, @Nullable Player player, @Nullable BlockState blockState) {
+    public int getLevel(ItemStack stack, ToolType tool, @Nullable Player player, @Nullable BlockState state) {
         return 3;
     }
 
@@ -107,34 +107,34 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
     }
 
     @Override
-    public boolean canHarvestBlock(BlockState blockIn) {
+    public boolean isCorrectToolForDrops(BlockState blockIn) {
         return true;
     }
 
     @Override
-    public boolean canHarvestBlock(ItemStack stack, BlockState state) {
+    public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
         return true;
     }
 
     @Override
     public float getAlignmentChargeCost(Player player, ItemStack stack) {
-        BlockHitResult hitResult = MiscUtils.rayTraceLookBlock(player, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE);
-        if (hitResult == null) {
+        BlockHitResult location = MiscUtils.rayTraceLookBlock(player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.NONE);
+        if (location == null) {
             return 0F;
         }
-        return getPlaceStates(player, player.getEntityWorld(), hitResult.getPos(), stack).size() * COST_PER_EXCHANGE;
+        return getPlaceStates(player, player.getCommandSenderWorld(), location.getBlockPos(), stack).size() * COST_PER_EXCHANGE;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean renderInHand(ItemStack stack, PoseStack renderStack, float pTicks) {
-        BlockHitResult hitResult = MiscUtils.rayTraceLookBlock(Minecraft.getInstance().player, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE);
-        if (hitResult == null) {
+        BlockHitResult location = MiscUtils.rayTraceLookBlock(Minecraft.getInstance().player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.NONE);
+        if (location == null) {
             return true;
         }
-        Level world = Minecraft.getInstance().world;
-        BlockPos at = hitResult.getPos();
-        Map<BlockPos, BlockState> placeStates = getPlaceStates(Minecraft.getInstance().player, world, at, stack);
+        Level level = Minecraft.getInstance().level;
+        BlockPos at = location.getBlockPos();
+        Map<BlockPos, BlockState> placeStates = getPlaceStates(Minecraft.getInstance().player, level, at, stack);
         if (placeStates.isEmpty()) {
             return true;
         }
@@ -151,13 +151,13 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
         RenderSystem.disableDepthTest();
         RenderSystem.disableAlphaTest();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.BLOCK, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.BLOCK, buf -> {
             placeStates.forEach((pos, state) -> {
-                renderStack.push();
+                renderStack.pushPose();
                 renderStack.translate(pos.getX() - offset.getX() + 0.1F, pos.getY() - offset.getY() + 0.1F, pos.getZ() - offset.getZ() + 0.1F);
                 renderStack.scale(0.8F, 0.8F, 0.8F);
                 RenderingUtils.renderSimpleBlockModel(state, renderStack, decorator.decorate(buf), pos, null, false);
-                renderStack.pop();
+                renderStack.popPose();
             });
         });
 
@@ -177,21 +177,21 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
     }
 
     @Override
-    public InteractionResult onItemUse(UseOnContext context) {
-        Level world = context.getWorld();
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
         ItemStack stack = context.getItem();
         Player player = context.getPlayer();
-        BlockPos pos = context.getPos();
-        if (world.isRemote() || !(player instanceof ServerPlayer) || stack.isEmpty()) {
-            return ActionResultType.SUCCESS;
+        BlockPos pos = context.getBlockPos();
+        if (level.isClientSide() || !(player instanceof ServerPlayer) || stack.isEmpty()) {
+            return InteractionResult.SUCCESS;
         }
-        if (player.isSneaking()) {
-            ItemBlockStorage.storeBlockState(stack, world, pos);
-            return ActionResultType.SUCCESS;
+        if (player.isShiftKeyDown()) {
+            ItemBlockStorage.storeBlockState(stack, level, pos);
+            return InteractionResult.SUCCESS;
         }
 
         // availableStacks should already contain enough to fill whatever placeStates has precalculated
-        Map<BlockPos, BlockState> placeStates = getPlaceStates(player, world, pos, stack);
+        Map<BlockPos, BlockState> placeStates = getPlaceStates(player, level, pos, stack);
         Map<BlockState, Tuple<ItemStack, Integer>> availableStacks = MapStream.of(ItemBlockStorage.getInventoryMatching(player, stack))
                 .filter(tpl -> placeStates.containsValue(tpl.getA()))
                 .collect(Collectors.toMap(Tuple::getA, Tuple::getB));
@@ -214,40 +214,40 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
                 continue;
             }
 
-            BlockState prevState = world.getBlockState(placePos);
+            BlockState prevState = level.getBlockState(placePos);
             if ((player.isCreative() || ItemUtils.consumeFromPlayerInventory(player, stack, extractable, true)) &&
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_EXCHANGE, false) &&
-                    ((ServerPlayer) player).interactionManager.tryHarvestBlock(placePos) &&
+                    ((ServerPlayer) player).gameMode.setLevel(placePos) &&
                     MiscUtils.canPlayerPlaceBlockPos(player, stateToPlace, placePos, Direction.UP) &&
                     (player.isCreative() || ItemUtils.consumeFromPlayerInventory(player, stack, extractable, false)) &&
-                    world.setBlockState(placePos, stateToPlace)) {
+                    level.setBlock(placePos, stateToPlace)) {
                 PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.BLOCK_EFFECT)
                         .addData(buf -> {
                             ByteBufUtils.writePos(buf, placePos);
                             ByteBufUtils.writeBlockState(buf, prevState);
                         });
-                PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(world, placePos, 32));
+                PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(level, placePos, 32));
             }
         }
 
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level worldIn, Player playerIn, InteractionHand handIn) {
-        ItemStack held = playerIn.getHeldItem(handIn);
-        if (playerIn.isSneaking()) {
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+        ItemStack held = playerIn.getItemInHand(handIn);
+        if (playerIn.isShiftKeyDown()) {
             SizeMode nextMode = getSizeMode(held).next();
             setSizeMode(held, nextMode);
-            playerIn.sendStatusMessage(nextMode.getDisplay(), true);
+            playerIn.move(nextMode.getDisplay(), true);
         }
-        return ActionResult.resultSuccess(held);
+        return InteractionResultHolder.success(held);
     }
 
     @Nonnull
-    private Map<BlockPos, BlockState> getPlaceStates(Player placer, Level world, BlockPos origin, ItemStack refStack) {
+    private Map<BlockPos, BlockState> getPlaceStates(Player placer, Level level, BlockPos origin, ItemStack refStack) {
         Map<BlockState, Tuple<ItemStack, Integer>> tplStates = ItemBlockStorage.getInventoryMatching(placer, refStack);
-        BlockState atState = world.getBlockState(origin);
+        BlockState atState = level.getBlockState(origin);
         SizeMode mode = getSizeMode(refStack);
         Map<BlockPos, BlockState> placeables = Maps.newHashMap();
 
@@ -255,7 +255,7 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
         if (match != null && tplStates.size() <= 1) {
             return placeables; //If trying to replace a block with its identical block.
         }
-        float hardness = atState.getBlockHardness(world, origin);
+        float hardness = atState.getDestroySpeed(level, origin);
         int cfgHardness = WandsConfig.CONFIG.exchangeWandMaxHardness.get();
         if (hardness == -1 || (cfgHardness != -1 && hardness > cfgHardness)) {
             return placeables; //Don't break/exchange too hard or unbreakable blocks.
@@ -270,7 +270,7 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
             }
         }
 
-        List<BlockPos> foundPositions = BlockDiscoverer.discoverBlocksWithSameStateAround(world, origin, true, mode.getSearchRadius(), totalItems, false);
+        List<BlockPos> foundPositions = BlockDiscoverer.discoverBlocksWithSameStateAround(level, origin, true, mode.getBlockSearchExtent(), totalItems, false);
         if (foundPositions.isEmpty()) {
             return placeables; //It.. shouldn't actually be empty here, ever. Should at least have 1 entry.
         }
@@ -280,10 +280,10 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
             placeAmounts.put(state, placer.isCreative() ? Integer.MAX_VALUE : tplStates.get(state).getB());
         }
         List<BlockState> placeableStates = Lists.newArrayList(placeAmounts.keySet());
-        Random rand = ItemBlockStorage.getPreviewRandomFromWorld(world);
+        Random random = ItemBlockStorage.getPreviewRandomFromWorld(level);
 
         for (BlockPos pos : foundPositions) {
-            Collections.shuffle(placeableStates, rand);
+            Collections.shuffle(placeableStates, random);
             BlockState toPlace = Iterables.getFirst(placeableStates, null);
 
             if (toPlace == null) {
@@ -335,7 +335,7 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
             this.searchRadius = searchRadius;
         }
 
-        public int getSearchRadius() {
+        public int getBlockSearchExtent() {
             return searchRadius;
         }
 

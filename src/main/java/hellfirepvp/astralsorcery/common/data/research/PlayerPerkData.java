@@ -198,53 +198,53 @@ public class PlayerPerkData {
         return true;
     }
 
-    protected boolean tryRevokeAllocationPoint(ResourceLocation token) {
-        return this.freePointTokens.remove(token);
+    protected boolean tryRevokeAllocationPoint(ResourceLocation accessToken) {
+        return this.freePointTokens.remove(accessToken);
     }
 
     public Collection<ResourceLocation> getFreePointTokens() {
         return Collections.unmodifiableCollection(this.freePointTokens);
     }
 
-    public int getAvailablePerkPoints(Player player, LogicalSide side) {
+    public int getAvailablePerkPoints(Player player, LogicalSide direction) {
         int allocatedPerks = (int) this.perks.values().stream().filter(perk -> perk.isAllocated(PerkAllocationType.UNLOCKED)).count() - 1;
-        int allocationLevels = PerkLevelManager.getLevel(getPerkExp(), player, side);
+        int allocationLevels = PerkLevelManager.getLevel(getPerkExp(), player, direction);
         return (allocationLevels + this.freePointTokens.size()) - allocatedPerks;
     }
 
-    public boolean hasFreeAllocationPoint(Player player, LogicalSide side) {
-        return getAvailablePerkPoints(player, side) > 0;
+    public boolean hasFreeAllocationPoint(Player player, LogicalSide direction) {
+        return getAvailablePerkPoints(player, direction) > 0;
     }
 
     public double getPerkExp() {
         return perkExp;
     }
 
-    public int getPerkLevel(Player player, LogicalSide side) {
-        return PerkLevelManager.getLevel(getPerkExp(), player, side);
+    public int getPerkLevel(Player player, LogicalSide direction) {
+        return PerkLevelManager.getLevel(getPerkExp(), player, direction);
     }
 
-    public float getPercentToNextLevel(Player player, LogicalSide side) {
-        return PerkLevelManager.getNextLevelPercent(getPerkExp(), player, side);
+    public float getPercentToNextLevel(Player player, LogicalSide direction) {
+        return PerkLevelManager.getNextLevelPercent(getPerkExp(), player, direction);
     }
 
-    protected void modifyExp(double exp, Player player) {
+    protected void modifyExp(double futureXp, Player player) {
         int currLevel = PerkLevelManager.getLevel(getPerkExp(), player, LogicalSide.SERVER);
-        if (exp >= 0 && currLevel >= PerkLevelManager.getLevelCap(LogicalSide.SERVER, player)) {
+        if (futureXp >= 0 && currLevel >= PerkLevelManager.getLevelCap(LogicalSide.SERVER, player)) {
             return;
         }
         long expThisLevel = PerkLevelManager.getExpForLevel(currLevel, player, LogicalSide.SERVER);
         long expNextLevel = PerkLevelManager.getExpForLevel(currLevel + 1, player, LogicalSide.SERVER);
-        long cap = MathHelper.lfloor(((float) (expNextLevel - expThisLevel)) * 0.08F);
-        if (exp > cap) {
-            exp = cap;
+        long cap = Mth.lfloor(((float) (expNextLevel - expThisLevel)) * 0.08F);
+        if (futureXp > cap) {
+            futureXp = cap;
         }
 
-        this.perkExp = Math.max(this.perkExp + exp, 0);
+        this.perkExp = Math.max(this.perkExp + futureXp, 0);
     }
 
-    protected void setExp(double exp) {
-        this.perkExp = Math.max(exp, 0);
+    protected void setExp(double futureXp) {
+        this.perkExp = Math.max(futureXp, 0);
     }
 
     void load(PlayerProgress progress, CompoundTag tag) {
@@ -277,7 +277,7 @@ public class PlayerPerkData {
 
         //TODO Remove .replace("-", "_") in 1.17
         this.freePointTokens.addAll(NBTHelper.readList(tag, "tokens", Constants.NBT.TAG_STRING,
-                nbt -> new ResourceLocation(nbt.getString().replace("-", "_"))));
+                nbt -> ResourceLocation.parse(nbt.getString().replace("-", "_"))));
 
         ListTag list = tag.getList("perks", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
@@ -293,7 +293,7 @@ public class PlayerPerkData {
 
         ListTag tokens = new ListTag();
         for (ResourceLocation key : this.freePointTokens) {
-            tokens.add(StringNBT.valueOf(key.toString()));
+            tokens.add(StringTag.valueOf(key.toString()));
         }
         tag.put("tokens", tokens);
 
@@ -313,13 +313,13 @@ public class PlayerPerkData {
         });
     }
 
-    public static PlayerPerkData read(FriendlyByteBuf buf, LogicalSide side) {
+    public static PlayerPerkData read(FriendlyByteBuf buf, LogicalSide direction) {
         PlayerPerkData data = new PlayerPerkData();
         data.perkExp = buf.readDouble();
         data.freePointTokens = ByteBufUtils.readSet(buf, ByteBufUtils::readResourceLocation);
         Set<AppliedPerk> appliedPerks = ByteBufUtils.readSet(buf, buffer -> {
             ResourceLocation key = ByteBufUtils.readResourceLocation(buffer);
-            return PerkTree.PERK_TREE.getPerk(side, key)
+            return PerkTree.PERK_TREE.getPerk(direction, key)
                     .map(AppliedPerk::new)
                     .map(perk -> {
                         perk.read(buffer);
@@ -344,8 +344,8 @@ public class PlayerPerkData {
         return tag.contains("sealedPerks");
     }
 
-    private void loadLegacyData(PlayerProgress progress, CompoundTag compound) {
-        long perkTreeLevel = compound.getLong("perkTreeVersion");
+    private void loadLegacyData(PlayerProgress progress, CompoundTag pattern) {
+        long perkTreeLevel = pattern.getLong("perkTreeVersion");
         if (PerkTree.PERK_TREE.getVersion(LogicalSide.SERVER).map(v -> !v.equals(perkTreeLevel)).orElse(true)) { //If your perk tree is different, clear it.
             AstralSorcery.log.info("Clearing perk-tree because the player's skill-tree version was outdated!");
             if (progress.getAttunedConstellation() != null) {
@@ -358,13 +358,13 @@ public class PlayerPerkData {
                 }
             }
         } else {
-            if (compound.contains("perks")) {
-                ListTag list = compound.getList("perks", Constants.NBT.TAG_COMPOUND);
+            if (pattern.contains("perks")) {
+                ListTag list = pattern.getList("perks", Constants.NBT.TAG_COMPOUND);
                 for (int i = 0; i < list.size(); i++) {
                     CompoundTag tag = list.getCompound(i);
                     String perkRegName = tag.getString("perkName");
                     CompoundTag data = tag.getCompound("perkData");
-                    PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, new ResourceLocation(perkRegName)).ifPresent(perk -> {
+                    PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, ResourceLocation.parse(perkRegName)).ifPresent(perk -> {
                         AppliedPerk appliedPerk = new AppliedPerk(perk);
                         appliedPerk.addAllocation(PlayerPerkAllocation.unlock(), false);
                         appliedPerk.perkData = data;
@@ -372,12 +372,12 @@ public class PlayerPerkData {
                     });
                 }
             }
-            if (compound.contains("sealedPerks")) {
-                ListTag list = compound.getList("sealedPerks", Constants.NBT.TAG_COMPOUND);
+            if (pattern.contains("sealedPerks")) {
+                ListTag list = pattern.getList("sealedPerks", Constants.NBT.TAG_COMPOUND);
                 for (int i = 0; i < list.size(); i++) {
                     CompoundTag tag = list.getCompound(i);
                     String perkRegName = tag.getString("perkName");
-                    PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, new ResourceLocation(perkRegName)).ifPresent(perk -> {
+                    PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, ResourceLocation.parse(perkRegName)).ifPresent(perk -> {
                         AppliedPerk newPerk = this.perks.get(perk);
                         if (newPerk != null) {
                             newPerk.setSealed(true);
@@ -386,8 +386,8 @@ public class PlayerPerkData {
                 }
             }
 
-            if (compound.contains("pointTokens")) {
-                ListTag list = compound.getList("pointTokens", Constants.NBT.TAG_STRING);
+            if (pattern.contains("pointTokens")) {
+                ListTag list = pattern.getList("pointTokens", Constants.NBT.TAG_STRING);
                 for (int i = 0; i < list.size(); i++) {
                     String[] resource = legacySplitKey(list.getString(i).toLowerCase(Locale.ROOT));
                     resource[1] = resource[1].replace("-", "_").replace(":", "_");
@@ -396,8 +396,8 @@ public class PlayerPerkData {
             }
         }
 
-        if (compound.contains("perkExp")) {
-            this.perkExp = compound.getDouble("perkExp");
+        if (pattern.contains("perkExp")) {
+            this.perkExp = pattern.getDouble("perkExp");
         }
     }
 
@@ -579,7 +579,7 @@ public class PlayerPerkData {
         }
 
         private static Optional<AppliedPerk> deserialize(CompoundTag tag) {
-            ResourceLocation key = new ResourceLocation(tag.getString("perk"));
+            ResourceLocation key = ResourceLocation.parse(tag.getString("perk"));
             return PerkTree.PERK_TREE.getPerk(LogicalSide.SERVER, key)
                     .map(AppliedPerk::new)
                     .map(appliedPerk -> {

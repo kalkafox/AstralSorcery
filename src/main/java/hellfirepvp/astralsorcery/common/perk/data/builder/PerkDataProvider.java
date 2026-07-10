@@ -44,7 +44,7 @@ public abstract class PerkDataProvider implements DataProvider {
     public abstract void registerPerks(Consumer<FinishedPerk> registrar);
 
     @Override
-    public void act(HashCache cache) throws IOException {
+    public void run(HashCache cache) throws IOException {
         Path path = this.generator.getOutputFolder();
 
         List<FinishedPerk> builtPerks = new ArrayList<>();
@@ -69,8 +69,8 @@ public abstract class PerkDataProvider implements DataProvider {
 
     private void savePerkFile(HashCache cache, JsonElement perk, Path filePath) {
         try {
-            String perkJson = GSON.toJson(perk);
-            String perkHash = HASH_FUNCTION.hashUnencodedChars(perkJson).toString();
+            String perkJson = GSON.getPos(perk);
+            String perkHash = SHA1.hashUnencodedChars(perkJson).toString();
             if (!Objects.equals(cache.getPreviousHash(filePath), perkHash) || !Files.exists(filePath)) {
                 Files.createDirectories(filePath.getParent());
 
@@ -79,7 +79,7 @@ public abstract class PerkDataProvider implements DataProvider {
                 }
             }
 
-            cache.recordHash(filePath, perkHash);
+            cache.putNew(filePath, perkHash);
         } catch (IOException exc) {
             AstralSorcery.log.error("Couldn't save perk {}", filePath, exc);
         }

@@ -50,18 +50,18 @@ public class EffectCheatDeath extends EffectCustomTexture {
 
     private void onDeath(LivingDeathEvent event) {
         LivingEntity le = event.getEntityLiving();
-        if (!le.getEntityWorld().isRemote() && le.isPotionActive(EffectsAS.EFFECT_CHEAT_DEATH)) {
+        if (!le.getCommandSenderWorld().isClientSide() && le.isPotionActive(EffectsAS.EFFECT_CHEAT_DEATH)) {
             event.setCanceled(true);
 
             int level = le.removeActivePotionEffect(EffectsAS.EFFECT_CHEAT_DEATH).getAmplifier();
             le.setHealth(Math.min(le.getMaxHealth(), 4 + level * 2));
-            le.addPotionEffect(new MobEffectInstance(Effects.REGENERATION, 200, 2, false, false, true));
-            le.addPotionEffect(new MobEffectInstance(Effects.FIRE_RESISTANCE, 500, 1, false, false, true));
-            List<LivingEntity> others = le.getEntityWorld().getEntitiesWithinAABB(LivingEntity.class,
+            le.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 2, false, false, true));
+            le.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 500, 1, false, false, true));
+            List<LivingEntity> others = le.getCommandSenderWorld().getEntitiesWithinAABB(LivingEntity.class,
                     le.getBoundingBox().grow(3), (e) -> e.isAlive() && e != le);
             for (LivingEntity lb : others) {
                 lb.setFire(10);
-                lb.applyKnockback(2F, lb.getPosX() - le.getPosX(), lb.getPosZ() - le.getPosZ());
+                lb.applyKnockback(2F, lb.getX() - le.getX(), lb.getZ() - le.getZ());
             }
             //TODO particles
             //PktParticleEvent ev = new PktParticleEvent(PktParticleEvent.ParticleEventType.PHOENIX_PROC, new Vector3(le.getPosX(), le.getPosY(), le.getPosZ()));

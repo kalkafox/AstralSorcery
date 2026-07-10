@@ -33,7 +33,7 @@ import java.util.Set;
  * Created by HellFirePvP
  * Date: 11.05.2020 / 20:26
  */
-public class ConstellationInstance extends CriterionInstance {
+public class ConstellationInstance extends AbstractCriterionTriggerInstance {
 
     private boolean constellationMajor = false;
     private boolean constellationWeak = false;
@@ -41,7 +41,7 @@ public class ConstellationInstance extends CriterionInstance {
     private final Set<IConstellation> constellations = new HashSet<>();
 
     private ConstellationInstance(ResourceLocation id) {
-        super(id, EntityPredicate.AndPredicate.ANY_AND);
+        super(id, EntityPredicate.AndPredicate.ANY);
     }
 
     public static ConstellationInstance any(ResourceLocation type) {
@@ -73,7 +73,7 @@ public class ConstellationInstance extends CriterionInstance {
     }
 
     @Override
-    public JsonObject serialize(ConditionArraySerializer conditions) {
+    public JsonObject serialize(SerializationContext conditions) {
         JsonObject out = super.serialize(conditions);
         if (this.constellationMajor) {
             out.addProperty("major", true);
@@ -96,14 +96,14 @@ public class ConstellationInstance extends CriterionInstance {
 
     public static ConstellationInstance deserialize(ResourceLocation id, JsonObject json) {
         ConstellationInstance instance = new ConstellationInstance(id);
-        instance.constellationMajor = JSONUtils.getBoolean(json, "major", false);
-        instance.constellationWeak  = JSONUtils.getBoolean(json, "weak", false);
-        instance.constellationMinor = JSONUtils.getBoolean(json, "minor", false);
-        JsonArray constellationNames = JSONUtils.getJsonArray(json, "constellations", new JsonArray());
+        instance.constellationMajor = GsonHelper.getBoolean(json, "major", false);
+        instance.constellationWeak  = GsonHelper.getBoolean(json, "weak", false);
+        instance.constellationMinor = GsonHelper.getBoolean(json, "minor", false);
+        JsonArray constellationNames = GsonHelper.getAsJsonArray(json, "constellations", new JsonArray());
         for (int idx = 0; idx < constellationNames.size(); idx++) {
-            JsonElement element = constellationNames.get(idx);
-            String key = JSONUtils.getString(element, String.format("constellations[%s]", idx));
-            IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(new ResourceLocation(key));
+            JsonElement value = constellationNames.get(idx);
+            String key = GsonHelper.getString(value, String.format("constellations[%s]", idx));
+            IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(ResourceLocation.parse(key));
             if (cst == null) {
                 throw new IllegalArgumentException(String.format("Unknown constellation: %s - at constellations[%s]", key, idx));
             }

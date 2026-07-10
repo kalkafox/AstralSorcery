@@ -28,8 +28,8 @@ import java.util.Optional;
  */
 public class ContainerAltarDiscovery extends ContainerAltarBase {
 
-    public ContainerAltarDiscovery(TileAltar altar, Inventory inv, int windowId) {
-        super(altar, ContainerTypesAS.ALTAR_DISCOVERY, inv, windowId);
+    public ContainerAltarDiscovery(TileAltar altar, Inventory inv, int containerId) {
+        super(altar, ContainerTypesAS.ALTAR_DISCOVERY, inv, containerId);
     }
 
     @Override

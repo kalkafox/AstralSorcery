@@ -41,32 +41,32 @@ public class KeyCleanseBadPotions extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOW, this::onHeal);
     }
 
     private void onHeal(LivingHealEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        if (entity instanceof Player && !entity.world.isRemote()) {
+        if (entity instanceof Player && !entity.level().isClientSide()) {
             Player player = (Player) entity;
-            List<MobEffectInstance> badEffects = player.getActivePotionEffects()
+            List<MobEffectInstance> badEffects = player.getActiveEffects()
                     .stream()
-                    .filter(p -> p.getPotion().getEffectType() == EffectType.HARMFUL)
+                    .filter(p -> p.getEffect().getCategory() == EffectType.HARMFUL)
                     .collect(Collectors.toList());
             if (badEffects.isEmpty()) {
                 return;
             }
-            MobEffectInstance effect = badEffects.get(rand.nextInt(badEffects.size()));
+            MobEffectInstance effect = badEffects.get(random.nextInt(badEffects.size()));
             PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 float inclChance = 0.1F;
                 inclChance = PerkAttributeHelper.getOrCreateMap(player, LogicalSide.SERVER)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, inclChance);
                 float chance = getChance(event.getAmount()) * inclChance;
-                if (rand.nextFloat() < chance) {
-                    player.removePotionEffect(effect.getPotion());
+                if (random.nextFloat() < chance) {
+                    player.removePotionEffect(effect.getEffect());
                 }
             }
         }
@@ -77,6 +77,6 @@ public class KeyCleanseBadPotions extends KeyPerk {
             return 0;
         }
         float chance = ((3F / (healed * -0.66666667F)) + 5F) / 5F;
-        return MathHelper.clamp(chance, 0F, 1F);
+        return Mth.clamp(chance, 0F, 1F);
     }
 }

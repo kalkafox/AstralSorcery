@@ -37,33 +37,33 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
     }
 
     @Override
-    public void onApply(Player player, LogicalSide side, ModifierSource source) {
-        super.onApply(player, side, source);
+    public void onApply(Player player, LogicalSide direction, ModifierSource source) {
+        super.onApply(player, direction, source);
 
         refreshAttribute(player);
     }
 
     @Override
-    public void onRemove(Player player, LogicalSide side, boolean removedCompletely, ModifierSource source) {
-        super.onRemove(player, side, removedCompletely, source);
+    public void onRemove(Player player, LogicalSide direction, boolean removedCompletely, ModifierSource source) {
+        super.onRemove(player, direction, removedCompletely, source);
 
         refreshAttribute(player);
     }
 
     @Override
-    public void onModeApply(Player player, ModifierType mode, LogicalSide side) {
-        super.onModeApply(player, mode, side);
+    public void onModeApply(Player player, ModifierType mode, LogicalSide direction) {
+        super.onModeApply(player, mode, direction);
 
-        AttributeInstance attr = player.getAttributeManager().createInstanceIfAbsent(getAttribute());
+        AttributeInstance attr = player.getAttributes().createInstanceIfAbsent(getAttribute());
         if (attr == null) {
             return;
         }
 
         //The attributes don't get written/read from bytebuffer on local connection, but ARE in dedicated connections.
         //Remove minecraft's dummy instances in case we're on a dedicated server.
-        if (side.isClient()) {
+        if (direction.isClient()) {
             AttributeModifier modifier;
-            if ((modifier = attr.getModifier(getID(mode))) != null) {
+            if ((modifier = attr.getAttributeInstance(getID(mode))) != null) {
                 if (!(modifier instanceof DynamicAttributeModifier)) {
                     attr.removeModifier(getID(mode));
                 } else {
@@ -74,13 +74,13 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
 
         switch (mode) {
             case ADDITION:
-                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Add", this, mode, player, side));
+                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Add", this, mode, player, direction));
                 break;
             case ADDED_MULTIPLY:
-                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Multiply Add", this, mode, player, side));
+                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Multiply Add", this, mode, player, direction));
                 break;
             case STACKING_MULTIPLY:
-                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Stack Add", this, mode, player, side));
+                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Stack Add", this, mode, player, direction));
                 break;
             default:
                 break;
@@ -88,10 +88,10 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
     }
 
     @Override
-    public void onModeRemove(Player player, ModifierType mode, LogicalSide side, boolean removedCompletely) {
-        super.onModeRemove(player, mode, side, removedCompletely);
+    public void onModeRemove(Player player, ModifierType mode, LogicalSide direction, boolean removedCompletely) {
+        super.onModeRemove(player, mode, direction, removedCompletely);
 
-        AttributeInstance attr = player.getAttributeManager().createInstanceIfAbsent(getAttribute());
+        AttributeInstance attr = player.getAttributes().createInstanceIfAbsent(getAttribute());
         if (attr == null) {
             return;
         }
@@ -100,7 +100,7 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
     }
 
     public void refreshAttribute(Player player) {
-        AttributeInstance attr = player.getAttributeManager().createInstanceIfAbsent(getAttribute());
+        AttributeInstance attr = player.getAttributes().createInstanceIfAbsent(getAttribute());
         if (attr == null) {
             return;
         }
@@ -124,25 +124,25 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
     static class DynamicAttributeModifier extends AttributeModifier {
 
         private Player player;
-        private LogicalSide side;
+        private LogicalSide direction;
         private PerkAttributeType type;
 
-        public DynamicAttributeModifier(UUID idIn, String nameIn, PerkAttributeType type, ModifierType mode, Player player, LogicalSide side) {
-            this(idIn, nameIn, type, mode.getVanillaAttributeOperation(), player, side);
+        public DynamicAttributeModifier(UUID idIn, String nameIn, PerkAttributeType type, ModifierType mode, Player player, LogicalSide direction) {
+            this(idIn, nameIn, type, mode.getVanillaAttributeOperation(), player, direction);
         }
 
-        public DynamicAttributeModifier(UUID idIn, String nameIn, PerkAttributeType type, Operation operationIn, Player player, LogicalSide side) {
+        public DynamicAttributeModifier(UUID idIn, String nameIn, PerkAttributeType type, Operation operationIn, Player player, LogicalSide direction) {
             super(idIn, nameIn, operationIn == Operation.MULTIPLY_TOTAL ? 1 : 0, operationIn);
             this.player = player;
-            this.side = side;
+            this.direction = direction;
             this.type = type;
         }
 
         @Override
         public double getAmount() {
             ModifierType mode = ModifierType.fromVanillaAttributeOperation(getOperation());
-            return PerkAttributeHelper.getOrCreateMap(player, side)
-                    .getModifier(player, ResearchHelper.getProgress(player, side), type, mode) - 1;
+            return PerkAttributeHelper.getOrCreateMap(player, direction)
+                    .getAttributeInstance(player, ResearchHelper.getProgress(player, direction), type, mode) - 1;
         }
 
     }

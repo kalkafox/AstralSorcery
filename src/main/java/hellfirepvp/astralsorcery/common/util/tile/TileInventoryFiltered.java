@@ -41,20 +41,20 @@ public class TileInventoryFiltered extends TileInventory {
 
     public TileInventoryFiltered(@Nonnull TileEntitySynchronized tile,
                                  @Nonnull Supplier<Integer> slotCountProvider,
-                                 @Nullable Consumer<Integer> changeListener,
+                                 @Nullable Consumer<Integer> callback,
                                  Direction... applicableSides) {
-        super(tile, slotCountProvider, changeListener, applicableSides);
+        super(tile, slotCountProvider, callback, applicableSides);
     }
 
     protected TileInventoryFiltered(@Nonnull TileEntitySynchronized tile,
                                     @Nonnull Supplier<Integer> slotCountProvider,
-                                    @Nullable Consumer<Integer> changeListener,
+                                    @Nullable Consumer<Integer> callback,
                                     @Nonnull Collection<Direction> applicableSides,
                                     @Nonnull BiFunction<Integer, ItemStack, Integer> stackSizeLimiter) {
-        super(tile, slotCountProvider, changeListener, applicableSides, stackSizeLimiter);
+        super(tile, slotCountProvider, callback, applicableSides, stackSizeLimiter);
     }
 
-    public TileInventoryFiltered canInsert(InputFilter filter) {
+    public TileInventoryFiltered updateType(InputFilter filter) {
         this.inputFilter = filter;
         return this;
     }
@@ -67,8 +67,8 @@ public class TileInventoryFiltered extends TileInventory {
     @Override
     protected TileInventoryFiltered makeNewInstance() {
         TileInventoryFiltered inv = new TileInventoryFiltered(this.tile, this.slotCountProvider,
-                this.changeListener, MiscUtils.copySet(this.applicableSides), this.stackSizeLimiter);
-        inv.canInsert(this.inputFilter);
+                this.callback, MiscUtils.copySet(this.applicableSides), this.stackSizeLimiter);
+        inv.updateType(this.inputFilter);
         inv.canExtract(this.extractFilter);
         return inv;
     }
@@ -82,7 +82,7 @@ public class TileInventoryFiltered extends TileInventory {
     @Nonnull
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-        if (!canInsertItem(slot, stack, getStackInSlot(slot))) {
+        if (!canPlaceItemThroughFace(slot, stack, getStackInSlot(slot))) {
             return stack;
         }
         return super.insertItem(slot, stack, simulate);
@@ -91,31 +91,31 @@ public class TileInventoryFiltered extends TileInventory {
     @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (!canExtractItem(slot, amount, getStackInSlot(slot))) {
+        if (!canTakeItemThroughFace(slot, amount, getStackInSlot(slot))) {
             return ItemStack.EMPTY;
         }
         return super.extractItem(slot, amount, simulate);
     }
 
-    public boolean canInsertItem(int slot, ItemStack toAdd) {
-        return this.canInsertItem(slot, toAdd, this.getStackInSlot(slot));
+    public boolean canPlaceItemThroughFace(int slot, ItemStack toAdd) {
+        return this.canPlaceItemThroughFace(slot, toAdd, this.getStackInSlot(slot));
     }
 
-    private boolean canInsertItem(int slot, ItemStack toAdd, @Nonnull ItemStack existing) {
-        return inputFilter == null || inputFilter.canInsert(slot, toAdd, existing);
+    private boolean canPlaceItemThroughFace(int slot, ItemStack toAdd, @Nonnull ItemStack existing) {
+        return inputFilter == null || inputFilter.updateType(slot, toAdd, existing);
     }
 
-    public boolean canExtractItem(int slot, int amount) {
-        return this.canExtractItem(slot, amount, this.getStackInSlot(slot));
+    public boolean canTakeItemThroughFace(int slot, int amount) {
+        return this.canTakeItemThroughFace(slot, amount, this.getStackInSlot(slot));
     }
 
-    private boolean canExtractItem(int slot, int amount, @Nonnull ItemStack existing) {
+    private boolean canTakeItemThroughFace(int slot, int amount, @Nonnull ItemStack existing) {
         return extractFilter == null || extractFilter.canExtract(slot, amount, existing);
     }
 
     public static interface InputFilter {
 
-        public boolean canInsert(int slot, ItemStack toAdd, @Nonnull ItemStack existing);
+        public boolean updateType(int slot, ItemStack toAdd, @Nonnull ItemStack existing);
 
     }
 

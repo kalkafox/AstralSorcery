@@ -25,6 +25,6 @@ public interface CrystalAttributeTile {
     void setAttributes(@Nullable CrystalAttributes attributes);
 
     default CrystalAttributes getMissingAttributes() {
-        return CrystalAttributes.Builder.newBuilder(false).build();
+        return CrystalAttributes.Builder.properties(false).build();
     }
 }

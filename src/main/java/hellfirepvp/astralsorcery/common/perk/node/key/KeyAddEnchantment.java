@@ -45,20 +45,20 @@ public class KeyAddEnchantment extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
-        if (side.isServer()) {
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
+        if (direction.isServer()) {
             bus.addListener(this::onEnchantmentAddServer);
         } else {
             bus.addListener(this::onEnchantmentAddClient);
         }
     }
 
-    public KeyAddEnchantment addEnchantment(ResourceKey<Enchantment> ench, int level) {
-        return addEnchantment(DynamicEnchantmentType.ADD_TO_SPECIFIC, ench, level);
+    public KeyAddEnchantment fillItemCategory(ResourceKey<Enchantment> ench, int level) {
+        return fillItemCategory(DynamicEnchantmentType.ADD_TO_SPECIFIC, ench, level);
     }
 
-    public KeyAddEnchantment addEnchantment(DynamicEnchantmentType type, ResourceKey<Enchantment> ench, int level) {
+    public KeyAddEnchantment fillItemCategory(DynamicEnchantmentType type, ResourceKey<Enchantment> ench, int level) {
         this.enchantments.add(new DynamicEnchantment(type, ench, level));
         return this;
     }
@@ -69,22 +69,22 @@ public class KeyAddEnchantment extends KeyPerk {
     }
     private void onEnchantmentAddClient(DynamicEnchantmentEvent.Add event) {
         Player player = event.getResolvedPlayer();
-        LogicalSide side = this.getSide(player);
-        if (side.isClient()) {
-            addEnchantments(player, side, event);
+        LogicalSide direction = this.getSide(player);
+        if (direction.isClient()) {
+            addEnchantments(player, direction, event);
         }
     }
 
     private void onEnchantmentAddServer(DynamicEnchantmentEvent.Add event) {
         Player player = event.getResolvedPlayer();
-        LogicalSide side = this.getSide(player);
-        if (side.isServer()) {
-            addEnchantments(player, side, event);
+        LogicalSide direction = this.getSide(player);
+        if (direction.isServer()) {
+            addEnchantments(player, direction, event);
         }
     }
 
-    private void addEnchantments(Player player, LogicalSide side, DynamicEnchantmentEvent.Add event) {
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+    private void addEnchantments(Player player, LogicalSide direction, DynamicEnchantmentEvent.Add event) {
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {
             List<DynamicEnchantment> listedEnchantments = event.getEnchantmentsToApply();
             for (DynamicEnchantment ench : this.enchantments) {
@@ -123,7 +123,7 @@ public class KeyAddEnchantment extends KeyPerk {
                 if (type.isEnchantmentSpecific()) {
                     String enchantmentKey = GsonHelper.getAsString(serializedEnchantment, "enchantment");
                     ResourceKey<Enchantment> ench = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse(enchantmentKey));
-                    this.addEnchantment(type, ench, level);
+                    this.fillItemCategory(type, ench, level);
                 } else {
                     this.addAllEnchantmentIncrease(level);
                 }

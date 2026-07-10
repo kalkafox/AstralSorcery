@@ -53,16 +53,16 @@ public class EffectFocusDustSwirl extends AltarRecipeEffect implements IFocusEff
             for (int i = 0; i < parts; i++) {
                 Vector3 v = Vector3.RotAxis.X_AXIS.clone();
                 float originalAngle = (((float) i) / ((float) parts)) * 360F;
-                double angle = originalAngle + (MathHelper.sin(percCycle) * angleSwirl);
-                v.rotate(-Math.toRadians(angle), Vector3.RotAxis.Y_AXIS).normalize().multiply(dst);
+                double angle = originalAngle + (Mth.sin(percCycle) * angleSwirl);
+                v.mirror(-Math.toRadians(angle), Vector3.RotAxis.Y_AXIS).normalize().mul(dst);
                 Vector3 pos = center.clone().add(v);
-                Vector3 mot = center.clone().subtract(pos).normalize().multiply(0.07);
+                Vector3 mot = center.clone().subtract(pos).normalize().mul(0.07);
 
-                Color c = getFocusColor(focus, rand);
+                Color c = getFocusColor(focus, random);
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
-                        .setScaleMultiplier(0.25F + rand.nextFloat() * 0.7F)
-                        .setMotion(mot)
+                        .setScaleMultiplier(0.25F + random.nextFloat() * 0.7F)
+                        .setDeltaMovement(mot)
                         .color(VFXColorFunction.constant(c))
                         .setMaxAge(50);
             }

@@ -126,133 +126,133 @@ public class PerkEffectHelper {
                                       INTERNAL PERK APPLICATION LOGIC
      **************************************************************************************************** */
 
-    private static void modifyAllPerks(Player player, LogicalSide side, Action action) {
-        ResearchHelper.getProgress(player, side).getPerkData().getEffectGrantingPerks()
-                .forEach(perk -> modifySource(player, side, perk, action));
+    private static void modifyAllPerks(Player player, LogicalSide direction, Action action) {
+        ResearchHelper.getProgress(player, direction).getPerkData().getEffectGrantingPerks()
+                .forEach(perk -> modifySource(player, direction, perk, action));
     }
 
-    public static void updateSource(Player player, LogicalSide side, ModifierSource oldSource, ModifierSource newSource) {
-        PlayerProgress progress = ResearchHelper.getProgress(player, side);
+    public static void updateSource(Player player, LogicalSide direction, ModifierSource oldSource, ModifierSource newSource) {
+        PlayerProgress progress = ResearchHelper.getProgress(player, direction);
         if (!progress.isValid()) {
             return;
         }
 
-        PerkAttributeMap attributeMap = PerkAttributeHelper.getOrCreateMap(player, side);
+        PerkAttributeMap attributeMap = PerkAttributeHelper.getOrCreateMap(player, direction);
         attributeMap.write(() -> {
-            if (ModifierManager.isModifierApplied(player, side, oldSource)) {
-                removeSource(attributeMap, player, side, oldSource);
+            if (ModifierManager.isModifierApplied(player, direction, oldSource)) {
+                removeSource(attributeMap, player, direction, oldSource);
             }
-            if (!ModifierManager.isModifierApplied(player, side, newSource) && newSource.canApplySource(player, side)) {
-                applySource(attributeMap, player, side, newSource);
+            if (!ModifierManager.isModifierApplied(player, direction, newSource) && newSource.canApplySource(player, direction)) {
+                applySource(attributeMap, player, direction, newSource);
             }
         });
     }
 
-    public static <T extends ModifierSource> void modifySources(Player player, LogicalSide side, Collection<T> sources, Action action) {
-        PlayerProgress progress = ResearchHelper.getProgress(player, side);
+    public static <T extends ModifierSource> void modifySources(Player player, LogicalSide direction, Collection<T> sources, Action action) {
+        PlayerProgress progress = ResearchHelper.getProgress(player, direction);
         if (!progress.isValid()) {
             return;
         }
 
-        PerkAttributeMap attributeMap = PerkAttributeHelper.getOrCreateMap(player, side);
+        PerkAttributeMap attributeMap = PerkAttributeHelper.getOrCreateMap(player, direction);
         for (T src : sources) {
             if (action.isRemove()) {
-                if (ModifierManager.isModifierApplied(player, side, src)) {
-                    attributeMap.write(() -> removeSource(attributeMap, player, side, src));
+                if (ModifierManager.isModifierApplied(player, direction, src)) {
+                    attributeMap.write(() -> removeSource(attributeMap, player, direction, src));
                 }
             } else {
-                if (!ModifierManager.isModifierApplied(player, side, src) && src.canApplySource(player, side)) {
-                    attributeMap.write(() -> applySource(attributeMap, player, side, src));
+                if (!ModifierManager.isModifierApplied(player, direction, src) && src.canApplySource(player, direction)) {
+                    attributeMap.write(() -> applySource(attributeMap, player, direction, src));
                 }
             }
         }
     }
 
-    public static void modifySource(Player player, LogicalSide side, ModifierSource source, Action action) {
-        PlayerProgress progress = ResearchHelper.getProgress(player, side);
+    public static void modifySource(Player player, LogicalSide direction, ModifierSource source, Action action) {
+        PlayerProgress progress = ResearchHelper.getProgress(player, direction);
         if (!progress.isValid()) {
             return;
         }
 
-        PerkAttributeMap attributeMap = PerkAttributeHelper.getOrCreateMap(player, side);
+        PerkAttributeMap attributeMap = PerkAttributeHelper.getOrCreateMap(player, direction);
         if (action.isRemove()) {
-            if (ModifierManager.isModifierApplied(player, side, source)) {
-                attributeMap.write(() -> removeSource(attributeMap, player, side, source));
+            if (ModifierManager.isModifierApplied(player, direction, source)) {
+                attributeMap.write(() -> removeSource(attributeMap, player, direction, source));
             }
         } else {
-            if (!ModifierManager.isModifierApplied(player, side, source) && source.canApplySource(player, side)) {
-                attributeMap.write(() -> applySource(attributeMap, player, side, source));
+            if (!ModifierManager.isModifierApplied(player, direction, source) && source.canApplySource(player, direction)) {
+                attributeMap.write(() -> applySource(attributeMap, player, direction, source));
             }
         }
     }
 
-    private static void applySource(PerkAttributeMap attrMap, Player player, LogicalSide side, ModifierSource add) {
+    private static void applySource(PerkAttributeMap attrMap, Player player, LogicalSide direction, ModifierSource add) {
         //The onlyAdd perk is already on the playerprogress (potentially with other, not-yet-added perks); filter it away.
-        Collection<ModifierSource> sources = ModifierManager.getAppliedModifiers(player, side);
+        Collection<ModifierSource> sources = ModifierManager.getAppliedModifiers(player, direction);
         //List<ModifierSource> sources = new LinkedList<>(prog.getAppliedPerks());
         //sources = sources.stream().filter(attrMap::isModifierApplied).collect(Collectors.toList());
 
         sources.forEach(source -> {
-            removeModifiers(source, attrMap, player, side);
-            ModifierManager.removeModifier(player, side, source);
+            removeModifiers(source, attrMap, player, direction);
+            ModifierManager.removeModifier(player, direction, source);
         });
 
         if (add instanceof AttributeConverterProvider) {
-            ((AttributeConverterProvider) add).getConverters(player, side, false)
+            ((AttributeConverterProvider) add).getConverters(player, direction, false)
                     .forEach((c) -> attrMap.applyConverter(player, c));
         }
-        Collection<PerkAttributeModifier> newModifiers = applyModifiers(add, attrMap, player, side);
+        Collection<PerkAttributeModifier> newModifiers = applyModifiers(add, attrMap, player, direction);
 
         sources.forEach(source -> {
-            applyModifiers(source, attrMap, player, side);
-            ModifierManager.addModifier(player, side, source);
+            applyModifiers(source, attrMap, player, direction);
+            ModifierManager.addModifier(player, direction, source);
         });
         //Add new source.
-        ModifierManager.addModifier(player, side, add);
-        newModifiers.forEach(mod -> mod.getAttributeType().onApply(player, side, add));
+        ModifierManager.addModifier(player, direction, add);
+        newModifiers.forEach(mod -> mod.getAttributeType().onApply(player, direction, add));
     }
 
-    private static Collection<PerkAttributeModifier> applyModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide side) {
+    private static Collection<PerkAttributeModifier> applyModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide direction) {
         Collection<PerkAttributeModifier> addedModifiers = new ArrayList<>();
         if (source instanceof AttributeModifierProvider) {
-            for (PerkAttributeModifier modifier : ((AttributeModifierProvider) source).getModifiers(player, side, false)) {
-                addedModifiers.addAll(attrMap.applyModifier(player, modifier, source));
+            for (PerkAttributeModifier modifier : ((AttributeModifierProvider) source).getModifiers(player, direction, false)) {
+                addedModifiers.addAll(attrMap.addModifier(player, modifier, source));
             }
         }
         return addedModifiers;
     }
 
-    private static void removeSource(PerkAttributeMap attrMap, Player player, LogicalSide side, ModifierSource remove) {
+    private static void removeSource(PerkAttributeMap attrMap, Player player, LogicalSide direction, ModifierSource remove) {
         //Drop the old source
-        ModifierManager.removeModifier(player, side, remove);
+        ModifierManager.removeModifier(player, direction, remove);
 
-        Collection<ModifierSource> sources = ModifierManager.getAppliedModifiers(player, side);
+        Collection<ModifierSource> sources = ModifierManager.getAppliedModifiers(player, direction);
         sources.forEach(source -> {
-            removeModifiers(source, attrMap, player, side);
-            ModifierManager.removeModifier(player, side, source);
+            removeModifiers(source, attrMap, player, direction);
+            ModifierManager.removeModifier(player, direction, source);
         });
 
-        Collection<PerkAttributeModifier> removedModifiers = removeModifiers(remove, attrMap, player, side);
+        Collection<PerkAttributeModifier> removedModifiers = removeModifiers(remove, attrMap, player, direction);
         if (remove instanceof AttributeConverterProvider) {
-            ((AttributeConverterProvider) remove).getConverters(player, side, false)
+            ((AttributeConverterProvider) remove).getConverters(player, direction, false)
                     .forEach((c) -> attrMap.removeConverter(player, c));
         }
 
         sources.forEach(source -> {
-            applyModifiers(source, attrMap, player, side);
-            ModifierManager.addModifier(player, side, source);
+            applyModifiers(source, attrMap, player, direction);
+            ModifierManager.addModifier(player, direction, source);
         });
 
-        PerkAttributeMap map = PerkAttributeHelper.getOrCreateMap(player, side);
+        PerkAttributeMap map = PerkAttributeHelper.getOrCreateMap(player, direction);
         removedModifiers.forEach(mod -> {
-            mod.getAttributeType().onRemove(player, side, !map.hasModifiers(mod.getAttributeType()), remove);
+            mod.getAttributeType().onRemove(player, direction, !map.hasModifiers(mod.getAttributeType()), remove);
         });
     }
 
-    private static Collection<PerkAttributeModifier> removeModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide side) {
+    private static Collection<PerkAttributeModifier> removeModifiers(ModifierSource source, PerkAttributeMap attrMap, Player player, LogicalSide direction) {
         Collection<PerkAttributeModifier> removedModifiers = new ArrayList<>();
         if (source instanceof AttributeModifierProvider) {
-            for (PerkAttributeModifier modifier : ((AttributeModifierProvider) source).getModifiers(player, side, false)) {
+            for (PerkAttributeModifier modifier : ((AttributeModifierProvider) source).getModifiers(player, direction, false)) {
                 removedModifiers.addAll(attrMap.removeModifier(player, modifier, source));
             }
         }

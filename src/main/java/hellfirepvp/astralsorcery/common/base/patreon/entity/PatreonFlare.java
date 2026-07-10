@@ -62,12 +62,12 @@ public class PatreonFlare extends PatreonPartialEntity {
             if (sprite != null) {
                 this.clientSprite = EffectHelper.of(EffectTemplatesAS.FACING_SPRITE)
                         .spawn(pos)
-                        .setSprite(sprite.resolveSprite())
+                        .pickSprite(sprite.resolveSprite())
                         .setScaleMultiplier(0.35F)
                         .position(new VFXPositionController<EntityVisualFX>() {
                             @Nonnull
                             @Override
-                            public Vector3 updatePosition(@Nonnull EntityVisualFX fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved) {
+                            public Vector3 finalizePosition(@Nonnull EntityVisualFX fx, @Nonnull Vector3 position, @Nonnull Vector3 motionToBeMoved) {
                                 return PatreonFlare.this.pos.clone();
                             }
                         })
@@ -87,10 +87,10 @@ public class PatreonFlare extends PatreonPartialEntity {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void tickEffects(Level world) {
-        super.tickEffects(world);
+    public void tickEffects(Level level) {
+        super.tickEffects(level);
 
-        if (!RenderingConfig.CONFIG.patreonEffects.get() || rand.nextBoolean()) {
+        if (!RenderingConfig.CONFIG.patreonEffects.get() || random.nextBoolean()) {
             return;
         }
         Color c = this.getColor();
@@ -98,24 +98,24 @@ public class PatreonFlare extends PatreonPartialEntity {
             return;
         }
 
-        int age = 30 + rand.nextInt(15);
-        float scale = 0.1F + rand.nextFloat() * 0.1F;
+        int age = 30 + random.nextInt(15);
+        float scale = 0.1F + random.nextFloat() * 0.1F;
         Vector3 at = new Vector3(this.pos);
-        at.add(rand.nextFloat() * 0.08 * (rand.nextBoolean() ? 1 : -1),
-                rand.nextFloat() * 0.08 * (rand.nextBoolean() ? 1 : -1),
-                rand.nextFloat() * 0.08 * (rand.nextBoolean() ? 1 : -1));
+        at.add(random.nextFloat() * 0.08 * (random.nextBoolean() ? 1 : -1),
+                random.nextFloat() * 0.08 * (random.nextBoolean() ? 1 : -1),
+                random.nextFloat() * 0.08 * (random.nextBoolean() ? 1 : -1));
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(at)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .setScaleMultiplier(scale)
                 .color(VFXColorFunction.constant(c))
                 .setMaxAge(age);
 
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .setScaleMultiplier(scale * 0.3F)
                     .setMaxAge(age - 10);
         }
@@ -128,7 +128,7 @@ public class PatreonFlare extends PatreonPartialEntity {
         if (col == null) {
             return null;
         }
-        return rand.nextInt(3) == 0 ? col.color2 : col.color1;
+        return random.nextInt(3) == 0 ? col.color2 : col.color1;
     }
 
     @Nullable

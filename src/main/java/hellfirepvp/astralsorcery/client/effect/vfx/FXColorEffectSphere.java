@@ -50,9 +50,9 @@ public class FXColorEffectSphere extends EntityVisualFX {
     public FXColorEffectSphere setupSphere(Vector3 axis, float scale, int fractionsSplit, int fractionsCircle) {
         this.setScaleMultiplier(scale);
 
-        Vector3 actAxis = axis.clone().normalize().multiply(scale);
-        fractionsSplit = MathHelper.clamp(fractionsSplit, 2, Integer.MAX_VALUE);
-        fractionsCircle = MathHelper.clamp(fractionsCircle, 3, Integer.MAX_VALUE);
+        Vector3 actAxis = axis.clone().normalize().mul(scale);
+        fractionsSplit = Mth.clamp(fractionsSplit, 2, Integer.MAX_VALUE);
+        fractionsCircle = Mth.clamp(fractionsCircle, 3, Integer.MAX_VALUE);
         this.sphereFaces = SphereBuilder.buildFaces(actAxis, fractionsSplit, fractionsCircle);
         return this;
     }
@@ -60,20 +60,20 @@ public class FXColorEffectSphere extends EntityVisualFX {
     public FXColorEffectSphere setAlphaFadeDistance(double fadeDistance) {
         if (fadeDistance > 0) {
             this.alphaFadeMaxDist = fadeDistance;
-            this.alpha((fx, alpha, pTicks) -> {
+            this.alpha1arg((fx, alpha, pTicks) -> {
                 Entity rView = Minecraft.getInstance().getRenderViewEntity();
                 if (rView == null) {
                     rView = Minecraft.getInstance().player;
                 }
                 Vector3 plVec = Vector3.atEntityCenter(rView);
-                double dst = plVec.distance(getRenderPosition(pTicks)) - 1.2;
+                double dst = plVec.distance(getCameraPosition(pTicks)) - 1.2;
 
                 alpha *= 1D - (dst / this.alphaFadeMaxDist);
-                alpha = MathHelper.clamp(alpha, 0, 1);
+                alpha = Mth.clamp(alpha, 0, 1);
                 return alpha;
             });
         } else {
-            this.alpha(VFXAlphaFunction.CONSTANT);
+            this.alpha1arg(VFXAlphaFunction.CONSTANT);
         }
         return this;
     }
@@ -95,8 +95,8 @@ public class FXColorEffectSphere extends EntityVisualFX {
         int g = c.getGreen();
         int b = c.getBlue();
 
-        Matrix4f matr = renderStack.getLast().getMatrix();
-        Vector3 pos = this.getRenderPosition(pTicks);
+        Matrix4f matr = renderStack.last().pose();
+        Vector3 pos = this.getCameraPosition(pTicks);
         pos.subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
         for (SphereBuilder.TriangleFace face : this.sphereFaces) {
             pos.clone().add(face.getV1()).drawPos(matr, vb).color(r, g, b, alpha).endVertex();

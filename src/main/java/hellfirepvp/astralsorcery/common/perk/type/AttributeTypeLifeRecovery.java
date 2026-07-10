@@ -43,13 +43,13 @@ public class AttributeTypeLifeRecovery extends PerkAttributeType {
         }
 
         Player player = (Player) event.getEntityLiving();
-        LogicalSide side = this.getSide(player);
-        if (!hasTypeApplied(player, side)) {
+        LogicalSide direction = this.getSide(player);
+        if (!hasTypeApplied(player, direction)) {
             return;
         }
 
-        float heal = PerkAttributeHelper.getOrCreateMap(player, side)
-                .modifyValue(player, ResearchHelper.getProgress(player, side), this, event.getAmount());
+        float heal = PerkAttributeHelper.getOrCreateMap(player, direction)
+                .modifyValue(player, ResearchHelper.getProgress(player, direction), this, event.getAmount());
         heal = AttributeEvent.postProcessModded(player, this, heal);
         float val = heal;
         if (val <= 0) {

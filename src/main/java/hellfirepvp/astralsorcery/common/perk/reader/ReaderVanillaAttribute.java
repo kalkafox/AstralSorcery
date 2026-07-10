@@ -15,6 +15,7 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeMap;
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
@@ -23,8 +24,6 @@ import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.RegistryObject;
-import net.neoforged.neoforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -36,11 +35,11 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class ReaderVanillaAttribute extends PerkAttributeReader {
 
-    protected final RegistryObject<Attribute> attribute;
+    protected final Holder<Attribute> attribute;
 
     protected boolean formatAsDecimal = false;
 
-    public ReaderVanillaAttribute(PerkAttributeType type, RegistryObject<Attribute> reference) {
+    public ReaderVanillaAttribute(PerkAttributeType type, Holder<Attribute> reference) {
         super(type);
         this.attribute = reference;
     }
@@ -51,24 +50,24 @@ public class ReaderVanillaAttribute extends PerkAttributeReader {
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
-        return player.getAttribute(this.attribute.get()).getBaseValue();
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide direction) {
+        return player.getAttribute(this.attribute).getBaseValue();
     }
 
     @Override
-    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode) {
-        return statMap.getModifier(player, ResearchHelper.getProgress(player, side), this.getType(), mode);
+    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide direction, ModifierType mode) {
+        return statMap.getAttributeInstance(player, ResearchHelper.getProgress(player, direction), this.getType(), mode);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public PerkStatistic getStatistics(PerkAttributeMap statMap, Player player) {
+    public PerkStatistic countParticles(PerkAttributeMap statMap, Player player) {
         String limitStr = "";
         Double limit = null;
         if (PerkAttributeLimiter.hasLimit(this.getType())) {
-            Pair<Double, Double> limits = PerkAttributeLimiter.getLimit(this.getType());
+            Pair<Double, Double> limits = PerkAttributeLimiter.getMaxResults(this.getType());
             limit = limits.getRight();
-            limitStr = I18n.format("perk.reader.astralsorcery.limit.default", MathHelper.floor(limit));
+            limitStr = I18n.format("perk.reader.astralsorcery.limit.default", Mth.floor(limit));
         }
 
         double value = getDefaultValue(statMap, player, LogicalSide.CLIENT);
@@ -76,7 +75,7 @@ public class ReaderVanillaAttribute extends PerkAttributeReader {
                 this.getType(), (float) value);
 
         String postProcess = "";
-        double post = AttributeEvent.postProcessVanilla(value, player.getAttribute(this.attribute.get()));
+        double post = AttributeEvent.postProcessVanilla(value, player.getAttribute(this.attribute));
         if (Math.abs(value - post) > 1E-4 &&
                 (limit == null || Math.abs(post - limit) > 1E-4)) {
             if (Math.abs(post) >= 1E-4) {
@@ -93,7 +92,7 @@ public class ReaderVanillaAttribute extends PerkAttributeReader {
         if (this.formatAsDecimal) {
             valueStr = formatDecimal(value);
         } else {
-            valueStr = String.valueOf(MathHelper.floor(value));
+            valueStr = String.valueOf(Mth.floor(value));
         }
         return valueStr;
     }

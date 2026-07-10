@@ -43,7 +43,7 @@ public class BufferContext extends BufferBuilder {
 
     public void draw() {
         if (this.inDrawing) {
-            RenderingUtils.finishDrawing(this);
+            RenderingUtils.end(this);
             this.inDrawing = false;
         }
     }

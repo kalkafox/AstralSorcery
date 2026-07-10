@@ -81,12 +81,12 @@ public class PktEngraveGlass extends ASPacket<PktEngraveGlass> {
     @Nonnull
     @Override
     public Handler<PktEngraveGlass> handler() {
-        return (packet, context, side) -> {
+        return (packet, context, direction) -> {
             context.enqueueWork(() -> {
                 //TODO 1.16.2 re-check once worlds are not all constantly loaded
                 MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-                Level world = srv.getWorld(packet.dim);
-                TileRefractionTable tmt = MiscUtils.getTileAt(world, packet.pos, TileRefractionTable.class, false);
+                Level level = srv.getLevel(packet.dim);
+                TileRefractionTable tmt = MiscUtils.getTileAt(level, packet.pos, TileRefractionTable.class, false);
                 if (tmt != null && !packet.constellations.isEmpty()) {
                     List<DrawnConstellation> cstList = packet.constellations.subList(0, Math.min(3, packet.constellations.size()));
                     tmt.engraveGlass(cstList);

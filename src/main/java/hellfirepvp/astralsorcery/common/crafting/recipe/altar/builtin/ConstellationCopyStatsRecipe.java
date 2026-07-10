@@ -59,8 +59,8 @@ public class ConstellationCopyStatsRecipe extends ConstellationBaseAverageStatsR
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {
         super.deserializeAdditionalJson(recipeObject);
 
-        if (JSONUtils.hasField(recipeObject, KEY_CONSTELLATION_SLOT)) {
-            this.constellationSlot = JSONUtils.getInt(recipeObject, KEY_CONSTELLATION_SLOT);
+        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_SLOT)) {
+            this.constellationSlot = GsonHelper.getInt(recipeObject, KEY_CONSTELLATION_SLOT);
         }
     }
 
@@ -75,9 +75,9 @@ public class ConstellationCopyStatsRecipe extends ConstellationBaseAverageStatsR
 
     @Nonnull
     @Override
-    public ItemStack getOutputForRender(Iterable<ItemStack> inventoryContents) {
-        ItemStack out = super.getOutputForRender(inventoryContents);
-        copyConstellation(out, inventoryContents);
+    public ItemStack getOutputForRender(Iterable<ItemStack> items) {
+        ItemStack out = super.getOutputForRender(items);
+        copyConstellation(out, items);
         return out;
     }
 
@@ -85,19 +85,19 @@ public class ConstellationCopyStatsRecipe extends ConstellationBaseAverageStatsR
     @Override
     public List<ItemStack> getOutputs(TileAltar altar) {
         List<ItemStack> out = super.getOutputs(altar);
-        out.forEach(stack -> copyConstellation(stack, altar.getInventory()));
+        out.forEach(stack -> copyConstellation(stack, altar.getItems()));
         return out;
     }
 
-    private void copyConstellation(ItemStack out, Iterable<ItemStack> inventoryContents) {
+    private void copyConstellation(ItemStack out, Iterable<ItemStack> items) {
         if (out.getItem() instanceof ConstellationItem) {
             ConstellationItem iOut = (ConstellationItem) out.getItem();
             if (iOut.getAttunedConstellation(out) == null || iOut.getTraitConstellation(out) == null) {
                 //Make a prioritizing iterable with the given index, if possible
                 if (this.constellationSlot >= 0) {
-                    inventoryContents = Iterables.concat(Lists.newArrayList(Iterables.get(inventoryContents, this.constellationSlot, ItemStack.EMPTY)), inventoryContents);
+                    items = Iterables.concat(Lists.newArrayList(Iterables.get(items, this.constellationSlot, ItemStack.EMPTY)), items);
                 }
-                for (ItemStack stack : inventoryContents) {
+                for (ItemStack stack : items) {
                     if (stack.getItem() instanceof ConstellationItem) {
                         if (iOut.getAttunedConstellation(out) == null) {
                             IWeakConstellation c = ((ConstellationItem) stack.getItem()).getAttunedConstellation(stack);

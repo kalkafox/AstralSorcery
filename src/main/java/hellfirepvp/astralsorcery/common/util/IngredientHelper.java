@@ -44,33 +44,33 @@ public class IngredientHelper {
             return ItemStack.EMPTY;
         }
         int mod = (int) ((tick / 20L) % applicable.size());
-        return applicable.get(MathHelper.clamp(mod, 0, applicable.size() - 1));
+        return applicable.get(Mth.clamp(mod, 0, applicable.size() - 1));
     }
 
     @OnlyIn(Dist.CLIENT)
     public static List<ItemStack> getVisibleItemStacks(Ingredient ingredient) {
-        if (ingredient.hasNoMatchingItems()) {
+        if (ingredient.isEmpty()) {
             return Collections.emptyList();
         }
-        return Arrays.asList(ingredient.getMatchingStacks());
+        return Arrays.asList(ingredient.getItems());
     }
 
     @Nullable
     public static Tag<Item> guessTag(Ingredient ingredient) {
-        ItemStack[] stacks = ingredient.getMatchingStacks();
+        ItemStack[] stacks = ingredient.getItems();
         if (stacks.length == 0) {
             return null;
         }
         List<Tag<Item>> applicableTags = new ArrayList<>();
         ItemStack first = stacks[0];
         for (ResourceLocation key : first.getItem().getTags()) {
-            Tag<Item> wrapper = TagCollectionManager.getManager().getItemTags().get(key);
+            Tag<Item> wrapper = SerializationTags.getInstance().getItems().get(key);
             if (wrapper == null) {
                 continue;
             }
 
             boolean containsAllItems = true;
-            for (Item itemInTag : wrapper.getAllElements()) {
+            for (Item itemInTag : wrapper.getValues()) {
                 if (!ingredient.test(new ItemStack(itemInTag))) {
                     containsAllItems = false;
                     break;
@@ -82,7 +82,7 @@ public class IngredientHelper {
         }
 
         return applicableTags.stream()
-                .max(Comparator.comparingInt(tag -> tag.getAllElements().size()))
+                .max(Comparator.comparingInt(tag -> tag.getValues().size()))
                 .orElse(null);
     }
 

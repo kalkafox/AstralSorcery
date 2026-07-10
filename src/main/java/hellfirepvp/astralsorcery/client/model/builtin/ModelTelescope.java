@@ -37,29 +37,29 @@ public class ModelTelescope extends CustomModel {
         this.textureHeight = 64;
 
         this.leg = new ModelPart(this, 56, 0);
-        this.leg.setRotationPoint(0.0F, 8.0F, 0.0F);
+        this.leg.setPos(0.0F, 8.0F, 0.0F);
         this.leg.addBox(-1.0F, -10.0F, -1.0F, 2, 36, 2, 0.0F);
         this.mountpiece_1 = new ModelPart(this, 32, 0);
-        this.mountpiece_1.setRotationPoint(0.0F, 0.0F, -1.0F);
+        this.mountpiece_1.setPos(0.0F, 0.0F, -1.0F);
         this.mountpiece_1.addBox(-2.0F, 20.0F, -1.0F, 4, 6, 4, 0.0F);
         this.aperture_1 = new ModelPart(this, 28, 28);
-        this.aperture_1.setRotationPoint(0.0F, 0.0F, 0.0F);
+        this.aperture_1.setPos(0.0F, 0.0F, 0.0F);
         this.aperture_1.addBox(-1.0F, -3.0F, -6.0F, 6, 6, 2, 0.0F);
         this.aperture = new ModelPart(this, 0, 28);
-        this.aperture.setRotationPoint(0.0F, 0.0F, 0.0F);
+        this.aperture.setPos(0.0F, 0.0F, 0.0F);
         this.aperture.addBox(-1.0F, -3.0F, -16.0F, 6, 6, 8, 0.0F);
         this.extension = new ModelPart(this, 0, 12);
-        this.extension.setRotationPoint(0.0F, 0.0F, 0.0F);
+        this.extension.setPos(0.0F, 0.0F, 0.0F);
         this.extension.addBox(-2.0F, -6.0F, 6.0F, 2, 6, 2, 0.0F);
         this.detail = new ModelPart(this, 0, 8);
-        this.detail.setRotationPoint(0.0F, 0.0F, 0.0F);
+        this.detail.setPos(0.0F, 0.0F, 0.0F);
         this.detail.addBox(1.0F, -1.0F, 10.0F, 2, 2, 2, 0.0F);
         this.opticalTube = new ModelPart(this, 0, 0);
-        this.opticalTube.setRotationPoint(1.0F, -3.0F, 0.0F);
+        this.opticalTube.setPos(1.0F, -3.0F, 0.0F);
         this.opticalTube.addBox(0.0F, -2.0F, -14.0F, 4, 4, 24, 0.0F);
         this.setRotateAngle(opticalTube, -0.7853981633974483F, 0.0F, 0.0F);
         this.mountpiece = new ModelPart(this, 0, 0);
-        this.mountpiece.setRotationPoint(0.0F, -2.0F, 0.0F);
+        this.mountpiece.setPos(0.0F, -2.0F, 0.0F);
         this.mountpiece.addBox(-2.0F, 4.0F, -2.0F, 4, 4, 4, 0.0F);
 
         this.opticalTube.addChild(this.extension);

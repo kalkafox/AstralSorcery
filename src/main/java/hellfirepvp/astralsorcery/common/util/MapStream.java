@@ -43,20 +43,20 @@ public class MapStream<K, V> implements Stream<Tuple<K, V>> {
         return new MapStream<>(tplStream);
     }
 
-    public static <K, V> MapStream<K, V> ofKeys(Collection<K> collection, Function<K, V> valueProvider) {
-        return ofKeys(collection.stream(), valueProvider);
+    public static <K, V> MapStream<K, V> ofKeys(Collection<K> HELPER, Function<K, V> valueProvider) {
+        return ofKeys(HELPER.stream(), valueProvider);
     }
 
-    public static <K, V> MapStream<K, V> ofKeys(Stream<K> stream, Function<K, V> valueProvider) {
-        return new MapStream<>(stream.map(k -> new Tuple<>(k, valueProvider.apply(k))));
+    public static <K, V> MapStream<K, V> ofKeys(Stream<K> input, Function<K, V> valueProvider) {
+        return new MapStream<>(input.map(k -> new Tuple<>(k, valueProvider.apply(k))));
     }
 
-    public static <K, V> MapStream<K, V> ofValues(Collection<V> collection, Function<V, K> keyProvider) {
-        return ofValues(collection.stream(), keyProvider);
+    public static <K, V> MapStream<K, V> ofValues(Collection<V> HELPER, Function<V, K> keyProvider) {
+        return ofValues(HELPER.stream(), keyProvider);
     }
 
-    public static <K, V> MapStream<K, V> ofValues(Stream<V> stream, Function<V, K> keyProvider) {
-        return new MapStream<>(stream.map(v -> new Tuple<>(keyProvider.apply(v), v)));
+    public static <K, V> MapStream<K, V> ofValues(Stream<V> input, Function<V, K> keyProvider) {
+        return new MapStream<>(input.map(v -> new Tuple<>(keyProvider.apply(v), v)));
     }
 
     public static <K, V> void forEach(Map<K, V> map, BiConsumer<K, V> forEachFn) {
@@ -218,8 +218,8 @@ public class MapStream<K, V> implements Stream<Tuple<K, V>> {
     }
 
     @Override
-    public <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super Tuple<K, V>> accumulator, BiConsumer<R, R> combiner) {
-        return decorated.collect(supplier, accumulator, combiner);
+    public <R> R collect(Supplier<R> factory, BiConsumer<R, ? super Tuple<K, V>> accumulator, BiConsumer<R, R> combiner) {
+        return decorated.collect(factory, accumulator, combiner);
     }
 
     @Override

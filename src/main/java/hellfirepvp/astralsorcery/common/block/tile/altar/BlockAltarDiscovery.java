@@ -36,11 +36,11 @@ public class BlockAltarDiscovery extends BlockAltar {
     }
 
     protected VoxelShape createShape() {
-        VoxelShape base = Block.makeCuboidShape(2, 0, 2, 14, 2, 14);
-        VoxelShape pillar = VoxelShapes.create(0.25, 0.125, 0.25, 0.75, 9.5 / 16.0, 0.75);
-        VoxelShape head = VoxelShapes.create(0, 9.5 / 16.0, 0, 1, 15.5 / 16.0, 1);
+        VoxelShape base = Block.box(2, 0, 2, 14, 2, 14);
+        VoxelShape pillar = Shapes.create(0.25, 0.125, 0.25, 0.75, 9.5 / 16.0, 0.75);
+        VoxelShape head = Shapes.create(0, 9.5 / 16.0, 0, 1, 15.5 / 16.0, 1);
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR, base, pillar, head);
+        return VoxelUtils.combineAll(BooleanOp.OR, base, pillar, head);
     }
 
     @Override

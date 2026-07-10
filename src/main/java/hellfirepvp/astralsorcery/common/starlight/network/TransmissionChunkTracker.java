@@ -35,38 +35,38 @@ public class TransmissionChunkTracker {
     }
 
     private void onChLoad(ChunkEvent.Load event) {
-        LevelAccessor iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
+        LevelAccessor iWorld = event.getLevel();
+        if (iWorld.isClientSide() || !(iWorld instanceof Level)) {
             return;
         }
         TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((Level) iWorld);
         if (handle != null) {
-            handle.informChunkLoad(event.getChunk().getPos());
+            handle.informChunkLoad(event.getChunk().getBlockPos());
         }
     }
 
     private void onChUnload(ChunkEvent.Unload event) {
-        LevelAccessor iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
+        LevelAccessor iWorld = event.getLevel();
+        if (iWorld.isClientSide() || !(iWorld instanceof Level)) {
             return;
         }
         TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((Level) iWorld);
         if (handle != null) {
-            handle.informChunkUnload(event.getChunk().getPos());
+            handle.informChunkUnload(event.getChunk().getBlockPos());
         }
     }
 
     private void onWorldLoad(WorldEvent.Load event) {
-        LevelAccessor iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
+        LevelAccessor iWorld = event.getLevel();
+        if (iWorld.isClientSide() || !(iWorld instanceof Level)) {
             return;
         }
         StarlightUpdateHandler.getInstance().informWorldLoad((Level) iWorld);
     }
 
     private void onWorldUnload(WorldEvent.Unload event) {
-        LevelAccessor iWorld = event.getWorld();
-        if (iWorld.isRemote() || !(iWorld instanceof Level)) {
+        LevelAccessor iWorld = event.getLevel();
+        if (iWorld.isClientSide() || !(iWorld instanceof Level)) {
             return;
         }
         StarlightTransmissionHandler.getInstance().informWorldUnload((Level) iWorld);

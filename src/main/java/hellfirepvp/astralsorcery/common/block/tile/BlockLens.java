@@ -51,19 +51,19 @@ import javax.annotation.Nullable;
  */
 public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock {
 
-    private static final VoxelShape LENS_DOWN =  VoxelShapes.create(2.5D / 16D, 0,          2.5D / 16D, 13.5D / 16D, 14.5D / 16D, 13.5D / 16D);
-    private static final VoxelShape LENS_UP =    VoxelShapes.create(2.5D / 16D, 1.5D / 16D, 2.5D / 16D, 13.5D / 16D, 1,           13.5D / 16D);
-    private static final VoxelShape LENS_NORTH = VoxelShapes.create(2.5D / 16D, 2.5D / 16D, 0,          13.5D / 16D, 13.5D / 16D, 14.5D / 16D);
-    private static final VoxelShape LENS_SOUTH = VoxelShapes.create(2.5D / 16D, 2.5D / 16D, 1.5D / 16D, 13.5D / 16D, 13.5D / 16D, 1);
-    private static final VoxelShape LENS_EAST =  VoxelShapes.create(1.5D / 16D, 2.5D / 16D, 2.5D / 16D, 1,           13.5D / 16D, 13.5D / 16D);
-    private static final VoxelShape LENS_WEST =  VoxelShapes.create(0,          2.5D / 16D, 2.5D / 16D, 14.5D / 16D, 13.5D / 16D, 13.5D / 16D);
+    private static final VoxelShape LENS_DOWN =  Shapes.create(2.5D / 16D, 0,          2.5D / 16D, 13.5D / 16D, 14.5D / 16D, 13.5D / 16D);
+    private static final VoxelShape LENS_UP =    Shapes.create(2.5D / 16D, 1.5D / 16D, 2.5D / 16D, 13.5D / 16D, 1,           13.5D / 16D);
+    private static final VoxelShape LENS_NORTH = Shapes.create(2.5D / 16D, 2.5D / 16D, 0,          13.5D / 16D, 13.5D / 16D, 14.5D / 16D);
+    private static final VoxelShape LENS_SOUTH = Shapes.create(2.5D / 16D, 2.5D / 16D, 1.5D / 16D, 13.5D / 16D, 13.5D / 16D, 1);
+    private static final VoxelShape LENS_EAST =  Shapes.create(1.5D / 16D, 2.5D / 16D, 2.5D / 16D, 1,           13.5D / 16D, 13.5D / 16D);
+    private static final VoxelShape LENS_WEST =  Shapes.create(0,          2.5D / 16D, 2.5D / 16D, 14.5D / 16D, 13.5D / 16D, 13.5D / 16D);
 
     public static EnumProperty<Direction> PLACED_AGAINST = EnumProperty.create("against", Direction.class);
 
     public BlockLens() {
         super(PropertiesGlass.coatedGlass()
                 .harvestTool(ToolType.PICKAXE));
-        setDefaultState(this.getStateContainer().getBaseState().with(PLACED_AGAINST, Direction.DOWN));
+        registerDefaultState(this.getStateContainer().any().setValue(PLACED_AGAINST, Direction.DOWN));
     }
 
     @Override
@@ -72,47 +72,47 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     @Override
-    public void onBlockHarvested(Level world, BlockPos pos, BlockState state, Player player) {
-        TileLens lens = MiscUtils.getTileAt(world, pos, TileLens.class, true);
-        if (lens != null && !world.isRemote() && !player.isCreative()) {
+    public void onBlockHarvested(Level level, BlockPos pos, BlockState state, Player player) {
+        TileLens lens = MiscUtils.getTileAt(level, pos, TileLens.class, true);
+        if (lens != null && !level.isClientSide() && !player.isCreative()) {
             if (lens.getColorType() != null) {
                 ItemStack drop = lens.getColorType().getStack();
-                ItemUtils.dropItemNaturally(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+                ItemUtils.dropItemNaturally(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
             }
         }
-        super.onBlockHarvested(world, pos, state, player);
+        super.onBlockHarvested(level, pos, state, player);
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!world.isRemote() && player.isSneaking()) {
-            TileLens lens = MiscUtils.getTileAt(world, pos, TileLens.class, true);
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!level.isClientSide() && player.isShiftKeyDown()) {
+            TileLens lens = MiscUtils.getTileAt(level, pos, TileLens.class, true);
             if (lens != null && lens.getColorType() != null) {
                 ItemStack drop = lens.getColorType().getStack();
-                if (player.getHeldItem(hand).isEmpty()) {
+                if (player.getItemInHand(hand).isEmpty()) {
                     player.setHeldItem(hand, drop);
                 } else {
-                    if (!player.inventory.addItemStackToInventory(drop)) {
-                        ItemUtils.dropItem(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+                    if (!player.inventory.getArmor(drop)) {
+                        ItemUtils.dropItem(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
                     }
                 }
-                SoundHelper.playSoundAround(SoundsAS.BLOCK_COLOREDLENS_ATTACH, world, pos, 0.8F, 1.5F);
+                SoundHelper.playSoundAround(SoundsAS.BLOCK_COLOREDLENS_ATTACH, level, pos, 0.8F, 1.5F);
                 lens.setColorType(null);
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(PLACED_AGAINST);
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.getDefaultState().with(PLACED_AGAINST, context.getFace().getOpposite());
+        return this.defaultBlockState().setValue(PLACED_AGAINST, context.getFace().getOpposite());
     }
 
     @Override
@@ -135,18 +135,18 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileLens();
     }
 }

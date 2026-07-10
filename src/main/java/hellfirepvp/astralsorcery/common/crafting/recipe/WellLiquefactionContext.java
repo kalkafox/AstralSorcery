@@ -22,17 +22,17 @@ import net.neoforged.neoforge.items.IItemHandler;
  */
 public class WellLiquefactionContext extends RecipeCraftingContext<WellLiquefaction, IItemHandler> {
 
-    private final ItemStack input;
+    private final ItemStack from;
 
     public WellLiquefactionContext(TileWell well) {
         this(well.getCatalyst());
     }
 
-    public WellLiquefactionContext(ItemStack input) {
-        this.input = input;
+    public WellLiquefactionContext(ItemStack from) {
+        this.from = from;
     }
 
     public ItemStack getInput() {
-        return input;
+        return from;
     }
 }

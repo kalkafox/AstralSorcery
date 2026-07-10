@@ -38,8 +38,8 @@ public class KeyDigTypes extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(this::onHarvest);
         bus.addListener(this::onHarvestSpeed);
@@ -51,10 +51,10 @@ public class KeyDigTypes extends KeyPerk {
         }
 
         Player player = event.getPlayer();
-        LogicalSide side = this.getSide(player);
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        LogicalSide direction = this.getSide(player);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {
-            ItemStack heldMainHand = player.getHeldItemMainhand();
+            ItemStack heldMainHand = player.getMainHandItem();
             if (!heldMainHand.isEmpty() && heldMainHand.getItem().getToolTypes(heldMainHand).contains(ToolType.PICKAXE)) {
                 ToolType requiredTool = event.getTargetBlock().getHarvestTool();
                 if (requiredTool == null || requiredTool.equals(ToolType.SHOVEL) || requiredTool.equals(ToolType.AXE)) {
@@ -66,21 +66,21 @@ public class KeyDigTypes extends KeyPerk {
 
     private void onHarvestSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getPlayer();
-        LogicalSide side = this.getSide(player);
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        LogicalSide direction = this.getSide(player);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {
             BlockState broken = event.getState();
-            ItemStack playerMainHand = player.getHeldItemMainhand();
+            ItemStack playerMainHand = player.getMainHandItem();
             if (!playerMainHand.isEmpty()) {
                 if (playerMainHand.getItem().getToolTypes(playerMainHand).contains(ToolType.PICKAXE)) {
                     if (!broken.isToolEffective(ToolType.PICKAXE) &&
                             (broken.isToolEffective(ToolType.AXE) || broken.isToolEffective(ToolType.SHOVEL))) {
                         EventFlags.CHECK_BREAK_SPEED.executeWithFlag(() -> {
                             MiscUtils.tryMultiple(
-                                    () -> player.getDigSpeed(Blocks.STONE.getDefaultState(), event.getPos()),
-                                    () -> player.getDigSpeed(Blocks.STONE.getDefaultState(), null),
-                                    () -> BlockUtils.getSimpleBreakSpeed(player, playerMainHand, Blocks.STONE.getDefaultState())
-                            ).ifPresent(speed -> event.setNewSpeed(Math.max(event.getNewSpeed(), speed)));
+                                    () -> player.getDigSpeed(Blocks.STONE.defaultBlockState(), event.getBlockPos()),
+                                    () -> player.getDigSpeed(Blocks.STONE.defaultBlockState(), null),
+                                    () -> BlockUtils.getSimpleBreakSpeed(player, playerMainHand, Blocks.STONE.defaultBlockState())
+                            ).ifPresent(speedModifier -> event.setNewSpeed(Math.max(event.getNewSpeed(), speedModifier)));
                         });
                     }
                 }

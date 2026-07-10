@@ -56,10 +56,10 @@ public class MantleEffectMineralis extends MantleEffect {
     private void onBreak(BlockEvent.BreakEvent event) {
         Player player = event.getPlayer();
         if (ItemMantle.getEffect(player, ConstellationsAS.mineralis) != null) {
-            LogicalSide side = player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
-            if (side.isServer()) {
-                float charge = Math.min(AlignmentChargeHandler.INSTANCE.getCurrentCharge(player, side), CONFIG.chargeCostPerBreak.get());
-                AlignmentChargeHandler.INSTANCE.drainCharge(player, side, charge, false);
+            LogicalSide direction = player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+            if (direction.isServer()) {
+                float charge = Math.min(AlignmentChargeHandler.INSTANCE.getCurrentCharge(player, direction), CONFIG.chargeCostPerBreak.get());
+                AlignmentChargeHandler.INSTANCE.drainCharge(player, direction, charge, false);
             }
         }
     }
@@ -71,7 +71,7 @@ public class MantleEffectMineralis extends MantleEffect {
 
         this.playCapeSparkles(player, 0.15F);
 
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             this.playBlockHighlight(player);
         }
     }
@@ -79,29 +79,29 @@ public class MantleEffectMineralis extends MantleEffect {
     @OnlyIn(Dist.CLIENT)
     private void playBlockHighlight(Player player) {
         BlockState state = null;
-        if (!player.getHeldItem(Hand.MAIN_HAND).isEmpty()) {
-            state = ItemUtils.createBlockState(player.getHeldItem(Hand.MAIN_HAND));
+        if (!player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) {
+            state = ItemUtils.createBlockState(player.getItemInHand(InteractionHand.MAIN_HAND));
         }
-        if (!player.getHeldItem(Hand.OFF_HAND).isEmpty()) {
-            state = ItemUtils.createBlockState(player.getHeldItem(Hand.OFF_HAND));
+        if (!player.getItemInHand(InteractionHand.OFF_HAND).isEmpty()) {
+            state = ItemUtils.createBlockState(player.getItemInHand(InteractionHand.OFF_HAND));
         }
         if (state == null || state.getBlock() instanceof AirBlock) {
             return;
         }
         BlockState fState = state;
 
-        BlockPredicate search = (world, pos, foundState) -> foundState == fState;
-        List<BlockPos> positions = BlockDiscoverer.searchForBlocksAround(player.getEntityWorld(), player.getPosition(), CONFIG.highlightRange.get(), search);
+        BlockPredicate search = (level, pos, foundState) -> foundState == fState;
+        List<BlockPos> positions = BlockDiscoverer.searchForBlocksAround(player.getCommandSenderWorld(), player.position(), CONFIG.highlightRange.get(), search);
         if (positions.isEmpty()) {
             return;
         }
-        int index = positions.size() > 10 ? rand.nextInt(positions.size()) : rand.nextInt(10);
+        int index = positions.size() > 10 ? random.nextInt(positions.size()) : random.nextInt(10);
         if (index >= positions.size()) {
             return;
         }
 
         BlockPos at = positions.get(index);
-        BlockState displayState = player.getEntityWorld().getBlockState(at);
+        BlockState displayState = player.getCommandSenderWorld().getBlockState(at);
         MiscPlayEffect.playSingleBlockTumbleDepthEffect(new Vector3(at).add(0.5, 0.5, 0.5), displayState);
     }
 

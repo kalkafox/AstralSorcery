@@ -26,8 +26,8 @@ public interface LargeBlock {
     public AABB getBlockSpace();
 
     default public boolean canPlaceAt(BlockPlaceContext ctx) {
-        BlockPos pos = ctx.getPos();
-        Level world = ctx.getWorld();
+        BlockPos pos = ctx.getBlockPos();
+        Level level = ctx.getLevel();
         AABB box = this.getBlockSpace();
 
         BlockPos.Mutable mPos = new BlockPos.Mutable();
@@ -35,7 +35,7 @@ public interface LargeBlock {
             for (int yy = (int) box.minY; yy <= box.maxY; yy++) {
                 for (int zz = (int) box.minZ; zz <= box.maxZ; zz++) {
                     mPos.setPos(pos.getX() + xx, pos.getY() + yy, pos.getZ() + zz);
-                    if (!world.isAirBlock(mPos) && !world.getBlockState(mPos).isReplaceable(BlockItemUseContext.func_221536_a(ctx, mPos, Direction.DOWN))) {
+                    if (!level.isEmptyBlock(mPos) && !level.getBlockState(mPos).isReplaceable(BlockPlaceContext.at(ctx, mPos, Direction.DOWN))) {
                         return false;
                     }
                 }

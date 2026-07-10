@@ -120,7 +120,7 @@ public class ScreenJournalProgression extends ScreenJournal {
             progressionRenderer.centerMouse();
         }
 
-        progressionRenderer.updateOffset(guiLeft + 10, guiTop + 10);
+        progressionRenderer.updateOffset(leftPos + 10, topPos + 10);
         progressionRenderer.setBox(10, 10, guiWidth - 10, guiHeight - 10);
         //progressionRenderer.resetOverlayText();
 
@@ -139,8 +139,8 @@ public class ScreenJournalProgression extends ScreenJournal {
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
-        super.render(renderStack, mouseX, mouseY, pTicks);
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
+        super.render(renderStack, xpos, ypos, pTicks);
 
         this.searchPrevRct = null;
         this.searchNextRct = null;
@@ -149,46 +149,46 @@ public class ScreenJournalProgression extends ScreenJournal {
         if (this.inProgressView()) {
             this.searchPageOffset = 0; //Reset page offset
 
-            this.renderProgressView(renderStack, mouseX, mouseY, pTicks);
+            this.renderProgressView(renderStack, xpos, ypos, pTicks);
         } else {
-            this.renderSearchView(renderStack, mouseX, mouseY, pTicks);
+            this.renderSearchView(renderStack, xpos, ypos, pTicks);
         }
     }
 
-    private void renderSearchView(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
-        this.drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_BLANK, mouseX, mouseY);
+    private void renderSearchView(PoseStack renderStack, int xpos, int ypos, float pTicks) {
+        this.drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_BLANK, xpos, ypos);
 
         this.setBlitOffset(300);
-        this.drawSearchResults(renderStack, mouseX, mouseY, pTicks);
+        this.drawSearchResults(renderStack, xpos, ypos, pTicks);
         this.drawSearchBox(renderStack);
 
         this.setBlitOffset(170);
-        this.drawSearchPageNavArrows(renderStack, mouseX, mouseY, pTicks);
+        this.drawSearchPageNavArrows(renderStack, xpos, ypos, pTicks);
         this.setBlitOffset(0);
     }
 
-    private void renderProgressView(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
-        double guiFactor = Minecraft.getInstance().getMainWindow().getGuiScaleFactor();
+    private void renderProgressView(PoseStack renderStack, int xpos, int ypos, float pTicks) {
+        double guiFactor = Minecraft.getInstance().getWindow().getGuiScale();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor(MathHelper.floor((guiLeft + 27) * guiFactor), MathHelper.floor((guiTop + 27) * guiFactor),
-                MathHelper.floor((guiWidth - 54) * guiFactor), MathHelper.floor((guiHeight - 54) * guiFactor));
-        progressionRenderer.drawProgressionPart(renderStack, this.getGuiZLevel(), mouseX, mouseY);
+        GL11.glScissor(Mth.floor((leftPos + 27) * guiFactor), Mth.floor((topPos + 27) * guiFactor),
+                Mth.floor((guiWidth - 54) * guiFactor), Mth.floor((guiHeight - 54) * guiFactor));
+        progressionRenderer.drawProgressionPart(renderStack, this.getGuiZLevel(), xpos, ypos);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
         RenderSystem.disableDepthTest();
-        drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_FRAME_FULL, mouseX, mouseY);
+        drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_FRAME_FULL, xpos, ypos);
         RenderSystem.enableDepthTest();
 
         this.setBlitOffset(300);
         this.drawSearchBox(renderStack);
 
         this.setBlitOffset(150);
-        drawMouseHighlight(renderStack, this.getGuiZLevel(), mouseX, mouseY);
+        drawMouseHighlight(renderStack, this.getGuiZLevel(), xpos, ypos);
         this.setBlitOffset(0);
     }
 
-    private void drawSearchResults(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
-        Font fr = Minecraft.getInstance().fontRenderer;
+    private void drawSearchResults(PoseStack renderStack, int xpos, int ypos, float pTicks) {
+        Font fr = Minecraft.getInstance().font;
         int lineHeight = 12;
         int offsetX = this.getGuiLeft() + 35;
         int offsetY = this.getGuiTop() + 26;
@@ -202,14 +202,14 @@ public class ScreenJournalProgression extends ScreenJournal {
         for (ResearchNode node : entries) {
             int startOffsetY = offsetY;
 
-            List<FormattedCharSequence> nodeTitle = fr.trimStringToWidth(node.getName(), searchEntryDrawWidth);
+            List<FormattedCharSequence> nodeTitle = fr.split(node.getName(), searchEntryDrawWidth);
             float maxLength = 0;
 
-            for (FormattedCharSequence line : nodeTitle) {
-                renderStack.push();
+            for (FormattedCharSequence lineState : nodeTitle) {
+                renderStack.pushPose();
                 renderStack.translate(offsetX, offsetY, this.getGuiZLevel());
-                float length = RenderingDrawUtils.renderStringAt(line, renderStack, fr, 0x00D0D0D0, false);
-                renderStack.pop();
+                float length = RenderingDrawUtils.renderStringAt(lineState, renderStack, fr, 0x00D0D0D0, false);
+                renderStack.popPose();
 
                 if (length > maxLength) {
                     maxLength = length;
@@ -219,7 +219,7 @@ public class ScreenJournalProgression extends ScreenJournal {
 
             if (this.searchHoverNode == null) {
                 Rectangle rctDrawn = new Rectangle(offsetX - 2, startOffsetY - 2, (int) (maxLength + 4), offsetY - startOffsetY);
-                if (rctDrawn.contains(mouseX, mouseY)) {
+                if (rctDrawn.contains(xpos, ypos)) {
                     fill(renderStack, rctDrawn.x, rctDrawn.y, rctDrawn.x + rctDrawn.width, rctDrawn.y + rctDrawn.height, boxColor.getRGB());
                     this.searchHoverNode = node;
                 }
@@ -232,14 +232,14 @@ public class ScreenJournalProgression extends ScreenJournal {
         for (ResearchNode node : entries) {
             int startOffsetY = offsetY;
 
-            List<FormattedCharSequence> nodeTitle = fr.trimStringToWidth(node.getName(), searchEntryDrawWidth);
+            List<FormattedCharSequence> nodeTitle = fr.split(node.getName(), searchEntryDrawWidth);
             float maxLength = 0;
 
-            for (FormattedCharSequence line : nodeTitle) {
-                renderStack.push();
+            for (FormattedCharSequence lineState : nodeTitle) {
+                renderStack.pushPose();
                 renderStack.translate(offsetX, offsetY, this.getGuiZLevel());
-                float length = RenderingDrawUtils.renderStringAt(line, renderStack, fr, 0x00D0D0D0, false);
-                renderStack.pop();
+                float length = RenderingDrawUtils.renderStringAt(lineState, renderStack, fr, 0x00D0D0D0, false);
+                renderStack.popPose();
 
                 if (length > maxLength) {
                     maxLength = length;
@@ -249,7 +249,7 @@ public class ScreenJournalProgression extends ScreenJournal {
 
             if (this.searchHoverNode == null) {
                 Rectangle rctDrawn = new Rectangle(offsetX - 2, startOffsetY - 2,  (int) (maxLength + 4), offsetY - startOffsetY);
-                if (rctDrawn.contains(mouseX, mouseY)) {
+                if (rctDrawn.contains(xpos, ypos)) {
                     fill(renderStack, rctDrawn.x, rctDrawn.y, rctDrawn.x + rctDrawn.width, rctDrawn.y + rctDrawn.height, boxColor.getRGB());
                     this.searchHoverNode = node;
                 }
@@ -257,26 +257,26 @@ public class ScreenJournalProgression extends ScreenJournal {
         }
     }
 
-    private void drawMouseHighlight(PoseStack renderStack, float zLevel, int mouseX, int mouseY) {
-        progressionRenderer.drawMouseHighlight(renderStack, zLevel, mouseX, mouseY);
+    private void drawMouseHighlight(PoseStack renderStack, float blitOffset, int xpos, int ypos) {
+        progressionRenderer.drawMouseHighlight(renderStack, blitOffset, xpos, ypos);
     }
 
     private void drawSearchBox(PoseStack renderStack) {
         TexturesAS.TEX_GUI_TEXT_FIELD.bindTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            RenderingGuiUtils.rect(buf, renderStack, guiLeft + 300, guiTop + 16, this.getGuiZLevel(), 88.5F, 15).draw();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingGuiUtils.rect(buf, renderStack, leftPos + 300, topPos + 16, this.getGuiZLevel(), 88.5F, 15).draw();
         });
         RenderSystem.disableBlend();
 
         String text = this.searchTextEntry.getText();
 
-        int length = font.getStringWidth(text);
+        int length = font.width(text);
         boolean addDots = length > 75;
         while (length > 75) {
             text = text.substring(1);
-            length = font.getStringWidth("..." + text);
+            length = font.width("..." + text);
         }
         if (addDots) {
             text = "..." + text;
@@ -286,21 +286,21 @@ public class ScreenJournalProgression extends ScreenJournal {
             text += "_";
         }
 
-        renderStack.push();
-        renderStack.translate(guiLeft + 304, guiTop + 20, this.getGuiZLevel());
+        renderStack.pushPose();
+        renderStack.translate(leftPos + 304, topPos + 20, this.getGuiZLevel());
         RenderingDrawUtils.renderStringAt(font, renderStack, Component.literal(text), 0xCCCCCC);
-        renderStack.pop();
+        renderStack.popPose();
     }
 
-    private void drawSearchPageNavArrows(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    private void drawSearchPageNavArrows(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         if (this.searchPageOffset > 0) {
             int width = 30;
             int height = 15;
-            this.searchPrevRct = new Rectangle(guiLeft + 25, guiTop + 220, width, height);
-            renderStack.push();
+            this.searchPrevRct = new Rectangle(leftPos + 25, topPos + 220, width, height);
+            renderStack.pushPose();
             renderStack.translate(this.searchPrevRct.getX() + (width / 2F), this.searchPrevRct.getY() + (height / 2F), this.getGuiZLevel());
             float uFrom, vFrom = 0.5F;
-            if (this.searchPrevRct.contains(mouseX, mouseY)) {
+            if (this.searchPrevRct.contains(xpos, ypos)) {
                 uFrom = 0.5F;
                 renderStack.scale(1.1F, 1.1F, 1F);
             } else {
@@ -311,24 +311,24 @@ public class ScreenJournalProgression extends ScreenJournal {
             }
             renderStack.translate(-(width / 2F), -(height / 2F), 0);
             TexturesAS.TEX_GUI_BOOK_ARROWS.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
                 RenderingGuiUtils.rect(buf, renderStack, 0, 0, 0, width, height)
                         .tex(uFrom, vFrom, 0.5F, 0.5F)
                         .color(1F, 1F, 1F, 0.8F)
                         .draw();
             });
-            renderStack.pop();
+            renderStack.popPose();
         }
 
         int nextDoublePageIndex = (this.searchPageOffset * 2) + 2;
         if (this.searchResultPageIndex.size() >= nextDoublePageIndex + 1) {
             int width = 30;
             int height = 15;
-            this.searchNextRct = new Rectangle(guiLeft + 367, guiTop + 220, width, height);
-            renderStack.push();
+            this.searchNextRct = new Rectangle(leftPos + 367, topPos + 220, width, height);
+            renderStack.pushPose();
             renderStack.translate(this.searchNextRct.getX() + (width / 2F), this.searchNextRct.getY() + (height / 2F), this.getGuiZLevel());
             float uFrom, vFrom = 0F;
-            if (this.searchNextRct.contains(mouseX, mouseY)) {
+            if (this.searchNextRct.contains(xpos, ypos)) {
                 uFrom = 0.5F;
                 renderStack.scale(1.1F, 1.1F, 1F);
             } else {
@@ -339,13 +339,13 @@ public class ScreenJournalProgression extends ScreenJournal {
             }
             renderStack.translate(-(width / 2F), -(height / 2F), 0);
             TexturesAS.TEX_GUI_BOOK_ARROWS.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
                 RenderingGuiUtils.rect(buf, renderStack, 0, 0, 0, width, height)
                         .tex(uFrom, vFrom, 0.5F, 0.5F)
                         .color(1F, 1F, 1F, 0.8F)
                         .draw();
             });
-            renderStack.pop();
+            renderStack.popPose();
         }
     }
 
@@ -374,7 +374,7 @@ public class ScreenJournalProgression extends ScreenJournal {
 
         this.searchResult.sort(Comparator.comparing(node -> node.getName().getString()));
 
-        Font fr = Minecraft.getInstance().fontRenderer;
+        Font fr = Minecraft.getInstance().font;
         int addedPages = 0;
         int pageIndex = 0;
         while (addedPages < this.searchResult.size()) {
@@ -382,7 +382,7 @@ public class ScreenJournalProgression extends ScreenJournal {
             int remainingLines = (pageIndex % 2 == 0 ? searchEntriesLeft : searchEntriesRight) - page.size();
 
             ResearchNode toAddNode = this.searchResult.get(addedPages);
-            int lines = fr.trimStringToWidth(toAddNode.getName(), searchEntryDrawWidth).size();
+            int lines = fr.split(toAddNode.getName(), searchEntryDrawWidth).size();
 
             if (remainingLines < lines) {
                 pageIndex++; //Add this node to the next page.
@@ -400,8 +400,8 @@ public class ScreenJournalProgression extends ScreenJournal {
     }
 
     @Override
-    protected void mouseDragTick(double mouseX, double mouseY, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {
-        super.mouseDragTick(mouseX, mouseY, mouseDiffX, mouseDiffY, mouseOffsetX, mouseOffsetY);
+    protected void mouseDragTick(double xpos, double ypos, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {
+        super.mouseDragTick(xpos, ypos, mouseDiffX, mouseDiffY, mouseOffsetX, mouseOffsetY);
 
         if (this.inProgressView()) {
             progressionRenderer.moveMouse((float) mouseDiffX, (float) mouseDiffY);
@@ -409,8 +409,8 @@ public class ScreenJournalProgression extends ScreenJournal {
     }
 
     @Override
-    protected void mouseDragStop(double mouseX, double mouseY, double mouseDiffX, double mouseDiffY) {
-        super.mouseDragStop(mouseX, mouseY, mouseDiffX, mouseDiffY);
+    protected void mouseDragStop(double xpos, double ypos, double mouseDiffX, double mouseDiffY) {
+        super.mouseDragStop(xpos, ypos, mouseDiffX, mouseDiffY);
 
         if (this.inProgressView()) {
             progressionRenderer.applyMovedMouseOffset();
@@ -418,14 +418,14 @@ public class ScreenJournalProgression extends ScreenJournal {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
+    public boolean mouseScrolled(double xpos, double ypos, double scroll) {
         if (this.inProgressView()) {
             if (scroll < 0) {
                 progressionRenderer.handleZoomOut();
                 return true;
             }
             if (scroll > 0)  {
-                progressionRenderer.handleZoomIn((float) mouseX, (float) mouseY);
+                progressionRenderer.handleZoomIn((float) xpos, (float) ypos);
                 return true;
             }
         }
@@ -433,26 +433,26 @@ public class ScreenJournalProgression extends ScreenJournal {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+    public boolean mouseClicked(double xpos, double ypos, int mouseButton) {
+        if (super.mouseClicked(xpos, ypos, mouseButton)) {
             return true;
         }
 
         if (mouseButton != 0) {
             return false;
         }
-        if (handleBookmarkClick(mouseX, mouseY)) {
+        if (handleBookmarkClick(xpos, ypos)) {
             return true;
         }
         if (this.inProgressView()) {
-            return progressionRenderer.propagateClick((float) mouseX, (float) mouseY);
+            return progressionRenderer.propagateClick((float) xpos, (float) ypos);
         } else {
-            if (this.searchPrevRct != null && this.searchPrevRct.contains(mouseX, mouseY)) {
+            if (this.searchPrevRct != null && this.searchPrevRct.contains(xpos, ypos)) {
                 this.searchPageOffset -= 1;
                 SoundHelper.playSoundClient(SoundsAS.GUI_JOURNAL_PAGE, 1F, 1F);
                 return true;
             }
-            if (this.searchNextRct != null && this.searchNextRct.contains(mouseX, mouseY)) {
+            if (this.searchNextRct != null && this.searchNextRct.contains(xpos, ypos)) {
                 this.searchPageOffset += 1;
                 SoundHelper.playSoundClient(SoundsAS.GUI_JOURNAL_PAGE, 1F, 1F);
                 return true;
@@ -468,7 +468,7 @@ public class ScreenJournalProgression extends ScreenJournal {
     }
 
     @Override
-    protected boolean shouldRightClickCloseScreen(double mouseX, double mouseY) {
+    protected boolean shouldRightClickCloseScreen(double xpos, double ypos) {
         return true;
     }
 

@@ -99,7 +99,7 @@ public class TileAttunementAltar extends TileEntityTick {
     public void tick() {
         super.tick();
 
-        if (!getWorld().isRemote()) {
+        if (!getLevel().isClientSide()) {
             if (!doesSeeSky() || !hasMultiblock()) {
 
                 if (this.activeConstellation != null) {
@@ -152,10 +152,10 @@ public class TileAttunementAltar extends TileEntityTick {
 
             if (this.activeConstellation != null) {
                 for (BlockPos pos : this.getConstellationPositions(this.activeConstellation)) {
-                    TileSpectralRelay relay = MiscUtils.getTileAt(getWorld(), pos, TileSpectralRelay.class, false);
-                    if (relay != null && !relay.getInventory().getStackInSlot(0).isEmpty()) {
-                        ItemUtils.dropInventory(relay.getInventory(), getWorld(), pos.up());
-                        relay.getInventory().clearInventory();
+                    TileSpectralRelay relay = MiscUtils.getTileAt(getLevel(), pos, TileSpectralRelay.class, false);
+                    if (relay != null && !relay.getItems().getStackInSlot(0).isEmpty()) {
+                        ItemUtils.dropEquipment(relay.getItems(), getLevel(), pos.above());
+                        relay.getItems().clearInventory();
                     }
                 }
             }
@@ -169,8 +169,8 @@ public class TileAttunementAltar extends TileEntityTick {
             this.currentRecipe = null;
             this.markForUpdate();
 
-            EntityFlare.spawnAmbientFlare(getWorld(), getPos().add(-5 + rand.nextInt(11), 1 + rand.nextInt(3), -5 + rand.nextInt(11)));
-            EntityFlare.spawnAmbientFlare(getWorld(), getPos().add(-5 + rand.nextInt(11), 1 + rand.nextInt(3), -5 + rand.nextInt(11)));
+            EntityFlare.spawnAmbientFlare(getLevel(), getBlockPos().offset(-5 + random.nextInt(11), 1 + random.nextInt(3), -5 + random.nextInt(11)));
+            EntityFlare.spawnAmbientFlare(getLevel(), getBlockPos().offset(-5 + random.nextInt(11), 1 + random.nextInt(3), -5 + random.nextInt(11)));
         }
     }
 
@@ -210,12 +210,12 @@ public class TileAttunementAltar extends TileEntityTick {
                     }
                 }
             }
-            float night = DayTimeHelper.getCurrentDaytimeDistribution(getWorld());
+            float night = DayTimeHelper.getCurrentDaytimeDistribution(getLevel());
             for (BlockPos key : positions) {
                 if (!this.activeStarSprites.containsKey(key)) {
                     FXFacingSprite sprite = EffectHelper.of(EffectTemplatesAS.FACING_SPRITE)
                             .spawn(new Vector3(key).add(0.5, 0.5, 0.5))
-                            .setSprite(SpritesAS.SPR_RELAY_FLARE)
+                            .pickSprite(SpritesAS.SPR_RELAY_FLARE)
                             .setScaleMultiplier(1.4F)
                             .refresh(fx -> this.canPlayConstellationActiveEffects());
 
@@ -245,7 +245,7 @@ public class TileAttunementAltar extends TileEntityTick {
 
     @OnlyIn(Dist.CLIENT)
     private void tickSoundIdle() {
-        if (SoundHelper.getSoundVolume(SoundCategory.BLOCKS) <= 0) {
+        if (SoundHelper.getSoundVolume(SoundSource.BLOCKS) <= 0) {
             this.attunementAltarIdleSound = null;
             return;
         }
@@ -257,7 +257,7 @@ public class TileAttunementAltar extends TileEntityTick {
                     1F,
                     false,
                     (s) -> !this.canPlayConstellationActiveEffects() ||
-                            SoundHelper.getSoundVolume(SoundCategory.BLOCKS) <= 0 ||
+                            SoundHelper.getSoundVolume(SoundSource.BLOCKS) <= 0 ||
                             this.getActiveRecipe() != null)
                     .setFadeInTicks(20)
                     .setFadeOutTicks(20);
@@ -283,19 +283,19 @@ public class TileAttunementAltar extends TileEntityTick {
                         .color(beamColor);
             }
 
-            if (rand.nextBoolean()) {
+            if (random.nextBoolean()) {
                 Vector3 at = from.clone()
                         .subtract(to)
-                        .multiply(rand.nextFloat())
+                        .mul(random.nextFloat())
                         .add(to)
-                        .add(Vector3.random().multiply(rand.nextFloat() * 0.25F));
+                        .add(Vector3.random().mul(random.nextFloat() * 0.25F));
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .color(VFXColorFunction.constant(this.activeConstellation.getConstellationColor()))
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                        .setMaxAge(20 + rand.nextInt(10));
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                        .setMaxAge(20 + random.nextInt(10));
             }
         }
     }
@@ -322,30 +322,30 @@ public class TileAttunementAltar extends TileEntityTick {
 
     @OnlyIn(Dist.CLIENT)
     public boolean canPlayConstellationActiveEffects() {
-        WorldContext ctx = SkyHandler.getContext(getWorld(), LogicalSide.CLIENT);
+        WorldContext ctx = SkyHandler.getContext(getLevel(), LogicalSide.CLIENT);
 
         return ctx != null &&
                 !this.isRemoved() &&
                 this.hasMultiblock() &&
                 this.doesSeeSky() &&
                 this.getActiveConstellation() != null &&
-                DayTimeHelper.isNight(getWorld()) &&
-                ctx.getConstellationHandler().isActiveCurrently(getActiveConstellation(), MoonPhase.fromWorld(getWorld()));
+                DayTimeHelper.isNight(getLevel()) &&
+                ctx.getConstellationHandler().isActiveCurrently(getActiveConstellation(), MoonPhase.fromWorld(getLevel()));
     }
 
     @OnlyIn(Dist.CLIENT)
     private void spawnAmbientEffects() {
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             Vector3 pos = new Vector3(this).add(
-                    rand.nextFloat() * 15 - 7,
+                    random.nextFloat() * 15 - 7,
                     0.01,
-                    rand.nextFloat() * 15 - 7);
+                    random.nextFloat() * 15 - 7);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
                     .color(VFXColorFunction.WHITE)
                     .setAlphaMultiplier(0.7F)
-                    .setScaleMultiplier(0.3F + rand.nextFloat() * 0.1F);
+                    .setScaleMultiplier(0.3F + random.nextFloat() * 0.1F);
         }
     }
 
@@ -354,13 +354,13 @@ public class TileAttunementAltar extends TileEntityTick {
         if (this.canPlayConstellationActiveEffects()) {
             return;
         }
-        WorldContext ctx = SkyHandler.getContext(getWorld(), LogicalSide.CLIENT);
+        WorldContext ctx = SkyHandler.getContext(getLevel(), LogicalSide.CLIENT);
         if (ctx == null) {
             return;
         }
 
         Player player = Minecraft.getInstance().player;
-        if (player == null || player.getDistanceSq(Vector3d.copyCentered(getPos())) >= 256) {
+        if (player == null || player.getDistanceSq(Vec3.copyCentered(getBlockPos())) >= 256) {
             return;
         }
         Tuple<InteractionHand, ItemStack> heldTpl = MiscUtils.getMainOrOffHand(player, stack -> stack.getItem() instanceof ItemConstellationPaper);
@@ -368,7 +368,7 @@ public class TileAttunementAltar extends TileEntityTick {
             ItemStack cstPaper = heldTpl.getB();
             IConstellation cst = ((ItemConstellationPaper) cstPaper.getItem()).getConstellation(cstPaper);
             if (cst != null && ResearchHelper.getClientProgress().hasConstellationDiscovered(cst)) {
-                float night = DayTimeHelper.getCurrentDaytimeDistribution(getWorld());
+                float night = DayTimeHelper.getCurrentDaytimeDistribution(getLevel());
                 if (night >= 0.1F) {
                     for (BlockPos pos : this.getConstellationPositions(cst)) {
                         this.playConstellationHighlightParticles(cst, pos, night);
@@ -381,43 +381,43 @@ public class TileAttunementAltar extends TileEntityTick {
     @OnlyIn(Dist.CLIENT)
     private void playConstellationHighlightParticles(IConstellation cst, BlockPos pos, float nightPercent) {
         Vector3 at = new Vector3(pos).add(0.5, 0, 0.5);
-        Vector3 offset = Vector3.random().multiply(0.5F).setY(0);
-        if (rand.nextInt(3) == 0) {
-            offset.multiply(0.5);
+        Vector3 offset = Vector3.random().mul(0.5F).setY(0);
+        if (random.nextInt(3) == 0) {
+            offset.mul(0.5);
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at.add(offset))
                     .color(VFXColorFunction.constant(cst.getConstellationColor()))
                     .setGravityStrength(-0.002F)
-                    .setMotion(Vector3.random().addY(3).normalize().multiply(0.03 + rand.nextFloat() * 0.01))
+                    .setDeltaMovement(Vector3.random().addY(3).normalize().mul(0.03 + random.nextFloat() * 0.01))
                     .setAlphaMultiplier(0.6F * nightPercent)
-                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                    .alpha(VFXAlphaFunction.FADE_OUT);
-        } else if (rand.nextInt(3) == 0) {
+                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT);
+        } else if (random.nextInt(3) == 0) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at.add(offset))
                     .setGravityStrength(-0.0005F)
-                    .setMotion(Vector3.random().addY(3).normalize().multiply(0.005))
+                    .setDeltaMovement(Vector3.random().addY(3).normalize().mul(0.005))
                     .setAlphaMultiplier(0.6F * nightPercent)
-                    .setScaleMultiplier(0.4F + rand.nextFloat() * 0.2F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setMaxAge(60 + rand.nextInt(40));
+                    .setScaleMultiplier(0.4F + random.nextFloat() * 0.2F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setMaxAge(60 + random.nextInt(40));
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void playAltarConstellationHighlightParticles(IConstellation cst, float nightPercent) {
-        Vector3 at = new Vector3(getPos())
+        Vector3 at = new Vector3(getBlockPos())
                 .add(0.5, 0, 0.5)
-                .add(Vector3.random().setY(0).multiply(0.65F));
+                .add(Vector3.random().setY(0).mul(0.65F));
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(at)
                 .color(VFXColorFunction.constant(cst.getConstellationColor().brighter()))
                 .setGravityStrength(-0.0015F)
-                .setMotion(Vector3.random().addY(3).normalize().multiply(0.03 + rand.nextFloat() * 0.015))
+                .setDeltaMovement(Vector3.random().addY(3).normalize().mul(0.03 + random.nextFloat() * 0.015))
                 .setAlphaMultiplier(0.85F * nightPercent)
-                .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                .alpha(VFXAlphaFunction.FADE_OUT);
+                .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT);
     }
 
     @Nullable
@@ -460,31 +460,31 @@ public class TileAttunementAltar extends TileEntityTick {
 
     @Nullable
     private IConstellation searchActiveConstellation() {
-        WorldContext ctx = SkyHandler.getContext(getWorld());
+        WorldContext ctx = SkyHandler.getContext(getLevel());
         if (ctx == null) {
             return null;
         }
         ConstellationHandler cstHandler = ctx.getConstellationHandler();
         IConstellation match = null;
         for (IConstellation cst : RegistriesAS.REGISTRY_CONSTELLATIONS.getValues()) {
-            boolean isValid = true;
+            boolean resolved = true;
             for (BlockPos expectedRelayPos : getConstellationPositions(cst)) {
-                if (expectedRelayPos.equals(this.getPos())) {
+                if (expectedRelayPos.equals(this.getBlockPos())) {
                     continue;
                 }
 
-                BlockEntity tile = MiscUtils.getTileAt(getWorld(), expectedRelayPos, TileEntity.class, true);
+                BlockEntity tile = MiscUtils.getTileAt(getLevel(), expectedRelayPos, BlockEntity.class, true);
                 if (!(tile instanceof TileSpectralRelay) && !(tile instanceof TileAttunementAltar)) {
-                    isValid = false;
+                    resolved = false;
                     break;
                 }
             }
-            if (isValid) {
+            if (resolved) {
                 match = cst;
                 break;
             }
         }
-        if (match != null && cstHandler.isActiveCurrently(match, MoonPhase.fromWorld(getWorld()))) {
+        if (match != null && cstHandler.isActiveCurrently(match, MoonPhase.fromWorld(getLevel()))) {
             return match;
         }
         return null;
@@ -495,7 +495,7 @@ public class TileAttunementAltar extends TileEntityTick {
         for (StarLocation sl : cst.getStars()) {
             int x = sl.x / 2;
             int z = sl.y / 2;
-            offsetPositions.add(new BlockPos(x - 7, 0, z - 7).add(getPos()));
+            offsetPositions.offset(new BlockPos(x - 7, 0, z - 7).add(getBlockPos()));
         }
         return offsetPositions;
     }
@@ -510,8 +510,8 @@ public class TileAttunementAltar extends TileEntityTick {
             int tX = to.x / 2;
             int tZ = to.y / 2;
             offsetPositions.add(
-                    new Tuple<>(new BlockPos(fX - 7, 0, fZ - 7).add(getPos()),
-                            new BlockPos(tX - 7, 0, tZ - 7).add(getPos()))
+                    new Tuple<>(new BlockPos(fX - 7, 0, fZ - 7).offset(getBlockPos()),
+                            new BlockPos(tX - 7, 0, tZ - 7).offset(getBlockPos()))
             );
         }
         return offsetPositions;
@@ -519,39 +519,39 @@ public class TileAttunementAltar extends TileEntityTick {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public AABB getRenderBoundingBox() {
-        return super.getRenderBoundingBox().expand(3.5, 2, 3.5);
+    public AABB getBoundingBoxForCulling() {
+        return super.getBoundingBoxForCulling().expand(3.5, 2, 3.5);
     }
 
     @Override
-    public void writeNetNBT(CompoundTag compound) {
-        super.writeNetNBT(compound);
+    public void writeNetNBT(CompoundTag pattern) {
+        super.writeNetNBT(pattern);
 
         if (this.activeConstellation != null) {
-            compound.putString("activeConstellation", this.activeConstellation.getRegistryName().toString());
+            pattern.putString("activeConstellation", this.activeConstellation.getRegistryName().toString());
         }
 
         if (this.currentRecipe != null) {
             CompoundTag nbt = new CompoundTag();
             nbt.putString("recipe", this.currentRecipe.getRecipe().getKey().toString());
-            this.currentRecipe.writeToNBT(nbt);
-            compound.put("currentRecipe", nbt);
+            this.currentRecipe.save(nbt);
+            pattern.put("currentRecipe", nbt);
         }
     }
 
     @Override
-    public void readNetNBT(CompoundTag compound) {
-        super.readNetNBT(compound);
+    public void readNetNBT(CompoundTag pattern) {
+        super.readNetNBT(pattern);
 
-        if (compound.contains("activeConstellation")) {
-            this.activeConstellation = ConstellationRegistry.getConstellation(new ResourceLocation(compound.getString("activeConstellation")));
+        if (pattern.contains("activeConstellation")) {
+            this.activeConstellation = ConstellationRegistry.getConstellation(ResourceLocation.parse(pattern.getString("activeConstellation")));
         } else {
             this.activeConstellation = null;
         }
 
-        if (compound.contains("currentRecipe")) {
-            CompoundTag nbt = compound.getCompound("currentRecipe");
-            AttunementRecipe recipe = AttunementCraftingRegistry.INSTANCE.getRecipe(new ResourceLocation(nbt.getString("recipe")));
+        if (pattern.contains("currentRecipe")) {
+            CompoundTag nbt = pattern.getCompound("currentRecipe");
+            AttunementRecipe recipe = AttunementCraftingRegistry.INSTANCE.getRecipe(ResourceLocation.parse(nbt.getString("recipe")));
             if (recipe != null) {
                 this.currentRecipe = recipe.deserialize(this, nbt, this.currentRecipe);
             } else if (this.currentRecipe != null) {

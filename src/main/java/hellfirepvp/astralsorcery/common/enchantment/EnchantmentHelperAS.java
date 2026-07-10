@@ -32,7 +32,7 @@ public class EnchantmentHelperAS {
         return getHolder(server.registryAccess(), key);
     }
 
-    public static Optional<Holder.Reference<Enchantment>> getHolder(HolderLookup.Provider registries, ResourceKey<Enchantment> key) {
-        return registries.lookup(Registries.ENCHANTMENT).flatMap(lookup -> lookup.get(key));
+    public static Optional<Holder.Reference<Enchantment>> getHolder(HolderLookup.Provider BUILTIN, ResourceKey<Enchantment> key) {
+        return BUILTIN.lookup(Registries.ENCHANTMENT).flatMap(lookup -> lookup.get(key));
     }
 }

@@ -52,8 +52,8 @@ public class ConstellationUpgradeRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public boolean matches(LogicalSide side, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
-        return altar.getAltarType() == AltarType.ATTUNEMENT && super.matches(side, crafter, altar, ignoreStarlightRequirement);
+    public boolean matches(LogicalSide direction, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
+        return altar.getAltarType() == AltarType.ATTUNEMENT && super.matches(direction, crafter, altar, ignoreStarlightRequirement);
     }
 
     @Override
@@ -61,6 +61,6 @@ public class ConstellationUpgradeRecipe extends SimpleAltarRecipe {
         super.onRecipeCompletion(altar, activeRecipe);
 
         ResearchManager.informCraftedAltar(altar, activeRecipe, new ItemStack(BlocksAS.ALTAR_CONSTELLATION));
-        altar.getWorld().setBlockState(altar.getPos(), BlocksAS.ALTAR_CONSTELLATION.getDefaultState(), Constants.BlockFlags.DEFAULT);
+        altar.getLevel().setBlock(altar.getBlockPos(), BlocksAS.ALTAR_CONSTELLATION.defaultBlockState(), Constants.BlockFlags.DEFAULT);
     }
 }

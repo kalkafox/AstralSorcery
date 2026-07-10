@@ -50,30 +50,30 @@ public class RootEvorsio extends RootPerk {
     }
 
     @Override
-    protected void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    protected void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOWEST, this::onBreak);
     }
 
     private void onBreak(BlockEvent.BreakEvent event) {
         Player player = event.getPlayer();
-        LogicalSide side = this.getSide(player);
+        LogicalSide direction = this.getSide(player);
 
-        if (!side.isServer()) {
+        if (!direction.isServer()) {
             return;
         }
 
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (!prog.getPerkData().hasPerkEffect(this)) {
             return;
         }
 
         BlockState broken = event.getState();
-        LevelAccessor world = event.getWorld();
+        LevelAccessor level = event.getLevel();
         float gainedExp;
         try {
-            gainedExp = broken.getBlockHardness(world, event.getPos());
+            gainedExp = broken.getDestroySpeed(level, event.getBlockPos());
         } catch (Exception exc) {
             gainedExp = 0.5F;
         }
@@ -83,8 +83,8 @@ public class RootEvorsio extends RootPerk {
 
         gainedExp *= this.getExpMultiplier();
         gainedExp *= this.getDiminishingReturns(player);
-        gainedExp *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
-        gainedExp *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
+        gainedExp *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+        gainedExp *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
         gainedExp = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP, gainedExp);
 
         ResearchManager.modifyExp(player, gainedExp);

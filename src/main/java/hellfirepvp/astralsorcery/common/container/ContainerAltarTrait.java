@@ -33,8 +33,8 @@ public class ContainerAltarTrait extends ContainerAltarBase {
 
     private SlotConstellationFocus focusSlot;
 
-    public ContainerAltarTrait(TileAltar altar, Inventory inv, int windowId) {
-        super(altar, ContainerTypesAS.ALTAR_RADIANCE, inv, windowId);
+    public ContainerAltarTrait(TileAltar altar, Inventory inv, int containerId) {
+        super(altar, ContainerTypesAS.ALTAR_RADIANCE, inv, containerId);
     }
 
     @Override
@@ -63,13 +63,13 @@ public class ContainerAltarTrait extends ContainerAltarBase {
 
     @Override
     Optional<ItemStack> handleCustomTransfer(Player player, int index) {
-        Slot slot = this.inventorySlots.get(index);
-        if (slot != null && slot.getHasStack()) {
+        Slot slot = this.slots.get(index);
+        if (slot != null && slot.hasItem()) {
             ItemStack slotStack = slot.getStack();
             if (index < 36 &&
                     slotStack.getItem() instanceof IConstellationFocus &&
                     ((IConstellationFocus) slotStack.getItem()).getFocusConstellation(slotStack) != null) {
-                if (this.mergeItemStack(slotStack, this.focusSlot.slotNumber, this.focusSlot.slotNumber + 1, false)) {
+                if (this.mergeItemStack(slotStack, this.focusSlot.index, this.focusSlot.index + 1, false)) {
                     return Optional.of(slotStack);
                 }
             }

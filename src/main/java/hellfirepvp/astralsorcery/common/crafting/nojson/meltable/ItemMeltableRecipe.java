@@ -37,7 +37,7 @@ public class ItemMeltableRecipe extends WorldMeltableRecipe {
     private final BiFunction<WorldBlockPos, BlockState, ItemStack> outputGenerator;
 
     public ItemMeltableRecipe(ResourceLocation key, BlockPredicate matcher, ItemStack output) {
-        this(key, matcher, (worldPos, state) -> ItemUtils.copyStackWithSize(output, output.getCount()));
+        this(key, matcher, (access, state) -> ItemUtils.copyStackWithSize(output, output.getCount()));
     }
 
     public ItemMeltableRecipe(ResourceLocation key, BlockPredicate matcher, BiFunction<WorldBlockPos, BlockState, ItemStack> outputGenerator) {
@@ -46,7 +46,7 @@ public class ItemMeltableRecipe extends WorldMeltableRecipe {
     }
 
     public static ItemMeltableRecipe of(BlockState stateIn, ItemStack itemOut) {
-        return new ItemMeltableRecipe(AstralSorcery.key(stateIn.getBlock().getRegistryName().getPath()),
+        return new ItemMeltableRecipe(AstralSorcery.key(RegistryHelper.getKey(stateIn.getBlock()).getPath()),
                 BlockPredicates.isState(stateIn), itemOut);
     }
 
@@ -56,9 +56,9 @@ public class ItemMeltableRecipe extends WorldMeltableRecipe {
     }
 
     @Override
-    public void doOutput(Level world, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
-        if (world.removeBlock(pos, false)) {
-            ItemStack generated = this.outputGenerator.apply(WorldBlockPos.wrapServer(world, pos), state);
+    public void doOutput(Level level, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput) {
+        if (level.removeBlock(pos, false)) {
+            ItemStack generated = this.outputGenerator.apply(WorldBlockPos.wrapServer(level, pos), state);
             if (!generated.isEmpty()) {
                 itemOutput.accept(generated);
             }

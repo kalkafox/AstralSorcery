@@ -51,18 +51,18 @@ public class AreaOfInfluencePreview implements ITickHandler {
     private AreaOfInfluencePreview() {}
 
     public void showOrRemoveIdentical(TileAreaOfInfluence aoeTile) {
-        if (this.tileDimension == aoeTile.getDimension() && aoeTile.getEffectOriginPosition().equals(this.tilePosition)) {
+        if (this.tileDimension == aoeTile.dimension() && aoeTile.getEffectOriginPosition().equals(this.tilePosition)) {
             this.clearClient();
             return;
         }
-        this.show(aoeTile);
+        this.showTitle(aoeTile);
     }
 
-    public void show(TileAreaOfInfluence aoeTile) {
+    public void showTitle(TileAreaOfInfluence aoeTile) {
         if (!(aoeTile instanceof BlockEntity)) {
             return;
         }
-        this.tileDimension = aoeTile.getDimension();
+        this.tileDimension = aoeTile.dimension();
         this.tilePosition = aoeTile.getEffectOriginPosition();
     }
 
@@ -77,13 +77,13 @@ public class AreaOfInfluencePreview implements ITickHandler {
             this.removeEffects();
             return;
         }
-        Level clientWorld = Minecraft.getInstance().world;
+        Level clientWorld = Minecraft.getInstance().level;
         if (clientWorld == null) {
             this.clearClient();
             this.removeEffects();
             return;
         }
-        ResourceKey<Level> clientDimType = clientWorld.getDimensionKey();
+        ResourceKey<Level> clientDimType = clientWorld.dimension();
         if (!clientDimType.equals(this.tileDimension)) {
             this.clearClient();
             this.removeEffects();
@@ -123,7 +123,7 @@ public class AreaOfInfluencePreview implements ITickHandler {
             if (aoeTile != null) {
                 updateEffect(cube, sizeMultiplier, aoeTile);
             }
-            cube.setAlphaMultiplier(MathHelper.clamp(cube.getAlphaMultiplier() - alphaTick, 0F, 0.75F));
+            cube.setAlphaMultiplier(Mth.clamp(cube.getAlphaMultiplier() - alphaTick, 0F, 0.75F));
             if (!this.canRefresh(cube)) {
                 cube = null;
             }
@@ -136,7 +136,7 @@ public class AreaOfInfluencePreview implements ITickHandler {
             if (cube.isRemoved()) {
                 EffectHelper.refresh(cube, EffectTemplatesAS.CUBE_AREA_OF_EFFECT);
             }
-            cube.setAlphaMultiplier(MathHelper.clamp(cube.getAlphaMultiplier() + alphaTick, 0F, 0.75F));
+            cube.setAlphaMultiplier(Mth.clamp(cube.getAlphaMultiplier() + alphaTick, 0F, 0.75F));
             updateEffect(cube, sizeMultiplier, aoeTile);
         } else {
             cube = createCube(sizeMultiplier, aoeTile);
@@ -161,7 +161,7 @@ public class AreaOfInfluencePreview implements ITickHandler {
                 .tumble()
                 .setTumbleIntensityMultiplier(0.06F)
                 .setAlphaMultiplier(2 * alphaTick)
-                .alpha((fx, alpha, pTicks) -> alpha)
+                .alpha1arg((fx, alpha, pTicks) -> alpha)
                 .color(VFXColorFunction.WHITE)
                 .refresh(fx -> canRefresh((FXCube) fx));
         updateEffect(cube, sizeMultiplier, aoeTile);
@@ -189,8 +189,8 @@ public class AreaOfInfluencePreview implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

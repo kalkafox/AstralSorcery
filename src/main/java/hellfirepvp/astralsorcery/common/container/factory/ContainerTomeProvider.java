@@ -50,7 +50,7 @@ public class ContainerTomeProvider extends CustomContainerProvider<ContainerTome
     }
 
     private static ContainerTome createFromPacket(int id, Inventory plInventory, FriendlyByteBuf data) {
-        ItemStack tome = ByteBufUtils.readItemStack(data);
+        ItemStack tome = ByteBufUtils.readItem(data);
         int slot = data.readInt();
         return new ContainerTome(id, plInventory, plInventory.player, tome, slot);
     }
@@ -58,8 +58,8 @@ public class ContainerTomeProvider extends CustomContainerProvider<ContainerTome
     public static class Factory implements IContainerFactory<ContainerTome> {
 
         @Override
-        public ContainerTome create(int windowId, Inventory inv, FriendlyByteBuf data) {
-            return ContainerTomeProvider.createFromPacket(windowId, inv, data);
+        public ContainerTome create(int containerId, Inventory inv, FriendlyByteBuf data) {
+            return ContainerTomeProvider.createFromPacket(containerId, inv, data);
         }
     }
 

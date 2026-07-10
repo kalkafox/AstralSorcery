@@ -45,33 +45,33 @@ public class TileVanishing extends TileEntityTick {
     public void tick() {
         super.tick();
 
-        if (!this.getWorld().isRemote() && this.getTicksExisted() % 5 == 0) {
+        if (!this.getLevel().isClientSide() && this.getTicksExisted() % 5 == 0) {
             boolean removeBlock = true;
 
-            List<Player> players = getWorld().getEntitiesWithinAABB(PlayerEntity.class, SEARCH_BOX.offset(getPos()));
+            List<Player> players = getLevel().getEntitiesWithinAABB(Player.class, SEARCH_BOX.offset(getBlockPos()));
             for (Player player : players) {
                 if (ItemMantle.getEffect(player, ConstellationsAS.aevitas) != null) {
-                    double yDiff = player.getPosY() - this.getPos().getY();
+                    double yDiff = player.getY() - this.getBlockPos().getY();
 
                     //Standing on top of this block
                     if (player.isOnGround() && yDiff >= 0.95 && yDiff <= 1.15) {
-                        if (player.isSneaking()) { //Indicating they want to drop down
+                        if (player.isShiftKeyDown()) { //Indicating they want to drop down
                             break; //Remove the block
                         }
 
                         removeBlock = false;
-                    } else if (player.isSneaking() && yDiff >= 0.95 && yDiff <= 2.15) {
+                    } else if (player.isShiftKeyDown() && yDiff >= 0.95 && yDiff <= 2.15) {
                         removeBlock = false;
                     }
                 }
             }
 
             if (removeBlock) {
-                this.getWorld().removeBlock(getPos(), false);
+                this.getLevel().removeBlock(getBlockPos(), false);
             }
         }
 
-        if (this.getWorld().isRemote()) {
+        if (this.getLevel().isClientSide()) {
             this.tickClient();
         }
     }
@@ -79,14 +79,14 @@ public class TileVanishing extends TileEntityTick {
     @OnlyIn(Dist.CLIENT)
     private void tickClient() {
         for (int i = 0; i < 3; i++) {
-            if (rand.nextFloat() < 0.07F) {
+            if (random.nextFloat() < 0.07F) {
                 Vector3 at = new Vector3(pos).add(0.5F, 0.5F, 0.5F).add(Vector3.random());
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
-                        .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                        .alpha(VFXAlphaFunction.PYRAMID)
-                        .setMaxAge(40 + rand.nextInt(10));
-                if (rand.nextBoolean()) {
+                        .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                        .alpha1arg(VFXAlphaFunction.PYRAMID)
+                        .setMaxAge(40 + random.nextInt(10));
+                if (random.nextBoolean()) {
                     p.color(VFXColorFunction.WHITE);
                 } else {
                     p.color(VFXColorFunction.constant(ColorsAS.RITUAL_CONSTELLATION_AEVITAS));

@@ -31,7 +31,7 @@ public class FXOrbitalLucerna extends FXSourceOrbital<FXFacingParticle, BatchRen
     private static final VFXColorFunction<FXFacingParticle> lucernaColor =
             VFXColorFunction.constant(ColorsAS.RITUAL_CONSTELLATION_LUCERNA);
 
-    private int count = 2 + rand.nextInt(2);
+    private int count = 2 + random.nextInt(2);
 
     public FXOrbitalLucerna(Vector3 pos) {
         super(pos, EffectTemplatesAS.GENERIC_PARTICLE);
@@ -50,26 +50,26 @@ public class FXOrbitalLucerna extends FXSourceOrbital<FXFacingParticle, BatchRen
 
     @Override
     public void spawnOrbitalParticle(Vector3 pos, Function<Vector3, FXFacingParticle> effectRegistrar) {
-        if (rand.nextInt(2) == 0) {
+        if (random.nextInt(2) == 0) {
             effectRegistrar.apply(pos)
                     .color(lucernaColor)
                     .setScaleMultiplier(0.25F)
                     .addPosition(new Vector3(
-                            (rand.nextFloat() * 0.01F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.01F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.01F) * (rand.nextBoolean() ? 1 : -1)
+                            (random.nextFloat() * 0.01F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.01F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.01F) * (random.nextBoolean() ? 1 : -1)
                     ))
                     .setMaxAge(45);
         }
 
-        if (rand.nextInt(3) == 0) {
+        if (random.nextInt(3) == 0) {
             effectRegistrar.apply(pos)
                     .color(VFXColorFunction.WHITE)
                     .setScaleMultiplier(0.25F)
-                    .setMotion(new Vector3(
-                            (rand.nextFloat() * 0.025F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.025F) * (rand.nextBoolean() ? 1 : -1),
-                            (rand.nextFloat() * 0.025F) * (rand.nextBoolean() ? 1 : -1)
+                    .setDeltaMovement(new Vector3(
+                            (random.nextFloat() * 0.025F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.025F) * (random.nextBoolean() ? 1 : -1),
+                            (random.nextFloat() * 0.025F) * (random.nextBoolean() ? 1 : -1)
                     ))
                     .setMaxAge(35);
         }

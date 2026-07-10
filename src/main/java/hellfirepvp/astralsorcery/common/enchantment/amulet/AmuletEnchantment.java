@@ -78,11 +78,11 @@ public class AmuletEnchantment extends DynamicEnchantment {
 
     @Nullable
     public static AmuletEnchantment deserialize(CompoundTag cmp) {
-        int typeId = cmp.getInt("type");
-        if (typeId < 0 || typeId >= DynamicEnchantmentType.values().length) {
+        int id = cmp.getInt("type");
+        if (id < 0 || id >= DynamicEnchantmentType.values().length) {
             return null;
         }
-        DynamicEnchantmentType type = DynamicEnchantmentType.values()[typeId];
+        DynamicEnchantmentType type = DynamicEnchantmentType.values()[id];
         int level = Math.max(0, cmp.getInt("level"));
         if (type.isEnchantmentSpecific()) {
             ResourceLocation res = ResourceLocation.parse(cmp.getString("ench"));

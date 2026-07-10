@@ -41,7 +41,7 @@ public class DistributionHandler {
         this.ctx = ctx;
     }
 
-    public void tick(Level world) {
+    public void tick(Level level) {
         ConstellationHandler cst = this.ctx.getConstellationHandler();
         int tracked = cst.getLastTrackedDay();
 
@@ -55,26 +55,26 @@ public class DistributionHandler {
         }
 
         this.lastRecordedDay = tracked;
-        this.updateDistribution(world);
+        this.updateDistribution(level);
     }
 
     public float getDistribution(IConstellation cst) {
         return this.activeDistribution.getOrDefault(cst, 0F);
     }
 
-    private void updateDistribution(Level world) {
-        MoonPhase current = MoonPhase.fromWorld(world);
+    private void updateDistribution(Level level) {
+        MoonPhase current = MoonPhase.fromWorld(level);
         Map<IConstellation, Float> distribution = new HashMap<>(this.dayDistributionMap.get(current.ordinal()));
 
         for (IConstellationSpecialShowup special : ConstellationRegistry.getSpecialShowupConstellations()) {
-            if (special.doesShowUp(world, lastRecordedDay)) {
-                distribution.put(special, MathHelper.clamp(
-                        special.getDistribution(world, lastRecordedDay, true),
+            if (special.doesShowUp(level, lastRecordedDay)) {
+                distribution.put(special, Mth.clamp(
+                        special.getDistribution(level, lastRecordedDay, true),
                         0F,
                         1F));
             } else {
-                distribution.put(special, MathHelper.clamp(
-                        special.getDistribution(world, lastRecordedDay, false),
+                distribution.put(special, Mth.clamp(
+                        special.getDistribution(level, lastRecordedDay, false),
                         0F,
                         1F));
             }
@@ -116,6 +116,6 @@ public class DistributionHandler {
         int phaseCount = MoonPhase.values().length;
         int dist = Math.min(Math.abs(dayStart - dayIn), Math.abs(dayStart - (dayIn + phaseCount)));
         float part = ((float) dist) / ((float) (phaseCount / 2));
-        return MathHelper.cos((float) ((part / 2) * Math.PI)) * 0.5F + 0.5F;
+        return Mth.cos((float) ((part / 2) * Math.PI)) * 0.5F + 0.5F;
     }
 }

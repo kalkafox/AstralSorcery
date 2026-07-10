@@ -51,8 +51,8 @@ public class ItemColoredLensRegeneration extends ItemColoredLens {
         }
 
         @Override
-        public void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
-            if (world.isRemote() || !(entity instanceof LivingEntity) || !entity.isAlive()) {
+        public void entityInBeam(Level level, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
+            if (level.isClientSide() || !(entity instanceof LivingEntity) || !entity.isAlive()) {
                 return;
             }
             if (entity instanceof Player && !GeneralConfig.CONFIG.doColoredLensesAffectPlayers.get()) {
@@ -63,9 +63,9 @@ public class ItemColoredLensRegeneration extends ItemColoredLens {
                 if (random.nextInt(8) != 0) {
                     return;
                 }
-                if (le.isEntityUndead()) {
+                if (le.isInvertedHealAndHarm()) {
                     DamageUtil.shotgunAttack(le, e -> {
-                        DamageUtil.attackEntityFrom(e, CommonProxy.DAMAGE_SOURCE_STELLAR, 0.5F);
+                        DamageUtil.hurt(e, CommonProxy.DAMAGE_SOURCE_STELLAR, 0.5F);
                     });
                 } else {
                     le.heal(0.5F);
@@ -74,6 +74,6 @@ public class ItemColoredLensRegeneration extends ItemColoredLens {
         }
 
         @Override
-        public void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
+        public void blockInBeam(Level level, BlockPos pos, BlockState state, PartialEffectExecutor executor) {}
     }
 }

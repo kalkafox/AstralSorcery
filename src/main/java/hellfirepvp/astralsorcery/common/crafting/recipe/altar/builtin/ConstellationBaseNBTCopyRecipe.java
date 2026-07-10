@@ -53,8 +53,8 @@ public class ConstellationBaseNBTCopyRecipe extends NBTCopyRecipe {
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {
         super.deserializeAdditionalJson(recipeObject);
 
-        if (JSONUtils.hasField(recipeObject, KEY_CONSTELLATION)) {
-            ResourceLocation cstName = new ResourceLocation(JSONUtils.getString(recipeObject, KEY_CONSTELLATION));
+        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION)) {
+            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getString(recipeObject, KEY_CONSTELLATION));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst != null) {
                 this.setConstellation(cst);
@@ -83,8 +83,8 @@ public class ConstellationBaseNBTCopyRecipe extends NBTCopyRecipe {
     @Override
     @Nonnull
     @OnlyIn(Dist.CLIENT)
-    public ItemStack getOutputForRender(Iterable<ItemStack> inventoryContents) {
-        ItemStack out = super.getOutputForRender(inventoryContents);
+    public ItemStack getOutputForRender(Iterable<ItemStack> items) {
+        ItemStack out = super.getOutputForRender(items);
         setConstellations(out);
         return out;
     }

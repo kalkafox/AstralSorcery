@@ -30,28 +30,28 @@ import net.neoforged.fml.LogicalSide;
 public class SkyRenderEventHandler {
 
     public static void onRender(RenderWorldLastEvent event) {
-        ClientLevel world = Minecraft.getInstance().world;
-        if (world != null && world.func_239132_a_().func_241683_c_() == DimensionRenderInfo.FogType.NORMAL) {
-            ISkyRenderHandler render = world.func_239132_a_().getSkyRenderHandler();
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level != null && level.effects().skyType() == DimensionSpecialEffects.FogType.NORMAL) {
+            ISkyRenderHandler render = level.effects().getSkyRenderHandler();
             if (!(render instanceof ChainingSkyRenderer)) {
-                String strDimKey = world.getDimensionKey().getLocation().toString();
+                String strDimKey = level.dimension().getLocation().toString();
                 if (RenderingConfig.CONFIG.dimensionsWithSkyRendering.get().contains(strDimKey)) {
-                    world.func_239132_a_().setSkyRenderHandler(new ChainingSkyRenderer(world.func_239132_a_().getSkyRenderHandler()));
+                    level.effects().setSkyRenderHandler(new ChainingSkyRenderer(level.effects().getSkyRenderHandler()));
                 }
             }
         }
     }
 
     public static void onFog(EntityViewRenderEvent.FogColors event) {
-        ClientLevel world = Minecraft.getInstance().world;
-        if (world != null) {
-            String strDimKey = world.getDimensionKey().getLocation().toString();
-            if (world.func_239132_a_().func_241683_c_() == DimensionRenderInfo.FogType.NORMAL &&
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level != null) {
+            String strDimKey = level.dimension().getLocation().toString();
+            if (level.effects().skyType() == DimensionSpecialEffects.FogType.NORMAL &&
                     RenderingConfig.CONFIG.dimensionsWithSkyRendering.get().contains(strDimKey) &&
                     !RenderingConfig.CONFIG.dimensionsWithOnlyConstellationRendering.get().contains(strDimKey) &&
-                    world.func_239132_a_().getSkyRenderHandler() instanceof ChainingSkyRenderer) {
+                    level.effects().getSkyRenderHandler() instanceof ChainingSkyRenderer) {
 
-                WorldContext ctx = SkyHandler.getContext(world, LogicalSide.CLIENT);
+                WorldContext ctx = SkyHandler.getContext(level, LogicalSide.CLIENT);
 
                 if (ctx != null && ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {
                     float perc = ctx.getCelestialEventHandler().getSolarEclipsePercent();

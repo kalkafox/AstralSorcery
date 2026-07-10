@@ -149,7 +149,7 @@ public class StorageCache {
         return change;
     }
 
-    public void writeToNBT(CompoundTag tag) {
+    public void save(CompoundTag tag) {
         ListTag content = new ListTag();
 
         for (StorageKey key : this.content.keySet()) {

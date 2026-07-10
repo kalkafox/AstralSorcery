@@ -41,7 +41,7 @@ public class ItemCrystalShovel extends ItemCrystalTierItem implements TypeEnchan
     }
 
     @Override
-    public boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type) {
+    public boolean canEnchant(ItemStack stack, AstralEnchantmentType type) {
         return type == AstralEnchantmentType.BREAKABLE || type == AstralEnchantmentType.DIGGER;
     }
 

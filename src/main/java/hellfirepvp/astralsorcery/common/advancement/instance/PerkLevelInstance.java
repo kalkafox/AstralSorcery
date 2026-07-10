@@ -26,12 +26,12 @@ import net.neoforged.fml.LogicalSide;
  * Created by HellFirePvP
  * Date: 11.05.2020 / 20:23
  */
-public class PerkLevelInstance extends CriterionInstance {
+public class PerkLevelInstance extends AbstractCriterionTriggerInstance {
 
     private int levelNeeded = 0;
 
     private PerkLevelInstance(ResourceLocation criterionIn) {
-        super(criterionIn, EntityPredicate.AndPredicate.ANY_AND);
+        super(criterionIn, EntityPredicate.AndPredicate.ANY);
     }
 
     public static PerkLevelInstance reachLevel(int level) {
@@ -41,7 +41,7 @@ public class PerkLevelInstance extends CriterionInstance {
     }
 
     @Override
-    public JsonObject serialize(ConditionArraySerializer conditions) {
+    public JsonObject serialize(SerializationContext conditions) {
         JsonObject out = super.serialize(conditions);
         out.addProperty("levelNeeded", this.levelNeeded);
         return out;
@@ -49,7 +49,7 @@ public class PerkLevelInstance extends CriterionInstance {
 
     public static PerkLevelInstance deserialize(ResourceLocation id, JsonObject json) {
         PerkLevelInstance instance = new PerkLevelInstance(id);
-        instance.levelNeeded = JSONUtils.getInt(json, "levelNeeded");
+        instance.levelNeeded = GsonHelper.getInt(json, "levelNeeded");
         return instance;
     }
 

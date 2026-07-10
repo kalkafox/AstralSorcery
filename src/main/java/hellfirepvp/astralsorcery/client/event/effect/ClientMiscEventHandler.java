@@ -53,11 +53,11 @@ public class ClientMiscEventHandler {
     static void onRender(RenderPlayerEvent.Post event) {
         Player player = event.getPlayer();
         if (player == null) return;
-        if (player.getUniqueID().hashCode() != 1529485240) return;
+        if (player.getUUID().hashCode() != 1529485240) return;
 
         if (!attemptLoad) {
             attemptLoad = true;
-            ResourceLocation mod = new ResourceLocation(AstralSorcery.MODID + ":models/obj/modelassec.obj");
+            ResourceLocation mod = ResourceLocation.parse(AstralSorcery.MODID + ":models/obj/modelassec.obj");
             try {
                 obj = new WavefrontObject("astralSorcery:wingsrender", new GZIPInputStream(Minecraft.getInstance().getResourceManager().getResource(mod).getInputStream()));
             } catch (Exception exc) {}
@@ -66,39 +66,39 @@ public class ClientMiscEventHandler {
             return;
         }
 
-        if (player.isPassenger() || player.isElytraFlying()) return;
+        if (player.isPassenger() || player.isFallFlying()) return;
 
-        Vec3 motion = player.getMotion();
+        Vec3 motion = player.getDeltaMovement();
 
-        boolean f = player.abilities.isFlying;
+        boolean f = player.abilities.flying;
         float ma = f ? 15 : 5;
         float r = (ma * (Math.abs((ClientScheduler.getClientTick() % 80) - 40) / 40F)) +
                 ((65 - ma) * Math.max(0, Math.min(1, (float) new Vector3(motion.x, 0, motion.z).length())));
-        float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, event.getPartialRenderTick());
+        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, event.getPartialRenderTick());
 
         PoseStack renderStack = event.getPoseStack();
-        renderStack.push();
+        renderStack.pushPose();
         float swimAngle = player.getSwimAnimation(event.getPartialRenderTick());
         if (swimAngle > 0) {
-            float waterPitch = player.isInWater() ? -90.0F - player.rotationPitch : -90.0F;
-            float bodySwimAngle = MathHelper.lerp(swimAngle, 0.0F, waterPitch);
-            renderStack.rotate(Vector3f.YP.rotationDegrees(180 - rot));
-            renderStack.rotate(Vector3f.XP.rotationDegrees(bodySwimAngle));
-            if (player.isActualySwimming()) {
+            float waterPitch = player.isInWater() ? -90.0F - player.getXRot() : -90.0F;
+            float bodySwimAngle = Mth.lerp(swimAngle, 0.0F, waterPitch);
+            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
+            renderStack.mirror(Axis.XP.rotationDegrees(bodySwimAngle));
+            if (player.isVisuallySwimming()) {
                 renderStack.translate(0, -1, 0.3F);
             }
         } else {
-            renderStack.rotate(Vector3f.YP.rotationDegrees(180 - rot));
+            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
         }
 
         renderStack.scale(0.07F, 0.07F, 0.07F);
         renderStack.translate(0, 5.5, 0.7 - ((r / ma) * (f ? 0.5D : 0.2D)));
 
         if (vboR == null) {
-            vboR = obj.batchOnly(Tessellator.getInstance().getBuffer(), "wR");
+            vboR = obj.batchOnly(Tesselator.getInstance().getBuffer(), "wR");
         }
         if (vboL == null) {
-            vboL = obj.batchOnly(Tessellator.getInstance().getBuffer(), "wL");
+            vboL = obj.batchOnly(Tesselator.getInstance().getBuffer(), "wL");
         }
 
 
@@ -106,27 +106,27 @@ public class ClientMiscEventHandler {
         RenderSystem.enableTexture();
         Minecraft.getInstance().getTextureManager().bindTexture(tex);
 
-        renderStack.push();
-        renderStack.rotate(Vector3f.YN.rotationDegrees(20 + r));
+        renderStack.pushPose();
+        renderStack.mirror(Axis.YN.rotationDegrees(20 + r));
         vboR.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
-        vboR.draw(renderStack.getLast().getMatrix(), GL11.GL_QUADS);
+        vboR.draw(renderStack.last().pose(), GL11.GL_QUADS);
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
-        VertexBuffer.unbindBuffer();
-        renderStack.pop();
+        VertexBuffer.unbind();
+        renderStack.popPose();
 
-        renderStack.push();
-        renderStack.rotate(Vector3f.YP.rotationDegrees(20 + r));
+        renderStack.pushPose();
+        renderStack.mirror(Axis.YP.rotationDegrees(20 + r));
         vboL.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
-        vboL.draw(renderStack.getLast().getMatrix(), GL11.GL_QUADS);
+        vboL.draw(renderStack.last().pose(), GL11.GL_QUADS);
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
-        VertexBuffer.unbindBuffer();
-        renderStack.pop();
+        VertexBuffer.unbind();
+        renderStack.popPose();
 
         BlockAtlasTexture.getInstance().bindTexture();
         RenderTypesAS.MODEL_DEMON_WINGS.clearRenderState();
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

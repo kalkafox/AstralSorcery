@@ -67,7 +67,7 @@ public interface GemSocketItem {
      * @param side
      * @return if the gem socket can be *inserted*
      */
-    default <T extends AbstractPerk & GemSocketPerk> boolean canBeInserted(ItemStack stack, T perk, Player player, PlayerProgress progress, LogicalSide side) {
+    default <T extends AbstractPerk & GemSocketPerk> boolean canBeInserted(ItemStack stack, T perk, Player player, PlayerProgress progress, LogicalSide direction) {
         return true;
     }
 
@@ -81,7 +81,7 @@ public interface GemSocketItem {
      * @param side
      * @return the list of modifiers
      */
-    default <T extends AbstractPerk & GemSocketPerk> List<DynamicAttributeModifier> getModifiers(ItemStack stack, T perk, Player player, LogicalSide side) {
+    default <T extends AbstractPerk & GemSocketPerk> List<DynamicAttributeModifier> getModifiers(ItemStack stack, T perk, Player player, LogicalSide direction) {
         return new ArrayList<>();
     }
 

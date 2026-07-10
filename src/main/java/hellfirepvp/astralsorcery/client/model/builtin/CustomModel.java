@@ -32,7 +32,7 @@ public abstract class CustomModel extends Model {
     }
 
     public final RenderType getGeneralType() {
-        return this.getRenderType(AtlasTexture.LOCATION_BLOCKS_TEXTURE);
+        return this.getRenderType(TextureAtlas.LOCATION_BLOCKS_TEXTURE);
     }
 
     public void render(PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, int packedOverlayIn) {
@@ -40,8 +40,8 @@ public abstract class CustomModel extends Model {
     }
 
     protected void setRotateAngle(ModelPart modelPart, float x, float y, float z) {
-        modelPart.rotateAngleX = x;
-        modelPart.rotateAngleY = y;
-        modelPart.rotateAngleZ = z;
+        modelPart.xRot = x;
+        modelPart.yRot = y;
+        modelPart.zRot = z;
     }
 }

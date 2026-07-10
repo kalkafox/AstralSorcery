@@ -35,34 +35,34 @@ public abstract class ItemUsableDust extends Item implements DispenseItemBehavio
 
     abstract boolean dispense(BlockSource dispenser);
 
-    abstract boolean rightClickAir(Level world, Player player, ItemStack dust);
+    abstract boolean rightClickAir(Level level, Player player, ItemStack dust);
 
     abstract boolean rightClickBlock(UseOnContext ctx);
 
     @Override
-    public InteractionResult onItemUse(UseOnContext ctx) {
-        if (!ctx.getWorld().isRemote()) {
+    public InteractionResult useOn(UseOnContext ctx) {
+        if (!ctx.getLevel().isClientSide()) {
             if (this.rightClickBlock(ctx)) {
                 if (!ctx.getPlayer().isCreative()) {
                     ctx.getItem().shrink(1);
                 }
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
-        ItemStack held = player.getHeldItem(hand);
-        if (!held.isEmpty() && !world.isRemote()) {
-            if (this.rightClickAir(world, player, held)) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
+        if (!held.isEmpty() && !level.isClientSide()) {
+            if (this.rightClickAir(level, player, held)) {
                 if (!player.isCreative()) {
                     held.shrink(1);
                 }
             }
         }
 
-        return ActionResult.resultSuccess(held);
+        return InteractionResultHolder.success(held);
     }
 
     @Override

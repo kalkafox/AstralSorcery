@@ -35,8 +35,8 @@ import java.util.List;
 public class ItemInfusedCrystalShovel extends ItemCrystalShovel {
 
     public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, Player player) {
-        Level world = player.level();
-        if (!world.isClientSide &&
+        Level level = player.level();
+        if (!level.isClientSide &&
                 !player.isShiftKeyDown() &&
                 !player.getCooldowns().isOnCooldown(itemstack.getItem()) &&
                 player instanceof ServerPlayer serverPlayer) {
@@ -44,18 +44,18 @@ public class ItemInfusedCrystalShovel extends ItemCrystalShovel {
             PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
             if (prog.doPerkAbilities()) {
                 EventFlags.CHAIN_MINING.executeWithFlag(() -> {
-                    if (!world.getBlockState(pos).isAir()) {
-                        List<BlockPos> foundBlocks = BlockDiscoverer.discoverBlocksWithSameStateAround(world, pos, true, 8, 200, false);
+                    if (!level.getBlockState(pos).isAir()) {
+                        List<BlockPos> foundBlocks = BlockDiscoverer.discoverBlocksWithSameStateAround(level, pos, true, 8, 200, false);
                         if (!foundBlocks.isEmpty()) {
                             foundBlocks.forEach(at -> {
-                                BlockState currentState = world.getBlockState(at);
+                                BlockState currentState = level.getBlockState(at);
                                 if (!currentState.isAir() && serverPlayer.gameMode.destroyBlock(at)) {
                                     PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.BLOCK_EFFECT)
                                             .addData(buf -> {
                                                 ByteBufUtils.writePos(buf, at);
                                                 ByteBufUtils.writeBlockState(buf, currentState);
                                             });
-                                    PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(world, at, 32));
+                                    PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(level, at, 32));
                                 }
                             });
 

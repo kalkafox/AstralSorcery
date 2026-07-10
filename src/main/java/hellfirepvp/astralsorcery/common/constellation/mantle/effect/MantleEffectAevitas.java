@@ -67,14 +67,14 @@ public class MantleEffectAevitas extends MantleEffect {
 
         int healChance = CONFIG.healChance.get();
         int foodChance = CONFIG.feedChance.get();
-        if (healChance > 0 && rand.nextInt(healChance) == 0) {
+        if (healChance > 0 && random.nextInt(healChance) == 0) {
             player.heal(CONFIG.healthPerCycle.get().floatValue());
         }
-        if (foodChance > 0 && rand.nextInt(foodChance) == 0) {
-            FoodData stats = player.getFoodStats();
+        if (foodChance > 0 && random.nextInt(foodChance) == 0) {
+            FoodData stats = player.getFoodData();
             if (stats.getFoodLevel() < 20 || stats.getSaturationLevel() < 5) {
                 if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFood.get())) {
-                    stats.addStats(CONFIG.foodPerCycle.get().intValue(), 0.5F);
+                    stats.addStats(CONFIG.foodPerCycle.get().getCommandResult(), 0.5F);
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFood.get(), false);
                 }
             }
@@ -92,15 +92,15 @@ public class MantleEffectAevitas extends MantleEffect {
             Vector3 center = Vector3.atEntityCorner(player).addY(0.15F);
             for (int i = 0; i < 5; i++) {
                 Vector3 offset = Vector3.random().setY(0).normalize()
-                        .multiply(rand.nextFloat() * 5).addY(rand.nextFloat() * -0.4F)
+                        .mul(random.nextFloat() * 5).addY(random.nextFloat() * -0.4F)
                         .add(center);
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(offset)
-                        .setScaleMultiplier(0.25F + rand.nextFloat() * 0.15F)
-                        .alpha(VFXAlphaFunction.PYRAMID)
-                        .setMotion(Vector3.random().normalize().multiply(0.004F))
-                        .setMaxAge(45 + rand.nextInt(20));
-                if (rand.nextInt(3) == 0) {
+                        .setScaleMultiplier(0.25F + random.nextFloat() * 0.15F)
+                        .alpha1arg(VFXAlphaFunction.PYRAMID)
+                        .setDeltaMovement(Vector3.random().normalize().mul(0.004F))
+                        .setMaxAge(45 + random.nextInt(20));
+                if (random.nextInt(3) == 0) {
                     p.color(VFXColorFunction.WHITE);
                 } else {
                     p.color(VFXColorFunction.constant(ColorsAS.RITUAL_CONSTELLATION_AEVITAS));
@@ -115,18 +115,18 @@ public class MantleEffectAevitas extends MantleEffect {
     }
 
     public static boolean canSupportEffect(Player player) {
-        LogicalSide side = player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
-        PlayerProgress progress = ResearchHelper.getProgress(player, side);
+        LogicalSide direction = player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+        PlayerProgress progress = ResearchHelper.getProgress(player, direction);
         return progress.doPerkAbilities() &&
                 progress.hasConstellationDiscovered(ConstellationsAS.aevitas) &&
-                AlignmentChargeHandler.INSTANCE.hasCharge(player, side, CONFIG.chargeCostPerTravelTick.get().floatValue());
+                AlignmentChargeHandler.INSTANCE.hasCharge(player, direction, CONFIG.chargeCostPerTravelTick.get().floatValue());
     }
 
     public static boolean isStandingOnAir(Entity entity) {
         if (entity.isOnGround()) {
-            Level world = entity.getEntityWorld();
-            BlockPos at = entity.getPosition().down();
-            return world.getBlockState(at).isAir(world, at);
+            Level level = entity.getCommandSenderWorld();
+            BlockPos at = entity.position().below();
+            return level.getBlockState(at).isAir(level, at);
         }
         return false;
     }
@@ -197,7 +197,7 @@ public class MantleEffectAevitas extends MantleEffect {
 
         @Override
         public boolean shouldAddCollisionFor(Entity entity) {
-            if (!(entity instanceof Player) || ((Player) entity).abilities.isFlying) {
+            if (!(entity instanceof Player) || ((Player) entity).abilities.flying) {
                 return false;
             }
             return ItemMantle.getEffect((LivingEntity) entity, ConstellationsAS.aevitas) != null &&
@@ -210,7 +210,7 @@ public class MantleEffectAevitas extends MantleEffect {
             if (entity.getPose() == Pose.CROUCHING && isStandingOnAir(entity)) {
                 yOffset = 2;
             }
-            additionalCollision.add(FULL_BOX.offset(entity.getPosX(), Math.floor(entity.getPosY()) - yOffset, entity.getPosZ()));
+            additionalCollision.add(FULL_BOX.offset(entity.getX(), Math.floor(entity.getY()) - yOffset, entity.getZ()));
         }
     }
 }

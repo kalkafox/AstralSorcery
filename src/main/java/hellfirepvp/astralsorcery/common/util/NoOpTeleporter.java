@@ -32,7 +32,7 @@ public class NoOpTeleporter extends PortalForcer {
     }
 
     @Override
-    public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+    public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yRot, Function<Boolean, Entity> repositionEntity) {
         Entity created = repositionEntity.apply(false);
         created.setPositionAndUpdate(targetPos.getX(), targetPos.getY(), targetPos.getZ());
         return created;

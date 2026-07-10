@@ -53,9 +53,9 @@ public class PktDiscoverConstellation extends ASPacket<PktDiscoverConstellation>
     @Nonnull
     @Override
     public Handler<PktDiscoverConstellation> handler() {
-        return (packet, context, side) -> {
+        return (packet, context, direction) -> {
             context.enqueueWork(() -> {
-                if (side == LogicalSide.SERVER) {
+                if (direction == LogicalSide.SERVER) {
                     Player player = context.getSender();
                     PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
                     if (prog.isValid() &&

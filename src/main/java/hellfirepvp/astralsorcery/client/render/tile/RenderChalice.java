@@ -18,12 +18,13 @@ import hellfirepvp.astralsorcery.common.tile.TileChalice;
 import hellfirepvp.astralsorcery.common.util.ColorUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Vector3f;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.awt.*;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,17 +35,17 @@ import java.awt.*;
  */
 public class RenderChalice extends CustomTileEntityRenderer<TileChalice> {
 
-    public RenderChalice(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderChalice(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
     public void render(TileChalice tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
-        FluidStack stack = tile.getTank().getFluid();
+        FluidStack stack = tile.getTank().getType();
         if (stack.isEmpty()) {
             return;
         }
-        TextureAtlasSprite tas = RenderingUtils.getParticleTexture(stack);
+        TextureAtlasSprite tas = RenderingUtils.getParticleIcon(stack);
         if (tas == null) {
             return;
         }
@@ -53,27 +54,27 @@ public class RenderChalice extends CustomTileEntityRenderer<TileChalice> {
         Color color = new Color(ColorUtils.getOverlayColor(stack));
         float percSize = 0.125F + (tile.getTank().getPercentageFilled() * 0.375F);
 
-        float ulength = tas.getMaxU() - tas.getMinU();
-        float vlength = tas.getMaxV() - tas.getMinV();
+        float ulength = tas.getU1() - tas.getU0();
+        float vlength = tas.getV1() - tas.getV0();
 
         float uPart = ulength * percSize;
         float vPart = vlength * percSize;
-        float uOffset = tas.getMinU() + ulength / 2F - uPart / 2F;
-        float vOffset = tas.getMinV() + vlength / 2F - vPart / 2F;
+        float uOffset = tas.getU0() + ulength / 2F - uPart / 2F;
+        float vOffset = tas.getV0() + vlength / 2F - vPart / 2F;
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0.5F, 1.4F, 0.5F);
-        renderStack.rotate(Vector3f.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.rotate(Vector3f.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
         renderStack.scale(percSize, percSize, percSize);
 
         VertexConsumer buf = renderTypeBuffer.getBuffer(RenderTypesAS.TER_CHALICE_LIQUID);
         RenderingDrawUtils.renderTexturedCubeCentralColorNormal(renderStack, buf,
                 uOffset, vOffset, uPart, vPart,
                 color.getRed(), color.getGreen(), color.getBlue(), 255,
-                renderStack.getLast().getNormal());
+                renderStack.last().normal());
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

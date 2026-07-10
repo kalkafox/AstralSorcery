@@ -36,14 +36,14 @@ public class CopyCrystalProperties extends LootItemConditionalFunction {
     }
 
     @Override
-    public LootItemFunctionType getFunctionType() {
+    public LootItemFunctionType getType() {
         return LootAS.Functions.COPY_CRYSTAL_PROPERTIES;
     }
 
     @Override
-    protected ItemStack doApply(ItemStack stack, LootContext context) {
-        if (context.has(LootParameters.BLOCK_ENTITY)) {
-            BlockEntity tile = context.get(LootParameters.BLOCK_ENTITY);
+    protected ItemStack run(ItemStack stack, LootContext context) {
+        if (context.has(LootContextParams.BLOCK_ENTITY)) {
+            BlockEntity tile = context.get(LootContextParams.BLOCK_ENTITY);
             if (tile instanceof CrystalAttributeTile && stack.getItem() instanceof CrystalAttributeItem) {
                 CrystalAttributes attr = ((CrystalAttributeTile) tile).getAttributes();
                 if (attr == null) {
@@ -55,11 +55,11 @@ public class CopyCrystalProperties extends LootItemConditionalFunction {
         return stack;
     }
 
-    public static LootFunction.Builder<?> builder() {
+    public static LootItemConditionalFunction.Builder<?> builder() {
         return builder(CopyCrystalProperties::new);
     }
 
-    public static class Serializer extends LootFunction.Serializer<CopyCrystalProperties> {
+    public static class Serializer extends LootItemConditionalFunction.Serializer<CopyCrystalProperties> {
 
         @Override
         public CopyCrystalProperties deserialize(JsonObject jsonObject, JsonDeserializationContext ctx, LootItemCondition[] conditions) {

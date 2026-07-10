@@ -23,8 +23,8 @@ import net.minecraft.world.level.ServerLevelAccessor;
 public class RockCrystalFeature extends ReplaceBlockFeature {
 
     @Override
-    protected boolean setBlockState(ServerLevelAccessor world, BlockPos pos, BlockState state) {
-        DataAS.DOMAIN_AS.getData(world.getWorld(), DataAS.KEY_ROCK_CRYSTAL_BUFFER).addOre(pos);
-        return super.setBlockState(world, pos, state);
+    protected boolean setBlock(ServerLevelAccessor level, BlockPos pos, BlockState state) {
+        DataAS.DOMAIN_AS.getData(level.getLevel(), DataAS.KEY_ROCK_CRYSTAL_BUFFER).addOre(pos);
+        return super.setBlock(level, pos, state);
     }
 }

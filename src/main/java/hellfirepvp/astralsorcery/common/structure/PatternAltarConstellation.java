@@ -34,15 +34,15 @@ public class PatternAltarConstellation extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        BlockState raw = BlocksAS.MARBLE_RAW.getDefaultState();
-        BlockState chiseled = BlocksAS.MARBLE_CHISELED.getDefaultState();
-        BlockState runed = BlocksAS.MARBLE_RUNED.getDefaultState();
-        BlockState bricks = BlocksAS.MARBLE_BRICKS.getDefaultState();
-        BlockState sootyRaw = BlocksAS.BLACK_MARBLE_RAW.getDefaultState();
+        BlockState raw = BlocksAS.MARBLE_RAW.defaultBlockState();
+        BlockState chiseled = BlocksAS.MARBLE_CHISELED.defaultBlockState();
+        BlockState runed = BlocksAS.MARBLE_RUNED.defaultBlockState();
+        BlockState bricks = BlocksAS.MARBLE_BRICKS.defaultBlockState();
+        BlockState sootyRaw = BlocksAS.BLACK_MARBLE_RAW.defaultBlockState();
 
         addBlockCube(bricks, -4, -1, -4,  4, -1,  4);
         addBlockCube(sootyRaw, -3, -1, -3,  3, -1,  3);
-        addBlock(BlocksAS.ALTAR_CONSTELLATION.getDefaultState(), 0, 0, 0);
+        addBlock(BlocksAS.ALTAR_CONSTELLATION.defaultBlockState(), 0, 0, 0);
 
         addBlock(raw, -4, -1, -4);
         addBlock(raw, -4, -1, -3);
@@ -99,7 +99,7 @@ public class PatternAltarConstellation extends PatternBlockArray {
             @Nonnull
             @Override
             public BlockState getDescriptiveState(long tick) {
-                return BlocksAS.MARBLE_PILLAR.getDefaultState().with(BlockMarblePillar.PILLAR_TYPE, type);
+                return BlocksAS.MARBLE_PILLAR.defaultBlockState().setValue(BlockMarblePillar.PILLAR_TYPE, type);
             }
         };
     }

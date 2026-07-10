@@ -39,29 +39,29 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
 
     @Override
     public WellLiquefaction read(ResourceLocation recipeId, JsonObject json) {
-        Ingredient input = Ingredient.deserialize(JSONUtils.getJsonObject(json, "input"));
-        String fluidKey = JSONUtils.getString(json, "output");
-        Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidKey));
+        Ingredient from = Ingredient.deserialize(GsonHelper.getAsJsonObject(json, "input"));
+        String fluidKey = GsonHelper.getString(json, "output");
+        Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey));
         if (fluid == null) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey);
         }
-        float productionMultiplier = JSONUtils.getFloat(json, "productionMultiplier");
-        float shatterMultiplier = JSONUtils.getFloat(json, "shatterMultiplier");
+        float productionMultiplier = GsonHelper.getFloat(json, "productionMultiplier");
+        float shatterMultiplier = GsonHelper.getFloat(json, "shatterMultiplier");
         Color color = null;
         if (json.has("color")) {
             color = JsonHelper.getColor(json, "color");
         }
-        return new WellLiquefaction(recipeId, input, fluid, color, productionMultiplier, shatterMultiplier);
+        return new WellLiquefaction(recipeId, from, fluid, color, productionMultiplier, shatterMultiplier);
     }
 
     @Override
     public WellLiquefaction read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-        Ingredient input = Ingredient.read(buffer);
+        Ingredient from = Ingredient.read(buffer);
         Fluid fluid = ByteBufUtils.readRegistryEntry(buffer);
         float shatter = buffer.readFloat();
         float production = buffer.readFloat();
         Color color = ByteBufUtils.readOptional(buffer, buf -> new Color(buf.readInt(), true));
-        return new WellLiquefaction(recipeId, input, fluid, color, production, shatter);
+        return new WellLiquefaction(recipeId, from, fluid, color, production, shatter);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
     @Override
     public void write(JsonObject object, WellLiquefaction recipe) {
         object.add("input", recipe.getInput().serialize());
-        object.addProperty("output", recipe.getFluidOutput().getRegistryName().toString());
+        object.addProperty("output", RegistryHelper.getKey(recipe.getFluidOutput()).toString());
         object.addProperty("productionMultiplier", recipe.getProductionMultiplier());
         object.addProperty("shatterMultiplier", recipe.getShatterMultiplier());
         object.addProperty("color", recipe.getCatalystColor() == null ? Color.WHITE.getRGB() : recipe.getCatalystColor().getRGB());

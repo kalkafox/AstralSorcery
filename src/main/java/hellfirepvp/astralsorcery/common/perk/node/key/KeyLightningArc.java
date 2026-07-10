@@ -36,7 +36,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -68,29 +68,29 @@ public class KeyLightningArc extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOWEST, this::onAttack);
     }
 
-    private void onAttack(LivingHurtEvent event) {
+    private void onAttack(LivingIncomingDamageEvent event) {
         if (EventFlags.LIGHTNING_ARC.isSet()) {
             return;
         }
 
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-            Player player = (Player) source.getTrueSource();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
-            if (side.isServer() && prog.getPerkData().hasPerkEffect(this) && prog.doPerkAbilities()) {
-                float chance = PerkAttributeHelper.getOrCreateMap(player, side)
+        if (source.getEntity() != null && source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
+            if (direction.isServer() && prog.getPerkData().hasPerkEffect(this) && prog.doPerkAbilities()) {
+                float chance = PerkAttributeHelper.getOrCreateMap(player, direction)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.arcChance.get().floatValue());
-                if (rand.nextFloat() < chance && AlignmentChargeHandler.INSTANCE.drainCharge(player, side, CONFIG.chargeCost.get(), false)) {
+                if (random.nextFloat() < chance && AlignmentChargeHandler.INSTANCE.drainCharge(player, direction, CONFIG.chargeCost.get(), false)) {
                     float dmg = event.getAmount();
                     dmg *= CONFIG.arcPercent.get();
-                    new RepetitiveArcEffect(player.world,
+                    new RepetitiveArcEffect(player.level(),
                             player,
                             CONFIG.arcTicks.get(),
                             event.getEntityLiving().getEntityId(),
@@ -139,7 +139,7 @@ public class KeyLightningArc extends KeyPerk {
 
     static class RepetitiveArcEffect {
 
-        private final Level world;
+        private final Level level;
         private final Player player;
         private final int entityStartId;
         private final float damage;
@@ -147,8 +147,8 @@ public class KeyLightningArc extends KeyPerk {
 
         private int count;
 
-        public RepetitiveArcEffect(Level world, Player player, int count, int entityStartId, float damage, double distance) {
-            this.world = world;
+        public RepetitiveArcEffect(Level level, Player player, int count, int entityStartId, float damage, double distance) {
+            this.level = level;
             this.player = player;
             this.count = count;
             this.entityStartId = entityStartId;
@@ -164,7 +164,7 @@ public class KeyLightningArc extends KeyPerk {
             int chainTimes = Math.round(PerkAttributeHelper.getOrCreateMap(player, LogicalSide.SERVER)
                     .modifyValue(player, ResearchHelper.getProgress(player, LogicalSide.SERVER), PerkAttributeTypesAS.ATTR_TYPE_ARC_CHAINS, arcChains));
             List<LivingEntity> visitedEntities = Lists.newArrayList();
-            Entity start = world.getEntityByID(entityStartId);
+            Entity start = level.getEntityByID(entityStartId);
 
             if (start instanceof LivingEntity && start.isAlive()) {
                 AABB box = new AABB(-distance, -distance, -distance, distance, distance, distance);
@@ -178,7 +178,7 @@ public class KeyLightningArc extends KeyPerk {
                     if (last != null) {
                         Vector3 from = Vector3.atEntityCenter(entity);
                         Vector3 to = Vector3.atEntityCenter(last);
-                        PacketDistributor.TargetPoint target = PacketChannel.pointFromPos(world, entity.getPosition(), 16);
+                        PacketDistributor.TargetPoint target = PacketChannel.pointFromPos(level, entity.position(), 16);
                         PacketChannel.CHANNEL.sendToAllAround(new PktPlayEffect(PktPlayEffect.Type.LIGHTNING)
                                 .addData(buf -> {
                                     ByteBufUtils.writeVector(buf, from);
@@ -192,7 +192,7 @@ public class KeyLightningArc extends KeyPerk {
                                     buf.writeInt(ColorsAS.EFFECT_LIGHTNING.getRGB());
                                 }), target);
                     }
-                    List<LivingEntity> entities = entity.getEntityWorld().getEntitiesWithinAABB(LivingEntity.class, box.offset(entity.getPositionVec()), EntityUtils.selectEntities(LivingEntity.class));
+                    List<LivingEntity> entities = entity.getCommandSenderWorld().getEntitiesWithinAABB(LivingEntity.class, box.offset(entity.position()), EntityUtils.selectEntities(LivingEntity.class));
                     entities.remove(entity);
                     if (last != null) {
                         entities.remove(last);
@@ -220,7 +220,7 @@ public class KeyLightningArc extends KeyPerk {
                 if (visitedEntities.size() > 1) {
                     visitedEntities.forEach((e) -> {
                         EventFlags.LIGHTNING_ARC.executeWithFlag(() -> {
-                            DamageUtil.attackEntityFrom(e, CommonProxy.DAMAGE_SOURCE_STELLAR, damage, player);
+                            DamageUtil.hurt(e, CommonProxy.DAMAGE_SOURCE_STELLAR, damage, player);
                         });
                     });
                 }

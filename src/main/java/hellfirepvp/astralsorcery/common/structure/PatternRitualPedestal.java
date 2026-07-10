@@ -31,18 +31,18 @@ public class PatternRitualPedestal extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        BlockState air = Blocks.AIR.getDefaultState();
+        BlockState air = Blocks.AIR.defaultBlockState();
 
         addBlockCube(MatchableState.REQUIRES_AIR, -2, 0, -2, 2, 2, 2);
         addBlockCube(MatchableState.REQUIRES_AIR, -3, 0, -1, 3, 2, 1);
         addBlockCube(MatchableState.REQUIRES_AIR, -1, 0, -3, 1, 2, 3);
 
-        addBlock(BlocksAS.RITUAL_PEDESTAL.getDefaultState(), 0, 0, 0);
+        addBlock(BlocksAS.RITUAL_PEDESTAL.defaultBlockState(), 0, 0, 0);
 
-        BlockState chiseled = BlocksAS.MARBLE_CHISELED.getDefaultState();
-        BlockState bricks = BlocksAS.MARBLE_BRICKS.getDefaultState();
-        BlockState raw = BlocksAS.MARBLE_RAW.getDefaultState();
-        BlockState arch = BlocksAS.MARBLE_ARCH.getDefaultState();
+        BlockState chiseled = BlocksAS.MARBLE_CHISELED.defaultBlockState();
+        BlockState bricks = BlocksAS.MARBLE_BRICKS.defaultBlockState();
+        BlockState raw = BlocksAS.MARBLE_RAW.defaultBlockState();
+        BlockState arch = BlocksAS.MARBLE_ARCH.defaultBlockState();
 
         addBlock(chiseled, 0, -1, 0);
 

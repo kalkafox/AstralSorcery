@@ -26,7 +26,7 @@ import java.util.Random;
  */
 public abstract class TileNetwork<T extends IPrismTransmissionNode> extends TileEntityTick {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
     private boolean isNetworkInformed = false;
 
     private T cachedNetworkNode = null;
@@ -39,7 +39,7 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
     @Nullable
     public T getNetworkNode() {
         if (cachedNetworkNode != null) {
-            if (!cachedNetworkNode.getLocationPos().equals(getPos())) {
+            if (!cachedNetworkNode.getLocationPos().equals(getBlockPos())) {
                 cachedNetworkNode = null;
             }
         }
@@ -51,7 +51,7 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
 
     @Nullable
     private T resolveNode() {
-        IPrismTransmissionNode node = WorldNetworkHandler.getNetworkHandler(getWorld()).getTransmissionNode(getPos());
+        IPrismTransmissionNode node = WorldNetworkHandler.getNetworkHandler(getLevel()).getTransmissionNode(getBlockPos());
         if (node == null) {
             return null;
         }
@@ -62,7 +62,7 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
     public void tick() {
         super.tick();
 
-        if (!this.getWorld().isRemote()) {
+        if (!this.getLevel().isClientSide()) {
             if (!this.isNetworkInformed) {
                 if (!TransmissionNetworkHelper.isTileInNetwork(this)) {
                     TransmissionNetworkHelper.informNetworkTilePlacement(this);
@@ -105,7 +105,7 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
     public void remove() {
         super.remove();
 
-        if (this.getWorld() == null || this.getWorld().isRemote()) {
+        if (this.getLevel() == null || this.getLevel().isClientSide()) {
             return;
         }
         TransmissionNetworkHelper.informNetworkTileRemoval(this);
@@ -113,16 +113,16 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
     }
 
     @Override
-    public void writeSaveNBT(CompoundTag compound) {
-        super.writeSaveNBT(compound);
+    public void writeSaveNBT(CompoundTag pattern) {
+        super.writeSaveNBT(pattern);
 
-        compound.putBoolean("needsNetworkSync", this.needsNetworkSync);
+        pattern.putBoolean("needsNetworkSync", this.needsNetworkSync);
     }
 
     @Override
-    public void readSaveNBT(CompoundTag compound) {
-        super.readSaveNBT(compound);
+    public void readSaveNBT(CompoundTag pattern) {
+        super.readSaveNBT(pattern);
 
-        this.needsNetworkSync = compound.getBoolean("needsNetworkSync");
+        this.needsNetworkSync = pattern.getBoolean("needsNetworkSync");
     }
 }

@@ -8,13 +8,14 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.EnchantmentsAS;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 /**
@@ -29,40 +30,39 @@ public class RegistryEnchantments {
     private RegistryEnchantments() {}
 
     /**
-     * @see hellfirepvp.astralsorcery.common.loot.global.LootModifierScorchingHeat
+     * Enchantments are a datapack registry since 1.21: definitions are loaded
+     * from data JSON instead of code registration. This bootstrap emits those
+     * JSONs through datagen (TODO 1.21: wire into a
+     * DatapackBuiltinEntriesProvider once datagen is ported).
+     * The in-game behavior stays code-driven; see
+     * {@link hellfirepvp.astralsorcery.common.loot.global.LootModifierScorchingHeat}
+     * and the night vision handling in EventHelperEnchantmentTick.
      */
-    public static void init() {
-        register(EnchantmentsAS.NIGHT_VISION, createNightVision());
-        register(EnchantmentsAS.SCORCHING_HEAT, createScorchingHeat());
-    }
+    public static void bootstrap(BootstrapContext<Enchantment> context) {
+        HolderGetter<Item> items = context.lookup(Registries.ITEM);
 
-    private static Enchantment createNightVision() {
-        return Enchantment.enchantment(Enchantment.definition(
-                BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.HEAD_ARMOR_ENCHANTABLE),
+        register(context, EnchantmentsAS.NIGHT_VISION, Enchantment.enchantment(Enchantment.definition(
+                items.getOrThrow(ItemTags.HEAD_ARMOR_ENCHANTABLE),
                 1,
                 1,
                 Enchantment.constantCost(25),
                 Enchantment.constantCost(50),
                 8,
                 EquipmentSlotGroup.HEAD
-        )).build(EnchantmentsAS.NIGHT_VISION.location());
-    }
-
-    private static Enchantment createScorchingHeat() {
-        return Enchantment.enchantment(Enchantment.definition(
-                BuiltInRegistries.ITEM.getOrCreateTag(ItemTags.MINING_ENCHANTABLE),
+        )));
+        register(context, EnchantmentsAS.SCORCHING_HEAT, Enchantment.enchantment(Enchantment.definition(
+                items.getOrThrow(ItemTags.MINING_ENCHANTABLE),
                 1,
                 1,
                 Enchantment.constantCost(25),
                 Enchantment.constantCost(50),
                 8,
                 EquipmentSlotGroup.MAINHAND
-        )).build(EnchantmentsAS.SCORCHING_HEAT.location());
+        )));
     }
 
-    private static <T extends Enchantment> T register(ResourceKey<Enchantment> key, T effect) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.ENCHANTMENT, key.location(), effect);
-        return effect;
+    private static void register(BootstrapContext<Enchantment> context, ResourceKey<Enchantment> key, Enchantment.Builder builder) {
+        context.register(key, builder.build(key.location()));
     }
 
 }

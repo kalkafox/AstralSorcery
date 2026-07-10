@@ -26,15 +26,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(ClientWorld.class)
+@Mixin(ClientLevel.class)
 public class MixinClientWorld {
 
     @Inject(method = "getSunBrightness", at = @At("RETURN"), cancellable = true)
-    public void solarEclipseSunBrightness(float partialTicks, CallbackInfoReturnable<Float> cir) {
-        Level world = (Level)(Object) this;
+    public void solarEclipseSunBrightness(float a, CallbackInfoReturnable<Float> cir) {
+        Level level = (Level)(Object) this;
 
-        WorldContext ctx = SkyHandler.getContext(world, LogicalSide.CLIENT);
-        String strDimKey = world.getDimensionKey().getLocation().toString();
+        WorldContext ctx = SkyHandler.getContext(level, LogicalSide.CLIENT);
+        String strDimKey = level.dimension().getLocation().toString();
         if (ctx != null &&
                 RenderingConfig.CONFIG.dimensionsWithSkyRendering.get().contains(strDimKey) &&
                 ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {

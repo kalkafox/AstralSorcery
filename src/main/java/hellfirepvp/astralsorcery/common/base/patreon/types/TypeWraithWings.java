@@ -51,10 +51,10 @@ public class TypeWraithWings extends PatreonEffect {
     }
 
     private boolean shouldDoEffect(Player player) {
-        return player.getUniqueID().equals(playerUUID) &&
+        return player.getUUID().equals(playerUUID) &&
                 !player.isPassenger() &&
-                !player.isElytraFlying() &&
-                !player.isPotionActive(Effects.INVISIBILITY);
+                !player.isFallFlying() &&
+                !player.isPotionActive(MobEffects.INVISIBILITY);
     }
 
     @SubscribeEvent
@@ -66,26 +66,26 @@ public class TypeWraithWings extends PatreonEffect {
         }
         PoseStack renderStack = event.getPoseStack();
 
-        float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, event.getPartialRenderTick());
+        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, event.getPartialRenderTick());
 
         float yOffset = 1.2F;
-        if (player.isSneaking() && !player.abilities.isFlying) {
+        if (player.isShiftKeyDown() && !player.abilities.flying) {
             yOffset = 1F;
         }
 
-        renderStack.push();
+        renderStack.pushPose();
 
         float swimAngle = player.getSwimAnimation(event.getPartialRenderTick());
         if (swimAngle > 0) {
-            float waterPitch = player.isInWater() ? -90.0F - player.rotationPitch : -90.0F;
-            float bodySwimAngle = MathHelper.lerp(swimAngle, 0.0F, waterPitch);
-            renderStack.rotate(Vector3f.YP.rotationDegrees(180 - rot));
-            renderStack.rotate(Vector3f.XP.rotationDegrees(bodySwimAngle));
-            if (player.isActualySwimming()) {
+            float waterPitch = player.isInWater() ? -90.0F - player.getXRot() : -90.0F;
+            float bodySwimAngle = Mth.lerp(swimAngle, 0.0F, waterPitch);
+            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
+            renderStack.mirror(Axis.XP.rotationDegrees(bodySwimAngle));
+            if (player.isVisuallySwimming()) {
                 renderStack.translate(0, -1, 0.3);
             }
         } else {
-            renderStack.rotate(Vector3f.YP.rotationDegrees(180 - rot));
+            renderStack.mirror(Axis.YP.rotationDegrees(180 - rot));
         }
 
         renderStack.translate(0, yOffset, 0);
@@ -93,21 +93,21 @@ public class TypeWraithWings extends PatreonEffect {
 
         RenderTypesAS.MODEL_WRAITH_WINGS.setupRenderState();
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(-2.3, 0, 0.8);
-        renderStack.rotate(Vector3f.YP.rotationDegrees(10));
+        renderStack.mirror(Axis.YP.rotationDegrees(10));
         ObjModelRender.renderWraithWings(renderStack);
-        renderStack.pop();
+        renderStack.popPose();
 
-        renderStack.push();
-        renderStack.rotate(Vector3f.YP.rotationDegrees(180));
+        renderStack.pushPose();
+        renderStack.mirror(Axis.YP.rotationDegrees(180));
         renderStack.translate(-2.3, 0, -0.8);
-        renderStack.rotate(Vector3f.YN.rotationDegrees(10));
+        renderStack.mirror(Axis.YN.rotationDegrees(10));
         ObjModelRender.renderWraithWings(renderStack);
-        renderStack.pop();
+        renderStack.popPose();
 
         RenderTypesAS.MODEL_WRAITH_WINGS.clearRenderState();
 
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

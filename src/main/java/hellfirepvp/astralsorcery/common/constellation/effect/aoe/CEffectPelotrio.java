@@ -54,12 +54,12 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
     public static PelotrioConfig CONFIG = new PelotrioConfig();
 
     public CEffectPelotrio(@Nonnull ILocatable origin) {
-        super(origin, ConstellationsAS.pelotrio, CONFIG.maxAmount.get(), (world, pos, state) -> {
-            if (!(world instanceof ServerLevel)) {
+        super(origin, ConstellationsAS.pelotrio, CONFIG.maxAmount.get(), (level, pos, state) -> {
+            if (!(level instanceof ServerLevel)) {
                 return false;
             }
-            pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).up();
-            return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) world, pos, SpawnReason.SPAWNER) != null;
+            pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).above();
+            return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) level, pos, MobSpawnType.SPAWNER) != null;
         });
     }
 
@@ -71,46 +71,46 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
 
     @Nullable
     @Override
-    public ListEntries.EntitySpawnEntry createElement(Level world, BlockPos pos) {
-        if (!(world instanceof ServerLevel)) {
+    public ListEntries.EntitySpawnEntry createElement(Level level, BlockPos pos) {
+        if (!(level instanceof ServerLevel)) {
             return null;
         }
-        pos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).up();
-        return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) world, pos, SpawnReason.SPAWNER);
+        pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).above();
+        return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) level, pos, MobSpawnType.SPAWNER);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
-        if (rand.nextFloat() < 0.2F) {
-            Vector3 at = Vector3.random().normalize().multiply(rand.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
+        if (random.nextFloat() < 0.2F) {
+            Vector3 at = Vector3.random().normalize().mul(random.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
 
             EffectHelper.spawnSource(new FXOrbitalPelotrio(at)
                     .setOrbitAxis(Vector3.random())
-                    .setOrbitRadius(0.8 + rand.nextFloat() * 0.7)
-                    .setTicksPerRotation(20 + rand.nextInt(20)));
+                    .setOrbitRadius(0.8 + random.nextFloat() * 0.7)
+                    .setTicksPerRotation(20 + random.nextInt(20)));
         }
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        if (!(world instanceof ServerLevel)) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        if (!(level instanceof ServerLevel)) {
             return false;
         }
 
         boolean update = false;
 
-        List<LivingEntity> nearbyEntities = world.getEntitiesWithinAABB(LivingEntity.class, PROXIMITY_BOX.offset(pos).grow(properties.getSize()));
+        List<LivingEntity> nearbyEntities = level.getEntitiesWithinAABB(LivingEntity.class, PROXIMITY_BOX.offset(pos).grow(properties.getSize()));
 
         if (properties.isCorrupted()) {
             for (LivingEntity entity : nearbyEntities) {
-                if (entity != null && entity.isAlive() && rand.nextInt(300) == 0) {
-                    LivingEntity transmuted = EntityTransmutationRegistry.INSTANCE.transmuteEntity((ServerLevel) world, entity);
+                if (entity != null && entity.isAlive() && random.nextInt(300) == 0) {
+                    LivingEntity transmuted = EntityTransmutationRegistry.INSTANCE.transmuteEntity((ServerLevel) level, entity);
                     if (transmuted != null) {
-                        transmuted.addPotionEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, Integer.MAX_VALUE, 1));
-                        AstralSorcery.getProxy().scheduleDelayed(() -> world.addEntity(transmuted));
+                        transmuted.addEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, Integer.MAX_VALUE, 1));
+                        AstralSorcery.getProxy().scheduleDelayed(() -> level.addEntity(transmuted));
                         update = true;
                     }
                 }
@@ -123,9 +123,9 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
             int count = entry.getCounter();
             count++;
             entry.setCounter(count);
-            sendConstellationPing(world, new Vector3(entry.getPos()).add(0.5, 0.5, 0.5));
+            sendConstellationPing(level, new Vector3(entry.getBlockPos()).add(0.5, 0.5, 0.5));
             if (count >= 10) {
-                entry.spawn((ServerLevel) world, SpawnReason.SPAWNER);
+                entry.spawn((ServerLevel) level, MobSpawnType.SPAWNER);
                 removeElement(entry);
             }
 
@@ -136,8 +136,8 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
             return update; //Flood prevention
         }
 
-        if (rand.nextFloat() < CONFIG.spawnChance.get()) {
-            if (findNewPosition(world, pos, properties).left().isPresent()) {
+        if (random.nextFloat() < CONFIG.spawnChance.get()) {
+            if (findNewPosition(level, pos, properties).left().isPresent()) {
                 update = true;
             }
         }

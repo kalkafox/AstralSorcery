@@ -25,12 +25,12 @@ public class LiquidInfusionContext extends RecipeCraftingContext<LiquidInfusion,
 
     private final TileInfuser infuser;
     private final Player crafter;
-    private final LogicalSide side;
+    private final LogicalSide direction;
 
-    public LiquidInfusionContext(TileInfuser infuser, Player crafter, LogicalSide side) {
+    public LiquidInfusionContext(TileInfuser infuser, Player crafter, LogicalSide direction) {
         this.infuser = infuser;
         this.crafter = crafter;
-        this.side = side;
+        this.direction = direction;
     }
 
     public TileInfuser getInfuser() {
@@ -42,6 +42,6 @@ public class LiquidInfusionContext extends RecipeCraftingContext<LiquidInfusion,
     }
 
     public LogicalSide getSide() {
-        return side;
+        return direction;
     }
 }

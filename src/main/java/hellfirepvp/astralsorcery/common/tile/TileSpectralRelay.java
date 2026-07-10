@@ -73,19 +73,19 @@ public class TileSpectralRelay extends TileEntityTick {
     public void tick() {
         super.tick();
 
-        if (!getWorld().isRemote()) {
-            if (!getWorld().isAirBlock(getPos().up())) {
-                ItemStack in = getInventory().getStackInSlot(0);
+        if (!getLevel().isClientSide()) {
+            if (!getLevel().isEmptyBlock(getBlockPos().above())) {
+                ItemStack in = getItems().getStackInSlot(0);
                 if (!in.isEmpty()) {
                     ItemStack out = ItemUtils.copyStackWithSize(in, in.getCount());
-                    ItemUtils.dropItem(getWorld(), getPos().getX(), getPos().getY(), getPos().getZ(), out);
-                    getInventory().setStackInSlot(0, ItemStack.EMPTY);
+                    ItemUtils.dropItem(getLevel(), getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), out);
+                    getItems().setStackInSlot(0, ItemStack.EMPTY);
                 }
             }
 
             if (hasMultiblock() && hasGlassLens() && this.altarPos != null) {
-                MiscUtils.executeWithChunk(getWorld(), this.altarPos, () -> {
-                    TileAltar ta = MiscUtils.getTileAt(getWorld(), this.altarPos, TileAltar.class, true);
+                MiscUtils.executeWithChunk(getLevel(), this.altarPos, () -> {
+                    TileAltar ta = MiscUtils.getTileAt(getLevel(), this.altarPos, TileAltar.class, true);
                     if (ta == null) {
                         this.updateAltarLinkState();
                     } else {
@@ -109,39 +109,39 @@ public class TileSpectralRelay extends TileEntityTick {
         this.updateRelayProximity();
     }
 
-    public static void cascadeRelayProximityUpdates(Level world, BlockPos pos) {
-        if (world.isRemote()) {
+    public static void cascadeRelayProximityUpdates(Level level, BlockPos pos) {
+        if (level.isClientSide()) {
             return;
         }
-        foreachNearbyRelay(world, pos, TileSpectralRelay::updateRelayProximity);
+        foreachNearbyRelay(level, pos, TileSpectralRelay::updateRelayProximity);
     }
 
     private void updateRelayProximity() {
-        if (this.getWorld().isRemote() || !this.hasGlassLens()) {
+        if (this.getLevel().isClientSide() || !this.hasGlassLens()) {
             return;
         }
         this.setClosestRelayPos(null);
-        BlockPos thisPos = this.getPos();
-        Vec3 thisVPos = Vector3d.copy(thisPos);
-        foreachNearbyRelay(this.getWorld(), thisPos, relay -> {
-            BlockPos relayPos = relay.getPos();
+        BlockPos thisPos = this.getBlockPos();
+        Vec3 thisVPos = Vec3.copy(thisPos);
+        foreachNearbyRelay(this.getLevel(), thisPos, relay -> {
+            BlockPos relayPos = relay.getBlockPos();
             if (relayPos.equals(thisPos)) {
                 return;
             }
-            Vec3 relayVPos = Vector3d.copy(relayPos);
+            Vec3 relayVPos = Vec3.copy(relayPos);
 
             BlockPos otherClosestPos = relay.closestRelayPos;
-            if (otherClosestPos == null || thisPos.distanceSq(relayVPos, false) < otherClosestPos.distanceSq(relayVPos, false)) {
+            if (otherClosestPos == null || thisPos.distSqr(relayVPos, false) < otherClosestPos.distSqr(relayVPos, false)) {
                 relay.setClosestRelayPos(thisPos);
             }
-            if (this.closestRelayPos == null || relayPos.distanceSq(thisVPos, false) < this.closestRelayPos.distanceSq(thisVPos, false)) {
+            if (this.closestRelayPos == null || relayPos.distSqr(thisVPos, false) < this.closestRelayPos.distSqr(thisVPos, false)) {
                 this.setClosestRelayPos(relayPos);
             }
         });
     }
 
-    private static void foreachNearbyRelay(Level world, BlockPos pos, Consumer<TileSpectralRelay> relayConsumer) {
-        List<BlockPos> nearbyRelays = BlockDiscoverer.searchForBlocksAround(world, pos, 8,
+    private static void foreachNearbyRelay(Level level, BlockPos pos, Consumer<TileSpectralRelay> relayConsumer) {
+        List<BlockPos> nearbyRelays = BlockDiscoverer.searchForBlocksAround(level, pos, 8,
                 ((world1, pos1, state) -> {
                     TileSpectralRelay relay;
                     return state.getBlock() instanceof BlockSpectralRelay &&
@@ -150,7 +150,7 @@ public class TileSpectralRelay extends TileEntityTick {
                             relay.hasMultiblock();
                 }));
         nearbyRelays.forEach(relayPos -> {
-            TileSpectralRelay relay = MiscUtils.getTileAt(world, relayPos, TileSpectralRelay.class, false);
+            TileSpectralRelay relay = MiscUtils.getTileAt(level, relayPos, TileSpectralRelay.class, false);
             if (relay != null) {
                 relayConsumer.accept(relay);
             }
@@ -162,38 +162,38 @@ public class TileSpectralRelay extends TileEntityTick {
         Vector3 pos = new Vector3(this).add(0.5, 0.35, 0.5);
         Vector3 target = new Vector3(this.altarPos).add(0.5, 0.5, 0.5);
 
-        int maxAge = 30;
-        maxAge *= Math.max(pos.distance(target) / 3, 1);
+        int lifetime = 30;
+        lifetime *= Math.max(pos.distance(target) / 3, 1);
 
         EntityVisualFX vfx = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(pos)
-                .alpha(VFXAlphaFunction.proximity(target::clone, 2F).andThen(VFXAlphaFunction.FADE_OUT))
+                .alpha1arg(VFXAlphaFunction.proximity(target::clone, 2F).andThen(VFXAlphaFunction.FADE_OUT))
                 .motion(VFXMotionController.target(target::clone, 0.08F))
-                .setMotion(Vector3.random().normalize().multiply(0.1F + rand.nextFloat() * 0.05F))
-                .setScaleMultiplier(0.15F + rand.nextFloat() * 0.05F)
-                .setMaxAge(maxAge);
+                .setDeltaMovement(Vector3.random().normalize().mul(0.1F + random.nextFloat() * 0.05F))
+                .setScaleMultiplier(0.15F + random.nextFloat() * 0.05F)
+                .setMaxAge(lifetime);
 
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             vfx.color(VFXColorFunction.WHITE);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void playStructureParticles() {
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             Vector3 pos = new Vector3(this).add(0.5, 0, 0.5);
             Vector3 offset = new Vector3(0, 0, 0);
-            MiscUtils.applyRandomOffset(offset, rand, 1.25F);
+            MiscUtils.applyRandomOffset(offset, random, 1.25F);
             pos.add(offset.getX(), 0, offset.getZ());
 
             EntityVisualFX vfx = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
                     .setGravityStrength(-0.001F)
-                    .setMaxAge(30 + rand.nextInt(20));
+                    .setMaxAge(30 + random.nextInt(20));
 
-            if (rand.nextBoolean()) {
+            if (random.nextBoolean()) {
                 vfx.color(VFXColorFunction.WHITE);
             }
         }
@@ -201,9 +201,9 @@ public class TileSpectralRelay extends TileEntityTick {
 
     private void provideStarlight(TileAltar ta) {
         if (this.doesSeeSky()) {
-            float heightAmount = MathHelper.clamp((float) Math.pow(getPos().getY() / 7F, 1.5F) / 60F, 0F, 1F);
+            float heightAmount = Mth.clamp((float) Math.pow(getBlockPos().getY() / 7F, 1.5F) / 60F, 0F, 1F);
             heightAmount = 0.7F + heightAmount * 0.3F;
-            heightAmount *= DayTimeHelper.getCurrentDaytimeDistribution(getWorld());
+            heightAmount *= DayTimeHelper.getCurrentDaytimeDistribution(getLevel());
             heightAmount *= this.proximityMultiplier;
             if (heightAmount > 1E-4) {
                 ta.collectStarlight(heightAmount * 45F, AltarCollectionCategory.RELAY);
@@ -241,12 +241,12 @@ public class TileSpectralRelay extends TileEntityTick {
     }
 
     private void updateAltarPos() {
-        Set<BlockPos> altarPositions = BlockDiscoverer.searchForTileEntitiesAround(getWorld(), getPos(), 16, tile -> tile instanceof TileAltar);
+        Set<BlockPos> altarPositions = BlockDiscoverer.searchForTileEntitiesAround(getLevel(), getBlockPos(), 16, tile -> tile instanceof TileAltar);
 
-        Vec3 thisPos = Vector3d.copy(getPos());
+        Vec3 thisPos = Vec3.copy(getBlockPos());
         BlockPos closestAltar = null;
         for (BlockPos other : altarPositions) {
-            if (closestAltar == null || other.distanceSq(thisPos, false) < closestAltar.distanceSq(thisPos, false)) {
+            if (closestAltar == null || other.distSqr(thisPos, false) < closestAltar.distSqr(thisPos, false)) {
                 closestAltar = other;
             }
         }
@@ -262,55 +262,55 @@ public class TileSpectralRelay extends TileEntityTick {
         if (this.closestRelayPos == null) {
             this.proximityMultiplier = 1F;
         } else {
-            this.proximityMultiplier = MathHelper.clamp((float) new Vector3(this.getPos()).distance(this.closestRelayPos) / 8F, 0F, 1F);
+            this.proximityMultiplier = Mth.clamp((float) new Vector3(this.getBlockPos()).distance(this.closestRelayPos) / 8F, 0F, 1F);
         }
     }
 
     public boolean hasGlassLens() {
-        return getInventory().getStackInSlot(0).getItem() instanceof ItemGlassLens;
+        return getItems().getStackInSlot(0).getItem() instanceof ItemGlassLens;
     }
 
     @Nonnull
-    public TileInventory getInventory() {
+    public TileInventory getItems() {
         return inventory;
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.inventory = this.inventory.deserialize(compound.getCompound("inventory"));
-        if (compound.contains("altarPos")) {
-            this.altarPos = NBTHelper.readBlockPosFromNBT(compound.getCompound("altarPos"));
+        this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
+        if (pattern.contains("altarPos")) {
+            this.altarPos = NBTHelper.readBlockPosFromNBT(pattern.getCompound("altarPos"));
         } else {
             this.altarPos = null;
         }
-        if (compound.contains("closestRelayPos")) {
-            this.setClosestRelayPos(NBTHelper.readBlockPosFromNBT(compound.getCompound("closestRelayPos")));
+        if (pattern.contains("closestRelayPos")) {
+            this.setClosestRelayPos(NBTHelper.readBlockPosFromNBT(pattern.getCompound("closestRelayPos")));
         } else {
             this.setClosestRelayPos(null);
         }
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.put("inventory", this.inventory.serialize());
+        pattern.put("inventory", this.inventory.serialize());
         if (this.altarPos != null) {
-            compound.put("altarPos", NBTHelper.writeBlockPosToNBT(this.altarPos, new CompoundTag()));
+            pattern.put("altarPos", NBTHelper.writeBlockPosToNBT(this.altarPos, new CompoundTag()));
         }
         if (this.closestRelayPos != null) {
-            compound.put("closestRelayPos", NBTHelper.writeBlockPosToNBT(this.closestRelayPos, new CompoundTag()));
+            pattern.put("closestRelayPos", NBTHelper.writeBlockPosToNBT(this.closestRelayPos, new CompoundTag()));
         }
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (this.inventory.hasCapability(cap, side)) {
-            return this.inventory.getCapability().cast();
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
+        if (this.inventory.hasCapability(cap, direction)) {
+            return this.inventory.getCapability().unwrap();
         }
-        return super.getCapability(cap, side);
+        return super.getCapability(cap, direction);
     }
 }

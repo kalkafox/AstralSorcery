@@ -34,6 +34,6 @@ public interface PerkRender {
     @OnlyIn(Dist.CLIENT)
     public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, PoseStack renderStack,
                                              AllocationStatus status, long spriteOffsetTick, float pTicks,
-                                             float x, float y, float zLevel, float scale);
+                                             float x, float y, float blitOffset, float scale);
 
 }

@@ -33,8 +33,8 @@ public class ScreenTextEntry {
         inputUtil = new TextFieldHelper(
                 this::getText,
                 this::setText,
-                TextInputUtil.getClipboardTextSupplier(Minecraft.getInstance()),
-                TextInputUtil.getClipboardTextSetter(Minecraft.getInstance()),
+                TextFieldHelper.getClipboardTextSupplier(Minecraft.getInstance()),
+                TextFieldHelper.getClipboardTextSetter(Minecraft.getInstance()),
                 (text) -> text.length() < 256);
     }
 

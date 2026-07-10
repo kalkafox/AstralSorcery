@@ -45,7 +45,7 @@ public class EntityTransmutationEntry implements ConfigDataSet {
     @Nonnull
     @Override
     public String serialize() {
-        return String.format("%s;%s", fromEntity.getRegistryName().toString(), toEntity.getRegistryName().toString());
+        return String.format("%s;%s", RegistryHelper.getKey(fromEntity).toString(), RegistryHelper.getKey(toEntity).toString());
     }
 
     @Nullable
@@ -54,17 +54,17 @@ public class EntityTransmutationEntry implements ConfigDataSet {
         if (split.length != 2) {
             return null;
         }
-        ResourceLocation fromKey = new ResourceLocation(split[0]);
-        EntityType<?> fromType = ForgeRegistries.ENTITIES.getValue(fromKey);
+        ResourceLocation fromKey = ResourceLocation.parse(split[0]);
+        EntityType<?> fromType = BuiltInRegistries.ENTITY_TYPE.get(fromKey);
         if (fromType == null) {
             throw new IllegalArgumentException(split[0] + " is not a known EntityType.");
         }
-        ResourceLocation toKey = new ResourceLocation(split[1]);
-        EntityType<?> toType = ForgeRegistries.ENTITIES.getValue(toKey);
+        ResourceLocation toKey = ResourceLocation.parse(split[1]);
+        EntityType<?> toType = BuiltInRegistries.ENTITY_TYPE.get(toKey);
         if (toType == null) {
             throw new IllegalArgumentException(split[0] + " is not a known EntityType.");
         }
-        if (!toType.isSummonable() || toType.getClassification() == EntityClassification.MISC) {
+        if (!toType.canSummon() || toType.getCategory() == MobCategory.MISC) {
             throw new IllegalArgumentException("EntityType " + split[1] + " seems to be not summonable or isn't classified as creature.");
         }
         return new EntityTransmutationEntry(fromType, toType);

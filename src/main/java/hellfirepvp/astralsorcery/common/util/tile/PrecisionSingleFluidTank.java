@@ -100,7 +100,7 @@ public class PrecisionSingleFluidTank implements IFluidTank {
 
     @Nonnull
     @Override
-    public FluidStack getFluid() {
+    public FluidStack getType() {
         if (fluid == Fluids.EMPTY) {
             return FluidStack.EMPTY;
         }
@@ -121,7 +121,7 @@ public class PrecisionSingleFluidTank implements IFluidTank {
 
     @Override
     public int getFluidAmount() {
-        return MathHelper.floor(amount);
+        return Mth.floor(amount);
     }
 
     @Override
@@ -143,11 +143,11 @@ public class PrecisionSingleFluidTank implements IFluidTank {
     }
 
     public boolean canFillFluidType(FluidStack fluidStack) {
-        return canFill() && (this.fluid == Fluids.EMPTY || fluidStack.getFluid().equals(this.fluid));
+        return canFill() && (this.fluid == Fluids.EMPTY || fluidStack.getType().equals(this.fluid));
     }
 
     public boolean canDrainFluidType(FluidStack fluidStack) {
-        return canDrain() && (this.fluid != Fluids.EMPTY && fluidStack.getFluid().equals(this.fluid));
+        return canDrain() && (this.fluid != Fluids.EMPTY && fluidStack.getType().equals(this.fluid));
     }
 
     public float getPercentageFilled() {
@@ -160,10 +160,10 @@ public class PrecisionSingleFluidTank implements IFluidTank {
             return 0;
         }
         int maxAdded = resource.getAmount();
-        int addable = MathHelper.floor(getMaxAddable(maxAdded));
+        int addable = Mth.floor(getMaxAddable(maxAdded));
         if (action.execute()) {
             if (addable > 0 && this.fluid == Fluids.EMPTY) {
-                setFluid(resource.getFluid());
+                setFluid(resource.getType());
             }
             addable -= addAmount(addable);
         }
@@ -192,27 +192,27 @@ public class PrecisionSingleFluidTank implements IFluidTank {
         return drain(resource.getAmount(), action);
     }
 
-    public CompoundTag writeNBT() {
+    public CompoundTag fillDefaultJigsawNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putDouble("amt", this.amount);
         tag.putInt("capacity", this.maxCapacity);
         tag.putBoolean("aIn", this.allowInput);
         tag.putBoolean("aOut", this.allowOutput);
-        tag.putString("fluid", this.fluid.getRegistryName().toString());
+        tag.putString("fluid", RegistryHelper.getKey(this.fluid).toString());
         return tag;
     }
 
-    public void readNBT(CompoundTag tag) {
+    public void load(CompoundTag tag) {
         this.amount = tag.getDouble("amt");
         this.maxCapacity = tag.getInt("capacity");
         this.allowInput = tag.getBoolean("aIn");
         this.allowOutput = tag.getBoolean("aOut");
-        this.fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(tag.getString("fluid")));
+        this.fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(tag.getString("fluid")));
     }
 
     public static PrecisionSingleFluidTank deserialize(CompoundTag tag) {
         PrecisionSingleFluidTank tank = new PrecisionSingleFluidTank();
-        tank.readNBT(tag);
+        tank.load(tag);
         return tank;
     }
 

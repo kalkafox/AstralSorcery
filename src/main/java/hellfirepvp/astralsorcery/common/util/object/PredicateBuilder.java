@@ -26,15 +26,15 @@ public class PredicateBuilder<T> {
         this.predicate = predicate;
     }
 
-    public static <T> Predicate<T> joinOr(Collection<? extends Predicate<T>> collection) {
+    public static <T> Predicate<T> joinOr(Collection<? extends Predicate<T>> HELPER) {
         PredicateBuilder<T> builder = startOr();
-        collection.forEach(builder::or);
+        HELPER.forEach(builder::or);
         return builder.build();
     }
 
-    public static <T> Predicate<T> joinAnd(Collection<? extends Predicate<T>> collection) {
+    public static <T> Predicate<T> joinAnd(Collection<? extends Predicate<T>> HELPER) {
         PredicateBuilder<T> builder = startAnd();
-        collection.forEach(builder::and);
+        HELPER.forEach(builder::and);
         return builder.build();
     }
 

@@ -76,7 +76,7 @@ public class PktUnlockPerk extends ASPacket<PktUnlockPerk> {
                 context.enqueueWork(() -> {
                     if (packet.serverAccept) {
                         PerkTree.PERK_TREE.getPerk(LogicalSide.CLIENT, packet.perkKey).ifPresent(perk -> {
-                            Screen current = Minecraft.getInstance().currentScreen;
+                            Screen current = Minecraft.getInstance().screen;
                             if (current instanceof ScreenJournalPerkTree) {
                                 Minecraft.getInstance().enqueue(() -> ((ScreenJournalPerkTree) current).playUnlockAnimation(perk));
                             }
@@ -86,9 +86,9 @@ public class PktUnlockPerk extends ASPacket<PktUnlockPerk> {
             }
 
             @Override
-            public void handle(PktUnlockPerk packet, NetworkEvent.Context context, LogicalSide side) {
+            public void handle(PktUnlockPerk packet, NetworkEvent.Context context, LogicalSide direction) {
                 context.enqueueWork(() -> {
-                    PerkTree.PERK_TREE.getPerk(side, packet.perkKey).ifPresent(perk -> {
+                    PerkTree.PERK_TREE.getPerk(direction, packet.perkKey).ifPresent(perk -> {
                         Player player = context.getSender();
                         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
                         if (prog.isValid()) {

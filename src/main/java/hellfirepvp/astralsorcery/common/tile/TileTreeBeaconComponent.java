@@ -36,11 +36,11 @@ public class TileTreeBeaconComponent extends TileFakedState {
     public void tick() {
         super.tick();
 
-        if (!this.getWorld().isRemote() && this.getTicksExisted() % 200 == 0) {
+        if (!this.getLevel().isClientSide() && this.getTicksExisted() % 200 == 0) {
             if (this.getTreeBeaconPos().equals(BlockPos.ZERO)) {
                 this.removeSelf();
             } else {
-                TileTreeBeacon ttb = MiscUtils.getTileAt(this.getWorld(), this.getTreeBeaconPos(), TileTreeBeacon.class, false);
+                TileTreeBeacon ttb = MiscUtils.getTileAt(this.getLevel(), this.getTreeBeaconPos(), TileTreeBeacon.class, false);
                 if (ttb == null) {
                     this.removeSelf();
                 }
@@ -59,16 +59,16 @@ public class TileTreeBeaconComponent extends TileFakedState {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.treeBeaconPos = NBTHelper.readFromSubTag(compound, "treeBeaconPos", NBTHelper::readBlockPosFromNBT);
+        this.treeBeaconPos = NBTHelper.readFromSubTag(pattern, "treeBeaconPos", NBTHelper::readBlockPosFromNBT);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        NBTHelper.setAsSubTag(compound, "treeBeaconPos", tag -> NBTHelper.writeBlockPosToNBT(this.treeBeaconPos, tag));
+        NBTHelper.setAsSubTag(pattern, "treeBeaconPos", tag -> NBTHelper.writeBlockPosToNBT(this.treeBeaconPos, tag));
     }
 }

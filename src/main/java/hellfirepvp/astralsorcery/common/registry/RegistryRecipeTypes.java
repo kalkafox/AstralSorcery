@@ -18,8 +18,8 @@ import hellfirepvp.astralsorcery.common.crafting.nojson.WorldFreezingRegistry;
 import hellfirepvp.astralsorcery.common.crafting.nojson.WorldMeltableRegistry;
 import hellfirepvp.astralsorcery.common.crafting.recipe.*;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.effect.*;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.core.Registry;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import static hellfirepvp.astralsorcery.common.lib.AltarRecipeEffectsAS.*;
@@ -41,7 +41,7 @@ public class RegistryRecipeTypes {
         TYPE_INFUSION = new ResolvingRecipeType<>("infusion", LiquidInfusion.class, (recipe, context) ->
                 recipe.matches(context.getInfuser(), context.getCrafter(), context.getSide()));
         TYPE_BLOCK_TRANSMUTATION = new ResolvingRecipeType<>("block_transmutation", BlockTransmutation.class, (recipe, context) ->
-                recipe.matches(context.getWorld(), context.getPos(), context.getState(), context.getConstellation()));
+                recipe.matches(context.getLevel(), context.getBlockPos(), context.getState(), context.getConstellation()));
         TYPE_ALTAR = new ResolvingRecipeType<>("altar", SimpleAltarRecipe.class, (recipe, context) ->
                 recipe.matches(context.getSide(), context.getCrafter(), context.getAltar(), context.ignoreStarlightRequirement()));
         TYPE_LIQUID_INTERACTION = new ResolvingRecipeType<>("liquid_interaction", LiquidInteraction.class, (recipe, context) ->
@@ -80,12 +80,11 @@ public class RegistryRecipeTypes {
 
     private static <T extends AltarRecipeEffect> T registerEffect(T recipeEffect) {
         recipeEffect.setRegistryName(NameUtil.fromClass(recipeEffect, "Effect"));
-        AstralSorcery.getProxy().getRegistryPrimer().register(recipeEffect);
-        return recipeEffect;
+        return AstralRegistries.register(AstralRegistries.ALTAR_EFFECTS, recipeEffect);
     }
 
     private static <C extends IItemHandler, T extends IHandlerRecipe<C>, R extends RecipeCraftingContext<T, C>, S extends ResolvingRecipeType<C, T, R>> S register(S recipeType) {
-        Registry.register(Registry.RECIPE_TYPE, recipeType.getRegistryName(), recipeType.getType());
+        AstralRegistries.register(AstralRegistries.RECIPE_TYPES, recipeType.getRegistryName(), recipeType.getType());
         return recipeType;
     }
 

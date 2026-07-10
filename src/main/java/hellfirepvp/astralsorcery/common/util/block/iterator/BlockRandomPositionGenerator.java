@@ -26,11 +26,11 @@ public class BlockRandomPositionGenerator extends BlockPositionGenerator {
         if (radius <= 0) {
             return offset.toBlockPos();
         }
-        return offset.clone().add(Vector3.random().multiply(radius)).toBlockPos();
+        return offset.clone().add(Vector3.random().mul(radius)).toBlockPos();
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbt) {}
+    public void save(CompoundTag nbt) {}
 
     @Override
     public void readFromNBT(CompoundTag nbt) {}

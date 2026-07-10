@@ -75,7 +75,7 @@ public final class EffectHelper {
 
         public T spawn(@Nonnull Vector3 spawnPos) {
             this.setPosition(spawnPos.toBlockPos());
-            return EffectRegistrar.registerFX(this.getContext().makeParticle(spawnPos), this);
+            return EffectRegistrar.registerFX(this.getContext().createParticle(spawnPos), this);
         }
 
     }

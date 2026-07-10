@@ -89,7 +89,7 @@ public class PktSyncData extends ASPacket<PktSyncData> {
             }
 
             @Override
-            public void handle(PktSyncData packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktSyncData packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

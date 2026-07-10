@@ -20,6 +20,6 @@ import net.minecraft.world.item.ItemStack;
  */
 public interface TypeEnchantableItem {
 
-    boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type);
+    boolean canEnchant(ItemStack stack, AstralEnchantmentType type);
 
 }

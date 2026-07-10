@@ -50,16 +50,16 @@ public class LootModifierScorchingHeat extends LootModifier {
 
     @Nonnull
     @Override
-    protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context) {
-        if (!LootUtil.doesContextFulfillSet(context, LootParameterSets.BLOCK)) {
-            return generatedLoot;
+    protected List<ItemStack> run(List<ItemStack> lootTable, LootContext context) {
+        if (!LootUtil.doesContextFulfillSet(context, LootContextParamSets.BLOCK)) {
+            return lootTable;
         }
-        return generatedLoot.stream()
+        return lootTable.stream()
                 .filter(stack -> !stack.isEmpty())
                 .map(stack -> {
-                    Optional<Tuple<ItemStack, Float>> furnaceResult = RecipeHelper.findSmeltingResult(context.getWorld(), stack);
-                    if (context.has(LootParameters.THIS_ENTITY)) {
-                        Entity e = context.get(LootParameters.THIS_ENTITY);
+                    Optional<Tuple<ItemStack, Float>> furnaceResult = RecipeHelper.findSmeltingResult(context.getLevel(), stack);
+                    if (context.has(LootContextParams.THIS_ENTITY)) {
+                        Entity e = context.get(LootContextParams.THIS_ENTITY);
                         if (e instanceof Player) {
                             furnaceResult.ifPresent(result -> BasicEventHooks.firePlayerSmeltedEvent((Player) e, result.getA()));
                         }
@@ -68,7 +68,7 @@ public class LootModifierScorchingHeat extends LootModifier {
                         ItemStack resultStack = result.getA();
                         float resultExp = result.getB();
 
-                        ItemStack tool = context.get(LootParameters.TOOL);
+                        ItemStack tool = context.get(LootContextParams.TOOL);
                         if (!tool.isEmpty() && !(resultStack.getItem() instanceof BlockItem)) {
                             int silkTouch = EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, tool);
                             if (silkTouch <= 0) {
@@ -87,10 +87,10 @@ public class LootModifierScorchingHeat extends LootModifier {
                                         iExp += 1;
                                     }
                                     if (iExp >= 1) {
-                                        Vec3 blockPos = context.get(LootParameters.field_237457_g_);
+                                        Vec3 blockPos = context.get(LootContextParams.ORIGIN);
                                         if (blockPos != null) {
-                                            ServerLevel world = context.getWorld();
-                                            world.addEntity(new ExperienceOrb(world, blockPos.getX(), blockPos.getY(), blockPos.getZ(), iExp));
+                                            ServerLevel level = context.getLevel();
+                                            level.addEntity(new ExperienceOrb(level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), iExp));
                                         }
                                     }
                                 }
@@ -105,8 +105,8 @@ public class LootModifierScorchingHeat extends LootModifier {
     public static class Serializer extends GlobalLootModifierSerializer<LootModifierScorchingHeat> {
 
         @Override
-        public LootModifierScorchingHeat read(ResourceLocation location, JsonObject object, LootItemCondition[] lootConditions) {
-            return new LootModifierScorchingHeat(lootConditions);
+        public LootModifierScorchingHeat read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions) {
+            return new LootModifierScorchingHeat(conditions);
         }
 
         @Override

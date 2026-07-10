@@ -52,7 +52,7 @@ public class ItemCrystalSword extends SwordItem implements CrystalAttributeItem,
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
-            attr.addTooltip(tooltip, CalculationContext.Builder.newBuilder()
+            attr.addTooltip(tooltip, CalculationContext.Builder.properties()
                     .addUsage(CrystalPropertiesAS.Usages.USE_TOOL_DURABILITY)
                     .addUsage(CrystalPropertiesAS.Usages.USE_TOOL_EFFECTIVENESS)
                     .build());
@@ -119,18 +119,18 @@ public class ItemCrystalSword extends SwordItem implements CrystalAttributeItem,
     }
 
     @Override
-    public boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type) {
+    public boolean canEnchant(ItemStack stack, AstralEnchantmentType type) {
         return type == AstralEnchantmentType.BREAKABLE || type == AstralEnchantmentType.WEAPON;
     }
 
     @Override
     public int getEnchantmentValue() {
-        return CrystalToolTier.getInstance().getEnchantability();
+        return CrystalToolTier.getInstance().getEnchantmentValue();
     }
 
     @Override
     public int getEnchantmentValue(ItemStack stack) {
-        return CrystalToolTier.getInstance().getEnchantability();
+        return CrystalToolTier.getInstance().getEnchantmentValue();
     }
 
     @Override

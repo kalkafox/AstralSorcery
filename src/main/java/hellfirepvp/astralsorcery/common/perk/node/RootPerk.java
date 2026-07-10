@@ -56,10 +56,10 @@ public abstract class RootPerk extends AttributeModifierPerk {
     }
 
     @Override
-    public void clearCaches(LogicalSide side) {
-        super.clearCaches(side);
+    public void clearCaches(LogicalSide direction) {
+        super.clearCaches(direction);
 
-        if (side.isServer()) {
+        if (direction.isServer()) {
             this.dimReturns.clear();
         }
     }
@@ -69,7 +69,7 @@ public abstract class RootPerk extends AttributeModifierPerk {
     }
 
     protected float getDiminishingReturns(Player player) {
-        UUID playerUUID = player.getUniqueID();
+        UUID playerUUID = player.getUUID();
         return this.dimReturns.computeIfAbsent(playerUUID, uuid -> createMultiplier()).getMultiplier();
     }
 

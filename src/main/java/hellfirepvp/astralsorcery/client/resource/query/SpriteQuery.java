@@ -25,21 +25,21 @@ import javax.annotation.Nonnull;
  */
 public class SpriteQuery extends TextureQuery {
 
-    private final int rows, columns;
+    private final int height, width;
 
     private Object spriteResource;
 
-    public SpriteQuery(AssetLoader.TextureLocation location, int rows, int columns, String... path) {
+    public SpriteQuery(AssetLoader.TextureLocation location, int height, int width, String... path) {
         super(location, path);
-        this.rows = rows;
-        this.columns = columns;
+        this.height = height;
+        this.width = width;
     }
 
-    private SpriteQuery(Object spriteResource, int rows, int columns) {
+    private SpriteQuery(Object spriteResource, int height, int width) {
         super(null, "");
         this.spriteResource = spriteResource;
-        this.rows = rows;
-        this.columns = columns;
+        this.height = height;
+        this.width = width;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -48,11 +48,11 @@ public class SpriteQuery extends TextureQuery {
     }
 
     public int getRows() {
-        return rows;
+        return height;
     }
 
     public int getColumns() {
-        return columns;
+        return width;
     }
 
     @Nonnull

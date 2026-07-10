@@ -32,7 +32,7 @@ public class EffectProperties<T extends EntityVisualFX> {
 
     private EffectType type = null;
     private UUID owner = null;
-    private Vec3i position = Vec3i.NULL_VECTOR;
+    private Vec3i position = Vec3i.ZERO;
     private boolean ignoreLimit = false;
 
     public EffectProperties(BatchRenderContext<T> ctx) {

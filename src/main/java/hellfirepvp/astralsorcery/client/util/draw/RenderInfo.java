@@ -41,7 +41,7 @@ public class RenderInfo implements ITickHandler {
     /** The Y component (scaled along the X axis) of the entity's pitch rotation */
     private float rotationXY;
 
-    private Vec3 view = Vector3d.ZERO;
+    private Vec3 viewDistance = Vec3.ZERO;
 
     private RenderInfo() {}
 
@@ -53,11 +53,11 @@ public class RenderInfo implements ITickHandler {
     public void tick(TickEvent.Type type, Object... context) {
         Camera info = this.getARI();
         if (info != null) {
-            this.rotationX = MathHelper.cos(info.getYaw() * ((float)Math.PI / 180F));
-            this.rotationZ = MathHelper.sin(info.getYaw() * ((float)Math.PI / 180F));
-            this.rotationYZ = -this.rotationZ * MathHelper.sin(info.getPitch() * ((float)Math.PI / 180F));
-            this.rotationXY = this.rotationX * MathHelper.sin(info.getPitch() * ((float)Math.PI / 180F));
-            this.rotationXZ = MathHelper.cos(info.getPitch() * ((float)Math.PI / 180F));
+            this.rotationX = Mth.cos(info.getYaw() * ((float)Math.PI / 180F));
+            this.rotationZ = Mth.sin(info.getYaw() * ((float)Math.PI / 180F));
+            this.rotationYZ = -this.rotationZ * Mth.sin(info.getPitch() * ((float)Math.PI / 180F));
+            this.rotationXY = this.rotationX * Mth.sin(info.getPitch() * ((float)Math.PI / 180F));
+            this.rotationXZ = Mth.cos(info.getPitch() * ((float)Math.PI / 180F));
         }
     }
 
@@ -85,7 +85,7 @@ public class RenderInfo implements ITickHandler {
     public Camera getARI() {
         GameRenderer gr = Minecraft.getInstance().gameRenderer;
         if (gr != null) {
-            return gr.getActiveRenderInfo();
+            return gr.getMainCamera();
         }
         return null;
     }
@@ -96,8 +96,8 @@ public class RenderInfo implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.START;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.START;
     }
 
     @Override

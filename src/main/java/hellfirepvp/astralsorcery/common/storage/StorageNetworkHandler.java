@@ -30,12 +30,12 @@ public class StorageNetworkHandler {
     //private static final AxisAlignedBB box = new AxisAlignedBB(-3, 0, -3, 3, 0, 3);
     private static final Map<ResourceKey<Level>, NetworkHelper> mappingHelpers = new HashMap<>();
 
-    public static NetworkHelper getHandler(Level world) {
-        return mappingHelpers.computeIfAbsent(world.getDimensionKey(), id -> new NetworkHelper(world));
+    public static NetworkHelper getHandler(Level level) {
+        return mappingHelpers.computeIfAbsent(level.dimension(), id -> new NetworkHelper(level));
     }
 
-    public static void clearHandler(Level world) {
-        clearHandler(world.getDimensionKey());
+    public static void clearHandler(Level level) {
+        clearHandler(level.dimension());
     }
 
     public static void clearHandler(ResourceKey<Level> dimKey) {
@@ -46,8 +46,8 @@ public class StorageNetworkHandler {
 
         private final StorageNetworkBuffer buffer;
 
-        private NetworkHelper(Level world) {
-            this.buffer = DataAS.DOMAIN_AS.getData(world, DataAS.KEY_STORAGE_NETWORK);
+        private NetworkHelper(Level level) {
+            this.buffer = DataAS.DOMAIN_AS.getData(level, DataAS.KEY_STORAGE_NETWORK);
         }
 
         @Nullable

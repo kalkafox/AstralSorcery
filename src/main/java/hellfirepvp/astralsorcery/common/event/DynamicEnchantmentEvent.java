@@ -40,7 +40,7 @@ public class DynamicEnchantmentEvent {
             this.resolvedPlayer = player;
         }
 
-        public ItemStack getEnchantedItemStack() {
+        public ItemStack createForEnchantment() {
             return itemStack;
         }
 
@@ -73,7 +73,7 @@ public class DynamicEnchantmentEvent {
             return resolvedPlayer;
         }
 
-        public ItemStack getEnchantedItemStack() {
+        public ItemStack createForEnchantment() {
             return itemStack;
         }
 

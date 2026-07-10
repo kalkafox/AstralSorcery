@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
  * Created by HellFirePvP
  * Date: 20.12.2020 / 21:46
  */
-public class GameplayLootTableProvider extends GiftLootTables {
+public class GameplayLootTableProvider extends GiftLoot {
 
     @Override
     public void accept(BiConsumer<ResourceLocation, LootTable.Builder> registrar) {

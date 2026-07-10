@@ -40,42 +40,42 @@ public class FluidIngredientSerializer implements IIngredientSerializer<FluidIng
         }
 
         List<FluidStack> foundFluids = new ArrayList<>();
-        JsonElement element = json.get("fluid");
-        if (element.isJsonArray()) {
-            element.getAsJsonArray().forEach(e -> {
+        JsonElement value = json.get("fluid");
+        if (value.convertToDouble()) {
+            value.getAsJsonArray().forEach(e -> {
                 if (e.isJsonObject()) {
                     JsonObject object = e.getAsJsonObject();
-                    ResourceLocation key = new ResourceLocation(JSONUtils.getString(object, "fluid"));
-                    if (!ForgeRegistries.FLUIDS.containsKey(key)) {
+                    ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(object, "fluid"));
+                    if (!BuiltInRegistries.FLUID.containsKey(key)) {
                         throw new JsonSyntaxException("Unknown fluid '" + key + "'");
                     }
                     int amount = FluidAttributes.BUCKET_VOLUME;
                     if (object.has("amount")) {
-                        amount = JSONUtils.getInt(object, "amount");
+                        amount = GsonHelper.getInt(object, "amount");
                     }
-                    Fluid fluid = ForgeRegistries.FLUIDS.getValue(key);
+                    Fluid fluid = BuiltInRegistries.FLUID.get(key);
                     foundFluids.add(new FluidStack(fluid, amount));
-                } else if (e.isJsonPrimitive()) {
-                    ResourceLocation key = new ResourceLocation(JSONUtils.getString(element, "fluid"));
-                    if (!ForgeRegistries.FLUIDS.containsKey(key)) {
+                } else if (e.convertToLong()) {
+                    ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(value, "fluid"));
+                    if (!BuiltInRegistries.FLUID.containsKey(key)) {
                         throw new JsonSyntaxException("Unknown fluid '" + key + "'");
                     }
-                    Fluid fluid = ForgeRegistries.FLUIDS.getValue(key);
+                    Fluid fluid = BuiltInRegistries.FLUID.get(key);
                     foundFluids.add(new FluidStack(fluid, FluidAttributes.BUCKET_VOLUME));
                 } else {
                     throw new JsonSyntaxException("Value at key 'fluid' has to be a fluid name or an array of fluid names or objects containing 'fluid'.");
                 }
             });
-        } else if (element.isJsonPrimitive()) {
-            ResourceLocation key = new ResourceLocation(JSONUtils.getString(element, "fluid"));
-            if (!ForgeRegistries.FLUIDS.containsKey(key)) {
+        } else if (value.convertToLong()) {
+            ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(value, "fluid"));
+            if (!BuiltInRegistries.FLUID.containsKey(key)) {
                 throw new JsonSyntaxException("Unknown fluid '" + key + "'");
             }
             int amount = FluidAttributes.BUCKET_VOLUME;
             if (json.has("amount")) {
-                amount = JSONUtils.getInt(json, "amount");
+                amount = GsonHelper.getInt(json, "amount");
             }
-            Fluid fluid = ForgeRegistries.FLUIDS.getValue(key);
+            Fluid fluid = BuiltInRegistries.FLUID.get(key);
             foundFluids.add(new FluidStack(fluid, amount));
         } else {
             throw new JsonSyntaxException("Value at key 'fluid' has to be a fluid name or an array of fluid names or objects containing 'fluid'.");

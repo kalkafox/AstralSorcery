@@ -44,12 +44,12 @@ public class BlockFountain extends BaseEntityBlock implements CustomItemBlock {
     }
 
     protected VoxelShape createShape() {
-        VoxelShape m1 = Block.makeCuboidShape(0, 10, 0, 16, 16, 16);
-        VoxelShape m2 = Block.makeCuboidShape(4, 6, 4, 12, 10, 12);
-        VoxelShape m3 = Block.makeCuboidShape(2, 0, 2, 14, 4, 14);
-        VoxelShape m4 = Block.makeCuboidShape(0, 4, 0, 16, 6, 16);
+        VoxelShape m1 = Block.box(0, 10, 0, 16, 16, 16);
+        VoxelShape m2 = Block.box(4, 6, 4, 12, 10, 12);
+        VoxelShape m3 = Block.box(2, 0, 2, 14, 4, 14);
+        VoxelShape m4 = Block.box(0, 4, 0, 16, 6, 16);
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR, m1, m2, m3, m4);
+        return VoxelUtils.combineAll(BooleanOp.OR, m1, m2, m3, m4);
     }
 
     @Override
@@ -59,12 +59,12 @@ public class BlockFountain extends BaseEntityBlock implements CustomItemBlock {
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Override
     @Nullable
-    public BlockEntity createNewTileEntity(BlockGetter world) {
+    public BlockEntity newBlockEntity(BlockGetter level) {
         return new TileFountain();
     }
 }

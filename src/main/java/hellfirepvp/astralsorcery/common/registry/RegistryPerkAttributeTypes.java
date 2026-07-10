@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeLimiter;
 import hellfirepvp.astralsorcery.common.perk.type.*;
 
@@ -69,7 +70,6 @@ public class RegistryPerkAttributeTypes {
     }
 
     private static <T extends PerkAttributeType> T register(T type) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(type);
-        return type;
+        return AstralRegistries.register(AstralRegistries.PERK_ATTRIBUTE_TYPES, type);
     }
 }

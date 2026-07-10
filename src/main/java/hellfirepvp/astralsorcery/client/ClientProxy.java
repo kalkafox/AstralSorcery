@@ -77,11 +77,11 @@ public class ClientProxy extends CommonProxy {
 
         if (!AstralSorcery.isDoingDataGeneration()) {
             ReloadableResourceManager resMgr = (ReloadableResourceManager) Minecraft.getInstance().getResourceManager();
-            resMgr.addReloadListener(AssetLibrary.INSTANCE);
-            resMgr.addReloadListener(AssetPreLoader.INSTANCE);
-            resMgr.addReloadListener(ColorizationHelper.onReload());
-            resMgr.addReloadListener((stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) ->
-                    stage.markCompleteAwaitingOthers(Unit.INSTANCE).thenRunAsync(() -> {
+            resMgr.registerReloadListener(AssetLibrary.INSTANCE);
+            resMgr.registerReloadListener(AssetPreLoader.INSTANCE);
+            resMgr.registerReloadListener(ColorizationHelper.onReload());
+            resMgr.registerReloadListener((stage, resourceManager, preparationsProfiler, reloadProfiler, executor, gameExecutor) ->
+                    stage.wait(Unit.INSTANCE).thenRunAsync(() -> {
                         if (!SelectiveReloadStateHandler.INSTANCE.get().test(VanillaResourceType.LANGUAGES)) {
                             return;
                         }

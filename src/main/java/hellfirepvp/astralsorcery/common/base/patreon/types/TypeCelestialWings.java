@@ -73,54 +73,54 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player player = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
 
-        if (side.isClient() &&
+        if (direction.isClient() &&
                 shouldDoEffect(player) &&
                 (Minecraft.getInstance().player != null &&
-                        Minecraft.getInstance().player.getUniqueID().equals(playerUUID) &&
-                        !Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a())) { //Not-in-first-person
+                        Minecraft.getInstance().player.getUUID().equals(playerUUID) &&
+                        !Minecraft.getInstance().options.getCameraType().isFirstPerson())) { //Not-in-first-person
             playEffects(player);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void playEffects(Player player) {
-        float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, 0);
+        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, 0);
         float yOffset = 1.3F;
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             yOffset = 1F;
         }
         float f = Math.abs((ClientScheduler.getSystemClientTick() % 240) - 120F) / 120F;
         double offset = Math.cos(f * 2 * Math.PI) * 0.03;
 
-        Vector3 look = new Vector3(1, 0, 0).rotate(Math.toRadians(360F - rot), Vector3.RotAxis.Y_AXIS).normalize();
+        Vector3 forwards = new Vector3(1, 0, 0).mirror(Math.toRadians(360F - rot), Vector3.RotAxis.Y_AXIS).normalize();
         Vector3 pos = Vector3.atEntityCorner(player);
-        pos.setY(player.getPosY() + yOffset + offset);
+        pos.setY(player.getY() + yOffset + offset);
 
         for (int i = 0; i < 4; i++) {
-            double height = -0.1 + Math.min(rand.nextFloat() * 1.3, rand.nextFloat() * 1.3);
-            double distance = 1.2F - (rand.nextFloat() * 0.6) * (1 - Math.max(0, height));
+            double height = -0.1 + Math.min(random.nextFloat() * 1.3, random.nextFloat() * 1.3);
+            double distance = 1.2F - (random.nextFloat() * 0.6) * (1 - Math.max(0, height));
 
-            Vector3 dir = look.clone().rotate(Math.toRadians(180 * (rand.nextBoolean() ? 1 : 0)), Vector3.RotAxis.Y_AXIS)
+            Vector3 dir = forwards.clone().mirror(Math.toRadians(180 * (random.nextBoolean() ? 1 : 0)), Vector3.RotAxis.Y_AXIS)
                     .normalize()
-                    .multiply(distance);
+                    .mul(distance);
 
             Vector3 at = pos.clone().addY(height).add(dir);
 
-            Color col = Color.getHSBColor(0.68F, 1, 0.6F - rand.nextFloat() * 0.5F);
+            Color col = Color.getHSBColor(0.68F, 1, 0.6F - random.nextFloat() * 0.5F);
 
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
                     .color(VFXColorFunction.constant(col))
-                    .setScaleMultiplier(0.27F + rand.nextFloat() * 0.1F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setMaxAge(25 + rand.nextInt(20));
+                    .setScaleMultiplier(0.27F + random.nextFloat() * 0.1F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setMaxAge(25 + random.nextInt(20));
 
-            if (rand.nextInt(4) == 0) {
-                p.setScaleMultiplier(0.09F + rand.nextFloat() * 0.02F)
+            if (random.nextInt(4) == 0) {
+                p.setScaleMultiplier(0.09F + random.nextFloat() * 0.02F)
                         .color(VFXColorFunction.WHITE)
-                        .setMaxAge(10 + rand.nextInt(8));
+                        .setMaxAge(10 + random.nextInt(8));
             } else {
                 p.setGravityStrength(0.0003F);
             }
@@ -128,10 +128,10 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
     }
 
     private boolean shouldDoEffect(Player player) {
-        return player.getUniqueID().equals(playerUUID) &&
+        return player.getUUID().equals(playerUUID) &&
                 !player.isPassenger() &&
-                !player.isElytraFlying() &&
-                !player.isPotionActive(Effects.INVISIBILITY);
+                !player.isFallFlying() &&
+                !player.isPotionActive(MobEffects.INVISIBILITY);
     }
 
     @SubscribeEvent
@@ -146,27 +146,27 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
 
     @OnlyIn(Dist.CLIENT)
     private void renderWings(Player player, PoseStack renderStack, float pTicks) {
-        float rot = RenderingVectorUtils.interpolateRotation(player.prevRenderYawOffset, player.renderYawOffset, pTicks);
+        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, pTicks);
         float yOffset = 1.3F;
-        if (player.isSneaking() && !player.abilities.isFlying) {
+        if (player.isShiftKeyDown() && !player.abilities.flying) {
             yOffset = 1F;
         }
         float f = Math.abs((ClientScheduler.getSystemClientTick() % 240) - 120F) / 120F;
         double offset = Math.cos(f * 2 * Math.PI) * 0.03;
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0, yOffset + offset, 0);
-        renderStack.rotate(Vector3f.YP.rotationDegrees(180F - rot));
+        renderStack.mirror(Axis.YP.rotationDegrees(180F - rot));
         renderStack.scale(0.02F, 0.02F, 0.02F);
 
         RenderTypesAS.MODEL_CELESTIAL_WINGS.setupRenderState();
 
         renderStack.translate(-25, 0, 0);
         ObjModelRender.renderCelestialWings(renderStack);
-        renderStack.rotate(Vector3f.YP.rotationDegrees(180F));
+        renderStack.mirror(Axis.YP.rotationDegrees(180F));
         renderStack.translate(-50, 0, 0);
         ObjModelRender.renderCelestialWings(renderStack);
-        renderStack.pop();
+        renderStack.popPose();
 
         RenderTypesAS.MODEL_CELESTIAL_WINGS.clearRenderState();
     }
@@ -177,8 +177,8 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

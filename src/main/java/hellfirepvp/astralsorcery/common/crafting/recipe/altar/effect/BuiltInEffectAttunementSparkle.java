@@ -35,12 +35,12 @@ public class BuiltInEffectAttunementSparkle extends AltarRecipeEffect {
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(new Vector3(altar).add(0.5, 0.5, 0.5))
                 .color(VFXColorFunction.constant(ColorsAS.ROCK_CRYSTAL))
-                .setMotion(new Vector3(
-                        rand.nextFloat() * 0.06 * (rand.nextBoolean() ? 1 : -1),
-                        rand.nextFloat() * 0.06 * (rand.nextBoolean() ? 1 : -1),
-                        rand.nextFloat() * 0.06 * (rand.nextBoolean() ? 1 : -1)))
-                .setScaleMultiplier(0.7F * rand.nextFloat() * 0.3F)
-                .setMaxAge(20 + rand.nextInt(30));
+                .setDeltaMovement(new Vector3(
+                        random.nextFloat() * 0.06 * (random.nextBoolean() ? 1 : -1),
+                        random.nextFloat() * 0.06 * (random.nextBoolean() ? 1 : -1),
+                        random.nextFloat() * 0.06 * (random.nextBoolean() ? 1 : -1)))
+                .setScaleMultiplier(0.7F * random.nextFloat() * 0.3F)
+                .setMaxAge(20 + random.nextInt(30));
     }
 
     @Override

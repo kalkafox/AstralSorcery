@@ -23,27 +23,27 @@ import net.minecraft.world.level.Level;
  */
 public class EntityDazzlingGem extends EntityItemExplosionResistant {
 
-    public EntityDazzlingGem(EntityType<? extends ItemEntity> type, Level world) {
-        super(type, world);
+    public EntityDazzlingGem(EntityType<? extends ItemEntity> type, Level level) {
+        super(type, level);
     }
 
-    public EntityDazzlingGem(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
-        super(type, world, x, y, z);
+    public EntityDazzlingGem(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z) {
+        super(type, level, x, y, z);
     }
 
-    public EntityDazzlingGem(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
-        super(type, world, x, y, z, stack);
+    public EntityDazzlingGem(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z, ItemStack stack) {
+        super(type, level, x, y, z, stack);
     }
 
     public static EntityType.IFactory<EntityDazzlingGem> factoryGem() {
-        return (spawnEntity, world) -> new EntityDazzlingGem(EntityTypesAS.ITEM_CRYSTAL, world);
+        return (spawnEntity, level) -> new EntityDazzlingGem(EntityTypesAS.ITEM_CRYSTAL, level);
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        if (!world.isRemote() && this.age + 10 >= this.lifespan) {
+        if (!level.isClientSide() && this.age + 10 >= this.timeout) {
             this.age = 0;
         }
     }

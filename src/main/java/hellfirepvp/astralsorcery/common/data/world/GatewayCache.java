@@ -56,32 +56,32 @@ public class GatewayCache extends GlobalWorldData {
     }
 
     public boolean hasGateway(BlockPos pos) {
-        return this.gatewayPositions.stream().anyMatch(gateway -> gateway.getPos().equals(pos));
+        return this.gatewayPositions.stream().anyMatch(gateway -> gateway.getBlockPos().equals(pos));
     }
 
     @Nullable
     public GatewayNode getGatewayNode(BlockPos pos) {
         return this.gatewayPositions.stream()
-                .filter(gateway -> gateway.getPos().equals(pos))
+                .filter(gateway -> gateway.getBlockPos().equals(pos))
                 .findFirst()
                 .orElse(null);
     }
 
     public void updateGatewayNode(BlockPos pos, Consumer<GatewayNodeAccess> nodeFn) {
         this.gatewayPositions.stream()
-                .filter(gateway -> gateway.getPos().equals(pos))
+                .filter(gateway -> gateway.getBlockPos().equals(pos))
                 .findFirst()
                 .ifPresent(gatewayNode -> update(gatewayNode, nodeFn));
     }
 
     private void update(GatewayNode node, Consumer<GatewayNodeAccess> nodeFn) {
         nodeFn.accept(node.writeAccess());
-        this.markDirty();
+        this.setChanged();
         CelestialGatewayHandler.INSTANCE.syncToAll();
     }
 
-    public boolean offerPosition(Level world, BlockPos pos) {
-        TileCelestialGateway te = MiscUtils.getTileAt(world, pos, TileCelestialGateway.class, false);
+    public boolean offerPosition(Level level, BlockPos pos) {
+        TileCelestialGateway te = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, false);
         if (te == null) {
             return false;
         }
@@ -89,28 +89,28 @@ public class GatewayCache extends GlobalWorldData {
         if (!gatewayPositions.add(node)) {
             return false;
         }
-        markDirty();
-        CelestialGatewayHandler.INSTANCE.addPosition(world, node);
-        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Added new gateway node at: dim=" + world.getDimensionKey().getLocation() + ", " + pos.toString());
+        setChanged();
+        CelestialGatewayHandler.INSTANCE.addPosition(level, node);
+        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Added new gateway node at: dim=" + level.dimension().getLocation() + ", " + pos.toString());
         return true;
     }
 
-    public void removePosition(Level world, BlockPos pos) {
-        if (gatewayPositions.removeIf(node -> node.getPos().equals(pos))) {
-            markDirty();
-            CelestialGatewayHandler.INSTANCE.removePosition(world, pos);
-            LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Removed gateway node at: dim=" + world.getDimensionKey().getLocation() + ", " + pos.toString());
+    public void removePosition(Level level, BlockPos pos) {
+        if (gatewayPositions.removeIf(node -> node.getBlockPos().equals(pos))) {
+            setChanged();
+            CelestialGatewayHandler.INSTANCE.removePosition(level, pos);
+            LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Removed gateway node at: dim=" + level.dimension().getLocation() + ", " + pos.toString());
         }
     }
 
     @Override
-    public void updateTick(Level world) {}
+    public void updateTick(Level level) {}
 
     @Override
-    public void onLoad(Level world) {
-        super.onLoad(world);
+    public void onLoad(Level level) {
+        super.onLoad(level);
 
-        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Checking GatewayCache integrity for dimension " + world.getDimensionKey().getLocation());
+        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Checking GatewayCache integrity for dimension " + level.dimension().getLocation());
         long msStart = System.currentTimeMillis();
 
         Iterator<GatewayNode> iterator = gatewayPositions.iterator();
@@ -118,7 +118,7 @@ public class GatewayCache extends GlobalWorldData {
             GatewayNode node = iterator.next();
             TileCelestialGateway gateway;
             try {
-                gateway = MiscUtils.getTileAt(world, node.getPos(), TileCelestialGateway.class, true);
+                gateway = MiscUtils.getTileAt(level, node.getBlockPos(), TileCelestialGateway.class, true);
             } catch (Exception loadEx) {
                 LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Failed to check gateway for " + node + " skipping");
                 continue;
@@ -135,19 +135,19 @@ public class GatewayCache extends GlobalWorldData {
     }
 
     @Override
-    public void writeToNBT(CompoundTag compound) {
+    public void save(CompoundTag pattern) {
         ListTag list = new ListTag();
         for (GatewayNode node : gatewayPositions) {
             CompoundTag tag = new CompoundTag();
             node.write(tag);
             list.add(tag);
         }
-        compound.put("posList", list);
+        pattern.put("posList", list);
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {
-        ListTag list = compound.getList("posList", Constants.NBT.TAG_COMPOUND);
+    public void readFromNBT(CompoundTag pattern) {
+        ListTag list = pattern.getList("posList", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag tag = list.getCompound(i);
             gatewayPositions.add(GatewayNode.read(tag));
@@ -173,7 +173,7 @@ public class GatewayCache extends GlobalWorldData {
         }
 
         @Nonnull
-        public final BlockPos getPos() {
+        public final BlockPos getBlockPos() {
             return pos;
         }
 
@@ -205,30 +205,30 @@ public class GatewayCache extends GlobalWorldData {
             if (owner == null || !this.isLocked()) {
                 return true;
             }
-            return owner.isPlayer(player) || this.getAllowedUsers().values().stream().anyMatch(ref -> ref.isPlayer(player));
+            return owner.isAlwaysExperienceDropper(player) || this.getAllowedUsers().values().stream().anyMatch(ref -> ref.isAlwaysExperienceDropper(player));
         }
 
         public void write(CompoundTag tag) {
-            NBTHelper.writeBlockPosToNBT(this.getPos(), tag);
+            NBTHelper.writeBlockPosToNBT(this.getBlockPos(), tag);
             if (this.getDisplayName() != null) {
-                tag.putString("display", ITextComponent.Serializer.toJson(this.getDisplayName()));
+                tag.putString("display", Component.Serializer.getPos(this.getDisplayName()));
             }
             if (this.getColor() != null) {
                 NBTHelper.writeEnum(tag, "color", this.getColor());
             }
 
             tag.putBoolean("locked", this.isLocked());
-            NBTHelper.writeOptional(tag, "owningPlayer", this.getOwner(), (compound, playerRef) -> playerRef.writeToNBT(compound));
+            NBTHelper.writeOptional(tag, "owningPlayer", this.getOwner(), (pattern, playerRef) -> playerRef.save(pattern));
             NBTHelper.writeList(tag, "allowedUsers", this.allowedUsers.entrySet(), entry -> {
-                CompoundTag compound = new CompoundTag();
-                compound.putInt("index", entry.getKey());
-                compound.put("player", entry.getValue().serialize());
-                return compound;
+                CompoundTag pattern = new CompoundTag();
+                pattern.putInt("index", entry.getKey());
+                pattern.put("player", entry.getValue().serialize());
+                return pattern;
             });
         }
 
         public void write(FriendlyByteBuf buf) {
-            ByteBufUtils.writePos(buf, this.getPos());
+            ByteBufUtils.writePos(buf, this.getBlockPos());
             ByteBufUtils.writeOptional(buf, this.getDisplayName(), ByteBufUtils::writeTextComponent);
             ByteBufUtils.writeOptional(buf, this.getColor(), ByteBufUtils::writeEnumValue);
             buf.writeBoolean(this.isLocked());
@@ -239,7 +239,7 @@ public class GatewayCache extends GlobalWorldData {
         public static GatewayNode read(CompoundTag tag) {
             GatewayNode node = new GatewayNode(NBTHelper.readBlockPosFromNBT(tag));
             if (tag.contains("display")) {
-                node.display = ITextComponent.Serializer.getComponentFromJson(tag.getString("display"));
+                node.display = Component.Serializer.getComponentFromJson(tag.getString("display"));
             }
             if (tag.contains("color")) {
                 node.color = NBTHelper.readEnum(tag, "color", DyeColor.class);
@@ -248,15 +248,15 @@ public class GatewayCache extends GlobalWorldData {
             node.locked = tag.getBoolean("locked");
             node.owner = NBTHelper.readOptional(tag, "owningPlayer", PlayerReference::deserialize);
             NBTHelper.readList(tag, "allowedUsers", Constants.NBT.TAG_COMPOUND, nbt -> {
-                CompoundTag compound = (CompoundTag) nbt;
-                return new Tuple<>(compound.getInt("index"), PlayerReference.deserialize(compound.getCompound("player")));
+                CompoundTag pattern = (CompoundTag) nbt;
+                return new Tuple<>(pattern.getInt("index"), PlayerReference.deserialize(pattern.getCompound("player")));
             }).forEach(tpl -> node.allowedUsers.put(tpl.getA(), tpl.getB()));
             return node;
         }
 
         public static GatewayNode read(FriendlyByteBuf buf) {
             GatewayNode node = new GatewayNode(ByteBufUtils.readPos(buf));
-            node.display = ByteBufUtils.readOptional(buf, ByteBufUtils::readTextComponent);
+            node.display = ByteBufUtils.readOptional(buf, ByteBufUtils::readComponent);
             node.color = ByteBufUtils.readOptional(buf, buffer -> ByteBufUtils.readEnumValue(buffer, DyeColor.class));
             node.locked = buf.readBoolean();
             node.owner = ByteBufUtils.readOptional(buf, PlayerReference::read);
@@ -269,12 +269,12 @@ public class GatewayCache extends GlobalWorldData {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             GatewayNode that = (GatewayNode) o;
-            return Objects.equals(getPos(), that.getPos());
+            return Objects.equals(getBlockPos(), that.getBlockPos());
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(getPos());
+            return Objects.hash(getBlockPos());
         }
     }
 
@@ -283,7 +283,7 @@ public class GatewayCache extends GlobalWorldData {
         private final GatewayNode decorated;
 
         public GatewayNodeAccess(GatewayNode decorated) {
-            super(decorated.getPos());
+            super(decorated.getBlockPos());
             this.decorated = decorated;
         }
 
@@ -303,7 +303,7 @@ public class GatewayCache extends GlobalWorldData {
             return this.decorated.getDisplayName();
         }
 
-        public void setDisplayName(@Nullable Component displayName) {
+        public void setLastHealthTime(@Nullable Component displayName) {
             this.decorated.display = displayName;
         }
 

@@ -79,11 +79,11 @@ public class ContainerTome extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack transferStackInSlot(Player playerIn, int index) {
+    public ItemStack quickMoveStack(Player playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
+        Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.getHasStack()) {
+        if (slot != null && slot.hasItem()) {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
 
@@ -108,9 +108,9 @@ public class ContainerTome extends AbstractContainerMenu {
             }
 
             if (itemstack1.getCount() == 0) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
 
             if (itemstack1.getCount() == itemstack.getCount()) {
@@ -124,7 +124,7 @@ public class ContainerTome extends AbstractContainerMenu {
     }
 
     @Override
-    public boolean canInteractWith(Player playerIn) {
+    public boolean stillValid(Player playerIn) {
         return true;
     }
 
@@ -132,7 +132,7 @@ public class ContainerTome extends AbstractContainerMenu {
         if (EffectiveSide.get().isServer()) {
             LinkedList<IConstellation> saveConstellations = new LinkedList<>();
             for (int i = 36; i < 63; i++) {
-                ItemStack in = inventorySlots.get(i).getStack();
+                ItemStack in = slots.get(i).getStack();
                 if (in.isEmpty()) {
                     continue;
                 }

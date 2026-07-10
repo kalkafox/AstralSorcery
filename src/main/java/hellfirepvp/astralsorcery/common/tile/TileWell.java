@@ -82,7 +82,7 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
         this.inventory = new TileInventoryFiltered(this, () -> 1, Direction.DOWN);
         this.inventory.filterMaxStackSize((slot, stack) -> 1);
         this.inventory.canExtract((slot, amount, existing) -> false);
-        this.inventory.canInsert((slot, toAdd, existing) -> {
+        this.inventory.updateType((slot, toAdd, existing) -> {
             if (toAdd.isEmpty()) {
                 return true;
             }
@@ -94,14 +94,14 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
     public void tick() {
         super.tick();
 
-        if (!getWorld().isRemote()) {
+        if (!getLevel().isClientSide()) {
             if (this.doesSeeSky()) {
                 this.collectStarlight();
             }
 
-            ItemStack stack = this.getInventory().getStackInSlot(0);
+            ItemStack stack = this.getItems().getStackInSlot(0);
             if (!stack.isEmpty()) {
-                if (!getWorld().isAirBlock(getPos().up())) {
+                if (!getLevel().isEmptyBlock(getBlockPos().above())) {
                     breakCatalyst();
                 } else {
                     if (runningRecipe == null) {
@@ -120,14 +120,14 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
                         if (gain > 0 && tank.getFluidAmount() <= TANK_SIZE) {
 
                             fillAndDiscardRest(runningRecipe, gain);
-                            if (rand.nextInt(750) == 0) {
-                                EntityFlare.spawnAmbientFlare(getWorld(), getPos().add(-3 + rand.nextInt(7), 1, -3 + rand.nextInt(7)));
+                            if (random.nextInt(750) == 0) {
+                                EntityFlare.spawnAmbientFlare(getLevel(), getBlockPos().offset(-3 + random.nextInt(7), 1, -3 + random.nextInt(7)));
                             }
                         }
                         starlightBuffer = 0;
-                        if (rand.nextInt(1 + (int) (1000 * (statMultiplier * runningRecipe.getShatterMultiplier()))) == 0) {
+                        if (random.nextInt(1 + (int) (1000 * (statMultiplier * runningRecipe.getShatterMultiplier()))) == 0) {
                             breakCatalyst();
-                            EntityFlare.spawnAmbientFlare(getWorld(), getPos().add(-3 + rand.nextInt(7), 1, -3 + rand.nextInt(7)));
+                            EntityFlare.spawnAmbientFlare(getLevel(), getBlockPos().offset(-3 + random.nextInt(7), 1, -3 + random.nextInt(7)));
                         }
                     } else {
                         breakCatalyst();
@@ -150,9 +150,9 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
             tank.setFluid(produced);
         }
 
-        if (tank.getFluid().isEmpty()) {
+        if (tank.getType().isEmpty()) {
             tank.setFluid(produced);
-        } else if (!produced.equals(tank.getFluid().getFluid())) {
+        } else if (!produced.equals(tank.getType().getType())) {
             return;
         }
         tank.addAmount(gain);
@@ -164,15 +164,15 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
 
         PktPlayEffect effect = new PktPlayEffect(PktPlayEffect.Type.SMALL_CRYSTAL_BREAK)
                 .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(this).add(0.5, 1.3, 0.5)));
-        PacketChannel.CHANNEL.sendToAllAround(effect, PacketChannel.pointFromPos(getWorld(), getPos(), 32));
+        PacketChannel.CHANNEL.sendToAllAround(effect, PacketChannel.pointFromPos(getLevel(), getBlockPos(), 32));
 
-        SoundHelper.playSoundAround(SoundEvents.BLOCK_GLASS_BREAK, getWorld(), getPos(), 1F, 1F);
+        SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, getLevel(), getBlockPos(), 1F, 1F);
         markForUpdate();
     }
 
     @Nonnull
     public ItemStack getCatalyst() {
-        return this.getInventory().getStackInSlot(0);
+        return this.getItems().getStackInSlot(0);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -189,8 +189,8 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
                 doCatalystEffect(color);
             }
         }
-        if (tank.getFluidAmount() > 0 && tank.getFluid().getFluid() instanceof FluidLiquidStarlight) {
-            BlockLiquidStarlight.playLiquidStarlightBlockEffect(rand,
+        if (tank.getFluidAmount() > 0 && tank.getType().getType() instanceof FluidLiquidStarlight) {
+            BlockLiquidStarlight.playLiquidStarlightBlockEffect(random,
                     new Vector3(this).add(0, 0.4 + tank.getPercentageFilled() * 0.5, 0),
                     0.7F);
         }
@@ -198,25 +198,25 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
 
     @OnlyIn(Dist.CLIENT)
     private void doCatalystEffect(Color color) {
-        if (rand.nextInt(6) == 0) {
+        if (random.nextInt(6) == 0) {
             Vector3 at = new Vector3(this)
                     .add(0.5, 1, 0.5)
-                    .add(rand.nextFloat() * 0.15 * (rand.nextBoolean() ? 1 : -1),
-                            rand.nextFloat() * 0.2,
-                            rand.nextFloat() * 0.15 * (rand.nextBoolean() ? 1 : -1));
+                    .add(random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1),
+                            random.nextFloat() * 0.2,
+                            random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1));
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .color(VFXColorFunction.constant(color))
-                    .setMaxAge(25 + rand.nextInt(20));
+                    .setMaxAge(25 + random.nextInt(20));
         }
     }
 
     private void collectStarlight() {
-        double sbDayDistribution = DayTimeHelper.getCurrentDaytimeDistribution(world);
+        double sbDayDistribution = DayTimeHelper.getCurrentDaytimeDistribution(level);
         sbDayDistribution = 0.3 + (0.7 * sbDayDistribution);
-        int yLevel = getPos().getY();
+        int yLevel = getBlockPos().getY();
         float dstr;
         if (yLevel > 120) {
             dstr = 1F;
@@ -224,8 +224,8 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
             dstr = yLevel / 120F;
         }
         if (posDistribution == -1) {
-            if (world instanceof WorldGenLevel) {
-                posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) world, getPos());
+            if (level instanceof WorldGenLevel) {
+                posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) level, getBlockPos());
             } else {
                 posDistribution = 0.3F;
             }
@@ -247,7 +247,7 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
     }
 
     @Nonnull
-    public TileInventoryFiltered getInventory() {
+    public TileInventoryFiltered getItems() {
         return inventory;
     }
 
@@ -258,30 +258,30 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.tank.readNBT(compound.getCompound("tank"));
-        this.inventory = this.inventory.deserialize(compound.getCompound("inventory"));
+        this.tank.load(pattern.getCompound("tank"));
+        this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.put("tank", this.tank.writeNBT());
-        compound.put("inventory", this.inventory.serialize());
+        pattern.put("tank", this.tank.fillDefaultJigsawNBT());
+        pattern.put("inventory", this.inventory.serialize());
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (this.access.hasCapability(cap, side)) {
-            return this.access.getCapability(side).cast();
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
+        if (this.access.hasCapability(cap, direction)) {
+            return this.access.getCapability(direction).unwrap();
         }
-        if (this.inventory.hasCapability(cap, side)) {
-            return this.inventory.getCapability().cast();
+        if (this.inventory.hasCapability(cap, direction)) {
+            return this.inventory.getCapability().unwrap();
         }
-        return super.getCapability(cap, side);
+        return super.getCapability(cap, direction);
     }
 }

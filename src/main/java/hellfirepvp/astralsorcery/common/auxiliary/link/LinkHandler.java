@@ -49,68 +49,68 @@ public class LinkHandler implements ITickHandler {
 
     @Nullable
     public static LinkSession getActiveSession(Player player) {
-        return players.get(player.getUniqueID());
+        return players.get(player.getUUID());
     }
 
     @Nonnull
     public static RightClickResult onInteractEntity(Player clicked, LivingEntity entity) {
-        LinkSession session = LinkSession.entity(entity);
-        players.put(clicked.getUniqueID(), session);
-        return new RightClickResult(RightClickResultType.SELECT_START, session);
+        LinkSession user = LinkSession.entity(entity);
+        players.put(clicked.getUUID(), user);
+        return new RightClickResult(RightClickResultType.SELECT_START, user);
     }
 
     @Nonnull
-    public static RightClickResult onInteractBlock(Player clicked, Level world, BlockPos pos, boolean sneak) {
-        UUID playerUUID = clicked.getUniqueID();
+    public static RightClickResult onInteractBlock(Player clicked, Level level, BlockPos pos, boolean sneak) {
+        UUID playerUUID = clicked.getUUID();
         if (!players.containsKey(playerUUID)) {
-            LinkableTileEntity tile = MiscUtils.getTileAt(world, pos, LinkableTileEntity.class, true);
+            LinkableTileEntity tile = MiscUtils.getTileAt(level, pos, LinkableTileEntity.class, true);
             if (tile == null) {
                 return new RightClickResult(RightClickResultType.NONE, null);
             }
 
-            LinkSession session = LinkSession.tile(tile);
-            players.put(playerUUID, session);
-            return new RightClickResult(RightClickResultType.SELECT_START, session);
+            LinkSession user = LinkSession.tile(tile);
+            players.put(playerUUID, user);
+            return new RightClickResult(RightClickResultType.SELECT_START, user);
         } else {
-            LinkSession session = players.get(playerUUID);
-            if (session.getType() == LinkType.ENTITY) {
-                LinkableTileEntity tile = MiscUtils.getTileAt(world, pos, LinkableTileEntity.class, true);
+            LinkSession user = players.get(playerUUID);
+            if (user.getType() == LinkType.ENTITY) {
+                LinkableTileEntity tile = MiscUtils.getTileAt(level, pos, LinkableTileEntity.class, true);
                 if (tile == null) {
                     players.remove(playerUUID);
                     return new RightClickResult(RightClickResultType.NONE, null);
                 } else {
-                    session.setSelected(tile);
-                    return new RightClickResult(RightClickResultType.TRY_LINK, session);
+                    user.setSelected(tile);
+                    return new RightClickResult(RightClickResultType.TRY_LINK, user);
                 }
             } else if (sneak) {
-                return new RightClickResult(RightClickResultType.TRY_UNLINK, session);
+                return new RightClickResult(RightClickResultType.TRY_UNLINK, user);
             } else {
-                return new RightClickResult(RightClickResultType.TRY_LINK, session);
+                return new RightClickResult(RightClickResultType.TRY_LINK, user);
             }
         }
     }
 
-    public static void processInteraction(RightClickResult result, Player playerIn, Level world, BlockPos pos) {
-        LinkSession session = result.getLinkingSession();
-        LinkableTileEntity tile = session.getSelectedTile();
+    public static void processInteraction(RightClickResult result, Player playerIn, Level level, BlockPos pos) {
+        LinkSession user = result.getLinkingSession();
+        LinkableTileEntity tile = user.getSelectedTile();
         String linkedToName;
         switch (result.getType()) {
             case SELECT_START:
-                if (session.getType() == LinkType.ENTITY) {
+                if (user.getType() == LinkType.ENTITY) {
                     playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.start",
-                            result.getLinkingSession().getSelectedEntity().getDisplayName()).withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+                            result.getLinkingSession().getSelectedEntity().getDisplayName()).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
                 } else {
                     String name = tile.getUnLocalizedDisplayName();
                     if (tile.onSelect(playerIn)) {
                         if (name != null) {
                             playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.start",
-                                    Component.translatable(name)).withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+                                    Component.translatable(name)).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
                         }
                     }
                 }
                 break;
             case TRY_LINK:
-                BlockEntity te = MiscUtils.getTileAt(world, pos, TileEntity.class, true);
+                BlockEntity te = MiscUtils.getTileAt(level, pos, BlockEntity.class, true);
                 linkedToName = "astralsorcery.misc.link.link.block";
                 if (te instanceof LinkableTileEntity) {
                     if (!((LinkableTileEntity) te).doesAcceptLinks()) {
@@ -122,9 +122,9 @@ public class LinkHandler implements ITickHandler {
                     }
                 }
 
-                if (session.getType() == LinkType.ENTITY && te instanceof LinkableTileEntity) {
+                if (user.getType() == LinkType.ENTITY && te instanceof LinkableTileEntity) {
                     LinkableTileEntity linkTarget = (LinkableTileEntity) te;
-                    LivingEntity linked = session.getSelectedEntity();
+                    LivingEntity linked = user.getSelectedEntity();
                     if (linkTarget.tryLinkEntity(playerIn, linked)) {
                         linkTarget.onEntityLinkCreate(playerIn, linked);
                     }
@@ -136,7 +136,7 @@ public class LinkHandler implements ITickHandler {
                             playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.link",
                                     Component.translatable(linkedFrom),
                                     Component.translatable(linkedToName))
-                                    .withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+                                    .withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
                         }
                     }
                 }
@@ -144,7 +144,7 @@ public class LinkHandler implements ITickHandler {
             case TRY_UNLINK:
                 if (tile.tryUnlink(playerIn, pos)) {
                     linkedToName = "astralsorcery.misc.link.link.block";
-                    te = MiscUtils.getTileAt(world, pos, TileEntity.class, true);
+                    te = MiscUtils.getTileAt(level, pos, BlockEntity.class, true);
                     if (te instanceof LinkableTileEntity) {
                         String unloc = ((LinkableTileEntity) te).getUnLocalizedDisplayName();
                         if (unloc != null) {
@@ -156,7 +156,7 @@ public class LinkHandler implements ITickHandler {
                         playerIn.sendMessage(Component.translatable("astralsorcery.misc.link.unlink",
                                 Component.translatable(linkedFrom),
                                 Component.translatable(linkedToName))
-                                .withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+                                .withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
                     }
                 }
                 break;
@@ -176,7 +176,7 @@ public class LinkHandler implements ITickHandler {
         Iterator<UUID> iterator = players.keySet().iterator();
         while (iterator.hasNext()) {
             UUID uuid = iterator.next();
-            LinkSession session = players.get(uuid);
+            LinkSession user = players.get(uuid);
             Player player = server.getPlayerList().getPlayerByUUID(uuid);
             if (player == null) {
                 iterator.remove();
@@ -185,15 +185,15 @@ public class LinkHandler implements ITickHandler {
 
             boolean needsRemoval = MiscUtils.getMainOrOffHand(player, stack -> stack.getItem() instanceof IItemLinkingTool) == null;
 
-            switch (session.getType()) {
+            switch (user.getType()) {
                 case ENTITY:
-                    LivingEntity entity = session.getSelectedEntity();
-                    if (!entity.isAlive() || !entity.getEntityWorld().getDimensionKey().equals(player.getEntityWorld().getDimensionKey())) {
+                    LivingEntity entity = user.getSelectedEntity();
+                    if (!entity.isAlive() || !entity.getCommandSenderWorld().dimension().equals(player.getCommandSenderWorld().dimension())) {
                         needsRemoval = true;
                     }
                     break;
                 case BLOCK:
-                    if (!session.getSelectedTile().getLinkWorld().getDimensionKey().equals(player.getEntityWorld().getDimensionKey())) {
+                    if (!user.getSelectedTile().getLinkWorld().dimension().equals(player.getCommandSenderWorld().dimension())) {
                         needsRemoval = true;
                     }
                     break;
@@ -201,7 +201,7 @@ public class LinkHandler implements ITickHandler {
             if (needsRemoval) {
                 iterator.remove();
                 player.sendMessage(Component.translatable("astralsorcery.misc.link.stop")
-                        .withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+                        .withStyle(ChatFormatting.RED), Util.NIL_UUID);
             }
         }
     }
@@ -212,8 +212,8 @@ public class LinkHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

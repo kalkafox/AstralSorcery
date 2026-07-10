@@ -36,12 +36,12 @@ public class BuiltInEffectConstellationLines extends AltarRecipeEffect {
             Vector3 thisAltar = new Vector3(altar).clone().add(0.5, 0.5, 0.5);
             for (int i = 0; i < 4; i++) {
                 Vector3 at = getRandomPillarOffset(altar.getAltarType()).clone().addY(getPillarHeight(altar.getAltarType()));
-                at.multiply(rand.nextFloat()).add(thisAltar);
+                at.mul(random.nextFloat()).add(thisAltar);
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .color(VFXColorFunction.randomBetween(ColorsAS.CONSTELLATION_TYPE_MAJOR, ColorsAS.CONSTELLATION_TYPE_MINOR))
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.2F);
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.2F);
             }
         }
     }

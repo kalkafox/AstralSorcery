@@ -46,11 +46,11 @@ public class EffectRenderEventHandler {
     }
 
     private void onDebugText(RenderGameOverlayEvent.Text event) {
-        if (Minecraft.getInstance().gameSettings.showDebugInfo) {
+        if (Minecraft.getInstance().options.renderDebug) {
             event.getLeft().add("");
             //event.getLeft().add(TextFormatting.BLUE + "[AstralSorcery]" + TextFormatting.RESET + " Use Local persistent data: " + PersistentDataManager.INSTANCE.usePersistent());
-            event.getLeft().add(TextFormatting.BLUE + "[AstralSorcery]" + TextFormatting.RESET + " EffectHandler:");
-            event.getLeft().add(TextFormatting.BLUE + "[AstralSorcery]" + TextFormatting.RESET + " > Complex effects: " + EffectHandler.getInstance().getEffectCount());
+            event.getLeft().add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " EffectHandler:");
+            event.getLeft().add(ChatFormatting.BLUE + "[AstralSorcery]" + ChatFormatting.RESET + " > Complex effects: " + EffectHandler.getInstance().getEffectCount());
         }
     }
 

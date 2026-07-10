@@ -60,8 +60,8 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         super(key, PRECISION_CHUNK);
     }
 
-    public WorldNetworkHandler getNetworkHandler(Level world) {
-        return new WorldNetworkHandler(this, world);
+    public WorldNetworkHandler getNetworkHandler(Level level) {
+        return new WorldNetworkHandler(this, level);
     }
 
     @Override
@@ -70,10 +70,10 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
     }
 
     @Override
-    public void updateTick(Level world) {
+    public void updateTick(Level level) {
         cleanupQueuedChunks();
 
-        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(world);
+        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(level);
 
         Iterator<Map.Entry<BlockPos, IIndependentStarlightSource>> iterator = starlightSources.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -81,8 +81,8 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
             BlockPos pos = entry.getKey();
             IIndependentStarlightSource source = entry.getValue();
 
-            MiscUtils.executeWithChunk(world, pos, () -> {
-                IStarlightSource<?> te = MiscUtils.getTileAt(world, pos, IStarlightSource.class, true);
+            MiscUtils.executeWithChunk(level, pos, () -> {
+                IStarlightSource<?> te = MiscUtils.getTileAt(level, pos, IStarlightSource.class, true);
                 if (te != null) {
                     if (te.needsToRefreshNetworkChain()) {
                         if (handle != null) {
@@ -91,12 +91,12 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
                         te.markChainRebuilt();
                     }
                 } else {
-                    BlockState actual = world.getBlockState(pos);
+                    BlockState actual = level.getBlockState(pos);
                     AstralSorcery.log.warn("Cached source at " + pos + " but didn't find the BlockEntity!");
                     AstralSorcery.log.warn("Purging cache entry and removing erroneous block!");
                     AstralSorcery.log.warn("Block that gets purged: " + BlockStateHelper.serialize(actual));
                     iterator.remove();
-                    if (world.setBlockState(pos, actual.getFluidState().getBlockState())) {
+                    if (level.setBlock(pos, actual.getFluidState().getBlockState())) {
                         ChunkNetworkData data = getSection(pos);
                         if (data != null) {
                             data.removeSourceTile(pos);
@@ -108,17 +108,17 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
     }
 
     @Override
-    public void onLoad(Level world) {
-        super.onLoad(world);
+    public void onLoad(Level level) {
+        super.onLoad(level);
 
         if (LightNetworkConfig.CONFIG.performNetworkIntegrityCheck.get()) {
-            AstralSorcery.log.info("[LightNetworkIntegrityCheck] Performing StarlightNetwork integrity check for world " + world.getDimensionKey().getLocation());
+            AstralSorcery.log.info("[LightNetworkIntegrityCheck] Performing StarlightNetwork integrity check for world " + level.dimension().getLocation());
             List<IPrismTransmissionNode> invalidRemoval = new LinkedList<>();
 
             for (ChunkNetworkData data : getSections()) {
                 for (ChunkSectionNetworkData secData : data.sections.values()) {
                     for (IPrismTransmissionNode node : secData.getAllTransmissionNodes()) {
-                        IStarlightTransmission<?> te = MiscUtils.getTileAt(world, node.getLocationPos(), IStarlightTransmission.class, true);
+                        IStarlightTransmission<?> te = MiscUtils.getTileAt(level, node.getLocationPos(), IStarlightTransmission.class, true);
                         if (te == null) {
                             invalidRemoval.add(node);
                             continue;
@@ -130,9 +130,9 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
                         }
 
                         if (node.needsUpdate()) {
-                            StarlightUpdateHandler.getInstance().addNode(world, node);
+                            StarlightUpdateHandler.getInstance().addNode(level, node);
                         }
-                        node.postLoad(world);
+                        node.runPostLoad(level);
                     }
                 }
             }
@@ -148,9 +148,9 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
                 for (ChunkSectionNetworkData secData : data.sections.values()) {
                     for (IPrismTransmissionNode node : secData.getAllTransmissionNodes()) {
                         if (node.needsUpdate()) {
-                            StarlightUpdateHandler.getInstance().addNode(world, node);
+                            StarlightUpdateHandler.getInstance().addNode(level, node);
                         }
-                        node.postLoad(world);
+                        node.runPostLoad(level);
                     }
                 }
             }
@@ -161,7 +161,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         for (BlockPos pos : queueRemoval) {
             ChunkNetworkData data = getSection(pos);
             if (data != null && data.isEmpty()) {
-                this.removeSection(data);
+                this.onNodeRemoved(data);
             }
         }
         queueRemoval.clear();
@@ -198,11 +198,11 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         if (nbt.contains("sources")) {
             ListTag list = nbt.getList("sources", Constants.NBT.TAG_COMPOUND);
             for (int i = 0; i < list.size(); i++) {
-                CompoundTag sourcePos = list.getCompound(i);
-                BlockPos at = NBTHelper.readBlockPosFromNBT(sourcePos);
+                CompoundTag pos = list.getCompound(i);
+                BlockPos at = NBTHelper.readBlockPosFromNBT(pos);
 
-                CompoundTag comp = sourcePos.getCompound("source");
-                ResourceLocation identifier = new ResourceLocation(comp.getString("sTypeId"));
+                CompoundTag comp = pos.getCompound("source");
+                ResourceLocation identifier = ResourceLocation.parse(comp.getString("sTypeId"));
                 SourceClassRegistry.SourceProvider provider = SourceClassRegistry.getProvider(identifier);
                 if (provider == null) {
                     AstralSorcery.log.warn("Couldn't load source tile at " + at + " - invalid identifier: " + identifier);
@@ -216,7 +216,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbt) {
+    public void save(CompoundTag nbt) {
         cleanupQueuedChunks();
 
         ListTag sourceList = new ListTag();
@@ -226,7 +226,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
             CompoundTag source = new CompoundTag();
             IIndependentStarlightSource sourceNode = starlightSources.get(pos);
             try {
-                sourceNode.writeToNBT(source);
+                sourceNode.save(source);
             } catch (Exception exc) {
                 AstralSorcery.log.warn("Couldn't write source-node data for network node at " + pos.toString() + "!");
                 AstralSorcery.log.warn("This is a major problem. To be perfectly save, consider making a backup, then break or mcedit the tileentity out and place a proper/new one...");
@@ -252,7 +252,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
             tr.start();
         }
 
-        markDirty(data);
+        setChanged(data);
     }
 
     private void threadedUpdateSourceProximity(Map<BlockPos, IIndependentStarlightSource> copyTr) {
@@ -270,7 +270,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         ChunkNetworkData data = getOrCreateSection(pos);
         data.addTransmissionTile(pos, transmission);
 
-        markDirty(data);
+        setChanged(data);
     }
 
     public void removeSource(BlockPos pos) {
@@ -286,7 +286,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         tr.start();
 
         checkIntegrity(pos);
-        markDirty(data);
+        setChanged(data);
     }
 
     public void removeTransmission(BlockPos pos) {
@@ -295,7 +295,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         data.removeTransmissionTile(pos);
 
         checkIntegrity(pos);
-        markDirty(data);
+        setChanged(data);
     }
 
     private void checkIntegrity(BlockPos actualPos) {
@@ -351,11 +351,11 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         }
 
         @Override
-        public void writeToNBT(CompoundTag data) {
+        public void save(CompoundTag data) {
             for (Integer yLevel : sections.keySet()) {
                 ChunkSectionNetworkData sectionData = sections.get(yLevel);
                 ListTag sectionTag = new ListTag();
-                sectionData.writeToNBT(sectionTag);
+                sectionData.save(sectionTag);
                 data.put(String.valueOf(yLevel), sectionTag);
             }
         }
@@ -427,7 +427,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
                 BlockPos pos = NBTHelper.readBlockPosFromNBT(nodeComp);
 
                 CompoundTag prismComp = nodeComp.getCompound("nodeTag");
-                ResourceLocation nodeIdentifier = new ResourceLocation(prismComp.getString("trNodeId"));
+                ResourceLocation nodeIdentifier = ResourceLocation.parse(prismComp.getString("trNodeId"));
                 TransmissionProvider provider = TransmissionClassRegistry.getProvider(nodeIdentifier);
                 if (provider == null) {
                     AstralSorcery.log.warn("Couldn't load node tile at " + pos + " - invalid identifier: " + nodeIdentifier);
@@ -440,7 +440,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
             return netData;
         }
 
-        private void writeToNBT(ListTag sectionData) {
+        private void save(ListTag sectionData) {
             for (Map.Entry<BlockPos, IPrismTransmissionNode> node : nodes.entrySet()) {
                 try {
                     CompoundTag nodeComp = new CompoundTag();
@@ -448,7 +448,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
 
                     CompoundTag prismComp = new CompoundTag();
                     IPrismTransmissionNode prismNode = node.getValue();
-                    prismNode.writeToNBT(prismComp);
+                    prismNode.save(prismComp);
                     prismComp.putString("trNodeId", prismNode.getProvider().getIdentifier().toString());
 
                     nodeComp.put("nodeTag", prismComp);

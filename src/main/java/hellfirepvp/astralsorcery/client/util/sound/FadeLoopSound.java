@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
  */
 public class FadeLoopSound extends PositionedLoopSound {
 
-    private float fadeInTicks = 40;
+    private float fade = 40;
     private float fadeOutTicks = 1;
 
     private int tick = 0;
@@ -38,8 +38,8 @@ public class FadeLoopSound extends PositionedLoopSound {
         super(sound, category, volume, pitch, pos, isGlobal);
     }
 
-    public <T extends FadeLoopSound> T setFadeInTicks(float fadeInTicks) {
-        this.fadeInTicks = fadeInTicks;
+    public <T extends FadeLoopSound> T setFadeInTicks(float fade) {
+        this.fade = fade;
         return (T) this;
     }
 
@@ -49,8 +49,8 @@ public class FadeLoopSound extends PositionedLoopSound {
     }
 
     @Override
-    public boolean isDonePlaying() {
-        return (this.shouldStop = super.isDonePlaying()) && this.stopTick > this.fadeOutTicks;
+    public boolean isStopped() {
+        return (this.shouldStop = super.isStopped()) && this.stopTick > this.fadeOutTicks;
     }
 
     @Override
@@ -64,14 +64,14 @@ public class FadeLoopSound extends PositionedLoopSound {
     }
 
     @Override
-    public boolean canBeSilent() {
+    public boolean canStartSilent() {
         return true;
     }
 
     @Override
     public float getVolume() {
-        float mulFadeIn = MathHelper.clamp(this.tick / this.fadeInTicks, 0F, 1F);
-        float mulFadeOut = MathHelper.clamp(1F - this.stopTick / this.fadeOutTicks, 0F, 1F);
+        float mulFadeIn = Mth.clamp(this.tick / this.fade, 0F, 1F);
+        float mulFadeOut = Mth.clamp(1F - this.stopTick / this.fadeOutTicks, 0F, 1F);
         return mulFadeIn * mulFadeOut * super.getVolume();
     }
 }

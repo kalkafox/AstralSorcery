@@ -89,24 +89,24 @@ public class TypeBlockRing extends PatreonEffect {
     @OnlyIn(Dist.CLIENT)
     public void onRenderLast(RenderWorldLastEvent event) {
         Player pl = Minecraft.getInstance().player;
-        if (Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a() && //First person
-                pl != null && pl.getUniqueID().equals(playerUUID)) {
+        if (Minecraft.getInstance().options.getCameraType().isFirstPerson() && //First person
+                pl != null && pl.getUUID().equals(playerUUID)) {
             PoseStack renderStack = event.getPoseStack();
 
             int alpha = 88;
-            if (pl.rotationPitch >= 35F) {
-                alpha *= Math.max(0, (55F - pl.rotationPitch) / 20F);
+            if (pl.getXRot() >= 35F) {
+                alpha *= Math.max(0, (55F - pl.getXRot()) / 20F);
             }
 
-            if (Minecraft.isFabulousGraphicsEnabled()) {
-                RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.IS_RUNNING_ON_MAC);
+            if (Minecraft.useShaderTransparency()) {
+                RenderSystem.clear(GL11C.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
             }
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(0, -0.5, 0);
             renderStack.scale(0.5F, 0.5F, 0.5F);
-            renderRingAt(renderStack, pl, alpha, event.getPartialTicks());
-            renderStack.pop();
+            renderRingAt(renderStack, pl, alpha, event.advanceTime());
+            renderStack.popPose();
         }
     }
 
@@ -114,7 +114,7 @@ public class TypeBlockRing extends PatreonEffect {
     @OnlyIn(Dist.CLIENT)
     public void onRenderPost(RenderPlayerEvent.Post ev) {
         Player player = ev.getPlayer();
-        if (!player.getUniqueID().equals(playerUUID)) {
+        if (!player.getUUID().equals(playerUUID)) {
             return;
         }
 
@@ -142,7 +142,7 @@ public class TypeBlockRing extends PatreonEffect {
             for (BlockPos offset : pattern.keySet()) {
                 BlockState state = pattern.get(offset);
 
-                TextureAtlasSprite tas = RenderingUtils.getParticleTexture(state, offset);
+                TextureAtlasSprite tas = RenderingUtils.getParticleIcon(state, offset);
                 if (tas == null) {
                     continue;
                 }
@@ -150,20 +150,20 @@ public class TypeBlockRing extends PatreonEffect {
                 float angle = offset.getZ() * rotationAngle + rotation + addedRotationAngle;
 
                 Vector3 dir = new Vector3(offset.getX() - distance, offset.getY(), 0);
-                dir.rotate(Math.toRadians(angle), Vector3.RotAxis.Y_AXIS);
-                dir.multiply(new Vector3(0.2F, 0.1F, 0.2F));
+                dir.mirror(Math.toRadians(angle), Vector3.RotAxis.Y_AXIS);
+                dir.mul(new Vector3(0.2F, 0.1F, 0.2F));
 
-                renderStack.push();
+                renderStack.pushPose();
                 renderStack.translate(dir.getX(), dir.getY(), dir.getZ());
                 renderStack.scale(0.09F, 0.09F, 0.09F);
 
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX_LIGHTMAP, buf -> {
+                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, buf -> {
                     RenderingDrawUtils.renderTexturedCubeCentralColorLighted(buf, renderStack,
-                            tas.getMinU(), tas.getMinV(),
-                            tas.getMaxU() - tas.getMinU(), tas.getMaxV() - tas.getMinV(),
-                            255, 255, 255, alphaMultiplier, LightmapUtil.getPackedLightCoords(player.getEntityWorld(), player.getPosition()));
+                            tas.getU0(), tas.getV0(),
+                            tas.getU1() - tas.getU0(), tas.getV1() - tas.getV0(),
+                            255, 255, 255, alphaMultiplier, LightmapUtil.getPackedLightCoords(player.getCommandSenderWorld(), player.position()));
                 });
-                renderStack.pop();
+                renderStack.popPose();
             }
         }
 

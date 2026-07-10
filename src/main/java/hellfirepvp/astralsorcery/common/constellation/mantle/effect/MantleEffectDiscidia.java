@@ -26,7 +26,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -73,11 +73,11 @@ public class MantleEffectDiscidia extends MantleEffect {
 
     private void onAttack(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntityLiving();
-        Level world = attacked.getEntityWorld();
+        Level level = attacked.getCommandSenderWorld();
         DamageSource source = event.getSource();
-        Entity attacker = source.getTrueSource();
+        Entity attacker = source.getEntity();
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             return;
         }
         if (attacker instanceof Player) {
@@ -92,8 +92,8 @@ public class MantleEffectDiscidia extends MantleEffect {
                     float added = this.getLastAttackDamage(player);
 
                     if (added > 0.1F && AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerAttack.get())) {
-                        DamageUtil.shotgunAttack(attacked, entity -> DamageUtil.attackEntityFrom(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, added / 2F));
-                        DamageUtil.shotgunAttack(attacked, entity -> DamageUtil.attackEntityFrom(entity, DamageSource.causePlayerDamage(player), added / 2F, player));
+                        DamageUtil.shotgunAttack(attacked, entity -> DamageUtil.hurt(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, added / 2F));
+                        DamageUtil.shotgunAttack(attacked, entity -> DamageUtil.hurt(entity, DamageSource.causePlayerDamage(player), added / 2F, player));
 
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerAttack.get(), false);
                     }
@@ -102,11 +102,11 @@ public class MantleEffectDiscidia extends MantleEffect {
         }
     }
 
-    private void onHurt(LivingHurtEvent event) {
-        Level world = event.getEntity().getEntityWorld();
+    private void onHurt(LivingIncomingDamageEvent event) {
+        Level level = event.getEntity().getCommandSenderWorld();
         LivingEntity hurt = event.getEntityLiving();
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             return;
         }
         MantleEffectDiscidia armara = ItemMantle.getEffect(hurt, ConstellationsAS.discidia);

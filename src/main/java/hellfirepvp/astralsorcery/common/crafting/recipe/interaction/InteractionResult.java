@@ -39,7 +39,7 @@ public abstract class InteractionResult {
         return id;
     }
 
-    public abstract void doResult(Level world, Vector3 at);
+    public abstract void doResult(Level level, Vector3 at);
 
     public abstract void read(JsonObject json) throws JsonParseException;
 

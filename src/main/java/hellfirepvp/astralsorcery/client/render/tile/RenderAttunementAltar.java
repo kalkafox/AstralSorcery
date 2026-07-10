@@ -14,9 +14,10 @@ import hellfirepvp.astralsorcery.client.model.builtin.ModelAttunementAltar;
 import hellfirepvp.astralsorcery.client.util.RenderingVectorUtils;
 import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import org.joml.Vector3f;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.util.Mth;
+import com.mojang.math.Axis;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,17 +30,17 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
 
     private static final ModelAttunementAltar MODEL_ATTUNEMENT_ALTAR = new ModelAttunementAltar();
 
-    public RenderAttunementAltar(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderAttunementAltar(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
     public void render(TileAttunementAltar tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0.5, 0.5, 0.5);
-        renderStack.rotate(Vector3f.XP.rotationDegrees(180));
+        renderStack.mirror(Axis.XP.rotationDegrees(180));
         MODEL_ATTUNEMENT_ALTAR.render(renderStack, renderTypeBuffer, combinedLight, combinedOverlay);
-        renderStack.pop();
+        renderStack.popPose();
 
         float spinDur = TileAttunementAltar.MAX_START_ANIMATION_SPIN;
         float spinStart = TileAttunementAltar.MAX_START_ANIMATION_TICK;
@@ -47,9 +48,9 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
         float startY = -1.2F;
         float endY   = -0.5F;
         float tickPartY = (endY - startY) / spinStart;
-        float prevPosY = endY + (tile.prevActivationTick * tickPartY);
+        float yo = endY + (tile.prevActivationTick * tickPartY);
         float posY     = endY + (tile.activationTick     * tickPartY);
-        float framePosY = RenderingVectorUtils.interpolate(prevPosY, posY, pTicks);
+        float framePosY = RenderingVectorUtils.interpolate(yo, posY, pTicks);
 
         double generalAnimationTick = (ClientScheduler.getClientTick() + pTicks) / 4D;
         if (tile.animate) {
@@ -77,15 +78,15 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
             double partRenderFrame = (renderFrame % spinDur) / spinDur;
             float normalized = (float) (partRenderFrame * 2F * Math.PI);
 
-            float xOffset = MathHelper.cos(normalized);
-            float zOffset = MathHelper.sin(normalized);
+            float xOffset = Mth.cos(normalized);
+            float zDist = Mth.sin(normalized);
             float rotation = RenderingVectorUtils.interpolate(tile.prevActivationTick / spinStart, tile.activationTick / spinStart, pTicks);
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(0.5, framePosY, 0.5);
-            renderStack.rotate(Vector3f.XP.rotationDegrees(180));
-            MODEL_ATTUNEMENT_ALTAR.renderHovering(renderStack, renderTypeBuffer.getBuffer(MODEL_ATTUNEMENT_ALTAR.getGeneralType()), combinedLight, combinedOverlay, 1F, 1F, 1F, 1F, xOffset, zOffset, rotation);
-            renderStack.pop();
+            renderStack.mirror(Axis.XP.rotationDegrees(180));
+            MODEL_ATTUNEMENT_ALTAR.renderHovering(renderStack, renderTypeBuffer.getBuffer(MODEL_ATTUNEMENT_ALTAR.getGeneralType()), combinedLight, combinedOverlay, 1F, 1F, 1F, 1F, xOffset, zDist, rotation);
+            renderStack.popPose();
         }
     }
 }

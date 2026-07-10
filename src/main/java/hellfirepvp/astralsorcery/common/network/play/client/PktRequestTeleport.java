@@ -69,19 +69,19 @@ public class PktRequestTeleport extends ASPacket<PktRequestTeleport> {
     @Nonnull
     @Override
     public Handler<PktRequestTeleport> handler() {
-        return (packet, context, side) -> {
+        return (packet, context, direction) -> {
             context.enqueueWork(() -> {
                 //TODO 1.16.2 re-check once worlds are not all constantly loaded
                 Player player = context.getSender();
-                TileCelestialGateway gate = MiscUtils.getTileAt(player.world, Vector3.atEntityCorner(player).toBlockPos(), TileCelestialGateway.class, false);
+                TileCelestialGateway gate = MiscUtils.getTileAt(player.level(), Vector3.atEntityCorner(player).toBlockPos(), TileCelestialGateway.class, false);
                 if (gate != null && gate.hasMultiblock() && gate.doesSeeSky()) {
                     MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
                     if (server != null) {
-                        Level to = server.getWorld(packet.dim);
+                        Level to = server.getLevel(packet.dim);
                         if (to != null) {
                             GatewayCache.GatewayNode node = DataAS.DOMAIN_AS.getData(to, DataAS.KEY_GATEWAY_CACHE).getGatewayNode(packet.pos);
                             if (node != null && node.hasAccess(player)) {
-                                AstralSorcery.getProxy().scheduleDelayed(() -> MiscUtils.transferEntityTo(player, to.getDimensionKey(), packet.pos));
+                                AstralSorcery.getProxy().scheduleDelayed(() -> MiscUtils.transferEntityTo(player, to.dimension(), packet.pos));
                             }
                         }
                     }

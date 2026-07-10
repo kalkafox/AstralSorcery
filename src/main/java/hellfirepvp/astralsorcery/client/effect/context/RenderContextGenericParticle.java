@@ -25,7 +25,7 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
  */
 public class RenderContextGenericParticle extends BatchRenderContext<FXFacingParticle> {
 
-    private static final VFXColorFunction<FXFacingParticle> defaultColor =
+    private static final VFXColorFunction<FXFacingParticle> defaultColorSet =
             VFXColorFunction.constant(ColorsAS.DEFAULT_GENERIC_PARTICLE);
 
     public RenderContextGenericParticle() {
@@ -33,8 +33,8 @@ public class RenderContextGenericParticle extends BatchRenderContext<FXFacingPar
                 (ctx, pos) -> new FXFacingParticle(pos)
                         .setScaleMultiplier(0.2F)
                         .setAlphaMultiplier(0.85F)
-                        .alpha(VFXAlphaFunction.PYRAMID)
-                        .color(defaultColor));
+                        .alpha1arg(VFXAlphaFunction.PYRAMID)
+                        .color(defaultColorSet));
     }
 
 }

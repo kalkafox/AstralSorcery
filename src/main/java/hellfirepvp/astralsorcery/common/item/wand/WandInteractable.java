@@ -22,6 +22,6 @@ import net.minecraft.world.level.Level;
  */
 public interface WandInteractable {
 
-    boolean onInteract(Level world, BlockPos pos, Player player, Direction side, boolean sneak);
+    boolean onInteract(Level level, BlockPos pos, Player player, Direction direction, boolean sneak);
 
 }

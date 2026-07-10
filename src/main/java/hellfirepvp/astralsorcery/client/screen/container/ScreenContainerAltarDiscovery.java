@@ -40,22 +40,22 @@ public class ScreenContainerAltarDiscovery extends ScreenContainerAltar<Containe
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(PoseStack renderStack, int mouseX, int mouseY) {
+    protected void renderLabels(PoseStack renderStack, int xpos, int ypos) {
         SimpleAltarRecipe recipe = this.findRecipe(false);
         if (recipe != null) {
-            ItemStack out = recipe.getOutputForRender(this.getContainer().getTileEntity().getInventory());
-            renderStack.push();
+            ItemStack out = recipe.getOutputForRender(this.getMenuProvider().getTileEntity().getItems());
+            renderStack.pushPose();
             renderStack.translate(130, 20, 0);
             renderStack.scale(1.7F, 1.7F, 1F);
 
             RenderingUtils.renderItemStackGUI(renderStack, out, null);
 
-            renderStack.pop();
+            renderStack.popPose();
         }
     }
 
     @Override
-    public void renderGuiBackground(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    public void renderGuiBackground(PoseStack renderStack, float a, int xpos, int ypos) {
         this.renderStarlightBar(renderStack, 6, 69, 165, 10);
     }
 }

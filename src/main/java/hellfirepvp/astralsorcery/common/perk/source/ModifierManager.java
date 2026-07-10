@@ -70,9 +70,9 @@ public class ModifierManager implements ITickHandler {
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player player = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
 
-        if (!side.isServer() || !(player instanceof ServerPlayer)) {
+        if (!direction.isServer() || !(player instanceof ServerPlayer)) {
             return;
         }
         ServerPlayer serverPlayer = (ServerPlayer) player;
@@ -83,35 +83,35 @@ public class ModifierManager implements ITickHandler {
     }
 
     @Nonnull
-    private static Set<ModifierSource> getModifiers(Player player, LogicalSide side) {
-        if (side.isClient()) {
-            return modifierCacheClient.computeIfAbsent(player.getUniqueID(), uuid -> new HashSet<>());
+    private static Set<ModifierSource> getModifiers(Player player, LogicalSide direction) {
+        if (direction.isClient()) {
+            return modifierCacheClient.computeIfAbsent(player.getUUID(), uuid -> new HashSet<>());
         } else {
-            return modifierCache.computeIfAbsent(player.getUniqueID(), uuid -> new HashSet<>());
+            return modifierCache.computeIfAbsent(player.getUUID(), uuid -> new HashSet<>());
         }
     }
 
     @Nonnull
-    public static Set<ModifierSource> getAppliedModifiers(Player player, LogicalSide side) {
-        return new HashSet<>(getModifiers(player, side));
+    public static Set<ModifierSource> getAppliedModifiers(Player player, LogicalSide direction) {
+        return new HashSet<>(getModifiers(player, direction));
     }
 
-    public static void addModifier(Player player, LogicalSide side, ModifierSource source) {
-        Set<ModifierSource> modifiers = getModifiers(player, side);
+    public static void addModifier(Player player, LogicalSide direction, ModifierSource source) {
+        Set<ModifierSource> modifiers = getModifiers(player, direction);
         if (!modifiers.contains(source) && modifiers.add(source)) {
-            source.onApply(player, side);
+            source.onApply(player, direction);
         }
     }
 
-    public static void removeModifier(Player player, LogicalSide side, ModifierSource source) {
-        Set<ModifierSource> modifiers = getModifiers(player, side);
+    public static void removeModifier(Player player, LogicalSide direction, ModifierSource source) {
+        Set<ModifierSource> modifiers = getModifiers(player, direction);
         if (modifiers.remove(source)) {
-            source.onRemove(player, side);
+            source.onRemove(player, direction);
         }
     }
 
-    public static boolean isModifierApplied(Player player, LogicalSide side, ModifierSource source) {
-        return getModifiers(player, side).contains(source);
+    public static boolean isModifierApplied(Player player, LogicalSide direction, ModifierSource source) {
+        return getModifiers(player, direction).contains(source);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -131,8 +131,8 @@ public class ModifierManager implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

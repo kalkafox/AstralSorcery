@@ -44,58 +44,58 @@ import javax.annotation.Nullable;
  */
 public class BlockTreeBeacon extends BlockStarlightNetwork implements CustomItemBlock {
 
-    private static final VoxelShape SHAPE = VoxelShapes.create(3D / 16D, 0D / 16D, 3D / 16D, 13D / 16D, 16D / 16D, 13D / 16D);
+    private static final VoxelShape SHAPE = Shapes.create(3D / 16D, 0D / 16D, 3D / 16D, 13D / 16D, 16D / 16D, 13D / 16D);
 
     public BlockTreeBeacon() {
         super(PropertiesMisc.defaultPlant()
                 .hardnessAndResistance(1.5F, 6.0F)
                 .harvestLevel(1)
                 .harvestTool(ToolType.AXE)
-                .setLightLevel(state -> 6)
+                .isRedstoneConductor(state -> 6)
                 .sound(SoundType.PLANT));
     }
 
     @Override
-    public void onBlockPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        super.onBlockPlacedBy(world, pos, state, placer, stack);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
 
-        TileTreeBeacon ttb = MiscUtils.getTileAt(world, pos, TileTreeBeacon.class, true);
-        if (ttb != null && !world.isRemote() && placer instanceof ServerPlayer && !MiscUtils.isPlayerFakeMP((ServerPlayer) placer)) {
-            ttb.setPlayerUUID(placer.getUniqueID());
+        TileTreeBeacon ttb = MiscUtils.getTileAt(level, pos, TileTreeBeacon.class, true);
+        if (ttb != null && !level.isClientSide() && placer instanceof ServerPlayer && !MiscUtils.isPlayerFakeMP((ServerPlayer) placer)) {
+            ttb.setPlayerUUID(placer.getUUID());
         }
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, world, pos)) {
-            return Blocks.AIR.getDefaultState();
+    public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
+        if (!this.isValidPosition(state, level, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
-        return hasSolidSideOnTop(world, pos.down());
+    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+        return hasSolidSideOnTop(level, pos.below());
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter world) {
+    public BlockEntity newBlockEntity(BlockGetter level) {
         return new TileTreeBeacon();
     }
 }

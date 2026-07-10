@@ -32,7 +32,7 @@ public class BlockDropCaptureAssist {
     private BlockDropCaptureAssist() {}
 
     public void onDrop(EntityJoinWorldEvent event) {
-        if (event.getWorld() instanceof ServerLevel && event.getEntity() instanceof ItemEntity) {
+        if (event.getLevel() instanceof ServerLevel && event.getEntity() instanceof ItemEntity) {
             ItemStack itemStack = ((ItemEntity) event.getEntity()).getItem();
             if (!capturing.isEmpty()) {
                 event.setCanceled(true);
@@ -48,11 +48,11 @@ public class BlockDropCaptureAssist {
     }
 
     public static void startCapturing() {
-        capturing.push(NonNullList.create());
+        capturing.pushPose(NonNullList.create());
     }
 
     public static NonNullList<ItemStack> getCapturedStacksAndStop() {
-        return capturing.pop();
+        return capturing.popPose();
     }
 
 }

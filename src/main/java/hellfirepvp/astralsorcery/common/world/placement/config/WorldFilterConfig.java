@@ -25,12 +25,12 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 20.11.2020 / 15:52
  */
-public class WorldFilterConfig implements IPlacementConfig {
+public class WorldFilterConfig implements DecoratorConfiguration {
 
     public static final Codec<WorldFilterConfig> CODEC = RecordCodecBuilder.create(codecInstance -> {
         return codecInstance.group(Codec.BOOL.fieldOf("ignoreFilter").forGetter(config -> {
             return config.ignoreFilter.get();
-        }), World.CODEC.listOf().fieldOf("worldFilter").forGetter(config -> {
+        }), Level.CODEC.listOf().fieldOf("worldFilter").forGetter(config -> {
             return config.worldFilter.get();
         })).apply(codecInstance, WorldFilterConfig::new);
     });
@@ -47,7 +47,7 @@ public class WorldFilterConfig implements IPlacementConfig {
         this.worldFilter = worldFilter;
     }
 
-    public boolean generatesIn(ServerLevelAccessor world) {
-         return this.ignoreFilter.get() || this.worldFilter.get().contains(world.getWorld().getDimensionKey());
+    public boolean generatesIn(ServerLevelAccessor level) {
+         return this.ignoreFilter.get() || this.worldFilter.get().contains(level.getLevel().dimension());
     }
 }

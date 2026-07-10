@@ -47,8 +47,8 @@ public class RootAevitas extends RootPerk {
     }
 
     @Override
-    protected void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    protected void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(this::onPlace);
     }
@@ -58,27 +58,27 @@ public class RootAevitas extends RootPerk {
             return;
         }
         Player player = (Player) event.getEntity();
-        LogicalSide side = this.getSide(player);
-        if (!side.isServer()) {
+        LogicalSide direction = this.getSide(player);
+        if (!direction.isServer()) {
             return;
         }
 
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (!prog.getPerkData().hasPerkEffect(this)) {
             return;
         }
 
         float hardness;
         try {
-            hardness = Math.max(event.getPlacedBlock().getBlockHardness(event.getWorld(), event.getPos()), 1F);
+            hardness = Math.max(event.getPlacedBlock().getDestroySpeed(event.getLevel(), event.getBlockPos()), 1F);
         } catch (Exception exc) {
             hardness = 1F;
         }
         float xp = Math.min(hardness * 4F, 100F);
         xp *= this.getExpMultiplier();
         xp *= this.getDiminishingReturns(player);
-        xp *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
-        xp *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
+        xp *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+        xp *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
 
         xp = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP, xp);
 

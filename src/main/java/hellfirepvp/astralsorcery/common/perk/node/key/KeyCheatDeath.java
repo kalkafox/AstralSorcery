@@ -46,21 +46,21 @@ public class KeyCheatDeath extends KeyPerk implements CooldownPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
         bus.addListener(EventPriority.HIGHEST, this::onDeath);
     }
 
     private void onDeath(LivingDeathEvent event) {
         if (event.getEntityLiving() instanceof Player) {
             Player player = (Player) event.getEntityLiving();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress progress = ResearchHelper.getProgress(player, side);
-            if (side.isServer() && progress.getPerkData().hasPerkEffect(this)) {
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress progress = ResearchHelper.getProgress(player, direction);
+            if (direction.isServer() && progress.getPerkData().hasPerkEffect(this)) {
                 if (!PerkCooldownHelper.isCooldownActiveForPlayer(player, this) &&
-                        AlignmentChargeHandler.INSTANCE.drainCharge(player, side, CONFIG.chargeCost.get(), false)) {
+                        AlignmentChargeHandler.INSTANCE.drainCharge(player, direction, CONFIG.chargeCost.get(), false)) {
                     PerkCooldownHelper.setCooldownActiveForPlayer(player, this, CONFIG.cooldownPotionApplication.get());
-                    player.addPotionEffect(new MobEffectInstance(EffectsAS.EFFECT_CHEAT_DEATH,
+                    player.addEffect(new MobEffectInstance(EffectsAS.EFFECT_CHEAT_DEATH,
                             CONFIG.potionDuration.get(),
                             CONFIG.potionAmplifier.get(),
                             true, false, true));

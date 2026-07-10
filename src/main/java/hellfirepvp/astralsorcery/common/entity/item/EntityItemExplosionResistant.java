@@ -26,29 +26,29 @@ import net.neoforged.fml.network.NetworkHooks;
  */
 public class EntityItemExplosionResistant extends EntityItemHighlighted {
 
-    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level world) {
-        super(type, world);
+    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level level) {
+        super(type, level);
     }
 
-    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
-        super(type, world, x, y, z);
+    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z) {
+        super(type, level, x, y, z);
     }
 
-    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
-        super(type, world, x, y, z, stack);
+    public EntityItemExplosionResistant(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z, ItemStack stack) {
+        super(type, level, x, y, z, stack);
     }
 
     public static EntityType.IFactory<EntityItemExplosionResistant> factoryExplosionResistant() {
-        return (spawnEntity, world) -> new EntityItemExplosionResistant(EntityTypesAS.ITEM_EXPLOSION_RESISTANT, world);
+        return (spawnEntity, level) -> new EntityItemExplosionResistant(EntityTypesAS.ITEM_EXPLOSION_RESISTANT, level);
     }
 
     @Override
-    public boolean attackEntityFrom(DamageSource source, float amount) {
-        return !source.isExplosion() && super.attackEntityFrom(source, amount);
+    public boolean hurt(DamageSource source, float amount) {
+        return !source.isExplosion() && super.hurt(source, amount);
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

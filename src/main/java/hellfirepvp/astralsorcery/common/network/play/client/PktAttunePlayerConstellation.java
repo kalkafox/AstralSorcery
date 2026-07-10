@@ -36,14 +36,14 @@ import javax.annotation.Nonnull;
 public class PktAttunePlayerConstellation extends ASPacket<PktAttunePlayerConstellation> {
 
     private IMajorConstellation attunement = null;
-    private ResourceKey<Level> world = null;
+    private ResourceKey<Level> level = null;
     private BlockPos at = BlockPos.ZERO;
 
     public PktAttunePlayerConstellation() {}
 
-    public PktAttunePlayerConstellation(IMajorConstellation attunement, ResourceKey<Level> world, BlockPos at) {
+    public PktAttunePlayerConstellation(IMajorConstellation attunement, ResourceKey<Level> level, BlockPos at) {
         this.attunement = attunement;
-        this.world = world;
+        this.level = level;
         this.at = at;
     }
 
@@ -52,7 +52,7 @@ public class PktAttunePlayerConstellation extends ASPacket<PktAttunePlayerConste
     public Encoder<PktAttunePlayerConstellation> encoder() {
         return (packet, buffer) -> {
             ByteBufUtils.writeRegistryEntry(buffer, packet.attunement);
-            ByteBufUtils.writeVanillaRegistryEntry(buffer, packet.world);
+            ByteBufUtils.writeVanillaRegistryEntry(buffer, packet.level);
             ByteBufUtils.writePos(buffer, packet.at);
         };
     }
@@ -64,7 +64,7 @@ public class PktAttunePlayerConstellation extends ASPacket<PktAttunePlayerConste
             PktAttunePlayerConstellation pkt = new PktAttunePlayerConstellation();
 
             pkt.attunement = ByteBufUtils.readRegistryEntry(buffer);
-            pkt.world = ByteBufUtils.readVanillaRegistryEntry(buffer);
+            pkt.level = ByteBufUtils.readVanillaRegistryEntry(buffer);
             pkt.at = ByteBufUtils.readPos(buffer);
 
             return pkt;
@@ -74,16 +74,16 @@ public class PktAttunePlayerConstellation extends ASPacket<PktAttunePlayerConste
     @Nonnull
     @Override
     public Handler<PktAttunePlayerConstellation> handler() {
-        return (packet, context, side) -> {
+        return (packet, context, direction) -> {
             context.enqueueWork(() -> {
                 IMajorConstellation cst = packet.attunement;
                 if (cst != null) {
                     MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-                    if (srv.forgeGetWorldMap().containsKey(packet.world)) {
-                        Level world = srv.getWorld(packet.world);
-                        TileAttunementAltar ta = MiscUtils.getTileAt(world, packet.at, TileAttunementAltar.class, false);
+                    if (srv.forgeGetWorldMap().containsKey(packet.level)) {
+                        Level level = srv.getLevel(packet.level);
+                        TileAttunementAltar ta = MiscUtils.getTileAt(level, packet.at, TileAttunementAltar.class, false);
                         if (ta != null && ta.getActiveRecipe() instanceof ActivePlayerAttunementRecipe) {
-                            if (context.getSender().getUniqueID().equals(((ActivePlayerAttunementRecipe) ta.getActiveRecipe()).getPlayerUUID()) &&
+                            if (context.getSender().getUUID().equals(((ActivePlayerAttunementRecipe) ta.getActiveRecipe()).getPlayerUUID()) &&
                                     AttunePlayerRecipe.isEligablePlayer(context.getSender(), ta.getActiveConstellation())) {
 
                                 ta.finishActiveRecipe();

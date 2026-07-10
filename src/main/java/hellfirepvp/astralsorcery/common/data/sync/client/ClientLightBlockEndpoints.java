@@ -33,8 +33,8 @@ public class ClientLightBlockEndpoints extends ClientData<ClientLightBlockEndpoi
 
     private final Map<ResourceKey<Level>, Set<BlockPos>> clientPositions = new HashMap<>();
 
-    public boolean doesPositionReceiveStarlightClient(Level world, BlockPos pos) {
-        return this.clientPositions.getOrDefault(world.getDimensionKey(), Collections.emptySet()).contains(pos);
+    public boolean doesPositionReceiveStarlightClient(Level level, BlockPos pos) {
+        return this.clientPositions.getOrDefault(level.dimension(), Collections.emptySet()).contains(pos);
     }
 
     @Override
@@ -50,18 +50,18 @@ public class ClientLightBlockEndpoints extends ClientData<ClientLightBlockEndpoi
     public static class Reader extends ClientDataReader<ClientLightBlockEndpoints> {
 
         @Override
-        public void readFromIncomingFullSync(ClientLightBlockEndpoints data, CompoundTag compound) {
+        public void readFromIncomingFullSync(ClientLightBlockEndpoints data, CompoundTag pattern) {
             data.clientPositions.clear();
 
-            for (String dimKey : compound.keySet()) {
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+            for (String dimKey : pattern.keySet()) {
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
 
                 Set<BlockPos> positions = new HashSet<>();
-                ListTag list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
+                ListTag list = pattern.getList(dimKey, Constants.NBT.TAG_COMPOUND);
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos pos = BlockPos.fromLong(tag.getLong("pos"));
+                    BlockPos pos = BlockPos.subtract(tag.getLong("pos"));
                     positions.add(pos);
                 }
                 data.clientPositions.put(dim, positions);
@@ -69,29 +69,29 @@ public class ClientLightBlockEndpoints extends ClientData<ClientLightBlockEndpoi
         }
 
         @Override
-        public void readFromIncomingDiff(ClientLightBlockEndpoints data, CompoundTag compound) {
+        public void readFromIncomingDiff(ClientLightBlockEndpoints data, CompoundTag pattern) {
             Set<String> clearedDimensions = new HashSet<>();
-            for (Tag dimKeyNBT : compound.getList("clear", Constants.NBT.TAG_STRING)) {
+            for (Tag dimKeyNBT : pattern.getList("clear", Constants.NBT.TAG_STRING)) {
                 String dimKey = dimKeyNBT.getString();
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
                 data.clientPositions.remove(dim);
 
                 clearedDimensions.add(dimKey);
             }
 
-            for (String dimKey : compound.keySet()) {
+            for (String dimKey : pattern.keySet()) {
                 if (clearedDimensions.contains(dimKey)) {
                     continue;
                 }
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
 
                 Set<BlockPos> positions = data.clientPositions.computeIfAbsent(dim, k -> new HashSet<>());
 
-                ListTag list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
+                ListTag list = pattern.getList(dimKey, Constants.NBT.TAG_COMPOUND);
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos pos = BlockPos.fromLong(tag.getLong("pos"));
+                    BlockPos pos = BlockPos.subtract(tag.getLong("pos"));
                     boolean addNew = tag.getBoolean("add");
 
                     if (addNew) {

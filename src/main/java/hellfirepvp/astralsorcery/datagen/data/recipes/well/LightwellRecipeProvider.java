@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  */
 public class LightwellRecipeProvider {
 
-    public static void registerLightwellRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerLightwellRecipes(Consumer<FinishedRecipe> registrar) {
         WellRecipeBuilder.builder(AstralSorcery.key("starlight_aquamarine"))
                 .setItemInput(ItemsAS.AQUAMARINE)
                 .setLiquidOutput(FluidsAS.LIQUID_STARLIGHT_SOURCE)

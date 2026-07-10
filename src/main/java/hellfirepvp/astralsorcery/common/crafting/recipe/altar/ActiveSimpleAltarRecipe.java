@@ -54,7 +54,7 @@ import java.util.function.Function;
  */
 public class ActiveSimpleAltarRecipe {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     private Map<Integer, Object> clientEffectContainer = new HashMap<>();
 
@@ -81,9 +81,9 @@ public class ActiveSimpleAltarRecipe {
         this.totalCraftingTime = recipeToCraft.getDuration() / durationDivisor;
     }
 
-    private void recoverContainedEffects(@Nullable ActiveSimpleAltarRecipe previous) {
-        if (previous != null && previous.getRecipeToCraft().getId().equals(this.recipeToCraft.getId())) {
-            this.clientEffectContainer.putAll(previous.clientEffectContainer);
+    private void recoverContainedEffects(@Nullable ActiveSimpleAltarRecipe cameFrom) {
+        if (cameFrom != null && cameFrom.getRecipeToCraft().getId().equals(this.recipeToCraft.getId())) {
+            this.clientEffectContainer.putAll(cameFrom.clientEffectContainer);
         }
     }
 
@@ -127,31 +127,31 @@ public class ActiveSimpleAltarRecipe {
     }
 
     public void consumeInputs(TileAltar altar) {
-        TileInventory inv = altar.getInventory();
+        TileInventory inv = altar.getItems();
         AltarRecipeGrid grid = this.recipeToCraft.getInputs();
 
         for (int slot = 0; slot < AltarRecipeGrid.MAX_INVENTORY_SIZE; slot++) {
-            Ingredient input = grid.getIngredient(slot);
-            if (input instanceof FluidIngredient) {
+            Ingredient from = grid.getIngredient(slot);
+            if (from instanceof FluidIngredient) {
                 ItemStack stack = inv.getStackInSlot(slot);
                 FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidAttributes.BUCKET_VOLUME, null, true);
-                if (far.isSuccess()) {
-                    inv.setStackInSlot(slot, far.getResult());
+                if (far.shouldSwing()) {
+                    inv.setStackInSlot(slot, far.getObject());
                 }
             } else {
                 ItemUtils.decrementItem(inv, slot, altar::dropItemOnTop);
             }
         }
 
-        for (CraftingFocusStack input : this.focusStacks) {
-            TileSpectralRelay tar = MiscUtils.getTileAt(altar.getWorld(), input.getRealPosition(), TileSpectralRelay.class, true);
+        for (CraftingFocusStack from : this.focusStacks) {
+            TileSpectralRelay tar = MiscUtils.getTileAt(altar.getLevel(), from.getRealPosition(), TileSpectralRelay.class, true);
             if (tar != null) {
-                TileInventory tarInventory = tar.getInventory();
-                if (input.getInput() != null && input.getInput().getIngredient() instanceof FluidIngredient) {
+                TileInventory tarInventory = tar.getItems();
+                if (from.getInput() != null && from.getInput().getIngredient() instanceof FluidIngredient) {
                     ItemStack stack = tarInventory.getStackInSlot(0);
                     FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidAttributes.BUCKET_VOLUME, null, true);
-                    if (far.isSuccess()) {
-                        tarInventory.setStackInSlot(0, far.getResult());
+                    if (far.shouldSwing()) {
+                        tarInventory.setStackInSlot(0, far.getObject());
                     }
                 } else {
                     ItemUtils.decrementItem(tarInventory, 0, altar::dropItemOnTop);
@@ -168,13 +168,13 @@ public class ActiveSimpleAltarRecipe {
         List<WrappedIngredient> listIngredients = this.getRecipeToCraft().getRelayInputs();
         for (CraftingFocusStack stack : this.focusStacks) {
             if (stack.getStackIndex() >= 0 && stack.getStackIndex() < listIngredients.size()) {
-                TileSpectralRelay relay = MiscUtils.getTileAt(altar.getWorld(), stack.getRealPosition(), TileSpectralRelay.class, true);
+                TileSpectralRelay relay = MiscUtils.getTileAt(altar.getLevel(), stack.getRealPosition(), TileSpectralRelay.class, true);
                 if (relay == null) {
                     return false;
                 }
                 if (testNecessaryRelayInputs) {
                     WrappedIngredient ingredient = listIngredients.get(stack.getStackIndex());
-                    if (!ingredient.getIngredient().test(relay.getInventory().getStackInSlot(0))) {
+                    if (!ingredient.getIngredient().test(relay.getItems().getStackInSlot(0))) {
                         return false;
                     }
                 }
@@ -216,7 +216,7 @@ public class ActiveSimpleAltarRecipe {
 
         boolean waitMissingInputs = false;
         for (int i = 0; i < iIngredients.size(); i++) {
-            WrappedIngredient input = iIngredients.get(i);
+            WrappedIngredient from = iIngredients.get(i);
             int index = i;
 
             int offset = part + (index * cttPart);
@@ -230,21 +230,21 @@ public class ActiveSimpleAltarRecipe {
                         waitMissingInputs = true;
                         continue;
                     }
-                    BlockPos at = MiscUtils.getRandomEntry(relays, rand);
-                    TileSpectralRelay tar = MiscUtils.getTileAt(altar.getWorld(), at, TileSpectralRelay.class, true);
+                    BlockPos at = MiscUtils.getRandomEntry(relays, random);
+                    TileSpectralRelay tar = MiscUtils.getTileAt(altar.getLevel(), at, TileSpectralRelay.class, true);
                     if (tar == null) { // We were lied to. lol.
                         waitMissingInputs = true;
                         continue;
                     }
-                    found = new CraftingFocusStack(index, input, at);
+                    found = new CraftingFocusStack(index, from, at);
                     this.focusStacks.add(found);
                 }
-                TileSpectralRelay tar = MiscUtils.getTileAt(altar.getWorld(), found.getRealPosition(), TileSpectralRelay.class, true);
+                TileSpectralRelay tar = MiscUtils.getTileAt(altar.getLevel(), found.getRealPosition(), TileSpectralRelay.class, true);
                 if (tar == null) {
                     waitMissingInputs = true;
                     continue;
                 }
-                if (!input.getIngredient().test(tar.getInventory().getStackInSlot(0))) {
+                if (!from.getIngredient().test(tar.getItems().getStackInSlot(0))) {
                     waitMissingInputs = true;
                 }
             }
@@ -269,25 +269,25 @@ public class ActiveSimpleAltarRecipe {
     }
 
     @Nullable
-    public static ActiveSimpleAltarRecipe deserialize(CompoundTag compound, @Nullable ActiveSimpleAltarRecipe previous) {
+    public static ActiveSimpleAltarRecipe deserialize(CompoundTag pattern, @Nullable ActiveSimpleAltarRecipe cameFrom) {
         RecipeManager mgr = RecipeHelper.getRecipeManager();
         if (mgr == null) {
             return null;
         }
 
-        ResourceLocation recipeKey = new ResourceLocation(compound.getString("recipeToCraft"));
+        ResourceLocation recipeKey = ResourceLocation.parse(pattern.getString("recipeToCraft"));
         Optional<?> recipe = mgr.getRecipe(recipeKey);
         if (!recipe.isPresent() || !(recipe.get() instanceof SimpleAltarRecipe)) {
             AstralSorcery.log.info("Recipe with unknown/invalid name found: " + recipeKey);
             return null;
         }
         SimpleAltarRecipe altarRecipe = (SimpleAltarRecipe) recipe.get();
-        UUID uuidCraft = compound.getUniqueId("playerCraftingUUID");
-        int tick = compound.getInt("ticksCrafting");
-        int total = compound.getInt("totalCraftingTime");
-        CraftingState state = CraftingState.values()[compound.getInt("state")];
+        UUID uuidCraft = pattern.getUniqueId("playerCraftingUUID");
+        int tick = pattern.getInt("ticksCrafting");
+        int total = pattern.getInt("totalCraftingTime");
+        CraftingState state = CraftingState.values()[pattern.getInt("state")];
         List<CraftingFocusStack> stacks = new LinkedList<>();
-        ListTag listStacks = compound.getList("focusStacks", Constants.NBT.TAG_COMPOUND);
+        ListTag listStacks = pattern.getList("focusStacks", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < listStacks.size(); i++) {
             stacks.add(new CraftingFocusStack(listStacks.getCompound(i)));
         }
@@ -296,28 +296,28 @@ public class ActiveSimpleAltarRecipe {
         task.ticksCrafting = tick;
         task.totalCraftingTime = total;
         task.setState(state);
-        task.craftingData = compound.getCompound("craftingData");
+        task.craftingData = pattern.getCompound("craftingData");
         task.focusStacks = stacks;
-        task.recoverContainedEffects(previous);
+        task.recoverContainedEffects(cameFrom);
         return task;
     }
 
     @Nonnull
     public CompoundTag serialize() {
-        CompoundTag compound = new CompoundTag();
-        compound.putString("recipeToCraft", getRecipeToCraft().getId().toString());
-        compound.putUniqueId("playerCraftingUUID", getPlayerCraftingUUID());
-        compound.putInt("ticksCrafting", getTicksCrafting());
-        compound.putInt("totalCraftingTime", getTotalCraftingTime());
-        compound.putInt("state", getState().ordinal());
-        compound.put("craftingData", craftingData);
+        CompoundTag pattern = new CompoundTag();
+        pattern.putString("recipeToCraft", getRecipeToCraft().getId().toString());
+        pattern.putUniqueId("playerCraftingUUID", getPlayerCraftingUUID());
+        pattern.putInt("ticksCrafting", getTicksCrafting());
+        pattern.putInt("totalCraftingTime", getTotalCraftingTime());
+        pattern.putInt("state", getState().ordinal());
+        pattern.put("craftingData", craftingData);
 
         ListTag list = new ListTag();
         for (CraftingFocusStack stack : this.focusStacks) {
             list.add(stack.serialize());
         }
-        compound.put("focusStacks", list);
-        return compound;
+        pattern.put("focusStacks", list);
+        return pattern;
     }
 
     public static enum CraftingState {

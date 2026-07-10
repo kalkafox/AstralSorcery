@@ -57,8 +57,8 @@ public class MantleEffectOctans extends MantleEffect {
         super.tickServer(player);
 
         if (player.areEyesInFluid(FluidTags.WATER)) {
-            if (player.getAir() < (player.getMaxAir() - 20)) {
-                player.setAir(player.getMaxAir());
+            if (player.getAirSupply() < (player.getMaxAirSupply() - 20)) {
+                player.air(player.getMaxAirSupply());
             }
 
             player.heal(CONFIG.healPerTick.get().floatValue());
@@ -80,25 +80,25 @@ public class MantleEffectOctans extends MantleEffect {
     private void handleUnderwaterBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getPlayer();
         if (player.areEyesInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(player)) {
-            LogicalSide side = player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+            LogicalSide direction = player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
             MantleEffectOctans octans = ItemMantle.getEffect(player, ConstellationsAS.octans);
-            if (octans != null && AlignmentChargeHandler.INSTANCE.hasCharge(player, side, CONFIG.chargeCostPerBreakSpeed.get())) {
+            if (octans != null && AlignmentChargeHandler.INSTANCE.hasCharge(player, direction, CONFIG.chargeCostPerBreakSpeed.get())) {
                 //Grab helmet
-                ItemStack existing = player.getItemStackFromSlot(EquipmentSlotType.HEAD);
+                ItemStack existing = player.getItemStackFromSlot(EquipmentSlot.HEAD);
 
                 //Set aqua affinity
                 ItemStack st = new ItemStack(Items.LEATHER_HELMET);
-                st.addEnchantment(Enchantments.AQUA_AFFINITY, 1);
-                player.inventory.armorInventory.set(EquipmentSlotType.HEAD.getIndex(), st);
+                st.fillItemCategory(Enchantments.AQUA_AFFINITY, 1);
+                player.inventory.armor.set(EquipmentSlot.HEAD.getIndex(), st);
 
                 //Recalc breakspeed
                 EventFlags.CHECK_UNDERWATER_BREAK_SPEED.executeWithFlag(() -> {
-                    event.setNewSpeed(player.getDigSpeed(event.getState(), event.getPos()));
-                    AlignmentChargeHandler.INSTANCE.drainCharge(player, side, CONFIG.chargeCostPerBreakSpeed.get(), false);
+                    event.setNewSpeed(player.getDigSpeed(event.getState(), event.getBlockPos()));
+                    AlignmentChargeHandler.INSTANCE.drainCharge(player, direction, CONFIG.chargeCostPerBreakSpeed.get(), false);
                 });
 
                 //Reset helmet
-                player.inventory.armorInventory.set(EquipmentSlotType.HEAD.getIndex(), existing);
+                player.inventory.armor.set(EquipmentSlot.HEAD.getIndex(), existing);
             }
         }
     }

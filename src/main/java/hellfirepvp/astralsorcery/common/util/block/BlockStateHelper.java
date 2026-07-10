@@ -42,12 +42,12 @@ public class BlockStateHelper {
 
     @Nonnull
     public static String serialize(@Nonnull Block block) {
-        return block.getRegistryName().toString();
+        return RegistryHelper.getKey(block).toString();
     }
 
     @Nonnull
     public static <V extends Comparable<V>> String serialize(@Nonnull BlockState state) {
-        StringBuilder name = new StringBuilder(state.getBlock().getRegistryName().toString());
+        StringBuilder name = new StringBuilder(RegistryHelper.getKey(state.getBlock()).toString());
         List<Property<?>> props = new ArrayList<>(state.getProperties());
         if (!props.isEmpty()) {
             name.append('[');
@@ -73,7 +73,7 @@ public class BlockStateHelper {
     }
 
     public static <V extends Comparable<V>> void serializeObject(JsonObject out, BlockState state, boolean serializeProperties) {
-        out.addProperty("block", state.getBlock().getRegistryName().toString());
+        out.addProperty("block", RegistryHelper.getKey(state.getBlock()).toString());
         if (serializeProperties && !state.getProperties().isEmpty()) {
             JsonArray properties = new JsonArray();
             for (Property<?> property : state.getProperties()) {
@@ -90,7 +90,7 @@ public class BlockStateHelper {
 
     @Nonnull
     public static Block deserializeBlock(@Nonnull String serialized) {
-        Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(serialized));
+        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(serialized));
         return block == null ? Blocks.AIR : block;
     }
 
@@ -100,12 +100,12 @@ public class BlockStateHelper {
         boolean hasProperties = !isMissingStateInformation(serialized);
         ResourceLocation key;
         if (hasProperties) {
-            key = new ResourceLocation(serialized.substring(0, propIndex).toLowerCase(Locale.ROOT));
+            key = ResourceLocation.parse(serialized.substring(0, propIndex).toLowerCase(Locale.ROOT));
         } else {
-            key = new ResourceLocation(serialized.toLowerCase(Locale.ROOT));
+            key = ResourceLocation.parse(serialized.toLowerCase(Locale.ROOT));
         }
-        Block block = ForgeRegistries.BLOCKS.getValue(key);
-        BlockState state = block.getDefaultState();
+        Block block = BuiltInRegistries.BLOCK.get(key);
+        BlockState state = block.defaultBlockState();
         if (!block.equals(Blocks.AIR) && hasProperties) {
             List<String> strProps = PROP_SPLITTER.splitToList(serialized.substring(propIndex, serialized.length() - 1));
             for (String serializedProperty : strProps) {
@@ -114,9 +114,9 @@ public class BlockStateHelper {
                 String strValue = propertyValues.get(1);
                 Property<T> property = (Property<T>) MiscUtils.iterativeSearch(state.getProperties(), prop -> prop.getName().equalsIgnoreCase(name));
                 if (property != null) {
-                    Optional<T> value = property.parseValue(strValue);
+                    Optional<T> value = property.getValue(strValue);
                     if (value.isPresent()) {
-                        state = state.with(property, value.get());
+                        state = state.setValue(property, value.get());
                     }
                 }
             }
@@ -126,26 +126,26 @@ public class BlockStateHelper {
 
     @Nonnull
     public static <T extends Comparable<T>> BlockState deserializeObject(JsonObject object) {
-        String key = JSONUtils.getString(object, "block");
-        Block b = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(key));
+        String key = GsonHelper.getString(object, "block");
+        Block b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(key));
         if (b == null || b instanceof AirBlock) {
-            return Blocks.AIR.getDefaultState();
+            return Blocks.AIR.defaultBlockState();
         }
-        BlockState state = b.getDefaultState();
+        BlockState state = b.defaultBlockState();
         if (isMissingStateInformation(object)) {
             return state;
         }
-        if (JSONUtils.hasField(object, "properties")) {
-            JsonArray properties = JSONUtils.getJsonArray(object, "properties");
+        if (GsonHelper.convertToInt(object, "properties")) {
+            JsonArray properties = GsonHelper.getAsJsonArray(object, "properties");
             for (JsonElement elemProperty : properties) {
-                JsonObject objProperty = JSONUtils.getJsonObject(elemProperty, "properties[?]");
-                String propName = JSONUtils.getString(objProperty, "name");
+                JsonObject objProperty = GsonHelper.getAsJsonObject(elemProperty, "properties[?]");
+                String propName = GsonHelper.getString(objProperty, "name");
                 Property<T> property = (Property<T>) MiscUtils.iterativeSearch(state.getProperties(), prop -> prop.getName().equalsIgnoreCase(propName));
                 if (property != null) {
-                    String propValue = JSONUtils.getString(objProperty, "value");
-                    Optional<T> value = property.parseValue(propValue);
+                    String propValue = GsonHelper.getString(objProperty, "value");
+                    Optional<T> value = property.getValue(propValue);
                     if (value.isPresent()) {
-                        state = state.with(property, value.get());
+                        state = state.setValue(property, value.get());
                     }
                 }
             }

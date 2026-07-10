@@ -31,11 +31,11 @@ public class RenderEntityEmpty extends EntityRenderer<Entity> {
     }
 
     @Override
-    public void render(Entity entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {}
+    public void render(Entity entity, float entityYaw, float a, PoseStack matrixStack, MultiBufferSource buffer, int packedLight) {}
 
     @Override
-    public ResourceLocation getEntityTexture(Entity entity) {
-        return AtlasTexture.LOCATION_BLOCKS_TEXTURE;
+    public ResourceLocation getTextureLocation(Entity entity) {
+        return TextureAtlas.LOCATION_BLOCKS_TEXTURE;
     }
 
     public static class Factory implements IRenderFactory<Entity> {

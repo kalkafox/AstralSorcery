@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class RenderingOverlayUtils {
 
-    public static void renderDefaultItemDisplay(PoseStack renderStack, List<Tuple<ItemStack, Integer>> itemStacks) {
+    public static void renderDefaultItemDisplay(PoseStack renderStack, List<Tuple<ItemStack, Integer>> items) {
         int heightNormal  =  26;
         int heightSplit = 13;
         int width   =  26;
@@ -43,38 +43,38 @@ public class RenderingOverlayUtils {
         int offsetY =  15;
 
         ItemRenderer itemRender = Minecraft.getInstance().getItemRenderer();
-        Font fontRenderer = Minecraft.getInstance().fontRenderer;
+        Font font = Minecraft.getInstance().font;
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
         //Draw background frame
         int tempY = offsetY;
-        for (int i = 0; i < itemStacks.size(); i++) {
+        for (int i = 0; i < items.size(); i++) {
             boolean first = i == 0;
-            boolean last = i + 1 == itemStacks.size();
+            boolean last = i + 1 == items.size();
             float currentY = tempY;
 
             if (first) {
                 //Draw upper half of the 1st slot
                 TexturesAS.TEX_OVERLAY_ITEM_FRAME.bindTexture();
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX, buf -> {
-                    Matrix4f offset = renderStack.getLast().getMatrix();
-                    buf.pos(offset, offsetX,            currentY + heightSplit, 10).tex(0, 0.5F).endVertex();
-                    buf.pos(offset, offsetX + width, currentY + heightSplit, 10).tex(1, 0.5F).endVertex();
-                    buf.pos(offset, offsetX + width,    currentY,               10).tex(1, 0)  .endVertex();
-                    buf.pos(offset, offsetX,               currentY,               10).tex(0, 0)  .endVertex();
+                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+                    Matrix4f offset = renderStack.last().pose();
+                    buf.vertex(offset, offsetX,            currentY + heightSplit, 10).tex(0, 0.5F).endVertex();
+                    buf.vertex(offset, offsetX + width, currentY + heightSplit, 10).tex(1, 0.5F).endVertex();
+                    buf.vertex(offset, offsetX + width,    currentY,               10).tex(1, 0)  .endVertex();
+                    buf.vertex(offset, offsetX,               currentY,               10).tex(0, 0)  .endVertex();
                 });
                 tempY += heightSplit;
             } else {
                 //Draw lower half and upper next half of the sequence
                 TexturesAS.TEX_OVERLAY_ITEM_FRAME_EXTENSION.bindTexture();
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX, buf -> {
-                    Matrix4f offset = renderStack.getLast().getMatrix();
-                    buf.pos(offset, offsetX,            currentY + heightNormal, 10).tex(0, 1).endVertex();
-                    buf.pos(offset, offsetX + width, currentY + heightNormal, 10).tex(1, 1).endVertex();
-                    buf.pos(offset, offsetX + width,    currentY,                10).tex(1, 0).endVertex();
-                    buf.pos(offset, offsetX,               currentY,                10).tex(0, 0).endVertex();
+                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+                    Matrix4f offset = renderStack.last().pose();
+                    buf.vertex(offset, offsetX,            currentY + heightNormal, 10).tex(0, 1).endVertex();
+                    buf.vertex(offset, offsetX + width, currentY + heightNormal, 10).tex(1, 1).endVertex();
+                    buf.vertex(offset, offsetX + width,    currentY,                10).tex(1, 0).endVertex();
+                    buf.vertex(offset, offsetX,               currentY,                10).tex(0, 0).endVertex();
                 });
                 tempY += heightNormal;
             }
@@ -82,12 +82,12 @@ public class RenderingOverlayUtils {
                 float drawY = tempY;
                 //Draw lower half of the slot
                 TexturesAS.TEX_OVERLAY_ITEM_FRAME.bindTexture();
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX, buf -> {
-                    Matrix4f offset = renderStack.getLast().getMatrix();
-                    buf.pos(offset, offsetX,            drawY + heightSplit, 10).tex(0, 1)  .endVertex();
-                    buf.pos(offset, offsetX + width, drawY + heightSplit, 10).tex(1, 1)  .endVertex();
-                    buf.pos(offset, offsetX + width,    drawY,               10).tex(1, 0.5F).endVertex();
-                    buf.pos(offset, offsetX,               drawY,               10).tex(0, 0.5F).endVertex();
+                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+                    Matrix4f offset = renderStack.last().pose();
+                    buf.vertex(offset, offsetX,            drawY + heightSplit, 10).tex(0, 1)  .endVertex();
+                    buf.vertex(offset, offsetX + width, drawY + heightSplit, 10).tex(1, 1)  .endVertex();
+                    buf.vertex(offset, offsetX + width,    drawY,               10).tex(1, 0.5F).endVertex();
+                    buf.vertex(offset, offsetX,               drawY,               10).tex(0, 0.5F).endVertex();
                 });
                 tempY += heightSplit;
             }
@@ -98,44 +98,44 @@ public class RenderingOverlayUtils {
 
         //Draw itemstacks on frame
         tempY = offsetY;
-        for (Tuple<ItemStack, Integer> stackTpl : itemStacks) {
-            renderStack.push();
+        for (Tuple<ItemStack, Integer> stackTpl : items) {
+            renderStack.pushPose();
             renderStack.translate(offsetX + 5, tempY + 5, 0);
             RenderingUtils.renderItemStackGUI(renderStack, stackTpl.getA(), null);
-            renderStack.pop();
+            renderStack.popPose();
 
             tempY += heightNormal;
         }
 
         //Draw itemstack counts
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(offsetX + 14, offsetY + 16, 0);
         int txtColor = 0x00DDDDDD;
-        for (Tuple<ItemStack, Integer> stackTpl : itemStacks) {
+        for (Tuple<ItemStack, Integer> stackTpl : items) {
             ItemStack stack = stackTpl.getA();
             Font fr;
-            if ((fr = stack.getItem().getFontRenderer(stack)) == null) {
-                fr = fontRenderer;
+            if ((fr = stack.getItem().getFont(stack)) == null) {
+                fr = font;
             }
             String amountStr = String.valueOf(stackTpl.getB());
             if (stackTpl.getB() == -1) {
                 amountStr = "\u221E"; //+Inf
             }
             FormattedText prop = Component.literal(amountStr);
-            int length = fontRenderer.getStringPropertyWidth(prop);
+            int length = font.getStringPropertyWidth(prop);
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(-length / 3F, 0, 500);
             renderStack.scale(0.7F, 0.7F, 1F);
             if (amountStr.length() > 3) {
                 renderStack.scale(0.9F, 0.9F, 1F);
             }
             RenderingDrawUtils.renderStringAt(fr, renderStack, prop, txtColor);
-            renderStack.pop();
+            renderStack.popPose();
 
             renderStack.translate(0, heightNormal, 0);
         }
-        renderStack.pop();
+        renderStack.popPose();
     }
 
 }

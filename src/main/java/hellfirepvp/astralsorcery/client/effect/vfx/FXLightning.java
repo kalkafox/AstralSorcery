@@ -67,12 +67,12 @@ public class FXLightning extends EntityVisualFX {
         double dstLength = to.clone().subtract(this.getPosition()).length();
         float perc = 1F;
         if (dstLength > optimalLightningLength) {
-            perc = MathHelper.sqrt(dstLength / optimalLightningLength);
+            perc = Mth.sqrt(dstLength / optimalLightningLength);
         } else if (dstLength < optimalLightningLength) {
             perc = (float) Math.pow(dstLength / optimalLightningLength, 2);
         }
 
-        this.make(rand.nextLong(), this.getPosition(), to, defaultMinJitterDst * perc, defaultMaxJitterDst * perc, defaultForkChance, defaultMinForkAngleDeg, defaultMaxForkAngleDeg);
+        this.make(random.nextLong(), this.getPosition(), to, defaultMinJitterDst * perc, defaultMaxJitterDst * perc, defaultForkChance, defaultMinForkAngleDeg, defaultMaxForkAngleDeg);
         this.setBuildSpeed(Math.max(0.01F, growSpeed * perc));
         this.setBuildWaitTime(Math.max(0.0067F, fadeTime * perc));
         return this;
@@ -88,16 +88,16 @@ public class FXLightning extends EntityVisualFX {
         rootVertices.add(this.root);
 
         double l = directionVector.length();
-        int iterations = Math.min(MathHelper.floor(Math.round(Math.sqrt(l))), 200);
+        int iterations = Math.min(Mth.floor(Math.round(Math.sqrt(l))), 200);
         for (int i = 0; i < iterations; i++) {
             LinkedList<LightningVertex> newRootVertices = new LinkedList<>();
             for (LightningVertex sourceVertex : rootVertices) {
                 LinkedList<LightningVertex> newNext = new LinkedList<>();
                 for (LightningVertex nextVertex : Lists.newArrayList(sourceVertex.next)) {
                     Vector3 direction = nextVertex.offset.clone().subtract(sourceVertex.offset);
-                    Vector3 split = direction.clone().multiply(0.5F).add(sourceVertex.offset);
+                    Vector3 split = direction.clone().mul(0.5F).add(sourceVertex.offset);
                     float jitDst = (minJitterDistance + (maxJitterDistance - minJitterDistance) * lightningSeed.nextFloat()) * ((float) (iterations - i) / ((float) iterations));
-                    Vector3 axPerp = direction.clone().perpendicular().rotate(lightningSeed.nextFloat() * 2 * Math.PI, direction).normalize().multiply(jitDst);
+                    Vector3 axPerp = direction.clone().perpendicular().mirror(lightningSeed.nextFloat() * 2 * Math.PI, direction).normalize().mul(jitDst);
                     split.add(axPerp);
                     LightningVertex newVertex = new LightningVertex(split);
                     newVertex.next.add(nextVertex);
@@ -106,8 +106,8 @@ public class FXLightning extends EntityVisualFX {
                         Vector3 dirFork = split.clone().subtract(sourceVertex.offset);
                         float forkAngle = minForkAngle + (maxForkAngle - minForkAngle) * lightningSeed.nextFloat();
                         forkAngle = (float) Math.toRadians(forkAngle);
-                        Vector3 perpAxis = dirFork.clone().perpendicular().rotate(lightningSeed.nextFloat() * 2 * Math.PI, dirFork);
-                        Vector3 dirPos = dirFork.clone().rotate(forkAngle, perpAxis).normalize().multiply(dirFork.length() * 3D / 4D).add(split);
+                        Vector3 perpAxis = dirFork.clone().perpendicular().mirror(lightningSeed.nextFloat() * 2 * Math.PI, dirFork);
+                        Vector3 dirPos = dirFork.clone().mirror(forkAngle, perpAxis).normalize().mul(dirFork.length() * 3D / 4D).add(split);
                         LightningVertex forkVertex = new LightningVertex(dirPos);
                         newVertex.next.add(forkVertex);
                     }
@@ -154,18 +154,18 @@ public class FXLightning extends EntityVisualFX {
     private void renderCurrentTextureAroundAxis(Vector3 from, Vector3 to, double angle, double size, VertexConsumer buf, PoseStack renderStack, float r, float g, float b, float a) {
         Vector3 aim = to.clone().subtract(from).normalize();
         Vector3 aimPerp = aim.clone().perpendicular().normalize();
-        Vector3 perp = aimPerp.clone().rotate(angle, aim).normalize();
-        Vector3 perpFrom = perp.clone().multiply(size);
-        Vector3 perpTo = perp.multiply(size);
+        Vector3 perp = aimPerp.clone().mirror(angle, aim).normalize();
+        Vector3 perpFrom = perp.clone().mul(size);
+        Vector3 perpTo = perp.mul(size);
 
-        Matrix4f matr = renderStack.getLast().getMatrix();
-        Vector3 vec = from.clone().add(perpFrom.clone().multiply(-1));
+        Matrix4f matr = renderStack.last().pose();
+        Vector3 vec = from.clone().add(perpFrom.clone().mul(-1));
         vec.drawPos(matr, buf).color(r, g, b, a).tex(1, 1).endVertex();
         vec = from.clone().add(perpFrom);
         vec.drawPos(matr, buf).color(r, g, b, a).tex(1, 0).endVertex();
         vec = to.clone().add(perpTo);
         vec.drawPos(matr, buf).color(r, g, b, a).tex(0, 0).endVertex();
-        vec = to.clone().add(perpTo.clone().multiply(-1));
+        vec = to.clone().add(perpTo.clone().mul(-1));
         vec.drawPos(matr, buf).color(r, g, b, a).tex(0, 1).endVertex();
     }
 

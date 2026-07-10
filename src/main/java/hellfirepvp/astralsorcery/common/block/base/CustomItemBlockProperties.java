@@ -39,7 +39,7 @@ public interface CustomItemBlockProperties extends CustomItemBlock {
     }
 
     @Nullable
-    default Item getContainerItem() {
+    default Item getCraftingRemainingItem() {
         return null;
     }
 

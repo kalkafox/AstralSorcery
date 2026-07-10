@@ -33,7 +33,7 @@ public class PatreonData {
 
         private String uuid;
         private String effectClass;
-        private final List<String> parameters = Lists.newArrayList();
+        private final List<String> params = Lists.newArrayList();
 
         public String getUuid() {
             return uuid;
@@ -43,8 +43,8 @@ public class PatreonData {
             return effectClass;
         }
 
-        public List<String> getParameters() {
-            return parameters;
+        public List<String> writeToString() {
+            return params;
         }
 
     }

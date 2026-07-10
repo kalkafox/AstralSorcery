@@ -48,8 +48,8 @@ public class ResultDropItem extends InteractionResult {
     }
 
     @Override
-    public void doResult(Level world, Vector3 at) {
-        ItemUtils.dropItemNaturally(world, at.getX(), at.getY(), at.getZ(), this.output.copy());
+    public void doResult(Level level, Vector3 at) {
+        ItemUtils.dropItemNaturally(level, at.getX(), at.getY(), at.getZ(), this.output.copy());
     }
 
     @Override
@@ -67,7 +67,7 @@ public class ResultDropItem extends InteractionResult {
 
     @Override
     public void read(FriendlyByteBuf buf) {
-        this.output = ByteBufUtils.readItemStack(buf);
+        this.output = ByteBufUtils.readItem(buf);
     }
 
     @Override

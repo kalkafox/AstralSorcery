@@ -28,22 +28,22 @@ public abstract class CustomMatcherRecipe extends BaseHandlerRecipe<IItemHandler
     }
 
     @Override
-    public final boolean canFit(int width, int height) {
+    public final boolean canCraftInDimensions(int width, int height) {
         return false;
     }
 
     @Override
-    public final boolean matches(IItemHandler handler, Level world) {
+    public final boolean matches(IItemHandler handler, Level level) {
         return false;
     }
 
     @Override
-    public final ItemStack getCraftingResult(Container inv) {
-        return getRecipeOutput();
+    public final ItemStack assemble(Container inv) {
+        return getResultItem();
     }
 
     @Override
-    public final ItemStack getRecipeOutput() {
+    public final ItemStack getResultItem() {
         return ItemStack.EMPTY;
     }
 

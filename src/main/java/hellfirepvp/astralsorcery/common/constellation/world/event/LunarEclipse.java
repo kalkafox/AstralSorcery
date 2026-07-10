@@ -29,16 +29,16 @@ public class LunarEclipse extends CelestialEvent {
     private int eventTick = 0;
 
     @Override
-    public void tick(Level world, Random rand, WorldContext ctx) {
-        for (int i = 0; i < 12 + rand.nextInt(12); i++) {
-            rand.nextLong(); //Flush
+    public void tick(Level level, Random random, WorldContext ctx) {
+        for (int i = 0; i < 12 + random.nextInt(12); i++) {
+            random.nextLong(); //Flush
         }
         int halfTime = this.getEventDuration() / 2;
 
-        int repeat = 68;
-        long wTime = world.getDayTime();
+        int looping = 68;
+        long wTime = level.getDayTime();
         int suggestedDayLength = GeneralConfig.CONFIG.dayLength.get();
-        int lunarTime = (int) (wTime % (repeat * suggestedDayLength));
+        int lunarTime = (int) (wTime % (looping * suggestedDayLength));
         dayOfEvent = lunarTime >= 0 && lunarTime < suggestedDayLength;
         int midLOffset = Math.round(suggestedDayLength * 0.75F); //Rounding errors are not my fault.
 

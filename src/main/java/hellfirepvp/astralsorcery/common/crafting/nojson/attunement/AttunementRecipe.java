@@ -48,7 +48,7 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?>> ext
 
     public static abstract class Active<T extends AttunementRecipe<? extends Active<T>>> {
 
-        protected final Random rand = new Random();
+        protected final Random random = new Random();
 
         private T recipe;
         private int tick = 0;
@@ -65,8 +65,8 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?>> ext
             return tick;
         }
 
-        public final void tick(LogicalSide side, TileAttunementAltar altar) {
-            this.doTick(side, altar);
+        public final void tick(LogicalSide direction, TileAttunementAltar altar) {
+            this.doTick(direction, altar);
             this.tick++;
         }
 
@@ -80,7 +80,7 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?>> ext
         public abstract void finishRecipe(TileAttunementAltar altar);
 
         //Called every tick for both sides
-        public abstract void doTick(LogicalSide side, TileAttunementAltar altar);
+        public abstract void doTick(LogicalSide direction, TileAttunementAltar altar);
 
         //Called every tick on server to test if this recipe is done. Create 'reward' and return true when finished.
         public abstract boolean isFinished(TileAttunementAltar altar);
@@ -94,7 +94,7 @@ public abstract class AttunementRecipe<T extends AttunementRecipe.Active<?>> ext
             return this.recipe.canStartCrafting(altar);
         }
 
-        public void writeToNBT(CompoundTag nbt) {
+        public void save(CompoundTag nbt) {
             nbt.putInt("tick", this.tick);
         }
 

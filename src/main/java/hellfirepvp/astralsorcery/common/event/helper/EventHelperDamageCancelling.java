@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.event.helper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.IEventBus;
 
 import java.util.*;
@@ -30,10 +30,10 @@ public class EventHelperDamageCancelling {
     private EventHelperDamageCancelling() {}
 
     public static void markInvulnerableToNextDamage(Player player, DamageSource source) {
-        if (player.getEntityWorld().isRemote()) {
+        if (player.getCommandSenderWorld().isClientSide()) {
             return;
         }
-        invulnerableTypes.computeIfAbsent(player.getUniqueID(), uuid -> new HashSet<>()).add(source);
+        invulnerableTypes.computeIfAbsent(player.getUUID(), uuid -> new HashSet<>()).add(source);
     }
 
     public static void attachListeners(IEventBus bus) {
@@ -49,15 +49,15 @@ public class EventHelperDamageCancelling {
         }
     }
 
-    private static void onLivingDamage(LivingHurtEvent event) {
+    private static void onLivingDamage(LivingIncomingDamageEvent event) {
         if (!(event.getEntityLiving() instanceof Player)) {
             return;
         }
         Player player = (Player) event.getEntityLiving();
-        Set<DamageSource> sources = invulnerableTypes.getOrDefault(player.getUniqueID(), Collections.emptySet());
+        Set<DamageSource> sources = invulnerableTypes.getOrDefault(player.getUUID(), Collections.emptySet());
         if (sources.remove(event.getSource())) {
             if (sources.isEmpty()) {
-                invulnerableTypes.remove(player.getUniqueID());
+                invulnerableTypes.remove(player.getUUID());
             }
 
             event.setCanceled(true);

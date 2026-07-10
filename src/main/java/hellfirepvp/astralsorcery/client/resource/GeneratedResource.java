@@ -75,14 +75,14 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
         public void loadTexture(ResourceManager manager) throws IOException {
             NativeImage image = NativeImage.read(NativeImage.PixelFormat.RGBA, createMemInput());
             if (!RenderSystem.isOnRenderThreadOrInit()) {
-                RenderSystem.recordRenderCall(() -> this.loadImage(image, this.blur, this.clamp));
+                RenderSystem.recordRenderCall(() -> this.doLoad(image, this.blur, this.clamp));
             } else {
-                this.loadImage(image, this.blur, this.clamp);
+                this.doLoad(image, this.blur, this.clamp);
             }
         }
 
-        private void loadImage(NativeImage imageIn, boolean blurIn, boolean clampIn) {
-            TextureUtil.prepareImage(this.getGlTextureId(), 0, imageIn.getWidth(), imageIn.getHeight());
+        private void doLoad(NativeImage imageIn, boolean blurIn, boolean clampIn) {
+            TextureUtil.prepareImage(this.getId(), 0, imageIn.getWidth(), imageIn.getHeight());
             imageIn.uploadTextureSub(0, 0, 0, 0, 0, imageIn.getWidth(), imageIn.getHeight(), blurIn, clampIn, false, true);
         }
 

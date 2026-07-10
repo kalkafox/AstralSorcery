@@ -8,12 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
 import hellfirepvp.astralsorcery.common.constellation.effect.ConstellationEffect;
 import hellfirepvp.astralsorcery.common.constellation.effect.ConstellationEffectProvider;
 import hellfirepvp.astralsorcery.common.constellation.effect.aoe.*;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.block.ILocatable;
 
 import javax.annotation.Nullable;
@@ -57,7 +57,6 @@ public class RegistryConstellationEffects {
     }
 
     private static <T extends ConstellationEffectProvider> T register(T effectProvider) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(effectProvider);
-        return effectProvider;
+        return AstralRegistries.register(AstralRegistries.CONSTELLATION_EFFECTS, effectProvider);
     }
 }

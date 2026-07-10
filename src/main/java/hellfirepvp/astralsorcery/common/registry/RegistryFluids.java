@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.fluid.FluidLiquidStarlight;
 import hellfirepvp.astralsorcery.common.fluid.ItemLiquidStarlightBucket;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
@@ -83,7 +84,6 @@ public class RegistryFluids {
     }
 
     private static <T extends Fluid> T registerFluid(T fluid, ResourceLocation name) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.FLUID, name, fluid);
-        return fluid;
+        return AstralRegistries.register(AstralRegistries.FLUIDS, name, fluid);
     }
 }

@@ -62,7 +62,7 @@ public abstract class PerkAttributeReader extends AbstractAstralRegistryEntry<Pe
      * @return A string representation of the attribute's value
      */
     @OnlyIn(Dist.CLIENT)
-    public abstract PerkStatistic getStatistics(PerkAttributeMap statMap, Player player);
+    public abstract PerkStatistic countParticles(PerkAttributeMap statMap, Player player);
 
     /**
      * Return the default value the perks or other things scale off of.
@@ -72,7 +72,7 @@ public abstract class PerkAttributeReader extends AbstractAstralRegistryEntry<Pe
      * @param side The current side
      * @return The default value as it would be without any modifiers.
      */
-    public abstract double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side);
+    public abstract double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide direction);
 
     /**
      * Return the modifier (multiplier or addition) for the given mode.
@@ -83,7 +83,7 @@ public abstract class PerkAttributeReader extends AbstractAstralRegistryEntry<Pe
      * @param mode The mode to get the modifier for
      * @return The currently applying modifier value for the given mode.
      */
-    public abstract double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side,
+    public abstract double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide direction,
                                                    ModifierType mode);
 
     public static String formatDecimal(double decimal) {

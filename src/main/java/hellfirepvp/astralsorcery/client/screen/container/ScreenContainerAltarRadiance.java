@@ -41,7 +41,7 @@ import java.util.Random;
  */
 public class ScreenContainerAltarRadiance extends ScreenContainerAltar<ContainerAltarTrait> {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     public ScreenContainerAltarRadiance(ContainerAltarTrait screenContainer, Inventory inv, Component name) {
         super(screenContainer, inv, name, 255, 202);
@@ -53,49 +53,49 @@ public class ScreenContainerAltarRadiance extends ScreenContainerAltar<Container
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(PoseStack renderStack, int mouseX, int mouse) {
+    protected void renderLabels(PoseStack renderStack, int xpos, int mouse) {
         SimpleAltarRecipe recipe = this.findRecipe(false);
         if (recipe != null) {
-            ItemStack out = recipe.getOutputForRender(this.getContainer().getTileEntity().getInventory());
-            renderStack.push();
+            ItemStack out = recipe.getOutputForRender(this.getMenuProvider().getTileEntity().getItems());
+            renderStack.pushPose();
             renderStack.translate(190, 35, 0);
             renderStack.scale(2.5F, 2.5F, 1F);
 
             RenderingUtils.renderItemStackGUI(renderStack, out, null);
 
-            renderStack.pop();
+            renderStack.popPose();
         }
 
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
         RenderSystem.disableDepthTest();
 
-        float pTicks = Minecraft.getInstance().getRenderPartialTicks();
+        float pTicks = Minecraft.getInstance().getFrameTime();
         TexturesAS.TEX_STAR_1.bindTexture();
-        rand.setSeed(0x889582997FF29A92L);
+        random.initNoise(0x889582997FF29A92L);
         for (int i = 0; i < 18; i++) {
 
-            int x = rand.nextInt(54);
-            int y = rand.nextInt(54);
+            int x = random.nextInt(54);
+            int y = random.nextInt(54);
 
-            float brightness = 0.3F + (RenderingConstellationUtils.stdFlicker(ClientScheduler.getClientTick(), pTicks, 10 + rand.nextInt(20))) * 0.6F;
+            float brightness = 0.3F + (RenderingConstellationUtils.stdFlicker(ClientScheduler.getClientTick(), pTicks, 10 + random.nextInt(20))) * 0.6F;
 
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
                 RenderingGuiUtils.rect(buf, renderStack, 15 + x, 39 + y, this.getBlitOffset(), 5, 5)
                         .color(brightness, brightness, brightness, brightness)
                         .draw();
             });
         }
 
-        TileAltar altar = this.getContainer().getTileEntity();
+        TileAltar altar = this.getMenuProvider().getTileEntity();
         IConstellation c = altar.getFocusedConstellation();
         if (c != null && altar.hasMultiblock() && ResearchHelper.getClientProgress().hasConstellationDiscovered(c)) {
-            rand.setSeed(0x61FF25A5B7C24109L);
+            random.initNoise(0x61FF25A5B7C24109L);
 
             RenderingConstellationUtils.renderConstellationIntoGUI(c.getConstellationColor(), c, renderStack,
                     16, 41, this.getBlitOffset(),
                     58, 58,
-                    2, () -> 0.2F + 0.8F * RenderingConstellationUtils.conCFlicker(Minecraft.getInstance().world.getDayTime(), pTicks, 5 + rand.nextInt(5)),
+                    2, () -> 0.2F + 0.8F * RenderingConstellationUtils.conCFlicker(Minecraft.getInstance().level.getDayTime(), pTicks, 5 + random.nextInt(5)),
                     true, false);
         }
 
@@ -104,7 +104,7 @@ public class ScreenContainerAltarRadiance extends ScreenContainerAltar<Container
     }
 
     @Override
-    public void renderGuiBackground(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    public void renderGuiBackground(PoseStack renderStack, float a, int xpos, int ypos) {
         this.renderStarlightBar(renderStack, 11, 104, 232, 10);
     }
 }

@@ -57,11 +57,11 @@ public class PatreonCrystalFlare extends PatreonFlare {
             }
         } else {
             this.crystalEffect = EffectHelper.of(EffectTemplatesAS.CRYSTAL)
-                    .spawn(getPos())
-                    .setTexture(this.queryTexture)
+                    .spawn(getBlockPos())
+                    .particle(this.queryTexture)
                     .setLightRayColor(this.colorTheme)
                     .setScaleMultiplier(0.03F)
-                    .position((fx, position, motionToBeMoved) -> this.getPos().clone())
+                    .position((fx, position, motionToBeMoved) -> this.getBlockPos().clone())
                     .refresh((fx) -> !this.removed && RenderingConfig.CONFIG.patreonEffects.get());
         }
     }

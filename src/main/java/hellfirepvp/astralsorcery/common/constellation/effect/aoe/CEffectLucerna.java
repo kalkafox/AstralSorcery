@@ -55,37 +55,37 @@ public class CEffectLucerna extends ConstellationEffect implements Constellation
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         if (ClientScheduler.getClientTick() % 20 == 0) {
             EffectHelper.spawnSource(new FXOrbitalLucerna(new Vector3(pos).add(0.5, 0.5, 0.5))
                     .setOrbitAxis(Vector3.RotAxis.Y_AXIS)
-                    .setOrbitRadius(0.8 + rand.nextFloat() * 0.7)
-                    .setTicksPerRotation(20 + rand.nextInt(20)));
+                    .setOrbitRadius(0.8 + random.nextFloat() * 0.7)
+                    .setTicksPerRotation(20 + random.nextInt(20)));
         }
     }
 
     @Override
-    public boolean runStatusEffect(Level world, BlockPos pos, int mirrorAmount, ConstellationEffectProperties modified, @Nullable IMinorConstellation possibleTraitEffect) {
-        if (modified.isCorrupted()) {
-            if (world instanceof ServerLevel && DayTimeHelper.isNight(world) && rand.nextBoolean()) {
-                SkyHandler.getInstance().revertWorldTimeTick((ServerLevel) world);
+    public boolean runStatusEffect(Level level, BlockPos pos, int mirrorAmount, ConstellationEffectProperties isDirty, @Nullable IMinorConstellation possibleTraitEffect) {
+        if (isDirty.isCorrupted()) {
+            if (level instanceof ServerLevel && DayTimeHelper.isNight(level) && random.nextBoolean()) {
+                SkyHandler.getInstance().revertWorldTimeTick((ServerLevel) level);
             }
             return true;
         }
 
-        WorldBlockPos at = WorldBlockPos.wrapServer(world, pos);
-        TickTokenMap.SimpleTickToken<Double> token = EventHelperSpawnDeny.spawnDenyRegions.get(at);
-        if(token != null && Math.abs(token.getValue() - modified.getSize()) < 1E-3) {
-            int next = token.getRemainingTimeout() + 80;
+        WorldBlockPos at = WorldBlockPos.wrapServer(level, pos);
+        TickTokenMap.SimpleTickToken<Double> accessToken = EventHelperSpawnDeny.spawnDenyRegions.get(at);
+        if(accessToken != null && Math.abs(accessToken.getValue() - isDirty.getSize()) < 1E-3) {
+            int next = accessToken.getRemainingTimeout() + 80;
             if(next > 400) next = 400;
-            token.setTimeout(next);
+            accessToken.setIdleTimeout(next);
             rememberedTimeout = next;
         } else {
-            if(token != null) {
-                token.setTimeout(0);
+            if(accessToken != null) {
+                accessToken.setIdleTimeout(0);
             }
             rememberedTimeout = Math.min(400, rememberedTimeout + 80);
-            EventHelperSpawnDeny.spawnDenyRegions.put(at, new TickTokenMap.SimpleTickToken<>(modified.getSize(), rememberedTimeout));
+            EventHelperSpawnDeny.spawnDenyRegions.put(at, new TickTokenMap.SimpleTickToken<>(isDirty.getSize(), rememberedTimeout));
         }
         return true;
     }
@@ -101,7 +101,7 @@ public class CEffectLucerna extends ConstellationEffect implements Constellation
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         return false;
     }
 
@@ -113,8 +113,8 @@ public class CEffectLucerna extends ConstellationEffect implements Constellation
     }
 
     @Override
-    public void writeToNBT(CompoundTag cmp) {
-        super.writeToNBT(cmp);
+    public void save(CompoundTag cmp) {
+        super.save(cmp);
 
         cmp.putInt("rememberedTimeout", this.rememberedTimeout);
     }

@@ -55,7 +55,7 @@ public class JournalPageRecipe implements JournalPage {
                 return recipe;
             }
 
-            recipe = mgr.getRecipes(IRecipeType.CRAFTING).get(recipeId);
+            recipe = mgr.getRecipes(RecipeType.CRAFTING).get(recipeId);
             if (recipe != null) {
                 return recipe;
             }
@@ -80,9 +80,9 @@ public class JournalPageRecipe implements JournalPage {
                 return recipe;
             }
 
-            recipe = mgr.getRecipes(IRecipeType.CRAFTING).values()
+            recipe = mgr.getRecipes(RecipeType.CRAFTING).values()
                     .stream()
-                    .filter(r -> outputTest.test(r.getRecipeOutput()))
+                    .filter(r -> outputTest.test(r.getResultItem()))
                     .findFirst()
                     .orElse(null);
             if (recipe != null) {
@@ -99,9 +99,9 @@ public class JournalPageRecipe implements JournalPage {
                 throw new IllegalStateException("Not connected to a server, but calling GUI code?");
             }
 
-            Recipe<?> recipe = mgr.getRecipes(IRecipeType.CRAFTING).values()
+            Recipe<?> recipe = mgr.getRecipes(RecipeType.CRAFTING).values()
                     .stream()
-                    .filter(r -> outputTest.test(r.getRecipeOutput()))
+                    .filter(r -> outputTest.test(r.getResultItem()))
                     .findFirst()
                     .orElse(null);
             if (recipe != null) {

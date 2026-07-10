@@ -26,7 +26,7 @@ public class SpriteSheetResource extends AbstractRenderableTexture {
 
     protected float uPart, vPart;
     protected int frameCount;
-    protected int rows, columns;
+    protected int height, width;
 
     private final AbstractRenderableTexture resource;
 
@@ -34,18 +34,18 @@ public class SpriteSheetResource extends AbstractRenderableTexture {
         this(resource, 1, 1);
     }
 
-    public SpriteSheetResource(AbstractRenderableTexture resource, int rows, int columns) {
+    public SpriteSheetResource(AbstractRenderableTexture resource, int height, int width) {
         super(NameUtil.suffixPath(resource.getKey(), "_sprite"));
-        if (rows <= 0 || columns <= 0)
+        if (height <= 0 || width <= 0)
             throw new IllegalArgumentException("Can't instantiate a sprite sheet without any rows or columns!");
 
-        frameCount = rows * columns;
-        this.rows = rows;
-        this.columns = columns;
+        frameCount = height * width;
+        this.height = height;
+        this.width = width;
         this.resource = resource;
 
-        this.uPart = 1F / ((float) columns);
-        this.vPart = 1F / ((float) rows);
+        this.uPart = 1F / ((float) width);
+        this.vPart = 1F / ((float) height);
     }
 
     @Override
@@ -88,13 +88,13 @@ public class SpriteSheetResource extends AbstractRenderableTexture {
 
     public Tuple<Float, Float> getUVOffset(long frameTimer) {
         int frame = (int) (frameTimer % frameCount);
-        return new Tuple<>((frame % columns) * uPart, (frame / columns) * vPart);
+        return new Tuple<>((frame % width) * uPart, (frame / width) * vPart);
     }
 
     public Tuple<Float, Float> getUVOffset(EntityComplexFX fx, float pTicks, float spriteDisplayFactor) {
         float agePart = fx.getAge() * spriteDisplayFactor + pTicks;
         float perc = agePart / fx.getMaxAge();
-        long timer = MathHelper.floor(this.getFrameCount() * perc);
+        long timer = Mth.floor(this.getFrameCount() * perc);
         return getUVOffset(timer);
     }
 
@@ -103,10 +103,10 @@ public class SpriteSheetResource extends AbstractRenderableTexture {
     }
 
     public int getRows() {
-        return rows;
+        return height;
     }
 
     public int getColumns() {
-        return columns;
+        return width;
     }
 }

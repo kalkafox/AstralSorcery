@@ -38,19 +38,19 @@ public class EffectGatewayEdge extends AltarRecipeEffect {
         for (int amount = 0; amount < 6; amount++) {
 
             Vector3 offset = new Vector3(altar).add(-scale, 0, -scale);
-            if (rand.nextBoolean()) {
-                offset.add(edgeScale * (rand.nextBoolean() ? 1 : 0), 0, rand.nextFloat() * edgeScale);
+            if (random.nextBoolean()) {
+                offset.add(edgeScale * (random.nextBoolean() ? 1 : 0), 0, random.nextFloat() * edgeScale);
             } else {
-                offset.add(rand.nextFloat() * edgeScale, 0, edgeScale * (rand.nextBoolean() ? 1 : 0));
+                offset.add(random.nextFloat() * edgeScale, 0, edgeScale * (random.nextBoolean() ? 1 : 0));
             }
             FXFacingParticle particle = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
                     .setGravityStrength(-0.0005F)
-                    .setScaleMultiplier(0.25F + rand.nextFloat() * 0.15F)
+                    .setScaleMultiplier(0.25F + random.nextFloat() * 0.15F)
                     .color(VFXColorFunction.constant(ColorsAS.DEFAULT_GENERIC_PARTICLE))
-                    .setMaxAge(20 + rand.nextInt(30));
+                    .setMaxAge(20 + random.nextInt(30));
 
-            switch (rand.nextInt(4)) {
+            switch (random.nextInt(4)) {
                 case 0:
                     particle.color(VFXColorFunction.WHITE);
                     break;

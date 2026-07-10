@@ -40,7 +40,7 @@ public class CommandConstellation {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("constellation")
-                .requires(cs -> cs.hasPermissionLevel(2))
+                .requires(cs -> cs.hasPermission(2))
                 .then(Commands.literal("memorize")
                         .then(Commands.argument("constellation", ArgumentTypeConstellation.any())
                                 .then(Commands.argument("player", EntityArgument.player())
@@ -68,42 +68,42 @@ public class CommandConstellation {
     }
 
     private static int markConstellationMemorized(CommandSourceStack src, @Nullable Player target, IConstellation cst) throws CommandSyntaxException {
-        Player source = src.asPlayer();
+        Player source = src.getPlayerOrException();
         target = target != null ? target : source;
         Component targetName = target.getDisplayName();
         PlayerProgress progress = ResearchHelper.getProgress(target, LogicalSide.SERVER);
         if (!progress.isValid() || progress.hasSeenConstellation(cst)) {
             source.sendMessage(Component.literal("Failed! ").append(targetName).append(" has already seen ").append(cst.getConstellationName())
-                    .withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+                    .withStyle(ChatFormatting.RED), Util.NIL_UUID);
             return 0;
         }
         if (ResearchManager.memorizeConstellation(cst, target)) {
             ResearchHelper.sendConstellationMemorizationMessage(target, progress, cst);
             source.sendMessage(Component.literal("Success! ")
-                    .withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+                    .withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
             return Command.SINGLE_SUCCESS;
         } else {
-            source.sendMessage(Component.literal("Failed!").withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+            source.sendSystemMessage(Component.literal("Failed!").withStyle(ChatFormatting.RED));
             return 0;
         }
     }
 
     private static int discoverConstellation(CommandSourceStack src, @Nullable Player target, IConstellation cst) throws CommandSyntaxException {
-        Player source = src.asPlayer();
+        Player source = src.getPlayerOrException();
         target = target != null ? target : source;
         Component targetName = target.getDisplayName();
         PlayerProgress progress = ResearchHelper.getProgress(target, LogicalSide.SERVER);
         if (!progress.isValid() || progress.hasConstellationDiscovered(cst)) {
             source.sendMessage(Component.literal("Failed! ").append(targetName).append(" has already discovered ").append(cst.getConstellationName())
-                    .withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+                    .withStyle(ChatFormatting.RED), Util.NIL_UUID);
             return 0;
         }
         if (ResearchManager.discoverConstellation(cst, target)) {
             ResearchHelper.sendConstellationDiscoveryMessage(target, cst);
-            source.sendMessage(Component.literal("Success! ").withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+            source.sendSystemMessage(Component.literal("Success! ").withStyle(ChatFormatting.GREEN));
             return Command.SINGLE_SUCCESS;
         } else {
-            source.sendMessage(Component.literal("Failed!").withStyle(TextFormatting.RED), Util.DUMMY_UUID);
+            source.sendSystemMessage(Component.literal("Failed!").withStyle(ChatFormatting.RED));
             return 0;
         }
     }

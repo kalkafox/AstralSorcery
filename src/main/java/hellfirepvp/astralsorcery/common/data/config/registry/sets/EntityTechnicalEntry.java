@@ -36,8 +36,8 @@ public class EntityTechnicalEntry implements ConfigDataSet {
         this.name = name;
     }
 
-    public EntityType<?> getEntityType() {
-        return ForgeRegistries.ENTITIES.getValue(this.name);
+    public EntityType<?> getType() {
+        return BuiltInRegistries.ENTITY_TYPE.get(this.name);
     }
 
     @Nonnull
@@ -47,12 +47,12 @@ public class EntityTechnicalEntry implements ConfigDataSet {
     }
 
     public static EntityTechnicalEntry deserialize(String string) throws IllegalArgumentException {
-        ResourceLocation name = new ResourceLocation(string);
+        ResourceLocation name = ResourceLocation.parse(string);
         Mods mod = Mods.byModId(name.getNamespace());
         if (mod != null && !mod.isPresent()) {
             throw new IllegalArgumentException("Entry " + string + ", Mod not present: " + mod.getModId());
         }
-        if (ForgeRegistries.ENTITIES.getValue(name) == null) {
+        if (BuiltInRegistries.ENTITY_TYPE.get(name) == null) {
             throw new IllegalArgumentException("Unknown Entity Type: " + name);
         }
         return new EntityTechnicalEntry(name);

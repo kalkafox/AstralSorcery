@@ -31,17 +31,17 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 20.11.2020 / 17:10
  */
-public class RiverbedPlacement extends Placement<NoPlacementConfig> {
+public class RiverbedPlacement extends FeatureDecorator<NoneDecoratorConfiguration> {
 
     public RiverbedPlacement() {
-        super(NoPlacementConfig.CODEC);
+        super(NoneDecoratorConfiguration.CODEC);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(WorldDecoratingHelper helper, Random rand, NoPlacementConfig config, BlockPos pos) {
-        int x = rand.nextInt(16) + pos.getX();
-        int z = rand.nextInt(16) + pos.getZ();
-        int y = helper.func_242893_a(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
+    public Stream<BlockPos> getPositions(DecorationContext helper, Random random, NoneDecoratorConfiguration config, BlockPos pos) {
+        int x = random.nextInt(16) + pos.getX();
+        int z = random.nextInt(16) + pos.getZ();
+        int y = helper.getHeight(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
         if (y <= 0) {
             return Stream.of();
         }
@@ -51,16 +51,16 @@ public class RiverbedPlacement extends Placement<NoPlacementConfig> {
         boolean foundWater = false;
         for (int yy = 0; yy < 5; yy++) {
             BlockPos check = floor.offset(Direction.UP, yy);
-            BlockState state = helper.func_242894_a(check);
+            BlockState state = helper.getBlockState(check);
             Block block = state.getBlock();
             Fluid f;
             if ((f = MiscUtils.tryGetFuild(state)) != null && f.isIn(FluidTags.WATER) || block.isIn(BlockTags.ICE)) {
                 foundWater = true;
-                floor = check.down();
+                floor = check.below();
                 break;
             }
         }
-        if (foundWater && BlockTags.SAND.contains(helper.func_242894_a(floor).getBlock())) {
+        if (foundWater && BlockTags.SAND.contains(helper.getBlockState(floor).getBlock())) {
             return Stream.of(floor);
         }
         return Stream.of();

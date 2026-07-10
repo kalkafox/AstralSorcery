@@ -114,7 +114,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     public void tick() {
         super.tick();
 
-        if (!this.getWorld().isRemote()) {
+        if (!this.getLevel().isClientSide()) {
             this.doCraftingCycle();
         } else {
             if (this.getActiveRecipe() != null) {
@@ -126,7 +126,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
 
     @OnlyIn(Dist.CLIENT)
     private void doCraftSound() {
-        if (SoundHelper.getSoundVolume(SoundCategory.BLOCKS) > 0) {
+        if (SoundHelper.getSoundVolume(SoundSource.BLOCKS) > 0) {
             if (clientCraftSound == null || ((PositionedLoopSound) clientCraftSound).hasStoppedPlaying()) {
                 CategorizedSoundEvent sound = SoundsAS.INFUSER_CRAFT_LOOP;
 
@@ -136,7 +136,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
                         1F,
                         false,
                         (s) -> isRemoved() ||
-                                SoundHelper.getSoundVolume(SoundCategory.BLOCKS) <= 0 ||
+                                SoundHelper.getSoundVolume(SoundSource.BLOCKS) <= 0 ||
                                 this.getActiveRecipe() == null)
                         .setFadeInTicks(30)
                         .setFadeOutTicks(20);
@@ -151,14 +151,14 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
         ResourceLocation recipeName = ByteBufUtils.readResourceLocation(pkt.getExtraData());
         BlockPos at = ByteBufUtils.readPos(pkt.getExtraData());
 
-        Level world = Minecraft.getInstance().world;
-        if (world == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
 
-        TileInfuser thisInfuser = MiscUtils.getTileAt(world, at, TileInfuser.class, false);
+        TileInfuser thisInfuser = MiscUtils.getTileAt(level, at, TileInfuser.class, false);
         if (thisInfuser != null) {
-            Recipe<?> recipe = world.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_INFUSION.getType()).get(recipeName);
+            Recipe<?> recipe = level.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_INFUSION.getType()).get(recipeName);
             if (recipe instanceof LiquidInfusion) {
                 FluidStack stack = new FluidStack(((LiquidInfusion) recipe).getLiquidInput(), FluidAttributes.BUCKET_VOLUME);
                 Vector3 pos = new Vector3(at).add(0.5, 1, 0.5);
@@ -172,16 +172,16 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     @OnlyIn(Dist.CLIENT)
     private static void playLiquidFinish(Vector3 at, FluidStack stack) {
         Vector3 motion = new Vector3();
-        MiscUtils.applyRandomOffset(motion, rand, 0.05F);
+        MiscUtils.applyRandomOffset(motion, random, 0.05F);
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_ATLAS_PARTICLE)
                 .spawn(at)
-                .setSprite(RenderingUtils.getParticleTexture(stack))
+                .pickSprite(RenderingUtils.getParticleIcon(stack))
                 .selectFraction(0.2F)
-                .setScaleMultiplier(0.02F + rand.nextFloat() * 0.05F)
-                .setMotion(motion)
+                .setScaleMultiplier(0.02F + random.nextFloat() * 0.05F)
+                .setDeltaMovement(motion)
                 .color((fx, pTicks) -> new Color(ColorUtils.getOverlayColor(stack)))
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .setMaxAge(40);
     }
 
@@ -214,16 +214,16 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
         ForgeHooks.setCraftingPlayer(null);
         this.abortCrafting();
 
-        SoundHelper.playSoundAround(SoundsAS.INFUSER_CRAFT_FINISH, this.getWorld(), this.getPos(), 1F, 1F);
+        SoundHelper.playSoundAround(SoundsAS.INFUSER_CRAFT_FINISH, this.getLevel(), this.getBlockPos(), 1F, 1F);
 
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.INFUSER_RECIPE_FINISH)
                 .addData(buf -> {
                     ByteBufUtils.writeResourceLocation(buf, recipeName);
-                    ByteBufUtils.writePos(buf, this.getPos());
+                    ByteBufUtils.writePos(buf, this.getBlockPos());
                 });
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getWorld(), this.getPos(), 32));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getLevel(), this.getBlockPos(), 32));
 
-        EntityFlare.spawnAmbientFlare(getWorld(), getPos().add(-3 + rand.nextInt(7), 1 + rand.nextInt(3), -3 + rand.nextInt(7)));
+        EntityFlare.spawnAmbientFlare(getLevel(), getBlockPos().offset(-3 + random.nextInt(7), 1 + random.nextInt(3), -3 + random.nextInt(7)));
 
         this.knownRecipes.add(recipeName);
     }
@@ -243,16 +243,16 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
             return false;
         }
 
-        this.activeRecipe = new ActiveLiquidInfusionRecipe(getWorld(), getPos(), recipe, crafter.getUniqueID());
+        this.activeRecipe = new ActiveLiquidInfusionRecipe(getLevel(), getBlockPos(), recipe, crafter.getUUID());
         markForUpdate();
 
-        SoundHelper.playSoundAround(SoundsAS.INFUSER_CRAFT_START, SoundCategory.BLOCKS, this.world, new Vector3(this).add(0.5, 0.5, 0.5), 1F, 1F);
+        SoundHelper.playSoundAround(SoundsAS.INFUSER_CRAFT_START, SoundSource.BLOCKS, this.level, new Vector3(this).add(0.5, 0.5, 0.5), 1F, 1F);
         return true;
     }
 
     @Override
-    public boolean onInteract(Level world, BlockPos pos, Player player, Direction side, boolean sneak) {
-        if (!world.isRemote() && this.hasMultiblock() && !this.getItemInput().isEmpty()) {
+    public boolean onInteract(Level level, BlockPos pos, Player player, Direction direction, boolean sneak) {
+        if (!level.isClientSide() && this.hasMultiblock() && !this.getItemInput().isEmpty()) {
             if (this.getActiveRecipe() != null) {
                 if (this.getActiveRecipe().matches(this)) {
                     return true;
@@ -293,13 +293,13 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
 
     @Nonnull
     public Map<BlockPos, Fluid> getLiquids() {
-        return MapStream.ofKeys(getLiquidOffsets(), pos -> getWorld().getFluidState(getPos().add(pos)).getFluid()).toMap();
+        return MapStream.ofKeys(getLiquidOffsets(), pos -> getLevel().getFluidState(getBlockPos().offset(pos)).getType()).toMap();
     }
 
     @Nonnull
     public Vector3 getRandomInfuserOffset() {
         Vector3 vec = new Vector3(this).add(0, 0.8, 0);
-        switch (rand.nextInt(4)) {
+        switch (random.nextInt(4)) {
             case 3:
                 vec.add(0.5, 0, 0.875);
                 break;
@@ -317,14 +317,14 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.inventory = this.inventory.deserialize(compound.getCompound("inventory"));
-        this.knownRecipes = NBTHelper.readSet(compound, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> new ResourceLocation(nbt.getString()));
+        this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
+        this.knownRecipes = NBTHelper.readSet(pattern, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> ResourceLocation.parse(nbt.getString()));
 
-        if (compound.contains("activeRecipe", Constants.NBT.TAG_COMPOUND)) {
-            this.activeRecipe = ActiveLiquidInfusionRecipe.deserialize(compound.getCompound("activeRecipe"), this.activeRecipe);
+        if (pattern.contains("activeRecipe", Constants.NBT.TAG_COMPOUND)) {
+            this.activeRecipe = ActiveLiquidInfusionRecipe.deserialize(pattern.getCompound("activeRecipe"), this.activeRecipe);
         } else {
             if (this.activeRecipe != null) {
                 this.activeRecipe.clearEffects();
@@ -334,23 +334,23 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.put("inventory", this.inventory.serialize());
-        NBTHelper.writeList(compound, "knownRecipes", this.knownRecipes, key -> StringNBT.valueOf(key.toString()));
+        pattern.put("inventory", this.inventory.serialize());
+        NBTHelper.writeList(pattern, "knownRecipes", this.knownRecipes, key -> StringTag.valueOf(key.toString()));
 
         if (this.activeRecipe != null) {
-            compound.put("activeRecipe", this.activeRecipe.serialize());
+            pattern.put("activeRecipe", this.activeRecipe.serialize());
         }
     }
 
     @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (this.inventory.hasCapability(cap, side)) {
-            return this.inventory.getCapability().cast();
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction) {
+        if (this.inventory.hasCapability(cap, direction)) {
+            return this.inventory.getCapability().unwrap();
         }
-        return super.getCapability(cap, side);
+        return super.getCapability(cap, direction);
     }
 }

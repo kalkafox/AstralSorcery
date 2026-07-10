@@ -36,11 +36,11 @@ public class BookLookupRegistry {
     private BookLookupRegistry() {}
 
     @Nullable
-    public static BookLookupInfo findPage(Player player, LogicalSide side, ItemStack search) {
+    public static BookLookupInfo findPage(Player player, LogicalSide direction, ItemStack search) {
         for (ItemStack compare : lookupMap.keySet()) {
             if (ItemComparator.compare(compare, search, ItemComparator.Clause.Sets.ITEMSTACK_CRAFTING)) {
                 BookLookupInfo info = lookupMap.get(compare);
-                PlayerProgress prog = ResearchHelper.getProgress(player, side);
+                PlayerProgress prog = ResearchHelper.getProgress(player, direction);
                 if (info.canSee(prog)) {
                     return info;
                 }

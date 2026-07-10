@@ -44,39 +44,39 @@ public class ConstellationHandler {
         return this.directOffsetMap.get(cst);
     }
 
-    public boolean isActiveCurrently(IConstellation cst, MoonPhase phase) {
-        return isActiveInPhase(cst, phase) || this.visibleSpecialConstellations.contains(cst);
+    public boolean isActiveCurrently(IConstellation cst, MoonPhase currentPhase) {
+        return isActiveInPhase(cst, currentPhase) || this.visibleSpecialConstellations.contains(cst);
     }
 
-    public boolean isActiveInPhase(IConstellation cst, MoonPhase phase) {
-        return this.activeMap.get(phase).contains(cst);
+    public boolean isActiveInPhase(IConstellation cst, MoonPhase currentPhase) {
+        return this.activeMap.get(currentPhase).contains(cst);
     }
 
     public int getLastTrackedDay() {
         return lastRecordedDay;
     }
 
-    public void tick(Level world) {
+    public void tick(Level level) {
         if (activeMap.isEmpty()) {
             initialize();
         }
 
-        int currentDay = (int) (world.getDayTime() / GeneralConfig.CONFIG.dayLength.get());
+        int currentDay = (int) (level.getDayTime() / GeneralConfig.CONFIG.dayLength.get());
 
         int dayDifference = currentDay - lastRecordedDay;
         if (dayDifference != 0) {
             lastRecordedDay = currentDay;
-            updateActiveConstellations(world);
+            updateActiveConstellations(level);
         }
     }
 
-    private void updateActiveConstellations(Level world) {
+    private void updateActiveConstellations(Level level) {
         this.visibleSpecialConstellations.clear();
-        MoonPhase ph = MoonPhase.fromWorld(world);
+        MoonPhase ph = MoonPhase.fromWorld(level);
 
         LinkedList<IConstellation> active = new LinkedList<>(this.activeMap.computeIfAbsent(ph, p -> Lists.newLinkedList()));
         for (IConstellationSpecialShowup cst : ConstellationRegistry.getSpecialShowupConstellations()) {
-            if (cst.doesShowUp(world, lastRecordedDay)) {
+            if (cst.doesShowUp(level, lastRecordedDay)) {
                 this.visibleSpecialConstellations.add(cst);
             }
         }
@@ -92,21 +92,21 @@ public class ConstellationHandler {
             this.activeMap.put(ph, Lists.newLinkedList());
         }
 
-        Random rand = ctx.getRandom();
+        Random random = ctx.getRandom();
 
         boolean[] occupiedSlots = new boolean[MoonPhase.values().length];
         Arrays.fill(occupiedSlots, false);
 
         LinkedList<IWeakConstellation> weakAndMajor = Lists.newLinkedList(ConstellationRegistry.getWeakConstellations());
-        Collections.shuffle(weakAndMajor, rand);
-        weakAndMajor.forEach(c -> addConstellationCycle(c, rand, occupiedSlots));
+        Collections.shuffle(weakAndMajor, random);
+        weakAndMajor.forEach(c -> addConstellationCycle(c, random, occupiedSlots));
 
         LinkedList<IConstellation> constellations = Lists.newLinkedList(ConstellationRegistry.getMinorConstellations());
-        Collections.shuffle(constellations, rand);
-        constellations.forEach(c -> addConstellationCycle(c, rand, occupiedSlots));
+        Collections.shuffle(constellations, random);
+        constellations.forEach(c -> addConstellationCycle(c, random, occupiedSlots));
     }
 
-    private void addConstellationCycle(IConstellation cst, Random rand, boolean[] slots) {
+    private void addConstellationCycle(IConstellation cst, Random random, boolean[] slots) {
         if (cst instanceof IConstellationSpecialShowup) {
             return;
         }
@@ -116,7 +116,7 @@ public class ConstellationHandler {
                 this.activeMap.get(ph).add(cst);
             }
         } else {
-            int start = searchForSpot(rand, slots);
+            int start = searchForSpot(random, slots);
             occupySlots(start, slots);
             if (getSlots(slots) <= 0) {
                 Arrays.fill(slots, false);
@@ -140,7 +140,7 @@ public class ConstellationHandler {
         return MoonPhase.values()[rIndex % moonPhaseCount];
     }
 
-    private int searchForSpot(Random r, boolean[] occupied) {
+    private int searchForSpot(Random r, boolean[] slotsOccupied) {
         int start;
         boolean foundFree = false;
         int tries = 5;
@@ -148,7 +148,7 @@ public class ConstellationHandler {
             tries--;
             start = r.nextInt(8);
 
-            int count = getSlots(occupied);
+            int count = getSlots(slotsOccupied);
             if (count >= 3) {
                 foundFree = true;
             }
@@ -156,10 +156,10 @@ public class ConstellationHandler {
         return start;
     }
 
-    private void occupySlots(int start, boolean[] occupied) {
+    private void occupySlots(int start, boolean[] slotsOccupied) {
         for (int i = 0; i < 5; i++) {
             int index = (start + i) % 8;
-            if (!occupied[index]) occupied[index] = true;
+            if (!slotsOccupied[index]) slotsOccupied[index] = true;
         }
     }
 

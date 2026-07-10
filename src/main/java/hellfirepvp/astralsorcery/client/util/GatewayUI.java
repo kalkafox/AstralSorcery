@@ -67,16 +67,16 @@ public class GatewayUI {
         }
     }
 
-    public static GatewayUI create(Level world, BlockPos tilePos, Vector3 renderPos, double sphereRadius) {
-        GatewayCache.GatewayNode gatewayNode = CelestialGatewayHandler.INSTANCE.getGatewayNode(world, LogicalSide.CLIENT, tilePos);
+    public static GatewayUI create(Level level, BlockPos tilePos, Vector3 renderPos, double sphereRadius) {
+        GatewayCache.GatewayNode gatewayNode = CelestialGatewayHandler.INSTANCE.getGatewayNode(level, LogicalSide.CLIENT, tilePos);
         if (gatewayNode == null) {
             return null;
         }
-        ResourceKey<Level> dimType = world.getDimensionKey();
+        ResourceKey<Level> dimType = level.dimension();
         GatewayUI ui = new GatewayUI(dimType, tilePos, renderPos, sphereRadius);
         Player thisPlayer = Minecraft.getInstance().player;
 
-        for (GatewayCache.GatewayNode node : CelestialGatewayHandler.INSTANCE.getGatewaysForWorld(world, LogicalSide.CLIENT)) {
+        for (GatewayCache.GatewayNode node : CelestialGatewayHandler.INSTANCE.getGatewaysForWorld(level, LogicalSide.CLIENT)) {
             if (!node.hasAccess(thisPlayer)) {
                 continue;
             }
@@ -100,7 +100,7 @@ public class GatewayUI {
     private static void appendEntry(GatewayUI ui, GatewayCache.GatewayNode node, ResourceKey<Level> nodeDimType, boolean sameWorld, double sphereRadius) {
         Vector3 renderPos = ui.getRenderCenter();
 
-        Vector3 nodePos = new Vector3(node.getPos());
+        Vector3 nodePos = new Vector3(node.getBlockPos());
         if (sameWorld) {
             if (renderPos.distance(nodePos) < 16) {
                 return;
@@ -108,12 +108,12 @@ public class GatewayUI {
 
             Vector3 dir = nodePos.subtract(renderPos);
             dir.setY(Math.max(dir.getY(), 0));
-            Vector3 sphereDirection = dir.normalize().multiply(sphereRadius);
+            Vector3 sphereDirection = dir.normalize().mul(sphereRadius);
             GatewayEntry entry = new GatewayEntry(node, nodeDimType, sphereDirection);
             ObjectReference<GatewayEntry> overlapping = new ObjectReference<>(null);
             ui.gatewayEntries.removeIf(otherEntry -> {
                 if (Math.abs(otherEntry.pitch - entry.pitch) < 7 &&
-                        (Math.abs(otherEntry.yaw - entry.yaw) <= 7 || Math.abs(otherEntry.yaw - entry.yaw - 360F) <= 7)) {
+                        (Math.abs(otherEntry.yRot - entry.yRot) <= 7 || Math.abs(otherEntry.yRot - entry.yRot - 360F) <= 7)) {
 
                     if (renderPos.distanceSquared(entry.getRelativePos()) < renderPos.distanceSquared(otherEntry.getRelativePos())) {
                         return true;
@@ -129,11 +129,11 @@ public class GatewayUI {
             }
         } else {
             long seed = 0xA7401CE1466A1095L;
-            seed |= ((long) node.getPos().getX()) << 48;
-            seed |= ((long) node.getPos().getY()) << 24;
-            seed |= ((long) node.getPos().getZ());
-            Random rand = new Random(seed);
-            Vector3 direction = Vector3.positiveYRandom(rand).normalize().multiply(sphereRadius);
+            seed |= ((long) node.getBlockPos().getX()) << 48;
+            seed |= ((long) node.getBlockPos().getY()) << 24;
+            seed |= ((long) node.getBlockPos().getZ());
+            Random random = new Random(seed);
+            Vector3 direction = Vector3.positiveYRandom(random).normalize().mul(sphereRadius);
             GatewayEntry entry = new GatewayEntry(node, nodeDimType, direction);
             int tries = 50;
             boolean foundSpace = false;
@@ -142,7 +142,7 @@ public class GatewayUI {
                 boolean mayAdd = true;
                 for (GatewayEntry otherEntry : ui.gatewayEntries) {
                     if (Math.abs(otherEntry.pitch - entry.pitch) < 15 &&
-                            (Math.abs(otherEntry.yaw - entry.yaw) <= 15 || Math.abs(otherEntry.yaw - entry.yaw - 360F) <= 15)) {
+                            (Math.abs(otherEntry.yRot - entry.yRot) <= 15 || Math.abs(otherEntry.yRot - entry.yRot - 360F) <= 15)) {
                         mayAdd = false;
                         break;
                     }
@@ -150,7 +150,7 @@ public class GatewayUI {
                 if(mayAdd) {
                     foundSpace = true;
                 } else {
-                    direction = Vector3.positiveYRandom(rand).normalize().multiply(sphereRadius);
+                    direction = Vector3.positiveYRandom(random).normalize().mul(sphereRadius);
                     entry = new GatewayEntry(node, nodeDimType, direction);
                 }
                 tries--;
@@ -165,7 +165,7 @@ public class GatewayUI {
         return dimType;
     }
 
-    public BlockPos getPos() {
+    public BlockPos getBlockPos() {
         return pos;
     }
 
@@ -179,7 +179,7 @@ public class GatewayUI {
 
     @Nullable
     public GatewayCache.GatewayNode getThisGatewayNode() {
-        return CelestialGatewayHandler.INSTANCE.getGatewayNode(Minecraft.getInstance().world, LogicalSide.CLIENT, this.getPos());
+        return CelestialGatewayHandler.INSTANCE.getGatewayNode(Minecraft.getInstance().level, LogicalSide.CLIENT, this.getBlockPos());
     }
 
     @Nullable
@@ -210,7 +210,7 @@ public class GatewayUI {
 
         private final Vector3 relativePos;
 
-        private final float yaw, pitch;
+        private final float yRot, pitch;
 
         private GatewayEntry(GatewayCache.GatewayNode node, ResourceKey<Level> nodeDimension, Vector3 relativePos) {
             this.node = node;
@@ -221,7 +221,7 @@ public class GatewayUI {
             }
 
             Vector3 angles = relativePos.copyToPolar();
-            this.yaw = (float) (180F - angles.getZ());
+            this.yRot = (float) (180F - angles.getZ());
             this.pitch = Math.min(0F, (float) (-90F + angles.getY()));
         }
 
@@ -238,7 +238,7 @@ public class GatewayUI {
         }
 
         public float getYaw() {
-            return yaw;
+            return yRot;
         }
 
         public float getPitch() {

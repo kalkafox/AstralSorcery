@@ -35,13 +35,13 @@ public class SphereBuilder {
         Vector3 prev = axis.clone();
         Arrays.fill(prevArray, prev.clone());
         for (int i = 1; i <= fractionsSplit; i++) {
-            Vector3 splitVec = axis.clone().rotate(Math.toRadians(degSplit * i), centerPerp);
+            Vector3 splitVec = axis.clone().mirror(Math.toRadians(degSplit * i), centerPerp);
 
             Vector3[] circlePositions = new Vector3[fractionsCircle];
             for (int j = 0; j < fractionsCircle; j++) {
                 double deg = shift ? degCircleOffsetShifted : 0;
                 deg += degCircleSplit * j;
-                circlePositions[j] = splitVec.clone().rotate(Math.toRadians(deg), axis);
+                circlePositions[j] = splitVec.clone().mirror(Math.toRadians(deg), axis);
             }
 
             for (int k = 0; k < fractionsCircle; k++) {

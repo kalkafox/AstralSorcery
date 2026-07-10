@@ -40,55 +40,55 @@ import net.neoforged.fml.network.NetworkHooks;
  */
 public class EntityStarmetal extends EntityCustomItemReplacement implements InteractableEntity {
 
-    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level world) {
-        super(type, world);
+    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level level) {
+        super(type, level);
         ReflectionHelper.setSkipItemPhysicsRender(this);
-        recalculateSize();
+        refreshDimensions();
     }
 
-    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
-        this(type, world);
+    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z) {
+        this(type, level);
         this.setPosition(x, y, z);
-        this.rotationYaw = this.rand.nextFloat() * 360.0F;
-        this.setMotion(this.rand.nextDouble() * 0.2D - 0.1D, 0.2D, this.rand.nextDouble() * 0.2D - 0.1D);
+        this.setYRot(this.random.nextFloat() * 360.0F);
+        this.setDeltaMovement(this.random.nextDouble() * 0.2D - 0.1D, 0.2D, this.random.nextDouble() * 0.2D - 0.1D);
     }
 
-    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
-        this(type, world, x, y, z);
+    public EntityStarmetal(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z, ItemStack stack) {
+        this(type, level, x, y, z);
         this.setItem(stack);
-        this.lifespan = stack.isEmpty() ? 6000 : stack.getEntityLifespan(world);
+        this.timeout = stack.isEmpty() ? 6000 : stack.getEntityLifespan(level);
     }
 
     public static EntityType.IFactory<EntityStarmetal> factoryStarmetalIngot() {
-        return (spawnEntity, world) -> new EntityStarmetal(EntityTypesAS.ITEM_STARMETAL_INGOT, world);
+        return (spawnEntity, level) -> new EntityStarmetal(EntityTypesAS.ITEM_STARMETAL_INGOT, level);
     }
 
     @Override
-    public boolean canBeCollidedWith() {
+    public boolean isPickable() {
         return true;
     }
 
     @Override
-    public boolean canBeAttackedWithItem() {
+    public boolean isAttackable() {
         return true;
     }
 
     @Override
-    public boolean hitByEntity(Entity entity) {
-        if (!this.getEntityWorld().isRemote() && entity instanceof ServerPlayer) {
-            ItemStack held = ((ServerPlayer) entity).getHeldItem(Hand.MAIN_HAND);
+    public boolean skipAttackInteraction(Entity entity) {
+        if (!this.getCommandSenderWorld().isClientSide() && entity instanceof ServerPlayer) {
+            ItemStack held = ((ServerPlayer) entity).getItemInHand(InteractionHand.MAIN_HAND);
             if (!held.isEmpty() && held.getItem() instanceof ItemChisel) {
 
                 ItemStack thisStack = this.getItem();
                 if (!thisStack.isEmpty() && thisStack.getItem() instanceof ItemStarmetalIngot) {
 
                     boolean doDamage = false;
-                    if (rand.nextFloat() < 0.4F) {
+                    if (random.nextFloat() < 0.4F) {
                         int fortuneLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, held);
                         doDamage = this.createStardust(fortuneLevel);
                     }
-                    if (doDamage || rand.nextFloat() < 0.35F) {
-                        held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(Hand.MAIN_HAND));
+                    if (doDamage || random.nextFloat() < 0.35F) {
+                        held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(InteractionHand.MAIN_HAND));
                     }
                 }
             }
@@ -98,11 +98,11 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
 
     private boolean createStardust(int fortuneLevel) {
         ItemStack created = new ItemStack(ItemsAS.STARDUST);
-        ItemUtils.dropItemNaturally(getEntityWorld(), this.getPosX(), this.getPosY() + 0.25F, this.getPosZ(), created);
+        ItemUtils.dropItemNaturally(getCommandSenderWorld(), this.getX(), this.getY() + 0.25F, this.getZ(), created);
 
         float breakIngot = 0.90F;
-        breakIngot -= MathHelper.clamp(fortuneLevel, 0, 10) * 0.06F;
-        if (rand.nextFloat() < breakIngot) {
+        breakIngot -= Mth.clamp(fortuneLevel, 0, 10) * 0.06F;
+        if (random.nextFloat() < breakIngot) {
             ItemStack thisStack = this.getItem();
             thisStack.shrink(1);
             this.setItem(thisStack);
@@ -115,7 +115,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
         boolean onGround = this.isOnGround();
         super.tick();
         if (this.isOnGround() != onGround) {
-            recalculateSize();
+            refreshDimensions();
         }
     }
 
@@ -124,7 +124,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
         boolean updateSize = isOnGround() != grounded;
         super.setOnGround(grounded);
         if (updateSize) {
-            recalculateSize();
+            refreshDimensions();
         }
     }
 
@@ -137,7 +137,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

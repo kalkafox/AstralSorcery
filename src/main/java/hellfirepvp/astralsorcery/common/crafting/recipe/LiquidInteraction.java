@@ -47,7 +47,7 @@ import java.util.Random;
  */
 public class LiquidInteraction extends CustomMatcherRecipe {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     private final FluidStack reactant1, reactant2;
     private final float chanceConsumeReactant1, chanceConsumeReactant2;
@@ -73,8 +73,8 @@ public class LiquidInteraction extends CustomMatcherRecipe {
     }
 
     public boolean consumeInputs(TileChalice chalice1, TileChalice chalice2) {
-        FluidStack contained1 = chalice1.getTank().getFluid();
-        FluidStack contained2 = chalice2.getTank().getFluid();
+        FluidStack contained1 = chalice1.getTank().getType();
+        FluidStack contained2 = chalice2.getTank().getType();
         if (!this.matches(contained1, contained2)) {
             return false;
         }
@@ -82,10 +82,10 @@ public class LiquidInteraction extends CustomMatcherRecipe {
             FluidStack drained1 = chalice1.getTank().drain(this.reactant1, IFluidHandler.FluidAction.SIMULATE);
             FluidStack drained2 = chalice2.getTank().drain(this.reactant2, IFluidHandler.FluidAction.SIMULATE);
             if (drained1.containsFluid(this.reactant1) && drained2.containsFluid(this.reactant2)) {
-                if (rand.nextFloat() < this.chanceConsumeReactant1) {
+                if (random.nextFloat() < this.chanceConsumeReactant1) {
                     chalice1.getTank().drain(this.reactant1, IFluidHandler.FluidAction.EXECUTE);
                 }
-                if (rand.nextFloat() < this.chanceConsumeReactant2) {
+                if (random.nextFloat() < this.chanceConsumeReactant2) {
                     chalice2.getTank().drain(this.reactant2, IFluidHandler.FluidAction.EXECUTE);
                 }
                 return true;
@@ -95,10 +95,10 @@ public class LiquidInteraction extends CustomMatcherRecipe {
             FluidStack drained1 = chalice1.getTank().drain(this.reactant2, IFluidHandler.FluidAction.SIMULATE);
             FluidStack drained2 = chalice2.getTank().drain(this.reactant1, IFluidHandler.FluidAction.SIMULATE);
             if (drained1.containsFluid(this.reactant2) && drained2.containsFluid(this.reactant1)) {
-                if (rand.nextFloat() < this.chanceConsumeReactant1) {
+                if (random.nextFloat() < this.chanceConsumeReactant1) {
                     chalice2.getTank().drain(this.reactant1, IFluidHandler.FluidAction.EXECUTE);
                 }
-                if (rand.nextFloat() < this.chanceConsumeReactant2) {
+                if (random.nextFloat() < this.chanceConsumeReactant2) {
                     chalice1.getTank().drain(this.reactant2, IFluidHandler.FluidAction.EXECUTE);
                 }
                 return true;
@@ -115,7 +115,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         return reactant2;
     }
 
-    public InteractionResult getResult() {
+    public InteractionResult getObject() {
         return result;
     }
 
@@ -125,68 +125,68 @@ public class LiquidInteraction extends CustomMatcherRecipe {
 
     @Nullable
     public static LiquidInteraction pickRecipe(Collection<LiquidInteraction> recipes) {
-        return MiscUtils.getWeightedRandomEntry(recipes, rand, interaction -> interaction.weight);
+        return MiscUtils.getWeightedRandomEntry(recipes, random, interaction -> interaction.weight);
     }
 
     public static LiquidInteraction read(ResourceLocation recipeId, JsonObject json) {
-        String fluidKey1 = JSONUtils.getString(json, "reactant1");
-        Fluid reactant1 = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidKey1));
+        String fluidKey1 = GsonHelper.getString(json, "reactant1");
+        Fluid reactant1 = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey1));
         if (reactant1 == null) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey1);
         }
-        int amount1 = JSONUtils.getInt(json, "reactant1Amount");
+        int amount1 = GsonHelper.getInt(json, "reactant1Amount");
         CompoundTag tag1 = null;
-        if (JSONUtils.hasField(json, "reactant1Tag")) {
-            String jsonTag1 = JSONUtils.getString(json, "reactant1Tag");
+        if (GsonHelper.convertToInt(json, "reactant1Tag")) {
+            String jsonTag1 = GsonHelper.getString(json, "reactant1Tag");
             try {
-                tag1 = JsonToNBT.getTagFromJson(jsonTag1);
+                tag1 = TagParser.expect(jsonTag1);
             } catch (CommandSyntaxException e) {
                 throw new JsonSyntaxException("Invalid Json: " + jsonTag1);
             }
         }
         FluidStack r1 = new FluidStack(reactant1, amount1, tag1);
 
-        String fluidKey2 = JSONUtils.getString(json, "reactant2");
-        Fluid reactant2 = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidKey2));
+        String fluidKey2 = GsonHelper.getString(json, "reactant2");
+        Fluid reactant2 = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey2));
         if (reactant2 == null) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey2);
         }
-        int amount2 = JSONUtils.getInt(json, "reactant2Amount");
+        int amount2 = GsonHelper.getInt(json, "reactant2Amount");
         CompoundTag tag2 = null;
-        if (JSONUtils.hasField(json, "reactant2Tag")) {
-            String jsonTag2 = JSONUtils.getString(json, "reactant2Tag");
+        if (GsonHelper.convertToInt(json, "reactant2Tag")) {
+            String jsonTag2 = GsonHelper.getString(json, "reactant2Tag");
             try {
-                tag2 = JsonToNBT.getTagFromJson(jsonTag2);
+                tag2 = TagParser.expect(jsonTag2);
             } catch (CommandSyntaxException e) {
                 throw new JsonSyntaxException("Invalid Json: " + jsonTag2);
             }
         }
         FluidStack r2 = new FluidStack(reactant2, amount2, tag2);
 
-        float chance1 = JSONUtils.getFloat(json, "chanceConsumeReactant1");
-        float chance2 = JSONUtils.getFloat(json, "chanceConsumeReactant2");
-        int weight = JSONUtils.getInt(json, "weight");
+        float chance1 = GsonHelper.getFloat(json, "chanceConsumeReactant1");
+        float chance2 = GsonHelper.getFloat(json, "chanceConsumeReactant2");
+        int weight = GsonHelper.getInt(json, "weight");
 
-        JsonObject ctResult = JSONUtils.getJsonObject(json, "result");
-        ResourceLocation id = new ResourceLocation(JSONUtils.getString(ctResult, "id"));
+        JsonObject ctResult = GsonHelper.getAsJsonObject(json, "result");
+        ResourceLocation id = ResourceLocation.parse(GsonHelper.getString(ctResult, "id"));
         InteractionResult result = InteractionResultRegistry.create(id);
         if (result == null) {
             throw new JsonSyntaxException("Unknown result type: " + id.toString() +
-                    "; expected one of " + Strings.join(InteractionResultRegistry.getKeysAsStrings(), ", "));
+                    "; expected one of " + Strings.checkExceptions(InteractionResultRegistry.getKeysAsStrings(), ", "));
         }
-        JsonObject resultData = JSONUtils.getJsonObject(ctResult, "data");
+        JsonObject resultData = GsonHelper.getAsJsonObject(ctResult, "data");
         result.read(resultData);
 
         return new LiquidInteraction(recipeId, r1, chance1, r2, chance2, weight, result);
     }
 
     public final void write(JsonObject object) {
-        object.addProperty("reactant1", this.reactant1.getFluid().getRegistryName().toString());
+        object.addProperty("reactant1", this.reactant1.getType().getRegistryName().toString());
         object.addProperty("reactant1Amount", this.reactant1.getAmount());
         if (this.reactant1.hasTag()) {
             object.addProperty("reactant1Tag", this.reactant1.getTag().toString());
         }
-        object.addProperty("reactant2", this.reactant2.getFluid().getRegistryName().toString());
+        object.addProperty("reactant2", this.reactant2.getType().getRegistryName().toString());
         object.addProperty("reactant2Amount", this.reactant2.getAmount());
         if (this.reactant2.hasTag()) {
             object.addProperty("reactant2Tag", this.reactant2.getTag().toString());
@@ -209,7 +209,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         float chanceConsumeReactant1 = buffer.readFloat();
         float chanceConsumeReactant2 = buffer.readFloat();
         int weight = buffer.readInt();
-        ResourceLocation key = new ResourceLocation(ByteBufUtils.readString(buffer));
+        ResourceLocation key = ResourceLocation.parse(ByteBufUtils.readUtf(buffer));
         InteractionResult result = InteractionResultRegistry.create(key);
         if (result == null) {
             return null;

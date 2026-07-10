@@ -37,14 +37,14 @@ import javax.annotation.Nonnull;
 public class PktRequestSeed extends ASPacket<PktRequestSeed> {
 
     private ResourceKey<Level> dim;
-    private Integer session;
+    private Integer user;
     private Long seed;
 
     public PktRequestSeed() {}
 
-    public PktRequestSeed(Integer session, ResourceKey<Level> dim) {
+    public PktRequestSeed(Integer user, ResourceKey<Level> dim) {
         this.dim = dim;
-        this.session = session;
+        this.user = user;
         this.seed = -1L;
     }
 
@@ -58,7 +58,7 @@ public class PktRequestSeed extends ASPacket<PktRequestSeed> {
     public Encoder<PktRequestSeed> encoder() {
         return (packet, buffer) -> {
             ByteBufUtils.writeOptional(buffer, packet.dim, ByteBufUtils::writeVanillaRegistryEntry);
-            ByteBufUtils.writeOptional(buffer, packet.session, FriendlyByteBuf::writeInt);
+            ByteBufUtils.writeOptional(buffer, packet.user, FriendlyByteBuf::writeInt);
             ByteBufUtils.writeOptional(buffer, packet.seed, FriendlyByteBuf::writeLong);
         };
     }
@@ -70,7 +70,7 @@ public class PktRequestSeed extends ASPacket<PktRequestSeed> {
             PktRequestSeed pkt = new PktRequestSeed();
 
             pkt.dim = ByteBufUtils.readOptional(buffer, ByteBufUtils::readVanillaRegistryEntry);
-            pkt.session = ByteBufUtils.readOptional(buffer, FriendlyByteBuf::readInt);
+            pkt.user = ByteBufUtils.readOptional(buffer, FriendlyByteBuf::readInt);
             pkt.seed = ByteBufUtils.readOptional(buffer, FriendlyByteBuf::readLong);
 
             return pkt;
@@ -84,17 +84,17 @@ public class PktRequestSeed extends ASPacket<PktRequestSeed> {
             @Override
             @OnlyIn(Dist.CLIENT)
             public void handleClient(PktRequestSeed packet, NetworkEvent.Context context) {
-                context.enqueueWork(() -> WorldSeedCache.updateSeedCache(packet.dim, packet.session, packet.seed));
+                context.enqueueWork(() -> WorldSeedCache.updateSeedCache(packet.dim, packet.user, packet.seed));
             }
 
             @Override
-            public void handle(PktRequestSeed packet, NetworkEvent.Context context, LogicalSide side) {
+            public void handle(PktRequestSeed packet, NetworkEvent.Context context, LogicalSide direction) {
                 context.enqueueWork(() -> {
                     //TODO 1.16.2 re-check once worlds are not all constantly loaded
                     MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-                    ServerLevel w = srv.getWorld(packet.dim);
+                    ServerLevel w = srv.getLevel(packet.dim);
                     if (w != null) {
-                        PktRequestSeed seedResponse = new PktRequestSeed(packet.session, packet.dim);
+                        PktRequestSeed seedResponse = new PktRequestSeed(packet.user, packet.dim);
                         seedResponse.seed(MiscUtils.getRandomWorldSeed(w));
                         packet.replyWith(seedResponse, context);
                     }

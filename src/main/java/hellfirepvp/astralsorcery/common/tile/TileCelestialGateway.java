@@ -89,7 +89,7 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
     };
 
     private boolean networkRegistered = false;
-    private Component displayText = null;
+    private Component chatComponent = null;
     private DyeColor color = null;
 
     private boolean locked = false;
@@ -106,16 +106,16 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
     public void tick() {
         super.tick();
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             playEffects();
         } else {
             boolean complete = this.hasMultiblock() & this.doesSeeSky();
             if (complete) {
                 if (!networkRegistered) {
-                    GatewayCache cache = DataAS.DOMAIN_AS.getData(world, DataAS.KEY_GATEWAY_CACHE);
-                    if (cache.offerPosition(world, getPos())) {
-                        cache.updateGatewayNode(getPos(), node -> {
-                            node.setDisplayName(this.displayText);
+                    GatewayCache cache = DataAS.DOMAIN_AS.getData(level, DataAS.KEY_GATEWAY_CACHE);
+                    if (cache.offerPosition(level, getBlockPos())) {
+                        cache.updateGatewayNode(getBlockPos(), node -> {
+                            node.setLastHealthTime(this.chatComponent);
                             node.setColor(this.color);
                         });
                         this.updateAccessInformation();
@@ -124,7 +124,7 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
                     }
                 }
             } else if (networkRegistered) {
-                DataAS.DOMAIN_AS.getData(world, DataAS.KEY_GATEWAY_CACHE).removePosition(world, getPos());
+                DataAS.DOMAIN_AS.getData(level, DataAS.KEY_GATEWAY_CACHE).removePosition(level, getBlockPos());
                 networkRegistered = false;
                 markForUpdate();
             }
@@ -163,10 +163,10 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
         }
 
         if (distance < 5.5) {
-            Minecraft.getInstance().gameSettings.setPointOfView(PointOfView.FIRST_PERSON);
+            Minecraft.getInstance().options.setPointOfView(CameraType.FIRST_PERSON);
         }
         if (distance < 2.5) {
-            GatewayUIRenderHandler.getInstance().getOrCreateUI(this.getWorld(), this.getPos(), at);
+            GatewayUIRenderHandler.getInstance().getOrCreateUI(this.getLevel(), this.getBlockPos(), at);
         }
     }
 
@@ -179,57 +179,57 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
         Color gatewayColor = ColorUtils.flareColorFromDye(this.getColor().orElse(DyeColor.YELLOW));
         for (int i = 0; i < 3; i++) {
             Vector3 offset = new Vector3(this).add(-2, 0.05, -2);
-            if (rand.nextBoolean()) {
-                offset.add(5 * (rand.nextBoolean() ? 1 : 0), 0, rand.nextFloat() * 5);
+            if (random.nextBoolean()) {
+                offset.add(5 * (random.nextBoolean() ? 1 : 0), 0, random.nextFloat() * 5);
             } else {
-                offset.add(rand.nextFloat() * 5, 0, 5 * (rand.nextBoolean() ? 1 : 0));
+                offset.add(random.nextFloat() * 5, 0, 5 * (random.nextBoolean() ? 1 : 0));
             }
 
-            Color c = MiscUtils.eitherOf(rand, Color.WHITE, gatewayColor, gatewayColor.brighter());
+            Color c = MiscUtils.eitherOf(random, Color.WHITE, gatewayColor, gatewayColor.brighter());
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
                     .setGravityStrength(-0.0001F)
                     .color(VFXColorFunction.constant(c))
-                    .setScaleMultiplier(0.25F + rand.nextFloat() * 0.15F)
-                    .setMaxAge(30 + rand.nextInt(30));
+                    .setScaleMultiplier(0.25F + random.nextFloat() * 0.15F)
+                    .setMaxAge(30 + random.nextInt(30));
         }
         for (int i = 0; i < 2; i++) {
             Vector3 offset = new Vector3();
-            MiscUtils.applyRandomOffset(offset, rand, 3F);
-            offset.add(new Vector3(this)).add(0.5, 0, 0.5).setY(this.getPos().getY() + 0.05);
+            MiscUtils.applyRandomOffset(offset, random, 3F);
+            offset.add(new Vector3(this)).add(0.5, 0, 0.5).setY(this.getBlockPos().getY() + 0.05);
 
-            Color c = MiscUtils.eitherOf(rand, Color.WHITE, gatewayColor, gatewayColor.brighter());
+            Color c = MiscUtils.eitherOf(random, Color.WHITE, gatewayColor, gatewayColor.brighter());
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
                     .setGravityStrength(-0.00004F)
                     .color(VFXColorFunction.constant(c))
-                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                    .setMaxAge(15 + rand.nextInt(10));
+                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                    .setMaxAge(15 + random.nextInt(10));
         }
 
         if (this.isLocked() && this.getOwner() != null) {
             Vector3 center = new Vector3(this).add(0.5, 0.2, 0.5);
-            for (int i = 0; i < rand.nextInt(5) + 2; i++) {
+            for (int i = 0; i < random.nextInt(5) + 2; i++) {
                 Vector3 pos = MiscUtils.getRandomCirclePosition(center, Vector3.RotAxis.Y_AXIS, 1.7);
-                MiscUtils.applyRandomOffset(pos, rand, 0.05F);
-                Color c = MiscUtils.eitherOf(rand, Color.WHITE, ColorsAS.EFFECT_BLUE_LIGHT, ColorsAS.EFFECT_BLUE_DARK);
+                MiscUtils.applyRandomOffset(pos, random, 0.05F);
+                Color c = MiscUtils.eitherOf(random, Color.WHITE, ColorsAS.EFFECT_BLUE_LIGHT, ColorsAS.EFFECT_BLUE_DARK);
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
                         .color(VFXColorFunction.constant(c))
-                        .setScaleMultiplier(0.25F + rand.nextFloat() * 0.15F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMaxAge(15 + rand.nextInt(10));
+                        .setScaleMultiplier(0.25F + random.nextFloat() * 0.15F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setMaxAge(15 + random.nextInt(10));
             }
-            for (int i = 0; i < rand.nextInt(3) + 1; i++) {
+            for (int i = 0; i < random.nextInt(3) + 1; i++) {
                 Vector3 pos = MiscUtils.getRandomCirclePosition(center, Vector3.RotAxis.Y_AXIS, 1.1).addY(0.3);
-                MiscUtils.applyRandomOffset(pos, rand, 0.05F);
-                Color c = MiscUtils.eitherOf(rand, Color.WHITE, ColorsAS.EFFECT_BLUE_LIGHT, ColorsAS.EFFECT_BLUE_DARK);
+                MiscUtils.applyRandomOffset(pos, random, 0.05F);
+                Color c = MiscUtils.eitherOf(random, Color.WHITE, ColorsAS.EFFECT_BLUE_LIGHT, ColorsAS.EFFECT_BLUE_DARK);
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
                         .color(VFXColorFunction.constant(c))
-                        .setScaleMultiplier(0.25F + rand.nextFloat() * 0.15F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMaxAge(15 + rand.nextInt(10));
+                        .setScaleMultiplier(0.25F + random.nextFloat() * 0.15F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setMaxAge(15 + random.nextInt(10));
             }
         }
     }
@@ -304,7 +304,7 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
         }
 
         Collections.shuffle(availableIndices);
-        this.allowedUsers.put(MiscUtils.getRandomEntry(availableIndices, rand), otherUser);
+        this.allowedUsers.put(MiscUtils.getRandomEntry(availableIndices, random), otherUser);
         this.updateAccessInformation();
         return true;
     }
@@ -332,7 +332,7 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
     }
 
     private void updateAccessInformation() {
-        DataAS.DOMAIN_AS.getData(world, DataAS.KEY_GATEWAY_CACHE).updateGatewayNode(this.getPos(), node -> {
+        DataAS.DOMAIN_AS.getData(level, DataAS.KEY_GATEWAY_CACHE).updateGatewayNode(this.getBlockPos(), node -> {
             node.setLocked(this.isLocked());
             node.setOwner(this.getOwner());
             node.setAllowedUsers(this.allowedUsers);
@@ -346,11 +346,11 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
     }
 
     public static BlockPos getAllowedUserOffset(int index) {
-        return OFFSETS_ALLOWED_PREVIEW[MathHelper.clamp(index, 0, OFFSETS_ALLOWED_PREVIEW.length - 1)];
+        return OFFSETS_ALLOWED_PREVIEW[Mth.clamp(index, 0, OFFSETS_ALLOWED_PREVIEW.length - 1)];
     }
 
-    public void setDisplayText(@Nullable Component displayText) {
-        this.displayText = displayText;
+    public void setDisplayText(@Nullable Component chatComponent) {
+        this.chatComponent = chatComponent;
     }
 
     public void setColor(@Nullable DyeColor color) {
@@ -370,12 +370,12 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
 
     @Override
     public Component getName() {
-        return this.displayText != null ? this.displayText : Component.translatable("block.astralsorcery.celestial_gateway");
+        return this.chatComponent != null ? this.chatComponent : Component.translatable("block.astralsorcery.celestial_gateway");
     }
 
     @Override
     public boolean hasCustomName() {
-        return this.displayText != null;
+        return this.chatComponent != null;
     }
 
     @Nullable
@@ -389,37 +389,37 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.networkRegistered = compound.getBoolean("networkRegistered");
-        this.displayText = compound.contains("displayText") ? ITextComponent.Serializer.getComponentFromJson(compound.getString("displayText")) : null;
-        this.color = compound.contains("color") ? NBTHelper.readEnum(compound, "color", DyeColor.class) : null;
+        this.networkRegistered = pattern.getBoolean("networkRegistered");
+        this.chatComponent = pattern.contains("displayText") ? Component.Serializer.getComponentFromJson(pattern.getString("displayText")) : null;
+        this.color = pattern.contains("color") ? NBTHelper.readEnum(pattern, "color", DyeColor.class) : null;
 
-        this.locked = compound.getBoolean("locked");
-        this.owner = NBTHelper.readOptional(compound, "owningPlayer", PlayerReference::deserialize);
+        this.locked = pattern.getBoolean("locked");
+        this.owner = NBTHelper.readOptional(pattern, "owningPlayer", PlayerReference::deserialize);
         this.allowedUsers.clear();
-        NBTHelper.readList(compound, "allowedUsers", Constants.NBT.TAG_COMPOUND, nbt -> {
+        NBTHelper.readList(pattern, "allowedUsers", Constants.NBT.TAG_COMPOUND, nbt -> {
             CompoundTag tag = (CompoundTag) nbt;
             return new Tuple<>(tag.getInt("index"), PlayerReference.deserialize(tag.getCompound("player")));
         }).forEach(tpl -> this.allowedUsers.put(tpl.getA(), tpl.getB()));
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.putBoolean("networkRegistered", this.networkRegistered);
-        if (this.displayText != null) {
-            compound.putString("displayText", ITextComponent.Serializer.toJson(this.displayText));
+        pattern.putBoolean("networkRegistered", this.networkRegistered);
+        if (this.chatComponent != null) {
+            pattern.putString("displayText", Component.Serializer.getPos(this.chatComponent));
         }
         if (this.color != null) {
-            NBTHelper.writeEnum(compound, "color", this.color);
+            NBTHelper.writeEnum(pattern, "color", this.color);
         }
 
-        compound.putBoolean("locked", this.locked);
-        NBTHelper.writeOptional(compound, "owningPlayer", this.owner, (tag, playerRef) -> playerRef.writeToNBT(tag));
-        NBTHelper.writeList(compound, "allowedUsers", this.allowedUsers.entrySet(), entry -> {
+        pattern.putBoolean("locked", this.locked);
+        NBTHelper.writeOptional(pattern, "owningPlayer", this.owner, (tag, playerRef) -> playerRef.save(tag));
+        NBTHelper.writeList(pattern, "allowedUsers", this.allowedUsers.entrySet(), entry -> {
             CompoundTag tag = new CompoundTag();
             tag.putInt("index", entry.getKey());
             tag.put("player", entry.getValue().serialize());
@@ -438,9 +438,9 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
                 Component accessGrantedMessage = Component.translatable(
                         "astralsorcery.misc.link.gateway.link",
                         linked.getDisplayName())
-                        .withStyle(TextFormatting.GREEN);
-                player.sendMessage(accessGrantedMessage, Util.DUMMY_UUID);
-                linked.sendMessage(accessGrantedMessage, Util.DUMMY_UUID);
+                        .withStyle(ChatFormatting.GREEN);
+                player.sendSystemMessage(accessGrantedMessage);
+                linked.sendSystemMessage(accessGrantedMessage);
             }
         }
     }

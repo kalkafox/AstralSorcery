@@ -30,15 +30,15 @@ public class LiquidContext extends FountainEffect.EffectContext {
     public Object fountainSprite;
 
     public LiquidContext(BlockPos fountainPos) {
-        this.digPositions = BlockGeometry.getVerticalCone(fountainPos.down(3), 5);
+        this.digPositions = BlockGeometry.getVerticalCone(fountainPos.below(3), 5);
     }
 
     public List<BlockPos> getDigPositions() {
         return digPositions;
     }
 
-    public void resetLiquidProductionTick(Random rand) {
-        this.tickLiquidProduction = 20 + rand.nextInt(10);
+    public void resetLiquidProductionTick(Random random) {
+        this.tickLiquidProduction = 20 + random.nextInt(10);
     }
 
     public boolean tickLiquidProduction() {
@@ -47,8 +47,8 @@ public class LiquidContext extends FountainEffect.EffectContext {
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {}
+    public void readFromNBT(CompoundTag pattern) {}
 
     @Override
-    public void writeToNBT(CompoundTag compound) {}
+    public void save(CompoundTag pattern) {}
 }

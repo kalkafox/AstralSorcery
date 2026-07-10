@@ -23,21 +23,21 @@ import java.util.EnumSet;
 public abstract class SpectralToolGoal extends Goal {
 
     private final EntitySpectralTool entity;
-    private final double speed;
+    private final double speedModifier;
 
     protected int actionCooldown = 0;
 
-    public SpectralToolGoal(EntitySpectralTool entity, double speed) {
+    public SpectralToolGoal(EntitySpectralTool entity, double speedModifier) {
         this.entity = entity;
-        this.speed = speed;
-        this.setMutexFlags(EnumSet.of(Flag.MOVE, Flag.TARGET, Flag.LOOK));
+        this.speedModifier = speedModifier;
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.TARGET, Flag.LOOK));
     }
 
     public EntitySpectralTool getEntity() {
         return entity;
     }
 
-    public double getSpeed() {
-        return speed;
+    public double getSpeedModifier() {
+        return speedModifier;
     }
 }

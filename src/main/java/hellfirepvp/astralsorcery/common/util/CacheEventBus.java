@@ -52,8 +52,8 @@ public class CacheEventBus implements IEventBus {
     }
 
     @Override
-    public <T extends Event> void addListener(Class<T> eventType, Consumer<T> consumer) {
-        wrapped.addListener(eventType, consumer);
+    public <T extends Event> void addListener(Class<T> event, Consumer<T> consumer) {
+        wrapped.addListener(event, consumer);
         registeredListeners.add(consumer);
     }
 
@@ -64,8 +64,8 @@ public class CacheEventBus implements IEventBus {
     }
 
     @Override
-    public <T extends Event> void addListener(EventPriority priority, Class<T> eventType, Consumer<T> consumer) {
-        wrapped.addListener(priority, eventType, consumer);
+    public <T extends Event> void addListener(EventPriority priority, Class<T> event, Consumer<T> consumer) {
+        wrapped.addListener(priority, event, consumer);
         registeredListeners.add(consumer);
     }
 
@@ -76,8 +76,8 @@ public class CacheEventBus implements IEventBus {
     }
 
     @Override
-    public <T extends Event> void addListener(EventPriority priority, boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer) {
-        wrapped.addListener(priority, receiveCancelled, eventType, consumer);
+    public <T extends Event> void addListener(EventPriority priority, boolean receiveCancelled, Class<T> event, Consumer<T> consumer) {
+        wrapped.addListener(priority, receiveCancelled, event, consumer);
         registeredListeners.add(consumer);
     }
 
@@ -88,8 +88,8 @@ public class CacheEventBus implements IEventBus {
     }
 
     @Override
-    public <T extends Event> void addListener(boolean receiveCancelled, Class<T> eventType, Consumer<T> consumer) {
-        wrapped.addListener(receiveCancelled, eventType, consumer);
+    public <T extends Event> void addListener(boolean receiveCancelled, Class<T> event, Consumer<T> consumer) {
+        wrapped.addListener(receiveCancelled, event, consumer);
         registeredListeners.add(consumer);
     }
 
@@ -105,8 +105,8 @@ public class CacheEventBus implements IEventBus {
     }
 
     @Override
-    public <T extends Event> T post(EventPriority phase, T event) {
-        return wrapped.post(phase, event);
+    public <T extends Event> T post(EventPriority currentPhase, T event) {
+        return wrapped.post(currentPhase, event);
     }
 
     @Override

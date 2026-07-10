@@ -66,33 +66,33 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
     @Nonnull
     @Override
     public LiquidContext createContext(TileFountain fountain) {
-        return new LiquidContext(fountain.getPos());
+        return new LiquidContext(fountain.getBlockPos());
     }
 
     @Override
-    public void tick(TileFountain fountain, LiquidContext ctx, int operationTick, LogicalSide side, OperationSegment currentSegment) {
-        if (side.isClient()) {
+    public void tick(TileFountain fountain, LiquidContext ctx, int operationTick, LogicalSide direction, OperationSegment currentSegment) {
+        if (direction.isClient()) {
             tickEffects(fountain, ctx, operationTick, currentSegment);
             return;
         }
 
         if (currentSegment.isLaterOrEqualTo(OperationSegment.RUNNING)) {
-            Level w = fountain.getWorld();
+            Level w = fountain.getLevel();
             if (fountain.getTicksExisted() % 32 == 0) {
                 digCone(w, ctx);
             }
 
             if (ctx.tickLiquidProduction()) {
-                ctx.resetLiquidProductionTick(rand);
+                ctx.resetLiquidProductionTick(random);
                 produceLiquid(fountain);
             }
         }
     }
 
     private void produceLiquid(TileFountain fountain) {
-        LevelChunk ch = fountain.getWorld().getChunkAt(fountain.getPos());
+        LevelChunk ch = fountain.getLevel().getChunkAt(fountain.getBlockPos());
         ch.getCapability(CapabilitiesAS.CHUNK_FLUID).ifPresent(entry -> {
-            int drain = 200 + rand.nextInt(400);
+            int drain = 200 + random.nextInt(400);
             FluidStack drained;
             if (!entry.isEmpty() && entry.isInitialized()) {
                 drained = entry.drain(drain, IFluidHandler.FluidAction.SIMULATE);
@@ -108,23 +108,23 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
         });
     }
 
-    private void digCone(Level world, LiquidContext ctx) {
-        if (world instanceof ServerLevel) {
-            dig((ServerLevel) world, ctx.getDigPositions());
+    private void digCone(Level level, LiquidContext ctx) {
+        if (level instanceof ServerLevel) {
+            dig((ServerLevel) level, ctx.getDigPositions());
         }
     }
 
-    private void dig(ServerLevel world, List<BlockPos> positions) {
+    private void dig(ServerLevel level, List<BlockPos> positions) {
         BlockDropCaptureAssist.startCapturing();
         try {
             positions.forEach(pos -> {
-                MiscUtils.executeWithChunk(world, pos, () -> {
-                    BlockState state = world.getBlockState(pos);
-                    if (!state.isAir(world, pos) &&
-                            world.getTileEntity(pos) == null &&
-                            state.getBlockHardness(world, pos) >= 0 &&
+                MiscUtils.executeWithChunk(level, pos, () -> {
+                    BlockState state = level.getBlockState(pos);
+                    if (!state.isAir(level, pos) &&
+                            level.getTileEntity(pos) == null &&
+                            state.getDestroySpeed(level, pos) >= 0 &&
                             !BlockUtils.isFluidBlock(state)) {
-                        BlockUtils.breakBlockWithoutPlayer(world, pos, state, ItemStack.EMPTY, true, true, false);
+                        BlockUtils.breakBlockWithoutPlayer(level, pos, state, ItemStack.EMPTY, true, true, false);
                     }
                 });
             });
@@ -142,9 +142,9 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
                         .spawn(new Vector3(fountain).add(0.5, 0.5, 0.5))
                         .setAxis(Vector3.RotAxis.Y_AXIS)
                         .setNoRotation(45)
-                        .setSprite(SpritesAS.SPR_FOUNTAIN_LIQUID)
+                        .pickSprite(SpritesAS.SPR_FOUNTAIN_LIQUID)
                         .setAlphaMultiplier(1F)
-                        .alpha((fx, alphaIn, pTicks) -> this.getSegmentPercent(OperationSegment.STARTUP, fountain.getTickActiveFountainEffect()))
+                        .alpha1arg((fx, alphaIn, pTicks) -> this.getSegmentPercent(OperationSegment.STARTUP, fountain.getTickActiveFountainEffect()))
                         .setScaleMultiplier(5.5F)
                         .refresh(RefreshFunction.tileExistsAnd(fountain, (tile, fx) -> tile.getCurrentEffect() == this));
             } else if (sprite.isRemoved() || sprite.canRemove()) {
@@ -153,7 +153,7 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
             ctx.fountainSprite = sprite;
         }
 
-        BlockPos fountainPos = fountain.getPos();
+        BlockPos fountainPos = fountain.getBlockPos();
         float segmentPercent = getSegmentPercent(currentSegment, operationTick);
         switch (currentSegment) {
             case STARTUP:
@@ -180,24 +180,24 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
     private void playDigPreparation(Vec3i pos, float chance) {
         Vector3 at = new Vector3(pos).add(0.5, 0.5, 0.5);
         for (int i = 0; i < 12; i++) {
-            if (rand.nextFloat() >= chance) {
+            if (random.nextFloat() >= chance) {
                 continue;
             }
             Vector3 particlePos = new Vector3(
-                    pos.getX() - 0.4 + rand.nextFloat() * 1.8,
-                    pos.getY()       - rand.nextFloat() * 3,
-                    pos.getZ() - 0.4 + rand.nextFloat() * 1.8
+                    pos.getX() - 0.4 + random.nextFloat() * 1.8,
+                    pos.getY()       - random.nextFloat() * 3,
+                    pos.getZ() - 0.4 + random.nextFloat() * 1.8
             );
             Vector3 motion = particlePos.clone().vectorFromHereTo(at).normalize().divide(30);
 
             EntityVisualFX fx = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(particlePos)
-                    .setMotion(motion)
+                    .setDeltaMovement(motion)
                     .setAlphaMultiplier(1F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                    .setMaxAge(20 + rand.nextInt(40));
-            if (rand.nextBoolean()) {
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                    .setMaxAge(20 + random.nextInt(40));
+            if (random.nextBoolean()) {
                 fx.color(VFXColorFunction.WHITE);
             } else {
                 fx.color(VFXColorFunction.constant(ColorsAS.DEFAULT_GENERIC_PARTICLE));
@@ -209,14 +209,14 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
     private void playDigParticles(Vec3i pos) {
         for (int i = 0; i < 2; i++) {
             Vector3 at = new Vector3(pos).add(
-                    0.3 + rand.nextFloat() * 0.4,
-                    -rand.nextFloat() * 1.7,
-                    0.3 + rand.nextFloat() * 0.4);
+                    0.3 + random.nextFloat() * 0.4,
+                    -random.nextFloat() * 1.7,
+                    0.3 + random.nextFloat() * 0.4);
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
                     .setScaleMultiplier(0.25F)
                     .setAlphaMultiplier(1F)
-                    .setMotion(new Vector3(0, -rand.nextFloat() * 0.008F, 0))
+                    .setDeltaMovement(new Vector3(0, -random.nextFloat() * 0.008F, 0))
                     .color(VFXColorFunction.random());
         }
     }
@@ -224,24 +224,24 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
     @OnlyIn(Dist.CLIENT)
     private void playDigLightbeam(Vec3i pos) {
         Vector3 from = new Vector3(pos).add(0.5, 1.5, 0.5);
-        MiscUtils.applyRandomOffset(from, rand, 0.1F);
+        MiscUtils.applyRandomOffset(from, random, 0.1F);
         Vector3 to = from.clone().setY(0);
 
-        float size = 6 + rand.nextFloat() * 2;
+        float size = 6 + random.nextFloat() * 2;
         EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                 .spawn(from)
                 .setup(to, size, size);
     }
 
     @Override
-    public void transition(TileFountain fountain, LiquidContext ctx, LogicalSide side, OperationSegment prevSegment, OperationSegment nextSegment) {
-        if (side.isServer()) {
+    public void transition(TileFountain fountain, LiquidContext ctx, LogicalSide direction, OperationSegment prevSegment, OperationSegment nextSegment) {
+        if (direction.isServer()) {
             if (nextSegment == OperationSegment.RUNNING) {
-                digCone(fountain.getWorld(), ctx);
+                digCone(fountain.getLevel(), ctx);
             }
         } else {
             if (nextSegment == OperationSegment.RUNNING) {
-                markDigProcess(fountain.getPos());
+                markDigProcess(fountain.getBlockPos());
             }
         }
     }
@@ -250,13 +250,13 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
     private void markDigProcess(BlockPos pos) {
         for (int yy = 0; yy <= pos.getY(); yy++) {
             for (int i = 0; i < 4; i++) {
-                Vector3 at = new Vector3(pos).setY(yy).add(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());
+                Vector3 at = new Vector3(pos).setY(yy).add(random.nextFloat(), random.nextFloat(), random.nextFloat());
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .setAlphaMultiplier(1F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                        .setMaxAge(20 + rand.nextInt(40));
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                        .setMaxAge(20 + random.nextInt(40));
             }
         }
 
@@ -266,13 +266,13 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
                 .spawn(from)
                 .setup(to, 1.5, 1.5)
                 .setAlphaMultiplier(1F)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.constant(ColorsAS.EFFECT_BLUE_LIGHT));
     }
 
     @Override
-    public void onReplace(TileFountain fountain, LiquidContext ctx, @Nullable FountainEffect<?> newEffect, LogicalSide side) {
-        if (side.isClient()) {
+    public void onReplace(TileFountain fountain, LiquidContext ctx, @Nullable FountainEffect<?> newEffect, LogicalSide direction) {
+        if (direction.isClient()) {
             removeSprite(ctx);
         }
     }

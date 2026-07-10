@@ -58,14 +58,14 @@ public class NBTHelper {
 
     @Nonnull
     public static CompoundTag getPersistentData(CompoundTag base) {
-        CompoundTag compound;
+        CompoundTag pattern;
         if (hasPersistentData(base)) {
-            compound = base.getCompound(AstralSorcery.MODID);
+            pattern = base.getCompound(AstralSorcery.MODID);
         } else {
-            compound = new CompoundTag();
-            base.put(AstralSorcery.MODID, compound);
+            pattern = new CompoundTag();
+            base.put(AstralSorcery.MODID, pattern);
         }
-        return compound;
+        return pattern;
     }
 
     public static boolean hasPersistentData(Entity entity) {
@@ -107,7 +107,7 @@ public class NBTHelper {
                 if (dst.contains(s, Constants.NBT.TAG_LIST)) {
                     ListTag dstList = (ListTag) dst.get(s);
                     ListTag srcList = (ListTag) nbtElement;
-                    if (dstList.getTagType() == srcList.getTagType()) {
+                    if (dstList.getElementType() == srcList.getElementType()) {
                         deepMergeList(dstList, srcList);
                     } else {
                         dst.put(s, srcList.copy());
@@ -120,9 +120,9 @@ public class NBTHelper {
                     IntArrayTag dstArr = (IntArrayTag) dst.get(s);
                     IntArrayTag srcArr = (IntArrayTag) nbtElement;
                     if (uniqueArrayEntries) {
-                        for (IntTag element : srcArr) {
-                            if (!dstArr.contains(element)) {
-                                dstArr.add(element);
+                        for (IntTag value : srcArr) {
+                            if (!dstArr.contains(value)) {
+                                dstArr.add(value);
                             }
                         }
                     } else {
@@ -136,9 +136,9 @@ public class NBTHelper {
                     LongArrayTag dstArr = (LongArrayTag) dst.get(s);
                     LongArrayTag srcArr = (LongArrayTag) nbtElement;
                     if (uniqueArrayEntries) {
-                        for (LongTag element : srcArr) {
-                            if (!dstArr.contains(element)) {
-                                dstArr.add(element);
+                        for (LongTag value : srcArr) {
+                            if (!dstArr.contains(value)) {
+                                dstArr.add(value);
                             }
                         }
                     } else {
@@ -152,9 +152,9 @@ public class NBTHelper {
                     ByteArrayTag dstArr = (ByteArrayTag) dst.get(s);
                     ByteArrayTag srcArr = (ByteArrayTag) nbtElement;
                     if (uniqueArrayEntries) {
-                        for (ByteTag element : srcArr) {
-                            if (!dstArr.contains(element)) {
-                                dstArr.add(element);
+                        for (ByteTag value : srcArr) {
+                            if (!dstArr.contains(value)) {
+                                dstArr.add(value);
                             }
                         }
                     } else {
@@ -190,42 +190,42 @@ public class NBTHelper {
     }
 
     @Nonnull
-    public static <E, N extends Tag> List<E> readList(CompoundTag nbt, String key, int type, Function<N, E> deserializer) {
+    public static <E, N extends Tag> List<E> readList(CompoundTag nbt, String key, int type, Function<N, E> reader) {
         if (!nbt.contains(key, Constants.NBT.TAG_LIST)) {
             return new ArrayList<>();
         }
-        return readList(nbt.getList(key, type), deserializer);
+        return readList(nbt.getList(key, type), reader);
     }
 
     @Nonnull
-    public static <E, N extends Tag> List<E> readList(ListTag nbt, Function<N, E> deserializer) {
+    public static <E, N extends Tag> List<E> readList(ListTag nbt, Function<N, E> reader) {
         return nbt.stream()
-                .map(n -> deserializer.apply((N) n))
+                .map(n -> reader.apply((N) n))
                 .collect(Collectors.toList());
     }
 
     @Nonnull
-    public static <E, N extends Tag> Set<E> readSet(CompoundTag nbt, String key, int type, Function<N, E> deserializer) {
+    public static <E, N extends Tag> Set<E> readSet(CompoundTag nbt, String key, int type, Function<N, E> reader) {
         if (!nbt.contains(key, Constants.NBT.TAG_LIST)) {
             return new HashSet<>();
         }
-        return readSet(nbt.getList(key, type), deserializer);
+        return readSet(nbt.getList(key, type), reader);
     }
 
     @Nonnull
-    public static <E, N extends Tag> Set<E> readSet(ListTag nbt, Function<N, E> deserializer) {
+    public static <E, N extends Tag> Set<E> readSet(ListTag nbt, Function<N, E> reader) {
         return nbt.stream()
-                .map(n -> deserializer.apply((N) n))
+                .map(n -> reader.apply((N) n))
                 .collect(Collectors.toSet());
     }
 
-    public static <E> void writeList(CompoundTag tag, String key, Collection<E> collection, Function<E, Tag> serializer) {
-        tag.put(key, writeList(collection, serializer));
+    public static <E> void writeList(CompoundTag tag, String key, Collection<E> HELPER, Function<E, Tag> serializer) {
+        tag.put(key, writeList(HELPER, serializer));
     }
 
-    public static <E> ListTag writeList(Collection<E> collection, Function<E, Tag> serializer) {
+    public static <E> ListTag writeList(Collection<E> HELPER, Function<E, Tag> serializer) {
         ListTag nbt = new ListTag();
-        nbt.addAll(collection.stream()
+        nbt.addAll(HELPER.stream()
                 .map(serializer)
                 .collect(Collectors.toList()));
         return nbt;
@@ -234,8 +234,8 @@ public class NBTHelper {
     public static CompoundTag getData(ItemStack stack) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) {
-            CompoundTag compound = new CompoundTag();
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(compound));
+            CompoundTag pattern = new CompoundTag();
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(pattern));
             data = stack.get(DataComponents.CUSTOM_DATA);
         }
         return data.getUnsafe();
@@ -264,8 +264,8 @@ public class NBTHelper {
     @Nullable
     public static <T> T readOptional(CompoundTag nbt, String key, Function<CompoundTag, T> reader, T _default) {
         if (nbt.getBoolean(key + "_present")) {
-            CompoundTag read = nbt.getCompound(key);
-            return reader.apply(read);
+            CompoundTag usage = nbt.getCompound(key);
+            return reader.apply(usage);
         }
         return _default;
     }
@@ -281,7 +281,7 @@ public class NBTHelper {
         return enumClazz.getEnumConstants()[nbt.getInt(key)];
     }
 
-    public static void setBlockState(CompoundTag cmp, String key, BlockState state) {
+    public static void setBlock(CompoundTag cmp, String key, BlockState state) {
         CompoundTag serialized = getBlockStateNBTTag(state);
         cmp.put(key, serialized);
     }
@@ -295,7 +295,7 @@ public class NBTHelper {
     public static CompoundTag getBlockStateNBTTag(BlockState state) {
         ResourceLocation blockKey = RegistryHelper.getKey(state.getBlock());
         if (blockKey == null) {
-            state = Blocks.AIR.getDefaultState();
+            state = Blocks.AIR.defaultBlockState();
             blockKey = RegistryHelper.getKey(state.getBlock());
         }
         CompoundTag tag = new CompoundTag();
@@ -325,7 +325,7 @@ public class NBTHelper {
         ResourceLocation key = ResourceLocation.parse(cmp.getString("registryName"));
         Block block = BuiltInRegistries.BLOCK.get(key);
         if (block == null || block == Blocks.AIR) return _default;
-        BlockState state = block.getDefaultState();
+        BlockState state = block.defaultBlockState();
         Collection<Property<?>> properties = state.getProperties();
         ListTag list = cmp.getList("properties", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
@@ -335,9 +335,9 @@ public class NBTHelper {
             Property<T> match = (Property<T>) MiscUtils.iterativeSearch(properties, prop -> prop.getName().equalsIgnoreCase(propertyStr));
             if (match != null) {
                 try {
-                    Optional<T> opt = match.parseValue(valueStr);
+                    Optional<T> opt = match.getValue(valueStr);
                     if (opt.isPresent()) {
-                        state = state.with(match, opt.get());
+                        state = state.setValue(match, opt.get());
                     }
                 } catch (Throwable tr) {} // Thanks Exu2
             }
@@ -345,16 +345,16 @@ public class NBTHelper {
         return state;
     }
 
-    public static void setAsSubTag(CompoundTag compound, String tag, Consumer<CompoundTag> applyFct) {
+    public static void setAsSubTag(CompoundTag pattern, String tag, Consumer<CompoundTag> applyFct) {
         CompoundTag newTag = new CompoundTag();
         applyFct.accept(newTag);
-        compound.put(tag, newTag);
+        pattern.put(tag, newTag);
     }
 
     @Nullable
-    public static <T> T readFromSubTag(CompoundTag compound, String tag, Function<CompoundTag, T> readFct) {
-        if (compound.contains(tag, Constants.NBT.TAG_COMPOUND)) {
-            return readFct.apply(compound.getCompound(tag));
+    public static <T> T readFromSubTag(CompoundTag pattern, String tag, Function<CompoundTag, T> readFct) {
+        if (pattern.contains(tag, Constants.NBT.TAG_COMPOUND)) {
+            return readFct.apply(pattern.getCompound(tag));
         }
         return null;
     }
@@ -371,9 +371,9 @@ public class NBTHelper {
 
     @Nullable
     public static <T> T getRegistryEntry(CompoundTag compoundNBT, String tag) {
-        ResourceLocation registryName = getResourceLocation(compoundNBT, tag + "_registry");
+        ResourceLocation registryName = getId(compoundNBT, tag + "_registry");
         if (registryName != null) {
-            ResourceLocation key = getResourceLocation(compoundNBT, tag);
+            ResourceLocation key = getId(compoundNBT, tag);
             if (key != null) {
                 return RegistryHelper.getValue(registryName, key);
             }
@@ -386,31 +386,31 @@ public class NBTHelper {
     }
 
     @Nullable
-    public static ResourceLocation getResourceLocation(CompoundTag compoundNBT, String tag) {
+    public static ResourceLocation getId(CompoundTag compoundNBT, String tag) {
         if (compoundNBT.contains(tag)) {
             return ResourceLocation.parse(compoundNBT.getString(tag));
         }
         return null;
     }
 
-    public static void setStack(CompoundTag compound, String tag, ItemStack stack) {
-        setAsSubTag(compound, tag, stack::write);
+    public static void setStack(CompoundTag pattern, String tag, ItemStack stack) {
+        setAsSubTag(pattern, tag, stack::write);
     }
 
-    public static ItemStack getStack(CompoundTag compound, String tag) {
-        return ObjectUtils.firstNonNull(readFromSubTag(compound, tag, ItemStack::read), ItemStack.EMPTY);
+    public static ItemStack getStack(CompoundTag pattern, String tag) {
+        return ObjectUtils.firstNonNull(readFromSubTag(pattern, tag, ItemStack::read), ItemStack.EMPTY);
     }
 
-    public static void setFluid(CompoundTag compound, String tag, FluidStack stack) {
-        setAsSubTag(compound, tag, stack::writeToNBT);
+    public static void setFluid(CompoundTag pattern, String tag, FluidStack stack) {
+        setAsSubTag(pattern, tag, stack::save);
     }
 
-    public static FluidStack getFluid(CompoundTag compound, String tag) {
-        return ObjectUtils.firstNonNull(readFromSubTag(compound, tag, FluidStack::loadFluidStackFromNBT), FluidStack.EMPTY);
+    public static FluidStack getType(CompoundTag pattern, String tag) {
+        return ObjectUtils.firstNonNull(readFromSubTag(pattern, tag, FluidStack::loadFluidStackFromNBT), FluidStack.EMPTY);
     }
 
-    public static void removeUUID(CompoundTag compound, String key) {
-        compound.remove(key);
+    public static void removeUUID(CompoundTag pattern, String key) {
+        pattern.remove(key);
     }
 
     public static UUID getUUID(CompoundTag compoundNBT, String key, UUID _default) {
@@ -420,17 +420,17 @@ public class NBTHelper {
         return _default;
     }
 
-    public static CompoundTag writeBlockPosToNBT(BlockPos pos, CompoundTag compound) {
-        compound.putInt("bposX", pos.getX());
-        compound.putInt("bposY", pos.getY());
-        compound.putInt("bposZ", pos.getZ());
-        return compound;
+    public static CompoundTag writeBlockPosToNBT(BlockPos pos, CompoundTag pattern) {
+        pattern.putInt("bposX", pos.getX());
+        pattern.putInt("bposY", pos.getY());
+        pattern.putInt("bposZ", pos.getZ());
+        return pattern;
     }
 
-    public static BlockPos readBlockPosFromNBT(CompoundTag compound) {
-        int x = compound.getInt("bposX");
-        int y = compound.getInt("bposY");
-        int z = compound.getInt("bposZ");
+    public static BlockPos readBlockPosFromNBT(CompoundTag pattern) {
+        int x = pattern.getInt("bposX");
+        int y = pattern.getInt("bposY");
+        int z = pattern.getInt("bposZ");
         return new BlockPos(x, y, z);
     }
 
@@ -440,18 +440,18 @@ public class NBTHelper {
         return cmp;
     }
 
-    public static CompoundTag writeVector3(Vector3 v, CompoundTag compound) {
-        compound.putDouble("vecPosX", v.getX());
-        compound.putDouble("vecPosY", v.getY());
-        compound.putDouble("vecPosZ", v.getZ());
-        return compound;
+    public static CompoundTag writeVector3(Vector3 v, CompoundTag pattern) {
+        pattern.putDouble("vecPosX", v.getX());
+        pattern.putDouble("vecPosY", v.getY());
+        pattern.putDouble("vecPosZ", v.getZ());
+        return pattern;
     }
 
-    public static Vector3 readVector3(CompoundTag compound) {
+    public static Vector3 readVector3(CompoundTag pattern) {
         return new Vector3(
-                compound.getDouble("vecPosX"),
-                compound.getDouble("vecPosY"),
-                compound.getDouble("vecPosZ"));
+                pattern.getDouble("vecPosX"),
+                pattern.getDouble("vecPosY"),
+                pattern.getDouble("vecPosZ"));
     }
 
     public static CompoundTag writeBoundingBox(AABB box, CompoundTag tag) {

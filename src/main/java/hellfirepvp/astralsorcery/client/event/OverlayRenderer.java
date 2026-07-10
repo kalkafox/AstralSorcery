@@ -37,18 +37,18 @@ public class OverlayRenderer {
     }
 
     private void onOverlayRender(RenderGameOverlayEvent.Post event) {
-        float pTicks = event.getPartialTicks();
+        float pTicks = event.advanceTime();
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
             return;
         }
 
         Player player = Minecraft.getInstance().player;
-        if (player == null || Minecraft.getInstance().world == null) {
+        if (player == null || Minecraft.getInstance().level == null) {
             return;
         }
 
         PoseStack renderStack = event.getPoseStack();
-        for (EquipmentSlot type : EquipmentSlotType.values()) {
+        for (EquipmentSlot type : EquipmentSlot.values()) {
             if (doHudRender(renderStack, player.getItemStackFromSlot(type), pTicks)) {
                 break;
             }

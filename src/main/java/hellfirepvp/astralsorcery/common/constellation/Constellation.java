@@ -52,7 +52,7 @@ public abstract class Constellation extends BaseConstellation implements IConste
         this.simpleName = name;
         ModContainer mod = MiscUtils.getCurrentlyActiveMod();
         if (mod != null) {
-            this.setRegistryName(new ResourceLocation(mod.getModId(), name));
+            this.setRegistryName(ResourceLocation.fromNamespaceAndPath(mod.getModId(), name));
             this.name = mod.getModId() + ".constellation." + name;
         } else {
             this.setRegistryName(AstralSorcery.key(name));
@@ -111,12 +111,12 @@ public abstract class Constellation extends BaseConstellation implements IConste
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return this.name;
     }
 
     @Override
-    public String getSimpleName() {
+    public String getName() {
         return simpleName;
     }
 
@@ -228,7 +228,7 @@ public abstract class Constellation extends BaseConstellation implements IConste
                 while (index >= MoonPhase.values().length) {
                     index -= MoonPhase.values().length;
                 }
-                index = MathHelper.clamp(index, 0, MoonPhase.values().length - 1);
+                index = Mth.clamp(index, 0, MoonPhase.values().length - 1);
                 MoonPhase offset = MoonPhase.values()[index];
                 if (!shifted.contains(offset)) {
                     shifted.add(offset);

@@ -50,8 +50,8 @@ public class RootDiscidia extends RootPerk {
     }
 
     @Override
-    protected void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    protected void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOWEST, this::onDamage);
     }
@@ -59,24 +59,24 @@ public class RootDiscidia extends RootPerk {
     private void onDamage(LivingDamageEvent event) {
         DamageSource ds = event.getSource();
         Player player = null;
-        if (ds.getImmediateSource() != null &&
-                ds.getImmediateSource() instanceof Player) {
-            player = (Player) ds.getImmediateSource();
+        if (ds.getDirectEntity() != null &&
+                ds.getDirectEntity() instanceof Player) {
+            player = (Player) ds.getDirectEntity();
         }
-        if (player == null && ds.getTrueSource() != null &&
-                ds.getTrueSource() instanceof Player) {
-            player = (Player) ds.getTrueSource();
+        if (player == null && ds.getEntity() != null &&
+                ds.getEntity() instanceof Player) {
+            player = (Player) ds.getEntity();
         }
         if (player == null) {
             return;
         }
 
-        LogicalSide side = this.getSide(player);
-        if (!side.isServer()) {
+        LogicalSide direction = this.getSide(player);
+        if (!direction.isServer()) {
             return;
         }
 
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (!prog.getPerkData().hasPerkEffect(this)) {
             return;
         }
@@ -92,8 +92,8 @@ public class RootDiscidia extends RootPerk {
         float expGain = Math.min(event.getAmount() * mul, 100F);
         expGain *= this.getExpMultiplier();
         expGain *= this.getDiminishingReturns(player);
-        expGain *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
-        expGain *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
+        expGain *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+        expGain *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
         expGain = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP, expGain);
 
         ResearchManager.modifyExp(player, expGain);

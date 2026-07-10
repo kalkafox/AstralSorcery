@@ -58,7 +58,7 @@ public class BlockSpherePositionGenerator extends BlockPositionGenerator {
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbt) {
+    public void save(CompoundTag nbt) {
         nbt.putInt("currentRadius", this.currentRadius);
     }
 

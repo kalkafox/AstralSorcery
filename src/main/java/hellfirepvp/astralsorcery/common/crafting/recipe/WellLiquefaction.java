@@ -33,19 +33,19 @@ import java.awt.*;
 public class WellLiquefaction extends CustomMatcherRecipe implements GatedRecipe.Progression {
 
     private final Color catalystColor;
-    private final Ingredient input;
+    private final Ingredient from;
     private final Fluid output;
 
     private final float productionMultiplier;
     private final float shatterMultiplier;
 
-    public WellLiquefaction(ResourceLocation recipeId, Ingredient input, Fluid output, float productionMultiplier, float shatterMultiplier) {
-        this(recipeId, input, output, null, productionMultiplier, shatterMultiplier);
+    public WellLiquefaction(ResourceLocation recipeId, Ingredient from, Fluid output, float productionMultiplier, float shatterMultiplier) {
+        this(recipeId, from, output, null, productionMultiplier, shatterMultiplier);
     }
 
-    public WellLiquefaction(ResourceLocation recipeId, Ingredient input, Fluid output, @Nullable Color catalystColor, float productionMultiplier, float shatterMultiplier) {
+    public WellLiquefaction(ResourceLocation recipeId, Ingredient from, Fluid output, @Nullable Color catalystColor, float productionMultiplier, float shatterMultiplier) {
         super(recipeId);
-        this.input = input;
+        this.from = from;
         this.output = output;
         this.catalystColor = catalystColor;
         this.productionMultiplier = productionMultiplier;
@@ -58,13 +58,13 @@ public class WellLiquefaction extends CustomMatcherRecipe implements GatedRecipe
         return ResearchProgression.BASIC_CRAFT;
     }
 
-    public boolean matches(ItemStack input) {
-        return this.input.test(input);
+    public boolean matches(ItemStack from) {
+        return this.from.test(from);
     }
 
     @Nonnull
     public Ingredient getInput() {
-        return input;
+        return from;
     }
 
     @Nonnull

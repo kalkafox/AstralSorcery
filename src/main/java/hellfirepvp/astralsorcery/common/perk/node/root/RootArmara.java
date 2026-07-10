@@ -21,7 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -50,24 +50,24 @@ public class RootArmara extends RootPerk {
     }
 
     @Override
-    protected void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    protected void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.HIGHEST, this::onHurt);
     }
 
-    private void onHurt(LivingHurtEvent event) {
+    private void onHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntityLiving() instanceof Player)) {
             return;
         }
 
         Player player = (Player) event.getEntityLiving();
-        LogicalSide side = this.getSide(player);
-        if (!side.isServer()) {
+        LogicalSide direction = this.getSide(player);
+        if (!direction.isServer()) {
             return;
         }
 
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (!prog.getPerkData().hasPerkEffect(this)) {
             return;
         }
@@ -81,15 +81,15 @@ public class RootArmara extends RootPerk {
             } else {
                 mul = 0.05F;
             }
-        } else if (event.getSource().getTrueSource() instanceof LivingEntity) {
+        } else if (event.getSource().getEntity() instanceof LivingEntity) {
             mul = 3.0F;
         }
 
         float expGain = Math.min(event.getAmount() * mul, 70F);
         expGain *= this.getExpMultiplier();
         expGain *= this.getDiminishingReturns(player);
-        expGain *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
-        expGain *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
+        expGain *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+        expGain *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP);
         expGain = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EXP, expGain);
 
         ResearchManager.modifyExp(player, expGain);

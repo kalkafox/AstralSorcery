@@ -54,17 +54,17 @@ public class PerkTreeGem<T extends AbstractPerk & GemSocketPerk> extends PerkTre
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderAt(AllocationStatus status, PoseStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float zLevel, float scale) {
+    public void renderAt(AllocationStatus status, PoseStack renderStack, long spriteOffsetTick, float pTicks, float x, float y, float blitOffset, float scale) {
         ItemStack stack = this.getPerk().getContainedItem(Minecraft.getInstance().player, LogicalSide.CLIENT);
         if (!stack.isEmpty()) {
             float posX = x - (8 * scale);
             float posY = y - (8 * scale);
 
-            renderStack.push();
-            renderStack.translate(posX, posY, zLevel - 50F);
+            renderStack.pushPose();
+            renderStack.translate(posX, posY, blitOffset - 50F);
             renderStack.scale(scale, scale, 1F);
             RenderingUtils.renderItemStackGUI(renderStack, stack, null);
-            renderStack.pop();
+            renderStack.popPose();
         }
     }
 
@@ -73,7 +73,7 @@ public class PerkTreeGem<T extends AbstractPerk & GemSocketPerk> extends PerkTre
     @OnlyIn(Dist.CLIENT)
     public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, PoseStack renderStack,
                                              AllocationStatus status, long spriteOffsetTick, float pTicks,
-                                             float x, float y, float zLevel, float scale) {
+                                             float x, float y, float blitOffset, float scale) {
         SpriteSheetResource tex = status.getPerkTreeHaloSprite();
         BatchPerkContext.TextureObjectGroup grp = PerkPointHaloRenderGroup.INSTANCE.getGroup(tex);
         if (grp == null) {
@@ -88,12 +88,12 @@ public class PerkTreeGem<T extends AbstractPerk & GemSocketPerk> extends PerkTre
 
         Tuple<Float, Float> frameUV = tex.getUVOffset(spriteOffsetTick);
 
-        RenderingGuiUtils.rect(buf, renderStack, x - haloSize, y - haloSize, zLevel, haloSize * 2F, haloSize * 2F)
+        RenderingGuiUtils.rect(buf, renderStack, x - haloSize, y - haloSize, blitOffset, haloSize * 2F, haloSize * 2F)
                 .color(1F, 1F, 1F, 0.85F)
                 .tex(frameUV.getA(), frameUV.getB(), tex.getULength(), tex.getVLength())
                 .draw();
 
-        super.renderPerkAtBatch(drawCtx, renderStack, status, spriteOffsetTick, pTicks, x, y, zLevel, scale);
+        super.renderPerkAtBatch(drawCtx, renderStack, status, spriteOffsetTick, pTicks, x, y, blitOffset, scale);
 
         float actualSize = getRenderSize() * scale;
         return new Rectangle.Float(-actualSize, -actualSize, actualSize * 2, actualSize * 2);

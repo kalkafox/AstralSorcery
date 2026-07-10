@@ -279,9 +279,9 @@ public class ColorThief {
         int r, g, b;
 
         for (int i = 0; i < pixelCount; i += quality) {
-            int row = i / width;
+            int y = i / width;
             int col = i % width;
-            int rgb = sourceImage.getRGB(col, row);
+            int rgb = sourceImage.getRGB(col, y);
 
             r = (rgb >> 16) & 0xFF;
             g = (rgb >> 8) & 0xFF;

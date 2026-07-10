@@ -90,28 +90,28 @@ public class WorldGenerationAS {
         public static StructureGenerationConfig CFG_ANCIENT_SHRINE =
                 new StructureGenerationConfig(Structures.KEY_ANCIENT_SHRINE, 18, 4)
                         .generatesInBiomes(Arrays.asList(ICY, EXTREME_HILLS))
-                        .generatesInWorlds(Collections.singletonList(World.OVERWORLD));
+                        .generatesInWorlds(Collections.singletonList(Level.OVERWORLD));
         public static StructureGenerationConfig CFG_DESERT_SHRINE =
                 new StructureGenerationConfig(Structures.KEY_DESERT_SHRINE, 18, 4)
                         .generatesInBiomes(Arrays.asList(MESA, DESERT, SAVANNA))
-                        .generatesInWorlds(Collections.singletonList(World.OVERWORLD));
+                        .generatesInWorlds(Collections.singletonList(Level.OVERWORLD));
         public static StructureGenerationConfig CFG_SMALL_SHRINE =
                 new StructureGenerationConfig(Structures.KEY_SMALL_SHRINE, 18, 4)
                         .generatesInBiomes(Arrays.asList(FOREST, PLAINS))
-                        .generatesInWorlds(Collections.singletonList(World.OVERWORLD));
+                        .generatesInWorlds(Collections.singletonList(Level.OVERWORLD));
 
         public static FeatureGenerationConfig CFG_GLOW_FLOWER =
                 new FeatureGenerationConfig(Features.KEY_GLOW_FLOWER)
                         .generatesInBiomes(Arrays.asList(ICY, EXTREME_HILLS))
-                        .generatesInWorlds(Collections.singletonList(World.OVERWORLD));
+                        .generatesInWorlds(Collections.singletonList(Level.OVERWORLD));
         public static FeatureGenerationConfig CFG_ROCK_CRYSTAL =
                 new FeatureGenerationConfig(Features.KEY_ROCK_CRYSTAL)
                         .setGenerateEveryBiome()
-                        .generatesInWorlds(Collections.singletonList(World.OVERWORLD));
+                        .generatesInWorlds(Collections.singletonList(Level.OVERWORLD));
         public static FeatureGenerationConfig CFG_AQUAMARINE =
                 new FeatureGenerationConfig(Features.KEY_AQUAMARINE)
                         .setGenerateEveryBiome()
-                        .generatesInWorlds(Collections.singletonList(World.OVERWORLD));
+                        .generatesInWorlds(Collections.singletonList(Level.OVERWORLD));
         public static FeatureGenerationConfig CFG_MARBLE =
                 new FeatureGenerationConfig(Features.KEY_MARBLE)
                         .setGenerateEveryBiome()

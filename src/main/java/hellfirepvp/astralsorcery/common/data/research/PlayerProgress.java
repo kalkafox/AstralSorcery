@@ -50,7 +50,7 @@ public class PlayerProgress {
     private boolean usePerkAbilities = true; //Move this out of this class at some point.. this doesn't actually belong here
 
     //Loading from flat-file, persistent data
-    public void load(CompoundTag compound) {
+    public void load(CompoundTag pattern) {
         knownConstellations.clear();
         seenConstellations.clear();
         researchProgression.clear();
@@ -61,26 +61,26 @@ public class PlayerProgress {
         tomeReceived = false;
         usePerkAbilities = true;
 
-        if (compound.contains("seenConstellations")) {
-            ListTag list = compound.getList("seenConstellations", Constants.NBT.TAG_STRING);
+        if (pattern.contains("seenConstellations")) {
+            ListTag list = pattern.getList("seenConstellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
-                seenConstellations.add(new ResourceLocation(list.getString(i)));
+                seenConstellations.add(ResourceLocation.parse(list.getString(i)));
             }
         }
-        if (compound.contains("constellations")) {
-            ListTag list = compound.getList("constellations", Constants.NBT.TAG_STRING);
+        if (pattern.contains("constellations")) {
+            ListTag list = pattern.getList("constellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
-                ResourceLocation s = new ResourceLocation(list.getString(i));
+                ResourceLocation s = ResourceLocation.parse(list.getString(i));
                 knownConstellations.add(s);
                 if (!seenConstellations.contains(s)) {
                     seenConstellations.add(s);
                 }
             }
         }
-        if (compound.contains("storedConstellationPapers")) {
-            ListTag list = compound.getList("storedConstellationPapers", Constants.NBT.TAG_STRING);
+        if (pattern.contains("storedConstellationPapers")) {
+            ListTag list = pattern.getList("storedConstellationPapers", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
-                ResourceLocation s = new ResourceLocation(list.getString(i));
+                ResourceLocation s = ResourceLocation.parse(list.getString(i));
                 storedConstellationPapers.add(s);
                 if (!seenConstellations.contains(s)) {
                     seenConstellations.add(s);
@@ -88,9 +88,9 @@ public class PlayerProgress {
             }
         }
 
-        if (compound.contains("attuned")) {
-            String cst = compound.getString("attuned");
-            IConstellation c = ConstellationRegistry.getConstellation(new ResourceLocation(cst));
+        if (pattern.contains("attuned")) {
+            String cst = pattern.getString("attuned");
+            IConstellation c = ConstellationRegistry.getConstellation(ResourceLocation.parse(cst));
             if (!(c instanceof IMajorConstellation)) {
                 AstralSorcery.log.warn("Failed to load attuned Constellation: " + cst + " - constellation doesn't exist or isn't major.");
             } else {
@@ -98,31 +98,31 @@ public class PlayerProgress {
             }
         }
 
-        this.perkData.load(this, compound);
+        this.perkData.load(this, pattern);
 
-        if (compound.contains("tierReached")) {
-            int tierOrdinal = compound.getInt("tierReached");
+        if (pattern.contains("tierReached")) {
+            int tierOrdinal = pattern.getInt("tierReached");
             tierReached = MiscUtils.getEnumEntry(ProgressionTier.class, tierOrdinal);
         }
 
-        if (compound.contains("research")) {
-            int[] research = compound.getIntArray("research");
+        if (pattern.contains("research")) {
+            int[] research = pattern.getIntArray("research");
             for (int resOrdinal : research) {
                 researchProgression.add(MiscUtils.getEnumEntry(ResearchProgression.class, resOrdinal));
             }
         }
 
-        this.wasOnceAttuned = compound.getBoolean("wasAttuned");
+        this.wasOnceAttuned = pattern.getBoolean("wasAttuned");
 
 
-        if (!compound.contains("bookReceived")) {
+        if (!pattern.contains("bookReceived")) {
             this.tomeReceived = true; //Legacy support for player progress files that do not have the tag yet.
         } else {
-            this.tomeReceived = compound.getBoolean("bookReceived");
+            this.tomeReceived = pattern.getBoolean("bookReceived");
         }
 
-        if (compound.contains("usePerkAbilities")) {
-            this.usePerkAbilities = compound.getBoolean("usePerkAbilities");
+        if (pattern.contains("usePerkAbilities")) {
+            this.usePerkAbilities = pattern.getBoolean("usePerkAbilities");
         }
     }
 
@@ -130,15 +130,15 @@ public class PlayerProgress {
     public void store(CompoundTag cmp) {
         ListTag known = new ListTag();
         for (ResourceLocation s : knownConstellations) {
-            known.add(StringNBT.valueOf(s.toString()));
+            known.add(StringTag.valueOf(s.toString()));
         }
         ListTag seen = new ListTag();
         for (ResourceLocation s : seenConstellations) {
-            seen.add(StringNBT.valueOf(s.toString()));
+            seen.add(StringTag.valueOf(s.toString()));
         }
         ListTag storedPapers = new ListTag();
         for (ResourceLocation s : storedConstellationPapers) {
-            storedPapers.add(StringNBT.valueOf(s.toString()));
+            storedPapers.add(StringTag.valueOf(s.toString()));
         }
         cmp.put("constellations", known);
         cmp.put("seenConstellations", seen);
@@ -164,11 +164,11 @@ public class PlayerProgress {
     public void storeKnowledge(CompoundTag cmp) {
         ListTag list = new ListTag();
         for (ResourceLocation s : knownConstellations) {
-            list.add(StringNBT.valueOf(s.toString()));
+            list.add(StringTag.valueOf(s.toString()));
         }
         ListTag l = new ListTag();
         for (ResourceLocation s : seenConstellations) {
-            l.add(StringNBT.valueOf(s.toString()));
+            l.add(StringTag.valueOf(s.toString()));
         }
         cmp.put("constellations", list);
         cmp.put("seenConstellations", l);
@@ -181,20 +181,20 @@ public class PlayerProgress {
     }
 
     //For knowledge sharing; some information is not important to be shared.
-    public void loadKnowledge(CompoundTag compound) {
-        if (compound.contains("seenConstellations")) {
-            ListTag list = compound.getList("seenConstellations", Constants.NBT.TAG_STRING);
+    public void loadKnowledge(CompoundTag pattern) {
+        if (pattern.contains("seenConstellations")) {
+            ListTag list = pattern.getList("seenConstellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
-                ResourceLocation cstName = new ResourceLocation(list.getString(i));
+                ResourceLocation cstName = ResourceLocation.parse(list.getString(i));
                 if (!seenConstellations.contains(cstName)) {
                     seenConstellations.add(cstName);
                 }
             }
         }
-        if (compound.contains("constellations")) {
-            ListTag list = compound.getList("constellations", Constants.NBT.TAG_STRING);
+        if (pattern.contains("constellations")) {
+            ListTag list = pattern.getList("constellations", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
-                ResourceLocation cstName = new ResourceLocation(list.getString(i));
+                ResourceLocation cstName = ResourceLocation.parse(list.getString(i));
 
                 if (!knownConstellations.contains(cstName)) {
                     knownConstellations.add(cstName);
@@ -205,16 +205,16 @@ public class PlayerProgress {
             }
         }
 
-        if (compound.contains("tierReached")) {
-            int tierOrdinal = compound.getInt("tierReached");
+        if (pattern.contains("tierReached")) {
+            int tierOrdinal = pattern.getInt("tierReached");
             ProgressionTier otherTier = MiscUtils.getEnumEntry(ProgressionTier.class, tierOrdinal);
             if (otherTier.isThisLater(this.tierReached)) {
                 this.tierReached = otherTier;
             }
         }
 
-        if (compound.contains("research")) {
-            int[] research = compound.getIntArray("research");
+        if (pattern.contains("research")) {
+            int[] research = pattern.getIntArray("research");
             for (int resOrdinal : research) {
                 researchProgression.add(MiscUtils.getEnumEntry(ResearchProgression.class, resOrdinal));
             }

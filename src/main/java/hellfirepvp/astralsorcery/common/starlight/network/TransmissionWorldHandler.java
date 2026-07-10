@@ -39,7 +39,7 @@ import java.util.*;
  */
 public class TransmissionWorldHandler {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     //If a source looses all chunks/all chunks in its network get unloaded it doesn't need to broadcast starlight anymore
     //This map exists to associate a certain chunkPosition to the involved networks in it.
@@ -62,8 +62,8 @@ public class TransmissionWorldHandler {
         this.dim = dimKey;
     }
 
-    public void tick(ServerLevel world) {
-        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(world);
+    public void tick(ServerLevel level) {
+        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(level);
 
         for (Tuple<BlockPos, IIndependentStarlightSource> sourceTuple : handler.getAllSources()) {
             BlockPos at = sourceTuple.getA();
@@ -72,7 +72,7 @@ public class TransmissionWorldHandler {
             if (!cachedSourceChain.containsKey(source)) {
                 if (!sourcePosBuilding.contains(at)) {
                     sourcePosBuilding.add(at);
-                    buildNetworkChain(world, source, handler, at);
+                    buildNetworkChain(level, source, handler, at);
                 }
             }
 
@@ -82,7 +82,7 @@ public class TransmissionWorldHandler {
             }
 
             TransmissionChain chain = cachedSourceChain.get(source);
-            float starlight = source.produceStarlightTick(world, at);
+            float starlight = source.produceStarlightTick(level, at);
             IWeakConstellation type = source.getStarlightType();
             if (type == null) {
                 continue;
@@ -93,36 +93,36 @@ public class TransmissionWorldHandler {
                 BlockPos pos = rec.getLocationPos();
                 Float multiplier = lossMultipliers.get(pos);
                 if (multiplier != null) {
-                    rec.onStarlightReceive(world, type, starlight * multiplier);
+                    rec.onStarlightReceive(level, type, starlight * multiplier);
                 }
             }
 
             if (starlight > 0.01F) {
                 chain.getTransmissionUpdates().forEach((node, multiplier) -> {
                     if (multiplier >= 0.01F) {
-                        node.onTransmissionTick(world, starlight * multiplier, type);
+                        node.onTransmissionTick(level, starlight * multiplier, type);
                     }
                 });
             }
 
             for (BlockPos endPointPos : chain.getUncheckedEndpointsBlock()) {
-                MiscUtils.executeWithChunk(world, endPointPos, () -> {
-                    BlockState endState = world.getBlockState(endPointPos);
+                MiscUtils.executeWithChunk(level, endPointPos, () -> {
+                    BlockState endState = level.getBlockState(endPointPos);
                     Block b = endState.getBlock();
                     if (b instanceof BlockStarlightRecipient) {
                         Float multiplier = lossMultipliers.get(endPointPos);
                         if (multiplier != null) {
-                            ((BlockStarlightRecipient) b).receiveStarlight(world, rand, endPointPos, type, starlight * multiplier);
+                            ((BlockStarlightRecipient) b).receiveStarlight(level, random, endPointPos, type, starlight * multiplier);
                         }
                     } else {
-                        StarlightNetworkRegistry.IStarlightBlockHandler handle = StarlightNetworkRegistry.getStarlightHandler(world, endPointPos, endState, type);
+                        StarlightNetworkRegistry.IStarlightBlockHandler handle = StarlightNetworkRegistry.getStarlightHandler(level, endPointPos, endState, type);
                         if (handle != null) {
                             Float multiplier = lossMultipliers.get(endPointPos);
                             if (multiplier != null) {
-                                handle.receiveStarlight(world, rand, endPointPos, endState, type, starlight * multiplier);
+                                handle.receiveStarlight(level, random, endPointPos, endState, type, starlight * multiplier);
                             }
                         } else {
-                            chain.updatePosAsResolved(world, endPointPos);
+                            chain.updatePosAsResolved(level, endPointPos);
                         }
                     }
                 });
@@ -130,19 +130,19 @@ public class TransmissionWorldHandler {
         }
     }
 
-    private void buildNetworkChain(Level world, IIndependentStarlightSource source, WorldNetworkHandler handler, BlockPos sourcePos) {
-        TransmissionChain.buildNetworkChain(world, this, source, handler, sourcePos);
+    private void buildNetworkChain(Level level, IIndependentStarlightSource source, WorldNetworkHandler handler, BlockPos pos) {
+        TransmissionChain.buildNetworkChain(level, this, source, handler, pos);
     }
 
-    void updateNetworkChainData(Level world, TransmissionChain chain, IIndependentStarlightSource source, WorldNetworkHandler handle, BlockPos sourcePos) {
-        sourcePosBuilding.remove(sourcePos);
+    void updateNetworkChainData(Level level, TransmissionChain chain, IIndependentStarlightSource source, WorldNetworkHandler handle, BlockPos pos) {
+        sourcePosBuilding.remove(pos);
 
         cachedSourceChain.put(source, chain);
         List<ChunkPos> activeChunks = new LinkedList<>();
         for (ChunkPos pos : chain.getInvolvedChunks()) {
             List<IIndependentStarlightSource> sources = involvedSourceMap.computeIfAbsent(pos, k -> new LinkedList<>());
             sources.add(source);
-            MiscUtils.executeWithChunk(world, pos, () -> activeChunks.add(pos));
+            MiscUtils.executeWithChunk(level, pos, () -> activeChunks.add(pos));
         }
         if (!activeChunks.isEmpty()) {
             activeChunkMap.put(source, activeChunks);
@@ -151,7 +151,7 @@ public class TransmissionWorldHandler {
             List<IIndependentStarlightSource> sources = posToSourceMap.computeIfAbsent(pos, k -> new LinkedList<>());
             sources.add(source);
         }
-        List<IIndependentStarlightSource> sources = posToSourceMap.computeIfAbsent(sourcePos, k -> new LinkedList<>());
+        List<IIndependentStarlightSource> sources = posToSourceMap.computeIfAbsent(pos, k -> new LinkedList<>());
         sources.add(source);
     }
 

@@ -29,7 +29,7 @@ import java.awt.*;
  */
 public abstract class TileFakedState extends TileEntityTick {
 
-    private BlockState fakedState = Blocks.AIR.getDefaultState();
+    private BlockState fakedState = Blocks.AIR.defaultBlockState();
     private Color overlayColor = Color.WHITE;
 
     protected TileFakedState(BlockEntityType<?> tileEntityTypeIn) {
@@ -37,10 +37,10 @@ public abstract class TileFakedState extends TileEntityTick {
     }
 
     public boolean revert() {
-        if (this.getWorld().isRemote()) {
+        if (this.getLevel().isClientSide()) {
             return false;
         }
-        return this.getWorld().setBlockState(this.getPos(), this.getFakedState(), Constants.BlockFlags.DEFAULT_AND_RERENDER);
+        return this.getLevel().setBlock(this.getBlockPos(), this.getFakedState(), Constants.BlockFlags.DEFAULT_AND_RERENDER);
     }
 
     @Nonnull
@@ -64,23 +64,23 @@ public abstract class TileFakedState extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.fakedState = NBTHelper.getBlockStateFromTag(compound.getCompound("fakedState"), Blocks.AIR.getDefaultState());
-        this.overlayColor = new Color(compound.getInt("color"), false);
+        this.fakedState = NBTHelper.getBlockStateFromTag(pattern.getCompound("fakedState"), Blocks.AIR.defaultBlockState());
+        this.overlayColor = new Color(pattern.getInt("color"), false);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        NBTHelper.setBlockState(compound, "fakedState", this.fakedState);
-        compound.putInt("color", this.overlayColor.getRGB());
+        NBTHelper.setBlock(pattern, "fakedState", this.fakedState);
+        pattern.putInt("color", this.overlayColor.getRGB());
     }
 
     @OnlyIn(Dist.CLIENT)
-    public double getMaxRenderDistanceSquared() {
+    public double getViewDistance() {
         return 65536.0D;
     }
 }

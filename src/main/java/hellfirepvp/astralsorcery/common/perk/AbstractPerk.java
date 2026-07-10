@@ -51,14 +51,14 @@ import java.util.*;
  */
 public class AbstractPerk implements ModifierSource {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
 
-    public static final PerkCategory CATEGORY_BASE = new PerkCategory("base", TextFormatting.WHITE);
-    public static final PerkCategory CATEGORY_ROOT = new PerkCategory("root", TextFormatting.WHITE);
-    public static final PerkCategory CATEGORY_MAJOR = new PerkCategory("major", TextFormatting.WHITE);
-    public static final PerkCategory CATEGORY_KEY = new PerkCategory("key", TextFormatting.GOLD);
-    public static final PerkCategory CATEGORY_EPIPHANY = new PerkCategory("epiphany", TextFormatting.GOLD);
-    public static final PerkCategory CATEGORY_FOCUS = new PerkCategory("focus", TextFormatting.GOLD);
+    public static final PerkCategory CATEGORY_BASE = new PerkCategory("base", ChatFormatting.WHITE);
+    public static final PerkCategory CATEGORY_ROOT = new PerkCategory("root", ChatFormatting.WHITE);
+    public static final PerkCategory CATEGORY_MAJOR = new PerkCategory("major", ChatFormatting.WHITE);
+    public static final PerkCategory CATEGORY_KEY = new PerkCategory("key", ChatFormatting.GOLD);
+    public static final PerkCategory CATEGORY_EPIPHANY = new PerkCategory("epiphany", ChatFormatting.GOLD);
+    public static final PerkCategory CATEGORY_FOCUS = new PerkCategory("focus", ChatFormatting.GOLD);
 
     private final ResourceLocation registryName;
     private final CacheEventBus busWrapper;
@@ -84,16 +84,16 @@ public class AbstractPerk implements ModifierSource {
         return new PerkTreePoint<>(this, this.getOffset());
     }
 
-    protected void invalidate(LogicalSide side) {
+    protected void invalidate(LogicalSide direction) {
         this.busWrapper.unregisterAll();
-        PerkCooldownHelper.removePerkCooldowns(side, this);
+        PerkCooldownHelper.removePerkCooldowns(direction, this);
     }
 
-    protected void validate(LogicalSide side) {
-        this.attachListeners(side, busWrapper);
+    protected void validate(LogicalSide direction) {
+        this.attachListeners(direction, busWrapper);
     }
 
-    protected void attachListeners(LogicalSide side, IEventBus bus) {}
+    protected void attachListeners(LogicalSide direction, IEventBus bus) {}
 
     @Nonnull
     public Point.Float getOffset() {
@@ -141,7 +141,7 @@ public class AbstractPerk implements ModifierSource {
     protected void removePerkLogic(Player player, LogicalSide dist) {}
 
     protected LogicalSide getSide(Entity entity) {
-        return entity.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+        return entity.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
     }
 
     @Nullable
@@ -173,11 +173,11 @@ public class AbstractPerk implements ModifierSource {
         return category;
     }
 
-    public AllocationStatus getPerkStatus(@Nullable Player player, LogicalSide side) {
+    public AllocationStatus getPerkStatus(@Nullable Player player, LogicalSide direction) {
         if (player == null) {
             return AllocationStatus.UNALLOCATED;
         }
-        PlayerProgress progress = ResearchHelper.getProgress(player, side);
+        PlayerProgress progress = ResearchHelper.getProgress(player, direction);
         if (!progress.isValid()) {
             return AllocationStatus.UNALLOCATED;
         }
@@ -218,14 +218,14 @@ public class AbstractPerk implements ModifierSource {
     @OnlyIn(Dist.CLIENT)
     public Collection<MutableComponent> getDescription() {
         List<MutableComponent> toolTip = new ArrayList<>();
-        if (I18n.hasKey(this.unlocalizedKey + ".desc.1")) { // Might have a indexed list there
+        if (I18n.exists(this.unlocalizedKey + ".desc.1")) { // Might have a indexed list there
             int count = 1;
-            while (I18n.hasKey(this.unlocalizedKey + ".desc." + count)) {
+            while (I18n.exists(this.unlocalizedKey + ".desc." + count)) {
                 toolTip.add(Component.translatable(this.unlocalizedKey + ".desc." + count));
                 count++;
             }
             toolTip.add(Component.literal(""));
-        } else if (I18n.hasKey(this.unlocalizedKey + ".desc")) {
+        } else if (I18n.exists(this.unlocalizedKey + ".desc")) {
             toolTip.add(Component.translatable(this.unlocalizedKey + ".desc"));
             toolTip.add(Component.literal(""));
         }
@@ -255,7 +255,7 @@ public class AbstractPerk implements ModifierSource {
             tooltipCache.addAll(this.getDescription());
         } else {
             tooltipCache.add(Component.translatable("perk.info.astralsorcery.missing_progress")
-                    .withStyle(TextFormatting.RED));
+                    .withStyle(ChatFormatting.RED));
         }
         return tooltipCache;
     }
@@ -278,7 +278,7 @@ public class AbstractPerk implements ModifierSource {
         return null;
     }
 
-    public void clearCaches(LogicalSide side) {}
+    public void clearCaches(LogicalSide direction) {}
 
     @OnlyIn(Dist.CLIENT)
     public void clearClientTextCaches() {
@@ -286,7 +286,7 @@ public class AbstractPerk implements ModifierSource {
     }
 
     @Override
-    public ResourceLocation getProviderName() {
+    public ResourceLocation gatherChunkSourceStats() {
         return ModifierManager.PERK_PROVIDER_KEY;
     }
 
@@ -310,7 +310,7 @@ public class AbstractPerk implements ModifierSource {
 
     //Return true to prevent further, other interactions when left-clicking this perk
     @OnlyIn(Dist.CLIENT)
-    public boolean handleMouseClick(ScreenJournalPerkTree gui, double mouseX, double mouseY) {
+    public boolean handleMouseClick(ScreenJournalPerkTree gui, double xpos, double ypos) {
         return false;
     }
 

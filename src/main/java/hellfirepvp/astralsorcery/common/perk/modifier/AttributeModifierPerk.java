@@ -61,8 +61,8 @@ public class AttributeModifierPerk extends AttributeConverterPerk implements Att
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
-        if (!ignoreRequirements && ResearchHelper.getProgress(player, side).getPerkData().isPerkSealed(this)) {
+    public Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide direction, boolean ignoreRequirements) {
+        if (!ignoreRequirements && ResearchHelper.getProgress(player, direction).getPerkData().isPerkSealed(this)) {
             return Collections.emptyList();
         }
 
@@ -95,32 +95,32 @@ public class AttributeModifierPerk extends AttributeConverterPerk implements Att
 
         this.modifiers.clear();
 
-        if (JSONUtils.hasField(perkData, "modifiers")) {
-            JsonArray array = JSONUtils.getJsonArray(perkData, "modifiers");
+        if (GsonHelper.convertToInt(perkData, "modifiers")) {
+            JsonArray array = GsonHelper.getAsJsonArray(perkData, "modifiers");
             for (int i = 0; i < array.size(); i++) {
-                JsonObject serializedModifier = JSONUtils.getJsonObject(array.get(i), "modifiers[%s]");
+                JsonObject serializedModifier = GsonHelper.getAsJsonObject(array.get(i), "modifiers[%s]");
 
                 if (serializedModifier.has("custom")) {
-                    String customKey = JSONUtils.getString(serializedModifier, "custom");
-                    PerkAttributeModifier customModifier = RegistriesAS.REGISTRY_PERK_CUSTOM_MODIFIERS.getValue(new ResourceLocation(customKey));
+                    String customKey = GsonHelper.getString(serializedModifier, "custom");
+                    PerkAttributeModifier customModifier = RegistriesAS.REGISTRY_PERK_CUSTOM_MODIFIERS.getValue(ResourceLocation.parse(customKey));
                     if (customModifier == null) {
                         throw new IllegalArgumentException("Unknown specified modifier: " + customKey);
                     }
                     this.addModifier(customModifier);
                 } else {
-                    String typeKey = JSONUtils.getString(serializedModifier, "type");
-                    PerkAttributeType type = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(new ResourceLocation(typeKey));
+                    String typeKey = GsonHelper.getString(serializedModifier, "type");
+                    PerkAttributeType type = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(ResourceLocation.parse(typeKey));
                     if (type == null) {
                         throw new IllegalArgumentException("Unknown modifier type: " + typeKey);
                     }
-                    String modeKey = JSONUtils.getString(serializedModifier, "mode");
+                    String modeKey = GsonHelper.getString(serializedModifier, "mode");
                     ModifierType mode;
                     try {
                         mode = ModifierType.valueOf(modeKey);
                     } catch (Exception exc) {
                         throw new IllegalArgumentException("Unknown mode: " + modeKey);
                     }
-                    float value = JSONUtils.getFloat(serializedModifier, "value");
+                    float value = GsonHelper.getFloat(serializedModifier, "value");
 
                     this.addModifier(value, mode, type);
                 }

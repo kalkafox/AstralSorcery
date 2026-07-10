@@ -42,7 +42,7 @@ public abstract class ListenerCriterionTrigger<T extends CriterionTriggerInstanc
         return id;
     }
 
-    public final void addListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<T> listener) {
+    public final void addListener(PlayerAdvancements playerAdvancementsIn, CriterionTrigger.Listener<T> listener) {
         Listeners<T> listeners = this.listeners.get(playerAdvancementsIn);
 
         if (listeners == null) {
@@ -53,7 +53,7 @@ public abstract class ListenerCriterionTrigger<T extends CriterionTriggerInstanc
         listeners.add(listener);
     }
 
-    public final void removeListener(PlayerAdvancements playerAdvancementsIn, ICriterionTrigger.Listener<T> listener) {
+    public final void removeListener(PlayerAdvancements playerAdvancementsIn, CriterionTrigger.Listener<T> listener) {
         Listeners<T> listeners = this.listeners.get(playerAdvancementsIn);
 
         if (listeners != null) {
@@ -65,7 +65,7 @@ public abstract class ListenerCriterionTrigger<T extends CriterionTriggerInstanc
         }
     }
 
-    public final void removeAllListeners(PlayerAdvancements playerAdvancementsIn) {
+    public final void removePlayerListeners(PlayerAdvancements playerAdvancementsIn) {
         this.listeners.remove(playerAdvancementsIn);
     }
 
@@ -82,24 +82,24 @@ public abstract class ListenerCriterionTrigger<T extends CriterionTriggerInstanc
             return this.listeners.isEmpty();
         }
 
-        public final void add(ICriterionTrigger.Listener<T> listener) {
+        public final void add(CriterionTrigger.Listener<T> listener) {
             this.listeners.add(listener);
         }
 
-        public final void remove(ICriterionTrigger.Listener<T> listener) {
+        public final void remove(CriterionTrigger.Listener<T> listener) {
             this.listeners.remove(listener);
         }
 
         public final void trigger(Predicate<T> test) {
             List<Listener<T>> list = Lists.newArrayList();
 
-            for (ICriterionTrigger.Listener<T> listener : this.listeners) {
+            for (CriterionTrigger.Listener<T> listener : this.listeners) {
                 if (test.test(listener.getCriterionInstance())) {
                     list.add(listener);
                 }
             }
 
-            for (ICriterionTrigger.Listener<T> listener1 : list) {
+            for (CriterionTrigger.Listener<T> listener1 : list) {
                 listener1.grantCriterion(this.playerAdvancements);
             }
         }

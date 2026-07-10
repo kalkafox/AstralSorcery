@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class PerkAttributeType extends AbstractAstralRegistryEntry<PerkAttributeType> implements ReadWriteLockable {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
 
     //May be used by subclasses to more efficiently track who's got a perk applied
     private final Map<LogicalSide, Set<UUID>> applicationCache = Maps.newHashMap();
@@ -66,7 +66,7 @@ public class PerkAttributeType extends AbstractAstralRegistryEntry<PerkAttribute
         return isOnlyMultiplicative;
     }
 
-    public Component getTranslatedName() {
+    public Component getName() {
         return Component.translatable(this.getUnlocalizedName());
     }
 
@@ -80,7 +80,7 @@ public class PerkAttributeType extends AbstractAstralRegistryEntry<PerkAttribute
     protected void attachListeners(IEventBus eventBus) {}
 
     protected LogicalSide getSide(Entity entity) {
-        return entity.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+        return entity.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
     }
 
     @Nullable
@@ -96,41 +96,41 @@ public class PerkAttributeType extends AbstractAstralRegistryEntry<PerkAttribute
         return new PerkAttributeModifier(this, mode, modifier);
     }
 
-    public void onApply(Player player, LogicalSide side, ModifierSource source) {
+    public void onApply(Player player, LogicalSide direction, ModifierSource source) {
         this.write(() -> {
-            applicationCache.computeIfAbsent(side, s -> new HashSet<>()).add(player.getUniqueID());
+            applicationCache.computeIfAbsent(direction, s -> new HashSet<>()).add(player.getUUID());
         });
     }
 
-    public void onRemove(Player player, LogicalSide side, boolean removedCompletely, ModifierSource source) {
+    public void onRemove(Player player, LogicalSide direction, boolean removedCompletely, ModifierSource source) {
         if (removedCompletely) {
             this.write(() -> {
-                applicationCache.getOrDefault(side, Collections.emptySet()).remove(player.getUniqueID());
+                applicationCache.getOrDefault(direction, Collections.emptySet()).remove(player.getUUID());
             });
         }
     }
 
     //Called if no modifiers of this type were applied on the player, but now there is at least 1 added.
     //Called before any modifiers are actually applied!
-    public void onModeApply(Player player, ModifierType mode, LogicalSide side) {}
+    public void onModeApply(Player player, ModifierType mode, LogicalSide direction) {}
 
     //Called if no more modifiers of this type are applied on the player.
     //Called after that last modifier is removed!
-    public void onModeRemove(Player player, ModifierType mode, LogicalSide side, boolean removedCompletely) {}
+    public void onModeRemove(Player player, ModifierType mode, LogicalSide direction, boolean removedCompletely) {}
 
-    public boolean hasTypeApplied(Player player, LogicalSide side) {
-        return this.read(() -> applicationCache.getOrDefault(side, Collections.emptySet()).contains(player.getUniqueID()));
+    public boolean hasTypeApplied(Player player, LogicalSide direction) {
+        return this.read(() -> applicationCache.getOrDefault(direction, Collections.emptySet()).contains(player.getUUID()));
     }
 
-    private void clear(LogicalSide side) {
+    private void clear(LogicalSide direction) {
         this.write(() -> {
-            this.applicationCache.remove(side);
+            this.applicationCache.remove(direction);
         });
     }
 
-    public static void clearCache(LogicalSide side) {
+    public static void clearCache(LogicalSide direction) {
         for (PerkAttributeType type : RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES) {
-            type.clear(side);
+            type.clear(direction);
         }
     }
 

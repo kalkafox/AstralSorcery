@@ -69,7 +69,7 @@ public class SimpleAltarRecipeBuilder<T extends SimpleAltarRecipe> extends Custo
     }
 
     public SimpleAltarRecipeBuilder<T> addRelayInput(ItemLike item) {
-        return this.addRelayInput(Ingredient.fromItems(item));
+        return this.addRelayInput(Ingredient.valueFromJson(item));
     }
 
     public SimpleAltarRecipeBuilder<T> addRelayInput(Ingredient ingredient) {
@@ -83,7 +83,7 @@ public class SimpleAltarRecipeBuilder<T extends SimpleAltarRecipe> extends Custo
     }
 
     public SimpleAltarRecipeBuilder<T> setStarlightRequirement(float percentOfAltarBar) {
-        this.recipe.setStarlightRequirement((int) (this.recipe.getAltarType().getStarlightCapacity() * MathHelper.clamp(percentOfAltarBar, 0F, 1F)));
+        this.recipe.setStarlightRequirement((int) (this.recipe.getAltarType().getStarlightCapacity() * Mth.clamp(percentOfAltarBar, 0F, 1F)));
         return this;
     }
 

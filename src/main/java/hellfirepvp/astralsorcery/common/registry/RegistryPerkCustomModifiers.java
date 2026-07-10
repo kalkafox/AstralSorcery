@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
@@ -60,8 +61,8 @@ public class RegistryPerkCustomModifiers {
 
             @Override
             public float getValue(Player player, PlayerProgress progress) {
-                LogicalSide side = player.getEntityWorld().isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER;
-                return 1F + (0.05F * progress.getPerkData().getAvailablePerkPoints(player, side));
+                LogicalSide direction = player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+                return 1F + (0.05F * progress.getPerkData().getAvailablePerkPoints(player, direction));
             }
 
             @Override
@@ -91,7 +92,6 @@ public class RegistryPerkCustomModifiers {
     }
 
     private static <T extends PerkAttributeModifier> T register(T modifier) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(modifier);
-        return modifier;
+        return AstralRegistries.register(AstralRegistries.PERK_CUSTOM_MODIFIERS, modifier);
     }
 }

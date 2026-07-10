@@ -19,13 +19,24 @@ import net.minecraft.sounds.SoundEvent;
  * Created by HellFirePvP
  * Date: 30.06.2019 / 22:58
  */
-public class CategorizedSoundEvent extends SoundEvent {
+// 1.21: SoundEvent's constructor is private (factory methods only), so this can no
+// longer subclass it; it wraps the registered SoundEvent with its default category.
+public class CategorizedSoundEvent {
 
+    private final SoundEvent event;
     private final SoundSource category;
 
-    public CategorizedSoundEvent(ResourceLocation soundNameIn, SoundSource category) {
-        super(soundNameIn);
+    public CategorizedSoundEvent(SoundEvent event, SoundSource category) {
+        this.event = event;
         this.category = category;
+    }
+
+    public SoundEvent getSoundEvent() {
+        return event;
+    }
+
+    public ResourceLocation getLocation() {
+        return event.getLocation();
     }
 
     public SoundSource getCategory() {

@@ -26,7 +26,7 @@ public interface ITransmissionSource extends IPrismTransmissionNode {
 
     @Override
     default <T extends BlockEntity> boolean updateFromTileEntity(T tile) {
-        WorldNetworkHandler handle = WorldNetworkHandler.getNetworkHandler(tile.getWorld());
+        WorldNetworkHandler handle = WorldNetworkHandler.getNetworkHandler(tile.getLevel());
         IIndependentStarlightSource src = handle.getSourceAt(getLocationPos());
         if (src != null) {
             return src.updateFromTileEntity(tile);

@@ -65,10 +65,10 @@ public class IntegrationJEI implements IModPlugin {
         registry.useNbtForSubtypes(
                 ItemsAS.ATTUNED_ROCK_CRYSTAL,
                 ItemsAS.ATTUNED_CELESTIAL_CRYSTAL,
-                Item.getItemFromBlock(BlocksAS.ROCK_COLLECTOR_CRYSTAL),
-                Item.getItemFromBlock(BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL),
-                Item.getItemFromBlock(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER),
-                Item.getItemFromBlock(BlocksAS.GEM_CRYSTAL_CLUSTER)
+                Item.canBeHurtBy(BlocksAS.ROCK_COLLECTOR_CRYSTAL),
+                Item.canBeHurtBy(BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL),
+                Item.canBeHurtBy(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER),
+                Item.canBeHurtBy(BlocksAS.GEM_CRYSTAL_CLUSTER)
         );
 
         registry.registerSubtypeInterpreter(ItemsAS.RESONATOR, stack -> ItemResonator.getUpgrades(stack)
@@ -76,7 +76,7 @@ public class IntegrationJEI implements IModPlugin {
                 .map(ItemResonator.ResonatorUpgrade::getAppendix)
                 .collect(Collectors.joining(",")));
         registry.registerSubtypeInterpreter(ItemsAS.MANTLE, stack -> Optional.ofNullable(ItemsAS.MANTLE.getConstellation(stack))
-                .map(IConstellation::getSimpleName)
+                .map(IConstellation::getName)
                 .orElse("none"));
     }
 

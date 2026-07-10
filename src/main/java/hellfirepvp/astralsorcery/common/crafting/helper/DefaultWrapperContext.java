@@ -21,18 +21,18 @@ import net.neoforged.neoforge.items.IItemHandler;
 public class DefaultWrapperContext extends RecipeCraftingContext<IHandlerRecipe, IItemHandler> {
 
     private final IItemHandler handler;
-    private final Level world;
+    private final Level level;
 
-    public DefaultWrapperContext(IItemHandler handler, Level world) {
+    public DefaultWrapperContext(IItemHandler handler, Level level) {
         this.handler = handler;
-        this.world = world;
+        this.level = level;
     }
 
     public IItemHandler getHandler() {
         return handler;
     }
 
-    public Level getWorld() {
-        return world;
+    public Level getLevel() {
+        return level;
     }
 }

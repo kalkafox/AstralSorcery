@@ -56,8 +56,8 @@ public class ProviderBlockRing implements PatreonEffectProvider<TypeBlockRing> {
                     obj.getAsJsonPrimitive("posX").getAsInt(),
                     obj.getAsJsonPrimitive("posY").getAsInt(),
                     obj.getAsJsonPrimitive("posZ").getAsInt());
-            Block b = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(obj.getAsJsonPrimitive("block").getAsString()));
-            pattern.put(pos, b.getDefaultState());
+            Block b = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(obj.getAsJsonPrimitive("block").getAsString()));
+            pattern.put(pos, b.defaultBlockState());
         }
         return new TypeBlockRing(effectUniqueId,
                 fc, playerUUID,

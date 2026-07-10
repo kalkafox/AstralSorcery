@@ -55,46 +55,46 @@ public class MantleEffectLucerna extends MantleEffect {
 
         this.playCapeSparkles(player, 0.15F);
 
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             this.playEntityHighlight(player);
         }
-        if (CONFIG.findSpawners.get() && rand.nextInt(10) == 0) {
-            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_SPAWNER, (tileEntity) -> tileEntity instanceof SpawnerBlockEntity);
+        if (CONFIG.findSpawners.get() && random.nextInt(10) == 0) {
+            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_SPAWNER, (entity) -> entity instanceof SpawnerBlockEntity);
         }
-        if (CONFIG.findChests.get() && rand.nextInt(10) == 0) {
-            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (tileEntity) -> tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent());
+        if (CONFIG.findChests.get() && random.nextInt(10) == 0) {
+            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (entity) -> entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent());
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void playBlockHighlight(Player player, Color highlightColor, Predicate<BlockEntity> test) {
         float chance = 0.9F;
-        Set<BlockPos> positions = BlockDiscoverer.searchForTileEntitiesAround(player.getEntityWorld(), player.getPosition(), CONFIG.range.get(), test);
+        Set<BlockPos> positions = BlockDiscoverer.searchForTileEntitiesAround(player.getCommandSenderWorld(), player.position(), CONFIG.range.get(), test);
         for (BlockPos pos : positions) {
-            if (rand.nextFloat() > chance) {
+            if (random.nextFloat() > chance) {
                 continue;
             }
-            Vector3 at = new Vector3(pos).add(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());
+            Vector3 at = new Vector3(pos).add(random.nextFloat(), random.nextFloat(), random.nextFloat());
             if (at.distance(player) < 4) {
                 continue;
             }
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_DEPTH_PARTICLE)
-                    .setOwner(player.getUniqueID())
+                    .setOwner(player.getUUID())
                     .spawn(at)
                     .color(VFXColorFunction.constant(highlightColor))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setScaleMultiplier(0.4F + rand.nextFloat() * 0.4F)
-                    .setMaxAge(30 + rand.nextInt(15));
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setScaleMultiplier(0.4F + random.nextFloat() * 0.4F)
+                    .setMaxAge(30 + random.nextInt(15));
 
-            if (rand.nextFloat() > 0.35F) {
+            if (random.nextFloat() > 0.35F) {
                 EffectHelper.of(EffectTemplatesAS.GENERIC_DEPTH_PARTICLE)
-                        .setOwner(player.getUniqueID())
+                        .setOwner(player.getUUID())
                         .spawn(at)
                         .color(VFXColorFunction.WHITE)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.2F)
-                        .setMaxAge(20 + rand.nextInt(10));
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.2F)
+                        .setMaxAge(20 + random.nextInt(10));
             }
 
             chance *= 0.9F;
@@ -105,10 +105,10 @@ public class MantleEffectLucerna extends MantleEffect {
     private void playEntityHighlight(Player player) {
         AABB box = new AABB(0, 0, 0, 0, 0, 0)
                 .grow(CONFIG.range.get())
-                .offset(player.getPosition());
-        List<LivingEntity> entities = player.getEntityWorld().getEntitiesWithinAABB(LivingEntity.class, box);
+                .offset(player.position());
+        List<LivingEntity> entities = player.getCommandSenderWorld().getEntitiesWithinAABB(LivingEntity.class, box);
         for (LivingEntity entity : entities) {
-            if (!entity.isAlive() || entity.equals(player) || rand.nextInt(8) != 0) {
+            if (!entity.isAlive() || entity.equals(player) || random.nextInt(8) != 0) {
                 continue;
             }
 
@@ -116,24 +116,24 @@ public class MantleEffectLucerna extends MantleEffect {
             if (atEntity.distance(player) < 2) {
                 continue;
             }
-            atEntity.add(rand.nextFloat() * entity.getWidth(), rand.nextFloat() * entity.getHeight(), rand.nextFloat() * entity.getWidth());
+            atEntity.add(random.nextFloat() * entity.getWidth(), random.nextFloat() * entity.getHeight(), random.nextFloat() * entity.getWidth());
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_DEPTH_PARTICLE)
-                    .setOwner(player.getUniqueID())
+                    .setOwner(player.getUUID())
                     .spawn(atEntity)
                     .color(VFXColorFunction.constant(this.getAssociatedConstellation().getConstellationColor()))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setScaleMultiplier(0.4F + rand.nextFloat() * 0.4F)
-                    .setMaxAge(30 + rand.nextInt(15));
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setScaleMultiplier(0.4F + random.nextFloat() * 0.4F)
+                    .setMaxAge(30 + random.nextInt(15));
 
-            if (rand.nextFloat() > 0.35F) {
+            if (random.nextFloat() > 0.35F) {
                 EffectHelper.of(EffectTemplatesAS.GENERIC_DEPTH_PARTICLE)
-                        .setOwner(player.getUniqueID())
+                        .setOwner(player.getUUID())
                         .spawn(atEntity)
                         .color(VFXColorFunction.WHITE)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.2F)
-                        .setMaxAge(20 + rand.nextInt(10));
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.2F)
+                        .setMaxAge(20 + random.nextInt(10));
             }
         }
     }

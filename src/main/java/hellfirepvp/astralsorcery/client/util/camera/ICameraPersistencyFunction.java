@@ -17,9 +17,9 @@ package hellfirepvp.astralsorcery.client.util.camera;
  */
 public interface ICameraPersistencyFunction {
 
-    public boolean isExpired();
+    public boolean timedOut();
 
-    public void setExpired();
+    public void remove();
 
     public void forceStop();
 

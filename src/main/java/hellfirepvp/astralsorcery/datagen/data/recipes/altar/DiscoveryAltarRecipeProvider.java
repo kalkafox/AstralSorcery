@@ -35,12 +35,12 @@ import java.util.function.Consumer;
  */
 public class DiscoveryAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
         registerRecipes(registrar);
         registerBuildingBlockRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<IFinishedRecipe> registrar) {
+    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.ALTAR_UPGRADE_ATTUNEMENT)
                 .createRecipe(BlocksAS.ALTAR_ATTUNEMENT, AltarType.DISCOVERY)
                 .setStarlightRequirement(0.7F)
@@ -274,7 +274,7 @@ public class DiscoveryAltarRecipeProvider {
                 .build(registrar);
     }
 
-    private static void registerBuildingBlockRecipes(Consumer<IFinishedRecipe> registrar) {
+    private static void registerBuildingBlockRecipes(Consumer<FinishedRecipe> registrar) {
         /*****************************************************************************
          * Infused wood
          *****************************************************************************/

@@ -44,9 +44,9 @@ public class AttributeTypeCooldown extends PerkAttributeType {
 
     private void onCooldown(CooldownSetEvent event) {
         Player player = event.getPlayer();
-        Level world = player.getEntityWorld();
+        Level level = player.getCommandSenderWorld();
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             return;
         }
         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
@@ -63,8 +63,8 @@ public class AttributeTypeCooldown extends PerkAttributeType {
                 .modifyValue(player, prog, this, 1F);
         multiplier -= 1F;
         multiplier = AttributeEvent.postProcessModded(player, this, multiplier);
-        multiplier = 1F - MathHelper.clamp(multiplier, 0F, 1F);
-        event.setCooldown(Math.round(event.getResultCooldown() * multiplier));
+        multiplier = 1F - Mth.clamp(multiplier, 0F, 1F);
+        event.addCooldown(Math.round(event.getResultCooldown() * multiplier));
     }
 
 }

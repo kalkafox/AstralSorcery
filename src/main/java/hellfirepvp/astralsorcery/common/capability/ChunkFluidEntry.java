@@ -48,7 +48,7 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundTag> {
         this.mbAmount = 0;
     }
 
-    public void generate(long seed) {
+    public void place(long seed) {
         if (isInitialized()) {
             return;
         }
@@ -57,7 +57,7 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundTag> {
         FluidRarityEntry fluidEntry = FluidRarityRegistry.INSTANCE.getRandomValue(r);
         if (fluidEntry != null) {
             this.mbAmount = fluidEntry.getRandomAmount(r);
-            this.chunkFluid = new FluidStack(fluidEntry.getFluid(), FluidAttributes.BUCKET_VOLUME);
+            this.chunkFluid = new FluidStack(fluidEntry.getType(), FluidAttributes.BUCKET_VOLUME);
         } else {
             this.setEmpty();
         }
@@ -93,7 +93,7 @@ public class ChunkFluidEntry implements INBTSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        this.chunkFluid = NBTHelper.getFluid(nbt, "chunkFluid");
+        this.chunkFluid = NBTHelper.getType(nbt, "chunkFluid");
         this.mbAmount = nbt.getInt("mbAmount");
         this.initialized = nbt.getBoolean("initialized");
     }

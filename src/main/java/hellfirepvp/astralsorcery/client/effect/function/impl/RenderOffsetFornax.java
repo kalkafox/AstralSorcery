@@ -29,15 +29,15 @@ public class RenderOffsetFornax implements VFXRenderOffsetFunction<EntityVisualF
     @Nonnull
     @Override
     public Vector3 changeRenderPosition(@Nonnull EntityVisualFX fx, Vector3 interpolatedPos, float pTicks) {
-        Vector3 currentMotion = fx.getMotion();
-        Vector3 perp = currentMotion.clone().perpendicular().normalize().multiply(0.05);
+        Vector3 currentMotion = fx.getDeltaMovement();
+        Vector3 perp = currentMotion.clone().perpendicular().normalize().mul(0.05);
         Random r = new Random(fx.getId()); //LUL tho...
 
         int interv = (int) ((r.nextInt() + ClientScheduler.getClientTick()) % 9);
         float part = interv + pTicks;
         float perc = part / 10F;
 
-        float sinPart = MathHelper.sin(perc * ((float) Math.PI) * 2F);
-        return interpolatedPos.add(perp.rotate(r.nextFloat() * 360F, currentMotion).multiply(sinPart));
+        float sinPart = Mth.sin(perc * ((float) Math.PI) * 2F);
+        return interpolatedPos.add(perp.mirror(r.nextFloat() * 360F, currentMotion).mul(sinPart));
     }
 }

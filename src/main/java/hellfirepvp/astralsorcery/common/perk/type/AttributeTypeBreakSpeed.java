@@ -45,13 +45,13 @@ public class AttributeTypeBreakSpeed extends PerkAttributeType {
         }
 
         Player player = event.getPlayer();
-        LogicalSide side = this.getSide(player);
-        if (!hasTypeApplied(player, side)) {
+        LogicalSide direction = this.getSide(player);
+        if (!hasTypeApplied(player, direction)) {
             return;
         }
-        float speed = PerkAttributeHelper.getOrCreateMap(player, side)
-                .modifyValue(player, ResearchHelper.getProgress(player, side), this, event.getNewSpeed());
-        speed = AttributeEvent.postProcessModded(player, this, speed);
-        event.setNewSpeed(speed);
+        float speedModifier = PerkAttributeHelper.getOrCreateMap(player, direction)
+                .modifyValue(player, ResearchHelper.getProgress(player, direction), this, event.getNewSpeed());
+        speedModifier = AttributeEvent.postProcessModded(player, this, speedModifier);
+        event.setNewSpeed(speedModifier);
     }
 }

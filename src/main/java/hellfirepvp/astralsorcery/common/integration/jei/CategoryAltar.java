@@ -60,7 +60,7 @@ public class CategoryAltar extends JEICategory<SimpleAltarRecipe> {
     }
 
     @Override
-    public IDrawable getBackground() {
+    public IDrawable getNoItemIcon() {
         return this.background;
     }
 
@@ -79,7 +79,7 @@ public class CategoryAltar extends JEICategory<SimpleAltarRecipe> {
     }
 
     @Override
-    public void draw(SimpleAltarRecipe recipe, PoseStack matrixStack, double mouseX, double mouseY) {
+    public void draw(SimpleAltarRecipe recipe, PoseStack matrixStack, double xpos, double ypos) {
         if (recipe.getFocusConstellation() != null) {
             RenderSystem.enableBlend();
             Blending.DEFAULT.apply();
@@ -114,7 +114,7 @@ public class CategoryAltar extends JEICategory<SimpleAltarRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayout recipeLayout, SimpleAltarRecipe altarRecipe, IIngredients ingredients) {
-        IGuiItemStackGroup itemStacks = recipeLayout.getItemStacks();
+        IGuiItemStackGroup items = recipeLayout.getItems();
 
         int step = 19;
         int xOffset = 11;
@@ -122,7 +122,7 @@ public class CategoryAltar extends JEICategory<SimpleAltarRecipe> {
         for (int yy = 0; yy < AltarRecipeGrid.GRID_SIZE; yy++) {
             for (int xx = 0; xx < AltarRecipeGrid.GRID_SIZE; xx++) {
                 int slot = xx + yy * AltarRecipeGrid.GRID_SIZE;
-                itemStacks.init(slot, true, xOffset + step * xx, yOffset + step * yy);
+                items.init(slot, true, xOffset + step * xx, yOffset + step * yy);
             }
         }
 
@@ -131,15 +131,15 @@ public class CategoryAltar extends JEICategory<SimpleAltarRecipe> {
         int additional = altarRecipe.getRelayInputs().size();
         for (int i = 0; i < additional; i++) {
             double part = ((double) i) / ((double) additional) * 2.0 * Math.PI; //Shift by half a period
-            part = MathHelper.clamp(part, 0, 2.0 * Math.PI);
+            part = Mth.clamp(part, 0, 2.0 * Math.PI);
             part += Math.PI;
             double xAdd = Math.sin(part) * 60.0;
             double yAdd = Math.cos(part) * 60.0;
-            itemStacks.init(25 + i, true, MathHelper.floor(centerX + xAdd), MathHelper.floor(centerY + yAdd));
+            items.init(25 + i, true, Mth.floor(centerX + xAdd), Mth.floor(centerY + yAdd));
         }
 
-        itemStacks.init(itemStacks.getGuiIngredients().size(), false, 48, 18);
+        items.init(items.getGuiIngredients().size(), false, 48, 18);
 
-        itemStacks.set(ingredients);
+        items.set(ingredients);
     }
 }

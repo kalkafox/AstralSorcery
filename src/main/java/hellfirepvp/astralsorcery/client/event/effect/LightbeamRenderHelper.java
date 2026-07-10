@@ -43,7 +43,7 @@ import java.util.function.Consumer;
 public class LightbeamRenderHelper implements ITickHandler {
 
     private static final LightbeamRenderHelper INSTANCE = new LightbeamRenderHelper();
-    private int ticksExisted = 0;
+    private int tickCount = 0;
 
     private LightbeamRenderHelper() {}
 
@@ -53,16 +53,16 @@ public class LightbeamRenderHelper implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        ticksExisted++;
-        if (ticksExisted % 48 == 0) {
-            ticksExisted = 0;
+        tickCount++;
+        if (tickCount % 48 == 0) {
+            tickCount = 0;
             Entity rView = Minecraft.getInstance().getRenderViewEntity();
             if (rView == null) {
                 rView = Minecraft.getInstance().player;
             }
             if (rView != null) {
                 Entity renderView = rView;
-                ResourceKey<Level> dimKey = renderView.getEntityWorld().getDimensionKey();
+                ResourceKey<Level> dimKey = renderView.getCommandSenderWorld().dimension();
 
                 SyncDataHolder.executeClient(SyncDataHolder.DATA_LIGHT_CONNECTIONS, ClientLightConnections.class, (data) -> {
                     for (Map.Entry<BlockPos, Set<BlockPos>> entry : data.getClientConnections(dimKey).entrySet()) {
@@ -71,7 +71,7 @@ public class LightbeamRenderHelper implements ITickHandler {
                         if (renderView.getDistanceSq(at.getX(), at.getY(), at.getZ()) <= RenderingConfig.CONFIG.getMaxEffectRenderDistanceSq()) {
                             Vector3 source = new Vector3(at).add(0.5, 0.5, 0.5);
                             Color overlay = null;
-                            TileLens lens = MiscUtils.getTileAt(renderView.getEntityWorld(), at, TileLens.class, true);
+                            TileLens lens = MiscUtils.getTileAt(renderView.getCommandSenderWorld(), at, TileLens.class, true);
                             if (lens != null) {
                                 if (lens.getColorType() != null) {
                                     overlay = lens.getColorType().getColor();
@@ -100,8 +100,8 @@ public class LightbeamRenderHelper implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

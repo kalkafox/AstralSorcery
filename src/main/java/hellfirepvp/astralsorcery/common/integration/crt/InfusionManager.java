@@ -36,7 +36,7 @@ public class InfusionManager implements IRecipeManager {
     @ZenCodeType.Method
     public void addRecipe(String name, IItemStack itemOutput, IIngredient itemInput, Fluid liquidInput, int craftingTickTime, float consumptionChance, boolean consumeMultipleFluids, boolean acceptChaliceInput, boolean copyNBTToOutputs) {
         name = fixRecipeName(name);
-        ResourceLocation recipeId = new ResourceLocation(name);
+        ResourceLocation recipeId = ResourceLocation.parse(name);
         LiquidInfusion recipe = new LiquidInfusion(recipeId, craftingTickTime, liquidInput, itemInput.asVanillaIngredient(), itemOutput.getInternal(), consumptionChance, consumeMultipleFluids, acceptChaliceInput, copyNBTToOutputs);
         CraftTweakerAPI.apply(new ActionAddRecipe(this, recipe));
     }

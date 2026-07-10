@@ -9,7 +9,6 @@
 package hellfirepvp.astralsorcery.common.util.item;
 
 import hellfirepvp.astralsorcery.common.base.Mods;
-import hellfirepvp.astralsorcery.common.integration.IntegrationBotania;
 import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,26 +51,26 @@ import static hellfirepvp.astralsorcery.common.util.item.ItemComparator.Clause.*
 public class ItemUtils {
 
     public static final IItemHandler EMPTY_INVENTORY = new ItemHandlerEmpty();
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
-    public static ItemEntity dropItem(Level world, double x, double y, double z, ItemStack stack) {
-        if (world.isRemote) {
+    public static ItemEntity dropItem(Level level, double x, double y, double z, ItemStack stack) {
+        if (level.isClientSide) {
             return null;
         }
-        ItemEntity ei = new ItemEntity(world, x, y, z, stack);
-        ei.setMotion(new Vec3(0, 0, 0));
-        world.addEntity(ei);
+        ItemEntity ei = new ItemEntity(level, x, y, z, stack);
+        ei.setDeltaMovement(new Vec3(0, 0, 0));
+        level.addEntity(ei);
         ei.setPickupDelay(20);
         return ei;
     }
 
-    public static ItemEntity dropItemNaturally(Level world, double x, double y, double z, ItemStack stack) {
-        if (world.isRemote) {
+    public static ItemEntity dropItemNaturally(Level level, double x, double y, double z, ItemStack stack) {
+        if (level.isClientSide) {
             return null;
         }
-        ItemEntity ei = new ItemEntity(world, x, y, z, stack);
+        ItemEntity ei = new ItemEntity(level, x, y, z, stack);
         applyRandomDropOffset(ei);
-        world.addEntity(ei);
+        level.addEntity(ei);
         ei.setPickupDelay(20);
         return ei;
     }
@@ -85,8 +84,8 @@ public class ItemUtils {
         toConsume = ItemUtils.copyStackWithSize(toConsume, toConsume.getCount());
 
         ItemStack toReplaceWith = ItemStack.EMPTY;
-        if (toConsume.hasContainerItem()) {
-            toReplaceWith = toConsume.getContainerItem();
+        if (toConsume.hasCraftingRemainingItem()) {
+            toReplaceWith = toConsume.getCraftingRemainingItem();
         }
 
         toConsume.shrink(1);
@@ -115,8 +114,8 @@ public class ItemUtils {
     }
 
     public static boolean isEquippableArmor(Entity entity, ItemStack stack) {
-        for (EquipmentSlot type : EquipmentSlotType.values()) {
-            if (type.getSlotType() == EquipmentSlotType.Group.ARMOR) {
+        for (EquipmentSlot type : EquipmentSlot.values()) {
+            if (type.getType() == EquipmentSlot.Group.ARMOR) {
                 if (stack.canEquip(type, entity)) {
                     return true;
                 }
@@ -126,17 +125,17 @@ public class ItemUtils {
     }
 
     public static ItemStack dropItemToPlayer(Player player, ItemStack stack) {
-        Level world = player.getEntityWorld();
-        if (world.isRemote() || stack.isEmpty()) {
+        Level level = player.getCommandSenderWorld();
+        if (level.isClientSide() || stack.isEmpty()) {
             return stack;
         }
-        ItemEntity item = new ItemEntity(world, player.getPosX(), player.getPosY(), player.getPosZ(), stack);
+        ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), stack);
         if (item.getItem().isEmpty()) {
             return stack;
         }
         item.setNoPickupDelay();
         try {
-            item.onCollideWithPlayer(player);
+            item.playerTouch(player);
         } catch (Exception ignored) {
             //Guess some mod could run into an issue here...
         }
@@ -148,9 +147,9 @@ public class ItemUtils {
     }
 
     private static void applyRandomDropOffset(ItemEntity item) {
-        item.setMotion(rand.nextFloat() * 0.3F - 0.15D,
-                rand.nextFloat() * 0.3F - 0.05D,
-                rand.nextFloat() * 0.3F - 0.15D);
+        item.setDeltaMovement(random.nextFloat() * 0.3F - 0.15D,
+                random.nextFloat() * 0.3F - 0.05D,
+                random.nextFloat() * 0.3F - 0.15D);
     }
 
     @Nonnull
@@ -171,18 +170,18 @@ public class ItemUtils {
         if (b == Blocks.AIR) {
             return null;
         }
-        return b.getDefaultState();
+        return b.defaultBlockState();
     }
 
     @Nonnull
     public static List<ItemStack> getItemsOfTag(ResourceLocation key) {
-        Tag<Item> tag = ItemTags.getCollection().get(key);
+        Tag<Item> tag = ItemTags.getAllTags().get(key);
         return tag == null ? Collections.emptyList() : getItemsOfTag(tag);
     }
 
     @Nonnull
     public static List<ItemStack> getItemsOfTag(Tag<Item> itemTag) {
-        return itemTag.getAllElements().stream().map(ItemStack::new).collect(Collectors.toList());
+        return itemTag.getValues().stream().map(ItemStack::new).collect(Collectors.toList());
     }
 
     public static Collection<ItemStack> scanInventoryFor(IItemHandler handler, Item i) {
@@ -203,9 +202,10 @@ public class ItemUtils {
         IItemHandler handler = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).orElse(EMPTY_INVENTORY);
         Collection<ItemStack> results = findItemsInInventory(handler, match, strict);
 
-        if (Mods.BOTANIA.isPresent()) {
-            results.addAll(IntegrationBotania.findProvidersProvidingItems(player, match));
-        }
+        // 1.21 port: Botania integration is excluded from the build for now.
+        //if (Mods.BOTANIA.isPresent()) {
+        //    results.addAll(IntegrationBotania.findProvidersProvidingItems(player, match));
+        //}
 
         return results;
     }
@@ -258,11 +258,12 @@ public class ItemUtils {
             return true;
         }
         
-        if (Mods.BOTANIA.isPresent()) {
-            if (IntegrationBotania.consumeFromPlayerInventory(player, requestingItemStack, toConsume, simulate)) {
-                return true;
-            }
-        }
+        // 1.21 port: Botania integration is excluded from the build for now.
+        //if (Mods.BOTANIA.isPresent()) {
+        //    if (IntegrationBotania.consumeFromPlayerInventory(player, requestingItemStack, toConsume, simulate)) {
+        //        return true;
+        //    }
+        //}
                 
         return false;
     }
@@ -290,8 +291,8 @@ public class ItemUtils {
         return cAmt <= 0;
     }
 
-    public static void dropInventory(IItemHandler handle, Level worldIn, BlockPos pos) {
-        if (worldIn.isRemote) {
+    public static void dropEquipment(IItemHandler handle, Level worldIn, BlockPos pos) {
+        if (worldIn.isClientSide) {
             return;
         }
         for (int i = 0; i < handle.getSlots(); i++) {
@@ -415,7 +416,7 @@ public class ItemUtils {
         }
 
         @Override
-        public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+        public boolean mayPlace(int slot, @Nonnull ItemStack stack) {
             return false;
         }
 

@@ -40,7 +40,7 @@ public class ItemCrystalAxe extends ItemCrystalTierItem implements TypeEnchantab
     }
 
     @Override
-    public boolean canEnchantItem(ItemStack stack, AstralEnchantmentType type) {
+    public boolean canEnchant(ItemStack stack, AstralEnchantmentType type) {
         return type == AstralEnchantmentType.BREAKABLE || type == AstralEnchantmentType.DIGGER;
     }
 

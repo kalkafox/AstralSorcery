@@ -46,7 +46,7 @@ public class EventHandlerInteract {
             if (item.shouldInterceptEntityInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getTarget()) &&
                     item.doEntityInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getTarget())) {
                 event.setCanceled(true);
-                event.setCancellationResult(ActionResultType.SUCCESS);
+                event.setCancellationResult(InteractionResult.SUCCESS);
             }
         }
     }
@@ -55,10 +55,10 @@ public class EventHandlerInteract {
         ItemStack held = event.getItemStack();
         if (held.getItem() instanceof OverrideInteractItem) {
             OverrideInteractItem item = (OverrideInteractItem) held.getItem();
-            if (item.shouldInterceptBlockInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getPos(), event.getFace()) &&
-                    item.doBlockInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getPos(), event.getFace())) {
+            if (item.shouldInterceptBlockInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getBlockPos(), event.getFace()) &&
+                    item.doBlockInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getBlockPos(), event.getFace())) {
                 event.setCanceled(true);
-                event.setCancellationResult(ActionResultType.SUCCESS);
+                event.setCancellationResult(InteractionResult.SUCCESS);
             }
         }
     }
@@ -67,26 +67,26 @@ public class EventHandlerInteract {
         if (event instanceof BlockEvent.EntityMultiPlaceEvent) {
             return; //Handled 1 method below.
         }
-        LevelAccessor world = event.getWorld();
-        if (world.isRemote() || !(event.getEntity() instanceof Player)) {
+        LevelAccessor level = event.getLevel();
+        if (level.isClientSide() || !(event.getEntity() instanceof Player)) {
             return;
         }
-        handleOwnerPlacement(world, event.getPos(), (Player) event.getEntity());
+        handleOwnerPlacement(level, event.getBlockPos(), (Player) event.getEntity());
     }
 
     private static void onMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
-        LevelAccessor world = event.getWorld();
-        if (world.isRemote() || !(event.getEntity() instanceof Player)) {
+        LevelAccessor level = event.getLevel();
+        if (level.isClientSide() || !(event.getEntity() instanceof Player)) {
             return;
         }
         Player placer = (Player) event.getEntity();
         for (BlockSnapshot snapshot : event.getReplacedBlockSnapshots()) {
-            handleOwnerPlacement(world, snapshot.getPos(), placer);
+            handleOwnerPlacement(level, snapshot.getBlockPos(), placer);
         }
     }
 
-    private static void handleOwnerPlacement(LevelAccessor world, BlockPos pos, Player placer) {
-        TileOwned owned = MiscUtils.getTileAt(world, pos, TileOwned.class, true);
+    private static void handleOwnerPlacement(LevelAccessor level, BlockPos pos, Player placer) {
+        TileOwned owned = MiscUtils.getTileAt(level, pos, TileOwned.class, true);
         if (owned != null) {
             owned.setOwner(placer);
         }

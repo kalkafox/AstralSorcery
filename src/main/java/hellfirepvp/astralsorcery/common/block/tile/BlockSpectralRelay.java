@@ -44,108 +44,108 @@ import javax.annotation.Nullable;
  */
 public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomItemBlock {
 
-    private static final VoxelShape RELAY = Block.makeCuboidShape(2, 0, 2, 14, 2, 14);
+    private static final VoxelShape RELAY = Block.box(2, 0, 2, 14, 2, 14);
 
     public BlockSpectralRelay() {
         super(PropertiesGlass.coatedGlass()
-                .setLightLevel(state -> 4));
+                .isRedstoneConductor(state -> 4));
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return RELAY;
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!world.isRemote()) {
-            ItemStack held = player.getHeldItem(hand);
-            TileSpectralRelay tar = MiscUtils.getTileAt(world, pos, TileSpectralRelay.class, true);
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!level.isClientSide()) {
+            ItemStack held = player.getItemInHand(hand);
+            TileSpectralRelay tar = MiscUtils.getTileAt(level, pos, TileSpectralRelay.class, true);
             if (tar != null) {
-                TileInventory inv = tar.getInventory();
+                TileInventory inv = tar.getItems();
                 if (!held.isEmpty()) {
                     if (!inv.getStackInSlot(0).isEmpty()) {
                         ItemStack stack = inv.getStackInSlot(0);
-                        player.inventory.placeItemBackInInventory(world, stack);
+                        player.inventory.hurtArmor(level, stack);
                         inv.setStackInSlot(0, ItemStack.EMPTY);
                         tar.markForUpdate();
-                        TileSpectralRelay.cascadeRelayProximityUpdates(world, pos);
+                        TileSpectralRelay.cascadeRelayProximityUpdates(level, pos);
                     }
 
-                    if (!world.isAirBlock(pos.up())) {
-                        return ActionResultType.PASS;
+                    if (!level.isEmptyBlock(pos.above())) {
+                        return InteractionResult.PASS;
                     }
 
                     inv.setStackInSlot(0, ItemUtils.copyStackWithSize(held, 1));
-                    world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((world.rand.nextFloat() - world.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                    level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((level.random.nextFloat() - level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                     if (!player.isCreative()) {
                         held.shrink(1);
                     }
                     tar.updateAltarLinkState();
-                    TileSpectralRelay.cascadeRelayProximityUpdates(world, pos);
+                    TileSpectralRelay.cascadeRelayProximityUpdates(level, pos);
                     tar.markForUpdate();
                 } else {
                     if (!inv.getStackInSlot(0).isEmpty()) {
                         ItemStack stack = inv.getStackInSlot(0);
-                        player.inventory.placeItemBackInInventory(world, stack);
+                        player.inventory.hurtArmor(level, stack);
                         inv.setStackInSlot(0, ItemStack.EMPTY);
-                        TileSpectralRelay.cascadeRelayProximityUpdates(world, pos);
+                        TileSpectralRelay.cascadeRelayProximityUpdates(level, pos);
                         tar.markForUpdate();
                     }
                 }
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void onReplaced(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-        super.onReplaced(state, worldIn, pos, newState, isMoving);
-        if (!worldIn.isRemote()) {
+    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+        super.onRemove(state, worldIn, pos, newState, isMoving);
+        if (!worldIn.isClientSide()) {
             TileSpectralRelay.cascadeRelayProximityUpdates(worldIn, pos);
         }
     }
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, world, pos)) {
-            return Blocks.AIR.getDefaultState();
+    public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
+        if (!this.isValidPosition(state, level, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
-        return hasSolidSideOnTop(world, pos.down());
+    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+        return hasSolidSideOnTop(level, pos.below());
     }
 
     @Override
-    public boolean hasComparatorInputOverride(BlockState p_149740_1_) {
+    public boolean hasAnalogOutputSignal(BlockState p_149740_1_) {
         return true;
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, Level world, BlockPos pos) {
-        TileSpectralRelay tsr = MiscUtils.getTileAt(world, pos, TileSpectralRelay.class, false);
+    public int getComparatorInputOverride(BlockState state, Level level, BlockPos pos) {
+        TileSpectralRelay tsr = MiscUtils.getTileAt(level, pos, TileSpectralRelay.class, false);
         if (tsr != null) {
-            return tsr.getInventory().getStackInSlot(0).isEmpty() ? 0 : 15;
+            return tsr.getItems().getStackInSlot(0).isEmpty() ? 0 : 15;
         }
         return 0;
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState p_149645_1_) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileSpectralRelay();
     }
 }

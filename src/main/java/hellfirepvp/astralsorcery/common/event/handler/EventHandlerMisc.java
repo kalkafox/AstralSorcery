@@ -51,19 +51,19 @@ public class EventHandlerMisc {
     }
 
     private static void onCrystalToss(ItemTossEvent event) {
-        if (!event.getPlayer().getEntityWorld().isRemote()) {
+        if (!event.getPlayer().getCommandSenderWorld().isClientSide()) {
             ItemStack thrown = event.getEntityItem().getItem();
             if (thrown.getItem() instanceof ItemCrystalBase) {
-                event.getEntityItem().setThrowerId(event.getPlayer().getUniqueID());
+                event.getEntityItem().setThrower(event.getPlayer().getUUID());
             }
         }
     }
 
     private static void onLecternOpen(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getWorld().isRemote()) {
+        if (event.getLevel().isClientSide()) {
             return;
         }
-        LecternBlockEntity lectern = MiscUtils.getTileAt(event.getWorld(), event.getPos(), LecternTileEntity.class, false);
+        LecternBlockEntity lectern = MiscUtils.getTileAt(event.getLevel(), event.getBlockPos(), LecternBlockEntity.class, false);
         if (lectern != null) {
             ItemStack contained = lectern.getBook();
             if (contained.getItem() instanceof ItemTome) {
@@ -75,18 +75,18 @@ public class EventHandlerMisc {
 
     private static void onChunkLoad(ChunkEvent.Load event) {
         ChunkAccess ch = event.getChunk();
-        if (ch instanceof LevelChunk && !event.getWorld().isRemote()) {
+        if (ch instanceof LevelChunk && !event.getLevel().isClientSide()) {
             ((LevelChunk) ch).getCapability(CapabilitiesAS.CHUNK_FLUID).ifPresent(entry -> {
                 if (!entry.isInitialized()) {
-                    LevelAccessor w = event.getWorld();
+                    LevelAccessor w = event.getLevel();
                     if (w instanceof WorldGenLevel) {
                         long seed = ((WorldGenLevel) w).getSeed();
-                        long chX = event.getChunk().getPos().x;
-                        long chZ = event.getChunk().getPos().z;
+                        long chX = event.getChunk().getBlockPos().x;
+                        long chZ = event.getChunk().getBlockPos().z;
                         seed ^= chX << 32;
                         seed ^= chZ;
-                        entry.generate(seed);
-                        ((LevelChunk) ch).markDirty();
+                        entry.place(seed);
+                        ((LevelChunk) ch).setChanged();
                     }
                 }
             });
@@ -94,17 +94,17 @@ public class EventHandlerMisc {
     }
 
     private static void onPlayerSleepEclipse(PlayerSleepInBedEvent event) {
-        WorldContext ctx = SkyHandler.getContext(event.getEntityLiving().getEntityWorld());
+        WorldContext ctx = SkyHandler.getContext(event.getEntityLiving().getCommandSenderWorld());
         if (ctx != null && ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {
             if (event.getResultStatus() == null) {
-                event.setResult(PlayerEntity.SleepResult.NOT_POSSIBLE_NOW);
+                event.setResult(Player.SleepResult.NOT_POSSIBLE_NOW);
             }
         }
     }
 
     private static void onSpawnEffectCloud(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof AreaEffectCloud &&
-                MiscUtils.contains(((AreaEffectCloud) event.getEntity()).effects, effect -> effect.getPotion() instanceof EffectDropModifier)) {
+                MiscUtils.contains(((AreaEffectCloud) event.getEntity()).effects, effect -> effect.getEffect() instanceof EffectDropModifier)) {
             event.setCanceled(true);
         }
     }

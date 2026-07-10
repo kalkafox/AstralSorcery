@@ -72,11 +72,11 @@ public class ConstellationGenerator {
         return cst;
     }
 
-    private static StarLocation findConnection(Random rand, StarLocation sl, List<StarLocation> stars, List<StarConnection> existingConnections) {
+    private static StarLocation findConnection(Random random, StarLocation sl, List<StarLocation> stars, List<StarConnection> existingConnections) {
         List<StarLocation> others = Lists.newArrayList(stars);
         others.remove(sl);
         if (others.isEmpty()) return null;
-        Collections.shuffle(others, rand);
+        Collections.shuffle(others, random);
         lblStars:
         for (StarLocation other : others) {
             StarConnection conn = new StarConnection(sl, other);
@@ -106,13 +106,13 @@ public class ConstellationGenerator {
         return p1.x * p2.y - p2.x * p1.y;
     }
 
-    private static Point pickStarPoint(Random rand, List<StarLocation> occupied, float minDst) {
+    private static Point pickStarPoint(Random random, List<StarLocation> slotsOccupied, float minDst) {
         lblSearch:
         while (true) {
-            Point opt = new Point(rand.nextInt(IConstellation.STAR_GRID_INDEX - 6), rand.nextInt(IConstellation.STAR_GRID_INDEX - 6));
+            Point opt = new Point(random.nextInt(IConstellation.STAR_GRID_INDEX - 6), random.nextInt(IConstellation.STAR_GRID_INDEX - 6));
             opt.translate(3, 3);
 
-            for (StarLocation other : occupied) {
+            for (StarLocation other : slotsOccupied) {
                 if (opt.distance(other.asPoint()) < minDst) {
                     continue lblSearch;
                 }
@@ -136,13 +136,13 @@ public class ConstellationGenerator {
         }
 
         @Override
-        public String getSimpleName() {
+        public String getName() {
             return localizedName;
         }
 
         @Override
-        public String getTranslationKey() {
-            return this.getSimpleName();
+        public String getDescriptionId() {
+            return this.getName();
         }
 
         @Override

@@ -25,7 +25,7 @@ class AstralSkyRendererSetup {
 
     private static final Random RAND = new Random();
 
-    static void generateSky(BufferBuilder skyBuffer) {
+    static void createLightSky(BufferBuilder skyBuffer) {
         prepareSky(skyBuffer, 16F, false);
     }
 
@@ -35,9 +35,9 @@ class AstralSkyRendererSetup {
 
     private static void prepareSky(BufferBuilder buf, float offsetY, boolean flip) {
         int scale = 64;
-        int segments = 6;
-        int width = segments * scale;
-        buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION);
+        int bodyCubes = 6;
+        int width = bodyCubes * scale;
+        buf.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION);
 
         for (int x = -width; x <= width; x += scale) {
             for (int z = -width; z <= width; z += scale) {
@@ -48,16 +48,16 @@ class AstralSkyRendererSetup {
                     x0 = (float) (x + scale);
                 }
 
-                buf.pos(x0, offsetY, z).endVertex();
-                buf.pos(x1, offsetY, z).endVertex();
-                buf.pos(x1, offsetY, z + scale).endVertex();
-                buf.pos(x0, offsetY, z + scale).endVertex();
+                buf.vertex(x0, offsetY, z).endVertex();
+                buf.vertex(x1, offsetY, z).endVertex();
+                buf.vertex(x1, offsetY, z + scale).endVertex();
+                buf.vertex(x0, offsetY, z + scale).endVertex();
             }
         }
     }
 
-    static void generateStars(BufferBuilder starBuffer, int amount, float sizeMultiplier) {
-        starBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+    static void createStars(BufferBuilder starBuffer, int amount, float sizeMultiplier) {
+        starBuffer.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX);
 
         for (int i = 0; i < amount; ++i) { //Amount of stars.
             double x = -1F + RAND.nextFloat() * 2F;
@@ -107,7 +107,7 @@ class AstralSkyRendererSetup {
                     double d26 = d22 * d9 + d24 * d10;
 
                     starBuffer
-                            .pos(d5 + d25, d6 + d23, d7 + d26)
+                            .vertex(d5 + d25, d6 + d23, d7 + d26)
                             .tex(((j + 1) & 2) >> 1, ((j + 2) & 2) >> 1)
                             .endVertex();
                 }

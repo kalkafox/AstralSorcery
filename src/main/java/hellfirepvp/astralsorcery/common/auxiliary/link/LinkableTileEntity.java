@@ -40,7 +40,7 @@ public interface LinkableTileEntity {
      */
     default public Level getLinkWorld() {
         if (this instanceof BlockEntity) {
-            return ((BlockEntity) this).getWorld();
+            return ((BlockEntity) this).getLevel();
         }
         throw new IllegalStateException("LinkableTileEntity not implemented on BlockEntity: " + this.getClass());
     }
@@ -50,7 +50,7 @@ public interface LinkableTileEntity {
      */
     default public BlockPos getLinkPos() {
         if (this instanceof BlockEntity) {
-            return ((BlockEntity) this).getPos();
+            return ((BlockEntity) this).getBlockPos();
         }
         throw new IllegalStateException("LinkableTileEntity not implemented on BlockEntity: " + this.getClass());
     }
@@ -63,7 +63,7 @@ public interface LinkableTileEntity {
     default public String getUnLocalizedDisplayName() {
         if (this instanceof BlockEntity) {
             BlockState state = ((BlockEntity) this).getBlockState();
-            return state.getBlock().getTranslationKey();
+            return state.getBlock().getDescriptionId();
         }
         throw new IllegalStateException("LinkableTileEntity not implemented on BlockEntity: " + this.getClass());
     }
@@ -106,11 +106,11 @@ public interface LinkableTileEntity {
      * @return boolean true if the select actually selected it, false for any other selection modification
      */
     default public boolean onSelect(Player player) {
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             for (BlockPos linkTo : Lists.newArrayList(getLinkedPositions())) {
                 tryUnlink(player, linkTo);
             }
-            player.sendMessage(Component.translatable("astralsorcery.misc.link.unlink.all").withStyle(TextFormatting.GREEN), Util.DUMMY_UUID);
+            player.sendSystemMessage(Component.translatable("astralsorcery.misc.link.unlink.all").withStyle(ChatFormatting.GREEN));
             return false;
         }
         return true;

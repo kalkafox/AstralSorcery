@@ -46,7 +46,7 @@ public abstract class JEICategory<T extends Recipe<?>> implements IRecipeCategor
     }
 
     protected static List<ItemStack> ingredientStacks(Ingredient ingredient) {
-        return Arrays.asList(ingredient.getMatchingStacks());
+        return Arrays.asList(ingredient.getItems());
     }
 
     protected static void initFluidInput(IGuiFluidStackGroup group, int index, int x, int y) {

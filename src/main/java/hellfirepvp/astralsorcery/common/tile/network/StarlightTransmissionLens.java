@@ -44,12 +44,12 @@ public class StarlightTransmissionLens extends CrystalTransmissionNode {
 
         LensColorType colorType = ((TileLens) tile).getColorType();
         if (this.updateAdditionalLoss(colorType == null ? 0 : colorType.getFlowMultiplier())) {
-            TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(tile.getWorld());
+            TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(tile.getLevel());
             if (handle != null) {
                 handle.notifyTransmissionNodeChange(this);
             }
         }
-        this.updateIgnoreBlockCollisionState(tile.getWorld(), colorType != null && colorType.doesIgnoreBlockCollision());
+        this.updateIgnoreBlockCollisionState(tile.getLevel(), colorType != null && colorType.doesIgnoreBlockCollision());
         return true;
     }
 

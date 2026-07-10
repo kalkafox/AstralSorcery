@@ -29,12 +29,12 @@ public class MouseUtil {
     }
 
     public static void ungrab() {
-        Minecraft.getInstance().mouseHelper.ungrabMouse();
+        Minecraft.getInstance().mouseHandler.releaseMouse();
     }
 
     public static void grab() {
         preventGuiChange = true;
-        Minecraft.getInstance().mouseHelper.grabMouse();
+        Minecraft.getInstance().mouseHandler.grabMouse();
     }
 
     private static void onGuiOpen(GuiOpenEvent event) {

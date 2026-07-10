@@ -50,7 +50,7 @@ public class ObjModelRender {
 
         RenderSystem.pushMatrix();
         RenderSystem.loadIdentity();
-        RenderSystem.multMatrix(renderStack.getLast().getMatrix());
+        RenderSystem.multMatrix(renderStack.last().pose());
         crystalModel.render(buf);
         drawFn.run();
         RenderSystem.popMatrix();
@@ -69,14 +69,14 @@ public class ObjModelRender {
         if (vboCelestialWings == null) {
             int[] lightGray = new int[] { 178, 178, 178, 255 };
             BufferDecoratorBuilder.withColor((r, g, b, a) -> lightGray)
-                    .decorate(Tessellator.getInstance().getBuffer(),
+                    .decorate(Tesselator.getInstance().getBuffer(),
                             (BufferBuilder decorated) -> vboCelestialWings = celestialWingsModel.batch(decorated));
         }
         vboCelestialWings.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0L);
-        vboCelestialWings.draw(renderStack.getLast().getMatrix(), celestialWingsModel.getGLDrawingMode());
+        vboCelestialWings.draw(renderStack.last().pose(), celestialWingsModel.getGLDrawingMode());
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
-        VertexBuffer.unbindBuffer();
+        VertexBuffer.unbind();
     }
 
     public static void renderWraithWings(PoseStack renderStack) {
@@ -87,26 +87,26 @@ public class ObjModelRender {
         if (wraithWingsBones == null) {
             int[] gray = new int[] { 77, 77, 77, 255 };
             BufferDecoratorBuilder.withColor((r, g, b, a) -> gray)
-                    .decorate(Tessellator.getInstance().getBuffer(),
+                    .decorate(Tesselator.getInstance().getBuffer(),
                             (BufferBuilder decorated) -> wraithWingsBones = wraithWingsModel.batchOnly(decorated, "Bones"));
         }
         if (wraithWingsWing == null) {
             int[] black = new int[] { 0, 0, 0, 255 };
             BufferDecoratorBuilder.withColor((r, g, b, a) -> black)
-                    .decorate(Tessellator.getInstance().getBuffer(),
+                    .decorate(Tesselator.getInstance().getBuffer(),
                             (BufferBuilder decorated) -> wraithWingsWing = wraithWingsModel.batchOnly(decorated, "Wing"));
         }
 
         wraithWingsBones.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0L);
-        wraithWingsBones.draw(renderStack.getLast().getMatrix(), wraithWingsModel.getGLDrawingMode());
+        wraithWingsBones.draw(renderStack.last().pose(), wraithWingsModel.getGLDrawingMode());
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
-        VertexBuffer.unbindBuffer();
+        VertexBuffer.unbind();
 
         wraithWingsWing.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0L);
-        wraithWingsWing.draw(renderStack.getLast().getMatrix(), wraithWingsModel.getGLDrawingMode());
+        wraithWingsWing.draw(renderStack.last().pose(), wraithWingsModel.getGLDrawingMode());
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
-        VertexBuffer.unbindBuffer();
+        VertexBuffer.unbind();
     }
 }

@@ -53,8 +53,8 @@ public class SkyHandler implements ITickHandler {
     public void tick(TickEvent.Type type, Object... context) {
         if (type == TickEvent.Type.WORLD) {
             Level w = (Level) context[0];
-            if (!w.isRemote() && w instanceof ServerLevel) {
-                ResourceKey<Level> dimKey = w.getDimensionKey();
+            if (!w.isClientSide() && w instanceof ServerLevel) {
+                ResourceKey<Level> dimKey = w.dimension();
                 skyRevertMap.put(dimKey, false);
 
                 WorldContext ctx = worldHandlersServer.get(dimKey);
@@ -71,9 +71,9 @@ public class SkyHandler implements ITickHandler {
 
     @OnlyIn(Dist.CLIENT)
     private void handleClientTick() {
-        Level w = Minecraft.getInstance().world;
+        Level w = Minecraft.getInstance().level;
         if (w != null) {
-            ResourceKey<Level> dimKey = w.getDimensionKey();
+            ResourceKey<Level> dimKey = w.dimension();
             WorldContext ctx = worldHandlersClient.get(dimKey);
             if (ctx == null) {
                 Optional<Long> seedOpt = WorldSeedCache.getSeedIfPresent(dimKey);
@@ -92,16 +92,16 @@ public class SkyHandler implements ITickHandler {
     }
 
     @Nullable
-    public static WorldContext getContext(Level world) {
-        return getContext(world, world.isRemote() ? LogicalSide.CLIENT : LogicalSide.SERVER);
+    public static WorldContext getContext(Level level) {
+        return getContext(level, level.isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER);
     }
 
     @Nullable
-    public static WorldContext getContext(Level world, LogicalSide dist) {
-        if (world == null) {
+    public static WorldContext getContext(Level level, LogicalSide dist) {
+        if (level == null) {
             return null;
         }
-        ResourceKey<Level> dimKey = world.getDimensionKey();
+        ResourceKey<Level> dimKey = level.dimension();
         if (dist.isClient()) {
             return getInstance().worldHandlersClient.getOrDefault(dimKey, null);
         } else {
@@ -109,12 +109,12 @@ public class SkyHandler implements ITickHandler {
         }
     }
 
-    public void revertWorldTimeTick(ServerLevel world) {
-        ResourceKey<Level> dimKey = world.getDimensionKey();
+    public void revertWorldTimeTick(ServerLevel level) {
+        ResourceKey<Level> dimKey = level.dimension();
         Boolean state = skyRevertMap.get(dimKey);
-        if (!world.isRemote && state != null && !state) {
+        if (!level.isClientSide && state != null && !state) {
             skyRevertMap.put(dimKey, true);
-            world.setDayTime(world.getDayTime() - 1);
+            level.setDayTime(level.getDayTime() - 1);
         }
     }
 
@@ -122,9 +122,9 @@ public class SkyHandler implements ITickHandler {
         worldHandlersClient.clear();
     }
 
-    public void informWorldUnload(Level world) {
-        worldHandlersServer.remove(world.getDimensionKey());
-        worldHandlersClient.remove(world.getDimensionKey());
+    public void informWorldUnload(Level level) {
+        worldHandlersServer.remove(level.dimension());
+        worldHandlersClient.remove(level.dimension());
     }
 
     @Override
@@ -133,8 +133,8 @@ public class SkyHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

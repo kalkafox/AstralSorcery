@@ -22,16 +22,16 @@ import net.minecraft.world.gen.feature.structure.Structure;
 public abstract class TemplateStructureFeature extends Structure<NoneFeatureConfiguration> {
 
     public TemplateStructureFeature() {
-        super(NoFeatureConfig.field_236558_a_);
+        super(NoneFeatureConfiguration.CODEC);
     }
 
     @Override
-    public GenerationStage.Decoration getDecorationStage() {
-        return GenerationStage.Decoration.SURFACE_STRUCTURES;
+    public GenerationStep.Decoration step() {
+        return GenerationStep.Decoration.SURFACE_STRUCTURES;
     }
 
     @Override
-    public String getStructureName() {
-        return this.getRegistryName().toString();
+    public String getFeatureName() {
+        return RegistryHelper.getKey(this).toString();
     }
 }

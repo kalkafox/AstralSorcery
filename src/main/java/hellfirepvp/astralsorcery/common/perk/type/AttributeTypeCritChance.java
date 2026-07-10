@@ -55,39 +55,39 @@ public class AttributeTypeCritChance extends PerkAttributeType {
     private void onArrowCrit(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof Arrow) {
             Arrow arrow = (Arrow) event.getEntity();
-            Entity shooter = arrow.func_234616_v_();
+            Entity shooter = arrow.getOwner();
             if (shooter instanceof Player) {
                 Player player = (Player) shooter;
-                LogicalSide side = this.getSide(player);
-                if (!hasTypeApplied(player, side)) {
+                LogicalSide direction = this.getSide(player);
+                if (!hasTypeApplied(player, direction)) {
                     return;
                 }
-                float critChance = PerkAttributeHelper.getOrCreateMap(player, side)
-                        .modifyValue(player, ResearchHelper.getProgress(player, side), this, 0F);
+                float critChance = PerkAttributeHelper.getOrCreateMap(player, direction)
+                        .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 0F);
                 critChance = AttributeEvent.postProcessModded(player, this, critChance);
                 critChance /= 100.0F;
-                if (critChance >= rand.nextFloat()) {
-                    arrow.setIsCritical(true);
+                if (critChance >= random.nextFloat()) {
+                    arrow.setCritArrow(true);
                 }
             }
         }
     }
 
     private void onHitCrit(CriticalHitEvent event) {
-        if (event.isVanillaCritical() || event.getResult() == Event.Result.ALLOW) {
+        if (event.isVanillaCritical() || event.getObject() == Event.Result.ALLOW) {
             return;
         }
         Player player = event.getPlayer();
-        LogicalSide side = this.getSide(player);
-        if (!hasTypeApplied(player, side)) {
+        LogicalSide direction = this.getSide(player);
+        if (!hasTypeApplied(player, direction)) {
             return;
         }
 
-        float critChance = PerkAttributeHelper.getOrCreateMap(player, side)
-                .modifyValue(player, ResearchHelper.getProgress(player, side), this, 0F);
+        float critChance = PerkAttributeHelper.getOrCreateMap(player, direction)
+                .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 0F);
         critChance = AttributeEvent.postProcessModded(player, this, critChance);
         critChance /= 100.0F;
-        if (critChance >= rand.nextFloat()) {
+        if (critChance >= random.nextFloat()) {
             event.setResult(Event.Result.ALLOW);
         }
     }

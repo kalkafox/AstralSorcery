@@ -53,7 +53,7 @@ public class FXCrystal extends EntityVisualFX implements EntityDynamicFX {
         return this;
     }
 
-    public FXCrystal setTexture(TextureQuery query) {
+    public FXCrystal particle(TextureQuery query) {
         this.alternativeTexture = query.resolve();
         return this;
     }
@@ -70,31 +70,31 @@ public class FXCrystal extends EntityVisualFX implements EntityDynamicFX {
         int alpha = this.getAlpha(pTicks);
         Color c = this.getColor(pTicks);
 
-        Vector3 vec = this.getRenderPosition(pTicks).subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
-        float scale = this.getScale(pTicks);
+        Vector3 vec = this.getCameraPosition(pTicks).subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
+        float scale = this.getQuadSize(pTicks);
 
         if (this.lightRayColor != null) {
             long seed = 0x515F1EB654AB915EL;
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(vec.getX(), vec.getY(), vec.getZ());
             RenderingDrawUtils.renderLightRayFan(renderStack, drawBuffer, this.lightRayColor, seed, 5, 1F, 50);
-            renderStack.pop();
+            renderStack.popPose();
             drawBuffer.draw();
         }
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(vec.getX(), vec.getY() - 0.05F, vec.getZ());
         renderStack.scale(scale, scale, scale);
-        renderStack.rotate(Vector3f.XP.rotationDegrees((float) rotation.getX()));
-        renderStack.rotate(Vector3f.YP.rotationDegrees((float) rotation.getY()));
-        renderStack.rotate(Vector3f.ZP.rotationDegrees((float) rotation.getZ()));
+        renderStack.mirror(Axis.XP.rotationDegrees((float) rotation.getX()));
+        renderStack.mirror(Axis.YP.rotationDegrees((float) rotation.getY()));
+        renderStack.mirror(Axis.ZP.rotationDegrees((float) rotation.getZ()));
 
         BufferDecoratorBuilder.withColor((r, g, b, a) -> new int[] { c.getRed(), c.getGreen(), c.getBlue(), alpha})
                 .decorate(drawBuffer.getBuffer(ctx.getRenderType()),
                         decorated -> ObjModelRender.renderCrystal(renderStack, decorated, drawBuffer::draw));
 
-        renderStack.pop();
+        renderStack.popPose();
 
         if (this.alternativeTexture != null) {
             ctx.getSprite().bindTexture();

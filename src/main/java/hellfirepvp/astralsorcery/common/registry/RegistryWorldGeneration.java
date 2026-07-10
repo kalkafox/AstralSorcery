@@ -64,9 +64,9 @@ import static hellfirepvp.astralsorcery.common.lib.WorldGenerationAS.Structures.
  */
 public class RegistryWorldGeneration {
 
-    private static final Map<StructureFeature<?, ?>, StructureGenerationConfig> STRUCTURES = new HashMap<>();
+    private static final Map<ConfiguredStructureFeature<?, ?>, StructureGenerationConfig> STRUCTURE_FEATURES = new HashMap<>();
     private static final Map<ConfiguredFeature<?, ?>, FeatureGenerationConfig> FEATURES = new HashMap<>();
-    private static final Map<ConfiguredFeature<?, ?>, GenerationStage.Decoration> FEATURE_STAGE = new HashMap<>();
+    private static final Map<ConfiguredFeature<?, ?>, GenerationStep.Decoration> FEATURE_STAGE = new HashMap<>();
 
     public static void init() {
         registerFeature(KEY_FEATURE_REPLACE_BLOCK, REPLACE_BLOCK);
@@ -84,71 +84,71 @@ public class RegistryWorldGeneration {
         STRUCTURE_DESERT_SHRINE  = registerStructure(KEY_DESERT_SHRINE, CFG_DESERT_SHRINE, new FeatureDesertShrineStructure());
         STRUCTURE_SMALL_SHRINE   = registerStructure(KEY_SMALL_SHRINE, CFG_SMALL_SHRINE, new FeatureSmallShrineStructure());
 
-        GEN_GLOW_FLOWER = registerConfiguredFeature(KEY_GLOW_FLOWER, GenerationStage.Decoration.VEGETAL_DECORATION, CFG_GLOW_FLOWER,
-                Feature.FLOWER.withConfiguration(new BlockClusterFeatureConfig.Builder(new SimpleStateProvider(BlocksAS.GLOW_FLOWER.getDefaultState()), SimpleBlockPlacer.PLACER)
+        GEN_GLOW_FLOWER = registerConfiguredFeature(KEY_GLOW_FLOWER, GenerationStep.Decoration.VEGETAL_DECORATION, CFG_GLOW_FLOWER,
+                Feature.FLOWER.withConfiguration(new RandomPatchConfiguration.Builder(new SimpleStateProvider(BlocksAS.GLOW_FLOWER.defaultBlockState()), SimpleBlockPlacer.INSTANCE)
                         .tries(12)
                         .build())
-                        .func_242732_c(6)
-                        .withPlacement(Features.Placements.VEGETATION_PLACEMENT)
-                        .withPlacement(Features.Placements.HEIGHTMAP_PLACEMENT)
-                        .withPlacement(WORLD_FILTER.configure(CFG_GLOW_FLOWER.worldFilterConfig())));
-        GEN_ROCK_CRYSTAL = registerConfiguredFeature(KEY_ROCK_CRYSTAL, GenerationStage.Decoration.UNDERGROUND_ORES, CFG_ROCK_CRYSTAL,
-                ROCK_CRYSTAL.withConfiguration(new ReplaceBlockConfig(OreFeatureConfig.FillerBlockType.BASE_STONE_OVERWORLD, BlocksAS.ROCK_CRYSTAL_ORE.getDefaultState()))
-                        .withPlacement(Placement.RANGE.configure(new TopSolidRangeConfig(5, 0, 2)))
-                        .withPlacement(CHANCE.withChance(1F / 25F))
-                        .withPlacement(WORLD_FILTER.configure(CFG_ROCK_CRYSTAL.worldFilterConfig())));
-        GEN_AQUAMARINE = registerConfiguredFeature(KEY_AQUAMARINE, GenerationStage.Decoration.UNDERGROUND_ORES, CFG_AQUAMARINE,
-                REPLACE_BLOCK.withConfiguration(new ReplaceBlockConfig(new TagMatchTest(BlockTags.SAND), BlocksAS.AQUAMARINE_SAND_ORE.getDefaultState()))
-                        .withPlacement(RIVERBED.configure(NoPlacementConfig.INSTANCE))
-                        .func_242732_c(8)
-                        .withPlacement(WORLD_FILTER.configure(CFG_AQUAMARINE.worldFilterConfig())));
-        GEN_MARBLE = registerConfiguredFeature(KEY_MARBLE, GenerationStage.Decoration.UNDERGROUND_ORES, CFG_MARBLE,
-                Feature.ORE.withConfiguration(new OreFeatureConfig(OreFeatureConfig.FillerBlockType.BASE_STONE_OVERWORLD, BlocksAS.MARBLE_RAW.getDefaultState(), 26))
+                        .countRandom(6)
+                        .decorated(Features.Placements.ADD_32)
+                        .decorated(Features.Placements.HEIGHTMAP_SQUARE)
+                        .decorated(WORLD_FILTER.configured(CFG_GLOW_FLOWER.worldFilterConfig())));
+        GEN_ROCK_CRYSTAL = registerConfiguredFeature(KEY_ROCK_CRYSTAL, GenerationStep.Decoration.UNDERGROUND_ORES, CFG_ROCK_CRYSTAL,
+                ROCK_CRYSTAL.withConfiguration(new ReplaceBlockConfig(OreConfiguration.FillerBlockType.BASE_STONE_OVERWORLD, BlocksAS.ROCK_CRYSTAL_ORE.defaultBlockState()))
+                        .decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(5, 0, 2)))
+                        .decorated(CHANCE.withChance(1F / 25F))
+                        .decorated(WORLD_FILTER.configured(CFG_ROCK_CRYSTAL.worldFilterConfig())));
+        GEN_AQUAMARINE = registerConfiguredFeature(KEY_AQUAMARINE, GenerationStep.Decoration.UNDERGROUND_ORES, CFG_AQUAMARINE,
+                REPLACE_BLOCK.withConfiguration(new ReplaceBlockConfig(new TagMatchTest(BlockTags.SAND), BlocksAS.AQUAMARINE_SAND_ORE.defaultBlockState()))
+                        .decorated(RIVERBED.configured(NoneDecoratorConfiguration.INSTANCE))
+                        .countRandom(8)
+                        .decorated(WORLD_FILTER.configured(CFG_AQUAMARINE.worldFilterConfig())));
+        GEN_MARBLE = registerConfiguredFeature(KEY_MARBLE, GenerationStep.Decoration.UNDERGROUND_ORES, CFG_MARBLE,
+                Feature.ORE.withConfiguration(new OreConfiguration(OreConfiguration.FillerBlockType.BASE_STONE_OVERWORLD, BlocksAS.MARBLE_RAW.defaultBlockState(), 26))
                         .range(96)
                         .square()
-                        .func_242732_c(10)
-                        .withPlacement(WORLD_FILTER.configure(CFG_MARBLE.worldFilterConfig())));
+                        .countRandom(10)
+                        .decorated(WORLD_FILTER.configured(CFG_MARBLE.worldFilterConfig())));
     }
 
     public static void registerStructureGeneration() {
-        List<Map<Structure<?>, StructureSeparationSettings>> structureSettings = new ArrayList<>();
-        structureSettings.add(DimensionSettings.field_242740_q.getStructures().func_236195_a_());
-        WorldGenRegistries.NOISE_SETTINGS.forEach(settings -> structureSettings.add(settings.getStructures().func_236195_a_()));
+        List<Map<Structure<?>, StructureFeatureConfiguration>> structureSettings = new ArrayList<>();
+        structureSettings.add(NoiseGeneratorSettings.BUILTIN_OVERWORLD.getStructures().structureConfig());
+        BuiltinRegistries.NOISE_GENERATOR_SETTINGS.forEach(settings -> structureSettings.add(settings.getStructures().structureConfig()));
 
-        ImmutableMap.Builder<Structure<?>, StructureSeparationSettings> builder = ImmutableMap.builder();
-        builder.putAll(DimensionStructuresSettings.field_236191_b_);
-        STRUCTURES.forEach((structureFeature, cfg) -> {
+        ImmutableMap.Builder<Structure<?>, StructureFeatureConfiguration> builder = ImmutableMap.builder();
+        builder.putAll(StructureSettings.DEFAULTS);
+        STRUCTURE_FEATURES.forEach((structureFeature, cfg) -> {
             if (cfg.isEnabled()) {
-                StructureSeparationSettings settings = cfg.createSettings();
-                builder.put(structureFeature.field_236268_b_, settings);
-                structureSettings.forEach(noiseStructureSettings -> noiseStructureSettings.put(structureFeature.field_236268_b_, settings));
+                StructureFeatureConfiguration settings = cfg.createSettings();
+                builder.put(structureFeature.feature, settings);
+                structureSettings.forEach(noiseStructureSettings -> noiseStructureSettings.put(structureFeature.feature, settings));
             }
         });
-        DimensionStructuresSettings.field_236191_b_ = builder.build();
+        StructureSettings.DEFAULTS = builder.build();
 
-        Structure.field_236384_t_ = ImmutableList.<Structure<?>>builder()
-                .addAll(Structure.field_236384_t_)
+        Structure.NOISE_AFFECTING_FEATURES = ImmutableList.<Structure<?>>builder()
+                .addAll(Structure.NOISE_AFFECTING_FEATURES)
                 .add(STRUCTURE_ANCIENT_SHRINE, STRUCTURE_DESERT_SHRINE, STRUCTURE_SMALL_SHRINE)
                 .build();
     }
 
     public static void loadBiomeFeatures(BiomeLoadingEvent event) {
         BiomeGenerationSettingsBuilder gen = event.getGeneration();
-        STRUCTURES.forEach((structureFeature, cfg) -> {
+        STRUCTURE_FEATURES.forEach((structureFeature, cfg) -> {
             if (cfg.isEnabled() && cfg.canGenerateIn(event.getCategory())) {
                 gen.withStructure(structureFeature);
             }
         });
         FEATURES.forEach((feature, cfg) -> {
             if (cfg.isEnabled() && cfg.canGenerateIn(event.getCategory())) {
-                GenerationStage.Decoration stage = FEATURE_STAGE.get(feature);
+                GenerationStep.Decoration stage = FEATURE_STAGE.get(feature);
                 if (stage == null) {
-                    ResourceLocation key = WorldGenRegistries.CONFIGURED_FEATURE.getOptionalKey(feature)
+                    ResourceLocation key = BuiltinRegistries.CONFIGURED_FEATURE.getOptionalKey(feature)
                             .map(ResourceKey::getLocation)
-                            .orElse(new ResourceLocation("not_registered"));
+                            .orElse(ResourceLocation.parse("not_registered"));
                     throw new IllegalArgumentException("Unknown generation stage for feature " + key + "!");
                 }
-                gen.withFeature(stage, feature);
+                gen.addCarver(stage, feature);
             }
         });
     }
@@ -164,17 +164,17 @@ public class RegistryWorldGeneration {
         registrar.accept(CFG_MARBLE);
     }
 
-    private static ConfiguredFeature<?, ?> registerConfiguredFeature(ResourceLocation key, GenerationStage.Decoration stage, FeatureGenerationConfig cfg, ConfiguredFeature<?, ?> feature) {
+    private static ConfiguredFeature<?, ?> registerConfiguredFeature(ResourceLocation key, GenerationStep.Decoration stage, FeatureGenerationConfig cfg, ConfiguredFeature<?, ?> feature) {
         FEATURE_STAGE.put(feature, stage);
         FEATURES.put(feature, cfg);
-        return Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, key, feature);
+        return Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, key, feature);
     }
 
     private static void registerFeature(ResourceLocation key, Feature<?> feature) {
         AstralSorcery.getProxy().getRegistryPrimer().register(feature.setRegistryName(key));
     }
 
-    private static void registerPlacement(ResourceLocation key, Placement<?> placement) {
+    private static void registerPlacement(ResourceLocation key, FeatureDecorator<?> placement) {
         AstralSorcery.getProxy().getRegistryPrimer().register(placement.setRegistryName(key));
     }
 
@@ -184,10 +184,10 @@ public class RegistryWorldGeneration {
 
     private static <S extends TemplateStructureFeature> S registerStructure(ResourceLocation key, StructureGenerationConfig cfg, S structure) {
         AstralSorcery.getProxy().getRegistryPrimer().register(structure.setRegistryName(key));
-        Structure.NAME_STRUCTURE_BIMAP.put(structure.getStructureName(), structure);
-        StructureFeature<?, ?> structureFeature = structure.withConfiguration(IFeatureConfig.NO_FEATURE_CONFIG);
-        STRUCTURES.put(structureFeature, cfg);
-        WorldGenRegistries.register(WorldGenRegistries.CONFIGURED_STRUCTURE_FEATURE, key, structureFeature);
+        Structure.STRUCTURES_REGISTRY.put(structure.getFeatureName(), structure);
+        ConfiguredStructureFeature<?, ?> structureFeature = structure.withConfiguration(FeatureConfiguration.NONE);
+        STRUCTURE_FEATURES.put(structureFeature, cfg);
+        BuiltinRegistries.register(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, key, structureFeature);
         return structure;
     }
 }

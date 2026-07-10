@@ -61,20 +61,20 @@ public class CEffectAevitas extends CEffectAbstractList<CropHelper.GrowablePlant
     public static AevitasConfig CONFIG = new AevitasConfig();
 
     public CEffectAevitas(@Nonnull ILocatable origin) {
-        super(origin, ConstellationsAS.aevitas, CONFIG.maxAmount.get(), (world, pos, state) -> CropHelper.wrapPlant(world, pos) != null);
+        super(origin, ConstellationsAS.aevitas, CONFIG.maxAmount.get(), (level, pos, state) -> CropHelper.wrapPlant(level, pos) != null);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
-        if (rand.nextBoolean()) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+        if (random.nextBoolean()) {
             ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(new Vector3(
-                            pos.getX() + rand.nextFloat() * (prop.getSize() / 2F) * (rand.nextBoolean() ? 1 : -1) + 0.5,
-                            pos.getY() + rand.nextFloat() * (prop.getSize() / 4F) + 0.5,
-                            pos.getZ() + rand.nextFloat() * (prop.getSize() / 2F) * (rand.nextBoolean() ? 1 : -1) + 0.5))
+                            pos.getX() + random.nextFloat() * (prop.getSize() / 2F) * (random.nextBoolean() ? 1 : -1) + 0.5,
+                            pos.getY() + random.nextFloat() * (prop.getSize() / 4F) + 0.5,
+                            pos.getZ() + random.nextFloat() * (prop.getSize() / 2F) * (random.nextBoolean() ? 1 : -1) + 0.5))
                     .setGravityStrength(-0.005F)
                     .setScaleMultiplier(0.45F)
                     .color(VFXColorFunction.constant(ColorsAS.RITUAL_CONSTELLATION_AEVITAS))
@@ -83,35 +83,35 @@ public class CEffectAevitas extends CEffectAbstractList<CropHelper.GrowablePlant
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
         boolean changed = false;
         CropHelper.GrowablePlant plant = getRandomElementChanced();
         if (plant != null) {
-            changed = MiscUtils.executeWithChunk(world, plant.getPos(), changed, (changedFlag) -> {
+            changed = MiscUtils.executeWithChunk(level, plant.getBlockPos(), changed, (changedFlag) -> {
                 if (properties.isCorrupted()) {
-                    if (world instanceof ServerLevel) {
-                        CropHelper.HarvestablePlant harvestablePlant = CropHelper.wrapHarvestablePlant(world, plant.getPos());
+                    if (level instanceof ServerLevel) {
+                        CropHelper.HarvestablePlant harvestablePlant = CropHelper.wrapHarvestablePlant(level, plant.getBlockPos());
                         if (harvestablePlant != null) {
-                            NonNullList<ItemStack> drops = harvestablePlant.harvestDropsAndReplant((ServerLevel) world, rand, 1);
-                            drops.forEach(drop -> ItemUtils.dropItem(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop));
+                            NonNullList<ItemStack> drops = harvestablePlant.harvestDropsAndReplant((ServerLevel) level, random, 1);
+                            drops.forEach(drop -> ItemUtils.dropItem(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop));
                             changedFlag = !drops.isEmpty();
-                        } else if (BlockUtils.breakBlockWithoutPlayer(((ServerLevel) world), plant.getPos())) {
+                        } else if (BlockUtils.breakBlockWithoutPlayer(((ServerLevel) level), plant.getBlockPos())) {
                             changedFlag = true;
                         }
                     } else {
-                        if (world.removeBlock(plant.getPos(), false)) {
+                        if (level.removeBlock(plant.getBlockPos(), false)) {
                             changedFlag = true;
                         }
                     }
                 } else {
-                    if (!plant.isValid(world)) {
-                        removeElement(plant.getPos());
+                    if (!plant.isValid(level)) {
+                        removeElement(plant.getBlockPos());
                         changedFlag = true;
                     } else {
-                        if (plant.tryGrow(world, rand)) {
+                        if (plant.tryGrow(level, random)) {
                             PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
-                                    .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(plant.getPos())));
-                            PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, plant.getPos(), 16));
+                                    .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(plant.getBlockPos())));
+                            PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, plant.getBlockPos(), 16));
                             changedFlag = true;
                         }
                     }
@@ -120,24 +120,24 @@ public class CEffectAevitas extends CEffectAbstractList<CropHelper.GrowablePlant
             }, false);
         }
 
-        if (this.findNewPosition(world, pos, properties)
-                .ifRight(attemptedPos -> sendConstellationPing(world, new Vector3(attemptedPos).add(0.5, 0.5, 0.5)))
+        if (this.findNewPosition(level, pos, properties)
+                .ifRight(attemptedPos -> sendConstellationPing(level, new Vector3(attemptedPos).add(0.5, 0.5, 0.5)))
                 .left().isPresent()) changed = true;
-        if (this.findNewPosition(world, pos, properties)
-                .ifRight(attemptedPos -> sendConstellationPing(world, new Vector3(attemptedPos).add(0.5, 0.5, 0.5)))
+        if (this.findNewPosition(level, pos, properties)
+                .ifRight(attemptedPos -> sendConstellationPing(level, new Vector3(attemptedPos).add(0.5, 0.5, 0.5)))
                 .left().isPresent()) changed = true;
 
         int amplifier = CONFIG.potionAmplifier.get();
-        List<LivingEntity> entities = world.getEntitiesWithinAABB(LivingEntity.class, BOX.offset(pos).grow(properties.getSize()));
+        List<LivingEntity> entities = level.getEntitiesWithinAABB(LivingEntity.class, BOX.offset(pos).grow(properties.getSize()));
         for (LivingEntity entity : entities) {
             if (entity.isAlive()) {
                 if (properties.isCorrupted()) {
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(EffectsAS.EFFECT_BLEED, 120, amplifier * 2));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.WEAKNESS, 120, amplifier * 3));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.HUNGER, 120, amplifier * 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.MINING_FATIGUE, 120, amplifier * 2));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.WEAKNESS, 120, amplifier * 3));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.HUNGER, 120, amplifier * 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 120, amplifier * 2));
                 } else {
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.REGENERATION, 120, amplifier));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.REGENERATION, 120, amplifier));
                 }
                 if (entity instanceof Player) {
                     markPlayerAffected((Player) entity);
@@ -156,8 +156,8 @@ public class CEffectAevitas extends CEffectAbstractList<CropHelper.GrowablePlant
 
     @Nullable
     @Override
-    public CropHelper.GrowablePlant createElement(Level world, BlockPos pos) {
-        return CropHelper.wrapPlant(world, pos);
+    public CropHelper.GrowablePlant createElement(Level level, BlockPos pos) {
+        return CropHelper.wrapPlant(level, pos);
     }
 
     @Override
@@ -171,13 +171,13 @@ public class CEffectAevitas extends CEffectAbstractList<CropHelper.GrowablePlant
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void playParticles(PktPlayEffect event) {
+    public static void showBreakingParticles(PktPlayEffect event) {
         Vector3 at = ByteBufUtils.readVector(event.getExtraData());
         for (int i = 0; i < 8; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                    .spawn(at.clone().add(rand.nextFloat(), 0.2, rand.nextFloat()))
-                    .setMotion(new Vector3(0, 0.005 + rand.nextFloat() * 0.01, 0))
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.1F)
+                    .spawn(at.clone().add(random.nextFloat(), 0.2, random.nextFloat()))
+                    .setDeltaMovement(new Vector3(0, 0.005 + random.nextFloat() * 0.01, 0))
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.1F)
                     .color(VFXColorFunction.constant(Color.GREEN));
         }
     }

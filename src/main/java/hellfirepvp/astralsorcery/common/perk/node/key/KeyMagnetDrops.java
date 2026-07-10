@@ -39,25 +39,25 @@ public class KeyMagnetDrops extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOW, this::onEntityLoot);
     }
 
     private void onEntityLoot(LivingDropsEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-            Player player = (Player) source.getTrueSource();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        if (source.getEntity() != null && source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 List<ItemEntity> remaining = new ArrayList<>();
                 for (ItemEntity drop : event.getDrops()) {
                     ItemStack remain = ItemUtils.dropItemToPlayer(player, drop.getItem());
                     if (!remain.isEmpty()) {
-                        ItemEntity newDrop = new ItemEntity(drop.getEntityWorld(), drop.getPosX(), drop.getPosY(), drop.getPosZ());
-                        newDrop.copyDataFromOld(drop);
+                        ItemEntity newDrop = new ItemEntity(drop.getCommandSenderWorld(), drop.getX(), drop.getY(), drop.getZ());
+                        newDrop.restoreFrom(drop);
                         remaining.add(newDrop);
                     }
                 }

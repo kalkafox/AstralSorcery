@@ -53,10 +53,10 @@ public class EffectDropModifier extends EffectCustomTexture {
 
     private void onDrops(LivingDropsEvent event) {
         LivingEntity le = event.getEntityLiving();
-        if (le.getEntityWorld().isRemote() ||
+        if (le.getCommandSenderWorld().isClientSide() ||
                 !(le instanceof Mob) ||
-                !(le.getEntityWorld() instanceof ServerLevel) ||
-                !le.getEntityWorld().getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
+                !(le.getCommandSenderWorld() instanceof ServerLevel) ||
+                !le.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
             return;
         }
 
@@ -68,12 +68,12 @@ public class EffectDropModifier extends EffectCustomTexture {
                 event.getDrops().clear(); //Special case to void all items
             } else {
                 for (int i = 0; i < amplifier; i++) {
-                    List<ItemStack> loot = EntityUtils.generateLoot(le, rand, src, event.isRecentlyHit() ? le.getAttackingEntity() : null);
+                    List<ItemStack> loot = EntityUtils.generateLoot(le, random, src, event.isRecentlyHit() ? le.getKillCredit() : null);
                     for (ItemStack stack : loot) {
                         if (stack.isEmpty()) {
                             continue;
                         }
-                        event.getDrops().add(le.entityDropItem(stack));
+                        event.getDrops().add(le.thunderHit(stack));
                     }
                 }
             }

@@ -56,7 +56,7 @@ public class CEffectMineralis extends CEffectAbstractList<ListEntries.PosEntry> 
     public static MineralisConfig CONFIG = new MineralisConfig(new BlockStateList().add(Blocks.STONE));
 
     public CEffectMineralis(@Nonnull ILocatable origin) {
-        super(origin, ConstellationsAS.mineralis, CONFIG.maxAmount.get(), (world, pos, state) -> true);
+        super(origin, ConstellationsAS.mineralis, CONFIG.maxAmount.get(), (level, pos, state) -> true);
         this.excludeRitualColumn();
         this.selectSphericalPositions();
     }
@@ -84,64 +84,64 @@ public class CEffectMineralis extends CEffectAbstractList<ListEntries.PosEntry> 
 
     @Nullable
     @Override
-    public ListEntries.PosEntry createElement(Level world, BlockPos pos) {
+    public ListEntries.PosEntry createElement(Level level, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
 
-        if (rand.nextFloat() < 0.6F) {
-            Color c = MiscUtils.eitherOf(rand,
+        if (random.nextFloat() < 0.6F) {
+            Color c = MiscUtils.eitherOf(random,
                     () -> ColorsAS.CONSTELLATION_MINERALIS,
                     () -> ColorsAS.CONSTELLATION_MINERALIS.brighter());
-            Vector3 at = Vector3.random().normalize().multiply(rand.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
+            Vector3 at = Vector3.random().normalize().mul(random.nextFloat() * prop.getSize()).add(pos).add(0.5, 0.5, 0.5);
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setMotion(Vector3.random().multiply(0.05F))
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setDeltaMovement(Vector3.random().mul(0.05F))
                     .color(VFXColorFunction.constant(c))
-                    .setScaleMultiplier(0.5F + rand.nextFloat() * 0.25F)
-                    .setMaxAge(50 + rand.nextInt(40));
+                    .setScaleMultiplier(0.5F + random.nextFloat() * 0.25F)
+                    .setMaxAge(50 + random.nextInt(40));
         }
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        return this.peekNewPosition(world, pos, properties).mapLeft(entry -> {
-            BlockPos at = entry.getPos();
-            BlockState atState = world.getBlockState(at);
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        return this.peekNewPosition(level, pos, properties).mapLeft(entry -> {
+            BlockPos at = entry.getBlockPos();
+            BlockState atState = level.getBlockState(at);
             if (properties.isCorrupted()) {
-                boolean generateOre = rand.nextInt(25) == 0;
-                if (atState.isAir(world, at) || (generateOre && atState.getBlock() == Blocks.STONE)) {
+                boolean generateOre = random.nextInt(25) == 0;
+                if (atState.isAir(level, at) || (generateOre && atState.getBlock() == Blocks.STONE)) {
                     if (generateOre) {
-                        Block ore = OreBlockRarityRegistry.MINERALIS_RITUAL.getRandomBlock(rand);
+                        Block ore = OreBlockRarityRegistry.MINERALIS_RITUAL.getRandomBlock(random);
                         if (ore != null) {
-                            return world.setBlockState(at, ore.getDefaultState());
+                            return level.setBlock(at, ore.defaultBlockState());
                         } else {
-                            return world.setBlockState(at, Blocks.STONE.getDefaultState());
+                            return level.setBlock(at, Blocks.STONE.defaultBlockState());
                         }
                     } else {
-                        return world.setBlockState(at, Blocks.STONE.getDefaultState());
+                        return level.setBlock(at, Blocks.STONE.defaultBlockState());
                     }
                 }
             } else {
                 if (CONFIG.replaceableStates.test(atState)) {
-                    Block ore = OreBlockRarityRegistry.MINERALIS_RITUAL.getRandomBlock(rand);
+                    Block ore = OreBlockRarityRegistry.MINERALIS_RITUAL.getRandomBlock(random);
                     if (ore != null) {
-                        return world.setBlockState(at, ore.getDefaultState());
+                        return level.setBlock(at, ore.defaultBlockState());
                     } else {
-                        sendConstellationPing(world, new Vector3(at).add(0.5, 0.5, 0.5));
+                        sendConstellationPing(level, new Vector3(at).add(0.5, 0.5, 0.5));
                     }
                 } else {
-                    sendConstellationPing(world, new Vector3(at).add(0.5, 0.5, 0.5));
+                    sendConstellationPing(level, new Vector3(at).add(0.5, 0.5, 0.5));
                 }
             }
             return false;
         }).ifRight(attemptedBreak -> {
-            sendConstellationPing(world, new Vector3(attemptedBreak).add(0.5, 0.5, 0.5));
+            sendConstellationPing(level, new Vector3(attemptedBreak).add(0.5, 0.5, 0.5));
         }).left().orElse(false);
     }
 

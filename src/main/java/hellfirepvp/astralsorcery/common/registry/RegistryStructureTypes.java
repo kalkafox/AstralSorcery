@@ -10,6 +10,7 @@ package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.StructuresAS;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.structure.types.StructureType;
 import hellfirepvp.observerlib.api.util.BlockArray;
 import net.minecraft.resources.ResourceLocation;
@@ -51,8 +52,7 @@ public class RegistryStructureTypes {
 
     private static StructureType register(ResourceLocation name, Supplier<BlockArray> structureSupplier) {
         StructureType type = new StructureType(name, structureSupplier);
-        AstralSorcery.getProxy().getRegistryPrimer().register(type);
-        return type;
+        return AstralRegistries.register(AstralRegistries.STRUCTURE_TYPES, name, type);
     }
 
 }

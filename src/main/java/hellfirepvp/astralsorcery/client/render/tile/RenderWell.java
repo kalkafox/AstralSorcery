@@ -18,7 +18,7 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.tile.PrecisionSingleFluidTank;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -33,27 +33,27 @@ import java.awt.*;
  */
 public class RenderWell extends CustomTileEntityRenderer<TileWell> {
 
-    public RenderWell(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderWell(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
     public void render(TileWell tile, float pTicks, PoseStack renderStack, MultiBufferSource renderTypeBuffer, int combinedLight, int combinedOverlay) {
         PrecisionSingleFluidTank tank = tile.getTank();
-        if (!tank.getFluid().isEmpty() && tank.getFluidAmount() > 0) {
-            FluidStack contained = tank.getFluid();
-            TextureAtlasSprite tas = RenderingUtils.getParticleTexture(contained);
-            Color fluidColor = new Color(contained.getFluid().getAttributes().getColor(tile.getWorld(), tile.getPos()));
+        if (!tank.getType().isEmpty() && tank.getFluidAmount() > 0) {
+            FluidStack contained = tank.getType();
+            TextureAtlasSprite tas = RenderingUtils.getParticleIcon(contained);
+            Color fluidColor = new Color(contained.getType().getAttributes().getColor(tile.getLevel(), tile.getBlockPos()));
             VertexConsumer buf = renderTypeBuffer.getBuffer(RenderTypesAS.TER_WELL_LIQUID);
 
             Vector3 offset = new Vector3(0.5D, 0.32D, 0.5D).addY(tank.getPercentageFilled() * 0.6);
 
             RenderingDrawUtils.renderAngleRotatedTexturedRectVB(buf, renderStack, offset, Vector3.RotAxis.Y_AXIS, (float) Math.toRadians(45F), 0.54F,
-                    tas.getMinU(), tas.getMinV(), tas.getMaxU() - tas.getMinU(), tas.getMaxV() - tas.getMinV(),
+                    tas.getU0(), tas.getV0(), tas.getU1() - tas.getU0(), tas.getV1() - tas.getV0(),
                     fluidColor.getRed(), fluidColor.getGreen(), fluidColor.getBlue(), 255);
         }
 
-        ItemStack catalyst = tile.getInventory().getStackInSlot(0);
+        ItemStack catalyst = tile.getItems().getStackInSlot(0);
         if (!catalyst.isEmpty()) {
             RenderingUtils.renderItemAsEntity(catalyst, renderStack, renderTypeBuffer, 0.5F, 0.75F, 0.5F, combinedLight, pTicks, tile.getTicksExisted());
         }

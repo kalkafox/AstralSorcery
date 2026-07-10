@@ -69,11 +69,11 @@ public class FormGemCrystalClusterRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public boolean matches(ItemEntity trigger, Level world, BlockPos at) {
-        if (!world.getBlockState(at.down()).isTopSolid(world, at.down(), trigger, Direction.UP)) {
+    public boolean matches(ItemEntity trigger, Level level, BlockPos at) {
+        if (!level.getBlockState(at.below()).isTopSolid(level, at.below(), trigger, Direction.UP)) {
             return false;
         }
-        List<Entity> otherEntities = getEntitiesInBlock(world, at);
+        List<Entity> otherEntities = getEntitiesInBlock(level, at);
         otherEntities.remove(trigger);
         Optional<Entity> crystalEntity = otherEntities.stream()
                 .filter(e -> e instanceof ItemEntity)
@@ -83,31 +83,31 @@ public class FormGemCrystalClusterRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at) {
-        Random r = new Random(MathHelper.getPositionRandom(at));
+    public void doServerCraftTick(ItemEntity trigger, Level level, BlockPos at) {
+        Random r = new Random(Mth.getSeed(at));
         if (getAndIncrementCraftingTick(trigger) > 50 + r.nextInt(20)) {
-            if (consumeItemEntityInBlock(world, at, ItemsAS.ILLUMINATION_POWDER) != null &&
-                    consumeItemEntityInBlock(world, at, 1, stack -> stack.getItem() instanceof ItemCrystalBase) != null) {
+            if (consumeItemEntityInBlock(level, at, ItemsAS.ILLUMINATION_POWDER) != null &&
+                    consumeItemEntityInBlock(level, at, 1, stack -> stack.getItem() instanceof ItemCrystalBase) != null) {
 
-                world.setBlockState(at, BlocksAS.GEM_CRYSTAL_CLUSTER.getDefaultState());
+                level.setBlock(at, BlocksAS.GEM_CRYSTAL_CLUSTER.defaultBlockState());
             }
         }
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at) {
+    public void doClientEffectTick(ItemEntity trigger, Level level, BlockPos at) {
         for (int i = 0; i < 4; i++) {
             Vector3 target = Vector3.atEntityCenter(trigger);
-            Vector3 pos = target.clone().add(Vector3.random().normalize().multiply(3 + rand.nextFloat()));
+            Vector3 pos = target.clone().add(Vector3.random().normalize().mul(3 + random.nextFloat()));
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
                     .color(VFXColorFunction.constant(ColorsAS.ILLUMINATION_POWDER_2))
-                    .alpha(VFXAlphaFunction.PYRAMID.andThen(VFXAlphaFunction.proximity(target::clone, 2F)))
+                    .alpha1arg(VFXAlphaFunction.PYRAMID.andThen(VFXAlphaFunction.proximity(target::clone, 2F)))
                     .motion(VFXMotionController.target(target::clone, 0.09F))
-                    .setScaleMultiplier(0.25F + rand.nextFloat() * 0.2F)
-                    .setMaxAge(20 + rand.nextInt(20));
+                    .setScaleMultiplier(0.25F + random.nextFloat() * 0.2F)
+                    .setMaxAge(20 + random.nextInt(20));
         }
     }
 }

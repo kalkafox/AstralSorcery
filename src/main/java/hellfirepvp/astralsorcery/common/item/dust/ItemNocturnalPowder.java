@@ -31,22 +31,22 @@ public class ItemNocturnalPowder extends ItemUsableDust {
     boolean dispense(BlockSource dispenser) {
         BlockPos at = dispenser.getBlockPos();
         Direction face = dispenser.getBlockState().get(DispenserBlock.FACING);
-        EntityNocturnalSpark nocSpark = new EntityNocturnalSpark(at.getX(), at.getY(), at.getZ(), dispenser.getWorld());
-        nocSpark.shoot(face.getXOffset(), face.getYOffset() + 0.1F, face.getZOffset(), 0.7F, 0.9F);
-        return dispenser.getWorld().addEntity(nocSpark);
+        EntityNocturnalSpark nocSpark = new EntityNocturnalSpark(at.getX(), at.getY(), at.getZ(), dispenser.getLevel());
+        nocSpark.shoot(face.getXOffset(), face.getMyRidingOffset() + 0.1F, face.getZOffset(), 0.7F, 0.9F);
+        return dispenser.getLevel().addEntity(nocSpark);
     }
 
     @Override
-    boolean rightClickAir(Level world, Player player, ItemStack dust) {
-        return world.addEntity(new EntityNocturnalSpark(player, world));
+    boolean rightClickAir(Level level, Player player, ItemStack dust) {
+        return level.addEntity(new EntityNocturnalSpark(player, level));
     }
 
     @Override
     boolean rightClickBlock(UseOnContext ctx) {
-        BlockPos pos = ctx.getPos().offset(ctx.getFace());
-        EntityNocturnalSpark noc = new EntityNocturnalSpark(ctx.getPlayer(), ctx.getWorld());
+        BlockPos pos = ctx.getBlockPos().offset(ctx.getFace());
+        EntityNocturnalSpark noc = new EntityNocturnalSpark(ctx.getPlayer(), ctx.getLevel());
         noc.setPosition(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
         noc.setSpawning();
-        return ctx.getWorld().addEntity(noc);
+        return ctx.getLevel().addEntity(noc);
     }
 }

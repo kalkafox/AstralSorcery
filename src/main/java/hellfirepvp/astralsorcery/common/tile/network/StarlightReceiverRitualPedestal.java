@@ -55,7 +55,7 @@ import java.util.*;
  */
 public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<TileRitualPedestal> {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     //own receiver data
     private final Map<BlockPos, Boolean> offsetMirrors = new HashMap<>();
@@ -68,7 +68,7 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
     private BlockPos ritualLinkPos = null;
 
     //Random other data
-    private int ticksExisted = 0;
+    private int tickCount = 0;
     private ConstellationEffect effect = null;
     private double collectedStarlight = 0;
 
@@ -79,28 +79,28 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
     }
 
     @Override
-    public void update(Level world) {
-        super.update(world);
-        this.ticksExisted++;
+    public void update(Level level) {
+        super.update(level);
+        this.tickCount++;
 
         if (!this.hasMultiblock || this.channelingType == null || this.attributes == null) {
             return;
         }
 
-        if ((this.ticksExisted % 20) == 0) {
-            validateMirrorPositions(world);
+        if ((this.tickCount % 20) == 0) {
+            validateMirrorPositions(level);
         }
 
         if (this.doesSeeSky) {
-            collectStarlight(world);
+            collectStarlight(level);
         }
 
         if (this.effect != null && this.collectedStarlight > 0) {
-            doRitualEffect(world);
+            doRitualEffect(level);
         }
     }
 
-    private void doRitualEffect(Level world) {
+    private void doRitualEffect(Level level) {
         ConstellationEffectProperties properties = this.effect.createProperties(this.getMirrorCount());
         if (this.channelingTrait != null) {
             this.channelingTrait.affectConstellationEffect(properties);
@@ -119,8 +119,8 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
 
         if (this.effect instanceof ConstellationEffectStatus && this.collectedStarlight > 0) {
             this.collectedStarlight = 0;
-            if (this.effect.getConfig().enabled.get() && ((ConstellationEffectStatus) this.effect).runStatusEffect(world, to, this.getMirrorCount(), properties, this.channelingTrait)) {
-                markDirty(world);
+            if (this.effect.getConfig().enabled.get() && ((ConstellationEffectStatus) this.effect).runStatusEffect(level, to, this.getMirrorCount(), properties, this.channelingTrait)) {
+                setChanged(level);
             }
             return;
         }
@@ -130,41 +130,41 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
 
         float executeTimes = (float) Math.atan(ritualStrength / stretch) * max;
         if (properties.isCorrupted()) {
-            executeTimes *= Math.max(rand.nextDouble() * 1.4, 0.1);
+            executeTimes *= Math.max(random.nextDouble() * 1.4, 0.1);
         }
-        PartialEffectExecutor exec = new PartialEffectExecutor(executeTimes, rand);
+        PartialEffectExecutor exec = new PartialEffectExecutor(executeTimes, random);
         while (exec.canExecute()) {
             exec.markExecution();
             if (this.effect.getConfig().enabled.get()) {
                 boolean didEffectExecute;
                 if (this.effect.needsChunkToBeLoaded()) {
-                    didEffectExecute = MiscUtils.executeWithChunk(world, to, to, (pos) -> {
-                        return this.effect.playEffect(world, pos, properties, this.channelingTrait);
+                    didEffectExecute = MiscUtils.executeWithChunk(level, to, to, (pos) -> {
+                        return this.effect.playEffect(level, pos, properties, this.channelingTrait);
                     }, false);
                 } else {
-                    didEffectExecute = this.effect.playEffect(world, to, properties, this.channelingTrait);
+                    didEffectExecute = this.effect.playEffect(level, to, properties, this.channelingTrait);
                 }
 
                 if (didEffectExecute) {
-                    markDirty(world);
+                    setChanged(level);
                 }
             }
         }
         this.collectedStarlight = 0F;
     }
 
-    private void collectStarlight(Level world) {
-        WorldContext ctx = SkyHandler.getContext(world, LogicalSide.SERVER);
+    private void collectStarlight(Level level) {
+        WorldContext ctx = SkyHandler.getContext(level, LogicalSide.SERVER);
         if (ctx == null) {
             return;
         }
 
         double collected = 1.3;
-        collected *= 0.25 + (0.75 * DayTimeHelper.getCurrentDaytimeDistribution(world));
+        collected *= 0.25 + (0.75 * DayTimeHelper.getCurrentDaytimeDistribution(level));
 
         if (this.noiseDistribution == -1) {
-            if (world instanceof WorldGenLevel) {
-                this.noiseDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) world, this.getLocationPos());
+            if (level instanceof WorldGenLevel) {
+                this.noiseDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) level, this.getLocationPos());
             } else {
                 this.noiseDistribution = 0.3F;
             }
@@ -178,10 +178,10 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
     }
 
     @Override
-    public void onStarlightReceive(Level world, IWeakConstellation type, double amount) {
+    public void onStarlightReceive(Level level, IWeakConstellation type, double amount) {
         if (this.channelingType != null && this.hasMultiblock && this.channelingType.equals(type)) {
             this.collectedStarlight += amount / 2;
-            this.findNextMirror(world);
+            this.findNextMirror(level);
         }
     }
 
@@ -191,9 +191,9 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
 
 
     @Override
-    public boolean syncTileData(Level world, TileRitualPedestal tile) {
+    public boolean syncTileData(Level level, TileRitualPedestal tile) {
         tile.setReceiverData(this.effect != null, this.offsetMirrors, this.attributes);
-        this.markDirty(world);
+        this.setChanged(level);
         return true;
     }
 
@@ -238,7 +238,7 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
             this.collectedStarlight = 0;
         }
 
-        this.markDirty(trp.getWorld());
+        this.setChanged(trp.getLevel());
         return super.updateFromTileEntity(tile);
     }
 
@@ -251,14 +251,14 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
     // Stuff surrounding lenses
     //=========================================================================================
 
-    private void findNextMirror(Level world) {
+    private void findNextMirror(Level level) {
         if (this.offsetMirrors.size() >= TileRitualPedestal.MAX_MIRROR_COUNT || this.effect == null || this.channelingType == null) {
             return;
         }
 
         long seed = 3451968351053166105L;
-        seed |= this.getLocationPos().toLong() * 31;
-        seed |= this.channelingType.getSimpleName().hashCode() * 31;
+        seed |= this.getLocationPos().asLong() * 31;
+        seed |= this.channelingType.getName().hashCode() * 31;
         Random r = new Random(seed);
         for (int i = 0; i < this.getMirrorCount(); i++) {
             r.nextInt(TileRitualPedestal.RITUAL_CIRCLE_OFFSETS.size());
@@ -269,7 +269,7 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
             c--;
 
             BlockPos test = MiscUtils.getRandomEntry(TileRitualPedestal.RITUAL_CIRCLE_OFFSETS, r);
-            RaytraceAssist ray = new RaytraceAssist(getLocationPos(), getLocationPos().add(test));
+            RaytraceAssist ray = new RaytraceAssist(getLocationPos(), getLocationPos().offset(test));
             Vector3 from = new Vector3(0.5, 0.7, 0.5);
             Vector3 newDir = new Vector3(test).add(0.5, 0.5, 0.5).subtract(from);
 
@@ -278,12 +278,12 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
                 if (Math.toDegrees(toDir.angle(newDir)) <= 30) {
                     continue lblWhile;
                 }
-                if (from.distanceSquared(Vector3d.copyCentered(p)) <= 3) {
+                if (from.distanceSquared(Vec3.copyCentered(p)) <= 3) {
                     continue lblWhile;
                 }
             }
 
-            if (!ray.isClear(world)) {
+            if (!ray.isClear(level)) {
                 continue;
             }
             offset = test;
@@ -292,17 +292,17 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
         if (offset != null) {
             this.offsetMirrors.put(offset, false);
             this.markForTileSync();
-            this.markDirty(world);
+            this.setChanged(level);
         }
     }
 
-    private void validateMirrorPositions(Level world) {
-        WorldNetworkHandler handle = WorldNetworkHandler.getNetworkHandler(world);
+    private void validateMirrorPositions(Level level) {
+        WorldNetworkHandler handle = WorldNetworkHandler.getNetworkHandler(level);
         List<BlockPos> srcLinkingToThis = this.getSources();
 
         boolean needsUpdate = false;
         for (BlockPos pos : new ArrayList<>(this.offsetMirrors.keySet())) {
-            BlockPos actualPos = this.getLocationPos().add(pos);
+            BlockPos actualPos = this.getLocationPos().offset(pos);
             boolean existingFlag = this.offsetMirrors.get(pos);
 
             //If the source is not linking to this
@@ -375,37 +375,37 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {
-        super.readFromNBT(compound);
+    public void readFromNBT(CompoundTag pattern) {
+        super.readFromNBT(pattern);
 
-        this.doesSeeSky = compound.getBoolean("doesSeeSky");
-        this.hasMultiblock = compound.getBoolean("hasMultiblock");
-        this.ticksExisted = compound.getInt("ticksExisted");
-        this.collectedStarlight = compound.getDouble("collectedStarlight");
+        this.doesSeeSky = pattern.getBoolean("doesSeeSky");
+        this.hasMultiblock = pattern.getBoolean("hasMultiblock");
+        this.tickCount = pattern.getInt("ticksExisted");
+        this.collectedStarlight = pattern.getDouble("collectedStarlight");
 
-        IConstellation channeling = IConstellation.readFromNBT(compound, "channelingType");
+        IConstellation channeling = IConstellation.readFromNBT(pattern, "channelingType");
         if (channeling instanceof IWeakConstellation) {
             this.channelingType = (IWeakConstellation) channeling;
         } else {
             this.channelingType = null;
         }
-        IConstellation trait = IConstellation.readFromNBT(compound, "channelingTrait");
+        IConstellation trait = IConstellation.readFromNBT(pattern, "channelingTrait");
         if (trait instanceof IMinorConstellation) {
             this.channelingTrait = (IMinorConstellation) trait;
         } else {
             this.channelingTrait = null;
         }
 
-        this.attributes = CrystalAttributes.getCrystalAttributes(compound);
-        if (compound.contains("ritualLinkPos")) {
-            this.ritualLinkPos = NBTHelper.readBlockPosFromNBT(compound.getCompound("ritualLinkPos"));
+        this.attributes = CrystalAttributes.getCrystalAttributes(pattern);
+        if (pattern.contains("ritualLinkPos")) {
+            this.ritualLinkPos = NBTHelper.readBlockPosFromNBT(pattern.getCompound("ritualLinkPos"));
         } else {
             this.ritualLinkPos = null;
         }
 
         this.offsetMirrors.clear();
-        ListTag tagList = compound.getList("mirrors", Constants.NBT.TAG_COMPOUND);
-        for (Tag nbt : tagList) {
+        ListTag list = pattern.getList("mirrors", Constants.NBT.TAG_COMPOUND);
+        for (Tag nbt : list) {
             CompoundTag tag = (CompoundTag) nbt;
             this.offsetMirrors.put(NBTHelper.readBlockPosFromNBT(tag), tag.getBoolean("connect"));
         }
@@ -413,33 +413,33 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
         //Reset ritual effect.
         if (this.channelingType != null) {
             this.effect = ConstellationEffectRegistry.createInstance(this, this.channelingType);
-            if (this.effect != null && compound.contains("effect")) {
-                this.effect.readFromNBT(compound.getCompound("effect"));
+            if (this.effect != null && pattern.contains("effect")) {
+                this.effect.readFromNBT(pattern.getCompound("effect"));
             }
         }
     }
 
     @Override
-    public void writeToNBT(CompoundTag compound) {
-        super.writeToNBT(compound);
+    public void save(CompoundTag pattern) {
+        super.save(pattern);
 
-        compound.putBoolean("doesSeeSky", this.doesSeeSky);
-        compound.putBoolean("hasMultiblock", this.hasMultiblock);
-        compound.putInt("ticksExisted", this.ticksExisted);
-        compound.putDouble("collectedStarlight", this.collectedStarlight);
+        pattern.putBoolean("doesSeeSky", this.doesSeeSky);
+        pattern.putBoolean("hasMultiblock", this.hasMultiblock);
+        pattern.putInt("ticksExisted", this.tickCount);
+        pattern.putDouble("collectedStarlight", this.collectedStarlight);
 
         if (this.channelingType != null) {
-            this.channelingType.writeToNBT(compound, "channelingType");
+            this.channelingType.save(pattern, "channelingType");
         }
         if (this.channelingTrait != null) {
-            this.channelingTrait.writeToNBT(compound, "channelingTrait");
+            this.channelingTrait.save(pattern, "channelingTrait");
         }
 
         if (attributes != null) {
-            attributes.store(compound);
+            attributes.store(pattern);
         }
         if (this.ritualLinkPos != null) {
-            compound.put("ritualLinkPos", NBTHelper.writeBlockPosToNBT(this.ritualLinkPos, new CompoundTag()));
+            pattern.put("ritualLinkPos", NBTHelper.writeBlockPosToNBT(this.ritualLinkPos, new CompoundTag()));
         }
 
         ListTag listPositions = new ListTag();
@@ -449,10 +449,10 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
             cmp.putBoolean("connect", posEntry.getValue());
             listPositions.add(cmp);
         }
-        compound.put("mirrors", listPositions);
+        pattern.put("mirrors", listPositions);
 
         if (this.channelingType != null && this.effect != null) {
-            NBTHelper.setAsSubTag(compound, "effect", this.effect::writeToNBT);
+            NBTHelper.setAsSubTag(pattern, "effect", this.effect::save);
         }
     }
 

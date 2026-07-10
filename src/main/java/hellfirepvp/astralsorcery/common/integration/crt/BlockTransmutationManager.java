@@ -43,16 +43,16 @@ import java.util.function.Consumer;
 public class BlockTransmutationManager implements IRecipeManager {
 
     @ZenCodeType.Method
-    public void addRecipe(String name, BlockState outState, MCTag<Block> input, double starlight, @ZenCodeType.Optional("null") ResourceLocation constellationKey) {
+    public void addRecipe(String name, BlockState outState, MCTag<Block> from, double starlight, @ZenCodeType.Optional("null") ResourceLocation constellationKey) {
         addTransmutation(name, outState, starlight, constellationKey, transmutation -> {
-            transmutation.addInputOption(new BlockMatchInformation((Tag<Block>) input.getInternal()));
+            transmutation.addInputOption(new BlockMatchInformation((Tag<Block>) from.getInternal()));
         });
     }
     
     @ZenCodeType.Method
-    public void addRecipe(String name, BlockState outState, BlockState input, boolean exact, double starlight, @ZenCodeType.Optional("null") ResourceLocation constellationKey) {
+    public void addRecipe(String name, BlockState outState, BlockState from, boolean exact, double starlight, @ZenCodeType.Optional("null") ResourceLocation constellationKey) {
         addTransmutation(name, outState, starlight, constellationKey, transmutation -> {
-            transmutation.addInputOption(new BlockMatchInformation(input, exact));
+            transmutation.addInputOption(new BlockMatchInformation(from, exact));
         });
     }
 
@@ -71,7 +71,7 @@ public class BlockTransmutationManager implements IRecipeManager {
                 throw new IllegalArgumentException("Constellation: \"" + constellationKey + "\" is not a weak constellation!");
             }
         }
-        BlockTransmutation transmutation = new BlockTransmutation(new ResourceLocation(name), outState, starlight, weakConstellation);
+        BlockTransmutation transmutation = new BlockTransmutation(ResourceLocation.parse(name), outState, starlight, weakConstellation);
         CraftTweakerAPI.apply(new ActionAddRecipe(this, transmutation));
     }
     

@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(ParticleManager.class)
+@Mixin(ParticleEngine.class)
 public class MixinParticleManager {
 
     @Inject(
@@ -37,7 +37,7 @@ public class MixinParticleManager {
             at = @At("RETURN"),
             remap = false
     )
-    public void renderParticles(PoseStack matrixStack, IRenderTypeBuffer.Impl buffer, LightTexture lightTexture, Camera ari, float pTicks, Frustum clippingHelper, CallbackInfo ci) {
+    public void render(PoseStack matrixStack, MultiBufferSource.Impl buffer, LightTexture lightTexture, Camera ari, float pTicks, Frustum clippingHelper, CallbackInfo ci) {
         EffectHandler.getInstance().render(matrixStack, pTicks);
 
         //Setup GL states again

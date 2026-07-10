@@ -36,13 +36,13 @@ public class PatternInfuser extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        addBlock(BlocksAS.INFUSER.getDefaultState(), 0, 0, 0);
+        addBlock(BlocksAS.INFUSER.defaultBlockState(), 0, 0, 0);
 
-        BlockState chiseled = BlocksAS.MARBLE_CHISELED.getDefaultState();
-        BlockState runed = BlocksAS.MARBLE_RUNED.getDefaultState();
-        BlockState raw = BlocksAS.MARBLE_RAW.getDefaultState();
+        BlockState chiseled = BlocksAS.MARBLE_CHISELED.defaultBlockState();
+        BlockState runed = BlocksAS.MARBLE_RUNED.defaultBlockState();
+        BlockState raw = BlocksAS.MARBLE_RAW.defaultBlockState();
 
-        addBlock(Blocks.LAPIS_BLOCK.getDefaultState(), 0, -1, 0);
+        addBlock(Blocks.LAPIS_BLOCK.defaultBlockState(), 0, -1, 0);
 
         for (int i = -2; i <= 2; i++) {
             addBlock(raw,     i, -2, -2);
@@ -82,7 +82,7 @@ public class PatternInfuser extends PatternBlockArray {
             @Nonnull
             @Override
             public BlockState getDescriptiveState(long tick) {
-                return BlocksAS.MARBLE_PILLAR.getDefaultState().with(BlockMarblePillar.PILLAR_TYPE, type);
+                return BlocksAS.MARBLE_PILLAR.defaultBlockState().setValue(BlockMarblePillar.PILLAR_TYPE, type);
             }
         };
     }

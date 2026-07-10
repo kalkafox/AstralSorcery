@@ -43,20 +43,20 @@ public class PlayerReference {
     public static PlayerReference of(Player player) {
         Component txt = player.getDisplayName();
         if (txt instanceof MutableComponent) {
-            return new PlayerReference(player.getUniqueID(), (MutableComponent) txt);
+            return new PlayerReference(player.getUUID(), (MutableComponent) txt);
         }
-        return new PlayerReference(player.getUniqueID(), Component.literal("").append(txt));
+        return new PlayerReference(player.getUUID(), Component.literal("").append(txt));
     }
 
-    public boolean isPlayer(Player player) {
-        return this.getPlayerUUID().equals(player.getUniqueID());
+    public boolean isAlwaysExperienceDropper(Player player) {
+        return this.getPlayerUUID().equals(player.getUUID());
     }
 
     public UUID getPlayerUUID() {
         return this.playerUUID;
     }
 
-    public Component getPlayerName() {
+    public Component getOwner() {
         return this.playerName;
     }
 
@@ -84,13 +84,13 @@ public class PlayerReference {
 
     public CompoundTag serialize() {
         CompoundTag tag = new CompoundTag();
-        this.writeToNBT(tag);
+        this.save(tag);
         return tag;
     }
 
-    public void writeToNBT(CompoundTag tag) {
+    public void save(CompoundTag tag) {
         tag.putUniqueId("playerUUID", this.playerUUID);
-        tag.putString("playerName", ITextComponent.Serializer.toJson(this.playerName));
+        tag.putString("playerName", Component.Serializer.getPos(this.playerName));
     }
 
     public void write(FriendlyByteBuf buf) {
@@ -99,10 +99,10 @@ public class PlayerReference {
     }
 
     public static PlayerReference deserialize(CompoundTag tag) {
-        return new PlayerReference(tag.getUniqueId("playerUUID"), ITextComponent.Serializer.getComponentFromJson(tag.getString("playerName")));
+        return new PlayerReference(tag.getUniqueId("playerUUID"), Component.Serializer.getComponentFromJson(tag.getString("playerName")));
     }
 
     public static PlayerReference read(FriendlyByteBuf buf) {
-        return new PlayerReference(ByteBufUtils.readUUID(buf), ByteBufUtils.readTextComponent(buf));
+        return new PlayerReference(ByteBufUtils.readUUID(buf), ByteBufUtils.readComponent(buf));
     }
 }

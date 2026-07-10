@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.custom.RecipeDyeableChangeColor;
 import hellfirepvp.astralsorcery.common.crafting.serializer.*;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -40,8 +40,7 @@ public class RegistryRecipeSerializers {
     }
 
     private static <C extends Container, R extends Recipe<C>, T extends RecipeSerializer<R>> T register(T serializer) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(serializer);
-        return serializer;
+        return AstralRegistries.register(AstralRegistries.RECIPE_SERIALIZERS, serializer);
     }
 
 }

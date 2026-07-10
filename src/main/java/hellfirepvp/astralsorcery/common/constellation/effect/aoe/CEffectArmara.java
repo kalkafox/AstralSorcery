@@ -65,12 +65,12 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
         if (pedestal.getTicksExisted() % 20 == 0) {
             EffectHelper.spawnSource(new FXOrbitalArmara(new Vector3(pos).add(0.5, 0.5, 0.5))
-                    .setOrbitRadius(0.8 + rand.nextFloat() * 0.7)
+                    .setOrbitRadius(0.8 + random.nextFloat() * 0.7)
                     .setOrbitAxis(Vector3.RotAxis.Y_AXIS)
-                    .setTicksPerRotation(20 + rand.nextInt(20)));
+                    .setTicksPerRotation(20 + random.nextInt(20)));
         }
 
         ConstellationEffectProperties prop = this.createProperties(pedestal.getMirrorCount());
@@ -86,20 +86,20 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
             }
         }
 
-        List<Entity> projectiles = world.getEntitiesWithinAABB(Entity.class, BOX.offset(pos).grow(prop.getSize()));
+        List<Entity> projectiles = level.getEntitiesWithinAABB(Entity.class, BOX.offset(pos).grow(prop.getSize()));
         if (!projectiles.isEmpty()) {
             for (Entity e : projectiles) {
                 if (e.isAlive() && TechnicalEntityRegistry.INSTANCE.canAffect(e)) {
                     if (e instanceof Projectile) {
-                        double xRatio = (pos.getX() + 0.5) - e.getPosX();
-                        double zRatio = (pos.getZ() + 0.5) - e.getPosZ();
-                        float f = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
-                        Vector3 motion = new Vector3(e.getMotion());
-                        motion.multiply(new Vector3(0.5, 1, 0.5));
+                        double xRatio = (pos.getX() + 0.5) - e.getX();
+                        double zRatio = (pos.getZ() + 0.5) - e.getZ();
+                        float f = Mth.sqrt(xRatio * xRatio + zRatio * zRatio);
+                        Vector3 motion = new Vector3(e.getDeltaMovement());
+                        motion.mul(new Vector3(0.5, 1, 0.5));
                         motion.subtract(xRatio / f * 0.4, 0, zRatio / f * 0.4);
                         ((Projectile) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
                     } else if (e instanceof Mob) {
-                        ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getPosX(), (pos.getZ() + 0.5) - e.getPosZ());
+                        ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getX(), (pos.getZ() + 0.5) - e.getZ());
                     }
                 }
             }
@@ -107,14 +107,14 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        int toAdd = 2 + rand.nextInt(5);
-        WorldBlockPos at = WorldBlockPos.wrapServer(world, pos);
-        TickTokenMap.SimpleTickToken<Double> token = EventHelperSpawnDeny.spawnDenyRegions.get(at);
-        if (token != null) {
-            int next = token.getRemainingTimeout() + toAdd;
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        int toAdd = 2 + random.nextInt(5);
+        WorldBlockPos at = WorldBlockPos.wrapServer(level, pos);
+        TickTokenMap.SimpleTickToken<Double> accessToken = EventHelperSpawnDeny.spawnDenyRegions.get(at);
+        if (accessToken != null) {
+            int next = accessToken.getRemainingTimeout() + toAdd;
             if (next > 400) next = 400;
-            token.setTimeout(next);
+            accessToken.setIdleTimeout(next);
             rememberedTimeout = next;
         } else {
             rememberedTimeout = Math.min(400, rememberedTimeout + toAdd);
@@ -122,20 +122,20 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
         }
 
         if (!properties.isCorrupted()) {
-            List<Entity> projectiles = world.getEntitiesWithinAABB(Entity.class, BOX.offset(pos).grow(properties.getSize()));
+            List<Entity> projectiles = level.getEntitiesWithinAABB(Entity.class, BOX.offset(pos).grow(properties.getSize()));
             if (!projectiles.isEmpty()) {
                 for (Entity e : projectiles) {
                     if (e.isAlive() && TechnicalEntityRegistry.INSTANCE.canAffect(e)) {
                         if (e instanceof Projectile) {
-                            double xRatio = (pos.getX() + 0.5) - e.getPosX();
-                            double zRatio = (pos.getZ() + 0.5) - e.getPosZ();
-                            float f = MathHelper.sqrt(xRatio * xRatio + zRatio * zRatio);
-                            Vector3 motion = new Vector3(e.getMotion());
-                            motion.multiply(new Vector3(0.5, 1, 0.5));
+                            double xRatio = (pos.getX() + 0.5) - e.getX();
+                            double zRatio = (pos.getZ() + 0.5) - e.getZ();
+                            float f = Mth.sqrt(xRatio * xRatio + zRatio * zRatio);
+                            Vector3 motion = new Vector3(e.getDeltaMovement());
+                            motion.mul(new Vector3(0.5, 1, 0.5));
                             motion.subtract(xRatio / f * 0.4, 0, zRatio / f * 0.4);
                             ((Projectile) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
                         } else if (e instanceof Mob) {
-                            ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getPosX(), (pos.getZ() + 0.5) - e.getPosZ());
+                            ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getX(), (pos.getZ() + 0.5) - e.getZ());
                         }
                     }
                 }
@@ -143,7 +143,7 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
         }
 
         int potionAmplifier = CONFIG.potionAmplifier.get();
-        List<LivingEntity> entities = this.collectEntities(world, pos, properties);
+        List<LivingEntity> entities = this.collectEntities(level, pos, properties);
         for (LivingEntity entity : entities) {
             if (entity.isAlive() && (entity instanceof Mob || entity instanceof Player)) {
                 if (properties.isCorrupted()) {
@@ -151,17 +151,17 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
                         continue;
                     }
 
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.SPEED, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.REGENERATION, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.RESISTANCE, 100, potionAmplifier + 2));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.STRENGTH, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.WATER_BREATHING, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.HASTE, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.REGENERATION, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, potionAmplifier + 2));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.STRENGTH, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.WATER_BREATHING, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DIG_SPEED, 100, potionAmplifier + 4));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 100, 5));
                 } else {
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.RESISTANCE, 30, Math.min(potionAmplifier, 3), true, true));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, Math.min(potionAmplifier, 3), true, true));
                     if (entity instanceof Player) {
-                        EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(Effects.ABSORPTION, 30, potionAmplifier, true, false));
+                        EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.ABSORPTION, 30, potionAmplifier, true, false));
                     }
                 }
                 if (entity instanceof Player) {
@@ -191,8 +191,8 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
     }
 
     @Override
-    public void writeToNBT(CompoundTag cmp) {
-        super.writeToNBT(cmp);
+    public void save(CompoundTag cmp) {
+        super.save(cmp);
 
         cmp.putInt("rememberedTimeout", this.rememberedTimeout);
     }

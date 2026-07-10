@@ -54,10 +54,10 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
     }
 
     private void onBreak(BlockEvent.BreakEvent event) {
-        LevelAccessor world = event.getWorld();
+        LevelAccessor level = event.getLevel();
         Player player = event.getPlayer();
 
-        if (!(world instanceof Level) || world.isRemote()) {
+        if (!(level instanceof Level) || level.isClientSide()) {
             return;
         }
         if (player instanceof ServerPlayer) {
@@ -70,18 +70,18 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_MINING_SIZE, 0);
                 size = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_MINING_SIZE, size);
                 if (size >= 1F) {
-                    BlockHitResult brtr = MiscUtils.rayTraceLookBlock(player, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE);
-                    if (brtr != null && brtr.getType() == RayTraceResult.Type.BLOCK) {
-                        int levelBroken = event.getState().getHarvestLevel();
-                        float hardnessBroken = event.getState().getBlockHardness(world, event.getPos());
+                    BlockHitResult brtr = MiscUtils.rayTraceLookBlock(player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.NONE);
+                    if (brtr != null && brtr.getType() == HitResult.Type.BLOCK) {
+                        int levelBroken = event.getState().getLevel();
+                        float hardnessBroken = event.getState().getDestroySpeed(level, event.getBlockPos());
                         BlockPredicate miningTest = (worldIn, posIn, stateIn) ->
-                                stateIn.getHarvestLevel() <= levelBroken &&
-                                        stateIn.getBlockHardness(worldIn, posIn) <= hardnessBroken;
+                                stateIn.getLevel() <= levelBroken &&
+                                        stateIn.getDestroySpeed(worldIn, posIn) <= hardnessBroken;
                         Direction dir = brtr.getFace();
                         if (dir.getAxis() == Direction.Axis.Y) {
-                            this.breakBlocksPlaneHorizontal((ServerPlayer) player, dir, (Level) world, event.getPos(), miningTest, MathHelper.floor(size));
+                            this.breakBlocksPlaneHorizontal((ServerPlayer) player, dir, (Level) level, event.getBlockPos(), miningTest, Mth.floor(size));
                         } else {
-                            this.breakBlocksPlaneVertical((ServerPlayer) player, dir, (Level) world, event.getPos(), miningTest, MathHelper.floor(size));
+                            this.breakBlocksPlaneVertical((ServerPlayer) player, dir, (Level) level, event.getBlockPos(), miningTest, Mth.floor(size));
                         }
                     }
                 }
@@ -89,28 +89,28 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
         }
     }
 
-    private void breakBlocksPlaneVertical(ServerPlayer player, Direction sideBroken, Level world, BlockPos at, BlockPredicate miningTest, int size) {
+    private void breakBlocksPlaneVertical(ServerPlayer player, Direction sideBroken, Level level, BlockPos at, BlockPredicate miningTest, int size) {
         if (size <= 0) {
             return;
         }
         for (int xx = -size; xx <= size; xx++) {
-            if (sideBroken.getDirectionVec().getX() != 0 && xx != 0) continue;
+            if (sideBroken.getNormal().getX() != 0 && xx != 0) continue;
             for (int yy = -1; yy <= (size * 2 - 1); yy++) {
-                if (sideBroken.getDirectionVec().getY() != 0 && yy != 0) continue;
+                if (sideBroken.getNormal().getY() != 0 && yy != 0) continue;
                 for (int zz = -size; zz <= size; zz++) {
-                    if (sideBroken.getDirectionVec().getZ() != 0 && zz != 0) continue;
+                    if (sideBroken.getNormal().getZ() != 0 && zz != 0) continue;
                     if (xx == 0 && yy == 0 && zz == 0) continue;
 
                     BlockPos other = at.add(xx, yy, zz);
-                    BlockState otherState = world.getBlockState(other);
-                    if (otherState.getBlockHardness(world, other) != -1 &&
-                            (player.isCreative() || miningTest.test(world, other, otherState)) &&
+                    BlockState otherState = level.getBlockState(other);
+                    if (otherState.getDestroySpeed(level, other) != -1 &&
+                            (player.isCreative() || miningTest.test(level, other, otherState)) &&
                             AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerBreak.get(), true)) {
-                        BlockState state = world.getBlockState(other);
+                        BlockState state = level.getBlockState(other);
                         if (!BlockUtils.isFluidBlock(state) &&
-                                (player.isCreative() || otherState.canHarvestBlock(world, other, player)) &&
-                                player.interactionManager.tryHarvestBlock(other)) {
-                            if (rand.nextInt(3) == 0) {
+                                (player.isCreative() || otherState.isCorrectToolForDrops(level, other, player)) &&
+                                player.gameMode.setLevel(other)) {
+                            if (random.nextInt(3) == 0) {
                                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerBreak.get(), false);
                             }
                         }
@@ -120,26 +120,26 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
         }
     }
 
-    private void breakBlocksPlaneHorizontal(ServerPlayer player, Direction sideBroken, Level world, BlockPos at, BlockPredicate miningTest, int size) {
+    private void breakBlocksPlaneHorizontal(ServerPlayer player, Direction sideBroken, Level level, BlockPos at, BlockPredicate miningTest, int size) {
         if (size <= 0) {
             return;
         }
         for (int xx = -size; xx <= size; xx++) {
-            if (sideBroken.getDirectionVec().getX() != 0 && xx != 0) continue;
+            if (sideBroken.getNormal().getX() != 0 && xx != 0) continue;
             for (int zz = -size; zz <= size; zz++) {
-                if (sideBroken.getDirectionVec().getZ() != 0 && zz != 0) continue;
+                if (sideBroken.getNormal().getZ() != 0 && zz != 0) continue;
                 if (xx == 0 && zz == 0) continue;
 
                 BlockPos other = at.add(xx, 0, zz);
-                BlockState otherState = world.getBlockState(other);
-                if (otherState.getBlockHardness(world, other) != -1 &&
-                        (player.isCreative() || miningTest.test(world, other, otherState)) &&
+                BlockState otherState = level.getBlockState(other);
+                if (otherState.getDestroySpeed(level, other) != -1 &&
+                        (player.isCreative() || miningTest.test(level, other, otherState)) &&
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerBreak.get(), true)) {
-                    BlockState state = world.getBlockState(other);
+                    BlockState state = level.getBlockState(other);
                     if (!BlockUtils.isFluidBlock(state) &&
-                            (player.isCreative() || otherState.canHarvestBlock(world, other, player)) &&
-                            player.interactionManager.tryHarvestBlock(other)) {
-                        if (rand.nextInt(3) == 0) {
+                            (player.isCreative() || otherState.isCorrectToolForDrops(level, other, player)) &&
+                            player.gameMode.setLevel(other)) {
+                        if (random.nextInt(3) == 0) {
                             AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerBreak.get(), false);
                         }
                     }

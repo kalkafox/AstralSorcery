@@ -20,6 +20,6 @@ import net.neoforged.fml.LogicalSide;
  */
 public interface PlayerTickPerk {
 
-    void onPlayerTick(Player player, LogicalSide side);
+    void onPlayerTick(Player player, LogicalSide direction);
 
 }

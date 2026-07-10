@@ -48,90 +48,90 @@ public class AlignmentChargeHandler implements ITickHandler {
 
     private AlignmentChargeHandler() {}
 
-    public void updateMaximum(Player player, LogicalSide side) {
-        float cap = PerkAttributeHelper.getOrCreateMap(player, side)
-                .modifyValue(player, ResearchHelper.getProgress(player, side), PerkAttributeTypesAS.ATTR_TYPE_ALIGNMENT_CHARGE_MAXIMUM, MAX_CHARGE);
+    public void updateMaximum(Player player, LogicalSide direction) {
+        float cap = PerkAttributeHelper.getOrCreateMap(player, direction)
+                .modifyValue(player, ResearchHelper.getProgress(player, direction), PerkAttributeTypesAS.ATTR_TYPE_ALIGNMENT_CHARGE_MAXIMUM, MAX_CHARGE);
         cap = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_ALIGNMENT_CHARGE_MAXIMUM, cap);
         cap = Math.max(0, cap);
 
-        maximumCharge.computeIfAbsent(side, s -> new HashMap<>()).put(player.getUniqueID(), cap);
-        if (getCurrentCharge(player, side) > cap) {
-            currentCharge.computeIfAbsent(side, s -> new HashMap<>()).put(player.getUniqueID(), cap);
+        maximumCharge.computeIfAbsent(direction, s -> new HashMap<>()).put(player.getUUID(), cap);
+        if (getCurrentCharge(player, direction) > cap) {
+            currentCharge.computeIfAbsent(direction, s -> new HashMap<>()).put(player.getUUID(), cap);
         }
     }
 
-    public float getMaximumCharge(Player player, LogicalSide side) {
-        return maximumCharge.computeIfAbsent(side, s -> new HashMap<>())
-                .computeIfAbsent(player.getUniqueID(), uuid -> MAX_CHARGE);
+    public float getMaximumCharge(Player player, LogicalSide direction) {
+        return maximumCharge.computeIfAbsent(direction, s -> new HashMap<>())
+                .computeIfAbsent(player.getUUID(), uuid -> MAX_CHARGE);
     }
 
-    public float getCurrentCharge(Player player, LogicalSide side) {
+    public float getCurrentCharge(Player player, LogicalSide direction) {
         if (player.isCreative() || player.isSpectator()) {
-            return getMaximumCharge(player, side);
+            return getMaximumCharge(player, direction);
         }
-        return currentCharge.computeIfAbsent(side, s -> new HashMap<>())
-                .computeIfAbsent(player.getUniqueID(), uuid -> MAX_CHARGE);
+        return currentCharge.computeIfAbsent(direction, s -> new HashMap<>())
+                .computeIfAbsent(player.getUUID(), uuid -> MAX_CHARGE);
     }
 
-    public float getFilledPercentage(Player player, LogicalSide side) {
+    public float getFilledPercentage(Player player, LogicalSide direction) {
         if (player.isCreative() || player.isSpectator()) {
             return 1F;
         }
-        float max = this.getMaximumCharge(player, side);
-        float current = this.getCurrentCharge(player, side);
-        return MathHelper.clamp(current / max, 0F, 1F);
+        float max = this.getMaximumCharge(player, direction);
+        float current = this.getCurrentCharge(player, direction);
+        return Mth.clamp(current / max, 0F, 1F);
     }
 
-    public boolean hasCharge(Player player, LogicalSide side, float charge) {
+    public boolean hasCharge(Player player, LogicalSide direction, float charge) {
         if (player.isCreative() || player.isSpectator()) {
             return true;
         }
-        float current = this.getCurrentCharge(player, side);
+        float current = this.getCurrentCharge(player, direction);
         return current >= charge;
     }
 
-    public boolean drainCharge(Player player, LogicalSide side, float charge, boolean simulate) {
+    public boolean drainCharge(Player player, LogicalSide direction, float charge, boolean simulate) {
         if (player.isCreative() || player.isSpectator()) {
             return true;
         }
-        if (!this.hasCharge(player, side, charge)) {
+        if (!this.hasCharge(player, direction, charge)) {
             return false;
         }
-        float current = this.getCurrentCharge(player, side);
+        float current = this.getCurrentCharge(player, direction);
         float result = current - charge;
         if (result < 0) {
             return false;
         }
         if (!simulate) {
-            currentCharge.computeIfAbsent(side, s -> new HashMap<>())
-                    .put(player.getUniqueID(), MathHelper.clamp(result, 0, this.getMaximumCharge(player, side)));
+            currentCharge.computeIfAbsent(direction, s -> new HashMap<>())
+                    .put(player.getUUID(), Mth.clamp(result, 0, this.getMaximumCharge(player, direction)));
         }
         return true;
     }
 
     @OnlyIn(Dist.CLIENT)
     public void receiveCharge(PktSyncCharge pkt, Player player) {
-        maximumCharge.computeIfAbsent(LogicalSide.CLIENT, s -> new HashMap<>()).put(player.getUniqueID(), pkt.getMaxCharge());
-        currentCharge.computeIfAbsent(LogicalSide.CLIENT, s -> new HashMap<>()).put(player.getUniqueID(), pkt.getCharge());
+        maximumCharge.computeIfAbsent(LogicalSide.CLIENT, s -> new HashMap<>()).put(player.getUUID(), pkt.getMaxCharge());
+        currentCharge.computeIfAbsent(LogicalSide.CLIENT, s -> new HashMap<>()).put(player.getUUID(), pkt.getCharge());
     }
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player player = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
 
-        float charge = this.getCurrentCharge(player, side);
-        float max = this.getMaximumCharge(player, side);
+        float charge = this.getCurrentCharge(player, direction);
+        float max = this.getMaximumCharge(player, direction);
         if (charge >= max) {
             return;
         }
-        PlayerProgress progress = ResearchHelper.getProgress(player, side);
+        PlayerProgress progress = ResearchHelper.getProgress(player, direction);
 
         float regenPerTick = max / (6F * 20F);
 
-        boolean underground = player.getEntityWorld().getHeight(Heightmap.Type.WORLD_SURFACE, player.getPosition()).getY() > player.getPosition().getY() + 1;
+        boolean underground = player.getCommandSenderWorld().getHeight(Heightmap.Type.WORLD_SURFACE, player.position()).getY() > player.position().getY() + 1;
 
-        float dayMultiplier = underground ? 0.85F : 0.3F + 0.7F * DayTimeHelper.getCurrentDaytimeDistribution(player.getEntityWorld());
+        float dayMultiplier = underground ? 0.85F : 0.3F + 0.7F * DayTimeHelper.getCurrentDaytimeDistribution(player.getCommandSenderWorld());
         float caveMultiplier = underground ? 0.25F : 1F;
         if (progress.getPerkData().hasPerkEffect(p -> p instanceof KeyChargeBalancing)) {
             dayMultiplier = 0.6F + dayMultiplier * 0.4F;
@@ -141,12 +141,12 @@ public class AlignmentChargeHandler implements ITickHandler {
         regenPerTick *= dayMultiplier;
         regenPerTick *= caveMultiplier;
 
-        regenPerTick = PerkAttributeHelper.getOrCreateMap(player, side)
+        regenPerTick = PerkAttributeHelper.getOrCreateMap(player, direction)
                 .modifyValue(player, progress, PerkAttributeTypesAS.ATTR_TYPE_ALIGNMENT_CHARGE_REGENERATION, regenPerTick);
         regenPerTick = AttributeEvent.postProcessModded(player, PerkAttributeTypesAS.ATTR_TYPE_ALIGNMENT_CHARGE_REGENERATION, regenPerTick);
 
         charge += regenPerTick;
-        currentCharge.computeIfAbsent(side, s -> new HashMap<>()).put(player.getUniqueID(), Math.min(charge, max));
+        currentCharge.computeIfAbsent(direction, s -> new HashMap<>()).put(player.getUUID(), Math.min(charge, max));
 
         PacketChannel.CHANNEL.sendToPlayer(player, new PktSyncCharge(player));
     }
@@ -157,8 +157,8 @@ public class AlignmentChargeHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

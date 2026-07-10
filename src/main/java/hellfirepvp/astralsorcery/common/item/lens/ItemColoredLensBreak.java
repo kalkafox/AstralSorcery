@@ -51,21 +51,21 @@ public class ItemColoredLensBreak extends ItemColoredLens {
         }
 
         @Override
-        public void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {}
+        public void entityInBeam(Level level, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {}
 
         @Override
-        public void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {
-            if (world.isRemote()) {
+        public void blockInBeam(Level level, BlockPos pos, BlockState state, PartialEffectExecutor executor) {
+            if (level.isClientSide()) {
                 return;
             }
 
             boolean ranOnce = executor.executeAll(() -> {
-                BlockBreakHelper.addProgress(world, pos, 0.4F, () -> {
-                    float hardness = state.getBlockHardness(world, pos);
+                BlockBreakHelper.addProgress(level, pos, 0.4F, () -> {
+                    float hardness = state.getDestroySpeed(level, pos);
                     if (hardness < 0) {
                         return null;
                     }
-                    return hardness * Math.max(1, state.getHarvestLevel());
+                    return hardness * Math.max(1, state.getLevel());
                 });
             });
             if (ranOnce) {
@@ -74,7 +74,7 @@ public class ItemColoredLensBreak extends ItemColoredLens {
                             ByteBufUtils.writePos(buf, pos);
                             buf.writeInt(Block.getStateId(state));
                         });
-                PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, pos, 16));
+                PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 16));
             }
         }
     }

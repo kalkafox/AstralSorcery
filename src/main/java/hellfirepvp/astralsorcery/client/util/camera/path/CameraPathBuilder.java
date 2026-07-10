@@ -35,20 +35,20 @@ public class CameraPathBuilder {
         return new CameraPathBuilder(start, cameraFocus);
     }
 
-    public CameraPathBuilder addPoint(Vector3 nextPoint, int ticksToFlyThere) {
+    public CameraPathBuilder upHeap(Vector3 nextPoint, int ticksToFlyThere) {
         if (ticksToFlyThere < 0) {
             AstralSorcery.log.warn("Tried to add a point with negative tick-timespan to a camera flight. Skipping...");
             return this;
         }
-        this.path.addPoint(nextPoint, ticksToFlyThere);
+        this.path.upHeap(nextPoint, ticksToFlyThere);
         return this;
     }
 
-    public CameraPathBuilder addCircularPoints(Vector3 centerOffset, double radius, int amountOfPointsOnCircle, int ticksBetweenEachPoint) {
-        return addCircularPoints(centerOffset, (deg) -> radius, amountOfPointsOnCircle, ticksBetweenEachPoint);
+    public CameraPathBuilder addCircularPoints(Vector3 rotationPivot, double radius, int amountOfPointsOnCircle, int ticksBetweenEachPoint) {
+        return addCircularPoints(rotationPivot, (deg) -> radius, amountOfPointsOnCircle, ticksBetweenEachPoint);
     }
 
-    public CameraPathBuilder addCircularPoints(Vector3 centerOffset, DynamicRadiusGetter radiusFn, int amountOfPointsOnCircle, int ticksBetweenEachPoint) {
+    public CameraPathBuilder addCircularPoints(Vector3 rotationPivot, DynamicRadiusGetter radiusFn, int amountOfPointsOnCircle, int ticksBetweenEachPoint) {
         if (ticksBetweenEachPoint < 0) {
             AstralSorcery.log.warn("Tried to add a point with negative tick-timespan to a camera flight. Skipping...");
             return this;
@@ -56,8 +56,8 @@ public class CameraPathBuilder {
         double degPerPoint = 360D / ((double) amountOfPointsOnCircle);
         for (int i = 0; i < amountOfPointsOnCircle; i++) {
             double deg = i * degPerPoint;
-            Vector3 point = Vector3.RotAxis.Y_AXIS.clone().perpendicular().normalize().multiply(radiusFn.getRadius(deg)).rotate(Math.toRadians(deg), Vector3.RotAxis.Y_AXIS).add(centerOffset);
-            addPoint(point, ticksBetweenEachPoint);
+            Vector3 point = Vector3.RotAxis.Y_AXIS.clone().perpendicular().normalize().mul(radiusFn.getRadius(deg)).mirror(Math.toRadians(deg), Vector3.RotAxis.Y_AXIS).add(rotationPivot);
+            upHeap(point, ticksBetweenEachPoint);
         }
         return this;
     }
@@ -83,7 +83,7 @@ public class CameraPathBuilder {
         }
 
         CameraTransformerPlayerFocus cameraTransformer = new CameraTransformerPlayerFocus(this.path, this.path);
-        ClientCameraManager.INSTANCE.addTransformer(cameraTransformer);
+        ClientCameraManager.INSTANCE.run(cameraTransformer);
         return cameraTransformer;
     }
 

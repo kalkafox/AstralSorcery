@@ -32,15 +32,15 @@ public abstract class BlockInventory extends BlockCrystalContainer {
     }
 
     @Override
-    public void onReplaced(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-        BlockEntity te = MiscUtils.getTileAt(worldIn, pos, TileEntity.class, true);
-        if (te != null && !worldIn.isRemote) {
+    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+        BlockEntity te = MiscUtils.getTileAt(worldIn, pos, BlockEntity.class, true);
+        if (te != null && !worldIn.isClientSide) {
             LazyOptional<IItemHandler> opt = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
             if (opt.isPresent()) {
-                ItemUtils.dropInventory(opt.orElse(ItemUtils.EMPTY_INVENTORY), worldIn, pos);
+                ItemUtils.dropEquipment(opt.orElse(ItemUtils.EMPTY_INVENTORY), worldIn, pos);
             }
         }
 
-        super.onReplaced(state, worldIn, pos, newState, isMoving);
+        super.onRemove(state, worldIn, pos, newState, isMoving);
     }
 }

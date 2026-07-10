@@ -35,11 +35,11 @@ public class BlockAltarAttunement extends BlockAltar {
     }
 
     protected VoxelShape createShape() {
-        VoxelShape base = Block.makeCuboidShape(0, 0, 0, 16, 2, 16);
-        VoxelShape pillar = Block.makeCuboidShape(4, 2, 4, 12, 10, 12);
-        VoxelShape head = Block.makeCuboidShape(0, 10, 0, 16, 16, 16);
+        VoxelShape base = Block.box(0, 0, 0, 16, 2, 16);
+        VoxelShape pillar = Block.box(4, 2, 4, 12, 10, 12);
+        VoxelShape head = Block.box(0, 10, 0, 16, 16, 16);
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR, base, pillar, head);
+        return VoxelUtils.combineAll(BooleanOp.OR, base, pillar, head);
     }
 
     @Override

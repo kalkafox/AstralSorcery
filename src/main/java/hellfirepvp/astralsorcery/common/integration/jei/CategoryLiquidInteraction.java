@@ -62,7 +62,7 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
     }
 
     @Override
-    public IDrawable getBackground() {
+    public IDrawable getNoItemIcon() {
         return this.background;
     }
 
@@ -77,12 +77,12 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
     }
 
     @Override
-    public void draw(LiquidInteraction recipe, PoseStack renderStack, double mouseX, double mouseY) {
+    public void draw(LiquidInteraction recipe, PoseStack renderStack, double xpos, double ypos) {
         this.icon.draw(renderStack, 3, 36);
         this.icon.draw(renderStack, 93, 36);
 
-        JEIInteractionResultRegistry.get(recipe.getResult().getId())
-                .ifPresent(handler -> handler.drawRecipe(recipe, renderStack, mouseX, mouseY));
+        JEIInteractionResultRegistry.get(recipe.getObject().getId())
+                .ifPresent(handler -> handler.drawRecipe(recipe, renderStack, xpos, ypos));
 
         FluidStack testMatch1 = new FluidStack(recipe.getReactant1(), FluidAttributes.BUCKET_VOLUME);
         FluidStack testMatch2 = new FluidStack(recipe.getReactant2(), FluidAttributes.BUCKET_VOLUME);
@@ -92,10 +92,10 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
             int totalWeight = sameInteractions.stream().mapToInt(LiquidInteraction::getWeight).sum();
             float perc = ((float) recipe.getWeight() / totalWeight) * 100;
 
-            Font fr = Minecraft.getInstance().fontRenderer;
+            Font fr = Minecraft.getInstance().font;
             MutableComponent txt = Component.translatable("jei.astralsorcery.tip.chance", FORMAT_CHANCE.format(perc));
             int width = fr.getStringPropertyWidth(txt);
-            fr.func_243248_b(renderStack, txt, 74 - width, 44, 0x333333);
+            fr.draw(renderStack, txt, 74 - width, 44, 0x333333);
         }
     }
 
@@ -108,7 +108,7 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
 
         ingredients.setInputLists(VanillaTypes.FLUID, fluidInputs.build());
 
-        JEIInteractionResultRegistry.get(recipe.getResult().getId())
+        JEIInteractionResultRegistry.get(recipe.getObject().getId())
                 .ifPresent(handler -> handler.addToRecipeIngredients(recipe, ingredients));
     }
 
@@ -121,7 +121,7 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
 
         fluidStacks.set(ingredients);
 
-        JEIInteractionResultRegistry.get(recipe.getResult().getId())
+        JEIInteractionResultRegistry.get(recipe.getObject().getId())
                 .ifPresent(handler -> handler.addToRecipeLayout(recipeLayout, recipe, ingredients));
     }
 }

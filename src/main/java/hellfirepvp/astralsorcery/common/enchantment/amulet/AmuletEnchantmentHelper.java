@@ -9,7 +9,6 @@
 package hellfirepvp.astralsorcery.common.enchantment.amulet;
 
 import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentHelper;
-import hellfirepvp.astralsorcery.common.integration.IntegrationCurios;
 import hellfirepvp.astralsorcery.common.item.ItemEnchantmentAmulet;
 import hellfirepvp.astralsorcery.common.util.item.ItemComparator;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
@@ -46,7 +45,7 @@ public class AmuletEnchantmentHelper {
     public static final String KEY_AS_OWNER = "AS_Amulet_Holder";
 
     public static void removeAmuletTagsAndCleanup(Player player, boolean keepEquipped) {
-        Inventory inv = player.getInventory();
+        Inventory inv = player.getItems();
         for (int i = 0; i < inv.items.size(); i++) {
             if (i == inv.selected && keepEquipped) {
                 continue;
@@ -55,8 +54,8 @@ public class AmuletEnchantmentHelper {
         }
         removeAmuletOwner(player.containerMenu.getCarried());
         if (!keepEquipped) {
-            for (int i = 0; i < inv.armor.size(); i++) {
-                removeAmuletOwner(inv.armor.get(i));
+            for (int i = 0; i < inv.itemStack.size(); i++) {
+                removeAmuletOwner(inv.itemStack.get(i));
             }
             for (int i = 0; i < inv.offhand.size(); i++) {
                 removeAmuletOwner(inv.offhand.get(i));
@@ -134,9 +133,11 @@ public class AmuletEnchantmentHelper {
         Player player = getPlayerHavingTool(anyTool);
         if (player == null) return null;
 
-        Optional<ImmutableTriple<String, Integer, ItemStack>> curios =
-                IntegrationCurios.getCurio(player, (stack) -> stack.getItem() instanceof ItemEnchantmentAmulet);
-        return curios.map(trpl -> new Tuple<>(trpl.right, player)).orElse(null);
+        // 1.21 port: Curios integration is excluded from the build for now.
+        //Optional<ImmutableTriple<String, Integer, ItemStack>> curios =
+        //        IntegrationCurios.getCurio(player, (stack) -> stack.getItem() instanceof ItemEnchantmentAmulet);
+        //return curios.map(trpl -> new Tuple<>(trpl.right, player)).orElse(null);
+        return null;
     }
 
     @OnlyIn(Dist.CLIENT)

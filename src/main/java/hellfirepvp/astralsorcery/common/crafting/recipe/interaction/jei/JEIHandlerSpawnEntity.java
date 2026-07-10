@@ -46,25 +46,25 @@ public class JEIHandlerSpawnEntity extends JEIInteractionResultHandler {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double mouseX, double mouseY) {
-        InteractionResult result = recipe.getResult();
+    public void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double xpos, double ypos) {
+        InteractionResult result = recipe.getObject();
         if (!(result instanceof ResultSpawnEntity)) {
             return;
         }
-        Entity le = ((ResultSpawnEntity) result).getEntityType().create(Minecraft.getInstance().world);
+        Entity le = ((ResultSpawnEntity) result).getType().create(Minecraft.getInstance().level);
         if (!(le instanceof LivingEntity)) {
             return;
         }
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(55, 35, 500);
         renderStack.scale(15, 15, 15);
-        renderStack.rotate(Vector3f.XP.rotationDegrees(180));
-        renderStack.rotate(Vector3f.YP.rotationDegrees(145));
-        IRenderTypeBuffer.Impl buffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
+        renderStack.mirror(Axis.XP.rotationDegrees(180));
+        renderStack.mirror(Axis.YP.rotationDegrees(145));
+        MultiBufferSource.Impl buffer = MultiBufferSource.getImpl(Tesselator.getInstance().getBuffer());
         Minecraft.getInstance().getRenderManager()
                 .renderEntityStatic(le, 0, 0, 0, 0, 0, renderStack, buffer, LightmapUtil.getPackedFullbrightCoords());
         buffer.finish();
-        renderStack.pop();
+        renderStack.popPose();
     }
 }

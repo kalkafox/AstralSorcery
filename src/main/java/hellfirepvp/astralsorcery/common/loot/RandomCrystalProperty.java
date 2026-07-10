@@ -34,12 +34,12 @@ public class RandomCrystalProperty extends LootItemConditionalFunction {
     }
 
     @Override
-    public LootItemFunctionType getFunctionType() {
+    public LootItemFunctionType getType() {
         return LootAS.Functions.RANDOM_CRYSTAL_PROPERTIES;
     }
 
     @Override
-    protected ItemStack doApply(ItemStack itemStack, LootContext lootContext) {
+    protected ItemStack run(ItemStack itemStack, LootContext compositePredicates) {
         if (itemStack.getItem() instanceof CrystalAttributeGenItem) {
             CrystalAttributes attr = CrystalGenerator.generateNewAttributes(itemStack);
             ((CrystalAttributeGenItem) itemStack.getItem()).setAttributes(itemStack, attr);
@@ -47,11 +47,11 @@ public class RandomCrystalProperty extends LootItemConditionalFunction {
         return itemStack;
     }
 
-    public static LootFunction.Builder<?> builder() {
+    public static LootItemConditionalFunction.Builder<?> builder() {
         return builder(RandomCrystalProperty::new);
     }
 
-    public static class Serializer extends LootFunction.Serializer<RandomCrystalProperty> {
+    public static class Serializer extends LootItemConditionalFunction.Serializer<RandomCrystalProperty> {
 
         @Override
         public RandomCrystalProperty deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] iLootConditions) {

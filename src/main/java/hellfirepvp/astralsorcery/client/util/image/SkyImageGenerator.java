@@ -33,21 +33,21 @@ public class SkyImageGenerator {
     }
 
     private static void placeRandomly(ImageTemplate template, BufferedImage out, int count) {
-        Random rand = new Random();
+        Random random = new Random();
 
         for (int i = 0; i < count; i++) {
-            int offsetX = rand.nextInt(out.getWidth() - template.getWidth());
-            int offsetY = rand.nextInt(out.getHeight() - template.getHeight());
+            int offsetX = random.nextInt(out.getWidth() - template.getWidth());
+            int offsetY = random.nextInt(out.getHeight() - template.getHeight());
 
-            template.place(createColorPlacer(offsetX, offsetY, rand, out));
+            template.place(createColorPlacer(offsetX, offsetY, random, out));
         }
     }
 
-    private static TriConsumer<Integer, Integer, Integer> createColorPlacer(int offsetX, int offsetY, Random rand, BufferedImage out) {
+    private static TriConsumer<Integer, Integer, Integer> createColorPlacer(int offsetX, int offsetY, Random random, BufferedImage out) {
         return (oX, oY, color) -> {
             int x = oX + offsetX;
             int y = oY + offsetY;
-            int newColor = blendAlphaAdditively(out.getRGB(x, y), color, 0.8F + rand.nextFloat() * 0.2F);
+            int newColor = blendAlphaAdditively(out.getRGB(x, y), color, 0.8F + random.nextFloat() * 0.2F);
             out.setRGB(x, y, convertToABGR(newColor));
         };
     }

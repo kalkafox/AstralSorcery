@@ -50,40 +50,40 @@ public class BlockInfusedWoodColumn extends BlockInfusedWoodTemplate implements 
     private final VoxelShape middleShape, bottomShape, topShape;
 
     public BlockInfusedWoodColumn() {
-        this.setDefaultState(this.getStateContainer().getBaseState().with(PILLAR_TYPE, PillarType.MIDDLE).with(WATERLOGGED, false));
+        this.registerDefaultState(this.getStateContainer().any().setValue(PILLAR_TYPE, PillarType.MIDDLE).setValue(WATERLOGGED, false));
         this.middleShape = createPillarShape();
         this.topShape    = createPillarTopShape();
         this.bottomShape = createPillarBottomShape();
     }
 
     protected VoxelShape createPillarShape() {
-        return Block.makeCuboidShape(4, 0, 4, 12, 16, 12);
+        return Block.box(4, 0, 4, 12, 16, 12);
     }
 
     protected VoxelShape createPillarTopShape() {
-        VoxelShape column = Block.makeCuboidShape(4, 0, 4, 12, 14, 12);
-        VoxelShape top = Block.makeCuboidShape(2, 14, 2, 14, 16, 14);
+        VoxelShape x = Block.box(4, 0, 4, 12, 14, 12);
+        VoxelShape top = Block.box(2, 14, 2, 14, 16, 14);
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR,
-                column, top);
+        return VoxelUtils.combineAll(BooleanOp.OR,
+                x, top);
     }
 
     protected VoxelShape createPillarBottomShape() {
-        VoxelShape column = Block.makeCuboidShape(4, 2, 4, 12, 16, 12);
-        VoxelShape bottom = Block.makeCuboidShape(2, 0, 2, 14, 2, 14);
+        VoxelShape x = Block.box(4, 2, 4, 12, 16, 12);
+        VoxelShape bottom = Block.box(2, 0, 2, 14, 2, 14);
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR,
-                column, bottom);
+        return VoxelUtils.combineAll(BooleanOp.OR,
+                x, bottom);
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        super.fillStateContainer(builder);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
         builder.add(PILLAR_TYPE, WATERLOGGED);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext ctx) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
         switch (state.get(PILLAR_TYPE)) {
             case TOP:
                 return this.topShape;
@@ -96,44 +96,44 @@ public class BlockInfusedWoodColumn extends BlockInfusedWoodTemplate implements 
     }
 
     @Override
-    public BlockState updatePostPlacement(BlockState thisState, Direction otherBlockFacing, BlockState otherBlockState, LevelAccessor world, BlockPos thisPos, BlockPos otherBlockPos) {
+    public BlockState updateShape(BlockState thisState, Direction otherBlockFacing, BlockState otherBlockState, LevelAccessor level, BlockPos thisPos, BlockPos otherBlockPos) {
         if (thisState.get(WATERLOGGED)) {
-            world.getPendingFluidTicks().scheduleTick(thisPos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+            level.getLiquidTicks().scheduleTick(thisPos, Fluids.WATER, Fluids.WATER.getTickRate(level));
         }
-        return this.getThisState(world, thisPos).with(WATERLOGGED, thisState.get(WATERLOGGED));
+        return this.getThisState(level, thisPos).setValue(WATERLOGGED, thisState.get(WATERLOGGED));
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        BlockPos blockpos = ctx.getPos();
-        Level world = ctx.getWorld();
-        FluidState ifluidstate = world.getFluidState(blockpos);
-        return this.getThisState(world, blockpos).with(WATERLOGGED, ifluidstate.getFluid() == Fluids.WATER);
+        BlockPos blockpos = ctx.getBlockPos();
+        Level level = ctx.getLevel();
+        FluidState ifluidstate = level.getFluidState(blockpos);
+        return this.getThisState(level, blockpos).setValue(WATERLOGGED, ifluidstate.getType() == Fluids.WATER);
     }
 
-    private BlockState getThisState(BlockGetter world, BlockPos pos) {
-        boolean hasUp   = world.getBlockState(pos.up()).getBlock()   instanceof BlockInfusedWoodColumn;
-        boolean hasDown = world.getBlockState(pos.down()).getBlock() instanceof BlockInfusedWoodColumn;
+    private BlockState getThisState(BlockGetter level, BlockPos pos) {
+        boolean hasUp   = level.getBlockState(pos.above()).getBlock()   instanceof BlockInfusedWoodColumn;
+        boolean hasDown = level.getBlockState(pos.below()).getBlock() instanceof BlockInfusedWoodColumn;
         if (hasUp) {
             if (hasDown) {
-                return this.getDefaultState().with(PILLAR_TYPE, PillarType.MIDDLE);
+                return this.defaultBlockState().setValue(PILLAR_TYPE, PillarType.MIDDLE);
             }
-            return this.getDefaultState().with(PILLAR_TYPE, PillarType.BOTTOM);
+            return this.defaultBlockState().setValue(PILLAR_TYPE, PillarType.BOTTOM);
         } else if (hasDown) {
-            return this.getDefaultState().with(PILLAR_TYPE, PillarType.TOP);
+            return this.defaultBlockState().setValue(PILLAR_TYPE, PillarType.TOP);
         }
-        return this.getDefaultState().with(PILLAR_TYPE, PillarType.MIDDLE);
+        return this.defaultBlockState().setValue(PILLAR_TYPE, PillarType.MIDDLE);
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
+        return state.get(WATERLOGGED) ? Fluids.WATER.getOwnHeight(false) : super.getFluidState(state);
     }
 
     @Nullable
     @Override
-    public PathNodeType getAiPathNodeType(BlockState state, BlockGetter world, BlockPos pos, @Nullable Mob entity) {
-        return PathNodeType.BLOCKED;
+    public BlockPathTypes getAiPathNodeType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob entity) {
+        return BlockPathTypes.BLOCKED;
     }
 
 

@@ -55,19 +55,19 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
     public static class Reader extends ClientDataReader<ClientLightConnections> {
 
         @Override
-        public void readFromIncomingFullSync(ClientLightConnections cl, CompoundTag compound) {
+        public void readFromIncomingFullSync(ClientLightConnections cl, CompoundTag pattern) {
             cl.clientPosBuffer.clear();
 
-            for (String dimKey : compound.keySet()) {
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+            for (String dimKey : pattern.keySet()) {
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
 
                 Map<BlockPos, Set<BlockPos>> posMap = new HashMap<>();
-                ListTag list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
+                ListTag list = pattern.getList(dimKey, Constants.NBT.TAG_COMPOUND);
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos start = BlockPos.fromLong(tag.getLong("start"));
-                    BlockPos end   = BlockPos.fromLong(tag.getLong("end"));
+                    BlockPos start = BlockPos.subtract(tag.getLong("start"));
+                    BlockPos end   = BlockPos.subtract(tag.getLong("end"));
                     posMap.computeIfAbsent(start, s -> new HashSet<>())
                             .add(end);
                 }
@@ -77,30 +77,30 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
         }
 
         @Override
-        public void readFromIncomingDiff(ClientLightConnections cl, CompoundTag compound) {
+        public void readFromIncomingDiff(ClientLightConnections cl, CompoundTag pattern) {
             Set<String> clearedDimensions = new HashSet<>();
-            for (Tag dimKeyNBT : compound.getList("clear", Constants.NBT.TAG_STRING)) {
+            for (Tag dimKeyNBT : pattern.getList("clear", Constants.NBT.TAG_STRING)) {
                 String dimKey = dimKeyNBT.getString();
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
                 cl.clientPosBuffer.remove(dim);
 
                 clearedDimensions.add(dimKey);
             }
 
-            for (String dimKey : compound.keySet()) {
+            for (String dimKey : pattern.keySet()) {
                 if (clearedDimensions.contains(dimKey)) {
                     continue;
                 }
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
 
                 Map<BlockPos, Set<BlockPos>> posMap = cl.clientPosBuffer.computeIfAbsent(dim, d -> new HashMap<>());
 
-                ListTag list = compound.getList(dimKey, Constants.NBT.TAG_COMPOUND);
+                ListTag list = pattern.getList(dimKey, Constants.NBT.TAG_COMPOUND);
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos start = BlockPos.fromLong(tag.getLong("start"));
-                    BlockPos end = BlockPos.fromLong(tag.getLong("end"));
+                    BlockPos start = BlockPos.subtract(tag.getLong("start"));
+                    BlockPos end = BlockPos.subtract(tag.getLong("end"));
                     boolean newConnection = tag.getBoolean("connect");
 
                     if (newConnection) {

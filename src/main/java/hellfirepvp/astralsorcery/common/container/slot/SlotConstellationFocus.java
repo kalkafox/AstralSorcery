@@ -35,7 +35,7 @@ public class SlotConstellationFocus extends SlotItemHandler {
     }
 
     @Override
-    public boolean isItemValid(ItemStack stack) {
+    public boolean mayPlace(ItemStack stack) {
         return !stack.isEmpty() && stack.getItem() instanceof IConstellationFocus && ((IConstellationFocus) stack.getItem()).getFocusConstellation(stack) != null;
     }
 
@@ -45,12 +45,12 @@ public class SlotConstellationFocus extends SlotItemHandler {
     }
 
     @Override
-    public void putStack(@Nonnull ItemStack stack) {
+    public void set(@Nonnull ItemStack stack) {
         this.altar.setFocusItem(stack);
     }
 
     @Override
-    public boolean canTakeStack(Player playerIn) {
+    public boolean mayPickup(Player playerIn) {
         return true;
     }
 
@@ -73,12 +73,12 @@ public class SlotConstellationFocus extends SlotItemHandler {
     }
 
     @Override
-    public int getItemStackLimit(ItemStack stack) {
+    public int getMaxStackSize(ItemStack stack) {
         return 1;
     }
 
     @Override
-    public int getSlotStackLimit() {
+    public int getMaxStackSize() {
         return 1;
     }
 

@@ -54,12 +54,12 @@ public class ItemColoredLensFire extends ItemColoredLens {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void playParticles(PktPlayEffect event) {
+    public static void showBreakingParticles(PktPlayEffect event) {
         Vector3 at = ByteBufUtils.readVector(event.getExtraData());
         for (int i = 0; i < 5; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at.clone().add(random.nextFloat(), 0.2, random.nextFloat()))
-                    .setMotion(new Vector3(0, 0.016 + random.nextFloat() * 0.02, 0))
+                    .setDeltaMovement(new Vector3(0, 0.016 + random.nextFloat() * 0.02, 0))
                     .setScaleMultiplier(0.2F)
                     .color(VFXColorFunction.constant(ColorsAS.COLORED_LENS_FIRE));
         }
@@ -77,14 +77,14 @@ public class ItemColoredLensFire extends ItemColoredLens {
         }
 
         @Override
-        public void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
-            if (world.isRemote()) {
+        public void entityInBeam(Level level, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor) {
+            if (level.isClientSide()) {
                 return;
             }
             if (entity instanceof ItemEntity) {
                 ItemStack current = ((ItemEntity) entity).getItem();
 
-                ItemStack result = RecipeHelper.findSmeltingResult(entity.getEntityWorld(), current).map(Tuple::getA).orElse(ItemStack.EMPTY);
+                ItemStack result = RecipeHelper.findSmeltingResult(entity.getCommandSenderWorld(), current).map(Tuple::getA).orElse(ItemStack.EMPTY);
                 if (result.isEmpty()) {
                     return;
                 }
@@ -95,7 +95,7 @@ public class ItemColoredLensFire extends ItemColoredLens {
                         continue;
                     }
                     Vector3 entityPos = Vector3.atEntityCorner(entity);
-                    ItemUtils.dropItemNaturally(entity.getEntityWorld(), entityPos.getX(), entityPos.getY(), entityPos.getZ(), ItemUtils.copyStackWithSize(result, result.getCount()));
+                    ItemUtils.dropItemNaturally(entity.getCommandSenderWorld(), entityPos.getX(), entityPos.getY(), entityPos.getZ(), ItemUtils.copyStackWithSize(result, result.getCount()));
                     if (current.getCount() > 1) {
                         current.shrink(1);
                         ((ItemEntity) entity).setItem(current);
@@ -108,18 +108,18 @@ public class ItemColoredLensFire extends ItemColoredLens {
                 if (entity instanceof Player) {
                     if (!GeneralConfig.CONFIG.doColoredLensesAffectPlayers.get() ||
                             entity.getServer() == null ||
-                            !entity.getServer().isPVPEnabled()) {
+                            !entity.getServer().isPvpAllowed()) {
                         return;
                     }
                 }
-                entity.attackEntityFrom(DamageSource.ON_FIRE, 0.5F);
+                entity.hurt(DamageSource.ON_FIRE, 0.5F);
                 entity.setFire(5);
             }
         }
 
         @Override
-        public void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor) {
-            if (!(world instanceof ServerLevel)) {
+        public void blockInBeam(Level level, BlockPos pos, BlockState state, PartialEffectExecutor executor) {
+            if (!(level instanceof ServerLevel)) {
                 return;
             }
 
@@ -127,14 +127,14 @@ public class ItemColoredLensFire extends ItemColoredLens {
             if (blockStack.isEmpty()) {
                 return;
             }
-            ItemStack result = RecipeHelper.findSmeltingResult(world, blockStack).map(Tuple::getA).orElse(ItemStack.EMPTY);
+            ItemStack result = RecipeHelper.findSmeltingResult(level, blockStack).map(Tuple::getA).orElse(ItemStack.EMPTY);
             if (result.isEmpty()) {
                 return;
             }
 
             PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.MELT_BLOCK)
                     .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(pos)));
-            PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(world, pos, 16));
+            PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(level, pos, 16));
 
             while (executor.canExecute()) {
                 executor.markExecution();
@@ -144,9 +144,9 @@ public class ItemColoredLensFire extends ItemColoredLens {
 
                 BlockState resState = ItemUtils.createBlockState(result);
                 if (resState != null) {
-                    world.setBlockState(pos, resState, Constants.BlockFlags.DEFAULT);
-                } else if (world.setBlockState(pos, Blocks.AIR.getDefaultState(), Constants.BlockFlags.DEFAULT)) {
-                    ItemUtils.dropItemNaturally(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, result);
+                    level.setBlock(pos, resState, Constants.BlockFlags.DEFAULT);
+                } else if (level.setBlock(pos, Blocks.AIR.defaultBlockState(), Constants.BlockFlags.DEFAULT)) {
+                    ItemUtils.dropItemNaturally(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, result);
                 }
                 return;
             }

@@ -21,9 +21,9 @@ import net.minecraft.world.level.Level;
 public class DayTimeHelper {
 
     //Convenience method
-    public static float getCurrentDaytimeDistribution(Level world) {
+    public static float getCurrentDaytimeDistribution(Level level) {
         int dLength = GeneralConfig.CONFIG.dayLength.get();
-        float dayPart = ((world.getDayTime() % dLength) + dLength) % dLength;
+        float dayPart = ((level.getDayTime() % dLength) + dLength) % dLength;
         if (dayPart < (dLength / 2F)) return 0F;
         float part = dLength / 7F;
         if (dayPart < ((dLength / 2F) + part)) return ((dayPart - ((dLength / 2F) + part)) / part) + 1F;
@@ -31,11 +31,11 @@ public class DayTimeHelper {
         return 1F;
     }
 
-    public static boolean isNight(Level world) {
-        return getCurrentDaytimeDistribution(world) >= 0.55;
+    public static boolean isNight(Level level) {
+        return getCurrentDaytimeDistribution(level) >= 0.55;
     }
 
-    public static boolean isDay(Level world) {
-        return getCurrentDaytimeDistribution(world) <= 0.05;
+    public static boolean isDay(Level level) {
+        return getCurrentDaytimeDistribution(level) <= 0.05;
     }
 }

@@ -35,11 +35,11 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
     }
 
     @Override
-    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
         if (isInGroup(group)) {
-            for (BlockGemCrystalCluster.GrowthStageType stage : BlockGemCrystalCluster.STAGE.getAllowedValues()) {
+            for (BlockGemCrystalCluster.GrowthStageType stage : BlockGemCrystalCluster.STAGE.getPossibleValues()) {
                 ItemStack cluster = new ItemStack(this);
-                this.setDamage(cluster, stage.ordinal());
+                this.setBaseDamage(cluster, stage.ordinal());
                 items.add(cluster);
             }
         }
@@ -50,7 +50,7 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
     protected BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState toPlace = super.getStateForPlacement(context);
         if (toPlace != null) {
-            return toPlace.with(BlockGemCrystalCluster.STAGE, this.getGrowthStage(context.getItem()));
+            return toPlace.setValue(BlockGemCrystalCluster.STAGE, this.getGrowthStage(context.getItem()));
         }
         return null;
     }
@@ -64,16 +64,16 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
     }
 
     @Override
-    public String getTranslationKey(ItemStack stack) {
+    public String getDescriptionId(ItemStack stack) {
         BlockGemCrystalCluster.GrowthStageType stage = this.getGrowthStage(stack);
         switch (stage) {
             case STAGE_2_SKY:
-                return super.getTranslationKey(stack) + ".sky";
+                return super.getDescriptionId(stack) + ".sky";
             case STAGE_2_DAY:
-                return super.getTranslationKey(stack) + ".day";
+                return super.getDescriptionId(stack) + ".day";
             case STAGE_2_NIGHT:
-                return super.getTranslationKey(stack) + ".night";
+                return super.getDescriptionId(stack) + ".night";
         }
-        return super.getTranslationKey(stack);
+        return super.getDescriptionId(stack);
     }
 }

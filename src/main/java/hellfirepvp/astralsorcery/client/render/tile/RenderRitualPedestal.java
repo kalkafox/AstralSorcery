@@ -18,7 +18,7 @@ import hellfirepvp.astralsorcery.common.item.crystal.ItemAttunedRockCrystal;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.tile.TileRitualPedestal;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemStack;
 
 import java.awt.*;
@@ -32,8 +32,8 @@ import java.awt.*;
  */
 public class RenderRitualPedestal extends CustomTileEntityRenderer<TileRitualPedestal> {
 
-    public RenderRitualPedestal(BlockEntityRenderDispatcher tileRenderer) {
-        super(tileRenderer);
+    public RenderRitualPedestal(BlockEntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -51,24 +51,24 @@ public class RenderRitualPedestal extends CustomTileEntityRenderer<TileRitualPed
             display = new ItemStack(BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL);
         }
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(0.5F, 0.9F, 0.5F);
         renderStack.scale(2F, 2F, 2F);
         RenderingUtils.renderTranslucentItemStackModelGround(display, renderStack, Color.WHITE, Blending.DEFAULT, 255);
-        renderStack.pop();
+        renderStack.popPose();
 
         IWeakConstellation ritualConstellation = tile.getRitualConstellation();
         if (ritualConstellation != null) {
-            long seed = RenderingUtils.getPositionSeed(tile.getPos());
+            long seed = RenderingUtils.getPositionSeed(tile.getBlockPos());
             int scales = tile.isWorking() ? 24 : 12;
             int count = tile.isWorking() ? 16 : 12;
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(0.5F, 1.2F, 0.5F);
 
             RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, ritualConstellation.getConstellationColor(), seed, scales, scales, count);
 
-            renderStack.pop();
+            renderStack.popPose();
         }
     }
 }

@@ -32,20 +32,20 @@ public class WorldMeltableRegistry extends CustomRecipeRegistry<WorldMeltableRec
 
     @Override
     public void init() {
-        this.register(BlockMeltableRecipe.of(BlockTags.ICE, Blocks.WATER.getDefaultState()));
-        this.register(BlockMeltableRecipe.of(Tags.Blocks.STONE, Blocks.LAVA.getDefaultState()));
-        this.register(BlockMeltableRecipe.of(Tags.Blocks.NETHERRACK, Blocks.LAVA.getDefaultState()));
-        this.register(BlockMeltableRecipe.of(Tags.Blocks.OBSIDIAN, Blocks.LAVA.getDefaultState()));
-        this.register(BlockMeltableRecipe.of(Blocks.MAGMA_BLOCK.getDefaultState(), Blocks.LAVA.getDefaultState()));
+        this.register(BlockMeltableRecipe.of(BlockTags.ICE, Blocks.WATER.defaultBlockState()));
+        this.register(BlockMeltableRecipe.of(Tags.Blocks.STONE, Blocks.LAVA.defaultBlockState()));
+        this.register(BlockMeltableRecipe.of(Tags.Blocks.NETHERRACK, Blocks.LAVA.defaultBlockState()));
+        this.register(BlockMeltableRecipe.of(Tags.Blocks.OBSIDIAN, Blocks.LAVA.defaultBlockState()));
+        this.register(BlockMeltableRecipe.of(Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.LAVA.defaultBlockState()));
 
         this.register(new FurnaceMeltableRecipe());
     }
 
     @Nullable
-    public WorldMeltableRecipe getRecipeFor(Level world, BlockPos pos) {
+    public WorldMeltableRecipe getRecipeFor(Level level, BlockPos pos) {
         return this.getRecipes()
                 .stream()
-                .filter(recipe -> recipe.canMelt(world, pos))
+                .filter(recipe -> recipe.canMelt(level, pos))
                 .findFirst()
                 .orElse(null);
     }

@@ -24,11 +24,11 @@ import javax.annotation.Nullable;
 public class NameUtil {
 
     public static ResourceLocation prefixPath(ResourceLocation key, String prefix) {
-        return new ResourceLocation(key.getNamespace(), prefix + key.getPath());
+        return ResourceLocation.fromNamespaceAndPath(key.getNamespace(), prefix + key.getPath());
     }
 
-    public static ResourceLocation suffixPath(ResourceLocation key, String suffix) {
-        return new ResourceLocation(key.getNamespace(), key.getPath() + suffix);
+    public static ResourceLocation suffixPath(ResourceLocation key, String playerSuffix) {
+        return ResourceLocation.fromNamespaceAndPath(key.getNamespace(), key.getPath() + playerSuffix);
     }
 
     public static ResourceLocation fromClass(Object object) {
@@ -52,9 +52,9 @@ public class NameUtil {
     }
 
     public static ResourceLocation fromClass(Class<?> clazz, @Nullable String cutPrefix, @Nullable String cutSuffix) {
-        String name = clazz.getSimpleName();
+        String name = clazz.getName();
         if (clazz.getEnclosingClass() != null) {
-            name = clazz.getEnclosingClass().getSimpleName() + name;
+            name = clazz.getEnclosingClass().getName() + name;
         }
         if (cutPrefix != null && name.startsWith(cutPrefix)) {
             name = name.substring(cutPrefix.length());

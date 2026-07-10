@@ -49,7 +49,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
 
     public BlockMatchInformation(Tag<Block> matchTag, ItemStack display) {
         this.matchTag = matchTag;
-        this.matchTagKey = TagCollectionManager.getManager().getBlockTags().getDirectIdFromTag(matchTag);
+        this.matchTagKey = SerializationTags.getInstance().getBlocks().getId(matchTag);
         this.display = display;
 
         if (this.matchTagKey == null) {
@@ -70,13 +70,13 @@ public class BlockMatchInformation implements Predicate<BlockState> {
         this.matchExact = matchExact;
 
         if (this.display.isEmpty()) {
-            throw new IllegalArgumentException("No display ItemStack passed, and " + matchState.getBlock().getRegistryName() + " has no associated ItemBlock!");
+            throw new IllegalArgumentException("No display ItemStack passed, and " + RegistryHelper.getKey(matchState.getBlock()) + " has no associated ItemBlock!");
         }
     }
 
     private static ItemStack createDisplayStack(Tag<Block> blockTag) {
-        for (Block block : blockTag.getAllElements()) {
-            ItemStack blockStack = ItemUtils.createBlockStack(block.getDefaultState());
+        for (Block block : blockTag.getValues()) {
+            ItemStack blockStack = ItemUtils.createBlockStack(block.defaultBlockState());
             if (!blockStack.isEmpty()) {
                 return blockStack;
             }
@@ -117,7 +117,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
             }
             return new BlockMatchInformation(state, display, fullyDefined);
         } else if (object.has("tag")) {
-            Tag<Block> blockTag = TagCollectionManager.getManager().getBlockTags().get(new ResourceLocation(object.get("tag").getAsString()));
+            Tag<Block> blockTag = SerializationTags.getInstance().getBlocks().get(ResourceLocation.parse(object.get("tag").getAsString()));
             if (object.has("display")) {
                 ItemStack display = JsonHelper.getItemStack(object, "display");
                 return new BlockMatchInformation(blockTag, display);
@@ -140,15 +140,15 @@ public class BlockMatchInformation implements Predicate<BlockState> {
 
     public static BlockMatchInformation read(FriendlyByteBuf buf) {
         int type = buf.readInt();
-        ItemStack display = ByteBufUtils.readItemStack(buf);
+        ItemStack display = ByteBufUtils.readItem(buf);
         switch (type) {
             case 0:
                 BlockState state = ByteBufUtils.readBlockState(buf);
                 boolean exactMatch = buf.readBoolean();
                 return new BlockMatchInformation(state, display, exactMatch);
             case 1:
-                String tagName = ByteBufUtils.readString(buf);
-                Tag<Block> blockTag = TagCollectionManager.getManager().getBlockTags().get(new ResourceLocation(tagName));
+                String tagId = ByteBufUtils.readUtf(buf);
+                Tag<Block> blockTag = SerializationTags.getInstance().getBlocks().get(ResourceLocation.parse(tagId));
                 return new BlockMatchInformation(blockTag, display);
         }
         throw new IllegalArgumentException("Unknown block transmutation match type: " + type);

@@ -57,39 +57,39 @@ public class PerkTreeLoader extends SimpleJsonResourceReloadListener {
         int count = 0;
         for(JsonObject serializedPerkData : perkTreeObjects) {
 
-            ResourceLocation perkRegistryName = new ResourceLocation(JSONUtils.getString(serializedPerkData, "registry_name"));
+            ResourceLocation perkRegistryName = ResourceLocation.parse(GsonHelper.getString(serializedPerkData, "registry_name"));
             ResourceLocation customClass = PerkTypeHandler.DEFAULT.getKey();
             if (serializedPerkData.has("perk_class")) {
-                customClass = new ResourceLocation(JSONUtils.getString(serializedPerkData, "perk_class"));
+                customClass = ResourceLocation.parse(GsonHelper.getString(serializedPerkData, "perk_class"));
                 if (!PerkTypeHandler.hasCustomType(customClass)) {
                     throw new JsonParseException("Unknown perk_class: " + customClass.toString());
                 }
             }
 
-            float posX = JSONUtils.getFloat(serializedPerkData, "x");
-            float posY = JSONUtils.getFloat(serializedPerkData, "y");
+            float posX = GsonHelper.getFloat(serializedPerkData, "x");
+            float posY = GsonHelper.getFloat(serializedPerkData, "y");
 
             AbstractPerk perk = PerkTypeHandler.convert(perkRegistryName, posX, posY, customClass);
             if (serializedPerkData.has("name")) {
-                String name = JSONUtils.getString(serializedPerkData, "name");
+                String name = GsonHelper.getString(serializedPerkData, "name");
                 perk.setName(name);
             }
             if (serializedPerkData.has("hiddenUnlessAllocated")) {
-                perk.setHiddenUnlessAllocated(JSONUtils.getBoolean(serializedPerkData, "hiddenUnlessAllocated"));
+                perk.setHiddenUnlessAllocated(GsonHelper.getBoolean(serializedPerkData, "hiddenUnlessAllocated"));
             }
 
             if (serializedPerkData.has("data")) {
-                JsonObject perkData = JSONUtils.getJsonObject(serializedPerkData, "data");
+                JsonObject perkData = GsonHelper.getAsJsonObject(serializedPerkData, "data");
                 perk.deserializeData(perkData);
             }
 
             LoadedPerkData connector = newTree.addPerk(perk, serializedPerkData);
             if (serializedPerkData.has("connection")) {
-                JsonArray connectionArray = JSONUtils.getJsonArray(serializedPerkData, "connection");
+                JsonArray connectionArray = GsonHelper.getAsJsonArray(serializedPerkData, "connection");
                 for (int i = 0; i < connectionArray.size(); i++) {
                     JsonElement connection = connectionArray.get(i);
-                    String connectedPerkKey = JSONUtils.getString(connection, String.format("connection[%s]", i));
-                    connector.addConnection(new ResourceLocation(connectedPerkKey));
+                    String connectedPerkKey = GsonHelper.getString(connection, String.format("connection[%s]", i));
+                    connector.addConnection(ResourceLocation.parse(connectedPerkKey));
                 }
             }
 

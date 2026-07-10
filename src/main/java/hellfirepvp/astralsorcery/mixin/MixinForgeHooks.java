@@ -47,13 +47,13 @@ public class MixinForgeHooks {
             cancellable = true,
             remap = false
     )
-    private static void runLootTeleportation(ResourceLocation lootTableId, List<ItemStack> generatedLoot, LootContext context, CallbackInfoReturnable<List<ItemStack>> cir) {
+    private static void runLootTeleportation(ResourceLocation lootTableId, List<ItemStack> lootTable, LootContext context, CallbackInfoReturnable<List<ItemStack>> cir) {
         List<ItemStack> loot = cir.getReturnValue();
 
-        if (!LootUtil.doesContextFulfillSet(context, LootParameterSets.BLOCK)) {
+        if (!LootUtil.doesContextFulfillSet(context, LootContextParamSets.BLOCK)) {
             return;
         }
-        Entity e = context.get(LootParameters.THIS_ENTITY);
+        Entity e = context.get(LootContextParams.THIS_ENTITY);
         if (!(e instanceof Player)) {
             return;
         }
@@ -64,7 +64,7 @@ public class MixinForgeHooks {
         }
 
         //Means we're in the 2nd run of loot manipulation, re-run by top.theillusivec4.curios.common.objects.FortuneBonusMultiplier
-        ItemStack tool = context.get(LootParameters.TOOL);
+        ItemStack tool = context.get(LootContextParams.TOOL);
         if (tool != null && tool.hasTag() && tool.getTag().contains("HasCuriosFortuneBonus")) {
             loot.removeIf(result -> ItemUtils.dropItemToPlayer(player, result).isEmpty());
         }

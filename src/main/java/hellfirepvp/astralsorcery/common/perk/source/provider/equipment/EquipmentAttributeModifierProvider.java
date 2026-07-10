@@ -28,10 +28,10 @@ import java.util.Collections;
 public interface EquipmentAttributeModifierProvider extends AttributeModifierProvider {
 
     @Override
-    default Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements) {
+    default Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide direction, boolean ignoreRequirements) {
         return Collections.emptyList();
     }
 
-    Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements);
+    Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide direction, boolean ignoreRequirements);
 
 }

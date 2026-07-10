@@ -35,19 +35,19 @@ public class EffectBleed extends EffectCustomTexture {
     }
 
     @Override
-    public boolean isReady(int duration, int amplifier) {
+    public boolean isDurationEffectTick(int duration, int amplifier) {
         return duration % 20 == 0;
     }
 
     @Override
     public void performEffect(LivingEntity entity, int amplifier) {
         if (entity instanceof Player &&
-                !entity.getEntityWorld().isRemote() &&
-                entity.getEntityWorld() instanceof ServerLevel &&
-                !((MinecraftServer) LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER)).isPVPEnabled()) {
+                !entity.getCommandSenderWorld().isClientSide() &&
+                entity.getCommandSenderWorld() instanceof ServerLevel &&
+                !((MinecraftServer) LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER)).isPvpAllowed()) {
             return;
         }
-        DamageUtil.shotgunAttack(entity, e -> DamageUtil.attackEntityFrom(e, CommonProxy.DAMAGE_SOURCE_BLEED, 0.5F * (amplifier + 1)));
+        DamageUtil.shotgunAttack(entity, e -> DamageUtil.hurt(e, CommonProxy.DAMAGE_SOURCE_BLEED, 0.5F * (amplifier + 1)));
     }
 
     @Override

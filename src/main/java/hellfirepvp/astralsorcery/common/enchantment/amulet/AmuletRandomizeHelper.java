@@ -33,7 +33,7 @@ import java.util.Random;
 public class AmuletRandomizeHelper {
 
     public static final Config CONFIG = new Config();
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     private static ModConfigSpec.DoubleValue chance2nd;
     private static ModConfigSpec.DoubleValue chance3rd;
@@ -70,10 +70,10 @@ public class AmuletRandomizeHelper {
         switch (existing.size()) {
             case 0:
             case 1:
-                if (rand.nextFloat() < chanceToAll.get()) {
+                if (random.nextFloat() < chanceToAll.get()) {
                     return DynamicEnchantmentType.ADD_TO_EXISTING_ALL;
                 }
-                if (rand.nextFloat() < chanceToNonExisting.get()) {
+                if (random.nextFloat() < chanceToNonExisting.get()) {
                     return DynamicEnchantmentType.ADD_TO_SPECIFIC;
                 }
                 return DynamicEnchantmentType.ADD_TO_EXISTING_SPECIFIC;
@@ -81,15 +81,15 @@ public class AmuletRandomizeHelper {
                 if (exAll > 1) {
                     return null;
                 } else if (exAll == 1) {
-                    if (rand.nextFloat() < chanceToNonExisting.get()) {
+                    if (random.nextFloat() < chanceToNonExisting.get()) {
                         return DynamicEnchantmentType.ADD_TO_SPECIFIC;
                     }
                     return DynamicEnchantmentType.ADD_TO_EXISTING_SPECIFIC;
                 } else {
-                    if (rand.nextFloat() < chanceToAll.get()) {
+                    if (random.nextFloat() < chanceToAll.get()) {
                         return DynamicEnchantmentType.ADD_TO_EXISTING_ALL;
                     }
-                    if (rand.nextFloat() < chanceToNonExisting.get()) {
+                    if (random.nextFloat() < chanceToNonExisting.get()) {
                         return DynamicEnchantmentType.ADD_TO_SPECIFIC;
                     }
                     return DynamicEnchantmentType.ADD_TO_EXISTING_SPECIFIC;
@@ -101,7 +101,7 @@ public class AmuletRandomizeHelper {
     }
 
     private static int getRollLevel() {
-        if (rand.nextFloat() < chance2Level.get()) {
+        if (random.nextFloat() < chance2Level.get()) {
             return 2;
         }
         return 1;
@@ -111,9 +111,9 @@ public class AmuletRandomizeHelper {
         if (existing.isEmpty()) return true;
         switch (existing.size()) {
             case 1:
-                return rand.nextFloat() < chance2nd.get();
+                return random.nextFloat() < chance2nd.get();
             case 2:
-                return getAdditionAll(existing) < 2 && rand.nextFloat() < chance3rd.get();
+                return getAdditionAll(existing) < 2 && random.nextFloat() < chance3rd.get();
             default:
                 break;
         }

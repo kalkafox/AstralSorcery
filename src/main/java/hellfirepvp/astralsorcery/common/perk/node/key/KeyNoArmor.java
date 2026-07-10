@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 
@@ -40,30 +40,30 @@ public class KeyNoArmor extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(this::onLivingHurt);
     }
 
-    private void onLivingHurt(LivingHurtEvent event) {
+    private void onLivingHurt(LivingIncomingDamageEvent event) {
         if (!(event.getEntityLiving() instanceof Player)) {
             return;
         }
 
         Player player = (Player) event.getEntityLiving();
-        LogicalSide side = this.getSide(player);
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        LogicalSide direction = this.getSide(player);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {
             int eq = 0;
-            for (ItemStack stack : player.getArmorInventoryList()) {
+            for (ItemStack stack : player.getArmorSlots()) {
                 if (!stack.isEmpty()) {
                     eq++;
                 }
             }
             if (eq < 2) {
                 float multiplier = CONFIG.damageTakenMultiplier.get().floatValue();
-                float effMulti = PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+                float effMulti = PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
                 event.setAmount(event.getAmount() * (multiplier * (1F / effMulti)));
             }
         }

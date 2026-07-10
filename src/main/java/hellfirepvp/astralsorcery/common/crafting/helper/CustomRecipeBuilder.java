@@ -36,11 +36,11 @@ public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
 
     private static final Map<RecipeType<?>, Set<ResourceLocation>> builtRecipes = new HashMap<>();
 
-    public void build(Consumer<IFinishedRecipe> consumerIn) {
+    public void build(Consumer<FinishedRecipe> consumerIn) {
         this.build(consumerIn, null);
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn, @Nullable String directory) {
+    public void build(Consumer<FinishedRecipe> consumerIn, @Nullable String directory) {
         R recipe = this.validateAndGet();
 
         String saveId = recipe.getId().getPath();
@@ -48,7 +48,7 @@ public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
             saveId = directory + "/" + saveId;
         }
         saveId = this.getSerializer().getRegistryName().getPath() + "/" + saveId;
-        ResourceLocation id = new ResourceLocation(recipe.getId().getNamespace(), saveId);
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(recipe.getId().getNamespace(), saveId);
 
         if (!builtRecipes.computeIfAbsent(recipe.getType(), type -> new HashSet<>()).add(id)) {
             throw new IllegalArgumentException("Tried to register recipe with id " + id + " twice for type " + Registry.RECIPE_TYPE.getKey(recipe.getType()));
@@ -61,7 +61,7 @@ public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
 
     protected abstract CustomRecipeSerializer<R> getSerializer();
 
-    private class WrappedCustomRecipe implements IFinishedRecipe {
+    private class WrappedCustomRecipe implements FinishedRecipe {
 
         private final R recipe;
         private final ResourceLocation id;
@@ -89,14 +89,14 @@ public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
 
         @Nullable
         @Override
-        public JsonObject getAdvancementJson() {
+        public JsonObject serializeAdvancement() {
             return null;
         }
 
         @Nullable
         @Override
         public ResourceLocation getAdvancementID() {
-            return new ResourceLocation("");
+            return ResourceLocation.parse("");
         }
     }
 }

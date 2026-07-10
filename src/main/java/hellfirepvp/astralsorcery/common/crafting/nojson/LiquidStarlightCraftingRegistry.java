@@ -36,11 +36,11 @@ public class LiquidStarlightCraftingRegistry extends CustomRecipeRegistry<Liquid
     }
 
     @Nullable
-    public LiquidStarlightRecipe getRecipeFor(ItemEntity itemEntity, Level world, BlockPos at) {
+    public LiquidStarlightRecipe getRecipeFor(ItemEntity itemEntity, Level level, BlockPos at) {
         return this.getRecipes()
                 .stream()
                 .filter(recipe -> recipe.doesStartRecipe(itemEntity.getItem()))
-                .filter(recipes -> recipes.matches(itemEntity, world, at))
+                .filter(recipes -> recipes.matches(itemEntity, level, at))
                 .findFirst()
                 .orElse(null);
     }
@@ -49,14 +49,14 @@ public class LiquidStarlightCraftingRegistry extends CustomRecipeRegistry<Liquid
         if (!itemEntity.isAlive()) {
             return;
         }
-        Level world = itemEntity.getEntityWorld();
+        Level level = itemEntity.getCommandSenderWorld();
 
-        LiquidStarlightRecipe recipe = LiquidStarlightCraftingRegistry.INSTANCE.getRecipeFor(itemEntity, world, at);
+        LiquidStarlightRecipe recipe = LiquidStarlightCraftingRegistry.INSTANCE.getRecipeFor(itemEntity, level, at);
         if (recipe != null) {
-            if (!world.isRemote()) {
-                recipe.doServerCraftTick(itemEntity, world, at);
+            if (!level.isClientSide()) {
+                recipe.doServerCraftTick(itemEntity, level, at);
             } else {
-                recipe.doClientEffectTick(itemEntity, world, at);
+                recipe.doClientEffectTick(itemEntity, level, at);
             }
         }
     }

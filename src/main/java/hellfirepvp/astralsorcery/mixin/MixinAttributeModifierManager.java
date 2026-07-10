@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(AttributeModifierManager.class)
+@Mixin(AttributeMap.class)
 public class MixinAttributeModifierManager implements AttributeEvent.EntityModifierManager {
 
     @Unique public LivingEntity astralSorceryEntityReference;

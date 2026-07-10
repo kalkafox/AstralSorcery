@@ -52,8 +52,8 @@ public class AttributeConverterPerk extends ProgressGatedPerk implements Attribu
     }
 
     @Override
-    public Collection<PerkConverter> getConverters(Player player, LogicalSide side, boolean ignoreRequirements) {
-        if (!ignoreRequirements && ResearchHelper.getProgress(player, side).getPerkData().isPerkSealed(this)) {
+    public Collection<PerkConverter> getConverters(Player player, LogicalSide direction, boolean ignoreRequirements) {
+        if (!ignoreRequirements && ResearchHelper.getProgress(player, direction).getPerkData().isPerkSealed(this)) {
             return Collections.emptyList();
         }
 
@@ -61,10 +61,10 @@ public class AttributeConverterPerk extends ProgressGatedPerk implements Attribu
     }
 
     @Override
-    public void applyPerkLogic(Player player, LogicalSide side) {}
+    public void applyPerkLogic(Player player, LogicalSide direction) {}
 
     @Override
-    public void removePerkLogic(Player player, LogicalSide side) {}
+    public void removePerkLogic(Player player, LogicalSide direction) {}
 
     @Override
     public void deserializeData(JsonObject perkData) {
@@ -72,17 +72,17 @@ public class AttributeConverterPerk extends ProgressGatedPerk implements Attribu
 
         this.converters.clear();
 
-        if (JSONUtils.hasField(perkData, "converters")) {
-            JsonArray array = JSONUtils.getJsonArray(perkData, "converters");
+        if (GsonHelper.convertToInt(perkData, "converters")) {
+            JsonArray array = GsonHelper.getAsJsonArray(perkData, "converters");
             for (int i = 0; i < array.size(); i++) {
-                JsonObject serializedConverter = JSONUtils.getJsonObject(array.get(i), "converters[%s]");
-                String key = JSONUtils.getString(serializedConverter, "name");
-                PerkConverter converter = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_CONVERTERS.getValue(new ResourceLocation(key));
+                JsonObject serializedConverter = GsonHelper.getAsJsonObject(array.get(i), "converters[%s]");
+                String key = GsonHelper.getString(serializedConverter, "name");
+                PerkConverter converter = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_CONVERTERS.getValue(ResourceLocation.parse(key));
                 if (converter == null) {
                     throw new JsonParseException("Unknown converter: " + key);
                 }
                 if (serializedConverter.has("radius")) {
-                    float radius = JSONUtils.getFloat(serializedConverter, "radius");
+                    float radius = GsonHelper.getFloat(serializedConverter, "radius");
                     this.addRangedConverter(radius, converter);
                 } else {
                     this.addConverter(converter);

@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  */
 public class InfuserRecipeProvider {
 
-    public static void registerInfuserRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerInfuserRecipes(Consumer<FinishedRecipe> registrar) {
         LiquidInfusionBuilder.builder(ItemsAS.AQUAMARINE)
                 .setLiquidInput(FluidsAS.LIQUID_STARLIGHT_SOURCE)
                 .setItemInput(ItemsAS.AQUAMARINE)

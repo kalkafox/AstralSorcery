@@ -73,7 +73,7 @@ public class BatchRenderContext<T extends EntityVisualFX> extends OrderSortable 
         });
     }
 
-    public T makeParticle(Vector3 pos) {
+    public T createParticle(Vector3 pos) {
         return this.particleCreator.apply(this, pos);
     }
 
@@ -86,7 +86,7 @@ public class BatchRenderContext<T extends EntityVisualFX> extends OrderSortable 
         return sprite;
     }
 
-    public void renderAll(List<EffectHandler.PendingEffect> effects, PoseStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
+    public void render(List<EffectHandler.PendingEffect> effects, PoseStack renderStack, IDrawRenderTypeBuffer drawBuffer, float pTicks) {
         //Erase type due to impossible typing
         BatchRenderContext blankCtx = this;
         effects.stream()
@@ -109,9 +109,9 @@ public class BatchRenderContext<T extends EntityVisualFX> extends OrderSortable 
     }
 
     private void drawBatched(VertexConsumer buf, IDrawRenderTypeBuffer renderTypeBuffer) {
-        if (buf instanceof BufferBuilder && this.getRenderType().getDrawMode() == GL11.GL_QUADS) {
-            Vec3 view = RenderInfo.getInstance().getARI().getProjectedView();
-            ((BufferBuilder) buf).sortVertexData((float) view.x, (float) view.y, (float) view.z);
+        if (buf instanceof BufferBuilder && this.getRenderType().mode() == GL11.GL_QUADS) {
+            Vec3 viewDistance = RenderInfo.getInstance().getARI().getPosition();
+            ((BufferBuilder) buf).sortVertexData((float) viewDistance.x, (float) viewDistance.y, (float) viewDistance.z);
         }
         renderTypeBuffer.draw();
     }

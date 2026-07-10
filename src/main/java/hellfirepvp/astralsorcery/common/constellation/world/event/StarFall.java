@@ -23,7 +23,7 @@ import java.util.Random;
 public class StarFall extends CelestialEvent {
 
     @Override
-    public void tick(Level world, Random rand, WorldContext ctx) {
+    public void tick(Level level, Random random, WorldContext ctx) {
 
     }
 

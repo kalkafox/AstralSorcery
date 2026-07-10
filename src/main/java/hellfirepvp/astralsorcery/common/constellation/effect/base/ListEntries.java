@@ -50,62 +50,62 @@ public class ListEntries {
         public void readFromNBT(CompoundTag nbt) {
             super.readFromNBT(nbt);
 
-            this.type = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(nbt.getString("entity")));
+            this.type = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(nbt.getString("entity")));
         }
 
         @Override
-        public void writeToNBT(CompoundTag nbt) {
-            super.writeToNBT(nbt);
+        public void save(CompoundTag nbt) {
+            super.save(nbt);
 
-            nbt.putString("entity", this.type.getRegistryName().toString());
+            nbt.putString("entity", RegistryHelper.getKey(this.type).toString());
         }
 
-        public static EntitySpawnEntry createEntry(ServerLevel world, BlockPos pos, MobSpawnType reason) {
-            Biome b = world.getBiome(pos);
-            List<MobSpawnInfo.Spawners> applicable = new LinkedList<>();
-            if (DayTimeHelper.isNight(world)) {
-                applicable.addAll(b.getMobSpawnInfo().getSpawners(EntityClassification.MONSTER));
+        public static EntitySpawnEntry createEntry(ServerLevel level, BlockPos pos, MobSpawnType reason) {
+            Biome b = level.getBiome(pos);
+            List<MobSpawnSettings.Spawners> applicable = new LinkedList<>();
+            if (DayTimeHelper.isNight(level)) {
+                applicable.addAll(b.getMobSettings().getSpawners(MobCategory.MONSTER));
             } else {
-                applicable.addAll(b.getMobSpawnInfo().getSpawners(EntityClassification.CREATURE));
+                applicable.addAll(b.getMobSettings().getSpawners(MobCategory.CREATURE));
             }
             if (applicable.isEmpty()) {
                 return null; //Duh.
             }
             Collections.shuffle(applicable);
-            MobSpawnInfo.Spawners entry = applicable.get(world.rand.nextInt(applicable.size()));
+            MobSpawnSettings.Spawners entry = applicable.get(level.random.nextInt(applicable.size()));
             EntityType<?> type = entry.type;
-            if (type != null && EntityUtils.canEntitySpawnHere(world, pos, type, reason, EntityUtils.SpawnConditionFlags.IGNORE_SPAWN_CONDITIONS,
+            if (type != null && EntityUtils.canEntitySpawnHere(level, pos, type, reason, EntityUtils.SpawnConditionFlags.IGNORE_SPAWN_CONDITIONS,
                     (e) -> e.addTag(ConstellationEffectRegistry.ENTITY_TAG_LUCERNA_SKIP_ENTITY))) {
                 return new EntitySpawnEntry(pos, type);
             }
             return null;
         }
 
-        public void spawn(ServerLevel world, MobSpawnType reason) {
+        public void spawn(ServerLevel level, MobSpawnType reason) {
             if (this.type == null) {
                 return;
             }
 
-            Entity e = this.type.create(world);
+            Entity e = this.type.create(level);
             if (e != null) {
                 e.addTag(ConstellationEffectRegistry.ENTITY_TAG_LUCERNA_SKIP_ENTITY);
 
-                BlockPos at = getPos();
-                e.setLocationAndAngles(
+                BlockPos at = getBlockPos();
+                e.moveTo(
                         at.getX() + 0.5,
                         at.getY() + 0.5,
                         at.getZ() + 0.5,
-                        world.rand.nextFloat() * 360.0F, 0.0F);
+                        level.random.nextFloat() * 360.0F, 0.0F);
                 if (e instanceof Mob) {
-                    ((Mob) e).onInitialSpawn(world, world.getDifficultyForLocation(at), reason, null, null);
-                    if (!((Mob) e).isNotColliding(world)) {
+                    ((Mob) e).finalizeSpawn(level, level.getCurrentDifficultyAt(at), reason, null, null);
+                    if (!((Mob) e).isNotColliding(level)) {
                         e.remove();
                         return;
                     }
                 }
-                world.addEntity(e);
-                world.playEvent(2004, e.getPosition(), 0);
-                world.playEvent(2004, e.getPosition(), 0);
+                level.addEntity(e);
+                level.levelEvent(2004, e.position(), 0);
+                level.levelEvent(2004, e.position(), 0);
             }
         }
     }
@@ -132,8 +132,8 @@ public class ListEntries {
         }
 
         @Override
-        public void writeToNBT(CompoundTag nbt) {
-            super.writeToNBT(nbt);
+        public void save(CompoundTag nbt) {
+            super.save(nbt);
 
             nbt.putInt("maxCount", this.maxCount);
         }
@@ -163,8 +163,8 @@ public class ListEntries {
         }
 
         @Override
-        public void writeToNBT(CompoundTag nbt) {
-            super.writeToNBT(nbt);
+        public void save(CompoundTag nbt) {
+            super.save(nbt);
 
             nbt.putInt("counter", this.counter);
         }
@@ -186,12 +186,12 @@ public class ListEntries {
         }
 
         @Override
-        public BlockPos getPos() {
+        public BlockPos getBlockPos() {
             return this.pos;
         }
 
         @Override
-        public void writeToNBT(CompoundTag nbt) {}
+        public void save(CompoundTag nbt) {}
 
         @Override
         public void readFromNBT(CompoundTag nbt) {}

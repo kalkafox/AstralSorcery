@@ -40,16 +40,16 @@ public class FluidRarityEntry implements ConfigDataSet {
         this.additionalRandomAmount = additionalRandomAmount;
     }
 
-    public Fluid getFluid() {
-        return ForgeRegistries.FLUIDS.getValue(this.fluidName);
+    public Fluid getType() {
+        return BuiltInRegistries.FLUID.get(this.fluidName);
     }
 
     public int getRarity() {
         return rarity;
     }
 
-    public int getRandomAmount(Random rand) {
-        return this.guaranteedAmount + (additionalRandomAmount > 0 ? rand.nextInt(additionalRandomAmount) : 0);
+    public int getRandomAmount(Random random) {
+        return this.guaranteedAmount + (additionalRandomAmount > 0 ? random.nextInt(additionalRandomAmount) : 0);
     }
 
     @Nonnull
@@ -64,8 +64,8 @@ public class FluidRarityEntry implements ConfigDataSet {
         if (split.length != 4) {
             return null;
         }
-        ResourceLocation fluidName = new ResourceLocation(split[0]);
-        if (ForgeRegistries.FLUIDS.getValue(fluidName) == null) {
+        ResourceLocation fluidName = ResourceLocation.parse(split[0]);
+        if (BuiltInRegistries.FLUID.get(fluidName) == null) {
             throw new IllegalArgumentException("Unknown Fluid: " + fluidName);
         }
         String strGAmount = split[1];

@@ -33,7 +33,7 @@ public class AttuneCrystalTrigger extends ListenerCriterionTrigger<Constellation
     }
 
     @Override
-    public ConstellationInstance deserialize(JsonObject object, ConditionArrayParser conditions) {
+    public ConstellationInstance deserialize(JsonObject object, DeserializationContext conditions) {
         return ConstellationInstance.deserialize(getId(), object);
     }
 

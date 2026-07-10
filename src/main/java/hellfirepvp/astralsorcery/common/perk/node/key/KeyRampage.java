@@ -44,33 +44,33 @@ public class KeyRampage extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOWEST, this::onEntityDeath);
     }
 
     private void onEntityDeath(LivingDeathEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-            Player player = (Player) source.getTrueSource();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
-            if (side.isServer() && prog.getPerkData().hasPerkEffect(this)) {
+        if (source.getEntity() != null && source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
+            if (direction.isServer() && prog.getPerkData().hasPerkEffect(this)) {
                 float ch = CONFIG.rampageChance.get().floatValue();
-                ch = PerkAttributeHelper.getOrCreateMap(player, side)
+                ch = PerkAttributeHelper.getOrCreateMap(player, direction)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, ch);
-                if (rand.nextFloat() < ch) {
+                if (random.nextFloat() < ch) {
 
                     int dur = CONFIG.rampageDuration.get();
-                    dur = Math.round(PerkAttributeHelper.getOrCreateMap(player, side)
+                    dur = Math.round(PerkAttributeHelper.getOrCreateMap(player, direction)
                             .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_RAMPAGE_DURATION, dur));
-                    dur = Math.round(PerkAttributeHelper.getOrCreateMap(player, side)
+                    dur = Math.round(PerkAttributeHelper.getOrCreateMap(player, direction)
                             .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, dur));
                     if (dur > 0) {
-                        player.addPotionEffect(new MobEffectInstance(Effects.SPEED, dur, 1, false, false, true));
-                        player.addPotionEffect(new MobEffectInstance(Effects.HASTE, dur, 1, false, false, true));
-                        player.addPotionEffect(new MobEffectInstance(Effects.STRENGTH, dur, 1, false, false, true));
+                        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, dur, 1, false, false, true));
+                        player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, dur, 1, false, false, true));
+                        player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, dur, 1, false, false, true));
                     }
                 }
             }

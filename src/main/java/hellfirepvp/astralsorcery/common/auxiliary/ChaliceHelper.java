@@ -37,19 +37,19 @@ import java.util.Optional;
 public class ChaliceHelper {
 
     @Nonnull
-    public static List<BlockPos> findNearbyChalices(Level world, BlockPos origin, int distance) {
+    public static List<BlockPos> findNearbyChalices(Level level, BlockPos origin, int distance) {
         Vector3 thisVector = new Vector3(origin).add(0.5, 1.5, 0.5);
 
-        List<BlockPos> foundChalices = BlockDiscoverer.searchForBlocksAround(world, origin, MathHelper.clamp(distance, 0, 16),
+        List<BlockPos> foundChalices = BlockDiscoverer.searchForBlocksAround(level, origin, Mth.clamp(distance, 0, 16),
                 (w, pos, state) -> !pos.equals(origin) &&
                         state.getBlock() instanceof BlockChalice &&
-                        !w.isBlockPowered(pos) &&
-                        !(w.getBlockState(pos.down()).getBlock() instanceof BlockFountain));
+                        !w.hasNeighborSignal(pos) &&
+                        !(w.getBlockState(pos.below()).getBlock() instanceof BlockFountain));
 
         foundChalices.removeIf(pos -> {
             Vector3 chaliceVector = new Vector3(pos).add(0.5, 1.5, 0.5);
             RaytraceAssist assist = new RaytraceAssist(thisVector, chaliceVector);
-            return !assist.isClear(world);
+            return !assist.isClear(level);
         });
 
         return foundChalices;
@@ -57,10 +57,10 @@ public class ChaliceHelper {
 
     //Distance must be positive and less or equal to 16
     @Nonnull
-    public static List<TileChalice> findNearbyChalicesContaining(Level world, BlockPos origin, FluidStack expected, int distance) {
+    public static List<TileChalice> findNearbyChalicesContaining(Level level, BlockPos origin, FluidStack expected, int distance) {
         List<TileChalice> out = new LinkedList<>();
-        for (BlockPos chalicePos : findNearbyChalices(world, origin, distance)) {
-            TileChalice chalice = MiscUtils.getTileAt(world, chalicePos, TileChalice.class, true);
+        for (BlockPos chalicePos : findNearbyChalices(level, origin, distance)) {
+            TileChalice chalice = MiscUtils.getTileAt(level, chalicePos, TileChalice.class, true);
             if (chalice != null && chalice.getTank().drain(expected, IFluidHandler.FluidAction.SIMULATE).getAmount() >= expected.getAmount()) {
                 out.add(chalice);
             }
@@ -72,12 +72,12 @@ public class ChaliceHelper {
     //Distance must be positive and less or equal to 16
     //Only returns a value if the chalices combined fulfilled the amount requirement.
     @Nonnull
-    public static Optional<List<TileChalice>> findNearbyChalicesCombined(Level world, BlockPos origin, FluidStack expected, int distance) {
+    public static Optional<List<TileChalice>> findNearbyChalicesCombined(Level level, BlockPos origin, FluidStack expected, int distance) {
         FluidStack required = expected.copy();
 
         List<TileChalice> out = new LinkedList<>();
-        for (BlockPos chalicePos : findNearbyChalices(world, origin, distance)) {
-            TileChalice chalice = MiscUtils.getTileAt(world, chalicePos, TileChalice.class, true);
+        for (BlockPos chalicePos : findNearbyChalices(level, origin, distance)) {
+            TileChalice chalice = MiscUtils.getTileAt(level, chalicePos, TileChalice.class, true);
             if (chalice != null) {
                 FluidStack drained = chalice.getTank().drain(expected, IFluidHandler.FluidAction.SIMULATE);
                 if (!drained.isEmpty()) {
@@ -93,11 +93,11 @@ public class ChaliceHelper {
         return Optional.empty();
     }
 
-    public static boolean doChalicesContainCombined(Level world, Collection<BlockPos> chalicePositions, FluidStack expected) {
+    public static boolean doChalicesContainCombined(Level level, Collection<BlockPos> chalicePositions, FluidStack expected) {
         FluidStack required = expected.copy();
 
         for (BlockPos pos : chalicePositions) {
-            TileChalice chalice = MiscUtils.getTileAt(world, pos, TileChalice.class, true);
+            TileChalice chalice = MiscUtils.getTileAt(level, pos, TileChalice.class, true);
             if (chalice != null) {
                 FluidStack drained = chalice.getTank().drain(expected, IFluidHandler.FluidAction.SIMULATE);
                 if (!drained.isEmpty()) {

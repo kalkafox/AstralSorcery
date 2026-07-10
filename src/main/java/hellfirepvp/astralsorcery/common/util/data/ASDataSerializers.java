@@ -39,7 +39,7 @@ public class ASDataSerializers {
         }
 
         @Override
-        public Long copyValue(Long value) {
+        public Long read(Long value) {
             return new Long(value);
         }
     };
@@ -63,7 +63,7 @@ public class ASDataSerializers {
         }
 
         @Override
-        public Vector3 copyValue(Vector3 value) {
+        public Vector3 read(Vector3 value) {
             return value.clone();
         }
     };
@@ -85,7 +85,7 @@ public class ASDataSerializers {
         }
 
         @Override
-        public FluidStack copyValue(FluidStack value) {
+        public FluidStack read(FluidStack value) {
             return value.copy();
         }
     };

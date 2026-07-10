@@ -42,7 +42,7 @@ public interface TileAreaOfInfluence {
     public BlockPos getEffectOriginPosition();
 
     @Nonnull
-    public ResourceKey<Level> getDimension();
+    public ResourceKey<Level> dimension();
 
     public boolean providesEffect();
 

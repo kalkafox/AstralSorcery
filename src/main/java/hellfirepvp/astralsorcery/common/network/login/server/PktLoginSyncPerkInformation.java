@@ -83,7 +83,7 @@ public class PktLoginSyncPerkInformation extends ASLoginPacket<PktLoginSyncPerkI
             }
 
             @Override
-            public void handle(PktLoginSyncPerkInformation packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktLoginSyncPerkInformation packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

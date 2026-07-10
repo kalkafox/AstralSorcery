@@ -48,7 +48,7 @@ public class MMCQ {
      * @param b the blue value
      * @return the color index
      */
-    static int getColorIndex(int r, int g, int b) {
+    static int getId(int r, int g, int b) {
         return (r << (2 * SIGBITS)) + (g << SIGBITS) + b;
     }
 
@@ -102,7 +102,7 @@ public class MMCQ {
                 for (i = r1; i <= r2; i++) {
                     for (j = g1; j <= g2; j++) {
                         for (k = b1; k <= b2; k++) {
-                            index = getColorIndex(i, j, k);
+                            index = getId(i, j, k);
                             npix += histo[index];
                         }
                     }
@@ -132,7 +132,7 @@ public class MMCQ {
                 for (i = r1; i <= r2; i++) {
                     for (j = g1; j <= g2; j++) {
                         for (k = b1; k <= b2; k++) {
-                            histoindex = getColorIndex(i, j, k);
+                            histoindex = getId(i, j, k);
                             hval = histo[histoindex];
                             ntot += hval;
                             rsum += (hval * (i + 0.5) * MULT);
@@ -173,7 +173,7 @@ public class MMCQ {
 
         public final ArrayList<VBox> vboxes = new ArrayList<VBox>();
 
-        public void push(VBox box) {
+        public void pushPose(VBox box) {
             vboxes.add(box);
         }
 
@@ -236,7 +236,7 @@ public class MMCQ {
             rval = pixel[0] >> RSHIFT;
             gval = pixel[1] >> RSHIFT;
             bval = pixel[2] >> RSHIFT;
-            index = getColorIndex(rval, gval, bval);
+            index = getId(rval, gval, bval);
             histo[index]++;
         }
         return histo;
@@ -307,7 +307,7 @@ public class MMCQ {
                 sum = 0;
                 for (j = vbox.g1; j <= vbox.g2; j++) {
                     for (k = vbox.b1; k <= vbox.b2; k++) {
-                        index = getColorIndex(i, j, k);
+                        index = getId(i, j, k);
                         sum += histo[index];
                     }
                 }
@@ -319,7 +319,7 @@ public class MMCQ {
                 sum = 0;
                 for (j = vbox.r1; j <= vbox.r2; j++) {
                     for (k = vbox.b1; k <= vbox.b2; k++) {
-                        index = getColorIndex(j, i, k);
+                        index = getId(j, i, k);
                         sum += histo[index];
                     }
                 }
@@ -332,7 +332,7 @@ public class MMCQ {
                 sum = 0;
                 for (j = vbox.r1; j <= vbox.r2; j++) {
                     for (k = vbox.g1; k <= vbox.g2; k++) {
-                        index = getColorIndex(j, k, i);
+                        index = getId(j, k, i);
                         sum += histo[index];
                     }
                 }
@@ -451,7 +451,7 @@ public class MMCQ {
         // calculate the actual colors
         CMap cmap = new CMap();
         for (VBox vb : pq) {
-            cmap.push(vb);
+            cmap.pushPose(vb);
         }
 
         return cmap;

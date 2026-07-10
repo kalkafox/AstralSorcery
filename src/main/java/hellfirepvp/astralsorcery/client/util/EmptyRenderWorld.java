@@ -51,12 +51,12 @@ public class EmptyRenderWorld implements BlockAndTintGetter {
     }
 
     @Override
-    public LevelLightEngine getLightManager() {
+    public LevelLightEngine getLightEngine() {
         return new StructureRenderLightManager(this.getMaxLightLevel());
     }
 
     @Override
-    public int getBlockColor(BlockPos blockPosIn, ColorResolver colorResolverIn) {
+    public int hasChunksAt(BlockPos blockPosIn, ColorResolver colorResolverIn) {
         return colorResolverIn.getColor(biome, blockPosIn.getX(), blockPosIn.getZ());
     }
 
@@ -73,11 +73,11 @@ public class EmptyRenderWorld implements BlockAndTintGetter {
 
     @Override
     public BlockState getBlockState(BlockPos blockPos) {
-        return Blocks.AIR.getDefaultState();
+        return Blocks.AIR.defaultBlockState();
     }
 
     @Override
     public FluidState getFluidState(BlockPos blockPos) {
-        return Fluids.EMPTY.getDefaultState();
+        return Fluids.EMPTY.defaultBlockState();
     }
 }

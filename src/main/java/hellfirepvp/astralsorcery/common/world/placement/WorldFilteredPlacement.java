@@ -28,23 +28,23 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 20.11.2020 / 15:52
  */
-public class WorldFilteredPlacement extends Placement<WorldFilterConfig> {
+public class WorldFilteredPlacement extends FeatureDecorator<WorldFilterConfig> {
 
     public WorldFilteredPlacement() {
         super(WorldFilterConfig.CODEC);
     }
 
-    public ConfiguredPlacement<WorldFilterConfig> inWorlds(boolean ignoreFilter, List<ResourceKey<Level>> worlds) {
-        return inWorlds(() -> ignoreFilter, () -> worlds);
+    public ConfiguredDecorator<WorldFilterConfig> inWorlds(boolean ignoreFilter, List<ResourceKey<Level>> levels) {
+        return inWorlds(() -> ignoreFilter, () -> levels);
     }
 
-    public ConfiguredPlacement<WorldFilterConfig> inWorlds(Supplier<Boolean> ignoreFilter, Supplier<List<ResourceKey<Level>>> worlds) {
-        return this.configure(new WorldFilterConfig(ignoreFilter, worlds));
+    public ConfiguredDecorator<WorldFilterConfig> inWorlds(Supplier<Boolean> ignoreFilter, Supplier<List<ResourceKey<Level>>> levels) {
+        return this.configured(new WorldFilterConfig(ignoreFilter, levels));
     }
 
     @Override
-    public Stream<BlockPos> getPositions(WorldDecoratingHelper helper, Random rand, WorldFilterConfig config, BlockPos pos) {
-        if (config.generatesIn(helper.field_242889_a)) {
+    public Stream<BlockPos> getPositions(DecorationContext helper, Random random, WorldFilterConfig config, BlockPos pos) {
+        if (config.generatesIn(helper.level)) {
             return Stream.of(pos);
         }
         return Stream.empty();

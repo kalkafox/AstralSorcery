@@ -47,13 +47,13 @@ public abstract class ModifierSourceProvider<T extends ModifierSource> {
     public abstract T deserialize(FriendlyByteBuf buf);
 
     @Nullable
-    private T getModifier(ServerPlayer player, ResourceLocation identifier) {
-        Map<ResourceLocation, T> playerModifiers = cachedSources.computeIfAbsent(player.getUniqueID(), uuid -> new HashMap<>());
+    private T getAttributeInstance(ServerPlayer player, ResourceLocation identifier) {
+        Map<ResourceLocation, T> playerModifiers = cachedSources.computeIfAbsent(player.getUUID(), uuid -> new HashMap<>());
         return playerModifiers.get(identifier);
     }
 
     private void setModifier(ServerPlayer player, ResourceLocation identifier, @Nullable T source) {
-        Map<ResourceLocation, T> playerModifiers = cachedSources.computeIfAbsent(player.getUniqueID(), uuid -> new HashMap<>());
+        Map<ResourceLocation, T> playerModifiers = cachedSources.computeIfAbsent(player.getUUID(), uuid -> new HashMap<>());
         if (source != null) {
             playerModifiers.put(identifier, source);
         } else {
@@ -64,7 +64,7 @@ public abstract class ModifierSourceProvider<T extends ModifierSource> {
     protected void updateSource(ServerPlayer player, ResourceLocation identifier, @Nullable T source) {
         boolean needsRemoval = false, needsAddition = false;
 
-        T existing = this.getModifier(player, identifier);
+        T existing = this.getAttributeInstance(player, identifier);
         if (existing != null) {
             if (!existing.isEqual(source)) {
                 needsRemoval = true;

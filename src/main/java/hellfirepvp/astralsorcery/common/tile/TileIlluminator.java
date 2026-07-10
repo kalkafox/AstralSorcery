@@ -72,14 +72,14 @@ public class TileIlluminator extends TileEntityTick {
             return; //Don't do anything if it's not specifically made as player-placed
         }
 
-        if (!world.isRemote()) {
+        if (!level.isClientSide()) {
             if (layerPositions == null) {
-                recalculate();
+                refresh();
             }
             placeFlare();
             placeFlare();
             placeFlare();
-            if (rand.nextInt(3) == 0 && placeFlare()) {
+            if (random.nextInt(3) == 0 && placeFlare()) {
                 doRecalculation = true;
             }
             if (boostedTicks > 0) {
@@ -90,31 +90,31 @@ public class TileIlluminator extends TileEntityTick {
                 ticksUntilNextPlacement = boostedTicks > 0 ? 30 : 180;
                 if (doRecalculation) {
                     doRecalculation = false;
-                    recalculate();
+                    refresh();
                 }
             }
         }
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             this.tickEffects();
         }
     }
 
-    private void recalculate() {
-        int height = Math.max(0, getPos().getY() - 7);
+    private void refresh() {
+        int height = Math.max(0, getBlockPos().getY() - 7);
         int parts = height / 7;
         layerPositions = new ArrayList<>(parts);
         for (int i = 0; i < parts; i++) {
             int yPart = 3 + i * 7;
             List<BlockPos> positions = new ArrayList<>();
-            generatePositions(positions, new BlockPos(getPos().getX(), yPart, getPos().getZ()));
+            generatePositions(positions, new BlockPos(getBlockPos().getX(), yPart, getBlockPos().getZ()));
             layerPositions.add(positions);
         }
     }
 
     private void generatePositions(List<BlockPos> positions, BlockPos center) {
-        int xPos = center.getX();
-        int yPos = center.getY();
+        int x = center.getX();
+        int y = center.getY();
         int zPos = center.getZ();
         BlockPos currentPos = center;
         if (!positions.contains(currentPos)) {
@@ -122,14 +122,14 @@ public class TileIlluminator extends TileEntityTick {
         }
 
         Direction dir = Direction.NORTH;
-        while (Math.abs(currentPos.getX() - xPos) <= SEARCH_RADIUS &&
-                Math.abs(currentPos.getY() - yPos) <= SEARCH_RADIUS &&
+        while (Math.abs(currentPos.getX() - x) <= SEARCH_RADIUS &&
+                Math.abs(currentPos.getY() - y) <= SEARCH_RADIUS &&
                 Math.abs(currentPos.getZ() - zPos) <= SEARCH_RADIUS) {
             currentPos = currentPos.offset(dir, STEP_WIDTH);
             if (!positions.contains(currentPos)) {
                 positions.add(currentPos);
             }
-            Direction tryDirNext = dir.rotateY();
+            Direction tryDirNext = dir.getClockWise();
             if (!positions.contains(currentPos.offset(tryDirNext, STEP_WIDTH))) {
                 dir = tryDirNext;
             }
@@ -144,25 +144,25 @@ public class TileIlluminator extends TileEntityTick {
         FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(new Vector3(this).add(0.5, 0.5, 0.5))
                 .setScaleMultiplier(0.25F)
-                .setMotion(new Vector3(rand.nextFloat() * 0.025F * (rand.nextBoolean() ? 1 : -1),
-                        rand.nextFloat() * 0.025F * (rand.nextBoolean() ? 1 : -1),
-                        rand.nextFloat() * 0.025F * (rand.nextBoolean() ? 1 : -1)));
+                .setDeltaMovement(new Vector3(random.nextFloat() * 0.025F * (random.nextBoolean() ? 1 : -1),
+                        random.nextFloat() * 0.025F * (random.nextBoolean() ? 1 : -1),
+                        random.nextFloat() * 0.025F * (random.nextBoolean() ? 1 : -1)));
         Color c = ColorUtils.flareColorFromDye(this.getColor());
-        p.color(VFXColorFunction.constant(MiscUtils.eitherOf(rand,
+        p.color(VFXColorFunction.constant(MiscUtils.eitherOf(random,
                 Color.WHITE, c.brighter().brighter(), c)));
 
         if (this.boostedTicks > 0) {
-            if (this.ticksExisted % 4 == 0) {
+            if (this.tickCount % 4 == 0) {
                 Collection<Vector3> positions = MiscUtils.getCirclePositions(
                         new Vector3(this).add(0.5, 0.5, 0.5),
-                        Vector3.RotAxis.Y_AXIS, 0.8F + rand.nextFloat() * 0.1F, 20 + rand.nextInt(10));
+                        Vector3.RotAxis.Y_AXIS, 0.8F + random.nextFloat() * 0.1F, 20 + random.nextInt(10));
 
                 for (Vector3 v : positions) {
                     p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                             .spawn(v)
                             .setScaleMultiplier(0.15F)
-                            .setMotion(new Vector3(0, (rand.nextBoolean() ? 1 : -1) * rand.nextFloat() * 0.01, 0));
-                    p.color(VFXColorFunction.constant(MiscUtils.eitherOf(rand,
+                            .setDeltaMovement(new Vector3(0, (random.nextBoolean() ? 1 : -1) * random.nextFloat() * 0.01, 0));
+                    p.color(VFXColorFunction.constant(MiscUtils.eitherOf(random,
                             Color.WHITE, c.brighter().brighter(), c)));
                 }
             }
@@ -177,18 +177,18 @@ public class TileIlluminator extends TileEntityTick {
                 continue;
             }
 
-            int index = rand.nextInt(list.size());
+            int index = random.nextInt(list.size());
             BlockPos at = list.remove(index);
             if (!recalc && list.isEmpty()) {
                 recalc = true;
             }
-            at = at.add(rand.nextInt(5) - 2, rand.nextInt(13) - 6, rand.nextInt(5) - 2);
-            MiscUtils.executeWithChunk(world, at, at, (pos) -> {
-                if (this.doesSeeSky() && TileIlluminator.ILLUMINATOR_CHECK.test(world, pos, world.getBlockState(pos))) {
+            at = at.offset(random.nextInt(5) - 2, random.nextInt(13) - 6, random.nextInt(5) - 2);
+            MiscUtils.executeWithChunk(level, at, at, (pos) -> {
+                if (this.doesSeeSky() && TileIlluminator.ILLUMINATOR_CHECK.test(level, pos, level.getBlockState(pos))) {
                     DyeColor color = this.getColor();
-                    BlockState toPlace = BlocksAS.FLARE_LIGHT.getDefaultState().with(BlockFlareLight.COLOR, color);
-                    if (world.setBlockState(pos, toPlace)) {
-                        EntityFlare.spawnAmbientFlare(world, this.getPos());
+                    BlockState toPlace = BlocksAS.FLARE_LIGHT.defaultBlockState().setValue(BlockFlareLight.COLOR, color);
+                    if (level.setBlock(pos, toPlace)) {
+                        EntityFlare.spawnAmbientFlare(level, this.getBlockPos());
                     }
                 }
             });
@@ -220,31 +220,31 @@ public class TileIlluminator extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
-        compound.putBoolean("playerPlaced", this.playerPlaced);
-        compound.putInt("color", this.color.getId());
-        compound.putInt("boostedTicks", this.boostedTicks);
+        pattern.putBoolean("playerPlaced", this.playerPlaced);
+        pattern.putInt("color", this.color.getId());
+        pattern.putInt("boostedTicks", this.boostedTicks);
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.playerPlaced = compound.getBoolean("playerPlaced");
-        this.color = DyeColor.byId(compound.getInt("color"));
-        this.boostedTicks = compound.getInt("boostedTicks");
+        this.playerPlaced = pattern.getBoolean("playerPlaced");
+        this.color = DyeColor.byId(pattern.getInt("color"));
+        this.boostedTicks = pattern.getInt("boostedTicks");
     }
 
     public static class LightCheck implements BlockPredicate {
 
         @Override
-        public boolean test(Level world, BlockPos pos, BlockState state) {
-            return world.isAirBlock(pos) &&
-                    !MiscUtils.canSeeSky(world, pos, false, false) &&
-                    world.getLight(pos) < 8 &&
-                    world.getLightFor(LightType.SKY, pos) < 4;
+        public boolean test(Level level, BlockPos pos, BlockState state) {
+            return level.isEmptyBlock(pos) &&
+                    !MiscUtils.canSeeSky(level, pos, false, false) &&
+                    level.getLight(pos) < 8 &&
+                    level.getLightFor(LightLayer.SKY, pos) < 4;
         }
 
     }

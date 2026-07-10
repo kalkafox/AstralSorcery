@@ -30,10 +30,10 @@ public class PatternCelestialGateway extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        BlockState arch = BlocksAS.MARBLE_ARCH.getDefaultState();
-        BlockState runed = BlocksAS.MARBLE_RUNED.getDefaultState();
-        BlockState engraved = BlocksAS.MARBLE_ENGRAVED.getDefaultState();
-        BlockState sooty = BlocksAS.BLACK_MARBLE_RAW.getDefaultState();
+        BlockState arch = BlocksAS.MARBLE_ARCH.defaultBlockState();
+        BlockState runed = BlocksAS.MARBLE_RUNED.defaultBlockState();
+        BlockState engraved = BlocksAS.MARBLE_ENGRAVED.defaultBlockState();
+        BlockState sooty = BlocksAS.BLACK_MARBLE_RAW.defaultBlockState();
 
         addBlock(BlocksAS.GATEWAY, BlockPos.ZERO);
 

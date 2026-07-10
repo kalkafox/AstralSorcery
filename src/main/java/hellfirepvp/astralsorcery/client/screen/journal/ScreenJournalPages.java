@@ -43,7 +43,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
     @Nullable
     private final ScreenJournalProgression origin;
     @Nullable
-    private final Screen previous;
+    private final Screen cameFrom;
     private final ResearchNode researchNode;
     private final List<RenderablePage> pages;
 
@@ -55,7 +55,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
         super(node.getName(), NO_BOOKMARK);
         this.researchNode = node;
         this.origin = origin;
-        this.previous = null;
+        this.cameFrom = null;
         List<JournalPage> pageList = node.getPages();
         this.pages = new ArrayList<>(pageList.size());
         for (int i = 0; i < pageList.size(); i++) {
@@ -64,11 +64,11 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
     }
 
     //Use this to use this screen independently of the actual journal.
-    public ScreenJournalPages(@Nullable Screen previous, ResearchNode detailedInformation, int exactPage) {
+    public ScreenJournalPages(@Nullable Screen cameFrom, ResearchNode detailedInformation, int exactPage) {
         super(detailedInformation.getName(), NO_BOOKMARK);
         this.researchNode = detailedInformation;
         this.origin = null;
-        this.previous = previous;
+        this.cameFrom = cameFrom;
         this.currentPageOffset = exactPage / 2;
         List<JournalPage> pageList = detailedInformation.getPages();
         this.pages = new ArrayList<>(pageList.size());
@@ -104,11 +104,11 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
-        super.render(renderStack, mouseX, mouseY, pTicks);
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
+        super.render(renderStack, xpos, ypos, pTicks);
 
         if (origin != null) {
-            drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_BLANK, mouseX, mouseY);
+            drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_BLANK, xpos, ypos);
         } else {
             RenderSystem.enableBlend();
             Blending.DEFAULT.apply();
@@ -123,17 +123,17 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
         if (this.currentPageOffset == 0) {
             int width = font.getStringPropertyWidth(this.getTitle());
 
-            renderStack.push();
-            renderStack.translate(guiLeft + 117, guiTop + 22, this.getGuiZLevel());
+            renderStack.pushPose();
+            renderStack.translate(leftPos + 117, topPos + 22, this.getGuiZLevel());
             renderStack.scale(1.3F, 1.3F, 1F);
             renderStack.translate(-width / 2F, 0, 0);
             RenderingDrawUtils.renderStringAt(font, renderStack, this.getTitle(), 0x00DDDDDD);
-            renderStack.pop();
+            renderStack.popPose();
 
             RenderSystem.enableBlend();
             Blending.DEFAULT.apply();
             TexturesAS.TEX_GUI_BOOK_UNDERLINE.bindTexture();
-            RenderingGuiUtils.drawRect(renderStack, guiLeft + 30, guiTop + 35, this.getGuiZLevel(), 175, 6);
+            RenderingGuiUtils.drawRect(renderStack, leftPos + 30, topPos + 35, this.getGuiZLevel(), 175, 6);
             RenderSystem.disableBlend();
 
             pageYOffset += 30;
@@ -142,54 +142,54 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
         int index = currentPageOffset * 2;
         if (pages.size() > index) {
             RenderablePage page = pages.get(index);
-            page.render(renderStack, guiLeft + 30, guiTop + pageYOffset, this.getGuiZLevel(), pTicks, mouseX, mouseY);
+            page.render(renderStack, leftPos + 30, topPos + pageYOffset, this.getGuiZLevel(), pTicks, xpos, ypos);
         }
         index = index + 1;
         if (pages.size() > index) {
             RenderablePage page = pages.get(index);
-            page.render(renderStack, guiLeft + 220, guiTop + 20, this.getGuiZLevel(), pTicks, mouseX, mouseY);
+            page.render(renderStack, leftPos + 220, topPos + 20, this.getGuiZLevel(), pTicks, xpos, ypos);
         }
 
         this.setBlitOffset(120);
-        drawNavArrows(renderStack, pTicks, mouseX, mouseY);
+        drawNavArrows(renderStack, pTicks, xpos, ypos);
         this.setBlitOffset(100);
 
         index = currentPageOffset * 2;
         if (pages.size() > index) {
             RenderablePage page = pages.get(index);
-            page.postRender(renderStack, guiLeft + 30, guiTop + pageYOffset, this.getGuiZLevel(), pTicks, mouseX, mouseY);
+            page.postRender(renderStack, leftPos + 30, topPos + pageYOffset, this.getGuiZLevel(), pTicks, xpos, ypos);
         }
         index = index + 1;
         if (pages.size() > index) {
             RenderablePage page = pages.get(index);
-            page.postRender(renderStack, guiLeft + 220, guiTop + 20, this.getGuiZLevel(), pTicks, mouseX, mouseY);
+            page.postRender(renderStack, leftPos + 220, topPos + 20, this.getGuiZLevel(), pTicks, xpos, ypos);
         }
 
         this.setBlitOffset(0);
     }
 
-    private void drawNavArrows(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    private void drawNavArrows(PoseStack renderStack, float a, int xpos, int ypos) {
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
 
         this.rectNext = null;
         this.rectPrev = null;
-        this.rectBack = this.drawArrow(renderStack, guiLeft + 197, guiTop + 230, this.getGuiZLevel(), Type.LEFT, mouseX, mouseY, partialTicks);
+        this.rectBack = this.drawArrow(renderStack, leftPos + 197, topPos + 230, this.getGuiZLevel(), Type.LEFT, xpos, ypos, a);
 
         int cIndex = currentPageOffset * 2;
         if (cIndex > 0) {
-            this.rectPrev = this.drawArrow(renderStack, guiLeft + 25, guiTop + 220, this.getGuiZLevel(), Type.LEFT, mouseX, mouseY, partialTicks);
+            this.rectPrev = this.drawArrow(renderStack, leftPos + 25, topPos + 220, this.getGuiZLevel(), Type.LEFT, xpos, ypos, a);
         }
         int nextIndex = cIndex + 2;
         if (pages.size() >= (nextIndex + 1)) {
-            this.rectNext = this.drawArrow(renderStack, guiLeft + 367, guiTop + 220, this.getGuiZLevel(), Type.RIGHT, mouseX, mouseY, partialTicks);
+            this.rectNext = this.drawArrow(renderStack, leftPos + 367, topPos + 220, this.getGuiZLevel(), Type.RIGHT, xpos, ypos, a);
         }
 
         RenderSystem.disableBlend();
     }
 
     @Override
-    protected boolean shouldRightClickCloseScreen(double mouseX, double mouseY) {
+    protected boolean shouldRightClickCloseScreen(double xpos, double ypos) {
         if (origin != null) {
             origin.expectReInit();
             saveSite = false;
@@ -200,7 +200,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
     }
 
     @Override
-    public void closeScreen() {
+    public void onClose() {
         if (origin != null) {
             if (saveSite) {
                 openGuiInstance = this;
@@ -212,15 +212,15 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
                 Minecraft.getInstance().displayGuiScreen(origin);
             }
         } else {
-            if (previous != null && informPreviousClose) {
-                previous.closeScreen();
+            if (cameFrom != null && informPreviousClose) {
+                cameFrom.onClose();
             }
-            Minecraft.getInstance().displayGuiScreen(previous);
+            Minecraft.getInstance().displayGuiScreen(cameFrom);
         }
     }
 
     @Override
-    protected void mouseDragTick(double mouseX, double mouseY, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {
+    protected void mouseDragTick(double xpos, double ypos, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {
         int index = currentPageOffset * 2;
         if (pages.size() > index) {
             RenderablePage page = pages.get(index);
@@ -240,8 +240,8 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+    public boolean mouseClicked(double xpos, double ypos, int mouseButton) {
+        if (super.mouseClicked(xpos, ypos, mouseButton)) {
             return true;
         }
 
@@ -254,29 +254,29 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
         }
 
         if (origin != null) {
-            if (handleBookmarkClick(mouseX, mouseY)) {
+            if (handleBookmarkClick(xpos, ypos)) {
                 saveSite = false;
                 return true;
             }
         }
-        if (rectBack != null && rectBack.contains(mouseX, mouseY)) {
+        if (rectBack != null && rectBack.contains(xpos, ypos)) {
             if (origin != null) {
                 origin.expectReInit();
                 saveSite = false;
-                this.closeScreen();
+                this.onClose();
                 return true;
             } else {
                 informPreviousClose = false;
-                this.closeScreen();
+                this.onClose();
                 return true;
             }
         }
-        if (rectPrev != null && rectPrev.contains(mouseX, mouseY)) {
+        if (rectPrev != null && rectPrev.contains(xpos, ypos)) {
             this.currentPageOffset -= 1;
             SoundHelper.playSoundClient(SoundsAS.GUI_JOURNAL_PAGE, 1F, 1F);
             return true;
         }
-        if (rectNext != null && rectNext.contains(mouseX, mouseY)) {
+        if (rectNext != null && rectNext.contains(xpos, ypos)) {
             this.currentPageOffset += 1;
             SoundHelper.playSoundClient(SoundsAS.GUI_JOURNAL_PAGE, 1F, 1F);
             return true;
@@ -286,7 +286,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
         if (pages.size() > index) {
             RenderablePage page = pages.get(index);
             if (page != null) {
-                if (page.propagateMouseClick(mouseX, mouseY)) {
+                if (page.propagateMouseClick(xpos, ypos)) {
                     return true;
                 }
             }
@@ -295,7 +295,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
         if (pages.size() > index) {
             RenderablePage page = pages.get(index);
             if (page != null) {
-                if (page.propagateMouseClick(mouseX, mouseY)) {
+                if (page.propagateMouseClick(xpos, ypos)) {
                     return true;
                 }
             }

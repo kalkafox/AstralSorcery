@@ -52,7 +52,7 @@ public class TransmissionNetworkHelper {
             if (nextNode.getTo().equals(end)) return false;
         }
 
-        return tr.getTrPos().withinDistance(new BlockPos(end), MAX_TRANSMISSION_DIST);
+        return tr.getTrPos().distSqr(new BlockPos(end), MAX_TRANSMISSION_DIST);
     }
 
     public static boolean createTransmissionLink(IStarlightTransmission<?> tr, BlockPos next) {
@@ -79,18 +79,18 @@ public class TransmissionNetworkHelper {
         IPrismTransmissionNode nextNode = handler.getTransmissionNode(to);
         removeLink(transmissionNode, nextNode, transmission.getTrWorld(), transmission.getTrPos(), to);
 
-        handler.markDirty(transmission.getTrPos(), to);
+        handler.setChanged(transmission.getTrPos(), to);
     }
 
-    private static void removeLink(IPrismTransmissionNode thisNode, IPrismTransmissionNode nextNode, Level world, BlockPos from, BlockPos to) {
-        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(world);
+    private static void removeLink(IPrismTransmissionNode thisNode, IPrismTransmissionNode nextNode, Level level, BlockPos from, BlockPos to) {
+        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(level);
         if (nextNode != null) {
-            nextNode.notifySourceUnlink(world, from);
+            nextNode.notifySourceUnlink(level, from);
             if (handle != null) {
                 handle.notifyTransmissionNodeChange(nextNode);
             }
         }
-        thisNode.notifyUnlink(world, to);
+        thisNode.notifyUnlink(level, to);
         if (handle != null) {
             handle.notifyTransmissionNodeChange(thisNode);
         }
@@ -101,52 +101,52 @@ public class TransmissionNetworkHelper {
         IPrismTransmissionNode nextNode = handler.getTransmissionNode(to);
         createLink(transmissionNode, nextNode, transmission.getTrWorld(), transmission.getTrPos(), to);
 
-        handler.markDirty(transmission.getTrPos(), to);
+        handler.setChanged(transmission.getTrPos(), to);
     }
 
-    private static void createLink(IPrismTransmissionNode thisNode, IPrismTransmissionNode nextNode, Level world, BlockPos from, BlockPos to) {
-        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(world);
+    private static void createLink(IPrismTransmissionNode thisNode, IPrismTransmissionNode nextNode, Level level, BlockPos from, BlockPos to) {
+        TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler(level);
         if (nextNode != null) {
-            nextNode.notifySourceLink(world, from);
+            nextNode.notifySourceLink(level, from);
             if (handle != null) {
                 handle.notifyTransmissionNodeChange(nextNode);
             }
         }
-        thisNode.notifyLink(world, to);
+        thisNode.notifyLink(level, to);
         if (handle != null) {
             handle.notifyTransmissionNodeChange(thisNode);
         }
     }
 
     public static boolean isTileInNetwork(TileNetwork<?> tileNetwork) {
-        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(tileNetwork.getWorld());
-        return handler.getTransmissionNode(tileNetwork.getPos()) != null;
+        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(tileNetwork.getLevel());
+        return handler.getTransmissionNode(tileNetwork.getBlockPos()) != null;
     }
 
     public static void informNetworkTilePlacement(TileNetwork<?> tileNetwork) {
-        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(tileNetwork.getWorld());
+        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(tileNetwork.getLevel());
         if (tileNetwork instanceof IStarlightSource) {
             handler.addNewSourceTile((IStarlightSource<?>) tileNetwork);
         } else if (tileNetwork instanceof IStarlightTransmission) {
             handler.addTransmissionTile((IStarlightTransmission<?>) tileNetwork);
         } else {
-            AstralSorcery.log.warn("Placed a network tile that's not transmission/receiver or source! At: dim=" + tileNetwork.getWorld().getDimensionKey().getLocation() + ", pos=" + tileNetwork.getPos());
+            AstralSorcery.log.warn("Placed a network tile that's not transmission/receiver or source! At: dim=" + tileNetwork.getLevel().dimension().getLocation() + ", pos=" + tileNetwork.getBlockPos());
         }
 
-        IPrismTransmissionNode node = handler.getTransmissionNode(tileNetwork.getPos());
+        IPrismTransmissionNode node = handler.getTransmissionNode(tileNetwork.getBlockPos());
         if (node == null) {
-            AstralSorcery.log.warn("Placed a network tile that didn't produce a network node! At: dim=" + tileNetwork.getWorld().getDimensionKey().getLocation() + ", pos=" + tileNetwork.getPos());
+            AstralSorcery.log.warn("Placed a network tile that didn't produce a network node! At: dim=" + tileNetwork.getLevel().dimension().getLocation() + ", pos=" + tileNetwork.getBlockPos());
         } else if (node.needsUpdate()) {
-            StarlightUpdateHandler.getInstance().addNode(tileNetwork.getWorld(), node);
+            StarlightUpdateHandler.getInstance().addNode(tileNetwork.getLevel(), node);
         }
     }
 
     public static void informNetworkTileRemoval(TileNetwork<?> tileNetwork) {
-        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(tileNetwork.getWorld());
+        WorldNetworkHandler handler = WorldNetworkHandler.getNetworkHandler(tileNetwork.getLevel());
 
-        IPrismTransmissionNode node = handler.getTransmissionNode(tileNetwork.getPos());
+        IPrismTransmissionNode node = handler.getTransmissionNode(tileNetwork.getBlockPos());
         if (node == null) {
-            AstralSorcery.log.warn("Tried to get a network node at a TileEntity, but didn't find one! At: dim=" + tileNetwork.getWorld().getDimensionKey().getLocation() + ", pos=" + tileNetwork.getPos());
+            AstralSorcery.log.warn("Tried to get a network node at a TileEntity, but didn't find one! At: dim=" + tileNetwork.getLevel().dimension().getLocation() + ", pos=" + tileNetwork.getBlockPos());
         } else {
             StarlightUpdateHandler.getInstance().removeNode(((IStarlightTransmission<?>) tileNetwork).getTrWorld(), node);
         }
@@ -156,7 +156,7 @@ public class TransmissionNetworkHelper {
         } else if (tileNetwork instanceof IStarlightTransmission) {
             handler.removeTransmission((IStarlightTransmission<?>) tileNetwork);
         } else {
-            AstralSorcery.log.warn("Removed a network tile that's not transmission/receiver or source! At: dim=" + tileNetwork.getWorld().getDimensionKey().getLocation() + ", pos=" + tileNetwork.getPos());
+            AstralSorcery.log.warn("Removed a network tile that's not transmission/receiver or source! At: dim=" + tileNetwork.getLevel().dimension().getLocation() + ", pos=" + tileNetwork.getBlockPos());
         }
     }
 

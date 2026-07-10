@@ -65,23 +65,11 @@ public class CrystalToolTier implements Tier {
         return this.getUses();
     }
 
-    public float getEfficiency() {
-        return this.getSpeed();
-    }
-
     public float getAttackDamage() {
         return this.getAttackDamageBonus();
     }
 
-    public int getHarvestLevel() {
+    public int getLevel() {
         return 3;
-    }
-
-    public int getEnchantability() {
-        return this.getEnchantmentValue();
-    }
-
-    public Ingredient getRepairMaterial() {
-        return this.getRepairIngredient();
     }
 }

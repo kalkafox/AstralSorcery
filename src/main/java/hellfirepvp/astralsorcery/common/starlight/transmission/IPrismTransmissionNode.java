@@ -32,8 +32,8 @@ import java.util.Random;
  */
 public interface IPrismTransmissionNode extends ILocatable {
 
-    public static final CrystalAttributes EMPTY = CrystalAttributes.Builder.newBuilder(false).build();
-    public static final Random rand = new Random();
+    public static final CrystalAttributes EMPTY = CrystalAttributes.Builder.properties(false).build();
+    public static final Random random = new Random();
 
     //Get the exact position of this Node
     public BlockPos getLocationPos();
@@ -76,27 +76,27 @@ public interface IPrismTransmissionNode extends ILocatable {
     }
 
     //The update method of #needsTransmissionUpdate
-    default public void onTransmissionTick(Level world, float starlightAmt, IWeakConstellation type) {}
+    default public void onTransmissionTick(Level level, float starlightAmt, IWeakConstellation type) {}
 
     //Fired to notify THIS that the link to "to" is no longer valid
     //The node at "to" should have THIS as a valid source.
-    public boolean notifyUnlink(Level world, BlockPos to);
+    public boolean notifyUnlink(Level level, BlockPos to);
 
     //Fired to notify THIS to add a link to "to"
     //The node at "to" should have THIS as a valid source.
-    public void notifyLink(Level world, BlockPos to);
+    public void notifyLink(Level level, BlockPos to);
 
     //Fired to notify THIS that the given "source" is a valid energy transmission node
     //The node at "source" should have THIS as its "next" or one of his "next"
-    public void notifySourceLink(Level world, BlockPos source);
+    public void notifySourceLink(Level level, BlockPos source);
 
     //Fired to notify THIS that the given "source" is no longer a valid energy transmission node
     //The node at "source" should have THIS as its "next" or one of his "next"
-    public void notifySourceUnlink(Level world, BlockPos source);
+    public void notifySourceUnlink(Level level, BlockPos source);
 
     //Fired to check if a line from THIS to a NEXT is still valid after blockchanges
     //Return true, if and only if the state of this node in regards to the network has changed at all.
-    public boolean notifyBlockChange(Level world, BlockPos changed);
+    public boolean notifyBlockChange(Level level, BlockPos changed);
 
     //Try get the next node. might not contain a valid transmission node.
     public List<NodeConnection<IPrismTransmissionNode>> queryNext(WorldNetworkHandler handler);
@@ -113,26 +113,26 @@ public interface IPrismTransmissionNode extends ILocatable {
     //If needsUpdate returns true and it is added to the UpdateHandler,
     //this method will be called each server-world-tick and may be used
     //like the BlockEntity's update method.
-    default public void update(Level world) {}
+    default public void update(Level level) {}
 
     //Called once after reading the node from NBT
     //Use this for post-load/place logic.
-    default public void postLoad(LevelAccessor world) {}
+    default public void runPostLoad(LevelAccessor level) {}
 
     //Flags the world's LightNetworkBuffer as dirty,
     //which causes it to be recalculated and saved
     //whenever the world saves the next time.
-    default public void markDirty(Level world) {
-        DataAS.DOMAIN_AS.getData(world, DataAS.KEY_STARLIGHT_NETWORK).markDirty(this.getLocationPos());
+    default public void setChanged(Level level) {
+        DataAS.DOMAIN_AS.getData(level, DataAS.KEY_STARLIGHT_NETWORK).setChanged(this.getLocationPos());
     }
 
     //Get the provider of the node. Used to recreate the class at NBT read.
     public TransmissionProvider getProvider();
 
     //Should recreate the exact state from when it was written.
-    public void readFromNBT(CompoundTag compound);
+    public void readFromNBT(CompoundTag pattern);
 
     //Should save all data that's needed to recreate the state accordingly.
-    public void writeToNBT(CompoundTag compound);
+    public void save(CompoundTag pattern);
 
 }

@@ -35,35 +35,35 @@ public class ItemIlluminationPowder extends ItemUsableDust {
     boolean dispense(BlockSource dispenser) {
         BlockPos at = dispenser.getBlockPos();
         Direction face = dispenser.getBlockState().get(DispenserBlock.FACING);
-        EntityIlluminationSpark nocSpark = new EntityIlluminationSpark(at.getX(), at.getY(), at.getZ(), dispenser.getWorld());
-        nocSpark.shoot(face.getXOffset(), face.getYOffset() + 0.1F, face.getZOffset(), 0.7F, 0.9F);
-        return dispenser.getWorld().addEntity(nocSpark);
+        EntityIlluminationSpark nocSpark = new EntityIlluminationSpark(at.getX(), at.getY(), at.getZ(), dispenser.getLevel());
+        nocSpark.shoot(face.getXOffset(), face.getMyRidingOffset() + 0.1F, face.getZOffset(), 0.7F, 0.9F);
+        return dispenser.getLevel().addEntity(nocSpark);
     }
 
     @Override
-    boolean rightClickAir(Level world, Player player, ItemStack dust) {
-        return world.addEntity(new EntityIlluminationSpark(player, world));
+    boolean rightClickAir(Level level, Player player, ItemStack dust) {
+        return level.addEntity(new EntityIlluminationSpark(player, level));
     }
 
     @Override
     boolean rightClickBlock(UseOnContext ctx) {
-        Level world = ctx.getWorld();
-        BlockPos pos = ctx.getPos();
+        Level level = ctx.getLevel();
+        BlockPos pos = ctx.getBlockPos();
         Player player = ctx.getPlayer();
         if (player == null) {
             return false;
         }
 
-        if (!BlockUtils.isReplaceable(world, pos)) {
+        if (!BlockUtils.isReplaceable(level, pos)) {
             pos = pos.offset(ctx.getFace());
         }
 
-        if (!BlockUtils.isReplaceable(world, pos)) {
+        if (!BlockUtils.isReplaceable(level, pos)) {
             return false;
         }
 
-        if (player.canPlayerEdit(pos, ctx.getFace(), ctx.getItem()) && !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(world.getDimensionKey(), world, pos), ctx.getFace())) {
-            return world.setBlockState(pos, BlocksAS.FLARE_LIGHT.getDefaultState());
+        if (player.mayUseItemAt(pos, ctx.getFace(), ctx.getItem()) && !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, pos), ctx.getFace())) {
+            return level.setBlock(pos, BlocksAS.FLARE_LIGHT.defaultBlockState());
         }
         return false;
     }

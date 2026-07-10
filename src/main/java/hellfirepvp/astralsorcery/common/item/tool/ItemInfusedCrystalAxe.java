@@ -48,8 +48,8 @@ public class ItemInfusedCrystalAxe extends ItemCrystalAxe implements EquipmentAt
             new CacheReference<>(() -> new DynamicAttributeModifier(MODIFIER_ID, PerkAttributeTypesAS.ATTR_TYPE_INC_HARVEST_SPEED, ModifierType.ADDED_MULTIPLY, 0.1F));
 
     public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, Player player) {
-        Level world = player.level();
-        if (!world.isClientSide &&
+        Level level = player.level();
+        if (!level.isClientSide &&
                 !player.isShiftKeyDown() &&
                 !player.getCooldowns().isOnCooldown(itemstack.getItem()) &&
                 player instanceof ServerPlayer serverPlayer) {
@@ -57,17 +57,17 @@ public class ItemInfusedCrystalAxe extends ItemCrystalAxe implements EquipmentAt
             PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
             if (prog.doPerkAbilities()) {
                 EventFlags.CHAIN_MINING.executeWithFlag(() -> {
-                    BlockArray tree = TreeDiscoverer.findTreeAt(world, pos, true, 9);
-                    if (!tree.getContents().isEmpty()) {
-                        tree.getContents().keySet().forEach(at -> {
-                            BlockState currentState = world.getBlockState(at);
+                    BlockArray treeGrower = TreeDiscoverer.findTreeAt(level, pos, true, 9);
+                    if (!treeGrower.getContents().isEmpty()) {
+                        treeGrower.getContents().keySet().forEach(at -> {
+                            BlockState currentState = level.getBlockState(at);
                             if (serverPlayer.gameMode.destroyBlock(at)) {
                                 PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.BLOCK_EFFECT)
                                         .addData(buf -> {
                                             ByteBufUtils.writePos(buf, at);
                                             ByteBufUtils.writeBlockState(buf, currentState);
                                         });
-                                PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(world, at, 32));
+                                PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(level, at, 32));
                             }
                         });
 
@@ -80,7 +80,7 @@ public class ItemInfusedCrystalAxe extends ItemCrystalAxe implements EquipmentAt
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide direction, boolean ignoreRequirements) {
         return Collections.singletonList(MINING_SPEED_MODIFIER.get());
     }
 }

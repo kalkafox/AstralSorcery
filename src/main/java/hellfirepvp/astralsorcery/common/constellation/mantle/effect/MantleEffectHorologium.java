@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 
@@ -54,29 +54,29 @@ public class MantleEffectHorologium extends MantleEffect {
     protected void tickClient(Player player) {
         super.tickClient(player);
 
-        if (!player.getCooldownTracker().hasCooldown(ItemsAS.MANTLE)) {
+        if (!player.getCooldowns().isOnCooldown(ItemsAS.MANTLE)) {
             this.playCapeSparkles(player, 0.4F);
         } else {
             this.playCapeSparkles(player, 0.2F);
         }
     }
 
-    private void onHurt(LivingHurtEvent event) {
+    private void onHurt(LivingIncomingDamageEvent event) {
         if (ItemMantle.getEffect(event.getEntityLiving(), ConstellationsAS.horologium) != null &&
                 event.getEntityLiving() instanceof Player &&
-                !event.getEntityLiving().getEntityWorld().isRemote() &&
-                !event.getSource().isFireDamage()) {
+                !event.getEntityLiving().getCommandSenderWorld().isClientSide() &&
+                !event.getSource().isFire()) {
             Player player = (Player) event.getEntityLiving();
 
-            if (!player.getCooldownTracker().hasCooldown(ItemsAS.MANTLE) &&
+            if (!player.getCooldowns().isOnCooldown(ItemsAS.MANTLE) &&
                     AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFreeze.get())) {
                 TimeStopController.freezeWorldAt(
                         TimeStopZone.EntityTargetController.allExcept(player),
-                        player.getEntityWorld(),
-                        player.getPosition(),
+                        player.getCommandSenderWorld(),
+                        player.position(),
                         CONFIG.effectRange.get().floatValue(),
                         CONFIG.effectDuration.get());
-                player.getCooldownTracker().setCooldown(ItemsAS.MANTLE, CONFIG.cooldown.get());
+                player.getCooldowns().addCooldown(ItemsAS.MANTLE, CONFIG.cooldown.get());
                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFreeze.get(), false);
             }
         }

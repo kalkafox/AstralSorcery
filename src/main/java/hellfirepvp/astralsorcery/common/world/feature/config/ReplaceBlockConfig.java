@@ -24,7 +24,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 public class ReplaceBlockConfig implements FeatureConfiguration {
 
     public static final Codec<ReplaceBlockConfig> CODEC = RecordCodecBuilder.create((codecInstance) -> {
-        return codecInstance.group(RuleTest.field_237127_c_.fieldOf("target").forGetter((config) -> {
+        return codecInstance.group(RuleTest.CODEC.fieldOf("target").forGetter((config) -> {
             return config.target;
         }), BlockState.CODEC.fieldOf("state").forGetter((config) -> {
             return config.state;

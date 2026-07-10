@@ -104,14 +104,14 @@ public class EventHandlerCache {
 
     @SubscribeEvent
     public static void onUnload(WorldEvent.Unload event) {
-        LevelAccessor w = event.getWorld();
+        LevelAccessor w = event.getLevel();
         if (w instanceof Level) {
-            Level world = (Level) w;
+            Level level = (Level) w;
 
-            SyncDataHolder.clearWorld(world);
-            StarlightTransmissionHandler.getInstance().informWorldUnload(world);
-            TimeStopController.onWorldUnload(world);
-            SkyHandler.getInstance().informWorldUnload(world);
+            SyncDataHolder.clearWorld(level);
+            StarlightTransmissionHandler.getInstance().informWorldUnload(level);
+            TimeStopController.onWorldUnload(level);
+            SkyHandler.getInstance().informWorldUnload(level);
         }
     }
 
@@ -121,7 +121,7 @@ public class EventHandlerCache {
 
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (GeneralConfig.CONFIG.giveJournalOnJoin.get() && !progress.didReceiveTome()) {
-            if (player.inventory.addItemStackToInventory(new ItemStack(ItemsAS.TOME))) {
+            if (player.inventory.getArmor(new ItemStack(ItemsAS.TOME))) {
                 ResearchManager.setTomeReceived(player);
             }
         }

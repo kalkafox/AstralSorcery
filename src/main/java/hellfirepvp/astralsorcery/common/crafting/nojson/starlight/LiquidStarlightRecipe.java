@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 public abstract class LiquidStarlightRecipe extends CustomRecipe {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
     private static final int WORLD_TIME_TOLERANCE = 10;
 
     public LiquidStarlightRecipe(ResourceLocation key) {
@@ -56,26 +56,26 @@ public abstract class LiquidStarlightRecipe extends CustomRecipe {
 
     public abstract boolean doesStartRecipe(ItemStack item);
 
-    public abstract boolean matches(ItemEntity trigger, Level world, BlockPos at);
+    public abstract boolean matches(ItemEntity trigger, Level level, BlockPos at);
 
-    public abstract void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at);
+    public abstract void doServerCraftTick(ItemEntity trigger, Level level, BlockPos at);
 
     @OnlyIn(Dist.CLIENT)
-    public abstract void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at);
+    public abstract void doClientEffectTick(ItemEntity trigger, Level level, BlockPos at);
 
-    protected final List<Entity> getEntitiesInBlock(LevelAccessor world, BlockPos pos) {
-        return world.getEntitiesWithinAABB(Entity.class, new AABB(pos));
+    protected final List<Entity> getEntitiesInBlock(LevelAccessor level, BlockPos pos) {
+        return level.getEntitiesWithinAABB(Entity.class, new AABB(pos));
     }
 
     @Nullable
-    protected final ItemStack consumeItemEntityInBlock(LevelAccessor world, BlockPos pos, Item itemClass) {
-        return consumeItemEntityInBlock(world, pos, 1, stack ->
+    protected final ItemStack consumeItemEntityInBlock(LevelAccessor level, BlockPos pos, Item itemClass) {
+        return consumeItemEntityInBlock(level, pos, 1, stack ->
                 itemClass.getClass().isAssignableFrom(stack.getItem().getClass()));
     }
 
     @Nullable
-    protected final ItemStack consumeItemEntityInBlock(LevelAccessor world, BlockPos pos, int count, Predicate<ItemStack> match) {
-        List<Entity> entities = getEntitiesInBlock(world, pos).stream()
+    protected final ItemStack consumeItemEntityInBlock(LevelAccessor level, BlockPos pos, int count, Predicate<ItemStack> match) {
+        List<Entity> entities = getEntitiesInBlock(level, pos).stream()
                 .filter(e -> e instanceof ItemEntity)
                 .collect(Collectors.toList());
         for (Entity e : entities) {
@@ -103,7 +103,7 @@ public abstract class LiquidStarlightRecipe extends CustomRecipe {
     }
 
     protected final void setCraftingTick(Entity e, int tick) {
-        long wTick = e.getEntityWorld().getGameTime();
+        long wTick = e.getCommandSenderWorld().getGameTime();
 
         CompoundTag nbt = NBTHelper.getPersistentData(e);
         nbt.putInt("craftTick", tick);
@@ -111,7 +111,7 @@ public abstract class LiquidStarlightRecipe extends CustomRecipe {
     }
 
     protected final int getCraftingTick(Entity e) {
-        long wTick = e.getEntityWorld().getGameTime();
+        long wTick = e.getCommandSenderWorld().getGameTime();
 
         CompoundTag nbt = NBTHelper.getPersistentData(e);
         if (!nbt.contains("wCraftTick", Constants.NBT.TAG_LONG)) {

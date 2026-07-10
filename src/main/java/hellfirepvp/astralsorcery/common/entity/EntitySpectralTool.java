@@ -47,9 +47,9 @@ import java.util.function.BiFunction;
  * Created by HellFirePvP
  * Date: 22.02.2020 / 14:25
  */
-public class EntitySpectralTool extends FlyingEntity {
+public class EntitySpectralTool extends FlyingMob {
 
-    private static final EntityDataAccessor<ItemStack> ITEM = EntityDataManager.createKey(EntitySpectralTool.class, DataSerializers.ITEMSTACK);
+    private static final EntityDataAccessor<ItemStack> ITEM = SynchedEntityData.createKey(EntitySpectralTool.class, EntityDataSerializers.ITEM_STACK);
 
     private LivingEntity owningEntity = null;
     private SpectralToolGoal task = null;
@@ -60,7 +60,7 @@ public class EntitySpectralTool extends FlyingEntity {
 
     public EntitySpectralTool(Level worldIn) {
         super(EntityTypesAS.SPECTRAL_TOOL, worldIn);
-        this.moveController = new FlyingMoveControl(this, 10, false);
+        this.moveControl = new FlyingMoveControl(this, 10, false);
     }
 
     public EntitySpectralTool(Level worldIn, BlockPos spawnPos, LivingEntity owner, ToolTask task) {
@@ -71,38 +71,38 @@ public class EntitySpectralTool extends FlyingEntity {
         this.owningEntity = owner;
         this.task = task.createGoal(this);
         this.goalSelector.addGoal(1, this.task);
-        this.remainingTime = task.maxAge + rand.nextInt(task.maxAge);
+        this.remainingTime = task.lifetime + random.nextInt(task.lifetime);
     }
 
     public static EntityType.IFactory<EntitySpectralTool> factory() {
-        return (type, world) -> new EntitySpectralTool(world);
+        return (type, level) -> new EntitySpectralTool(level);
     }
 
-    public static AttributeModifierMap.MutableAttribute createAttributes() {
-        return MobEntity.func_233666_p_()
+    public static AttributeSupplier.MutableAttribute createAttributes() {
+        return Mob.createMobAttributes()
                 .createMutableAttribute(Attributes.MAX_HEALTH, 3)
                 .createMutableAttribute(Attributes.FLYING_SPEED, 0.85);
     }
 
     @Override
-    protected void registerData() {
-        super.registerData();
+    protected void defineSynchedData() {
+        super.defineSynchedData();
 
-        this.getDataManager().register(ITEM, ItemStack.EMPTY);
+        this.getEntityData().register(ITEM, ItemStack.EMPTY);
     }
 
     @Override
-    public boolean canCollide(Entity entity) {
+    public boolean canCollideWith(Entity entity) {
         return !(entity instanceof Player);
     }
 
     @Override
-    public boolean canBePushed() {
+    public boolean isPushable() {
         return false;
     }
 
     @Override
-    protected boolean canTriggerWalking() {
+    protected boolean isMovementNoisy() {
         return false;
     }
 
@@ -110,7 +110,7 @@ public class EntitySpectralTool extends FlyingEntity {
     public void tick() {
         super.tick();
 
-        if (this.getEntityWorld().isRemote()) {
+        if (this.getCommandSenderWorld().isClientSide()) {
             this.tickClient();
         } else {
             if (this.startPosition == null) {
@@ -118,7 +118,7 @@ public class EntitySpectralTool extends FlyingEntity {
                 return;
             }
 
-            if (!this.task.shouldExecute()) {
+            if (!this.task.canUse()) {
                 this.idleTime++;
                 if (this.idleTime >= 30) {
                     this.remove();
@@ -130,32 +130,32 @@ public class EntitySpectralTool extends FlyingEntity {
 
             this.remainingTime--;
             if (this.remainingTime <= 0) {
-                DamageUtil.attackEntityFrom(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 50.0F);
+                DamageUtil.hurt(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 50.0F);
             }
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void tickClient() {
-        if (rand.nextFloat() < 0.2F) {
+        if (random.nextFloat() < 0.2F) {
             Vector3 at = Vector3.atEntityCorner(this)
-                    .add(rand.nextFloat() * 0.3 * (rand.nextBoolean() ? 1 : -1),
-                            rand.nextFloat() * 0.3 * (rand.nextBoolean() ? 1 : -1) + this.getHeight() / 2,
-                            rand.nextFloat() * 0.3 * (rand.nextBoolean() ? 1 : -1));
+                    .add(random.nextFloat() * 0.3 * (random.nextBoolean() ? 1 : -1),
+                            random.nextFloat() * 0.3 * (random.nextBoolean() ? 1 : -1) + this.getHeight() / 2,
+                            random.nextFloat() * 0.3 * (random.nextBoolean() ? 1 : -1));
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_TYPE_WEAK))
-                    .setScaleMultiplier(0.35F + rand.nextFloat() * 0.25F)
-                    .setMaxAge(30 + rand.nextInt(20));
-            if (rand.nextBoolean()) {
+                    .setScaleMultiplier(0.35F + random.nextFloat() * 0.25F)
+                    .setMaxAge(30 + random.nextInt(20));
+            if (random.nextBoolean()) {
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .color(VFXColorFunction.WHITE)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.15F)
-                        .setMaxAge(20 + rand.nextInt(10));
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.15F)
+                        .setMaxAge(20 + random.nextInt(10));
             }
         }
     }
@@ -169,38 +169,38 @@ public class EntitySpectralTool extends FlyingEntity {
     }
 
     private void setItem(@Nonnull ItemStack tool) {
-        this.dataManager.set(ITEM, tool);
+        this.entityData.set(ITEM, tool);
     }
 
     @Nonnull
     public ItemStack getItem() {
-        return this.dataManager.get(ITEM);
+        return this.entityData.get(ITEM);
     }
 
     @Override
-    public void applyEntityCollision(Entity entityIn) {
+    public void push(Entity entityIn) {
         if (!(entityIn instanceof Player || entityIn instanceof EntitySpectralTool)) {
-            super.applyEntityCollision(entityIn);
+            super.push(entityIn);
         }
     }
 
     @Override
-    protected void collideWithEntity(Entity entityIn) {
+    protected void doPush(Entity entityIn) {
         if (!(entityIn instanceof Player || entityIn instanceof EntitySpectralTool)) {
-            super.applyEntityCollision(entityIn);
+            super.push(entityIn);
         }
     }
 
     public static class ToolTask {
 
-        private final int maxAge;
-        private final double speed;
+        private final int lifetime;
+        private final double speedModifier;
         private final ItemStack displayStack;
         private final BiFunction<EntitySpectralTool, Double, SpectralToolGoal> toolGoal;
 
-        protected ToolTask(int maxAge, double speed, ItemStack displayStack, BiFunction<EntitySpectralTool, Double, SpectralToolGoal> toolGoal) {
-            this.maxAge = maxAge;
-            this.speed = speed;
+        protected ToolTask(int lifetime, double speedModifier, ItemStack displayStack, BiFunction<EntitySpectralTool, Double, SpectralToolGoal> toolGoal) {
+            this.lifetime = lifetime;
+            this.speedModifier = speedModifier;
             this.displayStack = displayStack;
             this.toolGoal = toolGoal;
         }
@@ -227,7 +227,7 @@ public class EntitySpectralTool extends FlyingEntity {
         }
 
         private SpectralToolGoal createGoal(EntitySpectralTool tool) {
-            return this.toolGoal.apply(tool, this.speed);
+            return this.toolGoal.apply(tool, this.speedModifier);
         }
     }
 }

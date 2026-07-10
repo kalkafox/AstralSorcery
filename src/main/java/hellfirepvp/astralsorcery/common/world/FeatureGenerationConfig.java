@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class FeatureGenerationConfig extends ConfigEntry {
 
     private List<Biome.Category> categories = new ArrayList<>();
-    private List<ResourceKey<Level>> worlds = new ArrayList<>();
+    private List<ResourceKey<Level>> levels = new ArrayList<>();
     private boolean defaultEveryBiome = false, defaultEveryWorld = false;
 
     private ModConfigSpec.BooleanValue enabled;
@@ -54,8 +54,8 @@ public class FeatureGenerationConfig extends ConfigEntry {
         return (T) this;
     }
 
-    public <T extends FeatureGenerationConfig> T generatesInWorlds(List<ResourceKey<Level>> worlds) {
-        this.worlds = worlds;
+    public <T extends FeatureGenerationConfig> T generatesInWorlds(List<ResourceKey<Level>> levels) {
+        this.levels = levels;
         return (T) this;
     }
 
@@ -96,7 +96,7 @@ public class FeatureGenerationConfig extends ConfigEntry {
                 .define("biomeCategoryNames", defaultCategories);
 
         //TODO Structures..
-        List<String> defaultWorlds = worlds.stream()
+        List<String> defaultWorlds = levels.stream()
                 .map(ResourceKey::getLocation)
                 .map(ResourceLocation::getPath)
                 .collect(Collectors.toList());
@@ -121,7 +121,7 @@ public class FeatureGenerationConfig extends ConfigEntry {
         return new WorldFilterConfig(this.everyWorld::get, () -> {
             return this.worldNames.get().stream()
                     .map(ResourceLocation::new)
-                    .map(key -> RegistryKey.getOrCreateKey(Registry.WORLD_KEY, key))
+                    .map(key -> ResourceKey.create(Registry.DIMENSION_REGISTRY, key))
                     .collect(Collectors.toList());
         });
     }

@@ -39,7 +39,7 @@ public class StructureType implements AstralRegistryEntry<StructureType> {
         this.structureSupplier = structureSupplier;
     }
 
-    public BlockArray getStructure() {
+    public BlockArray getFeature() {
         return this.structureSupplier.get();
     }
 
@@ -47,8 +47,8 @@ public class StructureType implements AstralRegistryEntry<StructureType> {
         return Component.translatable(String.format("structure.%s.%s.name", name.getNamespace(), name.getPath()));
     }
 
-    public ChangeSubscriber<ChangeObserverStructure> observe(Level world, BlockPos pos) {
-        return ObserverHelper.getHelper().observeArea(world, pos, new ObserverProviderStructure(getRegistryName()));
+    public ChangeSubscriber<ChangeObserverStructure> observe(Level level, BlockPos pos) {
+        return ObserverHelper.getHelper().observeArea(level, pos, new ObserverProviderStructure(getRegistryName()));
     }
 
     @Override

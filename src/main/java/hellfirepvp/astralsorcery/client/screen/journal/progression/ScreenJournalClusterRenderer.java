@@ -60,7 +60,7 @@ public class ScreenJournalClusterRenderer {
 
     private Map<Rectangle, ResearchNode> clickableNodes = new HashMap<>();
 
-    public ScreenJournalClusterRenderer(ResearchProgression progression, int guiHeight, int guiWidth, int guiLeft, int guiTop) {
+    public ScreenJournalClusterRenderer(ResearchProgression progression, int guiHeight, int guiWidth, int leftPos, int topPos) {
         this.progression = progression;
         this.progressionSizeHandler = new ProgressionSizeHandler(progression);
         this.progressionSizeHandler.setMaxScale(1.2F);
@@ -73,17 +73,17 @@ public class ScreenJournalClusterRenderer {
         this.centerMouse();
         this.applyMovedMouseOffset();
 
-        this.renderOffsetX = guiLeft;
-        this.renderOffsetY = guiTop;
+        this.renderOffsetX = leftPos;
+        this.renderOffsetY = topPos;
         this.renderGuiHeight = guiHeight;
         this.renderGuiWidth = guiWidth;
     }
 
-    public boolean propagateClick(ScreenJournalProgression parent, double mouseX, double mouseY) {
+    public boolean propagateClick(ScreenJournalProgression parent, double xpos, double ypos) {
         Rectangle frame = new Rectangle(renderOffsetX, renderOffsetY, renderGuiWidth, renderGuiHeight);
-        if (frame.contains(mouseX, mouseY)) {
+        if (frame.contains(xpos, ypos)) {
             for (Rectangle r : clickableNodes.keySet()) {
-                if (r.contains(mouseX, mouseY)) {
+                if (r.contains(xpos, ypos)) {
                     ResearchNode clicked = clickableNodes.get(r);
                     Minecraft.getInstance().displayGuiScreen(new ScreenJournalPages(parent, clicked));
                     return true;
@@ -93,18 +93,18 @@ public class ScreenJournalClusterRenderer {
         return false;
     }
 
-    public void drawMouseHighlight(PoseStack renderStack, float zLevel, int mouseX, int mouseY) {
+    public void drawMouseHighlight(PoseStack renderStack, float blitOffset, int xpos, int ypos) {
         Rectangle frame = new Rectangle(renderOffsetX, renderOffsetY, renderGuiWidth, renderGuiHeight);
-        if (frame.contains(mouseX, mouseY)) {
+        if (frame.contains(xpos, ypos)) {
             for (Rectangle r : clickableNodes.keySet()) {
-                if (r.contains(mouseX, mouseY)) {
+                if (r.contains(xpos, ypos)) {
                     FormattedText name = clickableNodes.get(r).getName();
 
-                    renderStack.push();
-                    renderStack.translate(r.getX(), r.getY(), zLevel + 200);
+                    renderStack.pushPose();
+                    renderStack.translate(r.getX(), r.getY(), blitOffset + 200);
                     renderStack.scale(progressionSizeHandler.getScalingFactor(), progressionSizeHandler.getScalingFactor(), 1F);
-                    RenderingDrawUtils.renderBlueTooltipComponents(renderStack, 0, 0, 0, Lists.newArrayList(name), Minecraft.getInstance().fontRenderer, false);
-                    renderStack.pop();
+                    RenderingDrawUtils.renderBlueTooltipComponents(renderStack, 0, 0, 0, Lists.newArrayList(name), Minecraft.getInstance().font, false);
+                    renderStack.popPose();
                 }
             }
         }
@@ -148,12 +148,12 @@ public class ScreenJournalClusterRenderer {
         rescale(progressionSizeHandler.getScalingFactor());
     }
 
-    public float getMouseX() {
-        return mousePointScaled.getPosX();
+    public float xpos() {
+        return mousePointScaled.getX();
     }
 
-    public float getMouseY() {
-        return mousePointScaled.getPosY();
+    public float ypos() {
+        return mousePointScaled.getY();
     }
 
     private void rescale(float newScale) {
@@ -164,17 +164,17 @@ public class ScreenJournalClusterRenderer {
         moveMouse(0, 0);
     }
 
-    public void drawClusterScreen(PoseStack renderStack, WidthHeightScreen parentGui, float zLevel) {
+    public void drawClusterScreen(PoseStack renderStack, WidthHeightScreen parentGui, float blitOffset) {
         clickableNodes.clear();
 
-        drawNodesAndConnections(renderStack, parentGui, zLevel);
+        drawNodesAndConnections(renderStack, parentGui, blitOffset);
     }
 
-    private void drawNodesAndConnections(PoseStack renderStack, WidthHeightScreen parentGui, float zLevel) {
+    private void drawNodesAndConnections(PoseStack renderStack, WidthHeightScreen parentGui, float blitOffset) {
         alpha = progressionSizeHandler.getScalingFactor(); //between 0.25F and ~1F
         alpha -= 0.25F;
         alpha /= 0.75F;
-        alpha = MathHelper.clamp(alpha, 0F, 1F);
+        alpha = Mth.clamp(alpha, 0F, 1F);
 
         Map<ResearchNode, Point.Float> displayPositions = new HashMap<>();
         for (ResearchNode node : progression.getResearchNodes()) {
@@ -184,41 +184,41 @@ public class ScreenJournalClusterRenderer {
             Point.Float from = this.progressionSizeHandler.scalePointToGui(parentGui, this.mousePointScaled, new Point.Float(node.renderPosX, node.renderPosZ));
             for (ResearchNode target : node.getConnectionsTo()) {
                 Point.Float to = this.progressionSizeHandler.scalePointToGui(parentGui, this.mousePointScaled, new Point.Float(target.renderPosX, target.renderPosZ));
-                drawConnection(renderStack, from.x, from.y, to.x, to.y, zLevel);
+                drawConnection(renderStack, from.x, from.y, to.x, to.y, blitOffset);
             }
 
             displayPositions.put(node, from);
         }
-        displayPositions.forEach((node, pos) -> renderNodeToGUI(renderStack, node, pos, zLevel));
+        displayPositions.forEach((node, pos) -> renderNodeToGUI(renderStack, node, pos, blitOffset));
     }
 
-    private void renderNodeToGUI(PoseStack renderStack, ResearchNode node, Point.Float offset, float zLevel) {
+    private void renderNodeToGUI(PoseStack renderStack, ResearchNode node, Point.Float offset, float blitOffset) {
         float zoomedWH = progressionSizeHandler.getZoomedWHNode();
         float offsetX = offset.x - zoomedWH / 2F;
         float offsetY = offset.y - zoomedWH / 2F;
 
         node.getBackgroundTexture().resolve().bindTexture();
         if (progressionSizeHandler.getScalingFactor() >= 0.7) {
-            clickableNodes.put(new Rectangle(MathHelper.floor(offsetX), MathHelper.floor(offsetY), MathHelper.floor(zoomedWH), MathHelper.floor(zoomedWH)), node);
+            clickableNodes.put(new Rectangle(Mth.floor(offsetX), Mth.floor(offsetY), Mth.floor(zoomedWH), Mth.floor(zoomedWH)), node);
         }
-        drawResearchItemBackground(zoomedWH, offsetX, offsetY, zLevel);
+        drawResearchItemBackground(zoomedWH, offsetX, offsetY, blitOffset);
 
         float pxWH = progressionSizeHandler.getZoomedWHNode() / 16F;
 
         switch (node.getNodeRenderType()) {
-            case ITEMSTACK:
-                renderStack.push();
+            case ITEM_STACK:
+                renderStack.pushPose();
                 renderStack.translate(offsetX, offsetY, 0);
                 renderStack.scale(progressionSizeHandler.getScalingFactor(), progressionSizeHandler.getScalingFactor(), 1);
                 renderStack.translate(3, 3, 100);
                 renderStack.scale(0.75F, 0.75F, 1);
 
-                RenderHelper.enableStandardItemLighting();
+                Lighting.turnBackOn();
                 RenderingUtils.renderTranslucentItemStackModelGUI(node.getRenderItemStack(ClientScheduler.getClientTick()),
-                        renderStack, Color.WHITE, Blending.DEFAULT, MathHelper.clamp((int) (alpha * 255F), 0, 255));
-                RenderHelper.disableStandardItemLighting();
+                        renderStack, Color.WHITE, Blending.DEFAULT, Mth.clamp((int) (alpha * 255F), 0, 255));
+                Lighting.turnOff();
 
-                renderStack.pop();
+                renderStack.popPose();
                 break;
             case TEXTURE_SPRITE:
                 Color col = node.getTextureColorHint();
@@ -232,27 +232,27 @@ public class ScreenJournalClusterRenderer {
                 res.getResource().bindTexture();
                 Tuple<Float, Float> uvTexture = res.getUVOffset(ClientScheduler.getClientTick());
 
-                renderStack.push();
+                renderStack.pushPose();
                 renderStack.translate(offsetX, offsetY, 0);
 
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
 
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-                    Matrix4f matr = renderStack.getLast().getMatrix();
-                    buf.pos(matr, pxWH, zoomedWH - pxWH, zLevel)
+                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+                    Matrix4f matr = renderStack.last().pose();
+                    buf.vertex(matr, pxWH, zoomedWH - pxWH, blitOffset)
                             .color(r, g, b, a)
                             .tex(uvTexture.getA(), uvTexture.getB() + res.getVLength())
                             .endVertex();
-                    buf.pos(matr, zoomedWH - pxWH, zoomedWH - pxWH, zLevel)
+                    buf.vertex(matr, zoomedWH - pxWH, zoomedWH - pxWH, blitOffset)
                             .color(r, g, b, a)
                             .tex(uvTexture.getA() + res.getULength(), uvTexture.getB() + res.getVLength())
                             .endVertex();
-                    buf.pos(matr, zoomedWH - pxWH, pxWH, zLevel)
+                    buf.vertex(matr, zoomedWH - pxWH, pxWH, blitOffset)
                             .color(r, g, b, a)
                             .tex(uvTexture.getA() + res.getULength(), uvTexture.getB())
                             .endVertex();
-                    buf.pos(matr, pxWH, pxWH, zLevel)
+                    buf.vertex(matr, pxWH, pxWH, blitOffset)
                             .color(r, g, b, a)
                             .tex(uvTexture.getA(), uvTexture.getB())
                             .endVertex();
@@ -261,14 +261,14 @@ public class ScreenJournalClusterRenderer {
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.disableBlend();
 
-                renderStack.pop();
+                renderStack.popPose();
                 break;
             default:
                 break;
         }
     }
 
-    private void drawConnection(PoseStack renderStack, float originX, float originY, float targetX, float targetY, float zLevel) {
+    private void drawConnection(PoseStack renderStack, float originX, float originY, float targetX, float targetY, float blitOffset) {
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
@@ -277,12 +277,12 @@ public class ScreenJournalClusterRenderer {
 
         long clientTicks = ClientScheduler.getClientTick();
         Vector3 origin = new Vector3(originX, originY, 0);
-        Vector3 line = origin.vectorFromHereTo(targetX, targetY, 0);
-        int segments = (int) Math.ceil(line.length() / 1); //1 = max line segment length
-        int activeSegment = (int) (clientTicks % segments);
-        Vector3 segmentIter = line.divide(segments);
-        RenderingUtils.draw(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION_COLOR, buf -> {
-            for (int i = segments; i >= 0; i--) {
+        Vector3 lineState = origin.vectorFromHereTo(targetX, targetY, 0);
+        int bodyCubes = (int) Math.ceil(lineState.length() / 1); //1 = max line segment length
+        int activeSegment = (int) (clientTicks % bodyCubes);
+        Vector3 segmentIter = lineState.divide(bodyCubes);
+        RenderingUtils.draw(GL11.GL_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR, buf -> {
+            for (int i = bodyCubes; i >= 0; i--) {
                 double lx = origin.getX();
                 double ly = origin.getY();
                 origin.add(segmentIter);
@@ -290,7 +290,7 @@ public class ScreenJournalClusterRenderer {
                 float brightness = 0.6F;
                 brightness += (0.4F * evaluateBrightness(i, activeSegment));
 
-                drawLinePart(buf, renderStack, lx, ly, origin.getX(), origin.getY(), zLevel, brightness);
+                drawLinePart(buf, renderStack, lx, ly, origin.getX(), origin.getY(), blitOffset, brightness);
             }
         });
 
@@ -300,12 +300,12 @@ public class ScreenJournalClusterRenderer {
         RenderSystem.enableTexture();
     }
 
-    private void drawLinePart(VertexConsumer buf, PoseStack renderStack, double lx, double ly, double hx, double hy, float zLevel, float brightness) {
-        Matrix4f offset = renderStack.getLast().getMatrix();
-        buf.pos(offset, (float) lx, (float) ly, zLevel)
+    private void drawLinePart(VertexConsumer buf, PoseStack renderStack, double lx, double ly, double hx, double hy, float blitOffset, float brightness) {
+        Matrix4f offset = renderStack.last().pose();
+        buf.vertex(offset, (float) lx, (float) ly, blitOffset)
                 .color(brightness * alpha, brightness * alpha, brightness * alpha, 0.4F * alpha)
                 .endVertex();
-        buf.pos(offset, (float) hx, (float) hy, zLevel)
+        buf.vertex(offset, (float) hx, (float) hy, blitOffset)
                 .color(brightness * alpha, brightness * alpha, brightness * alpha, 0.4F * alpha)
                 .endVertex();
     }
@@ -316,13 +316,13 @@ public class ScreenJournalClusterRenderer {
         return Math.max(0, res);
     }
 
-    private void drawResearchItemBackground(double zoomedWH, double xAdd, double yAdd, float zLevel) {
+    private void drawResearchItemBackground(double zoomedWH, double xAdd, double yAdd, float blitOffset) {
         RenderSystem.enableBlend();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            buf.pos(xAdd,            yAdd + zoomedWH, zLevel).color(alpha, alpha, alpha, alpha).tex(0, 1).endVertex();
-            buf.pos(xAdd + zoomedWH, yAdd + zoomedWH, zLevel).color(alpha, alpha, alpha, alpha).tex(1, 1).endVertex();
-            buf.pos(xAdd + zoomedWH, yAdd,            zLevel).color(alpha, alpha, alpha, alpha).tex(1, 0).endVertex();
-            buf.pos(xAdd,            yAdd,            zLevel).color(alpha, alpha, alpha, alpha).tex(0, 0).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            buf.vertex(xAdd,            yAdd + zoomedWH, blitOffset).color(alpha, alpha, alpha, alpha).tex(0, 1).endVertex();
+            buf.vertex(xAdd + zoomedWH, yAdd + zoomedWH, blitOffset).color(alpha, alpha, alpha, alpha).tex(1, 1).endVertex();
+            buf.vertex(xAdd + zoomedWH, yAdd,            blitOffset).color(alpha, alpha, alpha, alpha).tex(1, 0).endVertex();
+            buf.vertex(xAdd,            yAdd,            blitOffset).color(alpha, alpha, alpha, alpha).tex(0, 0).endVertex();
         });
         RenderSystem.disableBlend();
     }

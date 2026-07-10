@@ -41,11 +41,11 @@ public class TileGemCrystals extends TileEntityTick {
     public void tick() {
         super.tick();
 
-        if (!getWorld().isRemote()) {
+        if (!getLevel().isClientSide()) {
             if (getGrowth().getGrowthStage() < 2 && doesSeeSky()) {
                 this.tryGrowWithChance(TICK_GROWTH_CHANCE);
             } else if (getGrowth().getGrowthStage() == 2) {
-                if (rand.nextInt(4000) == 0) {
+                if (random.nextInt(4000) == 0) {
                     this.setGrowth(getGrowth().shrink());
                 }
             }
@@ -60,36 +60,36 @@ public class TileGemCrystals extends TileEntityTick {
     private void playHarvestEffects() {
         Vector3 pos = new Vector3(this)
                 .add(0.5, 0.5, 0.5)
-                .add(this.getBlockState().getOffset(getWorld(), getPos()));
-        MiscUtils.applyRandomOffset(pos, rand, 0.5F);
+                .add(this.getBlockState().getOffset(getLevel(), getBlockPos()));
+        MiscUtils.applyRandomOffset(pos, random, 0.5F);
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(pos)
                 .color(VFXColorFunction.constant(getGrowth().getDisplayColor()))
-                .setScaleMultiplier(0.1F + rand.nextFloat() * 0.05F)
-                .setMaxAge(15 + rand.nextInt(5));
+                .setScaleMultiplier(0.1F + random.nextFloat() * 0.05F)
+                .setMaxAge(15 + random.nextInt(5));
     }
 
-    public void tryGrowWithChance(int growthChance) {
-        float distribution = DayTimeHelper.getCurrentDaytimeDistribution(getWorld());
-        growthChance *= (1F - (0.2F * distribution));
+    public void tryGrowWithChance(int growPerTickProbability) {
+        float distribution = DayTimeHelper.getCurrentDaytimeDistribution(getLevel());
+        growPerTickProbability *= (1F - (0.2F * distribution));
 
-        this.grow(growthChance);
+        this.grow(growPerTickProbability);
     }
 
     public void grow(int chance) {
-        if (rand.nextInt(Math.max(chance, 1)) == 0) {
-            setGrowth(getGrowth().grow(getWorld()));
+        if (random.nextInt(Math.max(chance, 1)) == 0) {
+            setGrowth(getGrowth().grow(getLevel()));
         }
     }
 
     public BlockGemCrystalCluster.GrowthStageType getGrowth() {
-        BlockState current = getWorld().getBlockState(getPos());
+        BlockState current = getLevel().getBlockState(getBlockPos());
         return current.get(BlockGemCrystalCluster.STAGE);
     }
 
     public void setGrowth(BlockGemCrystalCluster.GrowthStageType stage) {
-        BlockState next = BlocksAS.GEM_CRYSTAL_CLUSTER.getDefaultState().with(BlockGemCrystalCluster.STAGE, stage);
-        getWorld().setBlockState(getPos(), next);
+        BlockState next = BlocksAS.GEM_CRYSTAL_CLUSTER.defaultBlockState().setValue(BlockGemCrystalCluster.STAGE, stage);
+        getLevel().setBlock(getBlockPos(), next);
     }
 }

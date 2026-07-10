@@ -31,6 +31,6 @@ public abstract class JEIInteractionResultHandler {
     public abstract void addToRecipeIngredients(LiquidInteraction recipe, IIngredients ingredients);
 
     @OnlyIn(Dist.CLIENT)
-    public abstract void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double mouseX, double mouseY);
+    public abstract void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double xpos, double ypos);
 
 }

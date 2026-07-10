@@ -36,30 +36,30 @@ public class FXSourceLiquidFountain extends FXSource<FXCube, BatchRenderContext<
 
     public FXSourceLiquidFountain(Vector3 pos, FluidStack fluid) {
         super(pos, EffectTemplatesAS.CUBE_TRANSLUCENT_ATLAS);
-        this.sprite = RenderingUtils.getParticleTexture(fluid);
+        this.sprite = RenderingUtils.getParticleIcon(fluid);
         this.fluid = fluid;
 
-        this.setMaxAge(40 + rand.nextInt(30));
+        this.setMaxAge(40 + random.nextInt(30));
     }
 
     @Override
     public void tickSpawnFX(Function<Vector3, FXCube> effectRegistrar) {
         Vector3 motion = Vector3.positiveYRandom();
-        motion.setY(motion.getY() * 8).normalize().multiply(new Vector3(
-                0.01F + rand.nextFloat() * 0.015F,
-                0.1F + rand.nextFloat() * 0.015F,
-                0.01F + rand.nextFloat() * 0.015F));
+        motion.setY(motion.getY() * 8).normalize().mul(new Vector3(
+                0.01F + random.nextFloat() * 0.015F,
+                0.1F + random.nextFloat() * 0.015F,
+                0.01F + random.nextFloat() * 0.015F));
 
         effectRegistrar.apply(getPosition())
                 .setTextureAtlasSprite(this.sprite)
                 .setTextureSubSizePercentage(1F)
                 .tumble()
-                .setAlphaMultiplier(DayTimeHelper.getCurrentDaytimeDistribution(Minecraft.getInstance().world))
-                .setScaleMultiplier(0.1F + rand.nextFloat() * 0.05F)
-                .setMotion(motion)
-                .color((fx, pTicks) -> new Color(fluid.getFluid().getAttributes().getColor(fluid)))
+                .setAlphaMultiplier(DayTimeHelper.getCurrentDaytimeDistribution(Minecraft.getInstance().level))
+                .setScaleMultiplier(0.1F + random.nextFloat() * 0.05F)
+                .setDeltaMovement(motion)
+                .color((fx, pTicks) -> new Color(fluid.getType().getAttributes().getColor(fluid)))
                 .setGravityStrength(0.003F)
-                .setMaxAge(40 + rand.nextInt(40));
+                .setMaxAge(40 + random.nextInt(40));
     }
 
     @Override

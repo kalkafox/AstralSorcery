@@ -36,7 +36,7 @@ public abstract class FXSourceOrbital<E extends EntityVisualFX, T extends BatchR
     }
 
     public FXSourceOrbital setTicksPerRotation(int ticks) {
-        this.maxAge = ticks;
+        this.lifetime = ticks;
         return this;
     }
 
@@ -77,15 +77,15 @@ public abstract class FXSourceOrbital<E extends EntityVisualFX, T extends BatchR
 
     @Override
     public void tickSpawnFX(Function<Vector3, E> effectRegistrar) {
-        if (Minecraft.getInstance().isGamePaused()) {
+        if (Minecraft.getInstance().isPaused()) {
             return;
         }
         for (int branch = 0; branch < this.branches; branch++) {
             Vector3 point = orbitAxis.clone()
                     .perpendicular()
                     .normalize()
-                    .multiply(orbitRadius)
-                    .rotate(Math.toRadians(getRotationDegree(branch)), orbitAxis)
+                    .mul(orbitRadius)
+                    .mirror(Math.toRadians(getRotationDegree(branch)), orbitAxis)
                     .add(offset)
                     .add(this.getPosition());
             this.spawnOrbitalParticle(point, effectRegistrar);
@@ -95,7 +95,7 @@ public abstract class FXSourceOrbital<E extends EntityVisualFX, T extends BatchR
     public abstract void spawnOrbitalParticle(Vector3 pos, Function<Vector3, E> effectRegistrar);
 
     private double getRotationDegree(int branch) {
-        double perc = ((double) ((this.age + this.tickOffset) % this.maxAge)) / ((double) this.maxAge);
+        double perc = ((double) ((this.age + this.tickOffset) % this.lifetime)) / ((double) this.lifetime);
         return (360F / this.branches) * branch + 360F * perc;
     }
 }

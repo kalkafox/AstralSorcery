@@ -68,16 +68,16 @@ public class CalculationContext {
 
         private CalculationContext ctx = new CalculationContext();
 
-        public static Builder newBuilder() {
+        public static Builder properties() {
             return new Builder();
         }
 
         public static Builder withUsage(PropertyUsage usage) {
-            return newBuilder().addUsage(usage);
+            return properties().addUsage(usage);
         }
 
         public static Builder withSource(PropertySource.SourceInstance source) {
-            return newBuilder().fromSource(source);
+            return properties().fromSource(source);
         }
 
         public Builder addUsage(PropertyUsage usage) {

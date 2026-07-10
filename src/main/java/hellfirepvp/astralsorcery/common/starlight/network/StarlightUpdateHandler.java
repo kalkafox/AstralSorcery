@@ -38,38 +38,38 @@ public class StarlightUpdateHandler implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        Level world = (Level) context[0];
-        if (world.isRemote()) {
+        Level level = (Level) context[0];
+        if (level.isClientSide()) {
             return;
         }
 
-        List<IPrismTransmissionNode> nodes = getNodes(world);
+        List<IPrismTransmissionNode> nodes = getNodes(level);
         synchronized (accessLock) {
             for (IPrismTransmissionNode node : nodes) {
-                node.update(world);
+                node.update(level);
             }
         }
     }
 
-    private List<IPrismTransmissionNode> getNodes(Level world) {
-        return updateRequired.computeIfAbsent(world.getDimensionKey(), k -> new LinkedList<>());
+    private List<IPrismTransmissionNode> getNodes(Level level) {
+        return updateRequired.computeIfAbsent(level.dimension(), k -> new LinkedList<>());
     }
 
-    public void removeNode(Level world, IPrismTransmissionNode node) {
+    public void removeNode(Level level, IPrismTransmissionNode node) {
         synchronized (accessLock) {
-            getNodes(world).remove(node);
+            getNodes(level).remove(node);
         }
     }
 
-    public void addNode(Level world, IPrismTransmissionNode node) {
+    public void addNode(Level level, IPrismTransmissionNode node) {
         synchronized (accessLock) {
-            getNodes(world).add(node);
+            getNodes(level).add(node);
         }
     }
 
-    public void informWorldLoad(Level world) {
+    public void informWorldLoad(Level level) {
         synchronized (accessLock) {
-            updateRequired.remove(world.getDimensionKey());
+            updateRequired.remove(level.dimension());
         }
     }
 
@@ -85,8 +85,8 @@ public class StarlightUpdateHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

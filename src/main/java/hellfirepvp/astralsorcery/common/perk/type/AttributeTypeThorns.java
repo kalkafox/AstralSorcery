@@ -22,7 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 
@@ -53,43 +53,43 @@ public class AttributeTypeThorns extends PerkAttributeType {
         return new AttributeModifierThorns(this, mode, modifier);
     }
 
-    private void onThronsReflect(LivingHurtEvent event) {
+    private void onThronsReflect(LivingIncomingDamageEvent event) {
         if (!(event.getEntityLiving() instanceof Player)) {
             return;
         }
         Player player = (Player) event.getEntityLiving();
-        LogicalSide side = this.getSide(player);
-        if (!hasTypeApplied(player, side)) {
+        LogicalSide direction = this.getSide(player);
+        if (!hasTypeApplied(player, direction)) {
             return;
         }
 
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
 
-        float reflectAmount = PerkAttributeHelper.getOrCreateMap(player, side)
+        float reflectAmount = PerkAttributeHelper.getOrCreateMap(player, direction)
                 .modifyValue(player, prog, this, 0F);
         reflectAmount = AttributeEvent.postProcessModded(player, this, reflectAmount);
         reflectAmount /= 100.0F;
         if (reflectAmount <= 0) {
             return;
         }
-        reflectAmount = MathHelper.clamp(reflectAmount, 0F, 1F);
+        reflectAmount = Mth.clamp(reflectAmount, 0F, 1F);
 
         DamageSource source = event.getSource();
         LivingEntity reflectTarget = null;
-        if (source.getImmediateSource() != null &&
-                source.getImmediateSource() instanceof LivingEntity &&
-                source.getImmediateSource().isAlive()) {
-            reflectTarget = (LivingEntity) source.getImmediateSource();
+        if (source.getDirectEntity() != null &&
+                source.getDirectEntity() instanceof LivingEntity &&
+                source.getDirectEntity().isAlive()) {
+            reflectTarget = (LivingEntity) source.getDirectEntity();
         }
 
         if (reflectTarget == null &&
                 AttributeEvent.postProcessModded(player, this,
-                        PerkAttributeHelper.getOrCreateMap(player, side)
-                                .getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_THORNS_RANGED)) > 1) {
-            if (source.getTrueSource() != null &&
-                    source.getTrueSource() instanceof LivingEntity &&
-                    source.getTrueSource().isAlive()) {
-                reflectTarget = (LivingEntity) source.getTrueSource();
+                        PerkAttributeHelper.getOrCreateMap(player, direction)
+                                .getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_THORNS_RANGED)) > 1) {
+            if (source.getEntity() != null &&
+                    source.getEntity() instanceof LivingEntity &&
+                    source.getEntity().isAlive()) {
+                reflectTarget = (LivingEntity) source.getEntity();
             }
         }
 
@@ -97,7 +97,7 @@ public class AttributeTypeThorns extends PerkAttributeType {
             float dmgReflected = event.getAmount() * reflectAmount;
             if (dmgReflected > 0 && !event.getEntityLiving().equals(reflectTarget)) {
                 if (MiscUtils.canPlayerAttackServer(event.getEntityLiving(), reflectTarget)) {
-                    DamageUtil.attackEntityFrom(reflectTarget, CommonProxy.DAMAGE_SOURCE_REFLECT, dmgReflected, player);
+                    DamageUtil.hurt(reflectTarget, CommonProxy.DAMAGE_SOURCE_REFLECT, dmgReflected, player);
                 }
             }
         }

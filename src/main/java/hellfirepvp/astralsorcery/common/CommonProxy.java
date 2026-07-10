@@ -38,8 +38,6 @@ import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentHe
 import hellfirepvp.astralsorcery.common.event.PlayerAffectionFlags;
 import hellfirepvp.astralsorcery.common.event.handler.*;
 import hellfirepvp.astralsorcery.common.event.helper.*;
-import hellfirepvp.astralsorcery.common.integration.IntegrationCraftTweaker;
-import hellfirepvp.astralsorcery.common.integration.IntegrationCurios;
 import hellfirepvp.astralsorcery.common.item.armor.ArmorMaterialImbuedLeather;
 import hellfirepvp.astralsorcery.common.network.PacketChannel;
 import hellfirepvp.astralsorcery.common.network.play.server.PktOpenGui;
@@ -52,8 +50,9 @@ import hellfirepvp.astralsorcery.common.perk.data.PerkTypeHandler;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierManager;
 import hellfirepvp.astralsorcery.common.perk.tick.PerkTickHelper;
 import hellfirepvp.astralsorcery.common.registry.*;
-import hellfirepvp.astralsorcery.common.registry.internal.InternalRegistryPrimer;
-import hellfirepvp.astralsorcery.common.registry.internal.PrimerEventHandler;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
+import hellfirepvp.astralsorcery.common.starlight.transmission.registry.SourceClassRegistry;
+import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionClassRegistry;
 import hellfirepvp.astralsorcery.common.starlight.network.StarlightNetworkRegistry;
 import hellfirepvp.astralsorcery.common.starlight.network.StarlightTransmissionHandler;
 import hellfirepvp.astralsorcery.common.starlight.network.StarlightUpdateHandler;
@@ -113,52 +112,49 @@ public class CommonProxy {
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("b0c3097f-8391-4b4b-a89a-553ef730b13a");
 
     public static DamageSource DAMAGE_SOURCE_BLEED   = DamageSourceUtil.newType("astralsorcery.bleed")
-            .setDamageBypassesArmor();
+            .bypassArmor();
     public static DamageSource DAMAGE_SOURCE_STELLAR = DamageSourceUtil.newType("astralsorcery.stellar")
-            .setDamageBypassesArmor().setMagicDamage();
+            .bypassArmor().setMagic();
     public static DamageSource DAMAGE_SOURCE_REFLECT = DamageSourceUtil.newType("thorns")
-            .setDamageBypassesArmor().setDamageIsAbsolute();
+            .bypassArmor().bypassMagic();
 
     public static final CreativeModeTab ITEM_GROUP_AS = new CreativeModeTab(AstralSorcery.MODID) {
         @Override
-        public ItemStack createIcon() {
+        public ItemStack makeIcon() {
             return new ItemStack(TOME);
         }
     };
     public static final CreativeModeTab ITEM_GROUP_AS_PAPERS = new CreativeModeTab(AstralSorcery.MODID + ".papers") {
         @Override
-        public ItemStack createIcon() {
+        public ItemStack makeIcon() {
             return new ItemStack(CONSTELLATION_PAPER);
         }
     };
     public static final CreativeModeTab ITEM_GROUP_AS_CRYSTALS = new CreativeModeTab(AstralSorcery.MODID + ".crystals") {
         @Override
-        public ItemStack createIcon() {
+        public ItemStack makeIcon() {
             return new ItemStack(ROCK_CRYSTAL);
         }
     };
-    public static final Rarity RARITY_CELESTIAL = Rarity.create("AS_CELESTIAL", TextFormatting.BLUE);
-    public static final Rarity RARITY_ARTIFACT = Rarity.create("AS_ARTIFACT", TextFormatting.GOLD);
-    public static final Rarity RARITY_VESTIGE = Rarity.create("AS_VESTIGE", TextFormatting.RED);
+    public static final Rarity RARITY_CELESTIAL = Rarity.create("AS_CELESTIAL", ChatFormatting.BLUE);
+    public static final Rarity RARITY_ARTIFACT = Rarity.create("AS_ARTIFACT", ChatFormatting.GOLD);
+    public static final Rarity RARITY_VESTIGE = Rarity.create("AS_VESTIGE", ChatFormatting.RED);
 
     public static final ArmorMaterial ARMOR_MATERIAL_IMBUED_LEATHER = new ArmorMaterialImbuedLeather();
 
-    private InternalRegistryPrimer registryPrimer;
-    private PrimerEventHandler registryEventHandler;
+    private boolean registryContentBuilt = false;
     private CommonScheduler commonScheduler;
     private TickManager tickManager;
     private final List<ServerLifecycleListener> serverLifecycleListeners = Lists.newArrayList();
 
     private CommonConfig commonConfig;
-    private ServerConfig serverConfig;
+    private ServerConfig worldData;
 
     public void initialize() {
-        this.registryPrimer = new InternalRegistryPrimer();
-        this.registryEventHandler = new PrimerEventHandler(this.registryPrimer);
         this.commonScheduler = new CommonScheduler();
 
         this.commonConfig = new CommonConfig();
-        this.serverConfig = new ServerConfig();
+        this.worldData = new ServerConfig();
 
         RegistryData.init();
         RegistryMaterials.init();
@@ -174,7 +170,7 @@ public class CommonProxy {
         RegistryArgumentTypes.init();
 
         this.initializeConfigurations();
-        ConfigRegistries.getRegistries().buildDataRegistries(this.serverConfig);
+        ConfigRegistries.getRegistries().buildDataRegistries(this.worldData);
 
         this.tickManager = new TickManager();
         this.attachTickListeners(tickManager::register);
@@ -198,10 +194,55 @@ public class CommonProxy {
         modEventBus.addListener(this::onEnqueueIMC);
         modEventBus.addListener(BaseConfiguration::refreshConfiguration);
 
-        modEventBus.addListener(RegistryRegistries::buildRegistries);
         modEventBus.addListener(PacketChannel::registerPayloadHandlers);
         modEventBus.addListener(RegistryEntities::initAttributes);
-        registryEventHandler.attachEventHandlers(modEventBus);
+
+        this.buildRegistryContent();
+        AstralRegistries.subscribe(modEventBus);
+    }
+
+    /**
+     * Eagerly builds the mod's registry content in dependency order, queueing
+     * everything on the deferred registers before their RegisterEvents fire.
+     */
+    protected void buildRegistryContent() {
+        if (registryContentBuilt) {
+            return;
+        }
+        registryContentBuilt = true;
+
+        RegistryFluids.registerFluids();
+        RegistryBlocks.registerBlocks();
+        RegistryBlocks.registerFluidBlocks();
+        RegistryItems.registerItems();
+        RegistryItems.registerItemBlocks();
+        RegistryItems.registerFluidContainerItems();
+
+        RegistryTileEntities.registerTiles();
+        RegistryEntities.init();
+        RegistryEffects.init();
+        RegistryContainerTypes.init();
+        RegistrySounds.init();
+
+        RegistryConstellationEffects.init();
+        RegistryMantleEffects.init();
+        RegistryEngravingEffects.init();
+        RegistryStructures.init();
+        RegistryCrystalPropertyUsages.init();
+        RegistryCrystalProperties.init();
+        RegistryCrystalProperties.initDefaultAttributes();
+        RegistryRecipeTypes.init();
+        RegistryRecipeTypes.initAltarEffects();
+        RegistryRecipeSerializers.init();
+        RegistryResearch.init();
+
+        TransmissionClassRegistry.setupRegistry();
+        SourceClassRegistry.setupRegistry();
+
+        RegistryPerkAttributeTypes.init();
+        RegistryPerkConverters.init();
+        RegistryPerkCustomModifiers.init();
+        RegistryPerkAttributeReaders.init();
     }
 
     public void attachEventHandlers(IEventBus eventBus) {
@@ -235,7 +276,8 @@ public class CommonProxy {
 
         BlockChangeNotifier.addListener(new EventHandlerAutoLink());
 
-        Mods.CRAFTTWEAKER.executeIfPresent(() -> () -> IntegrationCraftTweaker.attachListeners(eventBus));
+        // 1.21 port: CraftTweaker integration is excluded from the build for now.
+        //Mods.CRAFTTWEAKER.executeIfPresent(() -> () -> IntegrationCraftTweaker.attachListeners(eventBus));
     }
 
     public void attachTickListeners(Consumer<ITickHandler> registrar) {
@@ -275,15 +317,15 @@ public class CommonProxy {
         ToolsConfig.CONFIG.newSubSection(WandsConfig.CONFIG);
         MachineryConfig.CONFIG.newSubSection(TileTreeBeacon.Config.CONFIG);
 
-        this.serverConfig.addConfigEntry(GeneralConfig.CONFIG);
-        this.serverConfig.addConfigEntry(ToolsConfig.CONFIG);
-        this.serverConfig.addConfigEntry(EntityConfig.CONFIG);
-        this.serverConfig.addConfigEntry(CraftingConfig.CONFIG);
-        this.serverConfig.addConfigEntry(LightNetworkConfig.CONFIG);
-        this.serverConfig.addConfigEntry(LogConfig.CONFIG);
-        this.serverConfig.addConfigEntry(PerkConfig.CONFIG);
-        this.serverConfig.addConfigEntry(AmuletRandomizeHelper.CONFIG);
-        this.serverConfig.addConfigEntry(MachineryConfig.CONFIG);
+        this.worldData.addConfigEntry(GeneralConfig.CONFIG);
+        this.worldData.addConfigEntry(ToolsConfig.CONFIG);
+        this.worldData.addConfigEntry(EntityConfig.CONFIG);
+        this.worldData.addConfigEntry(CraftingConfig.CONFIG);
+        this.worldData.addConfigEntry(LightNetworkConfig.CONFIG);
+        this.worldData.addConfigEntry(LogConfig.CONFIG);
+        this.worldData.addConfigEntry(PerkConfig.CONFIG);
+        this.worldData.addConfigEntry(AmuletRandomizeHelper.CONFIG);
+        this.worldData.addConfigEntry(MachineryConfig.CONFIG);
 
         RegistryPerks.initConfig(PerkConfig.CONFIG::newSubSection);
 
@@ -292,12 +334,8 @@ public class CommonProxy {
 
         RegistryWorldGeneration.addConfigEntries(WorldGenConfig.CONFIG::newSubSection);
 
-        ConstellationEffectRegistry.addConfigEntries(this.serverConfig);
-        MantleEffectRegistry.addConfigEntries(this.serverConfig);
-    }
-
-    public InternalRegistryPrimer getRegistryPrimer() {
-        return registryPrimer;
+        ConstellationEffectRegistry.addConfigEntries(this.worldData);
+        MantleEffectRegistry.addConfigEntries(this.worldData);
     }
 
     public TickManager getTickManager() {
@@ -306,8 +344,8 @@ public class CommonProxy {
 
     // Utils
 
-    public FakePlayer getASFakePlayerServer(ServerLevel world) {
-        return FakePlayerFactory.get(world, new GameProfile(FAKEPLAYER_UUID, "AS-FakePlayer"));
+    public FakePlayer getASFakePlayerServer(ServerLevel level) {
+        return FakePlayerFactory.get(level, new GameProfile(FAKEPLAYER_UUID, "AS-FakePlayer"));
     }
 
     public File getASServerDataDirectory() {
@@ -353,7 +391,7 @@ public class CommonProxy {
     // Mod events
 
     private void onCommonSetup(FMLCommonSetupEvent event) {
-        this.serverConfig.buildConfiguration();
+        this.worldData.buildConfiguration();
 
         RegistryCapabilities.init(NeoForge.EVENT_BUS);
         StarlightNetworkRegistry.setupRegistry();
@@ -369,7 +407,8 @@ public class CommonProxy {
     }
 
     private void onEnqueueIMC(InterModEnqueueEvent event) {
-        Mods.CURIOS.executeIfPresent(() -> IntegrationCurios::initIMC);
+        // 1.21 port: Curios integration is excluded from the build for now.
+        //Mods.CURIOS.executeIfPresent(() -> IntegrationCurios::initIMC);
     }
 
     // Generic events

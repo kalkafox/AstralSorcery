@@ -86,8 +86,8 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        tooltip.add(getPlaceMode(stack).getDisplay().withStyle(TextFormatting.GOLD));
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        tooltip.add(getPlaceMode(stack).getDisplay().withStyle(ChatFormatting.GOLD));
     }
 
     @Override
@@ -117,13 +117,13 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         RenderSystem.disableDepthTest();
         RenderSystem.disableAlphaTest();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.BLOCK, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.BLOCK, buf -> {
             placeStates.forEach((pos, state) -> {
-                renderStack.push();
+                renderStack.pushPose();
                 renderStack.translate(pos.getX() - offset.getX() + 0.1F, pos.getY() - offset.getY() + 0.1F, pos.getZ() - offset.getZ() + 0.1F);
                 renderStack.scale(0.8F, 0.8F, 0.8F);
                 RenderingUtils.renderSimpleBlockModel(state, renderStack, decorator.decorate(buf), pos, null, false);
-                renderStack.pop();
+                renderStack.popPose();
             });
         });
 
@@ -143,42 +143,42 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
     }
 
     @Override
-    public InteractionResult onItemUse(UseOnContext context) {
-        Level world = context.getWorld();
+    public InteractionResult useOn(UseOnContext context) {
+        Level level = context.getLevel();
         Player player = context.getPlayer();
-        ItemStack held = player.getHeldItem(context.getHand());
-        BlockPos pos = context.getPos();
-        if (world.isRemote() || !(player instanceof ServerPlayer) || held.isEmpty()) {
-            return ActionResultType.SUCCESS;
+        ItemStack held = player.getItemInHand(context.getHand());
+        BlockPos pos = context.getBlockPos();
+        if (level.isClientSide() || !(player instanceof ServerPlayer) || held.isEmpty()) {
+            return InteractionResult.SUCCESS;
         }
-        if (player.isSneaking()) {
-            ItemBlockStorage.storeBlockState(held, world, pos);
-            return ActionResultType.SUCCESS;
+        if (player.isShiftKeyDown()) {
+            ItemBlockStorage.storeBlockState(held, level, pos);
+            return InteractionResult.SUCCESS;
         } else {
-            return attemptPlaceBlocks(world, player, held).getType();
+            return attemptPlaceBlocks(level, player, held).getType();
         }
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
-        ItemStack held = player.getHeldItem(hand);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
         PlaceMode mode = getPlaceMode(held);
-        if (player.isSneaking()) {
+        if (player.isShiftKeyDown()) {
             PlaceMode nextMode = mode.next();
             setPlaceMode(held, nextMode);
-            player.sendStatusMessage(nextMode.getDisplay(), true);
-            return ActionResult.resultSuccess(held);
+            player.move(nextMode.getDisplay(), true);
+            return InteractionResultHolder.success(held);
         }
-        if (world.isRemote()) {
-            return ActionResult.resultSuccess(held);
+        if (level.isClientSide()) {
+            return InteractionResultHolder.success(held);
         }
-        return attemptPlaceBlocks(world, player, held);
+        return attemptPlaceBlocks(level, player, held);
     }
 
-    private InteractionResultHolder<ItemStack> attemptPlaceBlocks(Level world, Player player, ItemStack held) {
+    private InteractionResultHolder<ItemStack> attemptPlaceBlocks(Level level, Player player, ItemStack held) {
         Map<BlockPos, BlockState> placeStates = getPlayerPlaceableStates(player, held);
         if (placeStates.isEmpty()) {
-            return ActionResult.resultFail(held);
+            return InteractionResultHolder.fail(held);
         }
 
         Map<BlockState, Tuple<ItemStack, Integer>> availableStacks = MapStream.of(ItemBlockStorage.getInventoryMatching(player, held))
@@ -209,24 +209,24 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
                     MiscUtils.canPlayerPlaceBlockPos(player, stateToPlace, placePos, Direction.UP) &&
                     (player.isCreative() || ItemUtils.consumeFromPlayerInventory(player, held, extractable, false)) &&
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_PLACEMENT, false) &&
-                    world.setBlockState(placePos, stateToPlace)) {
+                    level.setBlock(placePos, stateToPlace)) {
                 PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.BLOCK_EFFECT)
                         .addData(buf -> {
                             ByteBufUtils.writePos(buf, placePos);
                             ByteBufUtils.writeBlockState(buf, stateToPlace);
                         });
-                PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(world, placePos, 32));
+                PacketChannel.CHANNEL.sendToAllAround(ev, PacketChannel.pointFromPos(level, placePos, 32));
             }
         }
-        return ActionResult.resultSuccess(held);
+        return InteractionResultHolder.success(held);
     }
 
     @Nonnull
     private Map<BlockPos, BlockState> getPlayerPlaceableStates(Player player, ItemStack stack) {
         PlaceMode mode = getPlaceMode(stack);
-        Level world = player.getEntityWorld();
+        Level level = player.getCommandSenderWorld();
 
-        BlockHitResult rtr = MiscUtils.rayTraceLookBlock(player, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.ANY, 60F);
+        BlockHitResult rtr = MiscUtils.rayTraceLookBlock(player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.ANY, 60F);
         if (rtr == null && mode.needsOffset()) {
             return new HashMap<>();
         }
@@ -234,16 +234,16 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         Map<BlockPos, BlockState> placeStates;
         if (rtr != null) {
             Direction placingAgainst = rtr.getFace();
-            BlockPos at = rtr.getPos().offset(rtr.getFace());
-            placeStates = getPlaceStates(player, world, at, placingAgainst, stack);
+            BlockPos at = rtr.getBlockPos().offset(rtr.getFace());
+            placeStates = getPlaceStates(player, level, at, placingAgainst, stack);
         } else {
-            placeStates = getPlaceStates(player, world, null, null, stack);
+            placeStates = getPlaceStates(player, level, null, null, stack);
         }
         return placeStates;
     }
 
     @Nonnull
-    private Map<BlockPos, BlockState> getPlaceStates(Player placer, Level world, @Nullable BlockPos origin, @Nullable Direction placingAgainst, ItemStack refStack) {
+    private Map<BlockPos, BlockState> getPlaceStates(Player placer, Level level, @Nullable BlockPos origin, @Nullable Direction placingAgainst, ItemStack refStack) {
         Map<BlockState, Tuple<ItemStack, Integer>> tplStates = ItemBlockStorage.getInventoryMatching(placer, refStack);
         PlaceMode placeMode = getPlaceMode(refStack);
         Map<BlockPos, BlockState> placeables = Maps.newHashMap();
@@ -257,7 +257,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
             }
         }
 
-        List<BlockPos> foundPositions = placeMode.generatePlacementPositions(world, placer, placingAgainst, origin);
+        List<BlockPos> foundPositions = placeMode.generatePlacementPositions(level, placer, placingAgainst, origin);
         if (foundPositions.isEmpty()) {
             return placeables; //It.. shouldn't actually be empty here, ever. Should at least have 1 entry.
         }
@@ -268,18 +268,18 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
             placeAmounts.put(state, placer.isCreative() ? Integer.MAX_VALUE : tplStates.get(state).getB());
         }
         List<BlockState> placeableStates = Lists.newArrayList(placeAmounts.keySet());
-        Random rand = ItemBlockStorage.getPreviewRandomFromWorld(world);
+        Random random = ItemBlockStorage.getPreviewRandomFromWorld(level);
 
         for (BlockPos pos : foundPositions) {
-            Collections.shuffle(placeableStates, rand);
+            Collections.shuffle(placeableStates, random);
             BlockState toPlace = Iterables.getFirst(placeableStates, null);
 
             if (toPlace == null) {
                 continue;
             }
 
-            MiscUtils.executeWithChunk(world, pos, () -> {
-                if (BlockUtils.isReplaceable(world, pos)) {
+            MiscUtils.executeWithChunk(level, pos, () -> {
+                if (BlockUtils.isReplaceable(level, pos)) {
 
                     if (!placer.isCreative()) {
                         int count = placeAmounts.get(toPlace);
@@ -320,21 +320,21 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
 
         TOWARDS_PLAYER("towards", true, 3F) {
             @Override
-            public List<BlockPos> generatePlacementPositions(Level world, Player player, Direction placedAgainst, BlockPos center) {
+            public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
                 List<BlockPos> blocks = new ArrayList<>();
                 double cmpFrom, cmpTo;
                 switch (placedAgainst.getAxis()) {
                     case X:
                         cmpFrom = center.getX();
-                        cmpTo = player.getPosX();
+                        cmpTo = player.getX();
                         break;
                     case Y:
                         cmpFrom = center.getY();
-                        cmpTo = player.getPosY();
+                        cmpTo = player.getY();
                         break;
                     case Z:
                         cmpFrom = center.getZ();
-                        cmpTo = player.getPosZ();
+                        cmpTo = player.getZ();
                         break;
                     default:
                         return Lists.newLinkedList();
@@ -342,7 +342,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
                 int length = (int) Math.min(20, Math.abs(cmpFrom + 0.5 - cmpTo));
                 for (int i = 0; i < length; i++) {
                     BlockPos at = center.offset(placedAgainst, i);
-                    if (MiscUtils.executeWithChunk(world, at, () -> !BlockUtils.isReplaceable(world, at), true)) {
+                    if (MiscUtils.executeWithChunk(level, at, () -> !BlockUtils.isReplaceable(level, at), true)) {
                         break;
                     }
                     blocks.add(at);
@@ -352,51 +352,51 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         },
         FROM_PLAYER("line", false) {
             @Override
-            public List<BlockPos> generatePlacementPositions(Level world, Player player, Direction placedAgainst, BlockPos center) {
-                BlockPos origin = player.getPosition().down();
+            public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
+                BlockPos origin = player.position().below();
                 HitResult result = player.pick(60F, 1F, false);
                 BlockPos hit;
                 if (result instanceof BlockHitResult) {
-                    hit = ((BlockHitResult) result).getPos();
+                    hit = ((BlockHitResult) result).getBlockPos();
                 } else {
                     hit = new BlockPos(result.getHitVec());
                 }
-                List<BlockPos> line = new ArrayList<>();
+                List<BlockPos> lineState = new ArrayList<>();
                 RaytraceAssist rta = new RaytraceAssist(origin, hit);
                 rta.forEachBlockPos(pos -> {
-                    return MiscUtils.executeWithChunk(world, pos, () -> {
-                        if (BlockUtils.isReplaceable(world, pos)) {
-                            line.add(pos);
+                    return MiscUtils.executeWithChunk(level, pos, () -> {
+                        if (BlockUtils.isReplaceable(level, pos)) {
+                            lineState.add(pos);
                             return true;
                         }
                         return false;
                     }, false);
                 });
-                return line;
+                return lineState;
             }
         },
         H_PLANE("plane", true) {
             @Override
-            public List<BlockPos> generatePlacementPositions(Level world, Player player, Direction placedAgainst, BlockPos center) {
+            public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
                 return MiscUtils.transformList(BlockGeometry.getPlane(Direction.UP, 5), at -> at.add(center));
             }
         },
         V_PLANE("wall", true) {
             @Override
-            public List<BlockPos> generatePlacementPositions(Level world, Player player, Direction placedAgainst, BlockPos center) {
-                return MiscUtils.transformList(BlockGeometry.getPlane(player.getHorizontalFacing(), 5), at -> at.add(center));
+            public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
+                return MiscUtils.transformList(BlockGeometry.getPlane(player.getDirection(), 5), at -> at.offset(center));
             }
         },
         SPHERE("sphere", true, 0.2F) {
             @Override
-            public List<BlockPos> generatePlacementPositions(Level world, Player player, Direction placedAgainst, BlockPos center) {
-                return MiscUtils.transformList(BlockGeometry.getSphere(5), at -> at.add(center));
+            public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
+                return MiscUtils.transformList(BlockGeometry.getSphere(5), at -> at.offset(center));
             }
         },
         SPHERE_HOLLOW("sphere_hollow", true, 0.5F) {
             @Override
-            public List<BlockPos> generatePlacementPositions(Level world, Player player, Direction placedAgainst, BlockPos center) {
-                return MiscUtils.transformList(BlockGeometry.getHollowSphere(5, 4), at -> at.add(center));
+            public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
+                return MiscUtils.transformList(BlockGeometry.getHollowSphere(5, 4), at -> at.offset(center));
             }
         };
 
@@ -430,7 +430,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
             return needsOffset;
         }
 
-        public abstract List<BlockPos> generatePlacementPositions(Level world, Player player, Direction placedAgainst, BlockPos center);
+        public abstract List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center);
 
         @Nonnull
         private PlaceMode next() {

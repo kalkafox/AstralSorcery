@@ -50,11 +50,11 @@ import java.util.Random;
  */
 public class BlockCelestialCrystalCluster extends BlockCrystalContainer implements BlockStarlightRecipient, CustomItemBlock {
 
-    private static final VoxelShape GROWTH_STAGE_0 = Block.makeCuboidShape(4, 0, 5, 12, 8, 11);
-    private static final VoxelShape GROWTH_STAGE_1 = Block.makeCuboidShape(4, 0, 5, 12, 10, 11);
-    private static final VoxelShape GROWTH_STAGE_2 = Block.makeCuboidShape(2, 0, 4, 12, 12, 14);
-    private static final VoxelShape GROWTH_STAGE_3 = Block.makeCuboidShape(2, 0, 2, 14, 14, 14);
-    private static final VoxelShape GROWTH_STAGE_4 = Block.makeCuboidShape(2, 0, 2, 14, 16, 14);
+    private static final VoxelShape GROWTH_STAGE_0 = Block.box(4, 0, 5, 12, 8, 11);
+    private static final VoxelShape GROWTH_STAGE_1 = Block.box(4, 0, 5, 12, 10, 11);
+    private static final VoxelShape GROWTH_STAGE_2 = Block.box(2, 0, 4, 12, 12, 14);
+    private static final VoxelShape GROWTH_STAGE_3 = Block.box(2, 0, 2, 14, 14, 14);
+    private static final VoxelShape GROWTH_STAGE_4 = Block.box(2, 0, 2, 14, 16, 14);
 
     public static IntegerProperty STAGE = IntegerProperty.create("stage", 0, 4);
 
@@ -64,7 +64,7 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
                 .harvestTool(ToolType.PICKAXE)
                 .harvestLevel(1)
                 .sound(SoundType.GLASS)
-                .setLightLevel((state) -> 8));
+                .isRedstoneConductor((state) -> 8));
     }
 
     @Override
@@ -73,21 +73,21 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     }
 
     @Override
-    public void receiveStarlight(Level world, Random rand, BlockPos pos, IWeakConstellation starlightType, double amount) {
-        TileCelestialCrystals crystals = MiscUtils.getTileAt(world, pos, TileCelestialCrystals.class, false);
-        if (crystals != null) {
-            crystals.grow((int) (TileCelestialCrystals.TICK_GROWTH_CHANCE / amount));
+    public void receiveStarlight(Level level, Random random, BlockPos pos, IWeakConstellation starlightType, double amount) {
+        TileCelestialCrystals respawnCrystals = MiscUtils.getTileAt(level, pos, TileCelestialCrystals.class, false);
+        if (respawnCrystals != null) {
+            respawnCrystals.grow((int) (TileCelestialCrystals.TICK_GROWTH_CHANCE / amount));
         }
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(STAGE);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        Vec3 offset = state.getOffset(world, pos);
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        Vec3 offset = state.getOffset(level, pos);
         VoxelShape shape;
         switch (state.get(STAGE)) {
             case 4:
@@ -106,7 +106,7 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
             default:
                 shape = GROWTH_STAGE_0;
         }
-        return shape.withOffset(offset.x, offset.y, offset.z);
+        return shape.offset(offset.x, offset.y, offset.z);
     }
 
     @Override
@@ -122,43 +122,43 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     }*/
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, world, pos)) {
-            return Blocks.AIR.getDefaultState();
+    public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
+        if (!this.isValidPosition(state, level, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
-        return hasSolidSideOnTop(world, pos.down());
+    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+        return hasSolidSideOnTop(level, pos.below());
     }
 
     @Override
-    public void onReplaced(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (state.getBlock() != newState.getBlock()) {
-            super.onReplaced(state, world, pos, newState, isMoving);
+            super.onRemove(state, level, pos, newState, isMoving);
 
             PktPlayEffect effect = new PktPlayEffect(PktPlayEffect.Type.SMALL_CRYSTAL_BREAK)
                     .addData(buf -> ByteBufUtils.writeVector(buf,
-                            new Vector3(pos).add(state.getOffset(world, pos)).add(0.5, 0.4, 0.5)));
-            PacketChannel.CHANNEL.sendToAllAround(effect, PacketChannel.pointFromPos(world, pos, 32));
+                            new Vector3(pos).add(state.getOffset(level, pos)).add(0.5, 0.4, 0.5)));
+            PacketChannel.CHANNEL.sendToAllAround(effect, PacketChannel.pointFromPos(level, pos, 32));
         }
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter world) {
+    public BlockEntity newBlockEntity(BlockGetter level) {
         return new TileCelestialCrystals();
     }
 }

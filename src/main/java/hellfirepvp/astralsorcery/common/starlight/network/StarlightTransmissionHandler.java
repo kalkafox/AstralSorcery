@@ -39,12 +39,12 @@ public class StarlightTransmissionHandler implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        Level world = (Level) context[0];
-        if (world.isRemote() || !(world instanceof ServerLevel)) {
+        Level level = (Level) context[0];
+        if (level.isClientSide() || !(level instanceof ServerLevel)) {
             return;
         }
 
-        worldHandlers.computeIfAbsent(world.getDimensionKey(), TransmissionWorldHandler::new).tick((ServerLevel) world);
+        worldHandlers.computeIfAbsent(level.dimension(), TransmissionWorldHandler::new).tick((ServerLevel) level);
     }
 
     public void clearServer() {
@@ -52,8 +52,8 @@ public class StarlightTransmissionHandler implements ITickHandler {
         worldHandlers.clear();
     }
 
-    public void informWorldUnload(Level world) {
-        ResourceKey<Level> dimKey = world.getDimensionKey();
+    public void informWorldUnload(Level level) {
+        ResourceKey<Level> dimKey = level.dimension();
         TransmissionWorldHandler handle = worldHandlers.get(dimKey);
         if (handle != null) {
             handle.clear();
@@ -62,11 +62,11 @@ public class StarlightTransmissionHandler implements ITickHandler {
     }
 
     @Nullable
-    public TransmissionWorldHandler getWorldHandler(Level world) {
-        if (world == null) {
+    public TransmissionWorldHandler getWorldHandler(Level level) {
+        if (level == null) {
             return null;
         }
-        return worldHandlers.get(world.getDimensionKey());
+        return worldHandlers.get(level.dimension());
     }
 
     @Override
@@ -75,8 +75,8 @@ public class StarlightTransmissionHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.START;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.START;
     }
 
     @Override

@@ -37,12 +37,12 @@ public class EffectAltarDefaultSparkle extends AltarRecipeEffect {
         double edgeScale = (scale * 2 + 1);
 
         for (int i = 0; i < 1; i++) {
-            Vector3 at = altarPos.clone().add(-scale + rand.nextFloat() * edgeScale, 0.02, -scale + rand.nextFloat() * edgeScale);
+            Vector3 at = altarPos.clone().add(-scale + random.nextFloat() * edgeScale, 0.02, -scale + random.nextFloat() * edgeScale);
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .color(VFXColorFunction.WHITE)
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.2F);
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.2F);
         }
     }
 

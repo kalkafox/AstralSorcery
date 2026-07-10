@@ -44,11 +44,11 @@ public abstract class ItemColoredLens extends Item implements ItemDynamicColor {
     }
 
     @Override
-    public InteractionResult onItemUse(UseOnContext ctx) {
+    public InteractionResult useOn(UseOnContext ctx) {
         Player player = ctx.getPlayer();
-        Level world = ctx.getWorld();
-        if (!world.isRemote() && player != null) {
-            TileLens lens = MiscUtils.getTileAt(world, ctx.getPos(), TileLens.class, false);
+        Level level = ctx.getLevel();
+        if (!level.isClientSide() && player != null) {
+            TileLens lens = MiscUtils.getTileAt(level, ctx.getBlockPos(), TileLens.class, false);
             if (lens != null) {
                 ItemStack held = ctx.getItem();
                 LensColorType oldType = lens.setColorType(this.lensColorType);
@@ -60,13 +60,13 @@ public abstract class ItemColoredLens extends Item implements ItemDynamicColor {
                     }
                 }
 
-                SoundHelper.playSoundAround(SoundsAS.BLOCK_COLOREDLENS_ATTACH, world, ctx.getPos(), 0.8F, 1.5F);
+                SoundHelper.playSoundAround(SoundsAS.BLOCK_COLOREDLENS_ATTACH, level, ctx.getBlockPos(), 0.8F, 1.5F);
                 if (oldType != null) {
-                    player.inventory.placeItemBackInInventory(world, oldType.getStack());
+                    player.inventory.hurtArmor(level, oldType.getStack());
                 }
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override

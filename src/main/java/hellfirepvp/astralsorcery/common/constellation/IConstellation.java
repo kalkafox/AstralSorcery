@@ -62,12 +62,12 @@ public interface IConstellation extends AstralRegistryEntry<IConstellation>, Com
 
     public List<StarConnection> getStarConnections();
 
-    public String getSimpleName();
+    public String getName();
 
-    public String getTranslationKey();
+    public String getDescriptionId();
 
     default public MutableComponent getConstellationName() {
-        return Component.translatable(this.getTranslationKey());
+        return Component.translatable(this.getDescriptionId());
     }
 
     default public MutableComponent getConstellationTypeDescription() {
@@ -83,15 +83,15 @@ public interface IConstellation extends AstralRegistryEntry<IConstellation>, Com
     }
 
     default public MutableComponent getConstellationTag() {
-        return Component.translatable(this.getTranslationKey() + ".tag");
+        return Component.translatable(this.getDescriptionId() + ".tag");
     }
 
     default public MutableComponent getConstellationDescription() {
-        return Component.translatable(this.getTranslationKey() + ".description");
+        return Component.translatable(this.getDescriptionId() + ".description");
     }
 
     default public MutableComponent getConstellationEnchantmentDescription() {
-        return Component.translatable(this.getTranslationKey() + ".enchantments");
+        return Component.translatable(this.getDescriptionId() + ".enchantments");
     }
 
     public static String getDefaultSaveKey() {
@@ -133,22 +133,22 @@ public interface IConstellation extends AstralRegistryEntry<IConstellation>, Com
 
     boolean canDiscover(Player player, PlayerProgress progress);
 
-    default public void writeToNBT(CompoundTag compound) {
-        writeToNBT(compound, getDefaultSaveKey());
+    default public void save(CompoundTag pattern) {
+        save(pattern, getDefaultSaveKey());
     }
 
-    default public void writeToNBT(CompoundTag compound, String key) {
-        compound.putString(key, getRegistryName().toString());
-    }
-
-    @Nullable
-    public static IConstellation readFromNBT(CompoundTag compound) {
-        return readFromNBT(compound, getDefaultSaveKey());
+    default public void save(CompoundTag pattern, String key) {
+        pattern.putString(key, getRegistryName().toString());
     }
 
     @Nullable
-    public static IConstellation readFromNBT(CompoundTag compound, String key) {
-        return ConstellationRegistry.getConstellation(new ResourceLocation(compound.getString(key)));
+    public static IConstellation readFromNBT(CompoundTag pattern) {
+        return readFromNBT(pattern, getDefaultSaveKey());
+    }
+
+    @Nullable
+    public static IConstellation readFromNBT(CompoundTag pattern, String key) {
+        return ConstellationRegistry.getConstellation(ResourceLocation.parse(pattern.getString(key)));
     }
 
 }

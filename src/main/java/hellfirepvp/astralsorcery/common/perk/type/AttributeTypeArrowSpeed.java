@@ -43,20 +43,20 @@ public class AttributeTypeArrowSpeed extends PerkAttributeType {
     private void onArrowFire(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof Arrow) {
             Arrow arrow = (Arrow) event.getEntity();
-            Entity shooter = arrow.func_234616_v_();
+            Entity shooter = arrow.getOwner();
             if (shooter instanceof Player) {
                 Player player = (Player) shooter;
-                LogicalSide side = this.getSide(player);
-                if (!hasTypeApplied(player, side)) {
+                LogicalSide direction = this.getSide(player);
+                if (!hasTypeApplied(player, direction)) {
                     return;
                 }
 
-                Vector3 motion = new Vector3(arrow.getMotion());
-                float mul = PerkAttributeHelper.getOrCreateMap(player, side)
-                        .modifyValue(player, ResearchHelper.getProgress(player, side), this, 1F);
+                Vector3 motion = new Vector3(arrow.getDeltaMovement());
+                float mul = PerkAttributeHelper.getOrCreateMap(player, direction)
+                        .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 1F);
                 mul = AttributeEvent.postProcessModded(player, this, mul);
-                motion = MiscUtils.limitVelocityToMinecraftLimit(motion.multiply(mul));
-                arrow.setMotion(motion.toVector3d());
+                motion = MiscUtils.limitVelocityToMinecraftLimit(motion.mul(mul));
+                arrow.setDeltaMovement(motion.toVector3d());
             }
         }
     }

@@ -88,38 +88,38 @@ public class PktShootEntity extends ASPacket<PktShootEntity> {
             @OnlyIn(Dist.CLIENT)
             public void handleClient(PktShootEntity packet, NetworkEvent.Context context) {
                 context.enqueueWork(() -> {
-                    Optional<Level> world = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
-                    Entity entity = world.map(w -> w.getEntityByID(packet.entityId)).orElse(null);
+                    Optional<Level> level = LogicalSidedProvider.CLIENTWORLD.get(LogicalSide.CLIENT);
+                    Entity entity = level.map(w -> w.getEntityByID(packet.entityId)).orElse(null);
                     if (entity != null) {
-                        entity.setMotion(packet.motionVector.toVector3d());
+                        entity.setDeltaMovement(packet.motionVector.toVector3d());
 
                         if (packet.hasEffect) {
                             Vector3 origin = Vector3.atEntityCenter(entity)
-                                    .setY(entity.getPosY() + entity.getHeight());
-                            Vector3 look = new Vector3(entity.getLookVec()).normalize().multiply(packet.effectLength * 18);
-                            Vector3 motionReverse = look.clone().normalize().multiply(-0.4 * packet.effectLength);
+                                    .setY(entity.getY() + entity.getHeight());
+                            Vector3 forwards = new Vector3(entity.getLookAngle()).normalize().mul(packet.effectLength * 18);
+                            Vector3 motionReverse = forwards.clone().normalize().mul(-0.4 * packet.effectLength);
 
-                            Vector3 perp = look.clone().perpendicular().normalize().multiply(6F);
+                            Vector3 perp = forwards.clone().perpendicular().normalize().mul(6F);
                             for (int i = 0; i < 300; i++) {
-                                Vector3 at = look.clone()
-                                        .multiply(0.5F + rand.nextFloat() * 2F)
-                                        .add(perp.clone().rotate(rand.nextFloat() * 360, look).multiply(0.5F + rand.nextFloat()))
+                                Vector3 at = forwards.clone()
+                                        .mul(0.5F + random.nextFloat() * 2F)
+                                        .add(perp.clone().mirror(random.nextFloat() * 360, forwards).mul(0.5F + random.nextFloat()))
                                         .add(origin);
 
                                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                                         .spawn(at)
-                                        .alpha(VFXAlphaFunction.FADE_OUT)
+                                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                                         .setAlphaMultiplier(0.75F)
-                                        .setScaleMultiplier(0.7F + rand.nextFloat() * 0.35F)
-                                        .setMaxAge(20 + rand.nextInt(15));
+                                        .setScaleMultiplier(0.7F + random.nextFloat() * 0.35F)
+                                        .setMaxAge(20 + random.nextInt(15));
 
-                                if (rand.nextBoolean()) {
+                                if (random.nextBoolean()) {
                                     p.color(VFXColorFunction.WHITE)
-                                            .setScaleMultiplier(0.3F + rand.nextFloat() * 0.15F);
+                                            .setScaleMultiplier(0.3F + random.nextFloat() * 0.15F);
                                 } else {
                                     p.color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_VICIO));
                                 }
-                                p.setMotion(motionReverse);
+                                p.setDeltaMovement(motionReverse);
                             }
                         }
                     }
@@ -127,7 +127,7 @@ public class PktShootEntity extends ASPacket<PktShootEntity> {
             }
 
             @Override
-            public void handle(PktShootEntity packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktShootEntity packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -42,22 +42,22 @@ public class KeyProjectileProximity extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.HIGH, this::onProjDamage);
     }
 
-    private void onProjDamage(LivingHurtEvent event) {
+    private void onProjDamage(LivingIncomingDamageEvent event) {
         if (event.getSource().isProjectile()) {
             DamageSource source = event.getSource();
-            if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-                Player player = (Player) source.getTrueSource();
-                LogicalSide side = this.getSide(player);
-                PlayerProgress prog = ResearchHelper.getProgress(player, side);
+            if (source.getEntity() != null && source.getEntity() instanceof Player) {
+                Player player = (Player) source.getEntity();
+                LogicalSide direction = this.getSide(player);
+                PlayerProgress prog = ResearchHelper.getProgress(player, direction);
                 if (prog.getPerkData().hasPerkEffect(this)) {
                     float added = CONFIG.maxAdditionalMultiplier.get().floatValue();
-                    added *= PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+                    added *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
 
                     float capDstSq = CONFIG.capDistance.get().floatValue();
                     float dst = -(((float) (player.getDistanceSq(event.getEntityLiving()))) - capDstSq);

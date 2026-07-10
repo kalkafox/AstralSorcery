@@ -35,11 +35,11 @@ public class JEIHandlerDropItem extends JEIInteractionResultHandler {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void addToRecipeLayout(IRecipeLayout recipeLayout, LiquidInteraction recipe, IIngredients ingredients) {
-        IGuiItemStackGroup itemStacks = recipeLayout.getItemStacks();
+        IGuiItemStackGroup items = recipeLayout.getItems();
 
-        itemStacks.init(2, false, 47, 18);
+        items.init(2, false, 47, 18);
 
-        itemStacks.set(ingredients);
+        items.set(ingredients);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class JEIHandlerDropItem extends JEIInteractionResultHandler {
     public void addToRecipeIngredients(LiquidInteraction recipe, IIngredients ingredients) {
         ImmutableList.Builder<List<ItemStack>> itemOutputs = ImmutableList.builder();
 
-        InteractionResult result = recipe.getResult();
+        InteractionResult result = recipe.getObject();
         if (result instanceof ResultDropItem) {
             itemOutputs.add(Lists.newArrayList(((ResultDropItem) result).getOutput()));
         }
@@ -57,6 +57,6 @@ public class JEIHandlerDropItem extends JEIInteractionResultHandler {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double mouseX, double mouseY) {
+    public void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double xpos, double ypos) {
     }
 }

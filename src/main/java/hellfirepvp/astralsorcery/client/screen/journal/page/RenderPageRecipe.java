@@ -30,22 +30,22 @@ import java.util.Map;
  */
 public class RenderPageRecipe extends RenderPageRecipeTemplate {
 
-    private final Map<Integer, Ingredient> inputs;
+    private final Map<Integer, Ingredient> map;
     private final ItemStack output;
     private final ResourceLocation recipeId;
 
-    private RenderPageRecipe(@Nullable ResearchNode node, int nodePage, Map<Integer, Ingredient> inputs, ItemStack output, ResourceLocation recipeId) {
+    private RenderPageRecipe(@Nullable ResearchNode node, int nodePage, Map<Integer, Ingredient> map, ItemStack output, ResourceLocation recipeId) {
         super(node, nodePage);
-        this.inputs = inputs;
+        this.map = map;
         this.output = output;
         this.recipeId = recipeId;
     }
 
     public static RenderPageRecipe fromRecipe(@Nullable ResearchNode node, int nodePage, Recipe<?> recipe) {
         NonNullList<Ingredient> ingredients = recipe.getIngredients();
-        Map<Integer, Ingredient> inputs = new HashMap<>();
+        Map<Integer, Ingredient> map = new HashMap<>();
         for (int i = 0; i < 9; i++) {
-            inputs.put(i, Ingredient.EMPTY);
+            map.put(i, Ingredient.EMPTY);
         }
         //Centering inputs on render
         boolean offsetDiagonal = ingredients.size() == 1;
@@ -59,15 +59,15 @@ public class RenderPageRecipe extends RenderPageRecipeTemplate {
                     indexSlot -= 4;
                 }
                 if (indexSlot >= 0 && indexSlot < ingredients.size()) {
-                    inputs.put(slot, ingredients.get(indexSlot));
+                    map.put(slot, ingredients.get(indexSlot));
                 }
             }
         }
-        return new RenderPageRecipe(node, nodePage, inputs, recipe.getRecipeOutput(), recipe.getId());
+        return new RenderPageRecipe(node, nodePage, map, recipe.getResultItem(), recipe.getId());
     }
 
     @Override
-    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
         this.clearFrameRectangles();
 
         this.renderRecipeGrid(renderStack, x, y, z, TexturesAS.TEX_GUI_BOOK_GRID_T1);
@@ -81,18 +81,18 @@ public class RenderPageRecipe extends RenderPageRecipeTemplate {
 
                 float renderX = recipeX + 25 * xx;
                 float renderY = recipeY + 25 * yy;
-                this.renderExpectedIngredientInput(renderStack, renderX, renderY, z, 1.1F, slot * 20, this.inputs.get(slot));
+                this.renderExpectedIngredientInput(renderStack, renderX, renderY, z, 1.1F, slot * 20, this.map.get(slot));
             }
         }
     }
 
     @Override
-    public boolean propagateMouseClick(double mouseX, double mouseZ) {
-        return this.handleBookLookupClick(mouseX, mouseZ);
+    public boolean propagateMouseClick(double xpos, double mouseZ) {
+        return this.handleBookLookupClick(xpos, mouseZ);
     }
 
     @Override
-    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
-        this.renderHoverTooltips(renderStack, mouseX, mouseY, z, this.recipeId);
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
+        this.renderHoverTooltips(renderStack, xpos, ypos, z, this.recipeId);
     }
 }

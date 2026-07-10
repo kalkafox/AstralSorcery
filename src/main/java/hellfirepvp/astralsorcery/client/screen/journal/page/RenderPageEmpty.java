@@ -26,5 +26,5 @@ public class RenderPageEmpty extends RenderablePage {
     }
 
     @Override
-    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {}
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {}
 }

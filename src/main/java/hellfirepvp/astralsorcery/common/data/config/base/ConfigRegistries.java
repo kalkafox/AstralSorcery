@@ -54,8 +54,8 @@ public class ConfigRegistries {
 
                 ModConfigSpec.ConfigValue<List<? extends String>> cfgList = cfgBuilder
                         .comment(dataRegistry.getCommentDescription())
-                        .translation(dataRegistry.getTranslationKey())
-                        .defineList(registrySubSection(dataRegistry.getSectionName()),
+                        .translation(dataRegistry.getDescriptionId())
+                        .defineList(registrySubSection(dataRegistry.getMetadataSectionName()),
                                 dataRegistry.getDefaultValues()
                                         .stream()
                                         .map(ConfigDataSet::serialize)

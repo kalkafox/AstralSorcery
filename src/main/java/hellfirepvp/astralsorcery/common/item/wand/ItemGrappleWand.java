@@ -40,20 +40,20 @@ public class ItemGrappleWand extends Item implements AlignmentChargeConsumer {
 
     @Override
     public float getAlignmentChargeCost(Player player, ItemStack stack) {
-        return player.getCooldownTracker().hasCooldown(this) ? 0 : COST_PER_GRAPPLE;
+        return player.getCooldowns().isOnCooldown(this) ? 0 : COST_PER_GRAPPLE;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level worldIn, Player playerIn, InteractionHand handIn) {
-        ItemStack held = playerIn.getHeldItem(handIn);
-        if (worldIn.isRemote() || held.isEmpty()) {
-            return new InteractionResultHolder<>(ActionResultType.SUCCESS, held);
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+        ItemStack held = playerIn.getItemInHand(handIn);
+        if (worldIn.isClientSide() || held.isEmpty()) {
+            return new InteractionResultHolder<>(InteractionResult.SUCCESS, held);
         }
-        if (!playerIn.getCooldownTracker().hasCooldown(this) &&
+        if (!playerIn.getCooldowns().isOnCooldown(this) &&
                 AlignmentChargeHandler.INSTANCE.drainCharge(playerIn, LogicalSide.SERVER, COST_PER_GRAPPLE, false)) {
             worldIn.addEntity(new EntityGrapplingHook(playerIn, worldIn));
-            playerIn.getCooldownTracker().setCooldown(this, 40);
+            playerIn.getCooldowns().addCooldown(this, 40);
         }
-        return new InteractionResultHolder<>(ActionResultType.SUCCESS, held);
+        return new InteractionResultHolder<>(InteractionResult.SUCCESS, held);
     }
 }

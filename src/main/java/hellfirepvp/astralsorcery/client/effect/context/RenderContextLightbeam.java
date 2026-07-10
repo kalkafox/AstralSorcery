@@ -24,7 +24,7 @@ import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 public class RenderContextLightbeam extends BatchRenderContext<FXLightbeam> {
 
     public RenderContextLightbeam(SpriteSheetResource sprite) {
-        super(sprite, RenderTypesAS.EFFECT_FX_LIGHTBEAM, (ctx, pos) -> new FXLightbeam(pos).alpha(VFXAlphaFunction.PYRAMID));
+        super(sprite, RenderTypesAS.EFFECT_FX_LIGHTBEAM, (ctx, pos) -> new FXLightbeam(pos).alpha1arg(VFXAlphaFunction.PYRAMID));
     }
 
 }

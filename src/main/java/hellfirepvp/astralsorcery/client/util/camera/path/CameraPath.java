@@ -33,15 +33,15 @@ public class CameraPath extends EntityCameraRenderView implements ICameraPersist
 
     private int totalTickDuration = 0;
     private boolean expired = false;
-    private boolean stopped = false;
+    private boolean shutdown = false;
 
     CameraPath(Vector3 startPoint, Vector3 focusPoint, @Nullable ICameraTickListener tick) {
         this.startVector = startPoint;
         this.focus = focusPoint;
-        this.setRawPosition(startPoint.getX(), startPoint.getY(), startPoint.getZ());
-        this.prevPosX = getPosX();
-        this.prevPosY = getPosY();
-        this.prevPosZ = getPosZ();
+        this.setPosRaw(startPoint.getX(), startPoint.getY(), startPoint.getZ());
+        this.xo = getX();
+        this.yo = getY();
+        this.zo = getZ();
         this.delegate = tick;
         setCameraFocus(focusPoint);
         transformToFocusOnPoint(focusPoint, 0, false);
@@ -55,32 +55,32 @@ public class CameraPath extends EntityCameraRenderView implements ICameraPersist
         this.stopDelegate = delegate;
     }
 
-    void addPoint(Vector3 point, int ticks) {
+    void upHeap(Vector3 point, int ticks) {
         this.pathPoints.addLast(new PathPoint(point, ticks));
         this.totalTickDuration += ticks;
     }
 
     @Override
-    public void moveEntityTick(EntityCameraRenderView entity, EntityClientReplacement replacement, int ticksExisted) {
+    public void moveEntityTick(EntityCameraRenderView entity, EntityClientReplacement replacement, int tickCount) {
         if (delegate != null) {
             delegate.onCameraTick(entity, replacement);
         }
         setCameraFocus(Vector3.atEntityCorner(replacement));
-        this.expired = this.ticksExisted > totalTickDuration;
+        this.expired = this.tickCount > totalTickDuration;
         if (pathPoints.isEmpty()) {
             this.expired = true;
         } else {
-            Vector3 position = queryByTicks(ticksExisted);
-            this.prevPosX = this.getPosX();
-            this.prevPosY = this.getPosY();
-            this.prevPosZ = this.getPosZ();
-            this.setRawPosition(position.getX(), position.getY(), position.getZ());
+            Vector3 position = queryByTicks(tickCount);
+            this.xo = this.getX();
+            this.yo = this.getY();
+            this.zo = this.getZ();
+            this.setPosRaw(position.getX(), position.getY(), position.getZ());
         }
     }
 
     @Override
     public void onStopTransforming() {
-        if (stopDelegate != null && Minecraft.getInstance().world != null) {
+        if (stopDelegate != null && Minecraft.getInstance().level != null) {
             stopDelegate.onCameraStop();
         }
     }
@@ -102,33 +102,33 @@ public class CameraPath extends EntityCameraRenderView implements ICameraPersist
             if (accumulator >= ticks) {
                 int interp = current.ticksToGetThere - (accumulator - ticks);
                 int dstJump = current.ticksToGetThere;
-                return current.dstPoint.clone().subtract(prev).divide(dstJump).multiply(MathHelper.clamp(interp, 1, dstJump)).add(prev);
+                return current.dstPoint.clone().subtract(prev).divide(dstJump).mul(Mth.clamp(interp, 1, dstJump)).add(prev);
             } else {
                 acc = accumulator;
             }
         }
-        return pathPoints.getLast().dstPoint; //Doesn't happen since the list isn't empty.
+        return pathPoints.last().dstPoint; //Doesn't happen since the list isn't empty.
     }
 
     @Override
-    public boolean isExpired() {
+    public boolean timedOut() {
         return expired;
     }
 
     @Override
-    public void setExpired() {
+    public void remove() {
         this.expired = true;
     }
 
     @Override
     public void forceStop() {
-        this.stopped = true;
-        setExpired();
+        this.shutdown = true;
+        remove();
     }
 
     @Override
     public boolean wasForciblyStopped() {
-        return stopped;
+        return shutdown;
     }
 
     CameraPath copy() {

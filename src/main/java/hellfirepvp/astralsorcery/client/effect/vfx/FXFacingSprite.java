@@ -39,7 +39,7 @@ public class FXFacingSprite extends EntityVisualFX implements EntityDynamicFX {
         super(pos);
     }
 
-    public FXFacingSprite setSprite(SpriteSheetResource sprite) {
+    public FXFacingSprite pickSprite(SpriteSheetResource sprite) {
         this.sprite = sprite;
         return this;
     }
@@ -60,8 +60,8 @@ public class FXFacingSprite extends EntityVisualFX implements EntityDynamicFX {
         int alpha = this.getAlpha(pTicks);
         Color col = this.getColor(pTicks);
 
-        Vector3 vec = this.getRenderPosition(pTicks);
-        float scale = this.getScale(pTicks);
+        Vector3 vec = this.getCameraPosition(pTicks);
+        float scale = this.getQuadSize(pTicks);
 
         RenderTypeDecorator decorated = RenderTypeDecorator.wrapSetup(ctx.getRenderType(), ssr::bindTexture, BlockAtlasTexture.getInstance()::bindTexture);
         VertexConsumer buf = drawBuffer.getBuffer(decorated);

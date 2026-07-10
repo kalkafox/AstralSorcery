@@ -25,7 +25,7 @@ import javax.annotation.Nonnull;
 public abstract class BlockFlowerTemplate extends FlowerBlock implements CustomItemBlock {
 
     public BlockFlowerTemplate(Properties properties) {
-        super(Effects.INSTANT_HEALTH, 0, properties);
+        super(MobEffects.HEAL, 0, properties);
     }
 
     @Override
@@ -33,5 +33,5 @@ public abstract class BlockFlowerTemplate extends FlowerBlock implements CustomI
     public abstract MobEffect getStewEffect();
 
     @Override
-    public abstract int getStewEffectDuration();
+    public abstract int getEffectDuration();
 }

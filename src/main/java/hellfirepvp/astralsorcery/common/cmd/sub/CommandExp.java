@@ -38,7 +38,7 @@ public class CommandExp implements Command<CommandSourceStack> {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("exp")
-                .requires(cs -> cs.hasPermissionLevel(2))
+                .requires(cs -> cs.hasPermission(2))
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("exp", LongArgumentType.longArg())
                                 .executes(CMD)));
@@ -47,14 +47,14 @@ public class CommandExp implements Command<CommandSourceStack> {
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Player player = (Player) context.getArgument("player", EntitySelector.class).selectOne(context.getSource());
-        long exp = LongArgumentType.getLong(context, "exp");
+        long futureXp = LongArgumentType.getLong(context, "exp");
 
-        if (ResearchManager.setExp(player, exp)) {
-            context.getSource().sendFeedback(
-                    Component.literal("Success! Player exp has been set to " + exp).withStyle(TextFormatting.GREEN), true);
+        if (ResearchManager.setExp(player, futureXp)) {
+            context.getSource().customSuggestion(
+                    Component.literal("Success! Player exp has been set to " + futureXp).withStyle(ChatFormatting.GREEN), true);
         } else {
-            context.getSource().sendFeedback(
-                    Component.literal("Failed! Player specified doesn't seem to have a research progress!").withStyle(TextFormatting.RED), true);
+            context.getSource().customSuggestion(
+                    Component.literal("Failed! Player specified doesn't seem to have a research progress!").withStyle(ChatFormatting.RED), true);
         }
         return 0;
     }

@@ -22,7 +22,7 @@ import java.util.Random;
  * Created by HellFirePvP
  * Date: 19.11.2020 / 22:45
  */
-public class ChanceConfig implements IPlacementConfig {
+public class ChanceConfig implements DecoratorConfiguration {
 
     public static final Codec<ChanceConfig> CODEC = RecordCodecBuilder.create(codecInstance -> {
         return codecInstance.group(Codec.FLOAT.fieldOf("chance").forGetter(config -> {
@@ -33,10 +33,10 @@ public class ChanceConfig implements IPlacementConfig {
     private final float chance;
 
     public ChanceConfig(float chance) {
-        this.chance = MathHelper.clamp(chance, 0F, 1F);
+        this.chance = Mth.clamp(chance, 0F, 1F);
     }
 
-    public boolean test(Random rand) {
-        return rand.nextFloat() < this.chance;
+    public boolean test(Random random) {
+        return random.nextFloat() < this.chance;
     }
 }

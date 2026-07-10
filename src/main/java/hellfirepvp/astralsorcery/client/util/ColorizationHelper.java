@@ -51,7 +51,7 @@ public class ColorizationHelper {
         Item i = stack.getItem();
 
         if (!itemColors.containsKey(i)) {
-            TextureAtlasSprite tas = RenderingUtils.getParticleTexture(stack);
+            TextureAtlasSprite tas = RenderingUtils.getParticleIcon(stack);
             if (tas != null) {
                 itemColors.put(i, getDominantColor(tas));
             } else {
@@ -66,10 +66,10 @@ public class ColorizationHelper {
         if (stack.isEmpty()) {
             return Optional.empty();
         }
-        Fluid fluid = stack.getFluid();
+        Fluid fluid = stack.getType();
 
         if (!fluidColors.containsKey(fluid)) {
-            TextureAtlasSprite tas = RenderingUtils.getParticleTexture(stack);
+            TextureAtlasSprite tas = RenderingUtils.getParticleIcon(stack);
             if (tas != null) {
                 fluidColors.put(fluid, getDominantColor(tas));
             } else {
@@ -119,8 +119,8 @@ public class ColorizationHelper {
     }
 
     public static PreparableReloadListener onReload() {
-        return (stage, resourceManager, preparationsProfiler, reloadProfiler, backgroundExecutor, gameExecutor) ->
-                stage.markCompleteAwaitingOthers(Unit.INSTANCE).thenRunAsync(() -> {
+        return (stage, resourceManager, preparationsProfiler, reloadProfiler, executor, gameExecutor) ->
+                stage.wait(Unit.INSTANCE).thenRunAsync(() -> {
                     if (!SelectiveReloadStateHandler.INSTANCE.get().test(VanillaResourceType.TEXTURES)) {
                         return;
                     }

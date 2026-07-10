@@ -15,7 +15,7 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 
@@ -40,32 +40,32 @@ public class AttributeTypeAllElementalResist extends PerkAttributeType {
         eventBus.addListener(this::onDamageTaken);
     }
 
-    private void onDamageTaken(LivingHurtEvent event) {
+    private void onDamageTaken(LivingIncomingDamageEvent event) {
         if (!(event.getEntityLiving() instanceof Player)) {
             return;
         }
         Player player = (Player) event.getEntityLiving();
-        LogicalSide side = this.getSide(player);
-        if (!hasTypeApplied(player, side)) {
+        LogicalSide direction = this.getSide(player);
+        if (!hasTypeApplied(player, direction)) {
             return;
         }
         DamageSource ds = event.getSource();
         if (isMaybeElementalDamage(ds)) {
-            float multiplier = PerkAttributeHelper.getOrCreateMap(player, side)
-                    .modifyValue(player, ResearchHelper.getProgress(player, side), this, 1F);
+            float multiplier = PerkAttributeHelper.getOrCreateMap(player, direction)
+                    .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 1F);
             multiplier -= 1F;
             multiplier = AttributeEvent.postProcessModded(player, this, multiplier);
-            multiplier = 1F - MathHelper.clamp(multiplier, 0F, 1F);
+            multiplier = 1F - Mth.clamp(multiplier, 0F, 1F);
             event.setAmount(event.getAmount() * multiplier);
         }
     }
 
     private boolean isMaybeElementalDamage(DamageSource source) {
         // "Magic" is often used for any kinds of damages... poison for example
-        if (source.isFireDamage() || source.isMagicDamage()) {
+        if (source.isFire() || source.isMagic()) {
             return true;
         }
-        String key = source.getDamageType();
+        String key = source.getMsgId();
         if (key == null) {
             return false;
         }

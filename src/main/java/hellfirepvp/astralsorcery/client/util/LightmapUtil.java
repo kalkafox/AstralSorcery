@@ -33,7 +33,7 @@ public class LightmapUtil {
         return skyLight << 20 | blockLight << 4;
     }
 
-    public static int getPackedLightCoords(BlockAndTintGetter world, BlockPos at) {
-        return WorldRenderer.getCombinedLight(world, at);
+    public static int getPackedLightCoords(BlockAndTintGetter level, BlockPos at) {
+        return LevelRenderer.getCombinedLight(level, at);
     }
 }

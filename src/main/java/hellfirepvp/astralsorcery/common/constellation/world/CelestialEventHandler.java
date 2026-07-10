@@ -70,9 +70,9 @@ public class CelestialEventHandler {
         return Math.abs(tick);
     }
 
-    void tick(Level world) {
+    void tick(Level level) {
         for (CelestialEvent event : this.events) {
-            event.tick(world, this.ctx.getRandom(event.getSeedModifier()), ctx);
+            event.tick(level, this.ctx.getRandom(event.getSeedModifier()), ctx);
         }
     }
 

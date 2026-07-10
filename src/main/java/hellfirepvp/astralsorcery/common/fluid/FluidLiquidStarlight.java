@@ -41,11 +41,11 @@ public abstract class FluidLiquidStarlight extends ForgeFlowingFluid {
 
         public Flowing(Properties properties) {
             super(properties);
-            setDefaultState(getStateContainer().getBaseState().with(LEVEL_1_8, 7));
+            registerDefaultState(getStateContainer().any().setValue(LEVEL_1_8, 7));
         }
 
-        protected void fillStateContainer(StateContainer.Builder<Fluid, FluidState> builder) {
-            super.fillStateContainer(builder);
+        protected void createBlockStateDefinition(StateDefinition.Builder<Fluid, FluidState> builder) {
+            super.createBlockStateDefinition(builder);
             builder.add(LEVEL_1_8);
         }
 

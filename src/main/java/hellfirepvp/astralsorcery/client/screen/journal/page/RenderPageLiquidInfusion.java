@@ -47,7 +47,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
         this.clearFrameRectangles();
 
         this.renderRecipeGrid(renderStack, x, y, z, TexturesAS.TEX_GUI_BOOK_GRID_INFUSION);
@@ -60,9 +60,9 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
         this.renderExpectedIngredientInput(renderStack, renderX, renderY, z, 1.2F, 0, this.recipe.getItemInput());
 
         BlockAtlasTexture.getInstance().bindTexture();
-        TextureAtlasSprite tas = RenderingUtils.getParticleTexture(new FluidStack(this.recipe.getLiquidInput(), FluidAttributes.BUCKET_VOLUME));
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            renderStack.push();
+        TextureAtlasSprite tas = RenderingUtils.getParticleIcon(new FluidStack(this.recipe.getLiquidInput(), FluidAttributes.BUCKET_VOLUME));
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            renderStack.pushPose();
             renderStack.translate(x, y, z);
             this.renderLiquidInput(buf, renderStack, tas, 1, 0);
             this.renderLiquidInput(buf, renderStack, tas, 2, 0);
@@ -76,7 +76,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
             this.renderLiquidInput(buf, renderStack, tas, 4, 1);
             this.renderLiquidInput(buf, renderStack, tas, 4, 2);
             this.renderLiquidInput(buf, renderStack, tas, 4, 3);
-            renderStack.pop();
+            renderStack.popPose();
         });
     }
 
@@ -87,14 +87,14 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public boolean propagateMouseClick(double mouseX, double mouseZ) {
-        return this.handleBookLookupClick(mouseX, mouseZ);
+    public boolean propagateMouseClick(double xpos, double mouseZ) {
+        return this.handleBookLookupClick(xpos, mouseZ);
     }
 
     @Override
-    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
-        this.renderHoverTooltips(renderStack, mouseX, mouseY, z, this.recipe.getId());
-        this.renderInfoStarTooltips(renderStack, x, y, z, mouseX, mouseY, (toolTip) -> {
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
+        this.renderHoverTooltips(renderStack, xpos, ypos, z, this.recipe.getId());
+        this.renderInfoStarTooltips(renderStack, x, y, z, xpos, ypos, (toolTip) -> {
             toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.liquid",
                     this.recipe.getLiquidInput().getAttributes().getDisplayName(new FluidStack(this.recipe.getLiquidInput(), FluidAttributes.BUCKET_VOLUME))));
             toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.chance.format",

@@ -27,7 +27,7 @@ import java.util.function.Consumer;
  */
 public class BlockTransmutationRecipeProvider {
 
-    public static void registerTransmutationRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerTransmutationRecipes(Consumer<FinishedRecipe> registrar) {
         BlockTransmutationBuilder.builder(AstralSorcery.key("iron_starmetal"))
                 .multiplyStarlightCost(0.5F)
                 .addInputCheck(Tags.Blocks.ORES_IRON, new ItemStack(Blocks.IRON_ORE))

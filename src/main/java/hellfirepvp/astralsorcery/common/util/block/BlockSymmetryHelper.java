@@ -28,21 +28,21 @@ import java.util.function.Predicate;
  */
 public class BlockSymmetryHelper {
 
-    public SymmetryResult getDotSymmetry(BlockGetter world, BlockPos center, int radiusLayer, boolean allowMirrorSymmetry, Predicate<BlockState> applicableStateFilter) {
+    public SymmetryResult getDotSymmetry(BlockGetter level, BlockPos center, int radiusLayer, boolean allowMirrorSymmetry, Predicate<BlockState> applicableStateFilter) {
         List<BlockPos> layerPositions = BlockGeometry.getHollowSphere(radiusLayer + 1, radiusLayer);
         SymmetryResult result = new SymmetryResult(layerPositions.size());
         Set<BlockPos> visitedBlocks = new HashSet<>();
 
         for (BlockPos offset : layerPositions) {
-            BlockPos at = center.add(offset);
+            BlockPos at = center.offset(offset);
             if (visitedBlocks.contains(at)) {
                 continue;
             }
             visitedBlocks.add(at);
 
-            BlockState state = world.getBlockState(at);
+            BlockState state = level.getBlockState(at);
             if (offset.getX() == 0 || offset.getY() == 0 || offset.getZ() == 0) {
-                if (!state.isAir(world, at)) {
+                if (!state.isAir(level, at)) {
                     result.fillerBlocks.add(at);
                 }
                 continue;
@@ -50,22 +50,22 @@ public class BlockSymmetryHelper {
 
             if (applicableStateFilter.test(state)) {
                 BlockPos dotSym = center.subtract(offset);
-                BlockState dotState = world.getBlockState(dotSym);
+                BlockState dotState = level.getBlockState(dotSym);
                 if (applicableStateFilter.test(dotState)) {
                     result.symmetryPairs.add(new BiDiPair<>(at, dotSym));
 
                     if (!allowMirrorSymmetry) {
-                        checkMirrorSymmetry(world, new Vec3i(-offset.getX(),  offset.getY(),  offset.getZ()), center, result, visitedBlocks);
-                        checkMirrorSymmetry(world, new Vec3i( offset.getX(), -offset.getY(),  offset.getZ()), center, result, visitedBlocks);
-                        checkMirrorSymmetry(world, new Vec3i( offset.getX(),  offset.getY(), -offset.getZ()), center, result, visitedBlocks);
+                        checkMirrorSymmetry(level, new Vec3i(-offset.getX(),  offset.getY(),  offset.getZ()), center, result, visitedBlocks);
+                        checkMirrorSymmetry(level, new Vec3i( offset.getX(), -offset.getY(),  offset.getZ()), center, result, visitedBlocks);
+                        checkMirrorSymmetry(level, new Vec3i( offset.getX(),  offset.getY(), -offset.getZ()), center, result, visitedBlocks);
                     }
-                } else if (!dotState.isAir(world, dotSym)) {
+                } else if (!dotState.isAir(level, dotSym)) {
                     result.fillerBlocks.add(at);
                     result.fillerBlocks.add(dotSym);
                 }
 
                 visitedBlocks.add(dotSym);
-            } else if (!state.isAir(world, at)) {
+            } else if (!state.isAir(level, at)) {
                 result.fillerBlocks.add(at);
             }
         }
@@ -74,20 +74,20 @@ public class BlockSymmetryHelper {
         return result;
     }
 
-    private static void checkMirrorSymmetry(BlockGetter world, Vec3i offset, BlockPos center, SymmetryResult result, Set<BlockPos> visitedBlocks) {
+    private static void checkMirrorSymmetry(BlockGetter level, Vec3i offset, BlockPos center, SymmetryResult result, Set<BlockPos> visitedBlocks) {
         BlockPos at = center.add(offset);
-        BlockState state = world.getBlockState(at);
+        BlockState state = level.getBlockState(at);
         visitedBlocks.add(at);
 
-        if (!state.isAir(world, at)) {
+        if (!state.isAir(level, at)) {
             result.fillerBlocks.add(at);
         }
 
         BlockPos dotSym = center.subtract(offset);
-        BlockState dotState = world.getBlockState(dotSym);
+        BlockState dotState = level.getBlockState(dotSym);
         visitedBlocks.add(dotSym);
 
-        if (!dotState.isAir(world, dotSym)) {
+        if (!dotState.isAir(level, dotSym)) {
             result.fillerBlocks.add(at);
         }
     }

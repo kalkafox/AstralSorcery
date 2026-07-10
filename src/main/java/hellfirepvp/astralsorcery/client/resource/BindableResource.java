@@ -46,8 +46,8 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         return path;
     }
 
-    public SpriteSheetResource asSpriteSheet(int rows, int columns) {
-        return new SpriteSheetResource(this, rows, columns);
+    public SpriteSheetResource asSpriteSheet(int height, int width) {
+        return new SpriteSheetResource(this, height, width);
     }
 
     public void invalidateAndReload() {
@@ -64,7 +64,7 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         if (resource != null) {
             return resource;
         }
-        mgr.loadTexture(this.getKey(), new SimpleTexture(new ResourceLocation(this.getPath())));
+        mgr.loadTexture(this.getKey(), new SimpleTexture(ResourceLocation.parse(this.getPath())));
         return mgr.getTexture(this.getKey());
     }
 
@@ -79,7 +79,7 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         if (this.resource == null) {
             return;
         }
-        RenderSystem.bindTexture(this.resource.getGlTextureId());
+        RenderSystem.bindTexture(this.resource.getId());
     }
 
     @Override

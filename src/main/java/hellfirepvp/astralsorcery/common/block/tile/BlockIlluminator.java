@@ -47,33 +47,33 @@ public class BlockIlluminator extends BaseEntityBlock implements CustomItemBlock
 
     public BlockIlluminator() {
         super(PropertiesGlass.coatedGlass()
-                .setLightLevel(state -> 10)
+                .isRedstoneConductor(state -> 10)
                 .harvestLevel(1)
                 .harvestTool(ToolType.PICKAXE));
         this.shape = createShape();
     }
 
     protected VoxelShape createShape() {
-        List<VoxelShape> shapes = new ArrayList<>();
+        List<VoxelShape> shapeByIndex = new ArrayList<>();
         for (int xx = 0; xx < 3; xx++) {
             for (int yy = 0; yy < 3; yy++) {
                 for (int zz = 0; zz < 3; zz++) {
-                    shapes.add(Block.makeCuboidShape(
+                    shapeByIndex.add(Block.box(
                             1 + xx * 5, 1 + yy * 5, 1 + zz * 5,
                             5 + xx * 5, 5 + yy * 5, 5 + zz * 5));
                 }
             }
         }
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR, shapes);
+        return VoxelUtils.combineAll(BooleanOp.OR, shapeByIndex);
     }
 
     @Override
-    public void onBlockPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        super.onBlockPlacedBy(world, pos, state, placer, stack);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
 
-        if (!world.isRemote() && placer instanceof Player) {
-            TileIlluminator illuminator = MiscUtils.getTileAt(world, pos, TileIlluminator.class, true);
+        if (!level.isClientSide() && placer instanceof Player) {
+            TileIlluminator illuminator = MiscUtils.getTileAt(level, pos, TileIlluminator.class, true);
             if (illuminator != null)  {
                 illuminator.setPlayerPlaced(true);
             }
@@ -86,18 +86,18 @@ public class BlockIlluminator extends BaseEntityBlock implements CustomItemBlock
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter world) {
+    public BlockEntity newBlockEntity(BlockGetter level) {
         return new TileIlluminator();
     }
 }

@@ -24,8 +24,8 @@ public class MaterialBuilderAS {
     private final MaterialColor color;
     private PushReaction pushReaction = PushReaction.NORMAL;
     private boolean blocksMovement = true;
-    private boolean canBurn = false;
-    private boolean isLiquid = false;
+    private boolean flammable = false;
+    private boolean liquid = false;
     private boolean isReplaceable = false;
     private boolean isSolid = true;
     private boolean isOpaque = true;
@@ -35,7 +35,7 @@ public class MaterialBuilderAS {
     }
 
     public MaterialBuilderAS liquid() {
-        this.isLiquid = true;
+        this.liquid = true;
         return this;
     }
 
@@ -49,13 +49,13 @@ public class MaterialBuilderAS {
         return this;
     }
 
-    public MaterialBuilderAS notOpaque() {
+    public MaterialBuilderAS notSolidBlocking() {
         this.isOpaque = false;
         return this;
     }
 
     public MaterialBuilderAS flammable() {
-        this.canBurn = true;
+        this.flammable = true;
         return this;
     }
 
@@ -64,12 +64,12 @@ public class MaterialBuilderAS {
         return this;
     }
 
-    public MaterialBuilderAS pushDestroys() {
+    public MaterialBuilderAS destroyOnPush() {
         this.pushReaction = PushReaction.DESTROY;
         return this;
     }
 
-    public MaterialBuilderAS pushBlocks() {
+    public MaterialBuilderAS notPushable() {
         this.pushReaction = PushReaction.BLOCK;
         return this;
     }
@@ -77,11 +77,11 @@ public class MaterialBuilderAS {
     public Material build() {
         return new Material(
                 this.color,
-                this.isLiquid,
+                this.liquid,
                 this.isSolid,
                 this.blocksMovement,
                 this.isOpaque,
-                this.canBurn,
+                this.flammable,
                 this.isReplaceable,
                 this.pushReaction);
     }

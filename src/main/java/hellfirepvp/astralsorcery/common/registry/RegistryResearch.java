@@ -278,7 +278,7 @@ public class RegistryResearch {
                 .register(ResearchProgression.CONSTELLATION);
 
         ItemStack celestialCrystalCluster = new ItemStack(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER);
-        celestialCrystalCluster.setDamage(4); //Growth stage 4
+        celestialCrystalCluster.setBaseDamage(4); //Growth stage 4
         ResearchNode resCelestialCrystalCluster = new ResearchNode(celestialCrystalCluster, "CEL_CRYSTAL_GROW", 6.25F, 4)
                 .addPage(text("CEL_CRYSTAL_GROW.1"))
                 .addPage(text("CEL_CRYSTAL_GROW.2"))
@@ -829,7 +829,7 @@ public class RegistryResearch {
     }
 
     private static JournalPage structure(StructureType structure) {
-        return new JournalPageStructure(structure.getStructure());
+        return new JournalPageStructure(structure.getFeature());
     }
 
     private static JournalPage text(String identifier) {

@@ -84,25 +84,25 @@ public class PktProgressionUpdate extends ASPacket<PktProgressionUpdate> {
                     if (packet.tier != null) {
                         Minecraft.getInstance().player.sendMessage(
                                 Component.translatable("astralsorcery.progress.gain.progress.chat")
-                                        .withStyle(TextFormatting.BLUE), Util.DUMMY_UUID);
+                                        .withStyle(ChatFormatting.BLUE), Util.NIL_UUID);
                     }
                     if (packet.prog != null) {
                         Minecraft.getInstance().player.sendMessage(
                                 Component.translatable("astralsorcery.progress.gain.research.chat", packet.prog.getName())
-                                        .withStyle(TextFormatting.AQUA), Util.DUMMY_UUID);
+                                        .withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
                     }
                     packet.refreshJournal();
                 });
             }
 
             @Override
-            public void handle(PktProgressionUpdate packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktProgressionUpdate packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 
     @OnlyIn(Dist.CLIENT)
     private void refreshJournal() {
-        Screen open = Minecraft.getInstance().currentScreen;
+        Screen open = Minecraft.getInstance().screen;
         if (open != null) {
             if (open instanceof ScreenJournal && !(open instanceof ScreenJournalPerkTree)) {
                 Minecraft.getInstance().displayGuiScreen(null);

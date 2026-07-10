@@ -106,11 +106,11 @@ public class ByteBufUtils {
         if (size == -1) {
             return null;
         }
-        C collection = newCollection.get();
+        C HELPER = newCollection.get();
         for (int i = 0; i < size; i++) {
-            addFn.accept(collection, readFct.apply(buf));
+            addFn.accept(HELPER, readFct.apply(buf));
         }
-        return collection;
+        return HELPER;
     }
 
     public static <K, V> void writeMap(FriendlyByteBuf buf,
@@ -149,8 +149,8 @@ public class ByteBufUtils {
         writeString(buf, json.toString());
     }
 
-    public static MutableComponent readTextComponent(FriendlyByteBuf buf) {
-        return (MutableComponent) ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(readString(buf)))
+    public static MutableComponent readComponent(FriendlyByteBuf buf) {
+        return (MutableComponent) ComponentSerialization.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(readUtf(buf)))
                 .getOrThrow(IllegalStateException::new);
     }
 
@@ -160,7 +160,7 @@ public class ByteBufUtils {
         buf.writeBytes(str);
     }
 
-    public static String readString(FriendlyByteBuf buf) {
+    public static String readUtf(FriendlyByteBuf buf) {
         int length = buf.readInt();
         byte[] strBytes = new byte[length];
         buf.readBytes(strBytes, 0, length);
@@ -198,7 +198,7 @@ public class ByteBufUtils {
     }
 
     public static ResourceLocation readResourceLocation(FriendlyByteBuf buf) {
-        return ResourceLocation.parse(readString(buf));
+        return ResourceLocation.parse(readUtf(buf));
     }
 
     public static <T extends Enum<T>> void writeEnumValue(FriendlyByteBuf buf, T value) {
@@ -217,11 +217,11 @@ public class ByteBufUtils {
     }
 
     public static JsonObject readJsonObject(FriendlyByteBuf buf) {
-        return new JsonParser().parse(readString(buf)).getAsJsonObject();
+        return new JsonParser().parse(readUtf(buf)).getAsJsonObject();
     }
 
     public static void writeModifierSource(FriendlyByteBuf buf, ModifierSource source) {
-        ResourceLocation providerName = source.getProviderName();
+        ResourceLocation providerName = source.gatherChunkSourceStats();
         ByteBufUtils.writeResourceLocation(buf, providerName);
 
         ModifierSourceProvider provider = ModifierManager.getProvider(providerName);
@@ -277,7 +277,7 @@ public class ByteBufUtils {
     }
 
     @Nonnull
-    public static ItemStack readItemStack(FriendlyByteBuf byteBuf) {
+    public static ItemStack readItem(FriendlyByteBuf byteBuf) {
         boolean defined = byteBuf.readBoolean();
         if (defined) {
             return ItemStack.read(readNBTTag(byteBuf));
@@ -299,17 +299,17 @@ public class ByteBufUtils {
 
     public static <T extends Comparable<T>> BlockState readBlockState(FriendlyByteBuf byteBuf) {
         Block block = ByteBufUtils.readRegistryEntry(byteBuf);
-        BlockState state = block.getDefaultState();
+        BlockState state = block.defaultBlockState();
 
         int properties = byteBuf.readInt();
         for (int i = 0; i < properties; i++) {
-            String propName = ByteBufUtils.readString(byteBuf);
-            String valueStr = ByteBufUtils.readString(byteBuf);
+            String propName = ByteBufUtils.readUtf(byteBuf);
+            String valueStr = ByteBufUtils.readUtf(byteBuf);
             Property<T> property = (Property<T>) MiscUtils.iterativeSearch(state.getProperties(), prop -> prop.getName().equalsIgnoreCase(propName));
             if (property != null) {
-                Optional<T> value = property.parseValue(valueStr);
+                Optional<T> value = property.getValue(valueStr);
                 if (value.isPresent()) {
-                    state = state.with(property, value.get());
+                    state = state.setValue(property, value.get());
                 }
             }
         }

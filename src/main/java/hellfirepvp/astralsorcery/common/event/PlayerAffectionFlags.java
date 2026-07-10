@@ -42,11 +42,11 @@ public class PlayerAffectionFlags {
     }
 
     public static void markPlayerAffected(Player player, AffectionFlag flag) {
-        affectMap.getOrCreateList(player.getUniqueID()).setOrAddTimeout(DEFAULT_TICK_TIMEOUT, flag);
+        affectMap.getOrCreateList(player.getUUID()).setOrAddTimeout(DEFAULT_TICK_TIMEOUT, flag);
     }
 
     public static boolean isPlayerAffected(Player player, AffectionFlag flag) {
-        UUID playerUUID = player.getUniqueID();
+        UUID playerUUID = player.getUUID();
         return affectMap.hasList(playerUUID) && affectMap.getOrCreateList(playerUUID).contains(flag);
     }
 

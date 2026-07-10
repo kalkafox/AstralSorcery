@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
 import hellfirepvp.astralsorcery.common.crystal.CrystalProperty;
 import hellfirepvp.astralsorcery.common.crystal.calc.PropertySource;
@@ -88,14 +89,14 @@ public class RegistryCrystalProperties {
         };
 
         CREATIVE_CRYSTAL_TOOL_ATTRIBUTES =
-                CrystalAttributes.Builder.newBuilder(false)
+                CrystalAttributes.Builder.properties(false)
                         .addProperty(PROPERTY_SIZE, 3)
                         .addProperty(PROPERTY_SHAPE, 3)
                         .addProperty(PROPERTY_TOOL_DURABILITY, 3)
                         .addProperty(PROPERTY_TOOL_EFFICIENCY, 3)
                         .build();
         WORLDGEN_SHRINE_COLLECTOR_ATTRIBUTES =
-                CrystalAttributes.Builder.newBuilder(false)
+                CrystalAttributes.Builder.properties(false)
                         .addProperty(PROPERTY_SIZE, 2)
                         .addProperty(PROPERTY_SHAPE, 2)
                         .addProperty(PROPERTY_PURITY, 2)
@@ -103,14 +104,14 @@ public class RegistryCrystalProperties {
                         .build();
 
         CREATIVE_ROCK_COLLECTOR_ATTRIBUTES =
-                CrystalAttributes.Builder.newBuilder(false)
+                CrystalAttributes.Builder.properties(false)
                         .addProperty(PROPERTY_SIZE, 3)
                         .addProperty(PROPERTY_SHAPE, 3)
                         .addProperty(PROPERTY_PURITY, 2)
                         .addProperty(PROPERTY_COLLECTOR_COLLECTION_RATE, 3)
                         .build();
         CREATIVE_CELESTIAL_COLLECTOR_ATTRIBUTES =
-                CrystalAttributes.Builder.newBuilder(false)
+                CrystalAttributes.Builder.properties(false)
                         .addProperty(PROPERTY_SIZE, 3)
                         .addProperty(PROPERTY_SHAPE, 3)
                         .addProperty(PROPERTY_PURITY, 2)
@@ -118,14 +119,13 @@ public class RegistryCrystalProperties {
                         .build();
 
         LENS_PRISM_CREATIVE_ATTRIBUTES =
-                CrystalAttributes.Builder.newBuilder(false)
+                CrystalAttributes.Builder.properties(false)
                         .addProperty(PROPERTY_PURITY, 2)
                         .addProperty(PROPERTY_SHAPE, 3)
                         .build();
     }
 
     private static <T extends CrystalProperty> T registerProperty(T property) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(property);
-        return property;
+        return AstralRegistries.register(AstralRegistries.CRYSTAL_PROPERTIES, property);
     }
 }

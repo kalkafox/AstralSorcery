@@ -46,26 +46,26 @@ public class StorageKey {
         StorageKey that = (StorageKey) o;
         Item thisItem = this.stack.getItem();
         Item thatItem = that.stack.getItem();
-        return Objects.equals(thisItem.getRegistryName(), thatItem.getRegistryName());
+        return Objects.equals(RegistryHelper.getKey(thisItem), RegistryHelper.getKey(thatItem));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(stack.getItem().getRegistryName());
+        return Objects.hash(RegistryHelper.getKey(stack.getItem()));
     }
 
     @Nonnull
     public CompoundTag serialize() {
         CompoundTag keyTag = new CompoundTag();
-        keyTag.putString("name", stack.getItem().getRegistryName().toString());
+        keyTag.putString("name", RegistryHelper.getKey(stack.getItem()).toString());
         return keyTag;
     }
 
     //If the item in question does no longer exist in the registry, return null.
     @Nullable
     public static StorageKey deserialize(CompoundTag nbt) {
-        ResourceLocation rl = new ResourceLocation(nbt.getString("name"));
-        Item i = ForgeRegistries.ITEMS.getValue(rl);
+        ResourceLocation rl = ResourceLocation.parse(nbt.getString("name"));
+        Item i = BuiltInRegistries.ITEM.get(rl);
         if (i == null || i == Items.AIR) {
             return null;
         }

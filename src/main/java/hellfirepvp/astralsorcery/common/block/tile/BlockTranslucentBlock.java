@@ -35,18 +35,18 @@ public class BlockTranslucentBlock extends BlockFakedState {
     public BlockTranslucentBlock() {
         super(Properties.create(Material.BARRIER, MaterialColor.AIR)
                 .hardnessAndResistance(-1.0F, 6_000_000.0F)
-                .setLightLevel(state -> 12));
+                .isRedstoneConductor(state -> 12));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
-        this.playParticles(world, pos, rand);
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+        this.showBreakingParticles(level, pos, random);
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter world) {
+    public BlockEntity newBlockEntity(BlockGetter level) {
         return new TileTranslucentBlock();
     }
 }

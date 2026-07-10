@@ -45,38 +45,38 @@ public class AttributeTypeCritMultiplier extends PerkAttributeType {
     private void onArrowCrit(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof Arrow) {
             Arrow arrow = (Arrow) event.getEntity();
-            if (!arrow.getIsCritical()) {
+            if (!arrow.isCritArrow()) {
                 return;
             }
 
-            Entity shooter = arrow.func_234616_v_();
+            Entity shooter = arrow.getOwner();
             if (shooter instanceof Player) {
                 Player player = (Player) shooter;
-                LogicalSide side = this.getSide(player);
-                if (!hasTypeApplied(player, side)) {
+                LogicalSide direction = this.getSide(player);
+                if (!hasTypeApplied(player, direction)) {
                     return;
                 }
-                float dmgMod = PerkAttributeHelper.getOrCreateMap(player, side)
-                        .modifyValue(player, ResearchHelper.getProgress(player, side), this, 1F);
+                float dmgMod = PerkAttributeHelper.getOrCreateMap(player, direction)
+                        .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 1F);
                 dmgMod = AttributeEvent.postProcessModded(player, this, dmgMod);
-                arrow.setDamage(arrow.getDamage() * dmgMod);
+                arrow.setBaseDamage(arrow.getDamage() * dmgMod);
             }
         }
     }
 
     private void onHitCrit(CriticalHitEvent event) {
-        if (!event.isVanillaCritical() && event.getResult() != Event.Result.ALLOW) {
+        if (!event.isVanillaCritical() && event.getObject() != Event.Result.ALLOW) {
             return; //No crit
         }
 
         Player player = event.getPlayer();
-        LogicalSide side = this.getSide(player);
-        if (!hasTypeApplied(player, side)) {
+        LogicalSide direction = this.getSide(player);
+        if (!hasTypeApplied(player, direction)) {
             return;
         }
 
-        float dmgMod = PerkAttributeHelper.getOrCreateMap(player, side)
-                .modifyValue(player, ResearchHelper.getProgress(player, side), this, 1F);
+        float dmgMod = PerkAttributeHelper.getOrCreateMap(player, direction)
+                .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 1F);
         dmgMod = AttributeEvent.postProcessModded(player, this, dmgMod);
         event.setDamageModifier(event.getDamageModifier() * dmgMod);
     }

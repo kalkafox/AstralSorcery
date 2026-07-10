@@ -48,28 +48,28 @@ public class KeyStoneEnrichment extends KeyPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(Player player, LogicalSide side) {
-        if (side.isServer()) {
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+    public void onPlayerTick(Player player, LogicalSide direction) {
+        if (direction.isServer()) {
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             float modChance = (float) CONFIG.chanceToEnrich.get();
-            modChance /= PerkAttributeHelper.getOrCreateMap(player, side)
-                    .getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
-            if (rand.nextInt(Math.round(Math.max(modChance, 1))) == 0 &&
+            modChance /= PerkAttributeHelper.getOrCreateMap(player, direction)
+                    .getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+            if (random.nextInt(Math.round(Math.max(modChance, 1))) == 0 &&
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), true)) {
                 float radius = (float) CONFIG.enrichmentRadius.get();
-                radius *= PerkAttributeHelper.getOrCreateMap(player, side)
-                        .getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+                radius *= PerkAttributeHelper.getOrCreateMap(player, direction)
+                        .getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
 
                 Vector3 vec = Vector3.atEntityCenter(player).add(
-                        (rand.nextFloat() * radius * 2) - radius,
-                        (rand.nextFloat() * radius * 2) - radius,
-                        (rand.nextFloat() * radius * 2) - radius);
-                Level world = player.getEntityWorld();
+                        (random.nextFloat() * radius * 2) - radius,
+                        (random.nextFloat() * radius * 2) - radius,
+                        (random.nextFloat() * radius * 2) - radius);
+                Level level = player.getCommandSenderWorld();
                 BlockPos pos = vec.toBlockPos();
-                if (BlockTags.BASE_STONE_OVERWORLD.contains(world.getBlockState(pos).getBlock())) {
-                    Block block = OreBlockRarityRegistry.STONE_ENRICHMENT.getRandomBlock(rand);
+                if (BlockTags.BASE_STONE_OVERWORLD.contains(level.getBlockState(pos).getBlock())) {
+                    Block block = OreBlockRarityRegistry.STONE_ENRICHMENT.getRandomBlock(random);
                     if (block != null) {
-                        if (world.setBlockState(pos, block.getDefaultState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
+                        if (level.setBlock(pos, block.defaultBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
                             AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                         }
                     }

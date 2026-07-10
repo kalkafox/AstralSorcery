@@ -41,8 +41,8 @@ public class WorldSeedCache {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void updateSeedCache(ResourceKey<Level> dim, int session, long seed) {
-        if (activeSession == session) {
+    public static void updateSeedCache(ResourceKey<Level> dim, int user, long seed) {
+        if (activeSession == user) {
             cacheSeedLookup.put(dim, seed);
         }
     }

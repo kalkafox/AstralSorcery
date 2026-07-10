@@ -29,12 +29,12 @@ public class PatternAltarTrait extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        BlockState bricks = BlocksAS.MARBLE_BRICKS.getDefaultState();
+        BlockState bricks = BlocksAS.MARBLE_BRICKS.defaultBlockState();
 
-        StructureTypesAS.PTYPE_ALTAR_CONSTELLATION.getStructure().getContents().forEach((pos, state) ->
+        StructureTypesAS.PTYPE_ALTAR_CONSTELLATION.getFeature().getContents().forEach((pos, state) ->
                 this.addBlock(state, pos.getX(), pos.getY(), pos.getZ()));
 
-        addBlock(BlocksAS.ALTAR_RADIANCE.getDefaultState(), 0, 0, 0);
+        addBlock(BlocksAS.ALTAR_RADIANCE.defaultBlockState(), 0, 0, 0);
 
         addBlock(bricks, 4, 3, 3);
         addBlock(bricks, 4, 3, -3);

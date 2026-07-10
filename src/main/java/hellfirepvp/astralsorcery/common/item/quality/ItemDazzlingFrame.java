@@ -41,7 +41,7 @@ public class ItemDazzlingFrame extends Item {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
         getQuality(stack).ifPresent(quality -> tooltip.add(quality.getDisplayName()));
     }
 

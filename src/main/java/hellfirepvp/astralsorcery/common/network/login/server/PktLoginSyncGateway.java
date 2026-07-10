@@ -83,7 +83,7 @@ public class PktLoginSyncGateway extends ASLoginPacket<PktLoginSyncGateway> {
             }
 
             @Override
-            public void handle(PktLoginSyncGateway packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktLoginSyncGateway packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

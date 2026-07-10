@@ -18,6 +18,7 @@ import hellfirepvp.astralsorcery.common.constellation.star.StarLocation;
 import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.TagsAS;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.Items;
 import net.minecraft.tags.ItemTags;
@@ -261,8 +262,8 @@ public class RegistryConstellations {
         // HOR/Horologium
         horologium = new Constellation.WeakSpecial("horologium", CONSTELLATION_HOROLOGIUM) {
             @Override
-            public boolean doesShowUp(Level world, long day) {
-                WorldContext ctx = SkyHandler.getContext(world);
+            public boolean doesShowUp(Level level, long day) {
+                WorldContext ctx = SkyHandler.getContext(level);
                 if (ctx != null) {
                     return ctx.getCelestialEventHandler().getSolarEclipse().isActiveDay();
                 }
@@ -270,7 +271,7 @@ public class RegistryConstellations {
             }
 
             @Override
-            public float getDistribution(Level world, long day, boolean showsUp) {
+            public float getDistribution(Level level, long day, boolean showsUp) {
                 return showsUp ? 1F : 0.25F;
             }
         };
@@ -343,15 +344,15 @@ public class RegistryConstellations {
         // LEP/Lepus
         pelotrio = new Constellation.WeakSpecial("pelotrio", CONSTELLATION_PELOTRIO) {
             @Override
-            public boolean doesShowUp(Level world, long day) {
-                MoonPhase phase = MoonPhase.fromWorld(world);
-                return phase == MoonPhase.NEW || phase == MoonPhase.FULL;
+            public boolean doesShowUp(Level level, long day) {
+                MoonPhase currentPhase = MoonPhase.fromWorld(level);
+                return currentPhase == MoonPhase.NEW || currentPhase == MoonPhase.FULL;
             }
 
             @Override
-            public float getDistribution(Level world, long day, boolean showingUp) {
+            public float getDistribution(Level level, long day, boolean showingUp) {
                 if (showingUp) return 1F;
-                MoonPhase current = MoonPhase.fromWorld(world);
+                MoonPhase current = MoonPhase.fromWorld(level);
                 if (current == MoonPhase.WANING_1_2 || current == MoonPhase.WAXING_1_2) {
                     return 0.3F;
                 }
@@ -472,7 +473,7 @@ public class RegistryConstellations {
     }
 
     private static void register(IConstellation cst) {
-        AstralSorcery.getProxy().getRegistryPrimer().register(cst);
+        AstralRegistries.register(AstralRegistries.CONSTELLATIONS, cst);
     }
 }
 

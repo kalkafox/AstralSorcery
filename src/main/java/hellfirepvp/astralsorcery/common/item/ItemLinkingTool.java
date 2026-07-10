@@ -37,30 +37,30 @@ public class ItemLinkingTool extends Item implements IItemLinkingTool {
     }
 
     @Override
-    public boolean shouldInterceptBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, Direction face) {
+    public boolean shouldInterceptBlockInteract(LogicalSide direction, Player player, InteractionHand hand, BlockPos pos, Direction face) {
         return true;
     }
 
     @Override
-    public boolean shouldInterceptEntityInteract(LogicalSide side, Player player, InteractionHand hand, Entity interacted) {
+    public boolean shouldInterceptEntityInteract(LogicalSide direction, Player player, InteractionHand hand, Entity interacted) {
         return interacted instanceof Player;
     }
 
     @Override
-    public boolean doBlockInteract(LogicalSide side, Player player, InteractionHand hand, BlockPos pos, Direction face) {
-        Level world = player.getEntityWorld();
-        if (!world.isRemote()) {
-            LinkHandler.LinkSession session = LinkHandler.getActiveSession(player);
-            if (session != null && session.getType() == LinkHandler.LinkType.ENTITY) {
-                LinkHandler.RightClickResult result = LinkHandler.onInteractBlock(player, world, pos, player.isSneaking());
+    public boolean doBlockInteract(LogicalSide direction, Player player, InteractionHand hand, BlockPos pos, Direction face) {
+        Level level = player.getCommandSenderWorld();
+        if (!level.isClientSide()) {
+            LinkHandler.LinkSession user = LinkHandler.getActiveSession(player);
+            if (user != null && user.getType() == LinkHandler.LinkType.ENTITY) {
+                LinkHandler.RightClickResult result = LinkHandler.onInteractBlock(player, level, pos, player.isShiftKeyDown());
                 if (result.shouldProcess()) {
-                    LinkHandler.processInteraction(result, player, world, pos);
+                    LinkHandler.processInteraction(result, player, level, pos);
                     return true;
                 }
             }
-            LinkHandler.RightClickResult result = LinkHandler.onInteractBlock(player, world, pos, player.isSneaking());
+            LinkHandler.RightClickResult result = LinkHandler.onInteractBlock(player, level, pos, player.isShiftKeyDown());
             if (result.shouldProcess()) {
-                LinkHandler.processInteraction(result, player, world, pos);
+                LinkHandler.processInteraction(result, player, level, pos);
             }
         } else {
             player.swingArm(hand);
@@ -69,18 +69,18 @@ public class ItemLinkingTool extends Item implements IItemLinkingTool {
     }
 
     @Override
-    public boolean doEntityInteract(LogicalSide side, Player player, InteractionHand hand, Entity interacted) {
+    public boolean doEntityInteract(LogicalSide direction, Player player, InteractionHand hand, Entity interacted) {
         if (!(interacted instanceof LivingEntity)) {
             return false;
         }
         LivingEntity target = (LivingEntity) interacted;
-        Level world = player.getEntityWorld();
-        if (!world.isRemote()) {
-            LinkHandler.LinkSession session = LinkHandler.getActiveSession(player);
-            if (session == null || session.getType() == LinkHandler.LinkType.ENTITY) {
+        Level level = player.getCommandSenderWorld();
+        if (!level.isClientSide()) {
+            LinkHandler.LinkSession user = LinkHandler.getActiveSession(player);
+            if (user == null || user.getType() == LinkHandler.LinkType.ENTITY) {
                 LinkHandler.RightClickResult result = LinkHandler.onInteractEntity(player, target);
                 if (result.shouldProcess()) {
-                    LinkHandler.processInteraction(result, player, world, BlockPos.ZERO);
+                    LinkHandler.processInteraction(result, player, level, BlockPos.ZERO);
                 }
             }
         } else {

@@ -48,8 +48,8 @@ public class EventHelperSpawnDeny {
     }
 
     private static void onSpawn(LivingSpawnEvent.CheckSpawn event) {
-        if (event.getResult() == Event.Result.DENY ||
-                event.getWorld().isRemote() ||
+        if (event.getObject() == Event.Result.DENY ||
+                event.getLevel().isClientSide() ||
                 event.getSpawner() != null) {
             return;
         }
@@ -59,10 +59,10 @@ public class EventHelperSpawnDeny {
             return;
         }
 
-        if (GeneralConfig.CONFIG.mobSpawningDenyAllTypes.get() || entity.getClassification(false) == EntityClassification.MONSTER) {
+        if (GeneralConfig.CONFIG.mobSpawningDenyAllTypes.get() || entity.getCategory(false) == MobCategory.MONSTER) {
             Vector3 entityPos = Vector3.atEntityCorner(entity);
             for (Map.Entry<WorldBlockPos, TickTokenMap.SimpleTickToken<Double>> entry : spawnDenyRegions.entrySet()) {
-                if (!entry.getKey().getWorldKey().equals(entity.getEntityWorld().getDimensionKey())) {
+                if (!entry.getKey().getWorldKey().equals(entity.getCommandSenderWorld().dimension())) {
                     continue;
                 }
 

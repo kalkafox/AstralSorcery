@@ -65,11 +65,11 @@ public class StorageNetwork {
         return MapStream.of(this.cores).toList(CoreArea::new);
     }
 
-    public void writeToNBT(CompoundTag tag) {
+    public void save(CompoundTag tag) {
         ListTag list = new ListTag();
         for (CoreArea coreData : this.getCores()) {
             CompoundTag coreTag = new CompoundTag();
-            NBTHelper.writeBlockPosToNBT(coreData.getPos(), coreTag);
+            NBTHelper.writeBlockPosToNBT(coreData.getBlockPos(), coreTag);
             NBTHelper.writeBoundingBox(coreData.getOffsetBox(), coreTag);
             list.add(coreTag);
         }
@@ -77,7 +77,7 @@ public class StorageNetwork {
 
         CoreArea master;
         if ((master = getMaster()) != null) {
-            NBTHelper.setAsSubTag(tag, "master", nbt -> NBTHelper.writeBlockPosToNBT(master.getPos(), nbt));
+            NBTHelper.setAsSubTag(tag, "master", nbt -> NBTHelper.writeBlockPosToNBT(master.getBlockPos(), nbt));
         }
     }
 
@@ -105,7 +105,7 @@ public class StorageNetwork {
             this.offsetBox = offsetBox;
         }
 
-        public BlockPos getPos() {
+        public BlockPos getBlockPos() {
             return pos;
         }
 
@@ -114,7 +114,7 @@ public class StorageNetwork {
         }
 
         public AABB getRealBox() {
-            return offsetBox.offset(getPos());
+            return offsetBox.offset(getBlockPos());
         }
     }
 

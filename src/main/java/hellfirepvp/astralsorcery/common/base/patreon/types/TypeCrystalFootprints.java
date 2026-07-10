@@ -57,19 +57,19 @@ public class TypeCrystalFootprints extends PatreonEffect implements ITickHandler
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player player = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
 
-        if (side.isClient() &&
+        if (direction.isClient() &&
                 shouldDoEffect(player) &&
-                rand.nextInt(3) == 0) {
+                random.nextInt(3) == 0) {
 
             spawnFootprint(player);
         }
     }
 
     private boolean shouldDoEffect(Player player) {
-        return player.getUniqueID().equals(playerUUID) &&
-                !player.isPotionActive(Effects.INVISIBILITY) &&
+        return player.getUUID().equals(playerUUID) &&
+                !player.isPotionActive(MobEffects.INVISIBILITY) &&
                 player.isOnGround();
     }
 
@@ -77,21 +77,21 @@ public class TypeCrystalFootprints extends PatreonEffect implements ITickHandler
     private void spawnFootprint(Player player) {
         Vector3 pos = Vector3.atEntityCorner(player)
                 .subtract(player.getWidth() / 2, 0.1, player.getWidth() / 2)
-                .add(player.getWidth() * rand.nextFloat(), 0, player.getWidth() * rand.nextFloat());
+                .add(player.getWidth() * random.nextFloat(), 0, player.getWidth() * random.nextFloat());
 
-        if (player.getEntityWorld().isAirBlock(pos.toBlockPos())) {
+        if (player.getCommandSenderWorld().isEmptyBlock(pos.toBlockPos())) {
             return;
         }
 
         EffectHelper.of(EffectTemplatesAS.CRYSTAL)
                 .spawn(pos)
-                .rotation(rand.nextFloat() * 35F * (rand.nextBoolean() ? 1 : -1),
-                        rand.nextFloat() * 35F * (rand.nextBoolean() ? 1 : -1),
-                        rand.nextFloat() * 35F * (rand.nextBoolean() ? 1 : -1))
+                .rotation(random.nextFloat() * 35F * (random.nextBoolean() ? 1 : -1),
+                        random.nextFloat() * 35F * (random.nextBoolean() ? 1 : -1),
+                        random.nextFloat() * 35F * (random.nextBoolean() ? 1 : -1))
                 .color(VFXColorFunction.constant(this.color))
-                .alpha(VFXAlphaFunction.FADE_OUT)
-                .setScaleMultiplier(0.025F + rand.nextFloat() * 0.03F)
-                .setMaxAge(60 + rand.nextInt(30));
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                .setScaleMultiplier(0.025F + random.nextFloat() * 0.03F)
+                .setMaxAge(60 + random.nextInt(30));
     }
 
     @Override
@@ -100,8 +100,8 @@ public class TypeCrystalFootprints extends PatreonEffect implements ITickHandler
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

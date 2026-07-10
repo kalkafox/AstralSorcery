@@ -37,7 +37,7 @@ public class CommandReset implements Command<CommandSourceStack> {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("reset")
-                .requires(cs -> cs.hasPermissionLevel(2))
+                .requires(cs -> cs.hasPermission(2))
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(CMD));
     }
@@ -48,7 +48,7 @@ public class CommandReset implements Command<CommandSourceStack> {
         ResearchHelper.wipeKnowledge(player);
 
         String name = player.getGameProfile().getName();
-        context.getSource().sendFeedback(Component.literal("Wiped " + name + "'s data!").withStyle(TextFormatting.GREEN), true);
+        context.getSource().customSuggestion(Component.literal("Wiped " + name + "'s data!").withStyle(ChatFormatting.GREEN), true);
         return 0;
     }
 }

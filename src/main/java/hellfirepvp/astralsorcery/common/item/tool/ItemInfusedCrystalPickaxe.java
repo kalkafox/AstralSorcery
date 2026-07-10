@@ -52,12 +52,12 @@ public class ItemInfusedCrystalPickaxe extends ItemCrystalPickaxe implements Equ
             new CacheReference<>(() -> new DynamicAttributeModifier(MODIFIER_ID, PerkAttributeTypesAS.ATTR_TYPE_MINING_SIZE, ModifierType.ADDITION, 1F));
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
-        if (this.doOreScan(world, player.blockPosition(), player, held)) {
+        if (this.doOreScan(level, player.blockPosition(), player, held)) {
             return InteractionResultHolder.success(held);
         }
-        return super.use(world, player, hand);
+        return super.use(level, player, hand);
     }
 
     @Override
@@ -71,12 +71,12 @@ public class ItemInfusedCrystalPickaxe extends ItemCrystalPickaxe implements Equ
         return super.useOn(ctx);
     }
 
-    private boolean doOreScan(Level world, BlockPos origin, Player player, ItemStack stack) {
-        if (!world.isClientSide && player instanceof ServerPlayer serverPlayer && !MiscUtils.isPlayerFakeMP(serverPlayer)) {
+    private boolean doOreScan(Level level, BlockPos origin, Player player, ItemStack stack) {
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && !MiscUtils.isPlayerFakeMP(serverPlayer)) {
             if (stack.getItem() instanceof ItemInfusedCrystalPickaxe && !player.getCooldowns().isOnCooldown(stack.getItem())) {
                 PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
                 if (prog.doPerkAbilities()) {
-                    List<BlockPos> orePositions = BlockDiscoverer.searchForBlocksAround(world, origin, 16, BlockPredicates.isInTag(TagsAS.Blocks.ORES));
+                    List<BlockPos> orePositions = BlockDiscoverer.searchForBlocksAround(level, origin, 16, BlockPredicates.isInTag(TagsAS.Blocks.ORES));
                     PacketChannel.CHANNEL.sendToPlayer(player, new PktOreScan(orePositions));
 
                     player.getCooldowns().addCooldown(stack.getItem(), 120);
@@ -88,7 +88,7 @@ public class ItemInfusedCrystalPickaxe extends ItemCrystalPickaxe implements Equ
     }
 
     @Override
-    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide side, boolean ignoreRequirements) {
+    public Collection<PerkAttributeModifier> getModifiers(ItemStack stack, Player player, LogicalSide direction, boolean ignoreRequirements) {
         return Collections.singletonList(MINING_SIZE_MODIFIER.get());
     }
 }

@@ -30,18 +30,18 @@ public class WorldFreezingRegistry extends CustomRecipeRegistry<WorldFreezingRec
 
     @Override
     public void init() {
-        this.register(BlockFreezingRecipe.of(Blocks.FIRE, Blocks.AIR.getDefaultState()));
-        this.register(BlockFreezingRecipe.of(Blocks.AIR.getDefaultState(), Blocks.ICE.getDefaultState()));
-        this.register(BlockFreezingRecipe.of(Blocks.CAVE_AIR.getDefaultState(), Blocks.PACKED_ICE.getDefaultState()));
+        this.register(BlockFreezingRecipe.of(Blocks.FIRE, Blocks.AIR.defaultBlockState()));
+        this.register(BlockFreezingRecipe.of(Blocks.AIR.defaultBlockState(), Blocks.ICE.defaultBlockState()));
+        this.register(BlockFreezingRecipe.of(Blocks.CAVE_AIR.defaultBlockState(), Blocks.PACKED_ICE.defaultBlockState()));
 
         this.register(new FluidFreezingRecipe());
     }
 
     @Nullable
-    public WorldFreezingRecipe getRecipeFor(Level world, BlockPos pos) {
+    public WorldFreezingRecipe getRecipeFor(Level level, BlockPos pos) {
         return this.getRecipes()
                 .stream()
-                .filter(recipe -> recipe.canFreeze(world, pos))
+                .filter(recipe -> recipe.canFreeze(level, pos))
                 .findFirst()
                 .orElse(null);
     }

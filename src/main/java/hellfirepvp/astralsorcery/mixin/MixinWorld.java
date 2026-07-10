@@ -24,20 +24,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(World.class)
+@Mixin(Level.class)
 public class MixinWorld {
 
-    @Shadow private int skylightSubtracted;
+    @Shadow private int skyDarken;
 
     @Inject(method = "calculateInitialSkylight", at = @At("RETURN"), cancellable = true)
     public void solarEclipseSunBrightnessServer(CallbackInfo ci) {
-        Level world = (Level)(Object) this;
+        Level level = (Level)(Object) this;
 
-        WorldContext ctx = SkyHandler.getContext(world);
-        String strDimKey = world.getDimensionKey().getLocation().toString();
+        WorldContext ctx = SkyHandler.getContext(level);
+        String strDimKey = level.dimension().getLocation().toString();
         if (ctx != null &&
                 ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {
-            this.skylightSubtracted = 11 - Math.round(ctx.getCelestialEventHandler().getSolarEclipsePercent() * 11F);
+            this.skyDarken = 11 - Math.round(ctx.getCelestialEventHandler().getSolarEclipsePercent() * 11F);
         }
     }
 

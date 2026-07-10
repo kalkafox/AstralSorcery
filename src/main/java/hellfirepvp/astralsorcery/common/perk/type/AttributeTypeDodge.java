@@ -57,15 +57,15 @@ public class AttributeTypeDodge extends PerkAttributeType {
             return;
         }
         Player player = (Player) event.getEntityLiving();
-        LogicalSide side = this.getSide(player);
-        if (!hasTypeApplied(player, side)) {
+        LogicalSide direction = this.getSide(player);
+        if (!hasTypeApplied(player, direction)) {
             return;
         }
-        float chance = PerkAttributeHelper.getOrCreateMap(player, side)
-                .modifyValue(player, ResearchHelper.getProgress(player, side), this, 0F);
+        float chance = PerkAttributeHelper.getOrCreateMap(player, direction)
+                .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 0F);
         chance /= 100.0F;
         chance = AttributeEvent.postProcessModded(player, this, chance);
-        if (chance >= rand.nextFloat() && AlignmentChargeHandler.INSTANCE.drainCharge(player, side, CONFIG.chargeCost.get(), false)) {
+        if (chance >= random.nextFloat() && AlignmentChargeHandler.INSTANCE.drainCharge(player, direction, CONFIG.chargeCost.get(), false)) {
             event.setCanceled(true);
         }
     }

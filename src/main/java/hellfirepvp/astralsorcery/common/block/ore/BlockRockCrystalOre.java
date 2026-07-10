@@ -33,7 +33,7 @@ public class BlockRockCrystalOre extends Block implements CustomItemBlock {
     }
 
     @Override
-    public int getExpDrop(BlockState state, LevelReader world, BlockPos pos, int fortune, int silktouch) {
-        return fortune * MathHelper.nextInt(RANDOM, 8, 14);
+    public int getExpDrop(BlockState state, LevelReader level, BlockPos pos, int fortune, int silktouch) {
+        return fortune * Mth.nextInt(RANDOM, 8, 14);
     }
 }

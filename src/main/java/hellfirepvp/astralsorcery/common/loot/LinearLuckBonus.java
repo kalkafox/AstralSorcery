@@ -34,47 +34,47 @@ import java.util.Set;
  */
 public class LinearLuckBonus extends LootItemConditionalFunction {
 
-    private LinearLuckBonus(LootItemCondition[] lootConditions) {
-        super(lootConditions);
+    private LinearLuckBonus(LootItemCondition[] conditions) {
+        super(conditions);
     }
 
     @Override
-    public Set<LootContextParam<?>> getRequiredParameters() {
-        return ImmutableSet.of(LootParameters.TOOL);
+    public Set<LootContextParam<?>> getReferencedContextParams() {
+        return ImmutableSet.of(LootContextParams.TOOL);
     }
 
     @Override
-    public LootItemFunctionType getFunctionType() {
+    public LootItemFunctionType getType() {
         return LootAS.Functions.LINEAR_LUCK_BONUS;
     }
 
     @Override
-    protected ItemStack doApply(ItemStack itemStack, LootContext lootContext) {
-        ItemStack tool = lootContext.get(LootParameters.TOOL);
+    protected ItemStack run(ItemStack itemStack, LootContext compositePredicates) {
+        ItemStack tool = compositePredicates.get(LootContextParams.TOOL);
         if (tool != null) {
             int luck = 0;
-            Entity e = lootContext.get(LootParameters.THIS_ENTITY);
-            if (e instanceof Player && ((Player) e).isPotionActive(Effects.LUCK)) {
-                luck += ((Player) e).getActivePotionEffect(Effects.LUCK).getAmplifier() + 1;
+            Entity e = compositePredicates.get(LootContextParams.THIS_ENTITY);
+            if (e instanceof Player && ((Player) e).isPotionActive(MobEffects.LUCK)) {
+                luck += ((Player) e).getActivePotionEffect(MobEffects.LUCK).getAmplifier() + 1;
             }
             luck += EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, tool);
             luck += EnchantmentHelper.getEnchantmentLevel(Enchantments.LOOTING, tool);
 
-            Random rand = lootContext.getRandom();
+            Random random = compositePredicates.getRandom();
             int size = 0;
             for (int i = 0; i < luck; i++) {
-                size += rand.nextInt(3) + 1;
+                size += random.nextInt(3) + 1;
             }
             itemStack.setCount(itemStack.getCount() + size);
         }
         return itemStack;
     }
 
-    public static LootFunction.Builder<?> builder() {
+    public static LootItemConditionalFunction.Builder<?> builder() {
         return builder(LinearLuckBonus::new);
     }
 
-    public static class Serializer extends LootFunction.Serializer<LinearLuckBonus> {
+    public static class Serializer extends LootItemConditionalFunction.Serializer<LinearLuckBonus> {
 
         @Override
         public LinearLuckBonus deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] iLootConditions) {

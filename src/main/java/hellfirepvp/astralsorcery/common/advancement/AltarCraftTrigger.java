@@ -33,7 +33,7 @@ public class AltarCraftTrigger extends ListenerCriterionTrigger<AltarRecipeInsta
     }
 
     @Override
-    public AltarRecipeInstance deserialize(JsonObject object, ConditionArrayParser conditions) {
+    public AltarRecipeInstance deserialize(JsonObject object, DeserializationContext conditions) {
         return AltarRecipeInstance.deserialize(getId(), object);
     }
 

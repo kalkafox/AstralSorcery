@@ -29,26 +29,26 @@ import java.awt.*;
 public class FXFacingAtlasParticle extends EntityVisualFX {
 
     private TextureAtlasSprite sprite;
-    private float minU = 0, minV = 0;
+    private float u0 = 0, v0 = 0;
     private float uLength = 1, vLength = 1;
 
     public FXFacingAtlasParticle(Vector3 pos) {
         super(pos);
     }
 
-    public <T extends FXFacingAtlasParticle> T setSprite(TextureAtlasSprite sprite) {
+    public <T extends FXFacingAtlasParticle> T pickSprite(TextureAtlasSprite sprite) {
         this.sprite = sprite;
-        this.minU = this.sprite.getMinU();
-        this.minV = this.sprite.getMinV();
-        this.uLength = this.sprite.getMaxU() - this.minU;
-        this.vLength = this.sprite.getMaxV() - this.minV;
+        this.u0 = this.sprite.getU0();
+        this.v0 = this.sprite.getV0();
+        this.uLength = this.sprite.getU1() - this.u0;
+        this.vLength = this.sprite.getV1() - this.v0;
         return (T) this;
     }
 
     public <T extends FXFacingAtlasParticle> T selectFraction(float percentage) {
-        percentage = MathHelper.clamp(percentage, 0F, 1F);
-        this.minU += this.uLength * (1F - percentage) * rand.nextFloat();
-        this.minV += this.vLength * (1F - percentage) * rand.nextFloat();
+        percentage = Mth.clamp(percentage, 0F, 1F);
+        this.u0 += this.uLength * (1F - percentage) * random.nextFloat();
+        this.v0 += this.vLength * (1F - percentage) * random.nextFloat();
         this.uLength *= percentage;
         this.vLength *= percentage;
         return (T) this;
@@ -60,15 +60,15 @@ public class FXFacingAtlasParticle extends EntityVisualFX {
             return;
         }
 
-        Vector3 vec = this.getRenderPosition(pTicks);
+        Vector3 vec = this.getCameraPosition(pTicks);
         int alpha = this.getAlpha(pTicks);
-        float fScale = this.getScale(pTicks);
+        float fScale = this.getQuadSize(pTicks);
         Color col = this.getColor(pTicks);
 
         RenderingDrawUtils.renderFacingQuadVB(vb, renderStack,
                 vec.getX(), vec.getY(), vec.getZ(),
                 fScale, 0F,
-                this.minU, this.minV, this.uLength, this.vLength,
+                this.u0, this.v0, this.uLength, this.vLength,
                 col.getRed(), col.getGreen(), col.getBlue(), alpha);
     }
 }

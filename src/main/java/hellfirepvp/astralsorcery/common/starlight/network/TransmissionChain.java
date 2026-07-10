@@ -54,14 +54,14 @@ public class TransmissionChain {
         this.sourceNode = sourceNode;
     }
 
-    public static void buildNetworkChain(Level world, TransmissionWorldHandler handle, IIndependentStarlightSource source, WorldNetworkHandler netHandler, BlockPos sourcePos) {
-        TransmissionChain chain = buildFromSource(netHandler, sourcePos);
-        handle.updateNetworkChainData(world, chain, source, netHandler, sourcePos);
+    public static void buildNetworkChain(Level level, TransmissionWorldHandler handle, IIndependentStarlightSource source, WorldNetworkHandler netHandler, BlockPos pos) {
+        TransmissionChain chain = buildFromSource(netHandler, pos);
+        handle.updateNetworkChainData(level, chain, source, netHandler, pos);
         SyncDataHolder.executeServer(SyncDataHolder.DATA_LIGHT_CONNECTIONS, DataLightConnections.class, data -> {
-            data.updateNewConnectionsThreaded(netHandler.getWorld().getDimensionKey(), chain.getFoundConnections());
+            data.updateNewConnectionsThreaded(netHandler.getLevel().dimension(), chain.getFoundConnections());
         });
         SyncDataHolder.executeServer(SyncDataHolder.DATA_LIGHT_BLOCK_ENDPOINTS, DataLightBlockEndpoints.class, data -> {
-            data.updateNewEndpoints(netHandler.getWorld().getDimensionKey(), chain.getResolvedNormalBlockPositions());
+            data.updateNewEndpoints(netHandler.getLevel().dimension(), chain.getResolvedNormalBlockPositions());
         });
     }
 
@@ -75,14 +75,14 @@ public class TransmissionChain {
         }
 
         chain.calculateInvolvedChunks();
-        chain.resolveLoadedEndpoints(netHandler.getWorld());
+        chain.resolveLoadedEndpoints(netHandler.getLevel());
         return chain;
     }
 
-    private void resolveLoadedEndpoints(Level world) {
+    private void resolveLoadedEndpoints(Level level) {
         for (BlockPos pos : uncheckedEndpointsBlock) {
-            MiscUtils.executeWithChunk(world, pos, () -> {
-                BlockState state = world.getBlockState(pos);
+            MiscUtils.executeWithChunk(level, pos, () -> {
+                BlockState state = level.getBlockState(pos);
                 Block b = state.getBlock();
                 if (b instanceof BlockStarlightRecipient) {
                     return;
@@ -92,11 +92,11 @@ public class TransmissionChain {
         }
     }
 
-    protected void updatePosAsResolved(Level world, BlockPos pos) {
+    protected void updatePosAsResolved(Level level, BlockPos pos) {
         if (uncheckedEndpointsBlock.contains(pos) && !resolvedNormalBlockPositions.contains(pos)) {
             resolvedNormalBlockPositions.add(pos);
             SyncDataHolder.executeServer(SyncDataHolder.DATA_LIGHT_BLOCK_ENDPOINTS, DataLightBlockEndpoints.class, data -> {
-                data.updateNewEndpoint(world.getDimensionKey(), pos);
+                data.updateNewEndpoint(level.dimension(), pos);
             });
         }
     }
@@ -111,7 +111,7 @@ public class TransmissionChain {
 
         List<NodeConnection<IPrismTransmissionNode>> next = node.queryNext(handler);
         float nextLoss = nextHopLossPerc / ((float) next.size());
-        prevPath.push(node.getLocationPos());
+        prevPath.pushPose(node.getLocationPos());
 
         if (node.needsTransmissionUpdate()) {
             transmissionUpdateMap.put(node, transmissionPerc);
@@ -142,7 +142,7 @@ public class TransmissionChain {
             }
         }
 
-        prevPath.pop();
+        prevPath.popPose();
     }
 
     //After calculating everything...

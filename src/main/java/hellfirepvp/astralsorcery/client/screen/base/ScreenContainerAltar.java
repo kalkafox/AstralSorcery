@@ -46,26 +46,26 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
 
     @Nullable
     public SimpleAltarRecipe findRecipe(boolean ignoreStarlightRequirement) {
-        TileAltar ta = getContainer().getTileEntity();
+        TileAltar ta = getMenuProvider().getTileEntity();
         return RecipeTypesAS.TYPE_ALTAR.findRecipe(new SimpleAltarRecipeContext(Minecraft.getInstance().player, LogicalSide.CLIENT, ta)
                 .setIgnoreStarlightRequirement(ignoreStarlightRequirement));
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(PoseStack renderStack, float a, int xpos, int ypos) {
         RenderSystem.enableDepthTest();
-        this.renderGuiBackground(renderStack, partialTicks, mouseX, mouseY);
-        super.drawGuiContainerBackgroundLayer(renderStack, partialTicks, mouseX, mouseY);
+        this.renderGuiBackground(renderStack, a, xpos, ypos);
+        super.drawGuiContainerBackgroundLayer(renderStack, a, xpos, ypos);
     }
 
     protected void renderStarlightBar(PoseStack renderStack, int offsetX, int offsetZ, int width, int height) {
-        TileAltar altar = this.getContainer().getTileEntity();
+        TileAltar altar = this.getMenuProvider().getTileEntity();
 
         RenderSystem.disableAlphaTest();
 
         TexturesAS.TEX_BLACK.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            RenderingGuiUtils.rect(buf, renderStack, guiLeft + offsetX, guiTop + offsetZ, this.getBlitOffset(), width, height)
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingGuiUtils.rect(buf, renderStack, leftPos + offsetX, topPos + offsetZ, this.getBlitOffset(), width, height)
                     .draw();
         });
 
@@ -85,8 +85,8 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
 
             int tick = altar.getTicksExisted();
             Tuple<Float, Float> uvOffset = spriteStarlight.getUVOffset(tick);
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-                RenderingGuiUtils.rect(buf, renderStack, guiLeft + offsetX, guiTop + offsetZ, this.getBlitOffset(), (int) (width * percFilled), height)
+            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+                RenderingGuiUtils.rect(buf, renderStack, leftPos + offsetX, topPos + offsetZ, this.getBlitOffset(), (int) (width * percFilled), height)
                         .tex(uvOffset.getA(), uvOffset.getB(), spriteStarlight.getULength() * percFilled, spriteStarlight.getVLength())
                         .color(barColor)
                         .draw();
@@ -103,8 +103,8 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
                         int from = (int) (width * percFilled);
                         int to = (int) (width * percReq);
 
-                        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-                            RenderingGuiUtils.rect(buf, renderStack, guiLeft + offsetX + from, guiTop + offsetZ, this.getBlitOffset(), to, height)
+                        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+                            RenderingGuiUtils.rect(buf, renderStack, leftPos + offsetX + from, topPos + offsetZ, this.getBlitOffset(), to, height)
                                     .tex(uvOffset.getA() + spriteStarlight.getULength() * percFilled, uvOffset.getB(), spriteStarlight.getULength() * percReq, spriteStarlight.getVLength())
                                     .color(0.2F, 0.5F, 1.0F, 0.4F)
                                     .draw();
@@ -116,5 +116,5 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
         RenderSystem.enableAlphaTest();
     }
 
-    public abstract void renderGuiBackground(PoseStack renderStack, float partialTicks, int mouseX, int mouseY);
+    public abstract void renderGuiBackground(PoseStack renderStack, float a, int xpos, int ypos);
 }

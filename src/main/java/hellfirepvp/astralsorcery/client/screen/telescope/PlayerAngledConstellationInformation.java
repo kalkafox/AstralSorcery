@@ -21,17 +21,17 @@ import java.awt.*;
  */
 public class PlayerAngledConstellationInformation extends ConstellationDiscoveryScreen.ConstellationDisplayInformation {
 
-    private final float yaw;
+    private final float yRot;
     private final float pitch;
 
-    public PlayerAngledConstellationInformation(float size, float yaw, float pitch) {
+    public PlayerAngledConstellationInformation(float size, float yRot, float pitch) {
         super(new Point(), size);
-        this.yaw = yaw;
+        this.yRot = yRot;
         this.pitch = pitch;
     }
 
     public float getYaw() {
-        return yaw;
+        return yRot;
     }
 
     public float getPitch() {

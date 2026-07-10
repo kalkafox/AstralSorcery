@@ -23,35 +23,35 @@ import net.minecraft.world.phys.Vec3;
  */
 public class RenderingVectorUtils {
 
-    public static Vector3 getStandardTranslationRemovalVector(float partialTicks) {
-        Vec3 view = RenderInfo.getInstance().getARI().getProjectedView();
-        return new Vector3(view);
+    public static Vector3 getStandardTranslationRemovalVector(float a) {
+        Vec3 viewDistance = RenderInfo.getInstance().getARI().getPosition();
+        return new Vector3(viewDistance);
     }
 
-    public static Vector3 interpolatePosition(Entity e, float partialTicks) {
+    public static Vector3 interpolatePosition(Entity e, float a) {
         return new Vector3(
-                interpolate(e.prevPosX, e.getPosX(), partialTicks),
-                interpolate(e.prevPosY, e.getPosY(), partialTicks),
-                interpolate(e.prevPosZ, e.getPosZ(), partialTicks)
+                interpolate(e.xo, e.getX(), a),
+                interpolate(e.yo, e.getY(), a),
+                interpolate(e.zo, e.getZ(), a)
         );
     }
 
-    public static Vector3 interpolate(Vector3 oldV, Vector3 newV, float partialTicks) {
+    public static Vector3 interpolate(Vector3 oldV, Vector3 newV, float a) {
         return new Vector3(
-                interpolate(oldV.getX(), newV.getX(), partialTicks),
-                interpolate(oldV.getY(), newV.getY(), partialTicks),
-                interpolate(oldV.getZ(), newV.getZ(), partialTicks)
+                interpolate(oldV.getX(), newV.getX(), a),
+                interpolate(oldV.getY(), newV.getY(), a),
+                interpolate(oldV.getZ(), newV.getZ(), a)
         );
     }
 
-    public static double interpolate(double oldP, double newP, float partialTicks) {
+    public static double interpolate(double oldP, double newP, float a) {
         if (oldP == newP) return oldP;
-        return oldP + ((newP - oldP) * partialTicks);
+        return oldP + ((newP - oldP) * a);
     }
 
-    public static float interpolate(float oldP, float newP, float partialTicks) {
+    public static float interpolate(float oldP, float newP, float a) {
         if (oldP == newP) return oldP;
-        return oldP + ((newP - oldP) * partialTicks);
+        return oldP + ((newP - oldP) * a);
     }
 
     public static float interpolateRotation(float prevRotation, float nextRotation, float partialTick) {

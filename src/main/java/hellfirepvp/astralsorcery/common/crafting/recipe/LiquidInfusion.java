@@ -64,12 +64,12 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
         this.copyNBTToOutputs = copyNBTToOutputs;
     }
 
-    public boolean matches(TileInfuser infuser, Player crafter, LogicalSide side) {
+    public boolean matches(TileInfuser infuser, Player crafter, LogicalSide direction) {
         if (crafter == null) {
             return false;
         }
         boolean hasProgress;
-        if (side.isClient()) {
+        if (direction.isClient()) {
             hasProgress = this.hasProgressionClient();
         } else {
             hasProgress = this.hasProgressionServer(crafter);
@@ -78,7 +78,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
             return false;
         }
         boolean hasFluidInputs = MapStream.of(infuser.getLiquids())
-                .mapKey(pos -> pos.add(infuser.getPos()))
+                .mapKey(pos -> pos.offset(infuser.getBlockPos()))
                 .allMatch(tpl -> this.liquidInput.equals(tpl.getB()));
 
         if (!hasFluidInputs) {
@@ -112,7 +112,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
 
     @Nonnull
     @OnlyIn(Dist.CLIENT)
-    public ItemStack getOutputForRender(Iterable<ItemStack> inventoryContents) {
+    public ItemStack getOutputForRender(Iterable<ItemStack> items) {
         return ItemUtils.copyStackWithSize(this.output, this.output.getCount());
     }
 
@@ -122,7 +122,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
     }
 
     public float getConsumptionChance() {
-        return MathHelper.clamp(consumptionChance, 0F, 1F);
+        return Mth.clamp(consumptionChance, 0F, 1F);
     }
 
     public boolean doesConsumeMultipleFluids() {
@@ -140,7 +140,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
     public static LiquidInfusion read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
         Fluid fluidIn = ByteBufUtils.readRegistryEntry(buffer);
         Ingredient itemIn = Ingredient.read(buffer);
-        ItemStack output = ByteBufUtils.readItemStack(buffer);
+        ItemStack output = ByteBufUtils.readItem(buffer);
         float consumptionChance = buffer.readFloat();
         int duration = buffer.readInt();
         boolean consumeMultiple = buffer.readBoolean();
@@ -161,7 +161,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
     }
 
     public void write(JsonObject object) {
-        object.addProperty("fluidInput", this.getLiquidInput().getRegistryName().toString());
+        object.addProperty("fluidInput", RegistryHelper.getKey(this.getLiquidInput()).toString());
         object.add("input", this.getItemInput().serialize());
         object.add("output", JsonHelper.serializeItemStack(this.output));
         object.addProperty("consumptionChance", this.getConsumptionChance());

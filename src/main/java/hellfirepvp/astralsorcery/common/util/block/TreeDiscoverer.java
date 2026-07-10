@@ -30,33 +30,33 @@ import java.util.Stack;
 public class TreeDiscoverer {
 
     @Nonnull
-    public static BlockArray findTreeAt(Level world, BlockPos at, boolean checkCorners) {
-        return findTreeAt(world, at, checkCorners, -1);
+    public static BlockArray findTreeAt(Level level, BlockPos at, boolean checkCorners) {
+        return findTreeAt(level, at, checkCorners, -1);
     }
 
     @Nonnull
-    public static BlockArray findTreeAt(Level world, BlockPos at, boolean checkCorners, int xzLimit) {
+    public static BlockArray findTreeAt(Level level, BlockPos at, boolean checkCorners, int xzLimit) {
         int xzLimitSq = xzLimit == -1 ? -1 : xzLimit * xzLimit;
         BlockArray out = new BlockArray();
-        findTree(world, at, xzLimitSq, checkCorners, out);
+        findTree(level, at, xzLimitSq, checkCorners, out);
         return out;
     }
 
-    private static void findTree(Level world, BlockPos at, int xzLimitSq, boolean checkCorners, BlockArray out) {
+    private static void findTree(Level level, BlockPos at, int xzLimitSq, boolean checkCorners, BlockArray out) {
         //The gist: we start at a LOG and eventually might find a LEAF
         //If we don't find a log instantly, stop. If we find something different than what we found before, stop.
         //Match against blocks, not tags, not specific states.
         TreeMatch foundTreeType = new TreeMatch();
 
         Stack<BlockPos> discoverPositions = new Stack<>();
-        discoverPositions.push(at);
+        discoverPositions.pushPose(at);
         while (!discoverPositions.isEmpty()) {
-            BlockPos offset = discoverPositions.pop();
-            if (world.isAirBlock(offset)) {
+            BlockPos offset = discoverPositions.popPose();
+            if (level.isEmptyBlock(offset)) {
                 continue;
             }
 
-            BlockState foundState = world.getBlockState(offset);
+            BlockState foundState = level.getBlockState(offset);
             Block foundBlock = foundState.getBlock();
             if (foundTreeType.matchLog == null) {
                 //Try find log
@@ -72,9 +72,9 @@ public class TreeDiscoverer {
             }
 
             boolean successful = false;
-            if (foundTreeType.matchLog.test(world, offset, foundState)) {
+            if (foundTreeType.matchLog.test(level, offset, foundState)) {
                 successful = true;
-            } else if (foundTreeType.matchLeaf != null && foundTreeType.matchLeaf.test(world, offset, foundState)) {
+            } else if (foundTreeType.matchLeaf != null && foundTreeType.matchLeaf.test(level, offset, foundState)) {
                 successful = true;
             }
 
@@ -85,9 +85,9 @@ public class TreeDiscoverer {
                     for (int xx = -1; xx <= 1; xx++) {
                         for (int yy = -1; yy <= 1; yy++) {
                             for (int zz = -1; zz <= 1; zz++) {
-                                BlockPos newPos = offset.add(xx, yy, zz);
+                                BlockPos newPos = offset.offset(xx, yy, zz);
                                 if((xzLimitSq == -1 || flatDistanceSq(newPos, at) <= xzLimitSq) && !out.hasBlockAt(newPos)) {
-                                    discoverPositions.push(newPos);
+                                    discoverPositions.pushPose(newPos);
                                 }
                             }
                         }
@@ -96,7 +96,7 @@ public class TreeDiscoverer {
                     for (Direction dir : Direction.values()) {
                         BlockPos newPos = offset.offset(dir);
                         if((xzLimitSq == -1 || flatDistanceSq(newPos, at) <= xzLimitSq) && !out.hasBlockAt(newPos)) {
-                            discoverPositions.push(newPos);
+                            discoverPositions.pushPose(newPos);
                         }
                     }
                 }

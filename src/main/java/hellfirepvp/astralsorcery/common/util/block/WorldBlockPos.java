@@ -44,15 +44,15 @@ public class WorldBlockPos extends BlockPos {
         this.worldReference = new TransformReference<>(type, worldProvider);
     }
 
-    public static WorldBlockPos wrapServer(Level world, BlockPos pos) {
-        return new WorldBlockPos(world.getDimensionKey(), pos, type -> {
+    public static WorldBlockPos wrapServer(Level level, BlockPos pos) {
+        return new WorldBlockPos(level.dimension(), pos, type -> {
             MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-            return server.getWorld(type);
+            return server.getLevel(type);
         });
     }
 
     public static WorldBlockPos wrapTileEntity(BlockEntity tile) {
-        return new WorldBlockPos(tile.getWorld().getDimensionKey(), tile.getPos(), type -> tile.getWorld());
+        return new WorldBlockPos(tile.getLevel().dimension(), tile.getBlockPos(), type -> tile.getLevel());
     }
 
     public ResourceKey<Level> getWorldKey() {
@@ -65,7 +65,7 @@ public class WorldBlockPos extends BlockPos {
 
     @Override
     public WorldBlockPos add(int x, int y, int z) {
-        return wrapInternal(super.add(x, y, z));
+        return wrapInternal(super.offset(x, y, z));
     }
 
     @Override
@@ -80,15 +80,15 @@ public class WorldBlockPos extends BlockPos {
 
     @Nullable
     public <T extends BlockEntity> T getTileAt(Class<T> tileClass, boolean forceChunkLoad) {
-        Level world = this.worldReference.getValue();
-        if (world != null) {
-            return MiscUtils.getTileAt(world, this, tileClass, forceChunkLoad);
+        Level level = this.worldReference.getValue();
+        if (level != null) {
+            return MiscUtils.getTileAt(level, this, tileClass, forceChunkLoad);
         }
         return null;
     }
 
     @Nullable
-    public Level getWorld() {
+    public Level getLevel() {
         return this.worldReference.getValue();
     }
 

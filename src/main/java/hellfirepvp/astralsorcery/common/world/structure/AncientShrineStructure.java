@@ -35,7 +35,7 @@ public class AncientShrineStructure extends TemplateStructure {
     }
 
     @Override
-    public ResourceLocation getStructureName() {
+    public ResourceLocation getFeatureName() {
         return WorldGenerationAS.Structures.KEY_ANCIENT_SHRINE;
     }
 }

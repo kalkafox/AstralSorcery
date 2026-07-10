@@ -49,12 +49,12 @@ public class BlockGeometry {
         Vector3 vFrom = new Vector3(0.5, 0.5, 0.5);
         double dst = radius * radius;
 
-        int toX = MathHelper.ceil(radius);
-        int toY = MathHelper.ceil(radius);
-        int toZ = MathHelper.ceil(radius);
-        for (int y = MathHelper.floor(-radius); y <= toY; y++) {
-            for (int x = MathHelper.floor(-radius); x <= toX; x++) {
-                for (int z = MathHelper.floor(-radius); z <= toZ; z++) {
+        int toX = Mth.ceil(radius);
+        int toY = Mth.ceil(radius);
+        int toZ = Mth.ceil(radius);
+        for (int y = Mth.floor(-radius); y <= toY; y++) {
+            for (int x = Mth.floor(-radius); x <= toX; x++) {
+                for (int z = Mth.floor(-radius); z <= toZ; z++) {
                     Vector3 result = new Vector3(x, y, z).add(0.5, 0.5, 0.5);
                     if (result.distanceSquared(vFrom) <= dst) {
                         out.add(result.toBlockPos());
@@ -71,12 +71,12 @@ public class BlockGeometry {
         double dstOuter = outerRadius * outerRadius;
         double dstInner = innerRadius * innerRadius;
 
-        int toX = MathHelper.ceil(outerRadius);
-        int toY = MathHelper.ceil(outerRadius);
-        int toZ = MathHelper.ceil(outerRadius);
-        for (int x = MathHelper.floor(-outerRadius); x <= toX; x++) {
-            for (int y = MathHelper.floor(-outerRadius); y <= toY; y++) {
-                for (int z = MathHelper.floor(-outerRadius); z <= toZ; z++) {
+        int toX = Mth.ceil(outerRadius);
+        int toY = Mth.ceil(outerRadius);
+        int toZ = Mth.ceil(outerRadius);
+        for (int x = Mth.floor(-outerRadius); x <= toX; x++) {
+            for (int y = Mth.floor(-outerRadius); y <= toY; y++) {
+                for (int z = Mth.floor(-outerRadius); z <= toZ; z++) {
                     Vector3 result = new Vector3(x, y, z).add(0.5, 0.5, 0.5);
                     double dst = result.distanceSquared(vFrom);
                     if (dst > dstInner && dst <= dstOuter) {
@@ -94,11 +94,11 @@ public class BlockGeometry {
         double dstOuter = outerRadius * outerRadius;
         double dstInner = innerRadius * innerRadius;
 
-        int toX = MathHelper.ceil(outerRadius);
-        int toY = MathHelper.ceil(outerRadius);
-        int toZ = MathHelper.ceil(outerRadius);
-        for (int x = MathHelper.floor(-outerRadius); x <= toX; x++) {
-            for (int z = MathHelper.floor(-outerRadius); z <= toZ; z++) {
+        int toX = Mth.ceil(outerRadius);
+        int toY = Mth.ceil(outerRadius);
+        int toZ = Mth.ceil(outerRadius);
+        for (int x = Mth.floor(-outerRadius); x <= toX; x++) {
+            for (int z = Mth.floor(-outerRadius); z <= toZ; z++) {
                 for (int y = 0; y <= toY; y++) {
                     Vector3 result = new Vector3(x, y, z).add(0.5, 0.5, 0.5);
                     double dst = result.distanceSquared(vFrom);

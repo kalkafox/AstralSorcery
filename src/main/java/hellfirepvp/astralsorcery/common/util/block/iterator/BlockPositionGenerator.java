@@ -50,7 +50,7 @@ public abstract class BlockPositionGenerator {
 
     protected abstract BlockPos genNext(Vector3 offset, double radius);
 
-    public abstract void writeToNBT(CompoundTag nbt);
+    public abstract void save(CompoundTag nbt);
 
     public abstract void readFromNBT(CompoundTag nbt);
 

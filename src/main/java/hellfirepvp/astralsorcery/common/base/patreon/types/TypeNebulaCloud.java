@@ -58,9 +58,9 @@ public class TypeNebulaCloud extends PatreonEffect implements ITickHandler {
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player player = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
 
-        if (side.isClient() && shouldDoEffect(player)) {
+        if (direction.isClient() && shouldDoEffect(player)) {
             spawnCloudParticles(player);
         }
     }
@@ -70,38 +70,38 @@ public class TypeNebulaCloud extends PatreonEffect implements ITickHandler {
         Vector3 playerPos = Vector3.atEntityCorner(player).addY(0.1F);
 
         for (int i = 0; i < 3; i++) {
-            float oX = (rand.nextFloat() - rand.nextFloat()) * 2F;
-            float oZ = (rand.nextFloat() - rand.nextFloat()) * 2F;
-            Vector3 offset = new Vector3(oX, rand.nextFloat() * 0.1F, oZ);
+            float oX = (random.nextFloat() - random.nextFloat()) * 2F;
+            float oZ = (random.nextFloat() - random.nextFloat()) * 2F;
+            Vector3 offset = new Vector3(oX, random.nextFloat() * 0.1F, oZ);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(playerPos.clone().add(offset))
                     .setAlphaMultiplier(0.8F)
-                    .alpha(((VFXAlphaFunction<EntityVisualFX>) (fx, alphaIn, pTicks) -> {
-                        if (shouldDoEffect(player) && Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a()) {
-                            if (player.rotationPitch > 40) {
-                                return MathHelper.clamp(1F - (player.rotationPitch - 40F) / 20F, 0, 1F) * alphaIn;
+                    .alpha1arg(((VFXAlphaFunction<EntityVisualFX>) (fx, alphaIn, pTicks) -> {
+                        if (shouldDoEffect(player) && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+                            if (player.getXRot() > 40) {
+                                return Mth.clamp(1F - (player.getXRot() - 40F) / 20F, 0, 1F) * alphaIn;
                             }
                         }
                         return alphaIn;
                     }).andThen(VFXAlphaFunction.FADE_OUT))
                     .color(VFXColorFunction.WHITE)
-                    .setScaleMultiplier(0.2F + rand.nextFloat() * 0.3F)
-                    .setMaxAge(40 + rand.nextInt(20));
+                    .setScaleMultiplier(0.2F + random.nextFloat() * 0.3F)
+                    .setMaxAge(40 + random.nextInt(20));
         }
 
-        if (rand.nextInt(16) == 0) {
-            Vector3 from = Vector3.random().setY(0).normalize().multiply(rand.nextFloat() * 2F).addY(rand.nextFloat() * 0.1F);
-            Vector3 to   = Vector3.random().setY(0).normalize().multiply(rand.nextFloat() * 2F).addY(rand.nextFloat() * 0.1F);
+        if (random.nextInt(16) == 0) {
+            Vector3 from = Vector3.random().setY(0).normalize().mul(random.nextFloat() * 2F).addY(random.nextFloat() * 0.1F);
+            Vector3 to   = Vector3.random().setY(0).normalize().mul(random.nextFloat() * 2F).addY(random.nextFloat() * 0.1F);
 
             EffectHelper.of(EffectTemplatesAS.LIGHTNING)
                     .spawn(playerPos.clone().add(from))
                     .makeDefault(playerPos.clone().add(to))
                     .color(VFXColorFunction.WHITE)
-                    .alpha((fx, alphaIn, pTicks) -> {
-                        if (shouldDoEffect(player) && Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a()) {
-                            if (player.rotationPitch > 40) {
-                                return MathHelper.clamp(1F - (Math.abs(player.rotationPitch) - 40F) / 20F, 0, 1F) * alphaIn;
+                    .alpha1arg((fx, alphaIn, pTicks) -> {
+                        if (shouldDoEffect(player) && Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
+                            if (player.getXRot() > 40) {
+                                return Mth.clamp(1F - (Math.abs(player.getXRot()) - 40F) / 20F, 0, 1F) * alphaIn;
                             }
                         }
                         return alphaIn;
@@ -110,9 +110,9 @@ public class TypeNebulaCloud extends PatreonEffect implements ITickHandler {
     }
 
     private boolean shouldDoEffect(Player player) {
-        return player.getUniqueID().equals(playerUUID) &&
+        return player.getUUID().equals(playerUUID) &&
                 (player.getPose() == Pose.STANDING || player.getPose() == Pose.CROUCHING) &&
-                !player.isPotionActive(Effects.INVISIBILITY);
+                !player.isPotionActive(MobEffects.INVISIBILITY);
     }
 
     @Override
@@ -121,8 +121,8 @@ public class TypeNebulaCloud extends PatreonEffect implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

@@ -44,23 +44,23 @@ public class SimpleAltarRecipeSerializer extends CustomRecipeSerializer<SimpleAl
 
     @Override
     public SimpleAltarRecipe read(ResourceLocation recipeId, JsonObject json) {
-        int typeId = JSONUtils.getInt(json, "altar_type");
-        AltarType type = MiscUtils.getEnumEntry(AltarType.class, typeId);
-        int duration = JSONUtils.getInt(json, "duration");
-        int starlightRequirement = JSONUtils.getInt(json, "starlight");
+        int id = GsonHelper.getInt(json, "altar_type");
+        AltarType type = MiscUtils.getEnumEntry(AltarType.class, id);
+        int duration = GsonHelper.getInt(json, "duration");
+        int starlightRequirement = GsonHelper.getInt(json, "starlight");
 
         AltarRecipeGrid grid = AltarRecipeGrid.deserialize(type, json);
         grid.validate(type);
 
         SimpleAltarRecipe recipe = new SimpleAltarRecipe(recipeId, type, duration, starlightRequirement, grid);
-        if (JSONUtils.hasField(json, "recipe_class")) {
-            ResourceLocation key = new ResourceLocation(JSONUtils.getString(json, "recipe_class"));
+        if (GsonHelper.convertToInt(json, "recipe_class")) {
+            ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(json, "recipe_class"));
             recipe = AltarRecipeTypeHandler.convert(recipe, key);
             recipe.setCustomRecipeType(key);
         }
 
-        if (JSONUtils.isJsonArray(json, "output")) {
-            JsonArray outputArray = JSONUtils.getJsonArray(json, "output");
+        if (GsonHelper.convertToDouble(json, "output")) {
+            JsonArray outputArray = GsonHelper.getAsJsonArray(json, "output");
             for (int i = 0; i < outputArray.size(); i++) {
                 recipe.addOutput(JsonHelper.getItemStack(outputArray.get(i), String.format("output[%s]", i)));
             }
@@ -69,13 +69,13 @@ public class SimpleAltarRecipeSerializer extends CustomRecipeSerializer<SimpleAl
         }
 
         JsonObject recipeOptions = new JsonObject();
-        if (JSONUtils.hasField(json, "options")) {
-            recipeOptions = JSONUtils.getJsonObject(json, "options");
+        if (GsonHelper.convertToInt(json, "options")) {
+            recipeOptions = GsonHelper.getAsJsonObject(json, "options");
         }
         recipe.deserializeAdditionalJson(recipeOptions);
 
-        if (JSONUtils.hasField(json, "focus_constellation")) {
-            ResourceLocation key = new ResourceLocation(JSONUtils.getString(json, "focus_constellation"));
+        if (GsonHelper.convertToInt(json, "focus_constellation")) {
+            ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(json, "focus_constellation"));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(key);
             if (cst == null) {
                 throw new JsonSyntaxException("Unknown constellation " + key.toString());
@@ -83,25 +83,25 @@ public class SimpleAltarRecipeSerializer extends CustomRecipeSerializer<SimpleAl
             recipe.setFocusConstellation(cst);
         }
 
-        if (JSONUtils.hasField(json, "relay_inputs")) {
-            JsonArray relayIngredients = JSONUtils.getJsonArray(json, "relay_inputs");
+        if (GsonHelper.convertToInt(json, "relay_inputs")) {
+            JsonArray relayIngredients = GsonHelper.getAsJsonArray(json, "relay_inputs");
             for (int i = 0; i < relayIngredients.size(); i++) {
-                JsonElement element = relayIngredients.get(i);
-                Ingredient ingredient = Ingredient.deserialize(element);
-                if (!ingredient.hasNoMatchingItems()) {
+                JsonElement value = relayIngredients.get(i);
+                Ingredient ingredient = Ingredient.deserialize(value);
+                if (!ingredient.isEmpty()) {
                     recipe.addRelayInput(ingredient);
                 } else {
                     AstralSorcery.log.warn("Skipping relay_inputs[" + i + "] for recipe " + recipeId + " as the ingredient has no matching items!");
-                    AstralSorcery.log.warn("Ingredient skipped: " + JSONUtils.toString(element));
+                    AstralSorcery.log.warn("Ingredient skipped: " + GsonHelper.toString(value));
                 }
             }
         }
 
-        if (JSONUtils.hasField(json, "effects")) {
-            JsonArray effectNames = JSONUtils.getJsonArray(json, "effects");
+        if (GsonHelper.convertToInt(json, "effects")) {
+            JsonArray effectNames = GsonHelper.getAsJsonArray(json, "effects");
             for (int i = 0; i < effectNames.size(); i++) {
-                JsonElement element = effectNames.get(i);
-                ResourceLocation effectKey = new ResourceLocation(JSONUtils.getString(element, "effects[" + i + "]"));
+                JsonElement value = effectNames.get(i);
+                ResourceLocation effectKey = ResourceLocation.parse(GsonHelper.getString(value, "effects[" + i + "]"));
                 AltarRecipeEffect effect = RegistriesAS.REGISTRY_ALTAR_EFFECTS.getValue(effectKey);
                 if (effect == null) {
                     throw new JsonSyntaxException("No altar effect for name " + effectKey + "! (Found at: effects[" + i + "])");

@@ -35,7 +35,7 @@ public class AstralBlockTagsProvider extends BlockTagsProvider {
     }
 
     @Override
-    protected void registerTags() {
+    protected void addTags() {
         this.tag(BlockTags.BEACON_BASE_BLOCKS)
                 .add(BlocksAS.STARMETAL);
 

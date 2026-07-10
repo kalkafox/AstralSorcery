@@ -33,8 +33,8 @@ public class PatreonEffectHelper {
     static Map<UUID, PatreonEffect> effectMap = new HashMap<>();
 
     @Nonnull
-    public static List<PatreonEffect> getPatreonEffects(LogicalSide side, UUID playerUUID) {
-        if (side.isClient() && !RenderingConfig.CONFIG.patreonEffects.get()) {
+    public static List<PatreonEffect> getPatreonEffects(LogicalSide direction, UUID playerUUID) {
+        if (direction.isClient() && !RenderingConfig.CONFIG.patreonEffects.get()) {
             return Collections.emptyList(); //That config is to be applied clientside
         }
         if (!loadingFinished) {
@@ -52,7 +52,7 @@ public class PatreonEffectHelper {
         if (!loadingFinished) {
             return Maps.newHashMap();
         }
-        Collection<UUID> playerUUIDs = players.stream().map(Entity::getUniqueID).collect(Collectors.toList());
+        Collection<UUID> playerUUIDs = players.stream().map(Entity::getUUID).collect(Collectors.toList());
         return playerEffectMap.entrySet()
                 .stream()
                 .filter(e -> playerUUIDs.contains(e.getKey()))

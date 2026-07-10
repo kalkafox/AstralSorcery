@@ -31,15 +31,15 @@ public class SlotConstellationPaper extends SlotItemHandler {
     }
 
     @Override
-    public boolean isItemValid(ItemStack stack) {
+    public boolean mayPlace(ItemStack stack) {
         return !stack.isEmpty() &&
                 stack.getItem() instanceof ItemConstellationPaper &&
                 ((ItemConstellationPaper) stack.getItem()).getConstellation(stack) != null;
     }
 
     @Override
-    public void onSlotChanged() {
-        super.onSlotChanged();
+    public void setChanged() {
+        super.setChanged();
 
         listener.slotChanged();
     }

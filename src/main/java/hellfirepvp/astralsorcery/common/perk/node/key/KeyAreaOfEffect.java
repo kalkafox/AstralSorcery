@@ -45,12 +45,12 @@ public class KeyAreaOfEffect extends KeyAddEnchantment {
 
     public KeyAreaOfEffect(ResourceLocation name, float x, float y) {
         super(name, x, y);
-        this.addEnchantment(Enchantments.SWEEPING_EDGE, 2);
+        this.fillItemCategory(Enchantments.SWEEPING_EDGE, 2);
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
         bus.addListener(EventPriority.HIGH, this::onDamage);
     }
 
@@ -61,8 +61,8 @@ public class KeyAreaOfEffect extends KeyAddEnchantment {
 
         DamageSource source = event.getSource();
         if (source.getEntity() instanceof Player player && source.getDirectEntity() != player) {
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 LivingEntity attacked = event.getEntity();
 
@@ -76,16 +76,16 @@ public class KeyAreaOfEffect extends KeyAddEnchantment {
                     sweepingPercentage = getSweepingLevel(player);
                 }
                 if (sweepingPercentage > 0) {
-                    sweepingPercentage = PerkAttributeHelper.getOrCreateMap(player, side)
+                    sweepingPercentage = PerkAttributeHelper.getOrCreateMap(player, direction)
                             .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, sweepingPercentage);
                     float toApply = event.getAmount() * sweepingPercentage;
 
-                    float range = 2.5F * PerkAttributeHelper.getOrCreateMap(player, side).getModifier(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
+                    float range = 2.5F * PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
                     EventFlags.SWEEP_ATTACK.executeWithFlag(() -> {
                         for (LivingEntity target : attacked.level().getEntitiesOfClass(LivingEntity.class,
                                 attacked.getBoundingBox().inflate(range, range / 2F, range))) {
                             if (MiscUtils.canPlayerAttackServer(player, target) && !player.equals(target)) {
-                                DamageUtil.attackEntityFrom(target, source, toApply);
+                                DamageUtil.hurt(target, source, toApply);
                             }
                         }
                     });

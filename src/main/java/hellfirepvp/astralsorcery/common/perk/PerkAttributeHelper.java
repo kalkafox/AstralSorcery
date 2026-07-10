@@ -35,14 +35,14 @@ public class PerkAttributeHelper {
     @Nonnull
     public static PerkAttributeMap getOrCreateMap(Player player, LogicalSide dist) {
         if (dist.isClient()) {
-            return playerPerkAttributesClient.computeIfAbsent(player.getUniqueID(), (uuid) -> new PerkAttributeMap(dist));
+            return playerPerkAttributesClient.computeIfAbsent(player.getUUID(), (uuid) -> new PerkAttributeMap(dist));
         } else {
-            return playerPerkAttributes.computeIfAbsent(player.getUniqueID(), (uuid) -> new PerkAttributeMap(dist));
+            return playerPerkAttributes.computeIfAbsent(player.getUUID(), (uuid) -> new PerkAttributeMap(dist));
         }
     }
 
-    public static PerkAttributeMap getMockInstance(LogicalSide side) {
-        return new PerkAttributeMap(side);
+    public static PerkAttributeMap getMockInstance(LogicalSide direction) {
+        return new PerkAttributeMap(direction);
     }
 
     @OnlyIn(Dist.CLIENT)

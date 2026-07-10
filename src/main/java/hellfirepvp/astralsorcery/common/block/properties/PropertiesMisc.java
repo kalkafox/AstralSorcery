@@ -36,7 +36,7 @@ public class PropertiesMisc {
     }
 
     public static Block.Properties defaultRock() {
-        return Block.Properties.create(Material.ROCK, MaterialColor.STONE)
+        return Block.Properties.create(Material.STONE, MaterialColor.STONE)
                 .hardnessAndResistance(1.5F, 6.0F)
                 .harvestTool(ToolType.PICKAXE)
                 .sound(SoundType.STONE);
@@ -51,16 +51,16 @@ public class PropertiesMisc {
     }
 
     public static Block.Properties defaultPlant() {
-        return Block.Properties.create(Material.PLANTS)
+        return Block.Properties.create(Material.PLANT)
                 .doesNotBlockMovement()
                 .hardnessAndResistance(0)
                 .sound(SoundType.PLANT);
     }
 
     public static Block.Properties defaultTickingPlant() {
-        return Block.Properties.create(Material.PLANTS)
+        return Block.Properties.create(Material.PLANT)
                 .doesNotBlockMovement()
-                .tickRandomly()
+                .randomTicks()
                 .hardnessAndResistance(0)
                 .sound(SoundType.PLANT);
     }

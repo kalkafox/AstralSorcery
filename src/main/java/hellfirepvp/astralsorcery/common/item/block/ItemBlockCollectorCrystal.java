@@ -40,7 +40,7 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
     }
 
     @Override
-    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> stacks) {
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> stacks) {
         if (isInGroup(group)) {
             for (IWeakConstellation cst : ConstellationRegistry.getWeakConstellations()) {
                 ItemStack stack = new ItemStack(this);
@@ -61,7 +61,7 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
     public Component getDisplayName(ItemStack stack) {
         IWeakConstellation cst = this.getAttunedConstellation(stack);
         if (cst != null) {
-            return Component.translatable(super.getTranslationKey(stack) + ".typed", cst.getConstellationName());
+            return Component.translatable(super.getDescriptionId(stack) + ".typed", cst.getConstellationName());
         }
         return super.getDisplayName(stack);
     }
@@ -79,7 +79,7 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
     @Override
     public boolean setAttunedConstellation(ItemStack stack, @Nullable IWeakConstellation cst) {
         if (cst != null) {
-            cst.writeToNBT(NBTHelper.getPersistentData(stack), "constellation");
+            cst.save(NBTHelper.getPersistentData(stack), "constellation");
         } else {
             NBTHelper.getPersistentData(stack).remove("constellation");
         }
@@ -95,7 +95,7 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
     @Override
     public boolean setTraitConstellation(ItemStack stack, @Nullable IMinorConstellation cst) {
         if (cst != null) {
-            cst.writeToNBT(NBTHelper.getPersistentData(stack), "trait");
+            cst.save(NBTHelper.getPersistentData(stack), "trait");
         } else {
             NBTHelper.getPersistentData(stack).remove("trait");
         }

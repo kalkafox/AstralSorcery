@@ -67,15 +67,15 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     protected VoxelShape createShape() {
-        VoxelShape footing = Block.makeCuboidShape(1, 0, 1, 15, 2, 15);
-        VoxelShape floor = Block.makeCuboidShape(3, 2, 3, 13, 4, 13);
-        VoxelShape basinFloor = Block.makeCuboidShape(1, 4, 1, 15, 5, 15);
-        VoxelShape w1 = Block.makeCuboidShape(1, 5, 1, 2, 16, 14);
-        VoxelShape w2 = Block.makeCuboidShape(2, 5, 1, 15, 16, 2);
-        VoxelShape w3 = Block.makeCuboidShape(14, 5, 2, 15, 16, 15);
-        VoxelShape w4 = Block.makeCuboidShape(1, 5, 14, 14, 16, 15);
+        VoxelShape footing = Block.box(1, 0, 1, 15, 2, 15);
+        VoxelShape floor = Block.box(3, 2, 3, 13, 4, 13);
+        VoxelShape basinFloor = Block.box(1, 4, 1, 15, 5, 15);
+        VoxelShape w1 = Block.box(1, 5, 1, 2, 16, 14);
+        VoxelShape w2 = Block.box(2, 5, 1, 15, 16, 2);
+        VoxelShape w3 = Block.box(14, 5, 2, 15, 16, 15);
+        VoxelShape w4 = Block.box(1, 5, 14, 14, 16, 15);
 
-        return VoxelUtils.combineAll(IBooleanFunction.OR,
+        return VoxelUtils.combineAll(BooleanOp.OR,
                 footing, floor, basinFloor, w1, w2, w3, w4);
     }
 
@@ -85,29 +85,29 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!world.isRemote()) {
-            ItemStack heldItem = player.getHeldItem(hand);
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!level.isClientSide()) {
+            ItemStack heldItem = player.getItemInHand(hand);
             if (!heldItem.isEmpty()) {
-                TileWell tw = MiscUtils.getTileAt(world, pos, TileWell.class, false);
+                TileWell tw = MiscUtils.getTileAt(level, pos, TileWell.class, false);
                 if (tw == null) {
-                    return ActionResultType.PASS;
+                    return InteractionResult.PASS;
                 }
 
                 WellLiquefaction entry = RecipeTypesAS.TYPE_WELL.findRecipe(new WellLiquefactionContext(heldItem));
                 if (entry != null) {
-                    ItemStackHandler handle = tw.getInventory();
+                    ItemStackHandler handle = tw.getItems();
                     if (!handle.getStackInSlot(0).isEmpty()) {
-                        return ActionResultType.PASS;
+                        return InteractionResult.PASS;
                     }
-                    if (!world.isAirBlock(pos.up())) {
-                        return ActionResultType.PASS;
+                    if (!level.isEmptyBlock(pos.above())) {
+                        return InteractionResult.PASS;
                     }
 
                     handle.setStackInSlot(0, ItemUtils.copyStackWithSize(heldItem, 1));
-                    world.playSound(null, pos.getX(), pos.getY(), pos.getZ(),
-                            SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F,
-                            ((world.rand.nextFloat() - world.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                    level.playSound(null, pos.getX(), pos.getY(), pos.getZ(),
+                            SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F,
+                            ((level.random.nextFloat() - level.random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 
                     if (!player.isCreative()) {
                         heldItem.shrink(1);
@@ -121,58 +121,58 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
                         .ifPresent((handler) -> {
                             FluidActionResult far = FluidUtil.tryFillContainerAndStow(heldItem,
                                     handler, new InvWrapper(player.inventory), FluidAttributes.BUCKET_VOLUME, player, true);
-                            if (far.isSuccess()) {
-                                player.setHeldItem(hand, far.getResult());
-                                SoundHelper.playSoundAround(SoundEvents.ITEM_BUCKET_FILL, world, pos, 1F, 1F);
+                            if (far.shouldSwing()) {
+                                player.setHeldItem(hand, far.getObject());
+                                SoundHelper.playSoundAround(SoundEvents.BUCKET_FILL, level, pos, 1F, 1F);
                                 tw.markForUpdate();
                             }
                         });
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void onReplaced(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
         TileWell tw = MiscUtils.getTileAt(worldIn, pos, TileWell.class, true);
-        if (tw != null && !worldIn.isRemote) {
-            ItemStack stack = tw.getInventory().getStackInSlot(0);
+        if (tw != null && !worldIn.isClientSide) {
+            ItemStack stack = tw.getItems().getStackInSlot(0);
             if (!stack.isEmpty()) {
                 tw.breakCatalyst();
             }
         }
 
-        super.onReplaced(state, worldIn, pos, newState, isMoving);
+        super.onRemove(state, worldIn, pos, newState, isMoving);
     }
 
     @Override
-    public boolean hasComparatorInputOverride(BlockState p_149740_1_) {
+    public boolean hasAnalogOutputSignal(BlockState p_149740_1_) {
         return true;
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, Level world, BlockPos pos) {
-        TileWell tw = MiscUtils.getTileAt(world, pos, TileWell.class, false);
+    public int getComparatorInputOverride(BlockState state, Level level, BlockPos pos) {
+        TileWell tw = MiscUtils.getTileAt(level, pos, TileWell.class, false);
         if (tw != null) {
-            int fluidPart = MathHelper.ceil(tw.getTank().getPercentageFilled() * 8F);
+            int fluidPart = Mth.ceil(tw.getTank().getPercentageFilled() * 8F);
             return tw.getCatalyst().isEmpty() ? fluidPart : fluidPart + 7;
         }
         return 0;
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState p_149645_1_) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileWell();
     }
 

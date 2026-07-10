@@ -45,7 +45,7 @@ import java.util.Random;
  */
 public class TimeStopEffectHelper {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     @Nonnull
     private final BlockPos position;
@@ -78,65 +78,65 @@ public class TimeStopEffectHelper {
     @OnlyIn(Dist.CLIENT)
     static void playEntityParticles(LivingEntity e) {
         EntityDimensions size = e.getSize(e.getPose());
-        double x = e.getPosX() - size.width / 2F + rand.nextFloat() * size.width;
-        double y = e.getPosY() + rand.nextFloat() * size.height;
-        double z = e.getPosZ() - size.width / 2F + rand.nextFloat() * size.width;
-        playParticles(x, y, z);
+        double x = e.getX() - size.width / 2F + random.nextFloat() * size.width;
+        double y = e.getY() + random.nextFloat() * size.height;
+        double z = e.getZ() - size.width / 2F + random.nextFloat() * size.width;
+        showBreakingParticles(x, y, z);
     }
 
     @OnlyIn(Dist.CLIENT)
     public static void playEntityParticles(PktPlayEffect ev) {
         Vector3 at = ByteBufUtils.readVector(ev.getExtraData());
-        playParticles(at.getX(), at.getY(), at.getZ());
+        showBreakingParticles(at.getX(), at.getY(), at.getZ());
     }
 
     @OnlyIn(Dist.CLIENT)
-    static void playParticles(double x, double y, double z) {
+    static void showBreakingParticles(double x, double y, double z) {
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(new Vector3(x, y, z))
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.WHITE)
-                .setScaleMultiplier(0.3F + rand.nextFloat() * 0.5F)
-                .setMaxAge(40 + rand.nextInt(20));
+                .setScaleMultiplier(0.3F + random.nextFloat() * 0.5F)
+                .setMaxAge(40 + random.nextInt(20));
     }
 
     @OnlyIn(Dist.CLIENT)
     public void playClientTickEffect() {
-        Level world = Minecraft.getInstance().world;
-        if (world == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             return;
         }
 
-        List<LivingEntity> entities = world.getEntitiesWithinAABB(LivingEntity.class,
+        List<LivingEntity> entities = level.getEntitiesWithinAABB(LivingEntity.class,
                 new AABB(-range, -range, -range, range, range, range).offset(position.getX(), position.getY(), position.getZ()),
-                EntityPredicates.withinRange(position.getX(), position.getY(), position.getZ(), range));
+                EntitySelector.withinRange(position.getX(), position.getY(), position.getZ(), range));
 
         for (LivingEntity e : entities) {
-            if (e != null && e.isAlive() && targetController.shouldFreezeEntity(e) && rand.nextInt(3) == 0) {
+            if (e != null && e.isAlive() && targetController.shouldFreezeEntity(e) && random.nextInt(3) == 0) {
                 playEntityParticles(e);
             }
         }
 
-        int minX = MathHelper.floor((position.getX() - range) / 16.0D);
-        int maxX = MathHelper.floor((position.getX() + range) / 16.0D);
-        int minZ = MathHelper.floor((position.getZ() - range) / 16.0D);
-        int maxZ = MathHelper.floor((position.getZ() + range) / 16.0D);
+        int minX = Mth.floor((position.getX() - range) / 16.0D);
+        int maxX = Mth.floor((position.getX() + range) / 16.0D);
+        int minZ = Mth.floor((position.getZ() - range) / 16.0D);
+        int maxZ = Mth.floor((position.getZ() + range) / 16.0D);
 
         for (int xx = minX; xx <= maxX; ++xx) {
             for (int zz = minZ; zz <= maxZ; ++zz) {
-                LevelChunk ch = world.getChunk(xx, zz);
+                LevelChunk ch = level.getChunk(xx, zz);
                 if (!ch.isEmpty()) {
-                    Map<BlockPos, BlockEntity> map = ch.getTileEntityMap();
+                    Map<BlockPos, BlockEntity> map = ch.getBlockEntities();
                     for (Map.Entry<BlockPos, BlockEntity> teEntry : map.entrySet()) {
 
                         BlockEntity te = teEntry.getValue();
-                        if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) && te.getPos().withinDistance(position, range)) {
+                        if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) && te.getBlockPos().distSqr(position, range)) {
 
-                            double x = te.getPos().getX() + rand.nextFloat();
-                            double y = te.getPos().getY() + rand.nextFloat();
-                            double z = te.getPos().getZ() + rand.nextFloat();
+                            double x = te.getBlockPos().getX() + random.nextFloat();
+                            double y = te.getBlockPos().getY() + random.nextFloat();
+                            double z = te.getBlockPos().getZ() + random.nextFloat();
 
-                            playParticles(x, y, z);
+                            showBreakingParticles(x, y, z);
                         }
                     }
                 }
@@ -145,16 +145,16 @@ public class TimeStopEffectHelper {
 
         Vector3 pos;
         for (int i = 0; i < 10; i++) {
-            pos = Vector3.random().normalize().multiply(rand.nextFloat() * range).add(position);
-            playParticles(pos.getX(), pos.getY(), pos.getZ());
+            pos = Vector3.random().normalize().mul(random.nextFloat() * range).add(position);
+            showBreakingParticles(pos.getX(), pos.getY(), pos.getZ());
         }
 
-        if (rand.nextInt(4) == 0) {
-            Vector3 rand1 = Vector3.random().normalize().multiply(rand.nextFloat() * range).add(position);
-            Vector3 rand2 = Vector3.random().normalize().multiply(rand.nextFloat() * range).add(position);
+        if (random.nextInt(4) == 0) {
+            Vector3 rand1 = Vector3.random().normalize().mul(random.nextFloat() * range).add(position);
+            Vector3 rand2 = Vector3.random().normalize().mul(random.nextFloat() * range).add(position);
             if (rand1.distance(rand2) > 10) {
                 Vector3 dir = rand1.vectorFromHereTo(rand2);
-                rand2 = rand1.clone().add(dir.normalize().multiply(10));
+                rand2 = rand1.clone().add(dir.normalize().mul(10));
             }
             EffectHelper.of(EffectTemplatesAS.LIGHTNING)
                     .spawn(rand1)

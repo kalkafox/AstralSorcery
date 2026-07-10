@@ -36,7 +36,7 @@ public class WellRecipeBuilder extends CustomRecipeBuilder<WellLiquefaction> {
 
     private final ResourceLocation id;
 
-    private Ingredient input = Ingredient.EMPTY;
+    private Ingredient from = Ingredient.EMPTY;
     private Fluid output = Fluids.EMPTY;
 
     private float productionMultiplier = 0.5F;
@@ -56,17 +56,17 @@ public class WellRecipeBuilder extends CustomRecipeBuilder<WellLiquefaction> {
     }
 
     public WellRecipeBuilder setItemInput(ItemLike item) {
-        this.input = Ingredient.fromItems(item);
+        this.from = Ingredient.valueFromJson(item);
         return this;
     }
 
     public WellRecipeBuilder setItemInput(Tag<Item> tag) {
-        this.input = Ingredient.fromTag(tag);
+        this.from = Ingredient.fromTag(tag);
         return this;
     }
 
-    public WellRecipeBuilder setItemInput(Ingredient input) {
-        this.input = input;
+    public WellRecipeBuilder setItemInput(Ingredient from) {
+        this.from = from;
         return this;
     }
 
@@ -93,13 +93,13 @@ public class WellRecipeBuilder extends CustomRecipeBuilder<WellLiquefaction> {
     @Nonnull
     @Override
     protected WellLiquefaction validateAndGet() {
-        if (this.input.hasNoMatchingItems()) {
+        if (this.from.isEmpty()) {
             throw new IllegalArgumentException("No valid item for input found!");
         }
         if (this.output == Fluids.EMPTY) {
             throw new IllegalArgumentException("No output fluid defined!");
         }
-        return new WellLiquefaction(this.id, this.input, this.output, this.catalystColor, this.productionMultiplier, this.shatterMultiplier);
+        return new WellLiquefaction(this.id, this.from, this.output, this.catalystColor, this.productionMultiplier, this.shatterMultiplier);
     }
 
     @Override

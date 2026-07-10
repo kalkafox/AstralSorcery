@@ -37,18 +37,18 @@ public class EffectPillarSparkle extends AltarRecipeEffect {
             for (int i = 0; i < 3; i++) {
 
                 Vector3 at = new Vector3(altar).add(
-                        scale * (rand.nextBoolean() ? 1 : -1),
+                        scale * (random.nextBoolean() ? 1 : -1),
                         0,
-                        scale * (rand.nextBoolean() ? 1 : -1));
-                at.addY(rand.nextFloat() * getPillarHeight(altar.getAltarType()));
-                at.add(-0.3 + 1.6 * rand.nextFloat(), 0, -0.3 + 1.6 * rand.nextFloat());
+                        scale * (random.nextBoolean() ? 1 : -1));
+                at.addY(random.nextFloat() * getPillarHeight(altar.getAltarType()));
+                at.add(-0.3 + 1.6 * random.nextFloat(), 0, -0.3 + 1.6 * random.nextFloat());
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .color(VFXColorFunction.WHITE)
-                        .setGravityStrength(-0.001F + rand.nextFloat() * -0.002F)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.4F);
+                        .setGravityStrength(-0.001F + random.nextFloat() * -0.002F)
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.4F);
             }
         }
     }

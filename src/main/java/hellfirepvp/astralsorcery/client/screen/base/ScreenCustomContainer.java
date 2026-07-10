@@ -48,27 +48,27 @@ public abstract class ScreenCustomContainer<T extends AbstractContainerMenu> ext
     }
 
     @Override
-    public T getContainer() {
+    public T getMenuProvider() {
         return this.container;
     }
 
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         this.renderBackground(renderStack);
-        super.render(renderStack, mouseX, mouseY, pTicks);
-        this.renderHoveredTooltip(renderStack, mouseX, mouseY);
+        super.render(renderStack, xpos, ypos, pTicks);
+        this.renderHoveredTooltip(renderStack, xpos, ypos);
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(PoseStack renderStack, float a, int xpos, int ypos) {
         this.getBackgroundTexture().bindTexture();
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            RenderingGuiUtils.rect(buf, renderStack, this.guiLeft, this.guiTop, this.getBlitOffset(), this.sWidth, this.sHeight).draw();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingGuiUtils.rect(buf, renderStack, this.leftPos, this.topPos, this.getBlitOffset(), this.sWidth, this.sHeight).draw();
         });
     }
 }

@@ -41,18 +41,18 @@ public class OreItemRarityRegistry extends ConfigDataAdapter<OreItemRarityEntry>
     }
 
     @Nullable
-    public Item getRandomItem(Random rand) {
+    public Item getRandomItem(Random random) {
         List<OreItemRarityEntry> entries = this.getConfiguredValues();
         Set<OreItemRarityEntry> visitedEntires = new HashSet<>();
 
         while (visitedEntires.size() < entries.size()) {
             OreItemRarityEntry entry = MiscUtils.getWeightedRandomEntry(entries.stream()
                     .filter(value -> !visitedEntires.contains(value))
-                    .collect(Collectors.toList()), rand, OreItemRarityEntry::getWeight);
+                    .collect(Collectors.toList()), random, OreItemRarityEntry::getWeight);
 
             if (entry != null) {
                 visitedEntires.add(entry);
-                Item i = entry.getRandomItem(rand);
+                Item i = entry.getRandomItem(random);
                 if (i != null) {
                     return i;
                 }
@@ -77,7 +77,7 @@ public class OreItemRarityRegistry extends ConfigDataAdapter<OreItemRarityEntry>
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return this.fileName;
     }
 
@@ -87,7 +87,7 @@ public class OreItemRarityRegistry extends ConfigDataAdapter<OreItemRarityEntry>
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 

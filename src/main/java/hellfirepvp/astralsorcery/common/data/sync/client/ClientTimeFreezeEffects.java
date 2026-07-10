@@ -36,8 +36,8 @@ public class ClientTimeFreezeEffects extends ClientData<ClientTimeFreezeEffects>
     private final Map<ResourceKey<Level>, List<TimeStopEffectHelper>> clientActiveFreezeZones = new HashMap<>();
 
     @Nonnull
-    public List<TimeStopEffectHelper> getTimeStopEffects(Level world) {
-        return getTimeStopEffects(world.getDimensionKey());
+    public List<TimeStopEffectHelper> getTimeStopEffects(Level level) {
+        return getTimeStopEffects(level.dimension());
     }
 
     @Nonnull
@@ -78,12 +78,12 @@ public class ClientTimeFreezeEffects extends ClientData<ClientTimeFreezeEffects>
     public static class Reader extends ClientDataReader<ClientTimeFreezeEffects> {
 
         @Override
-        public void readFromIncomingFullSync(ClientTimeFreezeEffects data, CompoundTag compound) {
+        public void readFromIncomingFullSync(ClientTimeFreezeEffects data, CompoundTag pattern) {
             data.clientActiveFreezeZones.clear();
 
-            CompoundTag dimTag = compound.getCompound("dimTypes");
+            CompoundTag dimTag = pattern.getCompound("dimTypes");
             for (String dimKey : dimTag.keySet()) {
-                ResourceKey<Level> dim = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(dimKey));
+                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
 
                 List<TimeStopEffectHelper> effects = new LinkedList<>();
                 ListTag listEffects = dimTag.getList(dimKey, Constants.NBT.TAG_COMPOUND);
@@ -95,8 +95,8 @@ public class ClientTimeFreezeEffects extends ClientData<ClientTimeFreezeEffects>
         }
 
         @Override
-        public void readFromIncomingDiff(ClientTimeFreezeEffects data, CompoundTag compound) {
-            ListTag changes = compound.getList("changes", Constants.NBT.TAG_COMPOUND);
+        public void readFromIncomingDiff(ClientTimeFreezeEffects data, CompoundTag pattern) {
+            ListTag changes = pattern.getList("changes", Constants.NBT.TAG_COMPOUND);
             for (Tag iNBT : changes) {
                 DataTimeFreezeEffects.ServerSyncAction action = DataTimeFreezeEffects.ServerSyncAction.deserializeNBT((CompoundTag) iNBT);
                 data.applyChange(action);

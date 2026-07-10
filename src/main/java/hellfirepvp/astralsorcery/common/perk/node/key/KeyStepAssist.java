@@ -37,26 +37,26 @@ public class KeyStepAssist extends KeyPerk implements PlayerTickPerk, CooldownPe
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
         bus.addListener(EventPriority.LOWEST, this::onTeleport);
     }
 
     @Override
-    public void onPlayerTick(Player player, LogicalSide side) {
-        if (side.isServer()) {
-            float currentHeight = player.stepHeight;
+    public void onPlayerTick(Player player, LogicalSide direction) {
+        if (direction.isServer()) {
+            float storageY = player.maxUpStep;
             if (!PerkCooldownHelper.isCooldownActiveForPlayer(player, this)) {
-                player.stepHeight += 0.5F;
+                player.maxUpStep += 0.5F;
             } else {
-                if (player.stepHeight < 1.1F) {
-                    player.stepHeight = 1.1F;
+                if (player.maxUpStep < 1.1F) {
+                    player.maxUpStep = 1.1F;
                 }
             }
             PerkCooldownHelper.forceSetCooldownForPlayer(player, this, 20);
-            if (currentHeight != player.stepHeight && player instanceof ServerPlayer) {
+            if (storageY != player.maxUpStep && player instanceof ServerPlayer) {
                 if (MiscUtils.isConnectionEstablished((ServerPlayer) player)) {
-                    PktSyncStepAssist sync = new PktSyncStepAssist(player.stepHeight);
+                    PktSyncStepAssist sync = new PktSyncStepAssist(player.maxUpStep);
                     PacketChannel.CHANNEL.sendToPlayer(player, sync);
                 }
             }
@@ -65,19 +65,19 @@ public class KeyStepAssist extends KeyPerk implements PlayerTickPerk, CooldownPe
 
     @Override
     public void onCooldownTimeout(Player player) {
-        player.stepHeight -= 0.5F;
-        if (player.stepHeight < 0.6F) {
-            player.stepHeight = 0.6F;
+        player.maxUpStep -= 0.5F;
+        if (player.maxUpStep < 0.6F) {
+            player.maxUpStep = 0.6F;
         }
 
         if (player instanceof ServerPlayer && MiscUtils.isConnectionEstablished((ServerPlayer) player)) {
-            PktSyncStepAssist sync = new PktSyncStepAssist(player.stepHeight);
+            PktSyncStepAssist sync = new PktSyncStepAssist(player.maxUpStep);
             PacketChannel.CHANNEL.sendToPlayer(player, sync);
         }
     }
 
     private void onTeleport(EntityTravelToDimensionEvent event) {
-        if (!event.getEntity().getEntityWorld().isRemote() && event.getEntity() instanceof Player) {
+        if (!event.getEntity().getCommandSenderWorld().isClientSide() && event.getEntity() instanceof Player) {
             PerkCooldownHelper.removeAllCooldowns((Player) event.getEntity(), LogicalSide.SERVER);
         }
     }

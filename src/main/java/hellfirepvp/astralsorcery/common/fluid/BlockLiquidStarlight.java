@@ -53,96 +53,96 @@ public class BlockLiquidStarlight extends LiquidBlock {
     public BlockLiquidStarlight(Supplier<? extends FlowingFluid> fluidSupplier) {
         super(fluidSupplier, Block.Properties.create(Material.WATER)
                 .doesNotBlockMovement()
-                .setLightLevel(state -> 15)
+                .isRedstoneConductor(state -> 15)
                 .hardnessAndResistance(100.0F)
                 .noDrops());
     }
 
     @Override
-    public void onEntityCollision(BlockState state, Level world, BlockPos pos, Entity entity) {
-        super.onEntityCollision(state, world, pos, entity);
+    public void onEntityCollision(BlockState state, Level level, BlockPos pos, Entity entity) {
+        super.onEntityCollision(state, level, pos, entity);
 
         if (state.get(LEVEL) != 0) {
             return;
         }
 
         if (entity instanceof LivingEntity) {
-            ((LivingEntity) entity).addPotionEffect(new MobEffectInstance(Effects.NIGHT_VISION, 300, 0, true, true));
+            ((LivingEntity) entity).addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 300, 0, true, true));
         } else if (entity instanceof ItemEntity) {
             LiquidStarlightCraftingRegistry.tryCraft((ItemEntity) entity, pos);
 
-            if (!world.isRemote() &&((ItemEntity) entity).getItem().isEmpty()) {
+            if (!level.isClientSide() &&((ItemEntity) entity).getItem().isEmpty()) {
                 entity.remove();
             }
         }
     }
 
-    public void onBlockAdded(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
+    public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
-            worldIn.getPendingFluidTicks().scheduleTick(pos, state.getFluidState().getFluid(), this.getFluid().getTickRate(worldIn));
+            worldIn.getLiquidTicks().scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
         }
     }
 
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
-            worldIn.getPendingFluidTicks().scheduleTick(pos, state.getFluidState().getFluid(), this.getFluid().getTickRate(worldIn));
+            worldIn.getLiquidTicks().scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
         }
     }
 
-    private boolean reactWithNeighbors(Level world, BlockPos pos, BlockState state) {
+    private boolean reactWithNeighbors(Level level, BlockPos pos, BlockState state) {
         for (Direction dir : Direction.values()) {
-            FluidState otherState = world.getFluidState(pos.offset(dir));
-            Fluid otherFluid = otherState.getFluid();
+            FluidState otherState = level.getFluidState(pos.offset(dir));
+            Fluid otherFluid = otherState.getType();
             if (otherFluid instanceof FlowingFluid) {
-                otherFluid = ((FlowingFluid) otherFluid).getStillFluid();
+                otherFluid = ((FlowingFluid) otherFluid).getSource();
             }
-            if (otherFluid instanceof EmptyFluid || otherFluid.equals(this.getFluid())) {
+            if (otherFluid instanceof EmptyFluid || otherFluid.equals(this.getType())) {
                 continue;
             }
 
             BlockState generate;
-            boolean isHot = otherFluid.getAttributes().getTemperature(world, pos.offset(dir)) > 600;
+            boolean isHot = otherFluid.getAttributes().getTemperature(level, pos.offset(dir)) > 600;
             if (isHot) {
                 if (CraftingConfig.CONFIG.liquidStarlightInteractionSand.get()) {
-                    generate = Blocks.SAND.getDefaultState();
-                    if (CraftingConfig.CONFIG.liquidStarlightInteractionAquamarine.get() && world.rand.nextInt(800) == 0) {
-                        generate = BlocksAS.AQUAMARINE_SAND_ORE.getDefaultState();
+                    generate = Blocks.SAND.defaultBlockState();
+                    if (CraftingConfig.CONFIG.liquidStarlightInteractionAquamarine.get() && level.random.nextInt(800) == 0) {
+                        generate = BlocksAS.AQUAMARINE_SAND_ORE.defaultBlockState();
                     }
                 } else {
-                    generate = Blocks.COBBLESTONE.getDefaultState();
+                    generate = Blocks.COBBLESTONE.defaultBlockState();
                 }
             } else {
                 if (CraftingConfig.CONFIG.liquidStarlightInteractionIce.get()) {
-                    generate = Blocks.PACKED_ICE.getDefaultState();
+                    generate = Blocks.PACKED_ICE.defaultBlockState();
                 } else {
-                    generate = Blocks.COBBLESTONE.getDefaultState();
+                    generate = Blocks.COBBLESTONE.defaultBlockState();
                 }
             }
 
-            world.setBlockState(pos, ForgeEventFactory.fireFluidPlaceBlockEvent(world, pos, pos, generate));
+            level.setBlock(pos, ForgeEventFactory.fireFluidPlaceBlockEvent(level, pos, pos, generate));
         }
         return true;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
         Integer level = state.get(LEVEL);
         double percHeight = 1D - (((double) level + 1) / 8D);
-        playLiquidStarlightBlockEffect(rand, new Vector3(pos).addY(percHeight * rand.nextFloat()), 1F);
-        playLiquidStarlightBlockEffect(rand, new Vector3(pos).addY(percHeight * rand.nextFloat()), 1F);
+        playLiquidStarlightBlockEffect(random, new Vector3(pos).addY(percHeight * random.nextFloat()), 1F);
+        playLiquidStarlightBlockEffect(random, new Vector3(pos).addY(percHeight * random.nextFloat()), 1F);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void playLiquidStarlightBlockEffect(Random rand, Vector3 at, float blockSize) {
-        if (rand.nextInt(3) == 0) {
+    public static void playLiquidStarlightBlockEffect(Random random, Vector3 at, float blockSize) {
+        if (random.nextInt(3) == 0) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at.clone().add(
-                            0.5 + rand.nextFloat() * (blockSize / 2) * (rand.nextBoolean() ? 1 : -1),
+                            0.5 + random.nextFloat() * (blockSize / 2) * (random.nextBoolean() ? 1 : -1),
                             0,
-                            0.5 + rand.nextFloat() * (blockSize / 2) * (rand.nextBoolean() ? 1 : -1)))
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.06F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                            0.5 + random.nextFloat() * (blockSize / 2) * (random.nextBoolean() ? 1 : -1)))
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.06F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .color(VFXColorFunction.constant(ColorsAS.ROCK_CRYSTAL));
         }
     }

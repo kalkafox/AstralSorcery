@@ -55,14 +55,14 @@ public class TreeType {
         return type;
     }
 
-    public Supplier<List<BlockPos>> getTreeGenerator(ServerLevel world, BlockPos pos, Random rand) {
-        return this.treeGenerator.apply(world, pos, rand);
+    public Supplier<List<BlockPos>> getTreeGenerator(ServerLevel level, BlockPos pos, Random random) {
+        return this.treeGenerator.apply(level, pos, random);
     }
 
     @Nullable
-    public static TreeType isTree(Level world, BlockPos pos) {
+    public static TreeType isTree(Level level, BlockPos pos) {
         for (TreeType type : TYPES) {
-            if (type.treeTest.test(world, pos)) {
+            if (type.treeTest.test(level, pos)) {
                 return type;
             }
         }
@@ -70,23 +70,23 @@ public class TreeType {
     }
 
     static {
-        register((world, pos) -> {
-            BlockState state = world.getBlockState(pos);
-            return state.getBlock() instanceof SaplingBlock && ((SaplingBlock) state.getBlock()).tree != null;
-        }, (world, pos, rand) -> {
-            BlockState state = world.getBlockState(pos);
+        register((level, pos) -> {
+            BlockState state = level.getBlockState(pos);
+            return state.getBlock() instanceof SaplingBlock && ((SaplingBlock) state.getBlock()).treeGrower != null;
+        }, (level, pos, random) -> {
+            BlockState state = level.getBlockState(pos);
             if (state.getBlock() instanceof SaplingBlock) {
-                Tree treeFeature = ((SaplingBlock) state.getBlock()).tree;
+                AbstractTreeGrower treeFeature = ((SaplingBlock) state.getBlock()).treeGrower;
                 return () -> {
-                    List<BlockSnapshot> blockSnapshots = MiscUtils.captureBlockChanges(world, () -> {
-                        treeFeature.attemptGrowTree(world, world.getChunkProvider().getChunkGenerator(), pos, state, rand);
+                    List<BlockSnapshot> blockSnapshots = MiscUtils.captureBlockChanges(level, () -> {
+                        treeFeature.growTree(level, level.getChunkSource().getChunkGenerator(), pos, state, random);
                     });
                     return blockSnapshots.stream()
                             .filter(snapshot -> {
                                 Block b = snapshot.getCurrentBlock().getBlock();
                                 return b.isIn(BlockTags.LEAVES) || b.isIn(BlockTags.LOGS) || b instanceof VineBlock;
                             })
-                            .map(BlockSnapshot::getPos)
+                            .map(BlockSnapshot::getBlockPos)
                             .collect(Collectors.toList());
                 };
             }

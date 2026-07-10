@@ -37,12 +37,12 @@ import javax.annotation.Nullable;
 public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemBlock, LargeBlock {
 
     private static final AABB PLACEMENT_BOX = new AABB(-1, 0, -1, 1, 1, 1);
-    private static final VoxelShape ATTUNEMENT_ALTAR = Block.makeCuboidShape(-2, 0, -2, 18, 6, 18);
-    private static final VoxelShape ATTUNEMENT_ALTAR_COLLISION = Block.makeCuboidShape(0, 0, 0, 16, 6, 16);
+    private static final VoxelShape ATTUNEMENT_ALTAR = Block.box(-2, 0, -2, 18, 6, 18);
+    private static final VoxelShape ATTUNEMENT_ALTAR_COLLISION = Block.box(0, 0, 0, 16, 6, 16);
 
     public BlockAttunementAltar() {
         super(PropertiesMarble.defaultMarble()
-                .setLightLevel((state) -> 4)
+                .isRedstoneConductor((state) -> 4)
                 .harvestLevel(1)
                 .harvestTool(ToolType.PICKAXE));
     }
@@ -55,7 +55,7 @@ public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemB
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.canPlaceAt(context) ? this.getDefaultState() : null;
+        return this.canPlaceAt(context) ? this.defaultBlockState() : null;
     }
 
     @Override
@@ -69,13 +69,13 @@ public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemB
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileAttunementAltar();
     }
 }

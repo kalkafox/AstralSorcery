@@ -38,13 +38,13 @@ public interface ItemBlockStorage {
 
     Random random = new Random();
 
-    static boolean storeBlockState(ItemStack stack, Level world, BlockPos pos) {
-        if (MiscUtils.getTileAt(world, pos, TileEntity.class, true) != null) {
+    static boolean storeBlockState(ItemStack stack, Level level, BlockPos pos) {
+        if (MiscUtils.getTileAt(level, pos, BlockEntity.class, true) != null) {
             return false;
         }
-        BlockState state = world.getBlockState(pos);
-        if (state.isAir(world, pos) ||
-                state.getBlockHardness(world, pos) == -1 ||
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir(level, pos) ||
+                state.getDestroySpeed(level, pos) == -1 ||
                 ItemUtils.createBlockStack(state).isEmpty()) {
             return false;
         }
@@ -66,7 +66,7 @@ public interface ItemBlockStorage {
     static List<Tuple<ItemStack, Integer>> getInventoryMatchingItemStacks(Player player, ItemStack referenceContainer) {
         Map<BlockState, Tuple<ItemStack, Integer>> storedStates = getInventoryMatching(player, referenceContainer);
         List<Tuple<ItemStack, Integer>> foundStacks = new ArrayList<>(storedStates.values());
-        foundStacks.sort(Comparator.comparing(tpl -> tpl.getA().getItem().getRegistryName()));
+        foundStacks.sort(Comparator.comparing(tpl -> RegistryHelper.getKey(tpl.getA().getItem())));
         return foundStacks;
     }
 
@@ -116,9 +116,9 @@ public interface ItemBlockStorage {
         return states;
     }
 
-    static Random getPreviewRandomFromWorld(Level world) {
+    static Random getPreviewRandomFromWorld(Level level) {
         long tempSeed = 0x6834F10A91B03F15L;
-        tempSeed *= (world.getGameTime() / 40) << 8;
+        tempSeed *= (level.getGameTime() / 40) << 8;
         return new Random(tempSeed);
     }
 }

@@ -53,7 +53,7 @@ public class WeightedPerkAttributeRegistry extends ConfigDataAdapter<PerkAttribu
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return "gem_attributes";
     }
 
@@ -63,7 +63,7 @@ public class WeightedPerkAttributeRegistry extends ConfigDataAdapter<PerkAttribu
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 

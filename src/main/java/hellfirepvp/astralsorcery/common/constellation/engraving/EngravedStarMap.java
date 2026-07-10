@@ -37,7 +37,7 @@ import java.util.*;
  */
 public class EngravedStarMap {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     private final Map<ResourceLocation, Float> distributions;
     private final List<DrawnConstellation> drawInformation;
@@ -47,8 +47,8 @@ public class EngravedStarMap {
         this.drawInformation = drawnConstellations;
     }
 
-    public static EngravedStarMap buildStarMap(Level world, List<DrawnConstellation> constellations) {
-        float nightPerc = DayTimeHelper.getCurrentDaytimeDistribution(world);
+    public static EngravedStarMap buildStarMap(Level level, List<DrawnConstellation> constellations) {
+        float nightPerc = DayTimeHelper.getCurrentDaytimeDistribution(level);
 
         Map<DrawnConstellation, List<Rectangle.Double>> cstCoordinates = new HashMap<>();
         for (DrawnConstellation drawnCst : constellations) {
@@ -77,7 +77,7 @@ public class EngravedStarMap {
             }
 
             IConstellation drawnConstellation = drawn.getConstellation();
-            float percent = 0.1F + 0.9F * MathHelper.clamp(((foundPositions.size() * 1.5F) / positions.size()) * nightPerc, 0F, 1F);
+            float percent = 0.1F + 0.9F * Mth.clamp(((foundPositions.size() * 1.5F) / positions.size()) * nightPerc, 0F, 1F);
             float existingPercent = distributionMap.getOrDefault(drawnConstellation.getRegistryName(), 0.1F);
             if (percent >= existingPercent) {
                 distributionMap.put(drawnConstellation.getRegistryName(), percent);
@@ -154,7 +154,7 @@ public class EngravedStarMap {
         for (Tuple<EngravingEffect.ApplicableEffect, Float> tpl : engravings) {
             EngravingEffect.ApplicableEffect effect = tpl.getA();
             float distribution = tpl.getB();
-            stack = effect.apply(stack, distribution, rand);
+            stack = effect.apply(stack, distribution, random);
         }
         return stack;
     }
@@ -198,7 +198,7 @@ public class EngravedStarMap {
         ListTag list = tag.getList("distributions", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag cstTag = list.getCompound(i);
-            ResourceLocation constellationKey = new ResourceLocation(cstTag.getString("cst"));
+            ResourceLocation constellationKey = ResourceLocation.parse(cstTag.getString("cst"));
             float percent = cstTag.getFloat("percent");
             if (percent > 0) {
                 distributionMap.put(constellationKey, percent);
@@ -208,7 +208,7 @@ public class EngravedStarMap {
         ListTag listDrawn = tag.getList("drawInformation", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < listDrawn.size(); i++) {
             CompoundTag cstTag = listDrawn.getCompound(i);
-            IConstellation cst = ConstellationRegistry.getConstellation(new ResourceLocation(cstTag.getString("cst")));
+            IConstellation cst = ConstellationRegistry.getConstellation(ResourceLocation.parse(cstTag.getString("cst")));
             Point offset = new Point(cstTag.getInt("x"), cstTag.getInt("y"));
             drawnConstellations.add(new DrawnConstellation(offset, cst));
         }

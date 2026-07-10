@@ -154,7 +154,7 @@ public class PerkAttributeModifier extends AbstractAstralRegistryEntry<PerkAttri
 
     @OnlyIn(Dist.CLIENT)
     public boolean hasDisplayString() {
-        return I18n.hasKey(getAttributeType().getUnlocalizedName());
+        return I18n.exists(getAttributeType().getUnlocalizedName());
     }
 
     @OnlyIn(Dist.CLIENT)

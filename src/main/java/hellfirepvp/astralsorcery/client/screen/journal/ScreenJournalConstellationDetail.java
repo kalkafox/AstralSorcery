@@ -78,7 +78,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
         this.origin = origin;
         this.constellation = cst;
 
-        this.font = Minecraft.getInstance().fontRenderer;
+        this.font = Minecraft.getInstance().font;
 
         this.detailed = ResearchHelper.getClientProgress().hasConstellationDiscovered(cst);
 
@@ -113,15 +113,15 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
                 FormattedText headTxt = Component.translatable("astralsorcery.journal.constellation.mantle");
                 locTextMantle.add(localize(headTxt));
-                locTextMantle.add(IReorderingProcessor.field_242232_a);
+                locTextMantle.add(FormattedCharSequence.EMPTY);
 
                 List<FormattedCharSequence> lines = new LinkedList<>();
                 for (String segment : txtMantle.getString().split("<NL>")) {
-                    lines.addAll(font.trimStringToWidth(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
-                    lines.add(IReorderingProcessor.field_242232_a);
+                    lines.addAll(font.split(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
+                    lines.add(FormattedCharSequence.EMPTY);
                 }
                 locTextMantle.addAll(lines);
-                locTextMantle.add(IReorderingProcessor.field_242232_a);
+                locTextMantle.add(FormattedCharSequence.EMPTY);
             }
         }
     }
@@ -132,15 +132,15 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
             FormattedText headTxt = Component.translatable("astralsorcery.journal.constellation.enchantments");
             locTextRefraction.add(localize(headTxt));
-            locTextRefraction.add(IReorderingProcessor.field_242232_a);
+            locTextRefraction.add(FormattedCharSequence.EMPTY);
 
             List<FormattedCharSequence> lines = new LinkedList<>();
             for (String segment : txtEnchantments.getString().split("<NL>")) {
-                lines.addAll(font.trimStringToWidth(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
-                lines.add(IReorderingProcessor.field_242232_a);
+                lines.addAll(font.split(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
+                lines.add(FormattedCharSequence.EMPTY);
             }
             locTextRefraction.addAll(lines);
-            locTextRefraction.add(IReorderingProcessor.field_242232_a);
+            locTextRefraction.add(FormattedCharSequence.EMPTY);
         }
     }
 
@@ -151,12 +151,12 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
                 FormattedText headTxt = Component.translatable("astralsorcery.journal.constellation.ritual.trait");
                 locTextRitual.add(localize(headTxt));
-                locTextRitual.add(IReorderingProcessor.field_242232_a);
+                locTextRitual.add(FormattedCharSequence.EMPTY);
 
                 List<FormattedCharSequence> lines = new LinkedList<>();
                 for (String segment : txtRitual.getString().split("<NL>")) {
-                    lines.addAll(font.trimStringToWidth(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
-                    lines.add(IReorderingProcessor.field_242232_a);
+                    lines.addAll(font.split(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
+                    lines.add(FormattedCharSequence.EMPTY);
                 }
                 locTextRitual.addAll(lines);
             }
@@ -166,30 +166,30 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
                 FormattedText headTxt = Component.translatable("astralsorcery.journal.constellation.ritual");
                 locTextRitual.add(localize(headTxt));
-                locTextRitual.add(IReorderingProcessor.field_242232_a);
+                locTextRitual.add(FormattedCharSequence.EMPTY);
 
                 List<FormattedCharSequence> lines = new LinkedList<>();
                 for (String segment : txtRitual.getString().split("<NL>")) {
-                    lines.addAll(font.trimStringToWidth(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
-                    lines.add(IReorderingProcessor.field_242232_a);
+                    lines.addAll(font.split(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
+                    lines.add(FormattedCharSequence.EMPTY);
                 }
                 locTextRitual.addAll(lines);
-                locTextRitual.add(IReorderingProcessor.field_242232_a);
+                locTextRitual.add(FormattedCharSequence.EMPTY);
             }
             if (ResearchHelper.getClientProgress().getTierReached().isThisLaterOrEqual(ProgressionTier.TRAIT_CRAFT)) {
                 Component txtCorruptedRitual = ((IWeakConstellation) this.constellation).getInfoCorruptedRitualEffect();
 
                 FormattedText headTxt = Component.translatable("astralsorcery.journal.constellation.corruption");
                 locTextRitual.add(localize(headTxt));
-                locTextRitual.add(IReorderingProcessor.field_242232_a);
+                locTextRitual.add(FormattedCharSequence.EMPTY);
 
                 List<FormattedCharSequence> lines = new LinkedList<>();
                 for (String segment : txtCorruptedRitual.getString().split("<NL>")) {
-                    lines.addAll(font.trimStringToWidth(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
-                    lines.add(IReorderingProcessor.field_242232_a);
+                    lines.addAll(font.split(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
+                    lines.add(FormattedCharSequence.EMPTY);
                 }
                 locTextRitual.addAll(lines);
-                locTextRitual.add(IReorderingProcessor.field_242232_a);
+                locTextRitual.add(FormattedCharSequence.EMPTY);
             }
         }
     }
@@ -199,37 +199,37 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
         List<FormattedCharSequence> lines = new LinkedList<>();
         for (String segment : txtDescription.getString().split("<NL>")) {
-            lines.addAll(font.trimStringToWidth(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
-            lines.add(IReorderingProcessor.field_242232_a);
+            lines.addAll(font.split(Component.literal(segment), JournalPage.DEFAULT_WIDTH));
+            lines.add(FormattedCharSequence.EMPTY);
         }
         locTextMain.addAll(lines);
     }
 
     private void testActivePhases() {
-        WorldContext ctx = SkyHandler.getContext(Minecraft.getInstance().world, LogicalSide.CLIENT);
+        WorldContext ctx = SkyHandler.getContext(Minecraft.getInstance().level, LogicalSide.CLIENT);
         if (ctx == null) {
             return;
         }
         this.activePhases = new LinkedList<>();
-        for (MoonPhase phase : MoonPhase.values()) {
-            if (ctx.getConstellationHandler().isActiveInPhase(this.constellation, phase)) {
-                this.activePhases.add(phase);
+        for (MoonPhase currentPhase : MoonPhase.values()) {
+            if (ctx.getConstellationHandler().isActiveInPhase(this.constellation, currentPhase)) {
+                this.activePhases.add(currentPhase);
             }
         }
     }
 
     @Override
-    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         this.lastFramePage = null;
 
         if (this.doublePageID == 0) {
             drawCstBackground(renderStack);
-            drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_FRAME_LEFT, mouseX, mouseY);
+            drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_FRAME_LEFT, xpos, ypos);
         } else {
-            drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_BLANK, mouseX, mouseY);
+            drawDefault(renderStack, TexturesAS.TEX_GUI_BOOK_BLANK, xpos, ypos);
         }
 
-        drawNavArrows(renderStack, pTicks, mouseX, mouseY);
+        drawNavArrows(renderStack, pTicks, xpos, ypos);
 
         this.setBlitOffset(120);
         switch (doublePageID) {
@@ -239,16 +239,16 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
                 drawPageExtendedInformation(renderStack);
                 break;
             case 1:
-                drawRefractionTableInformation(renderStack, mouseX, mouseY, pTicks);
+                drawRefractionTableInformation(renderStack, xpos, ypos, pTicks);
                 break;
             case 2:
-                drawCapeInformationPages(renderStack, mouseX, mouseY, pTicks);
+                drawCapeInformationPages(renderStack, xpos, ypos, pTicks);
                 if (this.constellation instanceof IMinorConstellation) { //Doesn't have a 3rd double page
-                    drawConstellationPaperRecipePage(renderStack, mouseX, mouseY, pTicks);
+                    drawConstellationPaperRecipePage(renderStack, xpos, ypos, pTicks);
                 }
                 break;
             case 3:
-                drawConstellationPaperRecipePage(renderStack, mouseX, mouseY, pTicks);
+                drawConstellationPaperRecipePage(renderStack, xpos, ypos, pTicks);
                 break;
             default:
                 break;
@@ -256,30 +256,30 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
         this.setBlitOffset(0);
     }
 
-    private void drawRefractionTableInformation(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+    private void drawRefractionTableInformation(PoseStack renderStack, int xpos, int ypos, float pTicks) {
         for (int i = 0; i < locTextRitual.size(); i++) {
-            FormattedCharSequence line = locTextRitual.get(i);
-            renderStack.push();
-            renderStack.translate(guiLeft + 30, guiTop + 30 + i * 10, this.getGuiZLevel());
-            RenderingDrawUtils.renderStringAt(line, renderStack, font, 0xFFCCCCCC, true);
-            renderStack.pop();
+            FormattedCharSequence lineState = locTextRitual.get(i);
+            renderStack.pushPose();
+            renderStack.translate(leftPos + 30, topPos + 30 + i * 10, this.getGuiZLevel());
+            RenderingDrawUtils.renderStringAt(lineState, renderStack, font, 0xFFCCCCCC, true);
+            renderStack.popPose();
         }
         for (int i = 0; i < locTextRefraction.size(); i++) {
-            FormattedCharSequence line = locTextRefraction.get(i);
-            renderStack.push();
-            renderStack.translate(guiLeft + 220, guiTop + 30 + i * 10, this.getGuiZLevel());
-            RenderingDrawUtils.renderStringAt(line, renderStack, font, 0xFFCCCCCC, true);
-            renderStack.pop();
+            FormattedCharSequence lineState = locTextRefraction.get(i);
+            renderStack.pushPose();
+            renderStack.translate(leftPos + 220, topPos + 30 + i * 10, this.getGuiZLevel());
+            RenderingDrawUtils.renderStringAt(lineState, renderStack, font, 0xFFCCCCCC, true);
+            renderStack.popPose();
         }
     }
 
-    private void drawCapeInformationPages(PoseStack renderStack, int mouseX, int mouseY, float partialTicks) {
+    private void drawCapeInformationPages(PoseStack renderStack, int xpos, int ypos, float a) {
         for (int i = 0; i < locTextMantle.size(); i++) {
-            FormattedCharSequence line = locTextMantle.get(i);
-            renderStack.push();
-            renderStack.translate(guiLeft + 30, guiTop + 30 + i * 10, this.getGuiZLevel());
-            RenderingDrawUtils.renderStringAt(line, renderStack, font, 0xFFCCCCCC, true);
-            renderStack.pop();
+            FormattedCharSequence lineState = locTextMantle.get(i);
+            renderStack.pushPose();
+            renderStack.translate(leftPos + 30, topPos + 30 + i * 10, this.getGuiZLevel());
+            RenderingDrawUtils.renderStringAt(lineState, renderStack, font, 0xFFCCCCCC, true);
+            renderStack.popPose();
         }
 
         if (ResearchHelper.getClientProgress().getTierReached().isThisLaterOrEqual(ProgressionTier.TRAIT_CRAFT)) {
@@ -289,13 +289,13 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
             if (recipe != null) {
                 lastFramePage = new RenderPageAltarRecipe(null, -1, recipe);
-                lastFramePage.render    (renderStack, guiLeft + 220, guiTop + 20, this.getGuiZLevel(), partialTicks, mouseX, mouseY);
-                lastFramePage.postRender(renderStack, guiLeft + 220, guiTop + 20, this.getGuiZLevel(), partialTicks, mouseX, mouseY);
+                lastFramePage.render    (renderStack, leftPos + 220, topPos + 20, this.getGuiZLevel(), a, xpos, ypos);
+                lastFramePage.postRender(renderStack, leftPos + 220, topPos + 20, this.getGuiZLevel(), a, xpos, ypos);
             }
         }
     }
 
-    private void drawConstellationPaperRecipePage(PoseStack renderStack, int mouseX, int mouseY, float partialTicks) {
+    private void drawConstellationPaperRecipePage(PoseStack renderStack, int xpos, int ypos, float a) {
         if (ResearchHelper.getClientProgress().getTierReached().isThisLaterOrEqual(ProgressionTier.TRAIT_CRAFT)) {
             SimpleAltarRecipe recipe = RecipeHelper.findAltarRecipeResult(stack ->
                     stack.getItem() instanceof ItemConstellationPaper &&
@@ -303,8 +303,8 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
             if (recipe != null) {
                 lastFramePage = new RenderPageAltarRecipe(null, -1, recipe);
-                lastFramePage.render    (renderStack, guiLeft + 30, guiTop + 20, this.getGuiZLevel(), partialTicks, mouseX, mouseY);
-                lastFramePage.postRender(renderStack, guiLeft + 30, guiTop + 20, this.getGuiZLevel(), partialTicks, mouseX, mouseY);
+                lastFramePage.render    (renderStack, leftPos + 30, topPos + 20, this.getGuiZLevel(), a, xpos, ypos);
+                lastFramePage.postRender(renderStack, leftPos + 30, topPos + 20, this.getGuiZLevel(), a, xpos, ypos);
             }
         }
     }
@@ -317,20 +317,20 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
         int width = font.getStringPropertyWidth(info);
         float chX = 305 - (width / 2F);
-        renderStack.push();
-        renderStack.translate(guiLeft + chX, guiTop + 44, this.getGuiZLevel());
+        renderStack.pushPose();
+        renderStack.translate(leftPos + chX, topPos + 44, this.getGuiZLevel());
         RenderingDrawUtils.renderStringAt(font, renderStack, info, 0xFFCCCCCC);
-        renderStack.pop();
+        renderStack.popPose();
 
         if (detailed && !locTextMain.isEmpty()) {
             int offsetX = 220, offsetY = 77;
-            renderStack.push();
-            renderStack.translate(guiLeft + offsetX, guiTop + offsetY, this.getGuiZLevel());
-            for (FormattedCharSequence line : locTextMain) {
-                RenderingDrawUtils.renderStringAt(font, renderStack, line, 0xFFCCCCCC);
+            renderStack.pushPose();
+            renderStack.translate(leftPos + offsetX, topPos + offsetY, this.getGuiZLevel());
+            for (FormattedCharSequence lineState : locTextMain) {
+                RenderingDrawUtils.renderStringAt(font, renderStack, lineState, 0xFFCCCCCC);
                 renderStack.translate(0, 13, 0);
             }
-            renderStack.pop();
+            renderStack.popPose();
         }
     }
 
@@ -348,39 +348,39 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
             FormattedText none = Component.translatable("astralsorcery.journal.constellation.unknown");
             float scale = 1.8F;
             float length = font.getStringPropertyWidth(none) * scale;
-            float offsetLeft = guiLeft + 296 - length / 2;
-            int offsetTop = guiTop + 199;
+            float offsetLeft = leftPos + 296 - length / 2;
+            int offsetTop = topPos + 199;
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(offsetLeft + 10, offsetTop, getGuiZLevel());
             renderStack.scale(scale, scale, scale);
             RenderingDrawUtils.renderStringAt(none, renderStack, font, 0xCCDDDDDD, true);
-            renderStack.pop();
+            renderStack.popPose();
         } else {
             boolean known = ResearchHelper.getClientProgress().hasConstellationDiscovered(this.constellation);
 
             int size = 19;
             int offsetX = 95 + (width / 2) - (MoonPhase.values().length * (size + 2)) / 2;
-            int offsetY = 199 + guiTop;
+            int offsetY = 199 + topPos;
 
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
 
             MoonPhase[] mPhases = MoonPhase.values();
             for (int i = 0; i < mPhases.length; i++) {
-                MoonPhase phase = mPhases[i];
+                MoonPhase currentPhase = mPhases[i];
                 int index = i;
 
                 float brightness;
-                phase.getTexture().bindTexture();
-                if (known && this.activePhases.contains(phase)) {
+                currentPhase.getTexture().bindTexture();
+                if (known && this.activePhases.contains(currentPhase)) {
                     Blending.PREALPHA.apply();
                     brightness = 1F;
                 } else {
                     RenderSystem.defaultBlendFunc();
                     brightness = 0.7F;
                 }
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
                     RenderingGuiUtils.rect(buf, renderStack, offsetX + (index * (size + 2)), offsetY, this.getGuiZLevel(), size, size)
                             .color(brightness, brightness, brightness, brightness)
                             .draw();
@@ -395,11 +395,11 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
         FormattedText cstName = this.constellation.getConstellationName();
         int width = font.getStringPropertyWidth(cstName);
 
-        renderStack.push();
-        renderStack.translate(guiLeft + (305 - (width * 1.8F / 2F)), guiTop + 26, this.getGuiZLevel());
+        renderStack.pushPose();
+        renderStack.translate(leftPos + (305 - (width * 1.8F / 2F)), topPos + 26, this.getGuiZLevel());
         renderStack.scale(1.8F, 1.8F, 1);
         RenderingDrawUtils.renderStringAt(cstName, renderStack, font, 0xFFC3C3C3, true);
-        renderStack.pop();
+        renderStack.popPose();
 
         FormattedText dstInfo = constellation.getConstellationTypeDescription();
         if (!detailed) {
@@ -407,38 +407,38 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
         }
         width = font.getStringPropertyWidth(dstInfo);
 
-        renderStack.push();
-        renderStack.translate(guiLeft + (305 - (width / 2F)), guiTop + 219, this.getGuiZLevel());
+        renderStack.pushPose();
+        renderStack.translate(leftPos + (305 - (width / 2F)), topPos + 219, this.getGuiZLevel());
         RenderingDrawUtils.renderStringAt(dstInfo, renderStack, font, 0xFFDDDDDD, true);
-        renderStack.pop();
+        renderStack.popPose();
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        Random rand = new Random(0x4196A15C91A5E199L);
+        Random random = new Random(0x4196A15C91A5E199L);
         boolean known = ResearchHelper.getClientProgress().hasConstellationDiscovered(constellation);
         RenderingConstellationUtils.renderConstellationIntoGUI(
                 known ? constellation.getConstellationColor() : constellation.getTierRenderColor(), constellation, renderStack,
-                guiLeft + 40, guiTop + 60, this.getGuiZLevel(),
+                leftPos + 40, topPos + 60, this.getGuiZLevel(),
                 150, 150, 2F,
-                () -> 0.6F + 0.4F * RenderingConstellationUtils.conCFlicker(ClientScheduler.getClientTick(), partial, 12 + rand.nextInt(10)),
+                () -> 0.6F + 0.4F * RenderingConstellationUtils.conCFlicker(ClientScheduler.getClientTick(), partial, 12 + random.nextInt(10)),
                 true, false);
         RenderSystem.disableBlend();
     }
 
-    private void drawNavArrows(PoseStack renderStack, float partialTicks, int mouseX, int mouseY) {
+    private void drawNavArrows(PoseStack renderStack, float a, int xpos, int ypos) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
         this.rectNext = null;
         this.rectPrev = null;
-        this.rectBack = this.drawArrow(renderStack, guiLeft + 197, guiTop + 230, this.getGuiZLevel(), Type.LEFT, mouseX, mouseY, partialTicks);
+        this.rectBack = this.drawArrow(renderStack, leftPos + 197, topPos + 230, this.getGuiZLevel(), Type.LEFT, xpos, ypos, a);
 
         if (doublePageID - 1 >= 0) {
-            this.rectPrev = this.drawArrow(renderStack, guiLeft + 25, guiTop + 220, this.getGuiZLevel(), Type.LEFT, mouseX, mouseY, partialTicks);
+            this.rectPrev = this.drawArrow(renderStack, leftPos + 25, topPos + 220, this.getGuiZLevel(), Type.LEFT, xpos, ypos, a);
         }
 
         if (doublePageID + 1 <= doublePages) {
-            this.rectNext = this.drawArrow(renderStack, guiLeft + 367, guiTop + 220, this.getGuiZLevel(), Type.RIGHT, mouseX, mouseY, partialTicks);
+            this.rectNext = this.drawArrow(renderStack, leftPos + 367, topPos + 220, this.getGuiZLevel(), Type.RIGHT, xpos, ypos, a);
         }
 
         RenderSystem.disableBlend();
@@ -446,62 +446,62 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
     private void drawCstBackground(PoseStack renderStack) {
         TexturesAS.TEX_BLACK.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            Matrix4f offset = renderStack.getLast().getMatrix();
-            buf.pos(offset, guiLeft + 15,  guiTop + 240, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 1).endVertex();
-            buf.pos(offset, guiLeft + 200, guiTop + 240, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 1).endVertex();
-            buf.pos(offset, guiLeft + 200, guiTop + 10,  this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 0).endVertex();
-            buf.pos(offset, guiLeft + 15,  guiTop + 10,  this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 0).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            Matrix4f offset = renderStack.last().pose();
+            buf.vertex(offset, leftPos + 15,  topPos + 240, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 1).endVertex();
+            buf.vertex(offset, leftPos + 200, topPos + 240, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 1).endVertex();
+            buf.vertex(offset, leftPos + 200, topPos + 10,  this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 0).endVertex();
+            buf.vertex(offset, leftPos + 15,  topPos + 10,  this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 0).endVertex();
         });
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         TexturesAS.TEX_GUI_BACKGROUND_CONSTELLATIONS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            Matrix4f offset = renderStack.getLast().getMatrix();
-            buf.pos(offset, guiLeft + 15,  guiTop + 240, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.3F, 0.9F).endVertex();
-            buf.pos(offset, guiLeft + 200, guiTop + 240, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.7F, 0.9F).endVertex();
-            buf.pos(offset, guiLeft + 200, guiTop + 10,  this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.7F, 0.1F).endVertex();
-            buf.pos(offset, guiLeft + 15,  guiTop + 10,  this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.3F, 0.1F).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            Matrix4f offset = renderStack.last().pose();
+            buf.vertex(offset, leftPos + 15,  topPos + 240, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.3F, 0.9F).endVertex();
+            buf.vertex(offset, leftPos + 200, topPos + 240, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.7F, 0.9F).endVertex();
+            buf.vertex(offset, leftPos + 200, topPos + 10,  this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.7F, 0.1F).endVertex();
+            buf.vertex(offset, leftPos + 15,  topPos + 10,  this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.3F, 0.1F).endVertex();
         });
         RenderSystem.disableBlend();
     }
 
     @Override
-    protected boolean shouldRightClickCloseScreen(double mouseX, double mouseY) {
+    protected boolean shouldRightClickCloseScreen(double xpos, double ypos) {
         return true;
     }
 
     @Override
-    public void closeScreen() {
+    public void onClose() {
         Minecraft.getInstance().displayGuiScreen(origin);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+    public boolean mouseClicked(double xpos, double ypos, int mouseButton) {
+        if (super.mouseClicked(xpos, ypos, mouseButton)) {
             return true;
         }
 
         if (mouseButton != 0) {
             return false;
         }
-        if (handleBookmarkClick(mouseX, mouseY)) {
+        if (handleBookmarkClick(xpos, ypos)) {
             return true;
         }
 
-        if (rectBack != null && rectBack.contains(mouseX, mouseY)) {
+        if (rectBack != null && rectBack.contains(xpos, ypos)) {
             Minecraft.getInstance().displayGuiScreen(origin);
             return true;
         }
-        if (rectPrev != null && rectPrev.contains(mouseX, mouseY)) {
+        if (rectPrev != null && rectPrev.contains(xpos, ypos)) {
             if (doublePageID >= 1) {
                 this.doublePageID--;
             }
             SoundHelper.playSoundClient(SoundsAS.GUI_JOURNAL_PAGE, 1F, 1F);
             return true;
         }
-        if (rectNext != null && rectNext.contains(mouseX, mouseY)) {
+        if (rectNext != null && rectNext.contains(xpos, ypos)) {
             if (doublePageID <= doublePages - 1) {
                 this.doublePageID++;
             }
@@ -509,7 +509,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
             return true;
         }
         if (doublePageID != 0 && lastFramePage != null) {
-            if (lastFramePage.propagateMouseClick(mouseX, mouseY)) {
+            if (lastFramePage.propagateMouseClick(xpos, ypos)) {
                 return true;
             }
         }

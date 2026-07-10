@@ -77,44 +77,44 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        tooltip.add(getBlinkMode(stack).getDisplay().withStyle(TextFormatting.GOLD));
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        tooltip.add(getBlinkMode(stack).getDisplay().withStyle(ChatFormatting.GOLD));
     }
 
     @Override
     public float getAlignmentChargeCost(Player player, ItemStack stack) {
-        if (player.getCooldownTracker().hasCooldown(this)) {
+        if (player.getCooldowns().isOnCooldown(this)) {
             return 0F;
         }
         if (getBlinkMode(stack) == BlinkMode.TELEPORT) {
             return COST_PER_BLINK;
-        } else if (player.isHandActive()) {
-            ItemStack held = player.getActiveItemStack();
+        } else if (player.isUsingItem()) {
+            ItemStack held = player.getUseItem();
             if (!held.isEmpty() && held.getItem() instanceof ItemBlinkWand) {
-                int timeLeft = player.getItemInUseCount();
-                float strength = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - timeLeft) / 50F) * 0.8F;
-                return COST_PER_DASH * strength;
+                int timeLeft = player.getUseItemRemainingTicks();
+                float power = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - timeLeft) / 50F) * 0.8F;
+                return COST_PER_DASH * power;
             }
         }
         return 0F;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
-        ItemStack held = player.getHeldItem(hand);
-        if (player.isSneaking()) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
+        if (player.isShiftKeyDown()) {
             BlinkMode nextMode = getBlinkMode(held).next();
             setBlinkMode(held, nextMode);
-            player.sendStatusMessage(nextMode.getDisplay(), true);
-        } else if (!player.getCooldownTracker().hasCooldown(this)) {
+            player.move(nextMode.getDisplay(), true);
+        } else if (!player.getCooldowns().isOnCooldown(this)) {
             player.setActiveHand(hand);
         }
-        return ActionResult.resultConsume(held);
+        return InteractionResultHolder.consume(held);
     }
 
     @Override
-    public UseAnim getUseAction(ItemStack stack) {
-        return UseAction.BOW;
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.BOW;
     }
 
     @Override
@@ -123,8 +123,8 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
     }
 
     @Override
-    public void onPlayerStoppedUsing(ItemStack stack, Level worldIn, LivingEntity entityLiving, int timeLeft) {
-        if (worldIn.isRemote() || !(entityLiving instanceof ServerPlayer)) {
+    public void releaseUsing(ItemStack stack, Level worldIn, LivingEntity entityLiving, int timeLeft) {
+        if (worldIn.isClientSide() || !(entityLiving instanceof ServerPlayer)) {
             return;
         }
         ServerPlayer player = (ServerPlayer) entityLiving;
@@ -132,12 +132,12 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
         BlinkMode mode = getBlinkMode(stack);
         if (mode == BlinkMode.TELEPORT) {
             Vector3 origin = Vector3.atEntityCorner(player).addY(0.5F);
-            Vector3 look = new Vector3(player.getLook(1F)).normalize().multiply(40F).add(origin);
+            Vector3 forwards = new Vector3(player.getLook(1F)).normalize().mul(40F).add(origin);
             List<BlockPos> blockLine = new ArrayList<>();
-            RaytraceAssist rta = new RaytraceAssist(origin, look);
+            RaytraceAssist rta = new RaytraceAssist(origin, forwards);
             rta.forEachBlockPos(pos -> {
-                return MiscUtils.executeWithChunk(player.getEntityWorld(), pos, () -> {
-                    if (BlockUtils.isReplaceable(player.getEntityWorld(), pos) && BlockUtils.isReplaceable(player.getEntityWorld(), pos.up())) {
+                return MiscUtils.executeWithChunk(player.getCommandSenderWorld(), pos, () -> {
+                    if (BlockUtils.isReplaceable(player.getCommandSenderWorld(), pos) && BlockUtils.isReplaceable(player.getCommandSenderWorld(), pos.above())) {
                         blockLine.add(pos);
                         return true;
                     }
@@ -146,31 +146,31 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             });
 
             if (!blockLine.isEmpty()) {
-                BlockPos at = Iterables.getLast(blockLine);
+                BlockPos at = Iterables.last(blockLine);
                 if (origin.distance(at) > 5) {
                     if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_BLINK, false)) {
                         player.setPositionAndUpdate(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
                         if (!player.isCreative()) {
-                            player.getCooldownTracker().setCooldown(stack.getItem(), 40);
+                            player.getCooldowns().addCooldown(stack.getItem(), 40);
                         }
                     }
                 }
             }
         } else if (mode == BlinkMode.LAUNCH) {
             float multiplier = 0.8F;
-            if (!entityLiving.isElytraFlying()) {
+            if (!entityLiving.isFallFlying()) {
                 multiplier = 2.4F;
             }
-            float strength = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - timeLeft) / 50F) * multiplier;
-            if (strength > 0.3F) {
+            float power = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - timeLeft) / 50F) * multiplier;
+            if (power > 0.3F) {
                 float chargeCost = COST_PER_DASH * 0.8F;
                 if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, chargeCost, false)) {
-                    Vector3 motion = new Vector3(player.getLook(1F)).normalize().multiply(strength * 3F);
+                    Vector3 motion = new Vector3(player.getLook(1F)).normalize().mul(power * 3F);
                     if (motion.getY() > 0) {
-                        motion.setY(MathHelper.clamp(motion.getY() + (0.2F * strength), 0.2F * strength, Float.MAX_VALUE));
+                        motion.setY(Mth.clamp(motion.getY() + (0.2F * power), 0.2F * power, Float.MAX_VALUE));
                     }
 
-                    player.setMotion(motion.toVector3d());
+                    player.setDeltaMovement(motion.toVector3d());
                     player.fallDistance = 0F;
 
                     if (ItemMantle.getEffect(player, ConstellationsAS.vicio) != null) {
@@ -178,10 +178,10 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
                     }
 
                     PktShootEntity pkt = new PktShootEntity(player.getEntityId(), motion);
-                    pkt.setEffectLength(strength);
-                    PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(worldIn, player.getPosition(), 64));
+                    pkt.setEffectLength(power);
+                    PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(worldIn, player.position(), 64));
 
-                    if (!player.isElytraFlying()) {
+                    if (!player.isFallFlying()) {
                         EventHelperDamageCancelling.markInvulnerableToNextDamage(player, DamageSource.FALL);
                     }
                 }
@@ -191,7 +191,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
 
     @Override
     public void onUsingTick(ItemStack stack, LivingEntity entity, int count) {
-        if (entity.getEntityWorld().isRemote()) {
+        if (entity.getCommandSenderWorld().isClientSide()) {
             float perc = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - count) / 50F) * 0.8F;
             playUseParticles(stack, entity, count, perc);
         }
@@ -203,32 +203,32 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             return;
         }
         Player player = (Player) entity;
-        if (player.getCooldownTracker().hasCooldown(this)) {
+        if (player.getCooldowns().isOnCooldown(this)) {
             return;
         }
         if (getBlinkMode(stack) == BlinkMode.LAUNCH) {
-            Vector3 look = new Vector3(entity.getLook(1F)).normalize().multiply(20);
+            Vector3 forwards = new Vector3(entity.getLook(1F)).normalize().mul(20);
             Vector3 pos = Vector3.atEntityCorner(entity).addY(entity.getEyeHeight());
-            Vector3 motion = look.clone().normalize().multiply(-0.8F + random.nextFloat() * -0.5F);
-            Vector3 perp = look.clone().perpendicular().normalize();
+            Vector3 motion = forwards.clone().normalize().mul(-0.8F + random.nextFloat() * -0.5F);
+            Vector3 perp = forwards.clone().perpendicular().normalize();
 
             for (int i = 0; i < Math.round(usagePercent * 6); i++) {
                 float dst = i == 0 ? random.nextFloat() * 0.4F : 0.2F + random.nextFloat() * 0.4F;
-                float speed = i == 0 ? 0.005F : 0.5F + random.nextFloat() * 0.5F;
+                float speedModifier = i == 0 ? 0.005F : 0.5F + random.nextFloat() * 0.5F;
                 float angleDeg = random.nextFloat() * 360F;
 
-                Vector3 angle = perp.clone().rotate(angleDeg, look).normalize();
+                Vector3 angle = perp.clone().mirror(angleDeg, forwards).normalize();
                 Vector3 at = pos.clone()
-                        .add(look.clone().multiply(0.7F + random.nextFloat() * 0.3F))
-                        .add(angle.clone().multiply(dst));
-                Vector3 mot = motion.clone().add(angle.clone().multiply(0.1F + random.nextFloat() * 0.15F)).multiply(speed);
+                        .add(forwards.clone().mul(0.7F + random.nextFloat() * 0.3F))
+                        .add(angle.clone().mul(dst));
+                Vector3 mot = motion.clone().add(angle.clone().mul(0.1F + random.nextFloat() * 0.15F)).mul(speedModifier);
 
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                        .setOwner(entity.getUniqueID())
+                        .setOwner(entity.getUUID())
                         .spawn(at)
                         .setScaleMultiplier(0.3F + random.nextFloat() * 0.3F)
                         .setAlphaMultiplier(usagePercent)
-                        .setMotion(mot)
+                        .setDeltaMovement(mot)
                         .color(VFXColorFunction.constant(ColorsAS.CONSTELLATION_VICIO))
                         .setMaxAge(20 + random.nextInt(15));
                 if (random.nextBoolean()) {
@@ -237,35 +237,35 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             }
         } else if (getBlinkMode(stack) == BlinkMode.TELEPORT) {
             Vector3 origin = Vector3.atEntityCorner(entity).addY(0.5F);
-            Vector3 look = new Vector3(entity.getLook(1F)).normalize().multiply(40F).add(origin);
-            List<Vector3> line = new ArrayList<>();
-            RaytraceAssist rta = new RaytraceAssist(origin, look);
+            Vector3 forwards = new Vector3(entity.getLook(1F)).normalize().mul(40F).add(origin);
+            List<Vector3> lineState = new ArrayList<>();
+            RaytraceAssist rta = new RaytraceAssist(origin, forwards);
             boolean clearLine = rta.forEachStep(v -> {
                 BlockPos pos = v.toBlockPos();
-                return MiscUtils.executeWithChunk(entity.getEntityWorld(), pos, () -> {
-                    if (BlockUtils.isReplaceable(entity.getEntityWorld(), pos) && BlockUtils.isReplaceable(entity.getEntityWorld(), pos.up())) {
-                        line.add(v);
+                return MiscUtils.executeWithChunk(entity.getCommandSenderWorld(), pos, () -> {
+                    if (BlockUtils.isReplaceable(entity.getCommandSenderWorld(), pos) && BlockUtils.isReplaceable(entity.getCommandSenderWorld(), pos.above())) {
+                        lineState.add(v);
                         return true;
                     }
                     return false;
                 }, false);
             });
 
-            if (!line.isEmpty()) {
-                Vector3 last = Iterables.getLast(line);
+            if (!lineState.isEmpty()) {
+                Vector3 last = Iterables.last(lineState);
 
-                for (Vector3 v : line) {
+                for (Vector3 v : lineState) {
                     if (v == last || random.nextInt(300) == 0) {
                         VFXColorFunction<?> colorFn = VFXColorFunction.constant(ColorsAS.CONSTELLATION_VICIO);
                         float scale = 0.4F + random.nextFloat() * 0.2F;
-                        float speed = random.nextFloat() * 0.02F;
+                        float speedModifier = random.nextFloat() * 0.02F;
                         int age = 20 + random.nextInt(15);
                         if (random.nextInt(3) == 0) {
                             colorFn = VFXColorFunction.WHITE;
                         }
                         if (v == last) {
                             scale *= 1.5F;
-                            speed *= 4;
+                            speedModifier *= 4;
                             age *= 0.7F;
                             if (!clearLine) {
                                 colorFn = VFXColorFunction.constant(ColorsAS.CONSTELLATION_AEVITAS);
@@ -278,12 +278,12 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
                         }
 
                         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                                .setOwner(entity.getUniqueID())
+                                .setOwner(entity.getUUID())
                                 .spawn(v)
                                 .setScaleMultiplier(scale)
                                 .setAlphaMultiplier(usagePercent)
-                                .alpha(VFXAlphaFunction.FADE_OUT)
-                                .setMotion(Vector3.random().normalize().multiply(speed))
+                                .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                                .setDeltaMovement(Vector3.random().normalize().mul(speedModifier))
                                 .color(colorFn)
                                 .setMaxAge(age);
                     }

@@ -42,7 +42,7 @@ public abstract class ConfigDataAdapter<T extends ConfigDataSet> {
     }
 
     protected String translationKey(String key) {
-        return String.format("config.registry.%s.%s", this.getSectionName(), key);
+        return String.format("config.registry.%s.%s", this.getMetadataSectionName(), key);
     }
 
     public final void configBuilt(ModConfigSpec.ConfigValue<List<? extends String>> createdValue) {
@@ -61,7 +61,7 @@ public abstract class ConfigDataAdapter<T extends ConfigDataSet> {
                 try {
                     val = deserialize(str);
                 } catch (IllegalArgumentException exc) {
-                    AstralSorcery.log.error("Skipping configured entry in " + this.getSectionName() + "!");
+                    AstralSorcery.log.error("Skipping configured entry in " + this.getMetadataSectionName() + "!");
                     AstralSorcery.log.error(exc.getMessage());
                     continue;
                 }
@@ -75,17 +75,17 @@ public abstract class ConfigDataAdapter<T extends ConfigDataSet> {
     }
 
     @Nullable
-    public synchronized T getRandomValue(Random rand) {
-        return MiscUtils.getRandomEntry(getConfiguredValues(), rand);
+    public synchronized T getRandomValue(Random random) {
+        return MiscUtils.getRandomEntry(getConfiguredValues(), random);
     }
 
     public abstract List<T> getDefaultValues();
 
-    public abstract String getSectionName();
+    public abstract String getMetadataSectionName();
 
     public abstract String getCommentDescription();
 
-    public abstract String getTranslationKey();
+    public abstract String getDescriptionId();
 
     public abstract Predicate<Object> getValidator();
 

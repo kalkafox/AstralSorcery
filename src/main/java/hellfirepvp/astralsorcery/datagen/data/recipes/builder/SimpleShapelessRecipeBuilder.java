@@ -62,7 +62,7 @@ public class SimpleShapelessRecipeBuilder {
     }
     public SimpleShapelessRecipeBuilder addIngredient(ItemLike itemIn, int quantity) {
         for(int i = 0; i < quantity; ++i) {
-            this.addIngredient(Ingredient.fromItems(itemIn));
+            this.addIngredient(Ingredient.valueFromJson(itemIn));
         }
 
         return this;
@@ -84,20 +84,20 @@ public class SimpleShapelessRecipeBuilder {
         return this;
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn) {
-        this.build(consumerIn, ForgeRegistries.ITEMS.getKey(this.result.getItem()));
+    public void build(Consumer<FinishedRecipe> consumerIn) {
+        this.build(consumerIn, BuiltInRegistries.ITEM.getKey(this.result.getItem()));
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
+    public void build(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
         String path = id.getPath();
         if (this.subDirectory != null && !this.subDirectory.isEmpty()) {
             path = this.subDirectory + "/" + path;
         }
-        id = new ResourceLocation(id.getNamespace(), "shapeless/" + path);
+        id = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "shapeless/" + path);
         consumerIn.accept(new Result(id, this.result, this.count, this.ingredients));
     }
 
-    public static class Result implements IFinishedRecipe {
+    public static class Result implements FinishedRecipe {
 
         private final ResourceLocation key;
         private final Item result;
@@ -113,11 +113,11 @@ public class SimpleShapelessRecipeBuilder {
 
         @Override
         public void serialize(JsonObject json) {
-            JsonArray inputs = new JsonArray();
+            JsonArray map = new JsonArray();
             for (Ingredient ingredient : this.ingredients) {
-                inputs.add(ingredient.serialize());
+                map.add(ingredient.serialize());
             }
-            json.add("ingredients", inputs);
+            json.add("ingredients", map);
 
             JsonObject result = new JsonObject();
             result.addProperty("item", Registry.ITEM.getKey(this.result).toString());
@@ -130,7 +130,7 @@ public class SimpleShapelessRecipeBuilder {
 
         @Override
         public RecipeSerializer<?> getSerializer() {
-            return IRecipeSerializer.CRAFTING_SHAPELESS;
+            return RecipeSerializer.SHAPELESS_RECIPE;
         }
 
         @Override
@@ -140,14 +140,14 @@ public class SimpleShapelessRecipeBuilder {
 
         @Nullable
         @Override
-        public JsonObject getAdvancementJson() {
+        public JsonObject serializeAdvancement() {
             return null;
         }
 
         @Nullable
         @Override
         public ResourceLocation getAdvancementID() {
-            return new ResourceLocation("");
+            return ResourceLocation.parse("");
         }
     }
 }

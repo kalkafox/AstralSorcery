@@ -47,7 +47,7 @@ public class PerkAttributeEntry implements ConfigDataSet {
         if (split.length != 2) {
             return null;
         }
-        ResourceLocation keyAttributeType = new ResourceLocation(split[0]);
+        ResourceLocation keyAttributeType = ResourceLocation.parse(split[0]);
         PerkAttributeType type = RegistriesAS.REGISTRY_PERK_ATTRIBUTE_TYPES.getValue(keyAttributeType);
         if (type == null) {
             return null;

@@ -55,12 +55,12 @@ public class FluidRarityRegistry extends ConfigDataAdapter<FluidRarityEntry> {
 
     @Nullable
     @Override
-    public synchronized FluidRarityEntry getRandomValue(Random rand) {
-        return MiscUtils.getWeightedRandomEntry(this.getConfiguredValues(), rand, FluidRarityEntry::getRarity);
+    public synchronized FluidRarityEntry getRandomValue(Random random) {
+        return MiscUtils.getWeightedRandomEntry(this.getConfiguredValues(), random, FluidRarityEntry::getRarity);
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return "fluid_rarities";
     }
 
@@ -71,7 +71,7 @@ public class FluidRarityRegistry extends ConfigDataAdapter<FluidRarityEntry> {
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 
@@ -85,7 +85,7 @@ public class FluidRarityRegistry extends ConfigDataAdapter<FluidRarityEntry> {
         return obj -> obj instanceof String;
     }
 
-    private static ResourceLocation key(String domain, String path) {
-        return new ResourceLocation(domain, path);
+    private static ResourceLocation key(String name, String path) {
+        return ResourceLocation.fromNamespaceAndPath(name, path);
     }
 }

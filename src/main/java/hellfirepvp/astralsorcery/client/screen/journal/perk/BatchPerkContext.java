@@ -65,7 +65,7 @@ public class BatchPerkContext {
 
     public void beginDrawingPerks() {
         for (TextureObjectGroup group : bufferGroups.keySet()) {
-            bufferGroups.get(group).begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX);
+            bufferGroups.get(group).begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
         }
     }
 

@@ -34,10 +34,10 @@ public abstract class WorldMeltableRecipe extends CustomRecipe {
         this.matcher = matcher;
     }
 
-    public boolean canMelt(Level world, BlockPos pos) {
-        return this.matcher.test(world, pos, world.getBlockState(pos));
+    public boolean canMelt(Level level, BlockPos pos) {
+        return this.matcher.test(level, pos, level.getBlockState(pos));
     }
 
-    public abstract void doOutput(Level world, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput);
+    public abstract void doOutput(Level level, BlockPos pos, BlockState state, Consumer<ItemStack> itemOutput);
 
 }

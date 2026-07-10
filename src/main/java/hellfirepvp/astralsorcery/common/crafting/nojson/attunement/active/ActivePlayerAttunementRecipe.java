@@ -85,12 +85,12 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
             return false;
         }
         Player player;
-        return (player = altar.getWorld().getPlayerByUuid(this.playerUUID)) != null && player.isAlive();
+        return (player = altar.getLevel().getPlayerByUuid(this.playerUUID)) != null && player.isAlive();
     }
 
     @Override
     public void startCrafting(TileAttunementAltar altar) {
-        Player player = altar.getWorld().getPlayerByUuid(this.playerUUID);
+        Player player = altar.getLevel().getPlayerByUuid(this.playerUUID);
         if (player != null && player.isAlive()) {
             Vector3 offset = new Vector3(altar).add(0.5F, 1.2F, 0.5F);
             player.setPositionAndRotation(offset.getX(), offset.getY(), offset.getZ(), 0F, 0F);
@@ -105,16 +105,16 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
 
     @Override
     public void finishRecipe(TileAttunementAltar altar) {
-        Player player = altar.getWorld().getPlayerByUuid(this.playerUUID);
+        Player player = altar.getLevel().getPlayerByUuid(this.playerUUID);
         if (player != null) {
             ResearchManager.setAttunedConstellation(player, this.constellation);
         }
     }
 
     @Override
-    public void doTick(LogicalSide side, TileAttunementAltar altar) {
-        if (side.isServer()) {
-            Player player = altar.getWorld().getPlayerByUuid(this.playerUUID);
+    public void doTick(LogicalSide direction, TileAttunementAltar altar) {
+        if (direction.isServer()) {
+            Player player = altar.getLevel().getPlayerByUuid(this.playerUUID);
             if (player != null) {
                 EventHelperInvulnerability.makeInvulnerable(player);
             }
@@ -148,7 +148,7 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
         if (tick % 40 == 0) {
             for (BlockPos pos : altar.getConstellationPositions(cst)) {
                 Vector3 from = new Vector3(pos).add(0.5, 0, 0.5);
-                MiscUtils.applyRandomOffset(from, rand, 0.1F);
+                MiscUtils.applyRandomOffset(from, random, 0.1F);
                 EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                         .spawn(from)
                         .setup(from.clone().addY(6), 1.2, 1.2)
@@ -162,68 +162,68 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
         double edgeScale = (scale * 2 + 1);
         for (int i = 0; i < 7; i++) {
             Vector3 offset = new Vector3(altar).add(-scale, 0.1, -scale);
-            if (rand.nextBoolean()) {
-                offset.add(edgeScale * (rand.nextBoolean() ? 1 : 0), 0, rand.nextFloat() * edgeScale);
+            if (random.nextBoolean()) {
+                offset.add(edgeScale * (random.nextBoolean() ? 1 : 0), 0, random.nextFloat() * edgeScale);
             } else {
-                offset.add(rand.nextFloat() * edgeScale, 0, edgeScale * (rand.nextBoolean() ? 1 : 0));
+                offset.add(random.nextFloat() * edgeScale, 0, edgeScale * (random.nextBoolean() ? 1 : 0));
             }
             FXFacingParticle particle = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setGravityStrength(-0.0002F + rand.nextFloat() * -0.0001F)
-                    .setScaleMultiplier(0.3F + rand.nextFloat() * 0.15F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setGravityStrength(-0.0002F + random.nextFloat() * -0.0001F)
+                    .setScaleMultiplier(0.3F + random.nextFloat() * 0.15F)
                     .color(VFXColorFunction.WHITE)
-                    .setMaxAge(40 + rand.nextInt(10));
-            if (rand.nextBoolean()) {
+                    .setMaxAge(40 + random.nextInt(10));
+            if (random.nextBoolean()) {
                 particle.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
             }
         }
 
         for (int i = 0; i < 5; i++) {
             Set<BlockPos> offsets = altar.getConstellationPositions(cst);
-            BlockPos pos = MiscUtils.getRandomEntry(offsets, rand);
+            BlockPos pos = MiscUtils.getRandomEntry(offsets, random);
 
             if (tick <= 380) {
                 Vector3 offset = new Vector3(pos)
                         .add(0.5, 0, 0.5)
-                        .add(Vector3.random().setY(0).multiply(0.6));
+                        .add(Vector3.random().setY(0).mul(0.6));
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(offset)
                         .color(VFXColorFunction.WHITE)
-                        .setGravityStrength(-0.0006F + rand.nextFloat() * -0.003F)
-                        .setMotion(Vector3.random().addY(4).normalize().multiply(0.015 + rand.nextFloat() * 0.01))
+                        .setGravityStrength(-0.0006F + random.nextFloat() * -0.003F)
+                        .setDeltaMovement(Vector3.random().addY(4).normalize().mul(0.015 + random.nextFloat() * 0.01))
                         .setAlphaMultiplier(0.6F)
-                        .setScaleMultiplier(0.3F + rand.nextFloat() * 0.15F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMaxAge(60 + rand.nextInt(20));
+                        .setScaleMultiplier(0.3F + random.nextFloat() * 0.15F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setMaxAge(60 + random.nextInt(20));
             } else {
                 Vector3 offset = new Vector3(pos)
                         .add(0.5, 0, 0.5)
-                        .add(Vector3.random().setY(0).multiply(0.5));
+                        .add(Vector3.random().setY(0).mul(0.5));
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(offset)
                         .setAlphaMultiplier(0.6F)
-                        .alpha(VFXAlphaFunction.proximity(playerTarget::clone, 3F))
+                        .alpha1arg(VFXAlphaFunction.proximity(playerTarget::clone, 3F))
                         .motion(VFXMotionController.target(playerTarget::clone, 0.08F))
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
                         .color(VFXColorFunction.WHITE)
-                        .setMotion(new Vector3(0, 0.2 + rand.nextFloat() * 0.15F, 0))
-                        .setMaxAge(60 + rand.nextInt(20));
+                        .setDeltaMovement(new Vector3(0, 0.2 + random.nextFloat() * 0.15F, 0))
+                        .setMaxAge(60 + random.nextInt(20));
 
                 offset = new Vector3(altar)
                         .add(0.5, 0, 0.5)
-                        .add(Vector3.random().setY(0).multiply(0.6));
+                        .add(Vector3.random().setY(0).mul(0.6));
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(offset)
                         .color(VFXColorFunction.WHITE)
-                        .setGravityStrength(-0.0006F + rand.nextFloat() * -0.004F)
-                        .setMotion(Vector3.random().addY(4).normalize().multiply(0.02 + rand.nextFloat() * 0.01))
+                        .setGravityStrength(-0.0006F + random.nextFloat() * -0.004F)
+                        .setDeltaMovement(Vector3.random().addY(4).normalize().mul(0.02 + random.nextFloat() * 0.01))
                         .setAlphaMultiplier(0.75F)
-                        .setScaleMultiplier(0.3F + rand.nextFloat() * 0.1F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMaxAge(40 + rand.nextInt(10));
+                        .setScaleMultiplier(0.3F + random.nextFloat() * 0.1F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setMaxAge(40 + random.nextInt(10));
             }
         }
 
@@ -235,36 +235,36 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
                     .setAlphaMultiplier(1F)
-                    .alpha(VFXAlphaFunction.proximity(playerTarget::clone, 3F))
+                    .alpha1arg(VFXAlphaFunction.proximity(playerTarget::clone, 3F))
                     .motion(VFXMotionController.target(playerTarget::clone, 0.1F))
-                    .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
+                    .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
                     .color(VFXColorFunction.WHITE)
-                    .setMotion(Vector3.positiveYRandom().setY(1).normalize().multiply(0.5F + rand.nextFloat() * 0.1F))
-                    .setMaxAge(60 + rand.nextInt(20));
+                    .setDeltaMovement(Vector3.positiveYRandom().setY(1).normalize().mul(0.5F + random.nextFloat() * 0.1F))
+                    .setMaxAge(60 + random.nextInt(20));
 
-            if (rand.nextBoolean()) {
+            if (random.nextBoolean()) {
                 p.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
             }
 
             for (int i = 0; i < 3; i++) {
                 Vector3 at = new Vector3(altar).add(0.5, 0, 0.5);
-                at.addX(rand.nextFloat() * 7F * (rand.nextBoolean() ? 1 : -1));
-                at.addZ(rand.nextFloat() * 7F * (rand.nextBoolean() ? 1 : -1));
+                at.addX(random.nextFloat() * 7F * (random.nextBoolean() ? 1 : -1));
+                at.addZ(random.nextFloat() * 7F * (random.nextBoolean() ? 1 : -1));
 
                 p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .setAlphaMultiplier(0.75F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setGravityStrength(-0.001F + rand.nextFloat() * -0.0005F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setGravityStrength(-0.001F + random.nextFloat() * -0.0005F)
                         .color(VFXColorFunction.WHITE)
-                        .setScaleMultiplier(0.3F + rand.nextFloat() * 0.1F)
-                        .setMaxAge(20 + rand.nextInt(10));
+                        .setScaleMultiplier(0.3F + random.nextFloat() * 0.1F)
+                        .setMaxAge(20 + random.nextInt(10));
 
-                if (rand.nextBoolean()) {
+                if (random.nextBoolean()) {
                     p.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
                 }
                 if (tick >= 500) {
-                    p.setScaleMultiplier(0.3F + rand.nextFloat() * 0.15F);
+                    p.setScaleMultiplier(0.3F + random.nextFloat() * 0.15F);
                 }
             }
         }
@@ -272,15 +272,15 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
         if (tick >= 400) {
             int amt = tick >= 500 ? 4 : 1;
             for (int i = 0; i < amt; i++) {
-                RenderOffsetNoisePlane plane = (RenderOffsetNoisePlane) MiscUtils.getRandomEntry(this.playerNoisePlanes, rand);
+                RenderOffsetNoisePlane plane = (RenderOffsetNoisePlane) MiscUtils.getRandomEntry(this.playerNoisePlanes, random);
                 FXFacingParticle p = plane.createParticle(playerTarget.clone())
-                        .setMotion(Vector3.random().setY(0).multiply(rand.nextFloat() * 0.015F))
+                        .setDeltaMovement(Vector3.random().setY(0).mul(random.nextFloat() * 0.015F))
                         .setAlphaMultiplier(0.6F)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.05F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMaxAge(60 + rand.nextInt(20));
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.05F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setMaxAge(60 + random.nextInt(20));
 
-                if (rand.nextBoolean()) {
+                if (random.nextBoolean()) {
                     p.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
                 }
             }
@@ -289,12 +289,12 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
         if (tick >= 600) {
             if (tick % 10 == 0) {
                 Vector3 from = new Vector3(altar).add(0.5, 0, 0.5);
-                MiscUtils.applyRandomOffset(from, rand, 0.25F);
+                MiscUtils.applyRandomOffset(from, random, 0.25F);
                 EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                         .spawn(from)
                         .setup(from.clone().addY(8), 2.4, 2)
                         .setAlphaMultiplier(0.8F)
-                        .setMaxAge(40 + rand.nextInt(20));
+                        .setMaxAge(40 + random.nextInt(20));
             }
         }
 
@@ -302,18 +302,18 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
             for (int i = 0; i < 60; i++) {
                 Vector3 at = new Vector3(altar)
                         .add(0.5, 0, 0.5)
-                        .addY(rand.nextFloat() * 15);
+                        .addY(random.nextFloat() * 15);
 
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .color(VFXColorFunction.WHITE)
-                        .setMotion(Vector3.random().setY(0).normalize().multiply(0.03 + rand.nextFloat() * 0.01))
+                        .setDeltaMovement(Vector3.random().setY(0).normalize().mul(0.03 + random.nextFloat() * 0.01))
                         .setAlphaMultiplier(0.7F)
-                        .setScaleMultiplier(0.3F + rand.nextFloat() * 0.15F)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMaxAge(140 + rand.nextInt(60));
+                        .setScaleMultiplier(0.3F + random.nextFloat() * 0.15F)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setMaxAge(140 + random.nextInt(60));
 
-                if (rand.nextBoolean()) {
+                if (random.nextBoolean()) {
                     p.color(VFXColorFunction.constant(this.constellation.getConstellationColor()));
                 }
             }
@@ -324,7 +324,7 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
     private void doClientSetup(TileAttunementAltar altar) {
         if (this.cameraHack == null &&
                 Minecraft.getInstance().player != null &&
-                Minecraft.getInstance().player.getUniqueID().equals(this.getPlayerUUID())) {
+                Minecraft.getInstance().player.getUUID().equals(this.getPlayerUUID())) {
             Vector3 offset = new Vector3(altar).add(0.5, 6, 0.5);
             CameraPathBuilder builder = CameraPathBuilder.builder(offset.clone().add(4, 0, 4), new Vector3(altar).add(0.5, 0.5, 0.5));
             builder.addCircularPoints(offset, CameraPathBuilder.DynamicRadiusGetter.dyanmicIncrease( 5,  0.025), 200, 2);
@@ -359,27 +359,27 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
             }
 
             float floatTick = (ClientScheduler.getClientTick() % 40) / 40F;
-            float sin = MathHelper.sin((float) (floatTick * 2 * Math.PI)) / 2F + 0.5F;
+            float sin = Mth.sin((float) (floatTick * 2 * Math.PI)) / 2F + 0.5F;
             focusedEntity.setCustomNameVisible(false);
             focusedEntity.setPositionAndRotation(offset.getX(), offset.getY() + sin * 0.2D, offset.getZ(), 0F, 0F);
             focusedEntity.setPositionAndRotation(offset.getX(), offset.getY() + sin * 0.2D, offset.getZ(), 0F, 0F);
-            focusedEntity.rotationYawHead = 0;
-            focusedEntity.prevRotationYawHead = 0;
-            focusedEntity.renderYawOffset = 0;
-            focusedEntity.prevRenderYawOffset = 0;
-            focusedEntity.setVelocity(0, 0, 0);
+            focusedEntity.yHeadRot = 0;
+            focusedEntity.yHeadRotO = 0;
+            focusedEntity.yBodyRot = 0;
+            focusedEntity.yBodyRotO = 0;
+            focusedEntity.lerpMotion(0, 0, 0);
         };
     }
 
     @OnlyIn(Dist.CLIENT)
     private ICameraStopListener createAttunementListener(TileAttunementAltar altar) {
-        BlockPos at = altar.getPos();
+        BlockPos at = altar.getBlockPos();
         return () -> {
             if (this.cameraHack != null) {
                 ICameraTransformer transformer = (ICameraTransformer) this.cameraHack;
                 ICameraPersistencyFunction persistency = transformer.getPersistencyFunction();
-                if (persistency.isExpired() && !persistency.wasForciblyStopped()) {
-                    PktAttunePlayerConstellation attuneRequest = new PktAttunePlayerConstellation(this.constellation, altar.getWorld().getDimensionKey(), at);
+                if (persistency.timedOut() && !persistency.wasForciblyStopped()) {
+                    PktAttunePlayerConstellation attuneRequest = new PktAttunePlayerConstellation(this.constellation, altar.getLevel().dimension(), at);
                     PacketChannel.CHANNEL.sendToServer(attuneRequest);
                 }
             }
@@ -404,8 +404,8 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
     }
 
     @Override
-    public void writeToNBT(CompoundTag nbt) {
-        super.writeToNBT(nbt);
+    public void save(CompoundTag nbt) {
+        super.save(nbt);
 
         nbt.putUniqueId("playerUUID", this.playerUUID);
         nbt.putString("constellation", this.constellation.getRegistryName().toString());
@@ -416,6 +416,6 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
         super.readFromNBT(nbt);
 
         this.playerUUID = nbt.getUniqueId("playerUUID");
-        this.constellation = (IMajorConstellation) RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(new ResourceLocation(nbt.getString("constellation")));
+        this.constellation = (IMajorConstellation) RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(ResourceLocation.parse(nbt.getString("constellation")));
     }
 }

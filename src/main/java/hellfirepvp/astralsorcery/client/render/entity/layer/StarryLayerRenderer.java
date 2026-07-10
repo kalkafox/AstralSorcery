@@ -57,24 +57,24 @@ public class StarryLayerRenderer<E extends LivingEntity, M extends HumanoidModel
     }
 
     @Override
-    public void render(PoseStack renderStack, MultiBufferSource buffer, int light, E entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+    public void render(PoseStack renderStack, MultiBufferSource buffer, int light, E entity, float animationPosition, float animationSpeed, float a, float ageInTicks, float netHeadYaw, float yHeadRot) {
         if (!(entity instanceof Player)) {
             return;
         }
 
-        for (EquipmentSlot slotType : EquipmentSlotType.values()) {
-            if (slotType.getSlotType() == EquipmentSlotType.Group.ARMOR) {
-                if (renderTest.test((Player) entity, slotType)) {
-                    HumanoidModel<E> model = slotType == EquipmentSlotType.HEAD ? MODEL_HEAD : this.slimRender ? MODEL_ARMOR_SMALL : MODEL_ARMOR;
-                    this.renderArmorPart(renderStack, buffer, slotType, light, model);
+        for (EquipmentSlot type : EquipmentSlot.values()) {
+            if (type.getType() == EquipmentSlot.Group.ARMOR) {
+                if (renderTest.test((Player) entity, type)) {
+                    HumanoidModel<E> model = type == EquipmentSlot.HEAD ? MODEL_HEAD : this.slimRender ? MODEL_ARMOR_SMALL : MODEL_ARMOR;
+                    this.renderArmorPart(renderStack, buffer, type, light, model);
                 }
             }
         }
     }
 
-    private void renderArmorPart(PoseStack renderStack, MultiBufferSource buffer, EquipmentSlot slotType, int light, HumanoidModel<E> model) {
-        this.getEntityModel().setModelAttributes(model);
-        this.setModelSlotVisible(model, slotType);
+    private void renderArmorPart(PoseStack renderStack, MultiBufferSource buffer, EquipmentSlot type, int light, HumanoidModel<E> model) {
+        this.getEntityModel().getAttackArm(model);
+        this.setPartVisibility(model, type);
         for (CacheReference<RenderType> renderType : RENDER_TYPES) {
             model.render(renderStack, buffer.getBuffer(renderType.get()), light, OverlayTexture.NO_OVERLAY, 0.4F, 0.4F, 1F, 0.1F);
         }

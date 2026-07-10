@@ -30,7 +30,7 @@ public class WidthHeightScreen extends InputScreen {
 
     protected final int guiHeight;
     protected final int guiWidth;
-    protected int guiLeft, guiTop;
+    protected int leftPos, topPos;
 
     protected boolean closeWithInventoryKey = true;
 
@@ -48,11 +48,11 @@ public class WidthHeightScreen extends InputScreen {
     }
 
     public int getGuiLeft() {
-        return this.guiLeft;
+        return this.leftPos;
     }
 
     public int getGuiTop() {
-        return this.guiTop;
+        return this.topPos;
     }
 
     public int getGuiZLevel() {
@@ -72,8 +72,8 @@ public class WidthHeightScreen extends InputScreen {
     }
 
     private void initComponents() {
-        guiLeft = width / 2 - guiWidth / 2;
-        guiTop = height / 2 - guiHeight / 2;
+        leftPos = width / 2 - guiWidth / 2;
+        topPos = height / 2 - guiHeight / 2;
     }
 
     protected void drawWHRect(PoseStack renderStack, AbstractRenderableTexture resource) {
@@ -84,7 +84,7 @@ public class WidthHeightScreen extends InputScreen {
         RenderSystem.defaultAlphaFunc();
 
         resource.bindTexture();
-        RenderingGuiUtils.drawRect(renderStack, guiLeft, guiTop, this.getBlitOffset(), guiWidth, guiHeight);
+        RenderingGuiUtils.drawRect(renderStack, leftPos, topPos, this.getBlitOffset(), guiWidth, guiHeight);
         RenderSystem.disableAlphaTest();
     }
 
@@ -94,27 +94,27 @@ public class WidthHeightScreen extends InputScreen {
             return true;
         }
 
-        if (closeWithInventoryKey && Minecraft.getInstance().gameSettings.keyBindInventory.isKeyDown()) {
-            this.closeScreen();
+        if (closeWithInventoryKey && Minecraft.getInstance().options.keyInventory.isDown()) {
+            this.onClose();
 
-            if (Minecraft.getInstance().currentScreen == null) {
-                Minecraft.getInstance().mouseHelper.grabMouse();
+            if (Minecraft.getInstance().screen == null) {
+                Minecraft.getInstance().mouseHandler.grabMouse();
             }
         }
         return false;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(double xpos, double ypos, int buttonId) {
+        if (super.mouseClicked(xpos, ypos, buttonId)) {
             return true;
         }
 
-        if (button == 1 && shouldRightClickCloseScreen(mouseX, mouseY)) {
-            this.closeScreen();
+        if (buttonId == 1 && shouldRightClickCloseScreen(xpos, ypos)) {
+            this.onClose();
 
-            if (Minecraft.getInstance().currentScreen == null) {
-                Minecraft.getInstance().mouseHelper.grabMouse();
+            if (Minecraft.getInstance().screen == null) {
+                Minecraft.getInstance().mouseHandler.grabMouse();
             }
             return true;
         }
@@ -124,7 +124,7 @@ public class WidthHeightScreen extends InputScreen {
     /**
      * @return false if rightclick shouldn't close the current screen, true if it should close the current screen
      */
-    protected boolean shouldRightClickCloseScreen(double mouseX, double mouseY) {
+    protected boolean shouldRightClickCloseScreen(double xpos, double ypos) {
         return false;
     }
 }

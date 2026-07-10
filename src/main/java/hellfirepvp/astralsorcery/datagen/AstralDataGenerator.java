@@ -35,7 +35,7 @@ import net.neoforged.fml.event.lifecycle.GatherDataEvent;
 public class AstralDataGenerator {
 
     @SubscribeEvent
-    public static void gather(GatherDataEvent event) {
+    public static void createFileDeletedCheck(GatherDataEvent event) {
         if (!AstralSorcery.isDoingDataGeneration()) {
             return;
         }

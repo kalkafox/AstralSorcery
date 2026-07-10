@@ -50,7 +50,7 @@ public class StructureGenerationConfig extends FeatureGenerationConfig {
                 .defineInRange("separation", this.defaultSeparation, 1, 512);
     }
 
-    public StructureSeparationSettings createSettings() {
-        return new StructureSeparationSettings(this.spacing.get(), this.separation.get(), Math.abs(this.getFullPath().hashCode()));
+    public StructureFeatureConfiguration createSettings() {
+        return new StructureFeatureConfiguration(this.spacing.get(), this.separation.get(), Math.abs(this.getPathFromLocation().hashCode()));
     }
 }

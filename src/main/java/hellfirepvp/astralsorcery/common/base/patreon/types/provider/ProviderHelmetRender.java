@@ -38,14 +38,14 @@ public class ProviderHelmetRender implements PatreonEffectProvider<TypeHelmetRen
         }
 
         String[] itemInfo = effectParameters.get(1).split(";");
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemInfo[0]));
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemInfo[0]));
         if (item == null || item == Items.AIR) {
             throw new IllegalArgumentException("Unknown item: " + itemInfo[0]);
         }
         ItemStack stack = new ItemStack(item);
         if (itemInfo.length > 1) {
             int data = Integer.parseInt(itemInfo[1]);
-            stack.setDamage(data);
+            stack.setBaseDamage(data);
         }
         FlareColor flColor = effectParameters.size() > 2 ?
                 FlareColor.valueOf(effectParameters.get(2)) : null;

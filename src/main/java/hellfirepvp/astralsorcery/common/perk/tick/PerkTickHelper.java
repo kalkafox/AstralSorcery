@@ -35,13 +35,13 @@ public class PerkTickHelper implements ITickHandler {
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player ticked = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
-        PlayerProgress prog = ResearchHelper.getProgress(ticked, side);
+        LogicalSide direction = (LogicalSide) context[1];
+        PlayerProgress prog = ResearchHelper.getProgress(ticked, direction);
         if (prog.isValid()) {
             PlayerPerkData perkData = prog.getPerkData();
             for (AbstractPerk perk : perkData.getEffectGrantingPerks()) {
                 if (perk instanceof PlayerTickPerk) {
-                    ((PlayerTickPerk) perk).onPlayerTick(ticked, side);
+                    ((PlayerTickPerk) perk).onPlayerTick(ticked, direction);
                 }
             }
         }
@@ -53,8 +53,8 @@ public class PerkTickHelper implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

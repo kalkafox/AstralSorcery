@@ -32,90 +32,90 @@ public class RegistryBlockRenderTypes {
     private RegistryBlockRenderTypes() {}
 
     public static void initBlocks() {
-        setRenderLayer(MARBLE_ARCH,           RenderType.getSolid());
-        setRenderLayer(MARBLE_BRICKS,         RenderType.getSolid());
-        setRenderLayer(MARBLE_CHISELED,       RenderType.getSolid());
-        setRenderLayer(MARBLE_ENGRAVED,       RenderType.getSolid());
-        setRenderLayer(MARBLE_PILLAR,         RenderType.getSolid());
-        setRenderLayer(MARBLE_RAW,            RenderType.getSolid());
-        setRenderLayer(MARBLE_RUNED,          RenderType.getSolid());
-        setRenderLayer(MARBLE_STAIRS,         RenderType.getSolid());
-        setRenderLayer(MARBLE_SLAB,           RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_ARCH,     RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_BRICKS,   RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_CHISELED, RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_ENGRAVED, RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_PILLAR,   RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_RAW,      RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_RUNED,    RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_STAIRS,   RenderType.getSolid());
-        setRenderLayer(BLACK_MARBLE_SLAB,     RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD,          RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_ARCH,     RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_COLUMN,   RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_ENGRAVED, RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_ENRICHED, RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_INFUSED,  RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_PLANKS,   RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_STAIRS,   RenderType.getSolid());
-        setRenderLayer(INFUSED_WOOD_SLAB,     RenderType.getSolid());
+        setRenderLayer(MARBLE_ARCH,           RenderType.solid());
+        setRenderLayer(MARBLE_BRICKS,         RenderType.solid());
+        setRenderLayer(MARBLE_CHISELED,       RenderType.solid());
+        setRenderLayer(MARBLE_ENGRAVED,       RenderType.solid());
+        setRenderLayer(MARBLE_PILLAR,         RenderType.solid());
+        setRenderLayer(MARBLE_RAW,            RenderType.solid());
+        setRenderLayer(MARBLE_RUNED,          RenderType.solid());
+        setRenderLayer(MARBLE_STAIRS,         RenderType.solid());
+        setRenderLayer(MARBLE_SLAB,           RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_ARCH,     RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_BRICKS,   RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_CHISELED, RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_ENGRAVED, RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_PILLAR,   RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_RAW,      RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_RUNED,    RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_STAIRS,   RenderType.solid());
+        setRenderLayer(BLACK_MARBLE_SLAB,     RenderType.solid());
+        setRenderLayer(INFUSED_WOOD,          RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_ARCH,     RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_COLUMN,   RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_ENGRAVED, RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_ENRICHED, RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_INFUSED,  RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_PLANKS,   RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_STAIRS,   RenderType.solid());
+        setRenderLayer(INFUSED_WOOD_SLAB,     RenderType.solid());
 
-        setRenderLayer(AQUAMARINE_SAND_ORE, RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(ROCK_CRYSTAL_ORE,    RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(STARMETAL_ORE,       RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(STARMETAL,           RenderType.getSolid());
-        setRenderLayer(GLOW_FLOWER,         RenderType.getCutout());
+        setRenderLayer(AQUAMARINE_SAND_ORE, RenderType.solid(), RenderType.translucent());
+        setRenderLayer(ROCK_CRYSTAL_ORE,    RenderType.solid(), RenderType.translucent());
+        setRenderLayer(STARMETAL_ORE,       RenderType.solid(), RenderType.translucent());
+        setRenderLayer(STARMETAL,           RenderType.solid());
+        setRenderLayer(GLOW_FLOWER,         RenderType.cutout());
 
-        setRenderLayer(SPECTRAL_RELAY,              RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(ALTAR_DISCOVERY,             RenderType.getSolid());
-        setRenderLayer(ALTAR_ATTUNEMENT,            RenderType.getSolid());
-        setRenderLayer(ALTAR_CONSTELLATION,         RenderType.getSolid());
-        setRenderLayer(ALTAR_RADIANCE,              RenderType.getSolid());
-        setRenderLayer(ATTUNEMENT_ALTAR,            RenderType.getSolid());
-        setRenderLayer(CELESTIAL_CRYSTAL_CLUSTER,   RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(GEM_CRYSTAL_CLUSTER,         RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(ROCK_COLLECTOR_CRYSTAL,      RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(CELESTIAL_COLLECTOR_CRYSTAL, RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(LENS,                        RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(PRISM,                       RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(RITUAL_LINK,                 RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(RITUAL_PEDESTAL,             RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(INFUSER,                     RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(CHALICE,                     RenderType.getSolid());
-        setRenderLayer(WELL,                        RenderType.getSolid());
-        setRenderLayer(ILLUMINATOR,                 RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(TELESCOPE,                   RenderType.getSolid());
-        setRenderLayer(TELESCOPE,                   RenderType.getSolid());
-        setRenderLayer(OBSERVATORY,                 RenderType.getSolid());
-        setRenderLayer(REFRACTION_TABLE,            RenderType.getSolid());
-        setRenderLayer(TREE_BEACON,                 RenderType.getSolid());
-        setRenderLayer(TREE_BEACON_COMPONENT,       RenderType.getTranslucent());
-        setRenderLayer(GATEWAY,                     RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(FOUNTAIN,                    RenderType.getSolid());
-        setRenderLayer(FOUNTAIN_PRIME_LIQUID,       RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(FOUNTAIN_PRIME_VORTEX,       RenderType.getSolid(), RenderType.getTranslucent());
-        setRenderLayer(FOUNTAIN_PRIME_ORE,          RenderType.getSolid(), RenderType.getTranslucent());
+        setRenderLayer(SPECTRAL_RELAY,              RenderType.solid(), RenderType.translucent());
+        setRenderLayer(ALTAR_DISCOVERY,             RenderType.solid());
+        setRenderLayer(ALTAR_ATTUNEMENT,            RenderType.solid());
+        setRenderLayer(ALTAR_CONSTELLATION,         RenderType.solid());
+        setRenderLayer(ALTAR_RADIANCE,              RenderType.solid());
+        setRenderLayer(ATTUNEMENT_ALTAR,            RenderType.solid());
+        setRenderLayer(CELESTIAL_CRYSTAL_CLUSTER,   RenderType.solid(), RenderType.translucent());
+        setRenderLayer(GEM_CRYSTAL_CLUSTER,         RenderType.solid(), RenderType.translucent());
+        setRenderLayer(ROCK_COLLECTOR_CRYSTAL,      RenderType.solid(), RenderType.translucent());
+        setRenderLayer(CELESTIAL_COLLECTOR_CRYSTAL, RenderType.solid(), RenderType.translucent());
+        setRenderLayer(LENS,                        RenderType.solid(), RenderType.translucent());
+        setRenderLayer(PRISM,                       RenderType.solid(), RenderType.translucent());
+        setRenderLayer(RITUAL_LINK,                 RenderType.solid(), RenderType.translucent());
+        setRenderLayer(RITUAL_PEDESTAL,             RenderType.solid(), RenderType.translucent());
+        setRenderLayer(INFUSER,                     RenderType.solid(), RenderType.translucent());
+        setRenderLayer(CHALICE,                     RenderType.solid());
+        setRenderLayer(WELL,                        RenderType.solid());
+        setRenderLayer(ILLUMINATOR,                 RenderType.solid(), RenderType.translucent());
+        setRenderLayer(TELESCOPE,                   RenderType.solid());
+        setRenderLayer(TELESCOPE,                   RenderType.solid());
+        setRenderLayer(OBSERVATORY,                 RenderType.solid());
+        setRenderLayer(REFRACTION_TABLE,            RenderType.solid());
+        setRenderLayer(TREE_BEACON,                 RenderType.solid());
+        setRenderLayer(TREE_BEACON_COMPONENT,       RenderType.translucent());
+        setRenderLayer(GATEWAY,                     RenderType.solid(), RenderType.translucent());
+        setRenderLayer(FOUNTAIN,                    RenderType.solid());
+        setRenderLayer(FOUNTAIN_PRIME_LIQUID,       RenderType.solid(), RenderType.translucent());
+        setRenderLayer(FOUNTAIN_PRIME_VORTEX,       RenderType.solid(), RenderType.translucent());
+        setRenderLayer(FOUNTAIN_PRIME_ORE,          RenderType.solid(), RenderType.translucent());
 
-        setRenderLayer(FLARE_LIGHT,       RenderType.getTranslucent());
-        setRenderLayer(TRANSLUCENT_BLOCK, RenderType.getTranslucent());
-        setRenderLayer(VANISHING,         RenderType.getTranslucent());
-        setRenderLayer(STRUCTURAL,        RenderType.getTranslucent());
+        setRenderLayer(FLARE_LIGHT,       RenderType.translucent());
+        setRenderLayer(TRANSLUCENT_BLOCK, RenderType.translucent());
+        setRenderLayer(VANISHING,         RenderType.translucent());
+        setRenderLayer(STRUCTURAL,        RenderType.translucent());
     }
 
     public static void initFluids() {
-        RegistryFluids.FLUID_BLOCKS.forEach((fluidBlock) -> setRenderLayer(fluidBlock, RenderType.getTranslucent()));
+        RegistryFluids.FLUID_BLOCKS.forEach((fluidBlock) -> setRenderLayer(fluidBlock, RenderType.translucent()));
 
-        setRenderLayer(LIQUID_STARLIGHT_SOURCE, RenderType.getTranslucent());
-        setRenderLayer(LIQUID_STARLIGHT_FLOWING, RenderType.getTranslucent());
+        setRenderLayer(LIQUID_STARLIGHT_SOURCE, RenderType.translucent());
+        setRenderLayer(LIQUID_STARLIGHT_FLOWING, RenderType.translucent());
     }
 
     private static void setRenderLayer(Block block, RenderType... types) {
         List<RenderType> typeList = Arrays.asList(types);
-        RenderTypeLookup.setRenderLayer(block, typeList::contains);
+        ItemBlockRenderTypes.setRenderLayer(block, typeList::contains);
     }
 
     private static void setRenderLayer(Fluid fluid, RenderType... types) {
         List<RenderType> typeList = Arrays.asList(types);
-        RenderTypeLookup.setRenderLayer(fluid, typeList::contains);
+        ItemBlockRenderTypes.setRenderLayer(fluid, typeList::contains);
     }
 }

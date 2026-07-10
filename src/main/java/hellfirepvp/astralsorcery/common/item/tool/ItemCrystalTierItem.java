@@ -68,7 +68,7 @@ public abstract class ItemCrystalTierItem extends Item implements CrystalAttribu
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
-            attr.addTooltip(tooltip, CalculationContext.Builder.newBuilder()
+            attr.addTooltip(tooltip, CalculationContext.Builder.properties()
                     .addUsage(CrystalPropertiesAS.Usages.USE_TOOL_DURABILITY)
                     .addUsage(CrystalPropertiesAS.Usages.USE_TOOL_EFFECTIVENESS)
                     .build());
@@ -153,12 +153,12 @@ public abstract class ItemCrystalTierItem extends Item implements CrystalAttribu
 
     @Override
     public int getEnchantmentValue() {
-        return CrystalToolTier.getInstance().getEnchantability();
+        return CrystalToolTier.getInstance().getEnchantmentValue();
     }
 
     @Override
     public int getEnchantmentValue(ItemStack stack) {
-        return CrystalToolTier.getInstance().getEnchantability();
+        return CrystalToolTier.getInstance().getEnchantmentValue();
     }
 
     @Override

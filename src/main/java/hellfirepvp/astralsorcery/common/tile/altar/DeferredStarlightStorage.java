@@ -45,12 +45,12 @@ public class DeferredStarlightStorage {
         return starlightStorage.getLast();
     }
 
-    public void readNBT(CompoundTag compound) {
+    public void load(CompoundTag pattern) {
         this.starlightStorage.clear();
-        this.starlightStorage.addLast(compound.getInt("starlightStorage"));
+        this.starlightStorage.addLast(pattern.getInt("starlightStorage"));
     }
 
-    public void writeNBT(CompoundTag compound) {
-        compound.putInt("starlightStorage", this.getStoredStarlight());
+    public void fillDefaultJigsawNBT(CompoundTag pattern) {
+        pattern.putInt("starlightStorage", this.getStoredStarlight());
     }
 }

@@ -27,7 +27,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -92,59 +92,59 @@ public class MantleEffectArmara extends MantleEffect {
         Vector3 at = Vector3.atEntityCorner(player);
         at.addY(player.getHeight() / 3F * 2F);
 
-        Vector3 lookVec = new Vector3(player.getLookVec()).normalize();
+        Vector3 lookVec = new Vector3(player.getLookAngle()).normalize();
 
         int stacks = getCurrentImmunityStacks(player);
         if (stacks > 0) {
-            Random sRand = new Random(player.getUniqueID().hashCode());
+            Random sRand = new Random(player.getUUID().hashCode());
             for (int i = 0; i < stacks; i++) {
                 Vector3 axis = Vector3.random(sRand);
                 axis.setX(axis.getX() * 0.35F);
                 axis.setZ(axis.getZ() * 0.35F);
                 Vector3 perpEffect = axis.clone().perpendicular();
 
-                float scale = rand.nextFloat() * 0.2F + 0.2F;
+                float scale = random.nextFloat() * 0.2F + 0.2F;
                 int ticksPerCircle = 80 + sRand.nextInt(50);
-                int tick = (player.ticksExisted) % ticksPerCircle;
+                int tick = (player.tickCount) % ticksPerCircle;
 
                 Vector3 anglePlayer = perpEffect.normalize()
-                        .rotate(Math.toRadians(360 * ((float) (tick) / (float) (ticksPerCircle))), axis)
+                        .mirror(Math.toRadians(360 * ((float) (tick) / (float) (ticksPerCircle))), axis)
                         .normalize();
-                Vector3 pos = anglePlayer.clone().multiply(sRand.nextFloat() * 0.4F + 0.9F).add(at);
+                Vector3 pos = anglePlayer.clone().mul(sRand.nextFloat() * 0.4F + 0.9F).add(at);
 
                 float alpha = 0.8F;
-                if (Minecraft.getInstance().gameSettings.getPointOfView().func_243192_a()) {
+                if (Minecraft.getInstance().options.getCameraType().isFirstPerson()) {
                     float deg = (float) Math.toDegrees(lookVec.angle(anglePlayer));
                     if (deg < 70F) {
                         float tansparentDegree = 40F;
-                        alpha *= MathHelper.clamp((deg - tansparentDegree) / (80F - tansparentDegree), 0F, 1F);
+                        alpha *= Mth.clamp((deg - tansparentDegree) / (80F - tansparentDegree), 0F, 1F);
                     }
                 }
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .setAlphaMultiplier(alpha)
                         .color(VFXColorFunction.constant(ColorsAS.MANTLE_ARMARA_STACKS))
                         .setScaleMultiplier(scale)
-                        .setMaxAge(20 + rand.nextInt(20));
+                        .setMaxAge(20 + random.nextInt(20));
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .setAlphaMultiplier(alpha)
                         .color(VFXColorFunction.WHITE)
                         .setScaleMultiplier(scale * 0.4F)
-                        .setMaxAge(10 + rand.nextInt(10));
+                        .setMaxAge(10 + random.nextInt(10));
             }
         }
     }
 
-    private void onHurt(LivingHurtEvent event) {
-        Level world = event.getEntity().getEntityWorld();
+    private void onHurt(LivingIncomingDamageEvent event) {
+        Level level = event.getEntity().getCommandSenderWorld();
         LivingEntity hurt = event.getEntityLiving();
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             return;
         }
         MantleEffectArmara armara = ItemMantle.getEffect(hurt, ConstellationsAS.armara);
@@ -154,7 +154,7 @@ public class MantleEffectArmara extends MantleEffect {
     }
 
     private boolean shouldPreventDamage(LivingEntity hurt, DamageSource source, boolean simulate) {
-        if (source.canHarmInCreative()) {
+        if (source.isBypassInvul()) {
             return false;
         }
         int stacks = getCurrentImmunityStacks(hurt);

@@ -37,9 +37,9 @@ public class EventHelperEnchantmentTick implements ITickHandler {
     @Override
     public void tick(TickEvent.Type type, Object... context) {
         Player player = (Player) context[0];
-        LogicalSide side = (LogicalSide) context[1];
+        LogicalSide direction = (LogicalSide) context[1];
 
-        if (side.isServer()) {
+        if (direction.isServer()) {
             EnchantmentHelperAS.getHolder(player.registryAccess(), EnchantmentsAS.NIGHT_VISION).ifPresent(nightVision -> {
                 int level = EnchantmentHelper.getItemEnchantmentLevel(nightVision, player.getItemBySlot(EquipmentSlot.HEAD));
                 if (level > 0) {
@@ -55,8 +55,8 @@ public class EventHelperEnchantmentTick implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

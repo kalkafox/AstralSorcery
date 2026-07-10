@@ -26,7 +26,7 @@ public class SlotUnclickable extends Slot {
     }
 
     @Override
-    public boolean canTakeStack(Player playerIn) {
+    public boolean mayPickup(Player playerIn) {
         return false;
     }
 }

@@ -46,8 +46,8 @@ public class AttuneCrystalRecipe extends AttunementRecipe<ActiveCrystalAttunemen
 
     @Override
     public boolean canStartCrafting(TileAttunementAltar altar) {
-        Level world = altar.getWorld();
-        if (DayTimeHelper.isNight(world)) {
+        Level level = altar.getLevel();
+        if (DayTimeHelper.isNight(level)) {
             return findApplicableCrystal(altar) != null;
         }
         return false;
@@ -73,12 +73,12 @@ public class AttuneCrystalRecipe extends AttunementRecipe<ActiveCrystalAttunemen
             return null;
         }
 
-        AABB boxAt = BOX.offset(altar.getPos().up()).grow(1);
+        AABB boxAt = BOX.offset(altar.getBlockPos().above()).grow(1);
 
         Vector3 thisVec = new Vector3(altar).add(0.5, 1.5, 0.5);
-        List<ItemEntity> items = altar.getWorld().getEntitiesWithinAABB(ItemEntity.class, boxAt);
+        List<ItemEntity> items = altar.getLevel().getEntitiesWithinAABB(ItemEntity.class, boxAt);
         if (!items.isEmpty()) {
-            ItemEntity item = EntityUtils.selectClosest(items, (iEntity) -> thisVec.distanceSquared(iEntity.getPositionVec()));
+            ItemEntity item = EntityUtils.selectClosest(items, (iEntity) -> thisVec.distanceSquared(iEntity.position()));
             if (isApplicableCrystal(item, cst)) {
                 return item;
             }

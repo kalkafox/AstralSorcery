@@ -51,7 +51,7 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
     }
 
     @Override
-    protected ItemStack dispenseStack(BlockSource source, ItemStack stack) {
+    protected ItemStack execute(BlockSource source, ItemStack stack) {
         if (FluidUtil.getFluidContained(stack).isPresent()) {
             return dumpContainer(source, stack);
         } else {
@@ -61,20 +61,20 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
 
     @Nonnull
     private ItemStack fillContainer(BlockSource source, ItemStack stack) {
-        Level world = source.getWorld();
+        Level level = source.getLevel();
         Direction dispenserFacing = source.getBlockState().get(DispenserBlock.FACING);
         BlockPos blockpos = source.getBlockPos().offset(dispenserFacing);
 
-        FluidActionResult actionResult = FluidUtil.tryPickUpFluid(stack, null, world, blockpos, dispenserFacing.getOpposite());
-        ItemStack resultStack = actionResult.getResult();
+        FluidActionResult actionResult = FluidUtil.tryPickUpFluid(stack, null, level, blockpos, dispenserFacing.getOpposite());
+        ItemStack resultStack = actionResult.getObject();
 
-        if (!actionResult.isSuccess() || resultStack.isEmpty()) {
-            return super.dispenseStack(source, stack);
+        if (!actionResult.shouldSwing() || resultStack.isEmpty()) {
+            return super.execute(source, stack);
         }
 
         if (stack.getCount() == 1) {
             return resultStack;
-        } else if (((DispenserBlockEntity)source.getBlockTileEntity()).addItemStack(resultStack) < 0) {
+        } else if (((DispenserBlockEntity)source.getEntity()).addItemStack(resultStack) < 0) {
             this.defaultBehavior.dispense(source, resultStack);
         }
 
@@ -85,27 +85,27 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
 
     @Nonnull
     private ItemStack dumpContainer(BlockSource source, @Nonnull ItemStack stack) {
-        ServerLevel world = source.getWorld();
+        ServerLevel level = source.getLevel();
         ItemStack singleStack = stack.copy();
         singleStack.setCount(1);
         LazyOptional<IFluidHandlerItem> itemFluidHandler = FluidUtil.getFluidHandler(singleStack);
         if (!itemFluidHandler.isPresent()) {
-            return super.dispenseStack(source, stack);
+            return super.execute(source, stack);
         }
         FluidStack drained = itemFluidHandler
                 .map(handler -> handler.drain(FluidAttributes.BUCKET_VOLUME, IFluidHandler.FluidAction.EXECUTE))
                 .orElse(FluidStack.EMPTY);
         Direction dispenserFacing = source.getBlockState().get(DispenserBlock.FACING);
         BlockPos pos = source.getBlockPos().offset(dispenserFacing);
-        Player player = AstralSorcery.getProxy().getASFakePlayerServer((ServerLevel) world);
-        FluidActionResult result = FluidUtil.tryPlaceFluid(player, source.getWorld(), Hand.MAIN_HAND, pos, stack, drained);
+        Player player = AstralSorcery.getProxy().getASFakePlayerServer((ServerLevel) level);
+        FluidActionResult result = FluidUtil.tryPlaceFluid(player, source.getLevel(), InteractionHand.MAIN_HAND, pos, stack, drained);
 
-        if (result.isSuccess()) {
-            ItemStack drainedStack = result.getResult();
+        if (result.shouldSwing()) {
+            ItemStack drainedStack = result.getObject();
 
             if (drainedStack.getCount() == 1) {
                 return drainedStack;
-            } else if (!drainedStack.isEmpty() && ((DispenserBlockEntity) source.getBlockTileEntity()).addItemStack(drainedStack) < 0) {
+            } else if (!drainedStack.isEmpty() && ((DispenserBlockEntity) source.getEntity()).addItemStack(drainedStack) < 0) {
                 this.defaultBehavior.dispense(source, drainedStack);
             }
 

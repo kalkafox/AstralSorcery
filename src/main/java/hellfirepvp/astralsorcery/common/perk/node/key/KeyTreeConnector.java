@@ -44,9 +44,9 @@ public class KeyTreeConnector extends MajorPerk {
                 !canSee(player, progress)) return false;
         PlayerPerkData perkData = progress.getPerkData();
 
-        LogicalSide side = getSide(player);
+        LogicalSide direction = getSide(player);
         boolean hasAllAdjacent = true;
-        for (AbstractPerk otherPerks : PerkTree.PERK_TREE.getConnectedPerks(side, this)) {
+        for (AbstractPerk otherPerks : PerkTree.PERK_TREE.getConnectedPerks(direction, this)) {
             if (!perkData.hasPerkAllocation(otherPerks, PerkAllocationType.UNLOCKED)) {
                 hasAllAdjacent = false;
                 break;
@@ -70,9 +70,9 @@ public class KeyTreeConnector extends MajorPerk {
             ListTag listTokens = new ListTag();
             for (AbstractPerk otherPerk : PerkTree.PERK_TREE.getConnectedPerks(LogicalSide.SERVER, this)) {
                 if (ResearchManager.forceApplyPerk(player, otherPerk, PlayerPerkAllocation.unlock())) {
-                    ResourceLocation token = AstralSorcery.key("connector_tk_" + otherPerk.getRegistryName().getPath());
-                    if (ResearchManager.grantFreePerkPoint(player, token)) {
-                        listTokens.add(StringNBT.valueOf(token.toString()));
+                    ResourceLocation accessToken = AstralSorcery.key("connector_tk_" + otherPerk.getRegistryName().getPath());
+                    if (ResearchManager.grantFreePerkPoint(player, accessToken)) {
+                        listTokens.add(StringTag.valueOf(accessToken.toString()));
                     }
                 }
             }
@@ -87,13 +87,13 @@ public class KeyTreeConnector extends MajorPerk {
         if (allocationType == PerkAllocationType.UNLOCKED) {
             ListTag list = dataStorage.getList("pointtokens", Constants.NBT.TAG_STRING);
             for (int i = 0; i < list.size(); i++) {
-                ResearchManager.revokeFreePoint(player, new ResourceLocation(list.getString(i)));
+                ResearchManager.revokeFreePoint(player, ResourceLocation.parse(list.getString(i)));
             }
         }
     }
 
     @Override
-    public void clearCaches(LogicalSide side) {
-        super.clearCaches(side);
+    public void clearCaches(LogicalSide direction) {
+        super.clearCaches(direction);
     }
 }

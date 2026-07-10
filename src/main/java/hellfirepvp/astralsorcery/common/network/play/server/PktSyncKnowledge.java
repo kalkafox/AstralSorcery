@@ -124,7 +124,7 @@ public class PktSyncKnowledge extends ASPacket<PktSyncKnowledge> {
             }
 
             @Override
-            public void handle(PktSyncKnowledge packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktSyncKnowledge packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

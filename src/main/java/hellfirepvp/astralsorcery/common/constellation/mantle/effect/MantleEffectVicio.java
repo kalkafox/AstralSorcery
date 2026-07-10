@@ -55,11 +55,11 @@ public class MantleEffectVicio extends MantleEffect {
             boolean prev = player.abilities.allowFlying;
             player.abilities.allowFlying = true;
             if (!prev) {
-                player.sendPlayerAbilities();
+                player.onUpdateAbilities();
             }
 
             EventHelperTemporaryFlight.allowFlight(player, 20);
-            if (player.abilities.isFlying && !player.isOnGround() && player.ticksExisted % 20 == 0) {
+            if (player.abilities.flying && !player.isOnGround() && player.tickCount % 20 == 0) {
                 if (!PlayerAffectionFlags.isPlayerAffected(player, CEffectVicio.FLAG)) {
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                 }
@@ -72,8 +72,8 @@ public class MantleEffectVicio extends MantleEffect {
     protected void tickClient(Player player) {
         super.tickClient(player);
 
-        if (player.isElytraFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.isFlying)) {
-            if (!Minecraft.getInstance().gameSettings.getPointOfView().func_243193_b()) {
+        if (player.isFallFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.flying)) {
+            if (!Minecraft.getInstance().options.getCameraType().isMirrored()) {
                 this.playCapeSparkles(player, 0.1F);
             } else {
                 this.playCapeSparkles(player, 0.7F);
@@ -87,8 +87,8 @@ public class MantleEffectVicio extends MantleEffect {
     @Override
     @OnlyIn(Dist.CLIENT)
     protected FXFacingParticle spawnFacingParticle(Player player, Vector3 at) {
-        if (player.isElytraFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.isFlying)) {
-            at.subtract(player.getMotion().mul(1.5, 1.5, 1.5));
+        if (player.isFallFlying() || (!(player.isCreative() || player.isSpectator()) && player.abilities.flying)) {
+            at.subtract(player.getDeltaMovement().mul(1.5, 1.5, 1.5));
         }
         return super.spawnFacingParticle(player, at);
     }
@@ -97,7 +97,7 @@ public class MantleEffectVicio extends MantleEffect {
         if (elytraStack.getItem() instanceof ItemMantle) {
             MantleEffect effect = ItemMantle.getEffect(wearingEntity, ConstellationsAS.vicio);
             PlayerProgress progress;
-            if (wearingEntity.getEntityWorld().isRemote()) {
+            if (wearingEntity.getCommandSenderWorld().isClientSide()) {
                 progress = ResearchHelper.getClientProgress();
             } else {
                 progress = ResearchHelper.getProgress(wearingEntity, LogicalSide.SERVER);

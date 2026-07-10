@@ -82,9 +82,9 @@ public class PktPerkGemModification extends ASPacket<PktPerkGemModification> {
     @Nonnull
     @Override
     public Handler<PktPerkGemModification> handler() {
-        return (packet, context, side) -> {
+        return (packet, context, direction) -> {
             context.enqueueWork(() -> {
-                PerkTree.PERK_TREE.getPerk(side, packet.perkKey).ifPresent(perk -> {
+                PerkTree.PERK_TREE.getPerk(direction, packet.perkKey).ifPresent(perk -> {
                     Player player = context.getSender();
                     if (!(perk instanceof GemSocketPerk)) { //Exclusively for socketable gem perks.
                         return;
@@ -124,7 +124,7 @@ public class PktPerkGemModification extends ASPacket<PktPerkGemModification> {
             if (socketItem.canBeInserted(toInsert, socketPerk, player, prog, LogicalSide.SERVER) &&
                     !socketPerk.hasItem(player, LogicalSide.SERVER) &&
                     socketPerk.setContainedItem(player, LogicalSide.SERVER, toInsert)) {
-                player.inventory.setInventorySlotContents(packet.slotId, ItemUtils.copyStackWithSize(stack, stack.getCount() - 1));
+                player.inventory.setItem(packet.slotId, ItemUtils.copyStackWithSize(stack, stack.getCount() - 1));
             }
         }
     }

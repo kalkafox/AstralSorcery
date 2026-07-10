@@ -72,19 +72,19 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public boolean matches(ItemEntity trigger, Level world, BlockPos at) {
-        List<Entity> otherEntities = getEntitiesInBlock(world, at);
+    public boolean matches(ItemEntity trigger, Level level, BlockPos at) {
+        List<Entity> otherEntities = getEntitiesInBlock(level, at);
         otherEntities.remove(trigger);
         return otherEntities.isEmpty();
     }
 
     @Override
-    public void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at) {
-        Random r = new Random(MathHelper.getPositionRandom(at));
-        if (!world.isRemote() && getAndIncrementCraftingTick(trigger) > 80 + r.nextInt(40)) {
+    public void doServerCraftTick(ItemEntity trigger, Level level, BlockPos at) {
+        Random r = new Random(Mth.getSeed(at));
+        if (!level.isClientSide() && getAndIncrementCraftingTick(trigger) > 80 + r.nextInt(40)) {
             ItemStack stack = trigger.getItem();
             CrystalAttributes attr = ((ItemCrystalBase) stack.getItem()).getAttributes(stack);
-            if (attr != null && world.setBlockState(at, Blocks.AIR.getDefaultState())) {
+            if (attr != null && level.setBlock(at, Blocks.AIR.defaultBlockState())) {
                 if (attr.getTotalTierLevel() >= ((ItemCrystalBase) stack.getItem()).getMaxPropertyTiers()) {
                     return;
                 }
@@ -92,7 +92,7 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
                 if (attr.getTotalTierLevel() >= ((ItemCrystalBase) stack.getItem()).getGeneratedPropertyTiers()) {
                     chance = 0.5F;
                 }
-                if (rand.nextFloat() < chance) {
+                if (random.nextFloat() < chance) {
                     attr = attr.modifyLevel(CrystalPropertiesAS.Properties.PROPERTY_SIZE, 1);
                     ((ItemCrystalBase) stack.getItem()).setAttributes(stack, attr);
                 }
@@ -102,7 +102,7 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at) {
+    public void doClientEffectTick(ItemEntity trigger, Level level, BlockPos at) {
         Color c = ColorsAS.DEFAULT_GENERIC_PARTICLE;
         if (trigger.getItem().getItem() instanceof ItemRockCrystal ||
                 trigger.getItem().getItem() instanceof ItemAttunedRockCrystal) {
@@ -110,20 +110,20 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
         }
         for (int i = 0; i < 3; i++) {
             Vector3 pos = Vector3.atEntityCenter(trigger);
-            MiscUtils.applyRandomOffset(pos, rand, 0.15F);
+            MiscUtils.applyRandomOffset(pos, random, 0.15F);
 
             Vector3 motion = Vector3.RotAxis.Y_AXIS.clone();
-            motion.rotate(Math.toRadians(10 + rand.nextInt(20)), Vector3.RotAxis.X_AXIS)
-                    .rotate(rand.nextFloat() * Math.PI * 2, Vector3.RotAxis.Y_AXIS)
-                    .normalize().multiply(0.07F + rand.nextFloat() * 0.04F);
+            motion.mirror(Math.toRadians(10 + random.nextInt(20)), Vector3.RotAxis.X_AXIS)
+                    .mirror(random.nextFloat() * Math.PI * 2, Vector3.RotAxis.Y_AXIS)
+                    .normalize().mul(0.07F + random.nextFloat() * 0.04F);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setMotion(motion)
-                    .setScaleMultiplier(0.05F + rand.nextFloat() * 0.2F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setDeltaMovement(motion)
+                    .setScaleMultiplier(0.05F + random.nextFloat() * 0.2F)
                     .color(VFXColorFunction.constant(c))
-                    .setMaxAge(30 + rand.nextInt(20));
+                    .setMaxAge(30 + random.nextInt(20));
         }
     }
 }

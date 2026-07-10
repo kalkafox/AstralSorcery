@@ -32,8 +32,8 @@ public class EffectUpgradeAltar extends AltarRecipeEffect {
     public void onTick(TileAltar altar, ActiveSimpleAltarRecipe.CraftingState state) {
         ParticleEngine mgr = Minecraft.getInstance().particles;
         if (state == ActiveSimpleAltarRecipe.CraftingState.ACTIVE &&
-                rand.nextInt(8) == 0) {
-            mgr.addBlockDestroyEffects(altar.getPos(), BlocksAS.MARBLE_RUNED.getDefaultState());
+                random.nextInt(8) == 0) {
+            mgr.addBlockDestroyEffects(altar.getBlockPos(), BlocksAS.MARBLE_RUNED.defaultBlockState());
         }
     }
 

@@ -38,9 +38,9 @@ public class PktClearBlockStorageStack extends ASPacket<PktClearBlockStorageStac
     @Nonnull
     @Override
     public Handler<PktClearBlockStorageStack> handler() {
-        return (packet, context, side) -> {
+        return (packet, context, direction) -> {
             context.enqueueWork(() -> {
-                if (side == LogicalSide.SERVER) {
+                if (direction == LogicalSide.SERVER) {
                     ItemBlockStorage.clearContainerFor(context.getSender());
                 }
             });

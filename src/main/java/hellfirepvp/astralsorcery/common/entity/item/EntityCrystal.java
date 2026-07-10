@@ -39,36 +39,36 @@ import net.neoforged.fml.network.NetworkHooks;
  */
 public class EntityCrystal extends EntityItemExplosionResistant implements InteractableEntity {
 
-    public EntityCrystal(EntityType<? extends ItemEntity> type, Level world) {
-        super(type, world);
+    public EntityCrystal(EntityType<? extends ItemEntity> type, Level level) {
+        super(type, level);
     }
 
-    public EntityCrystal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z) {
-        super(type, world, x, y, z);
+    public EntityCrystal(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z) {
+        super(type, level, x, y, z);
     }
 
-    public EntityCrystal(EntityType<? extends ItemEntity> type, Level world, double x, double y, double z, ItemStack stack) {
-        super(type, world, x, y, z, stack);
+    public EntityCrystal(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z, ItemStack stack) {
+        super(type, level, x, y, z, stack);
     }
 
     public static EntityType.IFactory<EntityCrystal> factoryCrystal() {
-        return (spawnEntity, world) -> new EntityCrystal(EntityTypesAS.ITEM_CRYSTAL, world);
+        return (spawnEntity, level) -> new EntityCrystal(EntityTypesAS.ITEM_CRYSTAL, level);
     }
 
     @Override
-    public boolean canBeCollidedWith() {
+    public boolean isPickable() {
         return true;
     }
 
     @Override
-    public boolean canBeAttackedWithItem() {
+    public boolean isAttackable() {
         return true;
     }
 
     @Override
-    public boolean hitByEntity(Entity entity) {
-        if (!this.getEntityWorld().isRemote() && entity instanceof ServerPlayer) {
-            ItemStack held = ((ServerPlayer) entity).getHeldItem(Hand.MAIN_HAND);
+    public boolean skipAttackInteraction(Entity entity) {
+        if (!this.getCommandSenderWorld().isClientSide() && entity instanceof ServerPlayer) {
+            ItemStack held = ((ServerPlayer) entity).getItemInHand(InteractionHand.MAIN_HAND);
             if (!held.isEmpty() && held.getItem() instanceof ItemChisel) {
 
                 ItemStack thisStack = this.getItem();
@@ -79,12 +79,12 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
 
                         //TODO chipping sound ?
                         boolean doDamage = false;
-                        if (rand.nextFloat() < 0.35F) {
+                        if (random.nextFloat() < 0.35F) {
                             int fortuneLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, held);
                             doDamage = this.splitCrystal(thisAttributes, fortuneLevel);
                         }
-                        if (doDamage || rand.nextFloat() < 0.35F) {
-                            held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(Hand.MAIN_HAND));
+                        if (doDamage || random.nextFloat() < 0.35F) {
+                            held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(InteractionHand.MAIN_HAND));
                         }
                     }
                 }
@@ -102,23 +102,23 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
         if (created.isEmpty()) {
             return false;
         }
-        int maxSplit = MathHelper.ceil(thisAttributes.getTotalTierLevel() / 2F);
+        int maxSplit = Mth.ceil(thisAttributes.getTotalTierLevel() / 2F);
         if (maxSplit >= thisAttributes.getTotalTierLevel()) {
             return false;
         }
 
         int lostModifiers = 0;
-        if (maxSplit > 1 && rand.nextFloat() < (0.6F / (fortuneLevel + 1))) {
+        if (maxSplit > 1 && random.nextFloat() < (0.6F / (fortuneLevel + 1))) {
             lostModifiers++;
-            if (maxSplit > 2 && rand.nextFloat() < (0.2F / (fortuneLevel + 1))) {
+            if (maxSplit > 2 && random.nextFloat() < (0.2F / (fortuneLevel + 1))) {
                 lostModifiers++;
             }
         }
 
         CrystalAttributes resultThisAttributes = thisAttributes;
-        CrystalAttributes.Builder resultSplitAttributes = CrystalAttributes.Builder.newBuilder(false);
+        CrystalAttributes.Builder resultSplitAttributes = CrystalAttributes.Builder.properties(false);
         for (int i = 0; i < maxSplit; i++) {
-            CrystalProperty prop = MiscUtils.getRandomEntry(resultThisAttributes.getProperties(), rand);
+            CrystalProperty prop = MiscUtils.getRandomEntry(resultThisAttributes.getProperties(), random);
             if (prop == null) {
                 break;
             }
@@ -132,7 +132,7 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
 
         ((ItemCrystalBase) this.getItem().getItem()).setAttributes(this.getItem(), resultThisAttributes);
         newBase.setAttributes(created, resultSplitAttributes.build());
-        ItemUtils.dropItemNaturally(getEntityWorld(), this.getPosX(), this.getPosY() + 0.25F, this.getPosZ(), created);
+        ItemUtils.dropItemNaturally(getCommandSenderWorld(), this.getX(), this.getY() + 0.25F, this.getZ(), created);
         return true;
     }
 
@@ -140,13 +140,13 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
     public void tick() {
         super.tick();
 
-        if (!world.isRemote() && this.age + 10 >= this.lifespan) {
+        if (!level.isClientSide() && this.age + 10 >= this.timeout) {
             this.age = 0;
         }
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

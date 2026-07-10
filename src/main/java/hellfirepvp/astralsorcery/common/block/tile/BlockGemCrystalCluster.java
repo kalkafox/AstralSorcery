@@ -51,11 +51,11 @@ import java.util.Locale;
  */
 public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomItemBlock {
 
-    private static final VoxelShape STAGE_0       = Block.makeCuboidShape(4, 0, 4, 12,  6, 12);
-    private static final VoxelShape STAGE_1       = Block.makeCuboidShape(4, 0, 4, 12,  8, 12);
-    private static final VoxelShape STAGE_2_SKY   = Block.makeCuboidShape(5, 0, 5, 11, 10, 11);
-    private static final VoxelShape STAGE_2_DAY   = Block.makeCuboidShape(4, 0, 4, 12, 10, 12);
-    private static final VoxelShape STAGE_2_NIGHT = Block.makeCuboidShape(5, 0, 5, 11,  8, 11);
+    private static final VoxelShape STAGE_0       = Block.box(4, 0, 4, 12,  6, 12);
+    private static final VoxelShape STAGE_1       = Block.box(4, 0, 4, 12,  8, 12);
+    private static final VoxelShape STAGE_2_SKY   = Block.box(5, 0, 5, 11, 10, 11);
+    private static final VoxelShape STAGE_2_DAY   = Block.box(4, 0, 4, 12, 10, 12);
+    private static final VoxelShape STAGE_2_NIGHT = Block.box(5, 0, 5, 11,  8, 11);
 
     public static final EnumProperty<GrowthStageType> STAGE = EnumProperty.create("stage", GrowthStageType.class);
 
@@ -65,7 +65,7 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
                 .harvestTool(ToolType.PICKAXE)
                 .harvestLevel(1)
                 .sound(SoundType.GLASS)
-                .setLightLevel((state) -> 6));
+                .isRedstoneConductor((state) -> 6));
     }
 
     @Override
@@ -74,14 +74,14 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(STAGE);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        Vec3 offset = state.getOffset(world, pos);
-        VoxelShape shape = VoxelShapes.fullCube();
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        Vec3 offset = state.getOffset(level, pos);
+        VoxelShape shape = Shapes.block();
         switch (state.get(STAGE)) {
             case STAGE_0:
                 shape = STAGE_0;
@@ -99,7 +99,7 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
                 shape = STAGE_2_NIGHT;
                 break;
         }
-        return shape.withOffset(offset.x, offset.y, offset.z);
+        return shape.offset(offset.x, offset.y, offset.z);
     }
 
     @Override
@@ -115,45 +115,45 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
     }*/
 
     @Override
-    public BlockState updatePostPlacement(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, world, pos)) {
-            return Blocks.AIR.getDefaultState();
+    public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
+        if (!this.isValidPosition(state, level, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader world, BlockPos pos) {
-        return hasSolidSideOnTop(world, pos.down());
+    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+        return hasSolidSideOnTop(level, pos.below());
     }
 
     @Override
-    public void onReplaced(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
         if (state.getBlock() != newState.getBlock()) {
-            super.onReplaced(state, world, pos, newState, isMoving);
+            super.onRemove(state, level, pos, newState, isMoving);
 
             PktPlayEffect effect = new PktPlayEffect(PktPlayEffect.Type.GEM_CRYSTAL_BREAK)
                     .addData(buf -> {
-                        ByteBufUtils.writeVector(buf, new Vector3(pos).add(state.getOffset(world, pos)));
+                        ByteBufUtils.writeVector(buf, new Vector3(pos).add(state.getOffset(level, pos)));
                         buf.writeInt(state.get(STAGE).ordinal());
                     });
-            PacketChannel.CHANNEL.sendToAllAround(effect, PacketChannel.pointFromPos(world, pos, 32));
+            PacketChannel.CHANNEL.sendToAllAround(effect, PacketChannel.pointFromPos(level, pos, 32));
         }
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter world) {
+    public BlockEntity newBlockEntity(BlockGetter level) {
         return new TileGemCrystals();
     }
 
@@ -182,15 +182,15 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
             return growthStage;
         }
 
-        public GrowthStageType grow(Level world) {
+        public GrowthStageType grow(Level level) {
             if (this == STAGE_0) {
                 return STAGE_1;
             }
             if (this == STAGE_1) {
-                if (DayTimeHelper.isDay(world)) {
+                if (DayTimeHelper.isDay(level)) {
                     return STAGE_2_DAY;
                 }
-                if (DayTimeHelper.isNight(world)) {
+                if (DayTimeHelper.isNight(level)) {
                     return STAGE_2_NIGHT;
                 }
                 return STAGE_2_SKY;

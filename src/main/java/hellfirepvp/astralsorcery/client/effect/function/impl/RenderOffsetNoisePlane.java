@@ -91,8 +91,8 @@ public class RenderOffsetNoisePlane implements VFXRenderOffsetFunction<EntityVis
     }
 
     private Vector3 interpolateRotation(double partial, Vector3 vZero, Vector3 vOne) {
-        double v = (20 * MathHelper.clamp(partial, 0, 1)) - 10;
-        v = MathHelper.clamp(((Math.atan(v) / 2.9423D) + 0.5D), 0, 1);
+        double v = (20 * Mth.clamp(partial, 0, 1)) - 10;
+        v = Mth.clamp(((Math.atan(v) / 2.9423D) + 0.5D), 0, 1);
         return getInterpolatedVectorRotation((float) v, vZero, vOne);
     }
 
@@ -111,8 +111,8 @@ public class RenderOffsetNoisePlane implements VFXRenderOffsetFunction<EntityVis
             return interpolatedPos;
         }
         Vector3 angle = getCurrentRotationDegree(pTicks);
-        Vector3 v = angle.clone().perpendicular().normalize().multiply(data.initialDistance);
-        v.rotate(Math.toRadians(data.degreeRotation), angle);
+        Vector3 v = angle.clone().perpendicular().normalize().mul(data.initialDistance);
+        v.mirror(Math.toRadians(data.degreeRotation), angle);
         return interpolatedPos.add(v);
     }
 

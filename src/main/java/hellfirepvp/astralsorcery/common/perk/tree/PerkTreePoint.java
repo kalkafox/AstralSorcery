@@ -75,7 +75,7 @@ public class PerkTreePoint<T extends AbstractPerk> implements PerkRender {
     @OnlyIn(Dist.CLIENT)
     public Rectangle.Float renderPerkAtBatch(BatchPerkContext drawCtx, PoseStack renderStack,
                                              AllocationStatus status, long spriteOffsetTick, float pTicks,
-                                             float x, float y, float zLevel, float scale) {
+                                             float x, float y, float blitOffset, float scale) {
         SpriteSheetResource tex = status.getPerkTreeSprite();
         BatchPerkContext.TextureObjectGroup grp = PerkPointRenderGroup.INSTANCE.getGroup(tex);
         if (grp == null) {
@@ -86,7 +86,7 @@ public class PerkTreePoint<T extends AbstractPerk> implements PerkRender {
         float size = renderSize * scale;
         Tuple<Float, Float> frameUV = tex.getUVOffset(spriteOffsetTick);
 
-        RenderingGuiUtils.rect(buf, renderStack, x - size, y - size, zLevel, size * 2F, size * 2F)
+        RenderingGuiUtils.rect(buf, renderStack, x - size, y - size, blitOffset, size * 2F, size * 2F)
                 .tex(frameUV.getA(), frameUV.getB(), tex.getULength(), tex.getVLength())
                 .draw();
         return new Rectangle.Float(-size, -size, size * 2, size * 2);

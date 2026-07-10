@@ -52,8 +52,8 @@ public class StorageNetworkBuffer extends GlobalWorldData {
         this.availableNetworks.clear();
 
         for (StorageNetwork network : this.rawNetworks.values()) {
-            for (StorageNetwork.CoreArea core : network.getCores()) {
-                AABB box = core.getRealBox();
+            for (StorageNetwork.CoreArea insideCube : network.getCores()) {
+                AABB box = insideCube.getRealBox();
                 ChunkPos from = Vector3.getMin(box).toChunkPos();
                 ChunkPos to   = Vector3.getMax(box).toChunkPos();
 
@@ -69,21 +69,21 @@ public class StorageNetworkBuffer extends GlobalWorldData {
     }
 
     @Override
-    public void writeToNBT(CompoundTag compound) {
+    public void save(CompoundTag pattern) {
         ListTag networks = new ListTag();
         for (StorageNetwork network : this.rawNetworks.values()) {
             CompoundTag tag = new CompoundTag();
-            network.writeToNBT(tag);
+            network.save(tag);
             networks.add(tag);
         }
-        compound.put("networks", networks);
+        pattern.put("networks", networks);
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {
+    public void readFromNBT(CompoundTag pattern) {
         this.rawNetworks.clear();
 
-        ListTag networks = compound.getList("networks", Constants.NBT.TAG_COMPOUND);
+        ListTag networks = pattern.getList("networks", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < networks.size(); i++) {
             CompoundTag tag = networks.getCompound(i);
             StorageNetwork net = new StorageNetwork();
@@ -93,15 +93,15 @@ public class StorageNetworkBuffer extends GlobalWorldData {
             }
             StorageNetwork.CoreArea master = net.getMaster();
             if (master == null) {
-                master = MiscUtils.getRandomEntry(net.getCores(), rand);
+                master = MiscUtils.getRandomEntry(net.getCores(), random);
             }
-            this.rawNetworks.put(master.getPos(), net);
+            this.rawNetworks.put(master.getBlockPos(), net);
         }
 
         this.rebuildAccessContext();
     }
 
     @Override
-    public void updateTick(Level world) {}
+    public void updateTick(Level level) {}
 
 }

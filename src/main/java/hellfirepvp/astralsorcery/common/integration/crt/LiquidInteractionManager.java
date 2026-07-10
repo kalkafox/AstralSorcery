@@ -37,7 +37,7 @@ public class LiquidInteractionManager implements IRecipeManager {
     @ZenCodeType.Method
     public void addRecipe(String name, IItemStack output, IFluidStack reactant1, float chanceConsumeReactant1, IFluidStack reactant2, float chanceConsumeReactant2, int weight) {
         name = fixRecipeName(name);
-        ResourceLocation recipeId = new ResourceLocation(name);
+        ResourceLocation recipeId = ResourceLocation.parse(name);
         LiquidInteraction recipe = new LiquidInteraction(recipeId, reactant1.getInternal(), chanceConsumeReactant1, reactant2.getInternal(), chanceConsumeReactant2, weight, ResultDropItem.dropItem(output.getInternal()));
         CraftTweakerAPI.apply(new ActionAddRecipe(this, recipe, "Drop Item"));
     }
@@ -45,7 +45,7 @@ public class LiquidInteractionManager implements IRecipeManager {
     @ZenCodeType.Method
     public void addRecipe(String name, MCEntityType output, IFluidStack reactant1, float chanceConsumeReactant1, IFluidStack reactant2, float chanceConsumeReactant2, int weight) {
         name = fixRecipeName(name);
-        ResourceLocation recipeId = new ResourceLocation(name);
+        ResourceLocation recipeId = ResourceLocation.parse(name);
         LiquidInteraction recipe = new LiquidInteraction(recipeId, reactant1.getInternal(), chanceConsumeReactant1, reactant2.getInternal(), chanceConsumeReactant2, weight, ResultSpawnEntity.spawnEntity(output.getInternal()));
         CraftTweakerAPI.apply(new ActionAddRecipe(this, recipe, "Spawn Entity"));
     }
@@ -54,7 +54,7 @@ public class LiquidInteractionManager implements IRecipeManager {
     public void removeRecipe(IItemStack output) {
         CraftTweakerAPI.apply(new ActionRemoveRecipe(this, iRecipe -> {
             LiquidInteraction recipe = (LiquidInteraction) iRecipe;
-            InteractionResult result = recipe.getResult();
+            InteractionResult result = recipe.getObject();
             if(result instanceof ResultDropItem) {
                 ResultDropItem resultDropItem = (ResultDropItem) result;
                 return output.matches(new MCItemStackMutable(resultDropItem.getOutput()));
@@ -67,10 +67,10 @@ public class LiquidInteractionManager implements IRecipeManager {
     public void removeRecipe(MCEntityType entityType) {
         CraftTweakerAPI.apply(new ActionRemoveRecipe(this, iRecipe -> {
             LiquidInteraction recipe = (LiquidInteraction) iRecipe;
-            InteractionResult result = recipe.getResult();
+            InteractionResult result = recipe.getObject();
             if(result instanceof ResultSpawnEntity) {
                 ResultSpawnEntity resultSpawnEntity = (ResultSpawnEntity) result;
-                return entityType.getInternal() == resultSpawnEntity.getEntityType();
+                return entityType.getInternal() == resultSpawnEntity.getType();
             }
             return false;
         }).describeDefaultRemoval(entityType));

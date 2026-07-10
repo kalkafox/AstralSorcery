@@ -45,11 +45,11 @@ import java.util.Random;
  */
 public class EntityShootingStar extends ThrowableProjectile {
 
-    private static final EntityDataAccessor<Long> EFFECT_SEED = EntityDataManager.createKey(EntityShootingStar.class, ASDataSerializers.LONG);
+    private static final EntityDataAccessor<Long> EFFECT_SEED = SynchedEntityData.createKey(EntityShootingStar.class, ASDataSerializers.LONG);
 
     protected EntityShootingStar(Level worldIn) {
         super(EntityTypesAS.SHOOTING_STAR, worldIn);
-        this.dataManager.set(EFFECT_SEED, rand.nextLong());
+        this.entityData.set(EFFECT_SEED, random.nextLong());
     }
 
     protected EntityShootingStar(double x, double y, double z, Level worldIn) {
@@ -58,16 +58,16 @@ public class EntityShootingStar extends ThrowableProjectile {
     }
 
     public static EntityType.IFactory<EntityShootingStar> factory() {
-        return (type, world) -> new EntityShootingStar(world);
+        return (type, level) -> new EntityShootingStar(level);
     }
 
     @Override
-    protected void registerData() {
-        this.dataManager.register(EFFECT_SEED, 0L);
+    protected void defineSynchedData() {
+        this.entityData.register(EFFECT_SEED, 0L);
     }
 
     public long getEffectSeed() {
-        return this.dataManager.get(EFFECT_SEED);
+        return this.entityData.get(EFFECT_SEED);
     }
 
     @Override
@@ -76,15 +76,15 @@ public class EntityShootingStar extends ThrowableProjectile {
 
         super.tick();
 
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             spawnEffects();
         }
     }
 
     private void adjustMotion() {
-        Vec3 motion = getMotion();
+        Vec3 motion = getDeltaMovement();
         double y = Math.min(-0.7F, motion.getY());
-        setMotion(new Vec3(motion.getX(), y, motion.getZ()));
+        setDeltaMovement(new Vec3(motion.getX(), y, motion.getZ()));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -100,7 +100,7 @@ public class EntityShootingStar extends ThrowableProjectile {
             if (v.length() <= maxRenderPosDist) {
                 return iPos;
             }
-            return Vector3.atEntityCorner(pl).add(v.normalize().multiply(maxRenderPosDist));
+            return Vector3.atEntityCorner(pl).add(v.normalize().mul(maxRenderPosDist));
         };
         VFXScaleFunction<EntityVisualFX> scaleFn = (fx, scaleIn, pTicks) -> {
             Player pl = Minecraft.getInstance().player;
@@ -114,25 +114,25 @@ public class EntityShootingStar extends ThrowableProjectile {
 
         Vector3 thisPosition = Vector3.atEntityCorner(this);
         for (int i = 0; i < 4; i++) {
-            if (rand.nextFloat() > 0.75F) continue;
-            Vector3 dir = new Vector3(this.getMotion()).clone().multiply(rand.nextFloat() * -0.6F);
-            dir.setX(dir.getX() + rand.nextFloat() * 0.008 * (rand.nextBoolean() ? 1 : -1));
-            dir.setZ(dir.getZ() + rand.nextFloat() * 0.008 * (rand.nextBoolean() ? 1 : -1));
+            if (random.nextFloat() > 0.75F) continue;
+            Vector3 dir = new Vector3(this.getDeltaMovement()).clone().mul(random.nextFloat() * -0.6F);
+            dir.setX(dir.getX() + random.nextFloat() * 0.008 * (random.nextBoolean() ? 1 : -1));
+            dir.setZ(dir.getZ() + random.nextFloat() * 0.008 * (random.nextBoolean() ? 1 : -1));
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(thisPosition)
                     .color(VFXColorFunction.WHITE)
-                    .setMotion(dir)
+                    .setDeltaMovement(dir)
                     .setAlphaMultiplier(0.85F)
-                    .setScaleMultiplier(1.2F + rand.nextFloat() * 0.5F)
+                    .setScaleMultiplier(1.2F + random.nextFloat() * 0.5F)
                     .scale(VFXScaleFunction.SHRINK.andThen(scaleFn))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .renderOffset(renderFn)
-                    .setMaxAge(90 + rand.nextInt(40));
+                    .setMaxAge(90 + random.nextInt(40));
         }
 
-        float scale = 4F + rand.nextFloat() * 3F;
-        int age = 5 + rand.nextInt(2);
+        float scale = 4F + random.nextFloat() * 3F;
+        int age = 5 + random.nextInt(2);
         Random effectSeed = new Random(this.getEffectSeed());
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
@@ -141,7 +141,7 @@ public class EntityShootingStar extends ThrowableProjectile {
                 .setScaleMultiplier(scale)
                 .scale(VFXScaleFunction.SHRINK.andThen(scaleFn))
                 .renderOffset(renderFn)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .setMaxAge(age);
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(thisPosition)
@@ -149,18 +149,18 @@ public class EntityShootingStar extends ThrowableProjectile {
                 .setScaleMultiplier(scale * 0.6F)
                 .scale(VFXScaleFunction.SHRINK.andThen(scaleFn))
                 .renderOffset(renderFn)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .setMaxAge(Math.round(age * 1.5F));
     }
 
     @Override
     public void setPosition(double x, double y, double z) {
-        int chunkX = MathHelper.floor(this.getPosX() / 16.0D);
-        int chunkZ = MathHelper.floor(this.getPosZ() / 16.0D);
-        int newChunkX = MathHelper.floor(x / 16.0D);
-        int newChunkZ = MathHelper.floor(z / 16.0D);
+        int chunkX = Mth.floor(this.getX() / 16.0D);
+        int chunkZ = Mth.floor(this.getZ() / 16.0D);
+        int newChunkX = Mth.floor(x / 16.0D);
+        int newChunkZ = Mth.floor(z / 16.0D);
         if (chunkX != newChunkX || chunkZ != newChunkZ) {
-            if (!this.getEntityWorld().chunkExists(newChunkX, newChunkZ)) {
+            if (!this.getCommandSenderWorld().hasChunk(newChunkX, newChunkZ)) {
                 this.remove();
                 return;
             }
@@ -169,7 +169,7 @@ public class EntityShootingStar extends ThrowableProjectile {
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

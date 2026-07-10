@@ -86,7 +86,7 @@ public class ProgressGatedPerk extends AbstractPerk {
     public boolean addLocalizedTooltip(Collection<MutableComponent> tooltip) {
         if (!canSeeClient()) {
             tooltip.add(Component.translatable("perk.info.astralsorcery.missing_progress")
-                    .withStyle(TextFormatting.RED));
+                    .withStyle(ChatFormatting.RED));
             return false;
         }
         return super.addLocalizedTooltip(tooltip);
@@ -97,8 +97,8 @@ public class ProgressGatedPerk extends AbstractPerk {
         return canSee(Minecraft.getInstance().player, LogicalSide.CLIENT);
     }
 
-    public final boolean canSee(Player player, LogicalSide side) {
-        PlayerProgress prog = ResearchHelper.getProgress(player, side);
+    public final boolean canSee(Player player, LogicalSide direction) {
+        PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.isValid()) {
             return this.canSee(player, prog);
         }
@@ -117,12 +117,12 @@ public class ProgressGatedPerk extends AbstractPerk {
         this.neededResearch.clear();
         this.neededProgression.clear();
 
-        if (JSONUtils.hasField(perkData, "neededConstellations")) {
-            JsonArray array = JSONUtils.getJsonArray(perkData, "neededConstellations");
+        if (GsonHelper.convertToInt(perkData, "neededConstellations")) {
+            JsonArray array = GsonHelper.getAsJsonArray(perkData, "neededConstellations");
             for (int i = 0; i < array.size(); i++) {
                 JsonElement el = array.get(i);
-                String key = JSONUtils.getString(el, String.format("neededConstellations[%s]", i));
-                IConstellation cst = ConstellationRegistry.getConstellation(new ResourceLocation(key));
+                String key = GsonHelper.getString(el, String.format("neededConstellations[%s]", i));
+                IConstellation cst = ConstellationRegistry.getConstellation(ResourceLocation.parse(key));
                 if (cst == null) {
                     throw new JsonParseException("Unknown constellation: " + key);
                 }
@@ -130,11 +130,11 @@ public class ProgressGatedPerk extends AbstractPerk {
             }
         }
 
-        if (JSONUtils.hasField(perkData, "neededResearch")) {
-            JsonArray array = JSONUtils.getJsonArray(perkData, "neededResearch");
+        if (GsonHelper.convertToInt(perkData, "neededResearch")) {
+            JsonArray array = GsonHelper.getAsJsonArray(perkData, "neededResearch");
             for (int i = 0; i < array.size(); i++) {
                 JsonElement el = array.get(i);
-                String key = JSONUtils.getString(el, String.format("neededResearch[%s]", i));
+                String key = GsonHelper.getString(el, String.format("neededResearch[%s]", i));
                 try {
                     this.addRequireProgress(ResearchProgression.valueOf(key));
                 } catch (Exception exc) {
@@ -143,11 +143,11 @@ public class ProgressGatedPerk extends AbstractPerk {
             }
         }
 
-        if (JSONUtils.hasField(perkData, "neededProgression")) {
-            JsonArray array = JSONUtils.getJsonArray(perkData, "neededProgression");
+        if (GsonHelper.convertToInt(perkData, "neededProgression")) {
+            JsonArray array = GsonHelper.getAsJsonArray(perkData, "neededProgression");
             for (int i = 0; i < array.size(); i++) {
                 JsonElement el = array.get(i);
-                String key = JSONUtils.getString(el, String.format("neededProgression[%s]", i));
+                String key = GsonHelper.getString(el, String.format("neededProgression[%s]", i));
                 try {
                     this.addRequireTier(ProgressionTier.valueOf(key));
                 } catch (Exception exc) {

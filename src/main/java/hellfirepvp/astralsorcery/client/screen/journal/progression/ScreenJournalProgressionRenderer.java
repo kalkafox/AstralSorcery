@@ -117,9 +117,9 @@ public class ScreenJournalProgressionRenderer {
         }
     }
 
-    public void updateOffset(int guiLeft, int guiTop) {
-        this.realCoordLowerX = guiLeft;
-        this.realCoordLowerY = guiTop;
+    public void updateOffset(int leftPos, int topPos) {
+        this.realCoordLowerX = leftPos;
+        this.realCoordLowerY = topPos;
     }
 
     public void centerMouse() {
@@ -140,10 +140,10 @@ public class ScreenJournalProgressionRenderer {
     }
 
     //Nothing to actually click here, we redirect if we can.
-    public boolean propagateClick(float mouseX, float mouseY) {
+    public boolean propagateClick(float xpos, float ypos) {
         if (clusterRenderer != null) {
             if (sizeHandler.getScalingFactor() > 6) {
-                if (clusterRenderer.propagateClick(parentGui, mouseX, mouseY)) {
+                if (clusterRenderer.propagateClick(parentGui, xpos, ypos)) {
                     return true;
                 }
             }
@@ -154,7 +154,7 @@ public class ScreenJournalProgressionRenderer {
                 if (current - this.doubleClickLast < 400L) {
                     int timeout = 500; //Handles irregular clicks on the GUI so it doesn't loop trying to find a focus cluster
                     while (focusedClusterMouse != null && sizeHandler.getScalingFactor() < 9.9 && timeout > 0) {
-                        handleZoomIn(mouseX, mouseY);
+                        handleZoomIn(xpos, ypos);
                         timeout--;
                     }
                     this.doubleClickLast = 0L;
@@ -166,9 +166,9 @@ public class ScreenJournalProgressionRenderer {
         return false;
     }
 
-    public void drawMouseHighlight(PoseStack renderStack, float zLevel, int mouseX, int mouseY) {
+    public void drawMouseHighlight(PoseStack renderStack, float blitOffset, int xpos, int ypos) {
         if (clusterRenderer != null && sizeHandler.getScalingFactor() > 6) {
-            clusterRenderer.drawMouseHighlight(renderStack, zLevel, mouseX, mouseY);
+            clusterRenderer.drawMouseHighlight(renderStack, blitOffset, xpos, ypos);
         }
     }
 
@@ -194,12 +194,12 @@ public class ScreenJournalProgressionRenderer {
      * 4.0 - 6.0 has to have focus + centering to center of cluster
      * 6.0 - 10.0 transition (6.0 - 8.0) + cluster rendering + handling (cursor movement)
      */
-    public void handleZoomIn(float mouseX, float mouseY) {
+    public void handleZoomIn(float xpos, float ypos) {
         float scale = sizeHandler.getScalingFactor();
         //double nextScale = Math.min(10.0D, scale + 0.2D);
         if (scale >= 4.0F) {
             if (focusedClusterZoom == null) {
-                ResearchProgression prog = tryFocusCluster(mouseX, mouseY);
+                ResearchProgression prog = tryFocusCluster(xpos, ypos);
                 if (prog != null) {
                     focus(prog);
                 }
@@ -252,23 +252,23 @@ public class ScreenJournalProgressionRenderer {
         updateMouseState();
     }
 
-    public void drawProgressionPart(PoseStack renderStack, float zLevel, int mouseX, int mouseY) {
-        drawBackground(renderStack, zLevel);
+    public void drawProgressionPart(PoseStack renderStack, float blitOffset, int xpos, int ypos) {
+        drawBackground(renderStack, blitOffset);
 
-        drawClusters(renderStack, zLevel);
+        drawClusters(renderStack, blitOffset);
 
-        focusedClusterMouse = tryFocusCluster(mouseX, mouseY);
+        focusedClusterMouse = tryFocusCluster(xpos, ypos);
 
-        float scaleX = this.mousePointScaled.getPosX();
-        float scaleY = this.mousePointScaled.getPosY();
+        float scaleX = this.mousePointScaled.getX();
+        float scaleY = this.mousePointScaled.getY();
 
         if (sizeHandler.getScalingFactor() >= 6.1D && focusedClusterZoom != null && clusterRenderer != null) {
             JournalCluster cluster = JournalProgressionClusterMapping.getClusterMapping(focusedClusterZoom);
-            drawClusterBackground(renderStack, cluster.clusterBackgroundTexture, zLevel);
+            drawClusterBackground(renderStack, cluster.clusterBackgroundTexture, blitOffset);
 
-            clusterRenderer.drawClusterScreen(renderStack, this.parentGui, zLevel);
-            scaleX = clusterRenderer.getMouseX();
-            scaleY = clusterRenderer.getMouseY();
+            clusterRenderer.drawClusterScreen(renderStack, this.parentGui, blitOffset);
+            scaleX = clusterRenderer.xpos();
+            scaleY = clusterRenderer.ypos();
         }
 
         if (focusedClusterMouse != null) {
@@ -286,48 +286,48 @@ public class ScreenJournalProgressionRenderer {
             }
 
             FormattedText name = focusedClusterMouse.getName();
-            float length = Minecraft.getInstance().fontRenderer.getStringPropertyWidth(name) * 1.4F;
+            float length = Minecraft.getInstance().font.getStringPropertyWidth(name) * 1.4F;
             int alpha = 0xCC;
             alpha *= br;
             alpha = Math.max(alpha, 5);
             int color = 0x5A28FF | (alpha << 24);
 
-            renderStack.push();
+            renderStack.pushPose();
             renderStack.translate(offset.x + (width / 2F) - length / 2D, offset.y + (height / 3F), 0);
             renderStack.scale(1.4F, 1.4F, 1F);
             RenderingDrawUtils.renderStringAt(name, renderStack, null, color, true);
-            renderStack.pop();
+            renderStack.popPose();
         }
 
-        drawStarParallaxLayers(renderStack, scaleX, scaleY, zLevel);
+        drawStarParallaxLayers(renderStack, scaleX, scaleY, blitOffset);
     }
 
     @Nullable
-    private ResearchProgression tryFocusCluster(double mouseX, double mouseY) {
+    private ResearchProgression tryFocusCluster(double xpos, double ypos) {
         for (Rectangle r : this.clusterRectMap.keySet()) {
-            if (r.contains(mouseX, mouseY)) {
+            if (r.contains(xpos, ypos)) {
                 return this.clusterRectMap.get(r);
             }
         }
         return null;
     }
 
-    private void drawClusters(PoseStack renderStack, float zLevel) {
+    private void drawClusters(PoseStack renderStack, float blitOffset) {
         clusterRectMap.clear();
         if (sizeHandler.getScalingFactor() >= 8.01) return;
 
         PlayerProgress thisProgress = ResearchHelper.getClientProgress();
         for (ResearchProgression progress : thisProgress.getResearchProgression()) {
-            renderCluster(renderStack, progress, JournalProgressionClusterMapping.getClusterMapping(progress), zLevel);
+            renderCluster(renderStack, progress, JournalProgressionClusterMapping.getClusterMapping(progress), blitOffset);
         }
     }
 
-    private void renderCluster(PoseStack renderStack, ResearchProgression p, JournalCluster cluster, float zLevel) {
+    private void renderCluster(PoseStack renderStack, ResearchProgression p, JournalCluster cluster, float blitOffset) {
         Point.Float pCluster = this.sizeHandler.scalePointToGui(this.parentGui, this.mousePointScaled, new Point.Float(cluster.x, cluster.y));
         float width  = this.sizeHandler.scaledDistanceX(cluster.x, cluster.maxX);
         float height = this.sizeHandler.scaledDistanceY(cluster.y, cluster.maxY);
 
-        Rectangle r = new Rectangle(MathHelper.floor(pCluster.x), MathHelper.floor(pCluster.y), MathHelper.floor(width), MathHelper.floor(height));
+        Rectangle r = new Rectangle(Mth.floor(pCluster.x), Mth.floor(pCluster.y), Mth.floor(width), Mth.floor(height));
         clusterRectMap.put(r, p);
 
         cluster.cloudTexture.bindTexture();
@@ -344,19 +344,19 @@ public class ScreenJournalProgressionRenderer {
 
         RenderSystem.enableBlend();
         Blending.ADDITIVEDARK.apply();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            Matrix4f offset = renderStack.getLast().getMatrix();
-            buf.pos(offset, pCluster.x + 0,     pCluster.y + height, zLevel).color(br, br, br, br).tex(0, 1).endVertex();
-            buf.pos(offset, pCluster.x + width, pCluster.y + height, zLevel).color(br, br, br, br).tex(1, 1).endVertex();
-            buf.pos(offset, pCluster.x + width, pCluster.y + 0,      zLevel).color(br, br, br, br).tex(1, 0).endVertex();
-            buf.pos(offset, pCluster.x + 0,     pCluster.y + 0,      zLevel).color(br, br, br, br).tex(0, 0).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            Matrix4f offset = renderStack.last().pose();
+            buf.vertex(offset, pCluster.x + 0,     pCluster.y + height, blitOffset).color(br, br, br, br).tex(0, 1).endVertex();
+            buf.vertex(offset, pCluster.x + width, pCluster.y + height, blitOffset).color(br, br, br, br).tex(1, 1).endVertex();
+            buf.vertex(offset, pCluster.x + width, pCluster.y + 0,      blitOffset).color(br, br, br, br).tex(1, 0).endVertex();
+            buf.vertex(offset, pCluster.x + 0,     pCluster.y + 0,      blitOffset).color(br, br, br, br).tex(0, 0).endVertex();
         });
 
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
     }
 
-    private void drawClusterBackground(PoseStack renderStack, AbstractRenderableTexture tex, float zLevel) {
+    private void drawClusterBackground(PoseStack renderStack, AbstractRenderableTexture tex, float blitOffset) {
         float scale = sizeHandler.getScalingFactor();
         float br;
         if (scale > 8.01F) {
@@ -371,31 +371,31 @@ public class ScreenJournalProgressionRenderer {
         RenderSystem.enableBlend();
         Blending.ADDITIVEDARK.apply();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            Matrix4f offset = renderStack.getLast().getMatrix();
-            buf.pos(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, zLevel).color(br, br, br, br).tex(0, 1).endVertex();
-            buf.pos(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, zLevel).color(br, br, br, br).tex(1, 1).endVertex();
-            buf.pos(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    zLevel).color(br, br, br, br).tex(1, 0).endVertex();
-            buf.pos(offset, realCoordLowerX,                   realCoordLowerY,                    zLevel).color(br, br, br, br).tex(0, 0).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            Matrix4f offset = renderStack.last().pose();
+            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, br).tex(0, 1).endVertex();
+            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, br).tex(1, 1).endVertex();
+            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    blitOffset).color(br, br, br, br).tex(1, 0).endVertex();
+            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY,                    blitOffset).color(br, br, br, br).tex(0, 0).endVertex();
         });
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
     }
 
-    private void drawBackground(PoseStack renderStack, float zLevel) {
+    private void drawBackground(PoseStack renderStack, float blitOffset) {
         float br = 0.35F;
         TexturesAS.TEX_GUI_BACKGROUND_DEFAULT.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            Matrix4f offset = renderStack.getLast().getMatrix();
-            buf.pos(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, zLevel).color(br, br, br, 1.0F).tex(0, 1).endVertex();
-            buf.pos(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, zLevel).color(br, br, br, 1.0F).tex(1, 1).endVertex();
-            buf.pos(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    zLevel).color(br, br, br, 1.0F).tex(1, 0).endVertex();
-            buf.pos(offset, realCoordLowerX,                   realCoordLowerY,                    zLevel).color(br, br, br, 1.0F).tex(0, 0).endVertex();
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            Matrix4f offset = renderStack.last().pose();
+            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, 1.0F).tex(0, 1).endVertex();
+            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, 1.0F).tex(1, 1).endVertex();
+            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    blitOffset).color(br, br, br, 1.0F).tex(1, 0).endVertex();
+            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY,                    blitOffset).color(br, br, br, 1.0F).tex(0, 0).endVertex();
         });
     }
 
-    private void drawStarParallaxLayers(PoseStack renderStack, float scalePosX, float scalePosY, float zLevel) {
+    private void drawStarParallaxLayers(PoseStack renderStack, float scalePosX, float scalePosY, float blitOffset) {
         TexturesAS.TEX_GUI_STARFIELD_OVERLAY.bindTexture();
         RenderSystem.enableBlend();
         Blending.OVERLAYDARK.apply();
@@ -403,20 +403,20 @@ public class ScreenJournalProgressionRenderer {
         float offsetX = scalePosX / 2000F;
         float offsetY = scalePosY / 1000F;
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
-            drawStarOverlay(buf, renderStack, zLevel, offsetX, offsetY, 2F);
-            drawStarOverlay(buf, renderStack, zLevel, offsetX, offsetY, 1.5F);
-            drawStarOverlay(buf, renderStack, zLevel, offsetX, offsetY, 1F);
-            drawStarOverlay(buf, renderStack, zLevel, offsetX, offsetY, 0.75F);
-            drawStarOverlay(buf, renderStack, zLevel, offsetX, offsetY, 0.5F);
-            drawStarOverlay(buf, renderStack, zLevel, offsetX, offsetY, 0.3F);
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 2F);
+            drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 1.5F);
+            drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 1F);
+            drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 0.75F);
+            drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 0.5F);
+            drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 0.3F);
         });
 
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
     }
 
-    private void drawStarOverlay(VertexConsumer buf, PoseStack renderStack, float zLevel, float scalePosX, float scalePosY, float scaleFactor) {
+    private void drawStarOverlay(VertexConsumer buf, PoseStack renderStack, float blitOffset, float scalePosX, float scalePosY, float scaleFactor) {
         float scale = this.sizeHandler.getScalingFactor() / 40F;
 
         float x      = this.parentGui.getGuiLeft();
@@ -433,14 +433,14 @@ public class ScreenJournalProgressionRenderer {
             return;
         }
 
-        Matrix4f offset = renderStack.getLast().getMatrix();
-        buf.pos(offset, x, y + height, zLevel)
+        Matrix4f offset = renderStack.last().pose();
+        buf.vertex(offset, x, y + height, blitOffset)
                 .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u,  v + vL).endVertex();
-        buf.pos(offset, x + width, y + height, zLevel)
+        buf.vertex(offset, x + width, y + height, blitOffset)
                 .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u + uL, v + vL).endVertex();
-        buf.pos(offset, x + width, y, zLevel)
+        buf.vertex(offset, x + width, y, blitOffset)
                 .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u + uL, v).endVertex();
-        buf.pos(offset, x, y, zLevel)
+        buf.vertex(offset, x, y, blitOffset)
                 .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u, v).endVertex();
     }
 }

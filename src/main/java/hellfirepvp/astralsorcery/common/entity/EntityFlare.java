@@ -56,7 +56,7 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 22.02.2020 / 08:23
  */
-public class EntityFlare extends FlyingEntity {
+public class EntityFlare extends FlyingMob {
 
     private static final int RANDOM_WANDER_RANGE = 31;
 
@@ -73,26 +73,26 @@ public class EntityFlare extends FlyingEntity {
     }
 
     public static EntityType.IFactory<EntityFlare> factory() {
-        return (type, world) -> new EntityFlare(world);
+        return (type, level) -> new EntityFlare(level);
     }
 
-    public static AttributeModifierMap.MutableAttribute createAttributes() {
-        return MobEntity.func_233666_p_()
+    public static AttributeSupplier.MutableAttribute createAttributes() {
+        return Mob.createMobAttributes()
                 .createMutableAttribute(Attributes.MAX_HEALTH, 1);
     }
 
-    public static void spawnAmbientFlare(Level world, BlockPos at) {
-        if (world.isRemote() || EntityConfig.CONFIG.flareAmbientSpawnChance.get() <= 0) {
+    public static void spawnAmbientFlare(Level level, BlockPos at) {
+        if (level.isClientSide() || EntityConfig.CONFIG.flareAmbientSpawnChance.get() <= 0) {
             return;
         }
-        float nightPercent = DayTimeHelper.getCurrentDaytimeDistribution(world);
-        if (world.rand.nextInt(EntityConfig.CONFIG.flareAmbientSpawnChance.get()) == 0 && world.rand.nextFloat() < nightPercent) {
-            MiscUtils.executeWithChunk(world, at, () -> {
-                if (world.isAirBlock(at)) {
-                    EntityFlare flare = EntityTypesAS.FLARE.create(world);
+        float nightPercent = DayTimeHelper.getCurrentDaytimeDistribution(level);
+        if (level.random.nextInt(EntityConfig.CONFIG.flareAmbientSpawnChance.get()) == 0 && level.random.nextFloat() < nightPercent) {
+            MiscUtils.executeWithChunk(level, at, () -> {
+                if (level.isEmptyBlock(at)) {
+                    EntityFlare flare = EntityTypesAS.FLARE.create(level);
                     flare.setPosition(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
                     flare.setAmbient(true);
-                    world.addEntity(flare);
+                    level.addEntity(flare);
                 }
             });
         }
@@ -117,7 +117,7 @@ public class EntityFlare extends FlyingEntity {
         if (this.followingEntityId == -1) {
             return null;
         }
-        Entity e = world.getEntityByID(this.followingEntityId);
+        Entity e = level.getEntityByID(this.followingEntityId);
         if (e == null || !e.isAlive() || !(e instanceof LivingEntity)) {
             return null;
         }
@@ -130,22 +130,22 @@ public class EntityFlare extends FlyingEntity {
 
         this.entityAge++;
 
-        if (this.getEntityWorld().isRemote()) {
+        if (this.getCommandSenderWorld().isClientSide()) {
             this.tickClient();
         } else {
-            if (this.isAmbient() && this.entityAge > 600 && rand.nextInt(600) == 0) {
-                DamageUtil.attackEntityFrom(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
+            if (this.isAmbient() && this.entityAge > 600 && random.nextInt(600) == 0) {
+                DamageUtil.hurt(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
             }
 
             if (this.isAlive()) {
-                if (EntityConfig.CONFIG.flareAttackBats.get() && rand.nextInt(30) == 0) {
-                    Bat closest = EntityUtils.getClosestEntity(this.getEntityWorld(), BatEntity.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
+                if (EntityConfig.CONFIG.flareAttackBats.get() && random.nextInt(30) == 0) {
+                    Bat closest = EntityUtils.getNearestEntity(this.getCommandSenderWorld(), Bat.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
                     if (closest != null) {
                         this.doLightningAttack(closest, 100F);
                     }
                 }
-                if (EntityConfig.CONFIG.flareAttackPhantoms.get() && rand.nextInt(30) == 0) {
-                    Phantom closest = EntityUtils.getClosestEntity(this.getEntityWorld(), PhantomEntity.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
+                if (EntityConfig.CONFIG.flareAttackPhantoms.get() && random.nextInt(30) == 0) {
+                    Phantom closest = EntityUtils.getNearestEntity(this.getCommandSenderWorld(), Phantom.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
                     if (closest != null) {
                         this.doLightningAttack(closest, 100F);
                     }
@@ -156,14 +156,14 @@ public class EntityFlare extends FlyingEntity {
                     if (atTarget) {
                         this.currentMoveTarget = null;
                     }
-                    if (this.currentMoveTarget == null && rand.nextInt(150) == 0) {
-                        BlockPos newTarget = this.getPosition()
-                                .add(rand.nextInt(RANDOM_WANDER_RANGE) * (rand.nextBoolean() ? 1 : -1),
-                                        rand.nextInt(RANDOM_WANDER_RANGE) * (rand.nextBoolean() ? 1 : -1),
-                                        rand.nextInt(RANDOM_WANDER_RANGE) * (rand.nextBoolean() ? 1 : -1));
+                    if (this.currentMoveTarget == null && random.nextInt(150) == 0) {
+                        BlockPos newTarget = this.position()
+                                .add(random.nextInt(RANDOM_WANDER_RANGE) * (random.nextBoolean() ? 1 : -1),
+                                        random.nextInt(RANDOM_WANDER_RANGE) * (random.nextBoolean() ? 1 : -1),
+                                        random.nextInt(RANDOM_WANDER_RANGE) * (random.nextBoolean() ? 1 : -1));
 
                         if (newTarget.getY() > 1 && newTarget.getY() < 254 && new Vector3(newTarget).distance(this) >= 5.0) {
-                            MiscUtils.executeWithChunk(this.getEntityWorld(), newTarget, () -> {
+                            MiscUtils.executeWithChunk(this.getCommandSenderWorld(), newTarget, () -> {
                                 this.currentMoveTarget = new Vector3(newTarget);
                             });
                         }
@@ -183,11 +183,11 @@ public class EntityFlare extends FlyingEntity {
                 } else if (this.followingEntityId != -1) {
                     LivingEntity following = this.getFollowingTarget();
                     if (following == null) {
-                        DamageUtil.attackEntityFrom(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
+                        DamageUtil.hurt(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
                     } else {
                         MantleEffectBootes effect = ItemMantle.getEffect(following, ConstellationsAS.bootes);
                         if (effect == null) {
-                            DamageUtil.attackEntityFrom(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
+                            DamageUtil.hurt(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
                             return;
                         }
 
@@ -205,13 +205,13 @@ public class EntityFlare extends FlyingEntity {
                         }
                     }
                 } else {
-                    DamageUtil.attackEntityFrom(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
+                    DamageUtil.hurt(this, CommonProxy.DAMAGE_SOURCE_STELLAR, 1F);
                     return;
                 }
 
                 LivingEntity target = this.getAttackTarget();
-                if (target != null && target.isAlive() && target.getDistance(this) < 10 && rand.nextInt(40) == 0) {
-                    DamageUtil.shotgunAttack(target, e -> this.doLightningAttack(e, 2F + rand.nextFloat() * 2F));
+                if (target != null && target.isAlive() && target.getDistance(this) < 10 && random.nextInt(40) == 0) {
+                    DamageUtil.shotgunAttack(target, e -> this.doLightningAttack(e, 2F + random.nextFloat() * 2F));
                 }
 
                 this.doMovement();
@@ -224,7 +224,7 @@ public class EntityFlare extends FlyingEntity {
         if (this.texClientSprite == null) {
             this.texClientSprite = EffectHelper.of(EffectTemplatesAS.FACING_SPRITE)
                     .spawn(Vector3.atEntityCorner(this).addY(this.getHeight() / 2))
-                    .setSprite(SpritesAS.SPR_ENTITY_FLARE)
+                    .pickSprite(SpritesAS.SPR_ENTITY_FLARE)
                     .setScaleMultiplier(0.45F)
                     .position((fx, position, motionToBeMoved) -> Vector3.atEntityCorner(this).addY(this.getHeight() / 2))
                     .scale((fx, scaleIn, pTicks) -> this.isAlive() ? scaleIn : 0)
@@ -233,64 +233,64 @@ public class EntityFlare extends FlyingEntity {
             EffectHelper.refresh((FXFacingSprite) this.texClientSprite, EffectTemplatesAS.FACING_SPRITE);
         }
 
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(Vector3.atEntityCorner(this)
-                            .add(rand.nextFloat() * 0.2 * (rand.nextBoolean() ? 1 : -1),
-                                    this.getHeight() / 2 + rand.nextFloat() * 0.2 * (rand.nextBoolean() ? 1 : -1),
-                                    rand.nextFloat() * 0.2 * (rand.nextBoolean() ? 1 : -1)))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F);
-            if (rand.nextBoolean()) {
+                            .add(random.nextFloat() * 0.2 * (random.nextBoolean() ? 1 : -1),
+                                    this.getHeight() / 2 + random.nextFloat() * 0.2 * (random.nextBoolean() ? 1 : -1),
+                                    random.nextFloat() * 0.2 * (random.nextBoolean() ? 1 : -1)))
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F);
+            if (random.nextBoolean()) {
                 p.color(VFXColorFunction.WHITE);
             }
         }
     }
 
     private void doLightningAttack(LivingEntity target, float damage) {
-        DamageUtil.attackEntityFrom(target, CommonProxy.DAMAGE_SOURCE_STELLAR, damage, this);
+        DamageUtil.hurt(target, CommonProxy.DAMAGE_SOURCE_STELLAR, damage, this);
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.LIGHTNING)
                 .addData(buf -> {
                     ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(this).addY(getHeight() / 2F));
                     ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(target).addY(target.getHeight() / 2F));
                     buf.writeInt(ColorsAS.EFFECT_LIGHTNING.getRGB());
                 });
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getEntityWorld(), this.getPosition(), 32));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getCommandSenderWorld(), this.position(), 32));
     }
 
     private void doMovement() {
         if (this.currentMoveTarget != null) {
-            Vec3 motion = this.getMotion();
-            double motionX = (Math.signum(this.currentMoveTarget.getX() - this.getPosX()) * 0.5D - motion.getX()) * (this.isAmbient() ? 0.01D : 0.025D);
-            double motionY = (Math.signum(this.currentMoveTarget.getY() - this.getPosY()) * 0.7D - motion.getY()) * (this.isAmbient() ? 0.01D : 0.025D);
-            double motionZ = (Math.signum(this.currentMoveTarget.getZ() - this.getPosZ()) * 0.5D - motion.getZ()) * (this.isAmbient() ? 0.01D : 0.025D);
-            this.setMotion(motion.add(motionX, motionY, motionZ));
+            Vec3 motion = this.getDeltaMovement();
+            double motionX = (Math.signum(this.currentMoveTarget.getX() - this.getX()) * 0.5D - motion.getX()) * (this.isAmbient() ? 0.01D : 0.025D);
+            double motionY = (Math.signum(this.currentMoveTarget.getY() - this.getY()) * 0.7D - motion.getY()) * (this.isAmbient() ? 0.01D : 0.025D);
+            double motionZ = (Math.signum(this.currentMoveTarget.getZ() - this.getZ()) * 0.5D - motion.getZ()) * (this.isAmbient() ? 0.01D : 0.025D);
+            this.setDeltaMovement(motion.add(motionX, motionY, motionZ));
             this.moveForward = 0.2F;
         }
     }
 
     @Override
-    public void applyEntityCollision(Entity entityIn) {
+    public void push(Entity entityIn) {
         if(!(entityIn instanceof Player)) {
-            super.applyEntityCollision(entityIn);
+            super.push(entityIn);
         }
     }
 
     @Override
-    protected void collideWithEntity(Entity entityIn) {
+    protected void doPush(Entity entityIn) {
         if(!(entityIn instanceof Player)) {
-            super.applyEntityCollision(entityIn);
+            super.push(entityIn);
         }
     }
 
     @Override
-    protected void damageEntity(DamageSource damageSrc, float damageAmount) {
-        super.damageEntity(damageSrc, damageAmount);
+    protected void actuallyHurt(DamageSource source, float consumeItemDamage) {
+        super.actuallyHurt(source, consumeItemDamage);
         this.setHealth(0F);
     }
 
     @Override
-    public boolean canSpawn(LevelAccessor worldIn, MobSpawnType spawnReasonIn) {
+    public boolean checkBatSpawnRules(LevelAccessor worldIn, MobSpawnType spawnReasonIn) {
         return false;
     }
 
@@ -307,10 +307,10 @@ public class EntityFlare extends FlyingEntity {
     }
 
     @Override
-    protected void onDeathUpdate() {
+    protected void tickDeath() {
         this.remove();
 
-        if (this.getEntityWorld().isRemote()) {
+        if (this.getCommandSenderWorld().isClientSide()) {
             this.tickClientDeathEffects();
         }
     }
@@ -334,11 +334,11 @@ public class EntityFlare extends FlyingEntity {
 
         posList.forEach(pos -> {
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                    .spawn(pos.add(Vector3.random().multiply(0.45F)))
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.25F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setMaxAge(30 + rand.nextInt(40));
-            if (rand.nextBoolean()) {
+                    .spawn(pos.add(Vector3.random().mul(0.45F)))
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.25F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setMaxAge(30 + random.nextInt(40));
+            if (random.nextBoolean()) {
                 p.color(VFXColorFunction.WHITE);
             }
         });
@@ -346,32 +346,32 @@ public class EntityFlare extends FlyingEntity {
         for (int i = 0; i < 10; i++) {
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(Vector3.atEntityCorner(this)
-                            .add(rand.nextFloat() * 0.15 * (rand.nextBoolean() ? 1 : -1),
-                                    this.getHeight() / 2 + rand.nextFloat() * 0.15 * (rand.nextBoolean() ? 1 : -1),
-                                    rand.nextFloat() * 0.15 * (rand.nextBoolean() ? 1 : -1)))
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setMotion(Vector3.random().multiply(0.05F))
-                    .setScaleMultiplier(0.25F + rand.nextFloat() * 0.1F)
-                    .setMaxAge(40 + rand.nextInt(40));
-            if (rand.nextBoolean()) {
+                            .add(random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1),
+                                    this.getHeight() / 2 + random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1),
+                                    random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1)))
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setDeltaMovement(Vector3.random().mul(0.05F))
+                    .setScaleMultiplier(0.25F + random.nextFloat() * 0.1F)
+                    .setMaxAge(40 + random.nextInt(40));
+            if (random.nextBoolean()) {
                 p.color(VFXColorFunction.WHITE);
             }
         }
     }
 
     @Override
-    public void writeAdditional(CompoundTag compound) {
-        super.writeAdditional(compound);
+    public void writeAdditional(CompoundTag pattern) {
+        super.writeAdditional(pattern);
 
-        compound.putInt("AS_entityAge", this.entityAge);
-        compound.putBoolean("AS_ambient", this.ambient);
+        pattern.putInt("AS_entityAge", this.entityAge);
+        pattern.putBoolean("AS_ambient", this.ambient);
     }
 
     @Override
-    public void readAdditional(CompoundTag compound) {
-        super.readAdditional(compound);
+    public void readAdditional(CompoundTag pattern) {
+        super.readAdditional(pattern);
 
-        this.entityAge = compound.getInt("AS_entityAge");
-        this.ambient = compound.getBoolean("AS_ambient");
+        this.entityAge = pattern.getInt("AS_entityAge");
+        this.ambient = pattern.getBoolean("AS_ambient");
     }
 }

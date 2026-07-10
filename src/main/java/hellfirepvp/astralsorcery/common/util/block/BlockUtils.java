@@ -56,23 +56,23 @@ import java.util.Random;
 public class BlockUtils {
 
     @Nonnull
-    public static List<ItemStack> getDrops(ServerLevel world, BlockPos pos, int harvestFortune, Random rand) {
-        return getDrops(world, pos, harvestFortune, rand, ItemStack.EMPTY);
+    public static List<ItemStack> getDrops(ServerLevel level, BlockPos pos, int harvestFortune, Random random) {
+        return getDrops(level, pos, harvestFortune, random, ItemStack.EMPTY);
     }
 
     @Nonnull
-    public static List<ItemStack> getDrops(ServerLevel world, BlockPos pos, int harvestFortune, Random rand, ItemStack tool) {
-        return getDrops(world, pos, world.getBlockState(pos), harvestFortune, rand, tool);
+    public static List<ItemStack> getDrops(ServerLevel level, BlockPos pos, int harvestFortune, Random random, ItemStack tool) {
+        return getDrops(level, pos, level.getBlockState(pos), harvestFortune, random, tool);
     }
 
     @Nonnull
-    public static List<ItemStack> getDrops(ServerLevel world, BlockPos pos, BlockState state, int harvestFortune, Random rand, ItemStack tool) {
-        LootContext.Builder builder = new LootContext.Builder(world)
-                .withParameter(LootParameters.field_237457_g_, Vector3d.copyCentered(pos))
-                .withParameter(LootParameters.BLOCK_STATE, state)
-                .withParameter(LootParameters.TOOL, tool)
-                .withNullableParameter(LootParameters.BLOCK_ENTITY, MiscUtils.getTileAt(world, pos, TileEntity.class, true))
-                .withRandom(rand)
+    public static List<ItemStack> getDrops(ServerLevel level, BlockPos pos, BlockState state, int harvestFortune, Random random, ItemStack tool) {
+        LootContext.Builder builder = new LootContext.Builder(level)
+                .withParameter(LootContextParams.ORIGIN, Vec3.copyCentered(pos))
+                .withParameter(LootContextParams.BLOCK_STATE, state)
+                .withParameter(LootContextParams.TOOL, tool)
+                .withOptionalParameter(LootContextParams.BLOCK_ENTITY, MiscUtils.getTileAt(level, pos, BlockEntity.class, true))
+                .create(random)
                 .withLuck(harvestFortune);
         return state.getDrops(builder);
     }
@@ -80,30 +80,30 @@ public class BlockUtils {
     @Nonnull
     public static BlockPos getWorldTopPos(BlockPos at) {
         BlockPos it = at;
-        while (!World.isOutsideBuildHeight(it)) {
+        while (!Level.isOutsideBuildHeight(it)) {
             it = it.up();
         }
         return it;
     }
 
-    public static BlockPos firstSolidDown(BlockGetter world, BlockPos at) {
-        BlockState state = world.getBlockState(at);
-        while (at.getY() > 0 && !state.getMaterial().blocksMovement() && state.getFluidState().isEmpty()) {
-            at = at.down();
-            state = world.getBlockState(at);
+    public static BlockPos firstSolidDown(BlockGetter level, BlockPos at) {
+        BlockState state = level.getBlockState(at);
+        while (at.getY() > 0 && !state.getMaterial().blocksMotion() && state.getFluidState().isEmpty()) {
+            at = at.below();
+            state = level.getBlockState(at);
         }
         return at;
     }
 
-    public static boolean isReplaceable(Level world, BlockPos pos) {
-        return isReplaceable(world, pos, world.getBlockState(pos));
+    public static boolean isReplaceable(Level level, BlockPos pos) {
+        return isReplaceable(level, pos, level.getBlockState(pos));
     }
 
-    public static boolean isReplaceable(Level world, BlockPos pos, BlockState state) {
-        if (world.isAirBlock(pos)) {
+    public static boolean isReplaceable(Level level, BlockPos pos, BlockState state) {
+        if (level.isEmptyBlock(pos)) {
             return true;
         }
-        BlockPlaceContext ctx = TestBlockUseContext.getHandContext(world, null, Hand.MAIN_HAND, pos, Direction.UP);
+        BlockPlaceContext ctx = TestBlockUseContext.getHandContext(level, null, InteractionHand.MAIN_HAND, pos, Direction.UP);
         return state.isReplaceable(ctx);
     }
 
@@ -117,13 +117,13 @@ public class BlockUtils {
             }
         }
 
-        if (EffectUtils.hasMiningSpeedup(entity)) {
-            breakSpeed *= 1.0F + (EffectUtils.getMiningSpeedup(entity) + 1F) * 0.2F;
+        if (MobEffectUtil.hasDigSpeed(entity)) {
+            breakSpeed *= 1.0F + (MobEffectUtil.getDigSpeedAmplification(entity) + 1F) * 0.2F;
         }
 
-        if (entity.isPotionActive(Effects.MINING_FATIGUE)) {
+        if (entity.isPotionActive(MobEffects.DIG_SLOWDOWN)) {
             float fatigueMultiplier;
-            switch (entity.getActivePotionEffect(Effects.MINING_FATIGUE).getAmplifier()) {
+            switch (entity.getActivePotionEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
                 case 0:
                     fatigueMultiplier = (float) Math.pow(0.3F, 1);
                     break;
@@ -151,8 +151,8 @@ public class BlockUtils {
         return breakSpeed;
     }
 
-    public static boolean isFluidBlock(Level world, BlockPos pos) {
-        return isFluidBlock(world.getBlockState(pos));
+    public static boolean isFluidBlock(Level level, BlockPos pos) {
+        return isFluidBlock(level.getBlockState(pos));
     }
 
     public static boolean isFluidBlock(BlockState state) {
@@ -176,7 +176,7 @@ public class BlockUtils {
             return false;
         }
 
-        if (!state.getBlock().getRegistryName().equals(stateToTest.getBlock().getRegistryName())) {
+        if (!RegistryHelper.getKey(state.getBlock()).equals(RegistryHelper.getKey(stateToTest.getBlock()))) {
             return false;
         }
 
@@ -194,52 +194,52 @@ public class BlockUtils {
         return true;
     }
 
-    public static boolean canToolBreakBlockWithoutPlayer(@Nonnull Level world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ItemStack stack) {
-        if (state.getBlockHardness(world, pos) == -1) {
+    public static boolean canToolBreakBlockWithoutPlayer(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull ItemStack stack) {
+        if (state.getDestroySpeed(level, pos) == -1) {
             return false;
         }
-        if (!state.getRequiresTool()) {
+        if (!state.requiresCorrectToolForDrops()) {
             return true;
         }
 
         ToolType tool = state.getHarvestTool();
         if (stack.isEmpty() || tool == null) {
-            return !state.getRequiresTool() || stack.canHarvestBlock(state);
+            return !state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state);
         }
 
-        int toolLevel = stack.getItem().getHarvestLevel(stack, tool, null, state);
+        int toolLevel = stack.getItem().getLevel(stack, tool, null, state);
         if (toolLevel < 0) {
-            return!state.getRequiresTool() || stack.canHarvestBlock(state);
+            return!state.requiresCorrectToolForDrops() || stack.isCorrectToolForDrops(state);
         }
 
-        return toolLevel >= state.getHarvestLevel();
+        return toolLevel >= state.getLevel();
     }
 
     public static boolean breakBlockWithPlayer(BlockPos pos, ServerPlayer playerMP) {
-        return playerMP.interactionManager.tryHarvestBlock(pos);
+        return playerMP.gameMode.setLevel(pos);
     }
 
     //Copied from ForgeHooks.onBlockBreak & PlayerInteractionManager.tryHarvestBlock
     //Duplicate break functionality without a active player.
     //Emulates a FakePlayer - attempts without a player as harvester in case a fakeplayer leads to issues.
-    public static boolean breakBlockWithoutPlayer(ServerLevel world, BlockPos pos) {
-        return breakBlockWithoutPlayer(world, pos, world.getBlockState(pos), ItemStack.EMPTY, true, false);
+    public static boolean breakBlockWithoutPlayer(ServerLevel level, BlockPos pos) {
+        return breakBlockWithoutPlayer(level, pos, level.getBlockState(pos), ItemStack.EMPTY, true, false);
     }
 
     @Deprecated
-    public static boolean breakBlockWithoutPlayer(ServerLevel world, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions, boolean playEffects) {
-        return breakBlockWithoutPlayer(world, pos, stateBroken, heldItem, breakBlock, ignoreHarvestRestrictions);
+    public static boolean breakBlockWithoutPlayer(ServerLevel level, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions, boolean playEffects) {
+        return breakBlockWithoutPlayer(level, pos, stateBroken, heldItem, breakBlock, ignoreHarvestRestrictions);
     }
 
-    public static boolean breakBlockWithoutPlayer(ServerLevel world, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions) {
-        FakePlayer fakePlayer = AstralSorcery.getProxy().getASFakePlayerServer(world);
+    public static boolean breakBlockWithoutPlayer(ServerLevel level, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions) {
+        FakePlayer fakePlayer = AstralSorcery.getProxy().getASFakePlayerServer(level);
         int xp;
         try {
             boolean preCancelEvent = false;
-            if (!heldItem.isEmpty() && !heldItem.getItem().canPlayerBreakBlockWhileHolding(stateBroken, world, pos, fakePlayer)) {
+            if (!heldItem.isEmpty() && !heldItem.getItem().canPlayerBreakBlockWhileHolding(stateBroken, level, pos, fakePlayer)) {
                 preCancelEvent = true;
             }
-            BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, pos, stateBroken, fakePlayer);
+            BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, stateBroken, fakePlayer);
             event.setCanceled(preCancelEvent);
             NeoForge.EVENT_BUS.post(event);
 
@@ -261,7 +261,7 @@ public class BlockUtils {
         boolean harvestable = true;
         try {
             if (!ignoreHarvestRestrictions) {
-                harvestable = stateBroken.canHarvestBlock(world, pos, fakePlayer);
+                harvestable = stateBroken.isCorrectToolForDrops(level, pos, fakePlayer);
             }
         } catch (Exception exc) {
             return false;
@@ -269,74 +269,74 @@ public class BlockUtils {
 
         ItemStack heldCopy = heldItem.isEmpty() ? ItemStack.EMPTY : heldItem.copy();
         try {
-            heldCopy.onBlockDestroyed(world, stateBroken, pos, fakePlayer);
+            heldCopy.onBlockDestroyed(level, stateBroken, pos, fakePlayer);
         } catch (Exception exc) {
             return false;
         }
 
-        boolean wasCapturingStates = world.captureBlockSnapshots;
-        List<BlockSnapshot> previousCapturedStates = new ArrayList<>(world.capturedBlockSnapshots);
+        boolean wasCapturingStates = level.captureBlockSnapshots;
+        List<BlockSnapshot> previousCapturedStates = new ArrayList<>(level.capturedBlockSnapshots);
 
-        world.captureBlockSnapshots = true;
+        level.captureBlockSnapshots = true;
         try {
             if (breakBlock) {
-                if (!stateBroken.removedByPlayer(world, pos, fakePlayer, harvestable, Fluids.EMPTY.getDefaultState())) {
-                    restoreWorldState(world, wasCapturingStates, previousCapturedStates);
+                if (!stateBroken.removedByPlayer(level, pos, fakePlayer, harvestable, Fluids.EMPTY.defaultBlockState())) {
+                    restoreWorldState(level, wasCapturingStates, previousCapturedStates);
                     return false;
                 }
             } else {
-                stateBroken.getBlock().onBlockHarvested(world, pos, stateBroken, fakePlayer);
+                stateBroken.getBlock().onBlockHarvested(level, pos, stateBroken, fakePlayer);
             }
         } catch (Exception exc) {
-            restoreWorldState(world, wasCapturingStates, previousCapturedStates);
+            restoreWorldState(level, wasCapturingStates, previousCapturedStates);
             return false;
         }
 
-        stateBroken.getBlock().onPlayerDestroy(world, pos, stateBroken);
+        stateBroken.getBlock().onPlayerDestroy(level, pos, stateBroken);
 
         if (harvestable) {
             try {
-                BlockEntity tileentity = MiscUtils.getTileAt(world, pos, TileEntity.class, true);
+                BlockEntity tileentity = MiscUtils.getTileAt(level, pos, BlockEntity.class, true);
                 ItemStack harvestStack = heldCopy.isEmpty() ? ItemStack.EMPTY : heldCopy.copy();
-                stateBroken.getBlock().harvestBlock(world, fakePlayer, pos, stateBroken, tileentity, harvestStack);
+                stateBroken.getBlock().playerDestroy(level, fakePlayer, pos, stateBroken, tileentity, harvestStack);
             } catch (Exception exc) {
-                restoreWorldState(world, wasCapturingStates, previousCapturedStates);
+                restoreWorldState(level, wasCapturingStates, previousCapturedStates);
                 return false;
             }
         }
 
         if (xp > 0) {
-            stateBroken.getBlock().dropXpOnBlockBreak(world, pos, xp);
+            stateBroken.getBlock().dropXpOnBlockBreak(level, pos, xp);
         }
         BlockDropCaptureAssist.startCapturing();
         try {
             //Capturing block snapshots is aids. don't try that at home kids.
-            world.captureBlockSnapshots = false;
-            world.restoringBlockSnapshots = true;
-            world.capturedBlockSnapshots.forEach((s) -> s.restore(true));
-            world.restoringBlockSnapshots = false;
-            world.capturedBlockSnapshots.forEach((s) -> world.setBlockState(s.getPos(), Blocks.AIR.getDefaultState()));
+            level.captureBlockSnapshots = false;
+            level.restoringBlockSnapshots = true;
+            level.capturedBlockSnapshots.forEach((s) -> s.restore(true));
+            level.restoringBlockSnapshots = false;
+            level.capturedBlockSnapshots.forEach((s) -> level.setBlock(s.getBlockPos(), Blocks.AIR.defaultBlockState()));
         } finally {
             BlockDropCaptureAssist.getCapturedStacksAndStop(); //Discard
 
             //Restore previous state
-            world.capturedBlockSnapshots.clear();
-            world.captureBlockSnapshots = wasCapturingStates;
-            world.capturedBlockSnapshots.addAll(previousCapturedStates);
+            level.capturedBlockSnapshots.clear();
+            level.captureBlockSnapshots = wasCapturingStates;
+            level.capturedBlockSnapshots.addAll(previousCapturedStates);
         }
         return true;
     }
 
-    private static void restoreWorldState(Level world, boolean prevCaptureFlag, List<BlockSnapshot> prevSnapshots) {
-        world.captureBlockSnapshots = false;
+    private static void restoreWorldState(Level level, boolean prevCaptureFlag, List<BlockSnapshot> prevSnapshots) {
+        level.captureBlockSnapshots = false;
 
-        world.restoringBlockSnapshots = true;
-        world.capturedBlockSnapshots.forEach((s) -> s.restore(true));
-        world.restoringBlockSnapshots = false;
+        level.restoringBlockSnapshots = true;
+        level.capturedBlockSnapshots.forEach((s) -> s.restore(true));
+        level.restoringBlockSnapshots = false;
 
-        world.capturedBlockSnapshots.clear();
+        level.capturedBlockSnapshots.clear();
 
-        world.captureBlockSnapshots = prevCaptureFlag;
-        world.capturedBlockSnapshots.addAll(prevSnapshots);
+        level.captureBlockSnapshots = prevCaptureFlag;
+        level.capturedBlockSnapshots.addAll(prevSnapshots);
     }
 }

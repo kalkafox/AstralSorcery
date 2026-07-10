@@ -30,43 +30,43 @@ import java.util.function.Consumer;
  */
 public class StoneCuttingRecipeBuilder {
 
-    private final Ingredient input;
+    private final Ingredient from;
     private final ItemLike output;
     private final int count;
 
-    private StoneCuttingRecipeBuilder(Ingredient input, ItemLike output, int count) {
-        this.input = input;
+    private StoneCuttingRecipeBuilder(Ingredient from, ItemLike output, int count) {
+        this.from = from;
         this.output = output;
         this.count = count;
     }
 
-    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient input, ItemLike output) {
-        return stoneCuttingRecipe(input, output, 1);
+    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient from, ItemLike output) {
+        return stoneCuttingRecipe(from, output, 1);
     }
 
-    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient input, ItemLike output, int count) {
-        return new StoneCuttingRecipeBuilder(input, output, count);
+    public static StoneCuttingRecipeBuilder stoneCuttingRecipe(Ingredient from, ItemLike output, int count) {
+        return new StoneCuttingRecipeBuilder(from, output, count);
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn) {
-        this.build(consumerIn, ForgeRegistries.ITEMS.getKey(this.output.asItem()));
+    public void build(Consumer<FinishedRecipe> consumerIn) {
+        this.build(consumerIn, BuiltInRegistries.ITEM.getKey(this.output.asItem()));
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
+    public void build(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
         id = NameUtil.prefixPath(id, "stonecutting/");
-        consumerIn.accept(new Result(id, this.input, this.output.asItem(), this.count));
+        consumerIn.accept(new Result(id, this.from, this.output.asItem(), this.count));
     }
 
-    public static class Result implements IFinishedRecipe {
+    public static class Result implements FinishedRecipe {
 
         private final ResourceLocation id;
         private final Ingredient ingredient;
         private final Item result;
         private final int count;
 
-        public Result(ResourceLocation id, Ingredient input, Item output, int count) {
+        public Result(ResourceLocation id, Ingredient from, Item output, int count) {
             this.id = id;
-            this.ingredient = input;
+            this.ingredient = from;
             this.result = output;
             this.count = count;
         }
@@ -74,7 +74,7 @@ public class StoneCuttingRecipeBuilder {
         @Override
         public void serialize(JsonObject jsonObject) {
             jsonObject.add("ingredient", this.ingredient.serialize());
-            jsonObject.addProperty("result", ForgeRegistries.ITEMS.getKey(this.result).toString());
+            jsonObject.addProperty("result", BuiltInRegistries.ITEM.getKey(this.result).toString());
             jsonObject.addProperty("count", this.count);
         }
 
@@ -85,19 +85,19 @@ public class StoneCuttingRecipeBuilder {
 
         @Override
         public RecipeSerializer<?> getSerializer() {
-            return IRecipeSerializer.STONECUTTING;
+            return RecipeSerializer.STONECUTTING;
         }
 
         @Nullable
         @Override
-        public JsonObject getAdvancementJson() {
+        public JsonObject serializeAdvancement() {
             return null;
         }
 
         @Nullable
         @Override
         public ResourceLocation getAdvancementID() {
-            return new ResourceLocation("");
+            return ResourceLocation.parse("");
         }
     }
 }

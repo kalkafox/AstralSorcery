@@ -22,15 +22,15 @@ import net.minecraft.util.Mth;
  */
 public class ClientCameraUtil {
 
-    public static void positionCamera(Player renderView, float pTicks, double x, double y, double z, double prevX, double prevY, double prevZ, double yaw, double yawPrev, double pitch, double pitchPrev) {
-        double dYaw = MathHelper.positiveModulo(yaw - yawPrev, 360d);
+    public static void positionCamera(Player renderView, float pTicks, double x, double y, double z, double prevX, double prevY, double prevZ, double yRot, double yawPrev, double pitch, double pitchPrev) {
+        double dYaw = Mth.positiveModulo(yRot - yawPrev, 360d);
         // Use the smaller arc
         if (dYaw > 180) {
             dYaw -= 360;
         }
-        yawPrev = yaw - dYaw;
-        float iYaw = MathHelper.lerp(pTicks, (float) yawPrev, (float) yaw);
-        float iPitch = MathHelper.lerp(pTicks, (float) pitchPrev, (float) pitch);
+        yawPrev = yRot - dYaw;
+        float iYaw = Mth.lerp(pTicks, (float) yawPrev, (float) yRot);
+        float iPitch = Mth.lerp(pTicks, (float) pitchPrev, (float) pitch);
 
         Minecraft mc = Minecraft.getInstance();
         Entity rv = mc.getRenderViewEntity();
@@ -40,45 +40,45 @@ public class ClientCameraUtil {
         }
         Player render = (Player) rv;
 
-        render.setRawPosition(x, y, z);
-        render.prevPosX = prevX;
-        render.prevPosY = prevY;
-        render.prevPosZ = prevZ;
-        render.lastTickPosX = prevX;
-        render.lastTickPosY = prevY;
-        render.lastTickPosZ = prevZ;
+        render.setPosRaw(x, y, z);
+        render.xo = prevX;
+        render.yo = prevY;
+        render.zo = prevZ;
+        render.xOld = prevX;
+        render.yOld = prevY;
+        render.zOld = prevZ;
 
-        render.rotationYaw =         iYaw;
-        render.prevRotationYaw =     iYaw;
-        render.rotationYawHead =     iYaw;
-        render.prevRotationYawHead = iYaw;
+        render.setYRot(iYaw);
+        render.yRotO =     iYaw;
+        render.yHeadRot =     iYaw;
+        render.yHeadRotO = iYaw;
         render.cameraYaw =           iYaw;
-        render.prevCameraYaw =       iYaw;
-        render.renderYawOffset =     iYaw;
-        render.prevRenderYawOffset = iYaw;
-        render.rotationPitch =       iPitch;
-        render.prevRotationPitch =   iPitch;
+        render.oBob =       iYaw;
+        render.yBodyRot =     iYaw;
+        render.yBodyRotO = iYaw;
+        render.setXRot(iPitch);
+        render.xRotO =   iPitch;
 
         render = Minecraft.getInstance().player;
 
-        render.setRawPosition(x, y, z);
-        render.prevPosX = prevX;
-        render.prevPosY = prevY;
-        render.prevPosZ = prevZ;
-        render.lastTickPosX = prevX;
-        render.lastTickPosY = prevY;
-        render.lastTickPosZ = prevZ;
+        render.setPosRaw(x, y, z);
+        render.xo = prevX;
+        render.yo = prevY;
+        render.zo = prevZ;
+        render.xOld = prevX;
+        render.yOld = prevY;
+        render.zOld = prevZ;
 
-        render.rotationYaw =         iYaw;
-        render.prevRotationYaw =     iYaw;
-        render.rotationYawHead =     iYaw;
-        render.prevRotationYawHead = iYaw;
+        render.setYRot(iYaw);
+        render.yRotO =     iYaw;
+        render.yHeadRot =     iYaw;
+        render.yHeadRotO = iYaw;
         render.cameraYaw =           iYaw;
-        render.prevCameraYaw =       iYaw;
-        render.renderYawOffset =     iYaw;
-        render.prevRenderYawOffset = iYaw;
-        render.rotationPitch =       iPitch;
-        render.prevRotationPitch =   iPitch;
+        render.oBob =       iYaw;
+        render.yBodyRot =     iYaw;
+        render.yBodyRotO = iYaw;
+        render.setXRot(iPitch);
+        render.xRotO =   iPitch;
     }
 
     public static void resetCamera() {
@@ -92,7 +92,7 @@ public class ClientCameraUtil {
             //EntityRendererManager rm = mc.getRenderManager();
             //rm.setRenderPosition(x, y, z);
 
-            if (mc.currentScreen != null) {
+            if (mc.screen != null) {
                 mc.displayGuiScreen(null);
             }
         }

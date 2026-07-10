@@ -26,14 +26,14 @@ public class AssetLoader {
     private AssetLoader() {}
 
     @OnlyIn(Dist.CLIENT)
-    protected static BindableResource load(AssetLocation location, SubLocation subLocation, String name, String suffix) {
-        return new BindableResource(buildResourceString(location, subLocation, name, suffix));
+    protected static BindableResource load(AssetLocation location, SubLocation subLocation, String name, String playerSuffix) {
+        return new BindableResource(buildResourceString(location, subLocation, name, playerSuffix));
     }
 
     @OnlyIn(Dist.CLIENT)
-    private static String buildResourceString(AssetLocation location, SubLocation subLocation, String name, String suffix) {
-        if (name.endsWith(suffix)) { //In case of derp.
-            name = name.substring(0, name.length() - suffix.length());
+    private static String buildResourceString(AssetLocation location, SubLocation subLocation, String name, String playerSuffix) {
+        if (name.endsWith(playerSuffix)) { //In case of derp.
+            name = name.substring(0, name.length() - playerSuffix.length());
         }
 
         StringBuilder builder = new StringBuilder();
@@ -41,7 +41,7 @@ public class AssetLoader {
         if (subLocation != null) {
             builder.append(subLocation.getLocation()).append("/");
         }
-        builder.append(name).append(suffix);
+        builder.append(name).append(playerSuffix);
         return builder.toString();
     }
 
@@ -52,7 +52,7 @@ public class AssetLoader {
 
     @OnlyIn(Dist.CLIENT)
     public static WavefrontObject loadObjModel(ModelLocation location, String name) {
-        return new WavefrontObject(new ResourceLocation(buildResourceString(AssetLocation.MODELS, location, name, ".obj")));
+        return new WavefrontObject(ResourceLocation.parse(buildResourceString(AssetLocation.MODEL_BY_TYPE, location, name, ".obj")));
     }
 
     public static interface SubLocation {

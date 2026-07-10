@@ -37,14 +37,14 @@ public class CopyConstellation extends LootItemConditionalFunction {
     }
 
     @Override
-    public LootItemFunctionType getFunctionType() {
+    public LootItemFunctionType getType() {
         return LootAS.Functions.COPY_CONSTELLATION;
     }
 
     @Override
-    protected ItemStack doApply(ItemStack stack, LootContext context) {
-        if (context.has(LootParameters.BLOCK_ENTITY)) {
-            BlockEntity tile = context.get(LootParameters.BLOCK_ENTITY);
+    protected ItemStack run(ItemStack stack, LootContext context) {
+        if (context.has(LootContextParams.BLOCK_ENTITY)) {
+            BlockEntity tile = context.get(LootContextParams.BLOCK_ENTITY);
             if (tile instanceof ConstellationTile && stack.getItem() instanceof ConstellationItem) {
                 IWeakConstellation main = ((ConstellationTile) tile).getAttunedConstellation();
                 IMinorConstellation trait = ((ConstellationTile) tile).getTraitConstellation();
@@ -56,11 +56,11 @@ public class CopyConstellation extends LootItemConditionalFunction {
         return stack;
     }
 
-    public static LootFunction.Builder<?> builder() {
+    public static LootItemConditionalFunction.Builder<?> builder() {
         return builder(CopyConstellation::new);
     }
 
-    public static class Serializer extends LootFunction.Serializer<CopyConstellation> {
+    public static class Serializer extends LootItemConditionalFunction.Serializer<CopyConstellation> {
 
         @Override
         public CopyConstellation deserialize(JsonObject jsonObject, JsonDeserializationContext ctx, LootItemCondition[] conditions) {

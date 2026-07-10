@@ -57,30 +57,30 @@ public class RecipeHelper {
     }
 
     @Nonnull
-    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(Level world, BlockState input) {
-        ItemStack stack = ItemUtils.createBlockStack(input);
+    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(Level level, BlockState from) {
+        ItemStack stack = ItemUtils.createBlockStack(from);
         if (stack.isEmpty()) {
             return Optional.empty();
         }
-        return findSmeltingResult(world, stack);
+        return findSmeltingResult(level, stack);
     }
 
     @Nonnull
-    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(Level world, ItemStack input) {
-        RecipeManager mgr = world.getRecipeManager();
-        Container inv = new SimpleContainer(input);
+    public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(Level level, ItemStack from) {
+        RecipeManager mgr = level.getRecipeManager();
+        Container inv = new SimpleContainer(from);
         Optional<Recipe<Container>> optRecipe = (Optional<Recipe<Container>>) ObjectUtils.firstNonNull(
-                mgr.getRecipe(IRecipeType.SMELTING, inv, world),
-                mgr.getRecipe(IRecipeType.CAMPFIRE_COOKING, inv, world),
-                mgr.getRecipe(IRecipeType.SMOKING, inv, world),
+                mgr.getRecipe(RecipeType.SMELTING, inv, level),
+                mgr.getRecipe(RecipeType.CAMPFIRE_COOKING, inv, level),
+                mgr.getRecipe(RecipeType.SMOKING, inv, level),
                 Optional.empty());
         return optRecipe.map(recipe -> {
-            ItemStack smeltResult = recipe.getCraftingResult(inv).copy();
-            float exp = 0;
+            ItemStack smeltResult = recipe.assemble(inv).copy();
+            float futureXp = 0;
             if (recipe instanceof AbstractCookingRecipe) {
-                exp = ((AbstractCookingRecipe) recipe).getExperience();
+                futureXp = ((AbstractCookingRecipe) recipe).getExperience();
             }
-            return new Tuple<>(smeltResult, exp);
+            return new Tuple<>(smeltResult, futureXp);
         });
     }
 

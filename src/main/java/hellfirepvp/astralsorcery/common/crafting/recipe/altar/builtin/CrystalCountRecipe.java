@@ -40,8 +40,8 @@ public class CrystalCountRecipe extends ConstellationBaseAverageStatsRecipe {
 
     @Nonnull
     @Override
-    public ItemStack getOutputForRender(Iterable<ItemStack> inventoryContents) {
-        ItemStack out = super.getOutputForRender(inventoryContents);
+    public ItemStack getOutputForRender(Iterable<ItemStack> items) {
+        ItemStack out = super.getOutputForRender(items);
         setAmount(out);
         return out;
     }

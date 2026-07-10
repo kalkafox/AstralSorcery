@@ -35,35 +35,35 @@ public class ResultCookingRecipeBuilder {
     private final Ingredient ingredient;
     private final float experience;
     private final int cookingTime;
-    private final SimpleCookingSerializer<?> recipeSerializer;
+    private final SimpleCookingSerializer<?> serializer;
 
     private ResultCookingRecipeBuilder(ItemStack result, Ingredient ingredientIn, float experienceIn, int cookingTimeIn, SimpleCookingSerializer<?> serializer) {
         this.result = result.copy();
         this.ingredient = ingredientIn;
         this.experience = experienceIn;
         this.cookingTime = cookingTimeIn;
-        this.recipeSerializer = serializer;
+        this.serializer = serializer;
     }
 
-    public static ResultCookingRecipeBuilder cookingRecipe(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn, SimpleCookingSerializer<?> serializer) {
+    public static ResultCookingRecipeBuilder cooking(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn, SimpleCookingSerializer<?> serializer) {
         return new ResultCookingRecipeBuilder(result, ingredientIn, experienceIn, cookingTimeIn, serializer);
     }
 
-    public static ResultCookingRecipeBuilder blastingRecipe(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn) {
-        return cookingRecipe(ingredientIn, result, experienceIn, cookingTimeIn, IRecipeSerializer.BLASTING);
+    public static ResultCookingRecipeBuilder blasting(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn) {
+        return cooking(ingredientIn, result, experienceIn, cookingTimeIn, RecipeSerializer.BLASTING);
     }
 
-    public static ResultCookingRecipeBuilder smeltingRecipe(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn) {
-        return cookingRecipe(ingredientIn, result, experienceIn, cookingTimeIn, IRecipeSerializer.SMELTING);
+    public static ResultCookingRecipeBuilder smelting(Ingredient ingredientIn, ItemStack result, float experienceIn, int cookingTimeIn) {
+        return cooking(ingredientIn, result, experienceIn, cookingTimeIn, RecipeSerializer.SMELTING);
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn) {
-        this.build(consumerIn, ForgeRegistries.ITEMS.getKey(this.result.getItem()));
+    public void build(Consumer<FinishedRecipe> consumerIn) {
+        this.build(consumerIn, BuiltInRegistries.ITEM.getKey(this.result.getItem()));
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn, String save) {
-        ResourceLocation itemKey = ForgeRegistries.ITEMS.getKey(this.result.getItem());
-        ResourceLocation saveNameKey = new ResourceLocation(save);
+    public void build(Consumer<FinishedRecipe> consumerIn, String save) {
+        ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(this.result.getItem());
+        ResourceLocation saveNameKey = ResourceLocation.parse(save);
         if (saveNameKey.equals(itemKey)) {
             throw new IllegalStateException("Recipe " + saveNameKey + " should remove its 'save' argument");
         } else {
@@ -71,12 +71,12 @@ public class ResultCookingRecipeBuilder {
         }
     }
 
-    public void build(Consumer<IFinishedRecipe> consumerIn, ResourceLocation id) {
-        id = new ResourceLocation(id.getNamespace(), this.recipeSerializer.getRegistryName().getPath() + "/" + id.getPath());
-        consumerIn.accept(new Result(id, this.ingredient, this.result, this.experience, this.cookingTime, this.recipeSerializer));
+    public void build(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+        id = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), RegistryHelper.getKey(this.serializer).getPath() + "/" + id.getPath());
+        consumerIn.accept(new Result(id, this.ingredient, this.result, this.experience, this.cookingTime, this.serializer));
     }
 
-    public static class Result implements IFinishedRecipe {
+    public static class Result implements FinishedRecipe {
 
         private final ResourceLocation id;
         private final Ingredient ingredient;
@@ -96,7 +96,7 @@ public class ResultCookingRecipeBuilder {
 
         public void serialize(JsonObject json) {
             JsonObject itemResult = new JsonObject();
-            itemResult.addProperty("item", this.result.getItem().getRegistryName().toString());
+            itemResult.addProperty("item", RegistryHelper.getKey(this.result.getItem()).toString());
             itemResult.addProperty("count", this.result.getCount());
 
             json.add("ingredient", this.ingredient.serialize());
@@ -114,13 +114,13 @@ public class ResultCookingRecipeBuilder {
         }
 
         @Nullable
-        public JsonObject getAdvancementJson() {
+        public JsonObject serializeAdvancement() {
             return null;
         }
 
         @Nullable
         public ResourceLocation getAdvancementID() {
-            return new ResourceLocation("");
+            return ResourceLocation.parse("");
         }
     }
 }

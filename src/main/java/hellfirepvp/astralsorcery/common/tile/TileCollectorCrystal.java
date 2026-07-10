@@ -78,7 +78,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     public void tick() {
         super.tick();
 
-        if (!this.getWorld().isRemote()) {
+        if (!this.getLevel().isClientSide()) {
             this.doesSeeSky();
             this.hasMultiblock();
         } else {
@@ -90,7 +90,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     private void playEffects() {
         Vector3 thisPos = new Vector3(this).add(0.5F, 0.5F, 0.5F);
         Vector3 particlePos = thisPos.clone();
-        MiscUtils.applyRandomOffset(particlePos, rand, 0.75F);
+        MiscUtils.applyRandomOffset(particlePos, random, 0.75F);
 
         if (this.isEnhanced() &&
                 this.doesSeeSky() &&
@@ -101,18 +101,18 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(particlePos)
-                    .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
+                    .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
                     .setAlphaMultiplier(0.8F)
                     .color(VFXColorFunction.constant(c))
-                    .setMaxAge(20 + rand.nextInt(10));
+                    .setMaxAge(20 + random.nextInt(10));
 
             for (int i = 0; i < this.effectOrbitals.length; i++) {
                 FXOrbitalCollector fxSource = (FXOrbitalCollector) this.effectOrbitals[i];
                 if (fxSource == null) {
                     FXSource<?, ?> src = new FXOrbitalCollector(new Vector3(this).add(0.5F, 0.5F, 0.5F), c)
                             .setOrbitAxis(Vector3.random())
-                            .setOrbitRadius(0.8F + rand.nextFloat() * 0.5F)
-                            .setTicksPerRotation(40 + rand.nextInt(30));
+                            .setOrbitRadius(0.8F + random.nextFloat() * 0.5F)
+                            .setTicksPerRotation(40 + random.nextInt(30));
                     EffectHelper.spawnSource(src);
                     this.effectOrbitals[i] = src;
                 } else {
@@ -122,36 +122,36 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
                 }
             }
 
-            BlockPos starlightSource = MiscUtils.getRandomEntry(OFFSETS_LIQUID_STARLIGHT, rand).add(this.getPos());
+            BlockPos starlightSource = MiscUtils.getRandomEntry(OFFSETS_LIQUID_STARLIGHT, random).offset(this.getBlockPos());
 
-            Vector3 from = new Vector3(starlightSource).add(rand.nextFloat(), 0.85F, rand.nextFloat());
-            Vector3 motion = thisPos.clone().subtract(from).normalize().multiply(0.08F);
-            Color particleColor = MiscUtils.eitherOf(rand, Color.WHITE, c, c.brighter());
+            Vector3 from = new Vector3(starlightSource).add(random.nextFloat(), 0.85F, random.nextFloat());
+            Vector3 motion = thisPos.clone().subtract(from).normalize().mul(0.08F);
+            Color particleColor = MiscUtils.eitherOf(random, Color.WHITE, c, c.brighter());
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(from)
-                    .setMotion(motion)
-                    .alpha(VFXAlphaFunction.proximity(thisPos::clone, 2F).andThen(VFXAlphaFunction.FADE_OUT))
-                    .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
+                    .setDeltaMovement(motion)
+                    .alpha1arg(VFXAlphaFunction.proximity(thisPos::clone, 2F).andThen(VFXAlphaFunction.FADE_OUT))
+                    .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
                     .color(VFXColorFunction.constant(particleColor))
-                    .setMaxAge(30 + rand.nextInt(10));
+                    .setMaxAge(30 + random.nextInt(10));
 
-            if (rand.nextInt(80) == 0) {
+            if (random.nextInt(80) == 0) {
                 EffectHelper.of(EffectTemplatesAS.LIGHTNING)
                         .spawn(thisPos)
                         .makeDefault(from)
                         .color(VFXColorFunction.constant(c));
             }
         } else {
-            if (rand.nextBoolean()) {
+            if (random.nextBoolean()) {
                 Color c = this.getCollectorType().getDisplayColor();
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(particlePos)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
                         .setAlphaMultiplier(0.8F)
                         .color(VFXColorFunction.constant(c))
-                        .setMaxAge(20 + rand.nextInt(10));
+                        .setMaxAge(20 + random.nextInt(10));
             }
         }
     }
@@ -220,7 +220,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
         return playerUUID;
     }
 
-    public void updateData(UUID playerUUID, CollectorCrystalType collectorType) {
+    public void onSynced(UUID playerUUID, CollectorCrystalType collectorType) {
         this.playerUUID = playerUUID;
         this.collectorType = collectorType;
         if (this.collectorType == null) {
@@ -240,45 +240,45 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.constellationType = NBTHelper.readOptional(compound, "constellationType", (nbt) -> {
+        this.constellationType = NBTHelper.readOptional(pattern, "constellationType", (nbt) -> {
             IConstellation cst = IConstellation.readFromNBT(nbt);
             if (cst instanceof IWeakConstellation) {
                 return (IWeakConstellation) cst;
             }
             return null;
         });
-        this.constellationTrait = NBTHelper.readOptional(compound, "constellationTrait", (nbt) -> {
+        this.constellationTrait = NBTHelper.readOptional(pattern, "constellationTrait", (nbt) -> {
             IConstellation cst = IConstellation.readFromNBT(nbt);
             if (cst instanceof IMinorConstellation) {
                 return (IMinorConstellation) cst;
             }
             return null;
         });
-        setAttributes(CrystalAttributes.getCrystalAttributes(compound));
-        this.crystalAttributes = CrystalAttributes.getCrystalAttributes(compound);;
-        this.collectorType = NBTHelper.readEnum(compound, "collectorType", CollectorCrystalType.class);
-        this.playerUUID = NBTHelper.readOptional(compound, "playerUUID", (nbt) -> nbt.getUniqueId("playerUUID"));
+        setAttributes(CrystalAttributes.getCrystalAttributes(pattern));
+        this.crystalAttributes = CrystalAttributes.getCrystalAttributes(pattern);;
+        this.collectorType = NBTHelper.readEnum(pattern, "collectorType", CollectorCrystalType.class);
+        this.playerUUID = NBTHelper.readOptional(pattern, "playerUUID", (nbt) -> nbt.getUniqueId("playerUUID"));
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
         if (getAttributes() != null) {
-            getAttributes().store(compound);
+            getAttributes().store(pattern);
         }
-        NBTHelper.writeOptional(compound, "constellationType", this.constellationType, (nbt, cst) -> cst.writeToNBT(nbt));
-        NBTHelper.writeOptional(compound, "constellationTrait", this.constellationTrait, (nbt, cst) -> cst.writeToNBT(nbt));
-        NBTHelper.writeEnum(compound, "collectorType", this.collectorType);
-        NBTHelper.writeOptional(compound, "playerUUID", this.playerUUID, (nbt, uuid) -> nbt.putUniqueId("playerUUID", uuid));
+        NBTHelper.writeOptional(pattern, "constellationType", this.constellationType, (nbt, cst) -> cst.save(nbt));
+        NBTHelper.writeOptional(pattern, "constellationTrait", this.constellationTrait, (nbt, cst) -> cst.save(nbt));
+        NBTHelper.writeEnum(pattern, "collectorType", this.collectorType);
+        NBTHelper.writeOptional(pattern, "playerUUID", this.playerUUID, (nbt, uuid) -> nbt.putUniqueId("playerUUID", uuid));
     }
 
     @Override
-    public AABB getRenderBoundingBox() {
-        return BOX.grow(1).offset(getPos());
+    public AABB getBoundingBoxForCulling() {
+        return BOX.grow(1).offset(getBlockPos());
     }
 
     @Nonnull

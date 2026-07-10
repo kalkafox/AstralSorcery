@@ -27,10 +27,10 @@ public enum GatedKnowledge {
     COLLECTOR_CRYSTAL(ProgressionTier.CONSTELLATION_CRAFT),
     COLLECTOR_TYPE(ProgressionTier.CONSTELLATION_CRAFT);
 
-    private final ProgressionTier capability;
+    private final ProgressionTier state;
 
-    private GatedKnowledge(ProgressionTier capability) {
-        this.capability = capability;
+    private GatedKnowledge(ProgressionTier state) {
+        this.state = state;
     }
 
     public boolean canSee(PlayerProgress progress) {
@@ -38,7 +38,7 @@ public enum GatedKnowledge {
     }
 
     public boolean canSee(ProgressionTier compCapability) {
-        return capability.ordinal() <= compCapability.ordinal();
+        return state.ordinal() <= compCapability.ordinal();
     }
 
 }

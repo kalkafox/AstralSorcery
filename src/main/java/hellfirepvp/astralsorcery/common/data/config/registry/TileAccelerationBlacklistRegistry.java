@@ -69,8 +69,8 @@ public class TileAccelerationBlacklistRegistry extends ConfigDataAdapter<TileAcc
     @Override
     public List<TileAccelerationBlacklistEntry> getDefaultValues() {
         return Lists.newArrayList(
-                new TileAccelerationBlacklistEntry(PistonTileEntity.class.getName()),
-                new TileAccelerationBlacklistEntry(LockableLootTileEntity.class.getName()),
+                new TileAccelerationBlacklistEntry(PistonMovingBlockEntity.class.getName()),
+                new TileAccelerationBlacklistEntry(RandomizableContainerBlockEntity.class.getName()),
 
                 // Accelerating storage system components looks like a bad idea
                 new TileAccelerationBlacklistEntry("appeng"),
@@ -95,7 +95,7 @@ public class TileAccelerationBlacklistRegistry extends ConfigDataAdapter<TileAcc
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return "tile_acceleration_blacklist";
     }
 
@@ -108,7 +108,7 @@ public class TileAccelerationBlacklistRegistry extends ConfigDataAdapter<TileAcc
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 

@@ -82,9 +82,9 @@ public abstract class LensColorType {
         return BY_NAME.get(name);
     }
 
-    public abstract void entityInBeam(Level world, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor);
+    public abstract void entityInBeam(Level level, Vector3 origin, Vector3 target, Entity entity, PartialEffectExecutor executor);
 
-    public abstract void blockInBeam(Level world, BlockPos pos, BlockState state, PartialEffectExecutor executor);
+    public abstract void blockInBeam(Level level, BlockPos pos, BlockState state, PartialEffectExecutor executor);
 
     public static enum TargetType {
 

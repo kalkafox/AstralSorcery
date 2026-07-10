@@ -29,11 +29,11 @@ public class SolarEclipse extends CelestialEvent {
     private int eventTick = 0;
 
     @Override
-    public void tick(Level world, Random rand, WorldContext ctx) {
-        for (int i = 0; i < 12 + rand.nextInt(12); i++) {
-            rand.nextLong(); //Flush
+    public void tick(Level level, Random random, WorldContext ctx) {
+        for (int i = 0; i < 12 + random.nextInt(12); i++) {
+            random.nextLong(); //Flush
         }
-        int rOffset = rand.nextInt(36);
+        int rOffset = random.nextInt(36);
         if (rOffset >= 18) {
             rOffset -= 36;
         }
@@ -41,12 +41,12 @@ public class SolarEclipse extends CelestialEvent {
         int halfTime = this.getEventDuration() / 2;
 
         int offset = 36 - rOffset;
-        int repeat = 36;
-        long wTime = world.getDayTime();
+        int looping = 36;
+        long wTime = level.getDayTime();
 
         int suggestedDayLength = GeneralConfig.CONFIG.dayLength.get();
 
-        int solarTime = (int) ((wTime - offset * suggestedDayLength) % (repeat * suggestedDayLength));
+        int solarTime = (int) ((wTime - offset * suggestedDayLength) % (looping * suggestedDayLength));
         dayOfEvent = solarTime >= 0 && solarTime < suggestedDayLength;
         int midSOffset = suggestedDayLength / 4; //Rounding errors are not my fault.
 

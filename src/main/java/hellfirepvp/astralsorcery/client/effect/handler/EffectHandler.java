@@ -75,7 +75,7 @@ public final class EffectHandler {
         for (BatchRenderContext<?> ctx : this.orderedEffects) {
             List<PendingEffect> effects = this.effectMap.get(ctx);
             if (!effects.isEmpty()) {
-                ctx.renderAll(effects, renderStack, drawBuffer, pTicks);
+                ctx.render(effects, renderStack, drawBuffer, pTicks);
             }
         }
 
@@ -166,7 +166,7 @@ public final class EffectHandler {
             return true;
         }
         RenderingConfig.ParticleAmount cfg = RenderingConfig.CONFIG.particleAmount.get();
-        if (!Minecraft.isFancyGraphicsEnabled()) {
+        if (!Minecraft.useFancyGraphics()) {
             cfg = cfg.less();
         }
         return cfg.shouldSpawn(STATIC_EFFECT_RAND);
@@ -187,7 +187,7 @@ public final class EffectHandler {
         @Override
         public E apply(Vector3 pos) {
             EffectHelper.Builder<E> prop = source.generateFX();
-            E fx = prop.getContext().makeParticle(pos);
+            E fx = prop.getContext().createParticle(pos);
             PendingEffect effect = new PendingEffect(fx, prop);
             getInstance().registerUnsafe(effect);
             return fx;

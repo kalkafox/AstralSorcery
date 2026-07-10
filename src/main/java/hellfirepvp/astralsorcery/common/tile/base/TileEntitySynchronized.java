@@ -35,7 +35,7 @@ import java.util.Random;
  */
 public abstract class TileEntitySynchronized extends BlockEntity implements ILocatable {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
     protected static final AABB BOX = new AABB(0, 0, 0, 1, 1, 1);
 
     protected TileEntitySynchronized(BlockEntityType<?> tileEntityTypeIn) {
@@ -44,7 +44,7 @@ public abstract class TileEntitySynchronized extends BlockEntity implements ILoc
 
     @Override
     public BlockPos getLocationPos() {
-        return this.getPos();
+        return this.getBlockPos();
     }
 
     @Override
@@ -55,52 +55,52 @@ public abstract class TileEntitySynchronized extends BlockEntity implements ILoc
     }
 
     //Both Network & Chunk-saving
-    public void readCustomNBT(CompoundTag compound) {}
+    public void readCustomNBT(CompoundTag pattern) {}
 
     //Only Network-read
-    public void readNetNBT(CompoundTag compound) {}
+    public void readNetNBT(CompoundTag pattern) {}
 
     //Only Chunk-read
-    public void readSaveNBT(CompoundTag compound) {}
+    public void readSaveNBT(CompoundTag pattern) {}
 
     @Override
-    public final CompoundTag write(CompoundTag compound) {
-        compound = super.write(compound);
-        writeCustomNBT(compound);
-        writeSaveNBT(compound);
-        return compound;
+    public final CompoundTag write(CompoundTag pattern) {
+        pattern = super.write(pattern);
+        writeCustomNBT(pattern);
+        writeSaveNBT(pattern);
+        return pattern;
     }
 
     //Both Network & Chunk-saving
-    public void writeCustomNBT(CompoundTag compound) {}
+    public void writeCustomNBT(CompoundTag pattern) {}
 
     //Only Network-write
-    public void writeNetNBT(CompoundTag compound) {}
+    public void writeNetNBT(CompoundTag pattern) {}
 
     //Only Chunk-write
-    public void writeSaveNBT(CompoundTag compound) {}
+    public void writeSaveNBT(CompoundTag pattern) {}
 
     @Override
     public final ClientboundBlockEntityDataPacket getUpdatePacket() {
-        CompoundTag compound = new CompoundTag();
-        super.write(compound);
-        writeCustomNBT(compound);
-        writeNetNBT(compound);
-        return new ClientboundBlockEntityDataPacket(getPos(), 255, compound);
+        CompoundTag pattern = new CompoundTag();
+        super.write(pattern);
+        writeCustomNBT(pattern);
+        writeNetNBT(pattern);
+        return new ClientboundBlockEntityDataPacket(getBlockPos(), 255, pattern);
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        CompoundTag compound = new CompoundTag();
-        super.write(compound);
-        writeCustomNBT(compound);
-        return compound;
+        CompoundTag pattern = new CompoundTag();
+        super.write(pattern);
+        writeCustomNBT(pattern);
+        return pattern;
     }
 
     public final void onDataPacket(Connection manager, ClientboundBlockEntityDataPacket packet) {
         super.onDataPacket(manager, packet);
-        readCustomNBT(packet.getNbtCompound());
-        readNetNBT(packet.getNbtCompound());
+        readCustomNBT(packet.getTag());
+        readNetNBT(packet.getTag());
         this.onDataReceived();
     }
 
@@ -108,21 +108,21 @@ public abstract class TileEntitySynchronized extends BlockEntity implements ILoc
     protected void onDataReceived() {}
 
     public void markForUpdate() {
-        if (getWorld() != null) {
+        if (getLevel() != null) {
             BlockState thisState = this.getBlockState();
-            getWorld().notifyBlockUpdate(getPos(), thisState, thisState, 3);
+            getLevel().findNearestBiome(getBlockPos(), thisState, thisState, 3);
         }
-        markDirty();
+        setChanged();
     }
 
     public ItemEntity dropItemOnTop(ItemStack stack) {
-        return ItemUtils.dropItem(getWorld(), getPos().getX() + 0.5, getPos().getY() + 1.5, getPos().getZ() + 0.5, stack);
+        return ItemUtils.dropItem(getLevel(), getBlockPos().getX() + 0.5, getBlockPos().getY() + 1.5, getBlockPos().getZ() + 0.5, stack);
     }
 
     public boolean removeSelf() {
-        if (this.getWorld().isRemote()) {
+        if (this.getLevel().isClientSide()) {
             return false;
         }
-        return this.getWorld().setBlockState(this.getPos(), Blocks.AIR.getDefaultState());
+        return this.getLevel().setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState());
     }
 }

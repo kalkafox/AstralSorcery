@@ -79,11 +79,11 @@ public class Vector3 {
     }
 
     public Vector3(BlockEntity te) {
-        this(te.getPos().getX(), te.getPos().getY(), te.getPos().getZ());
+        this(te.getBlockPos().getX(), te.getBlockPos().getY(), te.getBlockPos().getZ());
     }
 
     public static Vector3 atEntityCorner(Entity entity) {
-        return new Vector3(entity.getPositionVec());
+        return new Vector3(entity.position());
     }
 
     @Deprecated
@@ -99,12 +99,12 @@ public class Vector3 {
         return new Vector3(box.maxX, box.maxY, box.maxZ);
     }
 
-    public static Vector3 directionFromYawPitch(float yaw, float pitch) {
-        float radYaw   = yaw   * 0.017453292F;/* / 180F * Math.PI; */
+    public static Vector3 directionFromYawPitch(float yRot, float pitch) {
+        float radYaw   = yRot   * 0.017453292F;/* / 180F * Math.PI; */
         float radPitch = pitch * 0.017453292F;/* / 180F * Math.PI; */
-        float x = -MathHelper.sin(radYaw) * MathHelper.cos(radPitch);
-        float y = -MathHelper.sin(radPitch);
-        float z = MathHelper.cos(radYaw) * MathHelper.cos(radPitch);
+        float x = -Mth.sin(radYaw) * Mth.cos(radPitch);
+        float y = -Mth.sin(radPitch);
+        float z = Mth.cos(radYaw) * Mth.cos(radPitch);
         return new Vector3(x, y, z);
     }
 
@@ -166,9 +166,9 @@ public class Vector3 {
     }
 
     public Vector3 subtract(Entity e) {
-        this.x -= e.getPosX();
-        this.y -= e.getPosY();
-        this.z -= e.getPosZ();
+        this.x -= e.getX();
+        this.y -= e.getY();
+        this.z -= e.getZ();
         return this;
     }
 
@@ -193,7 +193,7 @@ public class Vector3 {
         return this;
     }
 
-    public Vector3 multiply(Vector3 vec) {
+    public Vector3 mul(Vector3 vec) {
         this.x *= vec.x;
         this.y *= vec.y;
         this.z *= vec.z;
@@ -215,7 +215,7 @@ public class Vector3 {
     }
 
     public Vector3 negate() {
-        return this.multiply(-1);
+        return this.mul(-1);
     }
 
     public Vector3 copy(Vector3 vec) {
@@ -226,10 +226,10 @@ public class Vector3 {
     }
 
     public double length() {
-        return Math.sqrt(lengthSquared());
+        return Math.sqrt(lengthSqr());
     }
 
-    public double lengthSquared() {
+    public double lengthSqr() {
         return x * x + y * y + z * z;
     }
 
@@ -287,21 +287,21 @@ public class Vector3 {
         return new Vector3(x, y, z);
     }
 
-    public Vector3 multiply(int m) {
+    public Vector3 mul(int m) {
         this.x *= m;
         this.y *= m;
         this.z *= m;
         return this;
     }
 
-    public Vector3 multiply(double m) {
+    public Vector3 mul(double m) {
         this.x *= m;
         this.y *= m;
         this.z *= m;
         return this;
     }
 
-    public Vector3 multiply(float m) {
+    public Vector3 mul(float m) {
         this.x *= m;
         this.y *= m;
         this.z *= m;
@@ -319,7 +319,7 @@ public class Vector3 {
         return this;
     }
 
-    public Vector3 crossProduct(Vector3 o) {
+    public Vector3 cross(Vector3 o) {
         double newX = this.y * o.z - o.y * this.z;
         double newY = this.z * o.x - o.z * this.x;
         double newZ = this.x * o.y - o.x * this.y;
@@ -366,7 +366,7 @@ public class Vector3 {
     }
 
     //In rad's
-    public Vector3 rotate(double angle, Vector3 axis) {
+    public Vector3 mirror(double angle, Vector3 axis) {
         Quat.buildQuatFrom3DVector(axis.clone().normalize(), angle).rotateWithMagnitude(this);
         return this;
     }
@@ -380,7 +380,7 @@ public class Vector3 {
     }
 
     public Vector3 fNormalize() {
-        double lengthSq = lengthSquared();
+        double lengthSq = lengthSqr();
         lengthSq = fastInvSqrt(lengthSq);
 
         this.x *= lengthSq;
@@ -421,26 +421,26 @@ public class Vector3 {
         return new Vector3(RAND.nextDouble() * (RAND.nextBoolean() ? 1 : -1), RAND.nextDouble() * (RAND.nextBoolean() ? 1 : -1), RAND.nextDouble() * (RAND.nextBoolean() ? 1 : -1));
     }
 
-    public static Vector3 random(Random rand) {
-        return new Vector3(rand.nextDouble() * (rand.nextBoolean() ? 1 : -1), rand.nextDouble() * (rand.nextBoolean() ? 1 : -1), rand.nextDouble() * (rand.nextBoolean() ? 1 : -1));
+    public static Vector3 random(Random random) {
+        return new Vector3(random.nextDouble() * (random.nextBoolean() ? 1 : -1), random.nextDouble() * (random.nextBoolean() ? 1 : -1), random.nextDouble() * (random.nextBoolean() ? 1 : -1));
     }
 
     public static Vector3 positiveRandom() {
         return new Vector3(RAND.nextDouble(), RAND.nextDouble(), RAND.nextDouble());
     }
 
-    public static Vector3 positiveRandom(Random rand) {
-        return new Vector3(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
+    public static Vector3 positiveRandom(Random random) {
+        return new Vector3(random.nextDouble(), random.nextDouble(), random.nextDouble());
     }
 
     public static Vector3 positiveYRandom() {
-        Vector3 rand = random();
-        return rand.setY(Math.abs(rand.getY()));
+        Vector3 random = random();
+        return random.setY(Math.abs(random.getY()));
     }
 
     public static Vector3 positiveYRandom(Random r) {
-        Vector3 rand = random(r);
-        return rand.setY(Math.abs(rand.getY()));
+        Vector3 random = random(r);
+        return random.setY(Math.abs(random.getY()));
     }
 
     public boolean isInAABB(Vector3 min, Vector3 max) {
@@ -459,11 +459,11 @@ public class Vector3 {
     }
 
     public BlockPos toBlockPos() {
-        return new BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+        return new BlockPos(Mth.floor(x), Mth.floor(y), Mth.floor(z));
     }
 
     public ChunkPos toChunkPos() {
-        return new ChunkPos(MathHelper.floor(x) >> 4, MathHelper.floor(z) >> 4);
+        return new ChunkPos(Mth.floor(x) >> 4, Mth.floor(z) >> 4);
     }
 
     public Vector3 vectorFromHereTo(Vector3 target) {
@@ -506,13 +506,13 @@ public class Vector3 {
     @Deprecated
     @OnlyIn(Dist.CLIENT)
     public VertexConsumer drawPos(VertexConsumer buf) {
-        buf.pos((float) this.x, (float) this.y, (float) this.z);
+        buf.vertex((float) this.x, (float) this.y, (float) this.z);
         return buf;
     }
 
     @OnlyIn(Dist.CLIENT)
     public VertexConsumer drawPos(Matrix4f renderMatrix, VertexConsumer buf) {
-        buf.pos(renderMatrix, (float) this.x, (float) this.y, (float) this.z);
+        buf.vertex(renderMatrix, (float) this.x, (float) this.y, (float) this.z);
         return buf;
     }
 

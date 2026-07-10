@@ -29,8 +29,8 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 public class EventHandlerAutoLink implements BlockChangeNotifier.Listener {
 
     @Override
-    public void onChange(Level world, LevelChunk chunk, BlockPos pos, BlockState oldState, BlockState newState) {
-        if (world.isRemote() || !chunk.getStatus().isAtLeast(ChunkStatus.FULL)) {
+    public void onChange(Level level, LevelChunk chunk, BlockPos pos, BlockState oldState, BlockState newState) {
+        if (level.isClientSide() || !chunk.getStatus().isOrAfter(ChunkStatus.FULL)) {
             return;
         }
 
@@ -38,7 +38,7 @@ public class EventHandlerAutoLink implements BlockChangeNotifier.Listener {
         Block newB = newState.getBlock();
 
         if (oldB != newB) {
-            WorldNetworkHandler handle = WorldNetworkHandler.getNetworkHandler(world);
+            WorldNetworkHandler handle = WorldNetworkHandler.getNetworkHandler(level);
             handle.informBlockChange(pos);
 
             if (oldB == Blocks.CRAFTING_TABLE) {

@@ -34,11 +34,11 @@ public class PositionedLoopSound extends SimpleSoundInstance implements Tickable
     private float volumeMultiplier = 1F;
 
     public PositionedLoopSound(CategorizedSoundEvent sound, float volume, float pitch, Vector3 pos, boolean isGlobal) {
-        this(sound, sound.getCategory(), volume, pitch, pos, isGlobal);
+        this(sound.getSoundEvent(), sound.getCategory(), volume, pitch, pos, isGlobal);
     }
 
     public PositionedLoopSound(SoundEvent sound, SoundSource category, float volume, float pitch, Vector3 pos, boolean isGlobal) {
-        super(sound.getName(), category, volume, pitch, true, 0, AttenuationType.LINEAR, (float) pos.getX(), (float) pos.getY(), (float) pos.getZ(), isGlobal);
+        super(sound.getLocation(), category, volume, pitch, SoundInstance.createUnseededRandom(), true, 0, SoundInstance.Attenuation.LINEAR, pos.getX(), pos.getY(), pos.getZ(), isGlobal);
     }
 
     public void setRefreshFunction(Predicate<PositionedLoopSound> func) {
@@ -46,17 +46,17 @@ public class PositionedLoopSound extends SimpleSoundInstance implements Tickable
     }
 
     @Override
-    public boolean isDonePlaying() {
+    public boolean isStopped() {
         hasStoppedPlaying = func == null || func.test(this);
         return hasStoppedPlaying;
     }
 
     public boolean hasStoppedPlaying() {
-        return hasStoppedPlaying || !Minecraft.getInstance().getSoundHandler().isPlaying(this);
+        return hasStoppedPlaying || !Minecraft.getInstance().getSoundManager().isActive(this);
     }
 
     public void setVolumeMultiplier(float volumeMultiplier) {
-        this.volumeMultiplier = MathHelper.clamp(volumeMultiplier, 0F, 1F);
+        this.volumeMultiplier = Mth.clamp(volumeMultiplier, 0F, 1F);
     }
 
     @Override

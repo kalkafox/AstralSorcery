@@ -107,20 +107,20 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         this.multiLayerBlockState(BlocksAS.ROCK_COLLECTOR_CRYSTAL);
         this.multiLayerBlockState(BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL);
         this.getVariantBuilder(BlocksAS.LENS)
-                .partialState().with(BlockLens.PLACED_AGAINST, Direction.UP)
+                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.UP)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 180, 0, false))
-                .partialState().with(BlockLens.PLACED_AGAINST, Direction.DOWN)
+                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.DOWN)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 0, 0, false))
-                .partialState().with(BlockLens.PLACED_AGAINST, Direction.NORTH)
+                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.NORTH)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 180, false))
-                .partialState().with(BlockLens.PLACED_AGAINST, Direction.SOUTH)
+                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.SOUTH)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 0, false))
-                .partialState().with(BlockLens.PLACED_AGAINST, Direction.EAST)
+                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.EAST)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 270, false))
-                .partialState().with(BlockLens.PLACED_AGAINST, Direction.WEST)
+                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.WEST)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 90, false));
 
-        ResourceLocation prism = BlocksAS.PRISM.getRegistryName();
+        ResourceLocation prism = RegistryHelper.getKey(BlocksAS.PRISM);
         ResourceLocation prismColored = suffixPath(prism, "_colored");
         this.getMultipartBuilder(BlocksAS.PRISM)
                 .part().modelFile(multiLayerModel(prism)).rotationX(180).addModel().condition(BlockPrism.PLACED_AGAINST, Direction.UP).end()
@@ -157,20 +157,20 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         this.simpleBlockState(BlocksAS.TRANSLUCENT_BLOCK, this.modelNothing());
         this.simpleBlockState(BlocksAS.VANISHING, this.modelNothing());
         this.getVariantBuilder(BlocksAS.STRUCTURAL)
-                .partialState().with(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE)
+                .partialState().setValue(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE)
                 .addModels(new ConfiguredModel(model(BlocksAS.TELESCOPE)))
-                .partialState().with(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.DUMMY)
+                .partialState().setValue(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.DUMMY)
                 .addModels(new ConfiguredModel(modelNothing()));
     }
 
     private <T extends Comparable<T>> void pillarModel(Block b, Property<T> pillarType, T middle, T top, T bottom) {
-        ResourceLocation key = b.getRegistryName();
+        ResourceLocation key = RegistryHelper.getKey(b);
         this.getVariantBuilder(b)
-                .partialState().with(pillarType, middle)
+                .partialState().setValue(pillarType, middle)
                 .addModels(new ConfiguredModel(model(key)))
-                .partialState().with(pillarType, top)
+                .partialState().setValue(pillarType, top)
                 .addModels(new ConfiguredModel(model(suffixPath(key, "_top"))))
-                .partialState().with(pillarType, bottom)
+                .partialState().setValue(pillarType, bottom)
                 .addModels(new ConfiguredModel(model(suffixPath(key, "_bottom"))));
     }
 
@@ -180,11 +180,11 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
             throw new IllegalArgumentException("Can only make path-suffix enumeration for blockstates with exactly 1 property!");
         }
 
-        ResourceLocation key = b.getRegistryName();
+        ResourceLocation key = RegistryHelper.getKey(b);
         Property<T> property = (Property<T>) Iterables.getFirst(properties, null);
         VariantBlockStateBuilder builder = this.getVariantBuilder(b);
-        for (T value : property.getAllowedValues()) {
-            builder.partialState().with(property, value)
+        for (T value : property.getPossibleValues()) {
+            builder.partialState().setValue(property, value)
                     .addModels(new ConfiguredModel(model(suffixPath(key, "_" + value.toString()))));
         }
     }
@@ -195,31 +195,31 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
             throw new IllegalArgumentException("Can only make path-suffix enumeration for blockstates with exactly 1 property!");
         }
 
-        ResourceLocation key = b.getRegistryName();
+        ResourceLocation key = RegistryHelper.getKey(b);
         Property<T> property = (Property<T>) Iterables.getFirst(properties, null);
         VariantBlockStateBuilder builder = this.getVariantBuilder(b);
-        for (T value : property.getAllowedValues()) {
-            builder.partialState().with(property, value)
+        for (T value : property.getPossibleValues()) {
+            builder.partialState().setValue(property, value)
                     .addModels(new ConfiguredModel(multiLayerModel(suffixPath(key, "_" + value.toString()))));
         }
     }
 
     private void simpleSlabs(SlabBlock b, ModelFile doubleSlabModel) {
-        ResourceLocation key = b.getRegistryName();
+        ResourceLocation key = RegistryHelper.getKey(b);
         this.slabBlock(b, model(key), model(suffixPath(key, "_top")), doubleSlabModel);
     }
 
     private void simpleStairs(StairBlock b) {
-        ResourceLocation key = b.getRegistryName();
+        ResourceLocation key = RegistryHelper.getKey(b);
         this.stairsBlock(b, model(key), model(suffixPath(key, "_inner")), model(suffixPath(key, "_outer")));
     }
 
     private void multiLayerBlockState(Block b) {
-        this.simpleBlockState(b, multiLayerModel(b.getRegistryName()));
+        this.simpleBlockState(b, multiLayerModel(RegistryHelper.getKey(b)));
     }
 
     private void simpleBlockState(Block b) {
-        this.simpleBlockState(b, model(b.getRegistryName()));
+        this.simpleBlockState(b, model(RegistryHelper.getKey(b)));
     }
 
     private void simpleBlockState(Block b, ModelFile targetModel) {

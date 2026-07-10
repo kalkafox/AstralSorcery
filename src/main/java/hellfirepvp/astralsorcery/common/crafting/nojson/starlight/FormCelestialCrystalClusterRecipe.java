@@ -73,11 +73,11 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public boolean matches(ItemEntity trigger, Level world, BlockPos at) {
-        if (!world.getBlockState(at.down()).isTopSolid(world, at.down(), trigger, Direction.UP)) {
+    public boolean matches(ItemEntity trigger, Level level, BlockPos at) {
+        if (!level.getBlockState(at.below()).isTopSolid(level, at.below(), trigger, Direction.UP)) {
             return false;
         }
-        List<Entity> otherEntities = getEntitiesInBlock(world, at);
+        List<Entity> otherEntities = getEntitiesInBlock(level, at);
         otherEntities.remove(trigger);
         Optional<Entity> crystalEntity = otherEntities.stream()
                 .filter(e -> e instanceof ItemEntity)
@@ -87,15 +87,15 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at) {
-        Random r = new Random(MathHelper.getPositionRandom(at));
-        if (!world.isRemote() && getAndIncrementCraftingTick(trigger) > 50 + r.nextInt(20)) {
+    public void doServerCraftTick(ItemEntity trigger, Level level, BlockPos at) {
+        Random r = new Random(Mth.getSeed(at));
+        if (!level.isClientSide() && getAndIncrementCraftingTick(trigger) > 50 + r.nextInt(20)) {
             ItemStack crystalFound;
-            if (consumeItemEntityInBlock(world, at, ItemsAS.STARDUST) != null &&
-                    (crystalFound = consumeItemEntityInBlock(world, at, 1, stack -> stack.getItem() instanceof ItemCrystalBase)) != null) {
+            if (consumeItemEntityInBlock(level, at, ItemsAS.STARDUST) != null &&
+                    (crystalFound = consumeItemEntityInBlock(level, at, 1, stack -> stack.getItem() instanceof ItemCrystalBase)) != null) {
 
-                if (world.setBlockState(at, BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.getDefaultState())) {
-                    TileCelestialCrystals cluster = MiscUtils.getTileAt(world, at, TileCelestialCrystals.class, true);
+                if (level.setBlock(at, BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.defaultBlockState())) {
+                    TileCelestialCrystals cluster = MiscUtils.getTileAt(level, at, TileCelestialCrystals.class, true);
                     if (cluster != null) {
                         CrystalAttributes attr = ((CrystalAttributeItem) crystalFound.getItem()).getAttributes(crystalFound);
                         ItemStack targetCrystal = new ItemStack(ItemsAS.CELESTIAL_CRYSTAL);
@@ -109,33 +109,33 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at) {
+    public void doClientEffectTick(ItemEntity trigger, Level level, BlockPos at) {
         for (int i = 0; i < 3; i++) {
             Vector3 pos = Vector3.atEntityCorner(trigger);
-            MiscUtils.applyRandomOffset(pos, rand, 0.15F);
+            MiscUtils.applyRandomOffset(pos, random, 0.15F);
 
             Vector3 motion = Vector3.RotAxis.Y_AXIS.clone();
-            motion.rotate(Math.toRadians(10 + rand.nextInt(20)), Vector3.RotAxis.X_AXIS)
-                .rotate(rand.nextFloat() * Math.PI * 2, Vector3.RotAxis.Y_AXIS)
-                .normalize().multiply(0.07F + rand.nextFloat() * 0.04F);
+            motion.mirror(Math.toRadians(10 + random.nextInt(20)), Vector3.RotAxis.X_AXIS)
+                .mirror(random.nextFloat() * Math.PI * 2, Vector3.RotAxis.Y_AXIS)
+                .normalize().mul(0.07F + random.nextFloat() * 0.04F);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .setMotion(motion)
-                    .setScaleMultiplier(0.05F + rand.nextFloat() * 0.2F)
-                    .setMaxAge(30 + rand.nextInt(20));
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .setDeltaMovement(motion)
+                    .setScaleMultiplier(0.05F + random.nextFloat() * 0.2F)
+                    .setMaxAge(30 + random.nextInt(20));
         }
         for (int i = 0; i < 4; i++) {
             Vector3 target = Vector3.atEntityCorner(trigger);
-            Vector3 pos = target.clone().add(Vector3.random().normalize().multiply(3 + rand.nextFloat()));
+            Vector3 pos = target.clone().add(Vector3.random().normalize().mul(3 + random.nextFloat()));
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
-                    .alpha(VFXAlphaFunction.PYRAMID.andThen(VFXAlphaFunction.proximity(target::clone, 2)))
+                    .alpha1arg(VFXAlphaFunction.PYRAMID.andThen(VFXAlphaFunction.proximity(target::clone, 2)))
                     .motion(VFXMotionController.target(target::clone, 0.1F))
-                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                    .setMaxAge(20 + rand.nextInt(20));
+                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                    .setMaxAge(20 + random.nextInt(20));
         }
     }
 }

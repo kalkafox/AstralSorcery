@@ -30,7 +30,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import hellfirepvp.astralsorcery.common.util.Constants;
 import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
-import net.neoforged.neoforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -66,20 +66,20 @@ public class MantleEffectBootes extends MantleEffect {
     protected void tickServer(Player player) {
         super.tickServer(player);
 
-        ItemStack mantle = player.getItemStackFromSlot(EquipmentSlotType.CHEST);
+        ItemStack mantle = player.getItemStackFromSlot(EquipmentSlot.CHEST);
         if (mantle.isEmpty() || !(mantle.getItem() instanceof ItemMantle)) {
             return;
         }
 
-        Level world = player.getEntityWorld();
-        List<EntityFlare> flares = gatherFlares(world, mantle);
+        Level level = player.getCommandSenderWorld();
+        List<EntityFlare> flares = gatherFlares(level, mantle);
         if (flares.size() < CONFIG.maxFlareCount.get()) {
-            if (player.ticksExisted % 80 == 0) {
-                if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFlare.get()) && rand.nextInt(4) == 0) {
-                    EntityFlare flare = EntityTypesAS.FLARE.create(player.getEntityWorld());
-                    flare.setPosition(player.getPosX(), player.getPosY(), player.getPosZ());
+            if (player.tickCount % 80 == 0) {
+                if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFlare.get()) && random.nextInt(4) == 0) {
+                    EntityFlare flare = EntityTypesAS.FLARE.create(player.getCommandSenderWorld());
+                    flare.setPosition(player.getX(), player.getY(), player.getZ());
                     flare.setFollowingTarget(player);
-                    if (world.addEntity(flare)) {
+                    if (level.addEntity(flare)) {
                         flares.add(flare);
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFlare.get(), false);
                     }
@@ -89,7 +89,7 @@ public class MantleEffectBootes extends MantleEffect {
 
         for (EntityFlare flare : flares) {
             if (flare.getFollowingTarget() != null && (flare.getAttackTarget() == null ? player.getDistance(flare) >= 12 : player.getDistance(flare) >= 35)) {
-                flare.setPositionAndRotation(player.getPosX(), player.getPosY(), player.getPosZ(), 0, 0);
+                flare.setPositionAndRotation(player.getX(), player.getY(), player.getZ(), 0, 0);
             }
         }
         setEntityIds(mantle, flares.stream().map(Entity::getEntityId).collect(Collectors.toList()));
@@ -106,8 +106,8 @@ public class MantleEffectBootes extends MantleEffect {
     private void onAttacked(LivingAttackEvent event) {
         LivingEntity attacked = event.getEntityLiving();
         DamageSource src = event.getSource();
-        if (!attacked.getEntityWorld().isRemote() && src.getTrueSource() instanceof LivingEntity) {
-            LivingEntity attacker = (LivingEntity) src.getTrueSource();
+        if (!attacked.getCommandSenderWorld().isClientSide() && src.getEntity() instanceof LivingEntity) {
+            LivingEntity attacker = (LivingEntity) src.getEntity();
             if (ItemMantle.getEffect(attacker, ConstellationsAS.bootes) != null && attacked.isAlive()) {
                 if (attacked instanceof Player && !MiscUtils.canPlayerAttackServer(attacker, attacked)) {
                     return;
@@ -117,10 +117,10 @@ public class MantleEffectBootes extends MantleEffect {
         }
     }
 
-    private void onHurt(LivingHurtEvent event) {
+    private void onHurt(LivingIncomingDamageEvent event) {
         LivingEntity hurt = event.getEntityLiving();
-        if (!hurt.getEntityWorld().isRemote() && ItemMantle.getEffect(hurt, ConstellationsAS.bootes) != null) {
-            Entity source = event.getSource().getTrueSource();
+        if (!hurt.getCommandSenderWorld().isClientSide() && ItemMantle.getEffect(hurt, ConstellationsAS.bootes) != null) {
+            Entity source = event.getSource().getEntity();
             if (source instanceof LivingEntity) {
                 this.forEachFlare(hurt, flare -> flare.setAttackTarget((LivingEntity) source));
             }
@@ -128,18 +128,18 @@ public class MantleEffectBootes extends MantleEffect {
     }
 
     protected void forEachFlare(LivingEntity owner, Consumer<EntityFlare> fn) {
-        ItemStack mantle = owner.getItemStackFromSlot(EquipmentSlotType.CHEST);
+        ItemStack mantle = owner.getItemStackFromSlot(EquipmentSlot.CHEST);
         if (mantle.isEmpty() || !(mantle.getItem() instanceof ItemMantle)) {
             return;
         }
 
-        this.gatherFlares(owner.getEntityWorld(), mantle).forEach(fn);
+        this.gatherFlares(owner.getCommandSenderWorld(), mantle).forEach(fn);
     }
 
-    protected List<EntityFlare> gatherFlares(Level world, ItemStack mantleStack) {
+    protected List<EntityFlare> gatherFlares(Level level, ItemStack mantleStack) {
         List<EntityFlare> flares = new ArrayList<>();
         for (int flareId : getEntityIds(mantleStack)) {
-            Entity e = world.getEntityByID(flareId);
+            Entity e = level.getEntityByID(flareId);
             if (e instanceof EntityFlare && e.isAlive()) {
                 flares.add((EntityFlare) e);
             }
@@ -149,7 +149,7 @@ public class MantleEffectBootes extends MantleEffect {
 
     protected void setEntityIds(ItemStack mantleStack, List<Integer> ids) {
         ListTag list = new ListTag();
-        ids.forEach(i -> list.add(IntNBT.valueOf(i)));
+        ids.forEach(i -> list.add(IntTag.valueOf(i)));
         NBTHelper.getPersistentData(mantleStack).put("flareIds", list);
     }
 

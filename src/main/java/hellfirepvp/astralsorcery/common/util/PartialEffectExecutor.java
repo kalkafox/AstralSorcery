@@ -19,32 +19,32 @@ import java.util.Random;
  */
 public class PartialEffectExecutor {
 
-    private static final Random random = new Random();
+    private static final Random RAND = new Random();
 
-    private final Random rand;
+    private final Random random;
     private final float amount;
-    private float currentAmount;
+    private float index;
 
     public PartialEffectExecutor(float amount) {
-        this(amount, random);
+        this(amount, RAND);
     }
 
-    public PartialEffectExecutor(float amount, Random rand) {
-        this.rand = rand;
+    public PartialEffectExecutor(float amount, Random random) {
+        this.random = random;
         this.amount = amount;
-        this.currentAmount = amount;
+        this.index = amount;
     }
 
     public boolean canExecute() {
-        return currentAmount > 1 || rand.nextFloat() < currentAmount;
+        return index > 1 || random.nextFloat() < index;
     }
 
     public void markExecution() {
-        currentAmount -= 1F;
+        index -= 1F;
     }
 
     public void reset() {
-        this.currentAmount = this.amount;
+        this.index = this.amount;
     }
 
     public boolean executeAll(Runnable run) {

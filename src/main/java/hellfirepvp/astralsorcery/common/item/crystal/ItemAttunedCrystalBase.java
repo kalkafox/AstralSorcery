@@ -44,7 +44,7 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level world, List<Component> toolTip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> toolTip, TooltipFlag flag) {
         CrystalAttributes.TooltipResult result = addCrystalPropertyToolTip(stack, toolTip);
         if (result != null) {
             ProgressionTier tier = ResearchHelper.getClientProgress().getTierReached();
@@ -54,10 +54,10 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
             if (c != null) {
                 if (GatedKnowledge.CRYSTAL_TUNE.canSee(tier) && ResearchHelper.getClientProgress().hasConstellationDiscovered(c)) {
                     toolTip.add(Component.translatable("crystal.info.astralsorcery.attuned",
-                            c.getConstellationName().withStyle(TextFormatting.BLUE))
-                            .withStyle(TextFormatting.GRAY));
+                            c.getConstellationName().withStyle(ChatFormatting.BLUE))
+                            .withStyle(ChatFormatting.GRAY));
                 } else if (!addedMissing) {
-                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(ChatFormatting.GRAY));
                     addedMissing = true;
                 }
             }
@@ -66,10 +66,10 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
             if (tr != null) {
                 if (GatedKnowledge.CRYSTAL_TUNE.canSee(tier) && ResearchHelper.getClientProgress().hasConstellationDiscovered(tr)) {
                     toolTip.add(Component.translatable("crystal.info.astralsorcery.trait",
-                            tr.getConstellationName().withStyle(TextFormatting.BLUE))
-                            .withStyle(TextFormatting.GRAY));
+                            tr.getConstellationName().withStyle(ChatFormatting.BLUE))
+                            .withStyle(ChatFormatting.GRAY));
                 } else if (!addedMissing) {
-                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(TextFormatting.GRAY));
+                    toolTip.add(Component.translatable("astralsorcery.progress.missing.knowledge").withStyle(ChatFormatting.GRAY));
                 }
             }
         }
@@ -79,7 +79,7 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
     public Component getDisplayName(ItemStack stack) {
         IWeakConstellation cst = this.getAttunedConstellation(stack);
         if (cst != null) {
-            return Component.translatable(super.getTranslationKey(stack) + ".typed", cst.getConstellationName());
+            return Component.translatable(super.getDescriptionId(stack) + ".typed", cst.getConstellationName());
         }
         return super.getDisplayName(stack);
     }
@@ -99,7 +99,7 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
     @Override
     public boolean setAttunedConstellation(ItemStack stack, @Nullable IWeakConstellation cst) {
         if (cst != null) {
-            cst.writeToNBT(NBTHelper.getPersistentData(stack));
+            cst.save(NBTHelper.getPersistentData(stack));
         } else {
             NBTHelper.getPersistentData(stack).remove(IConstellation.getDefaultSaveKey());
         }
@@ -115,7 +115,7 @@ public abstract class ItemAttunedCrystalBase extends ItemCrystalBase implements 
     @Override
     public boolean setTraitConstellation(ItemStack stack, @Nullable IMinorConstellation cst) {
         if (cst != null) {
-            cst.writeToNBT(NBTHelper.getPersistentData(stack), "constellationTrait");
+            cst.save(NBTHelper.getPersistentData(stack), "constellationTrait");
         } else {
             NBTHelper.getPersistentData(stack).remove("constellationTrait");
         }

@@ -28,15 +28,15 @@ import java.awt.*;
  */
 public interface NavigationArrowScreen {
 
-    default public Rectangle drawArrow(PoseStack renderStack, int offsetLeft, int offsetTop, int guiZLevel, Type direction, int mouseX, int mouseY, float pTicks) {
+    default public Rectangle drawArrow(PoseStack renderStack, int offsetLeft, int offsetTop, int guiZLevel, Type direction, int xpos, int ypos, float pTicks) {
         float width = 30F;
         float height = 15F;
 
         Rectangle rectArrow = new Rectangle(offsetLeft, offsetTop, (int) width, (int) height);
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(rectArrow.getX() + (width / 2), rectArrow.getY() + (height / 2), 0);
         float uFrom, vFrom = direction == Type.LEFT ? 0.5F : 0F;
-        if (rectArrow.contains(mouseX, mouseY)) {
+        if (rectArrow.contains(xpos, ypos)) {
             uFrom = 0.5F;
             renderStack.scale(1.1F, 1.1F, 1.1F);
         } else {
@@ -48,14 +48,14 @@ public interface NavigationArrowScreen {
         renderStack.translate(-(width / 2), -(height / 2), 0);
 
         TexturesAS.TEX_GUI_BOOK_ARROWS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, 0, 0, guiZLevel, width, height)
                     .tex(uFrom, vFrom, 0.5F, 0.5F)
                     .color(1F, 1F, 1F, 0.8F)
                     .draw();
         });
 
-        renderStack.pop();
+        renderStack.popPose();
 
         return rectArrow;
     }

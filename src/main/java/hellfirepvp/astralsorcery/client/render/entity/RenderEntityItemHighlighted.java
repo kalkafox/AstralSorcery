@@ -28,22 +28,22 @@ import net.neoforged.fml.client.registry.IRenderFactory;
  */
 public class RenderEntityItemHighlighted extends ItemEntityRenderer {
 
-    protected RenderEntityItemHighlighted(EntityRenderDispatcher renderManager) {
-        super(renderManager, Minecraft.getInstance().getItemRenderer());
+    protected RenderEntityItemHighlighted(EntityRenderDispatcher entityRenderDispatcher) {
+        super(entityRenderDispatcher, Minecraft.getInstance().getItemRenderer());
     }
 
     @Override
-    public void render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack renderStack, MultiBufferSource buffer, int packedLight) {
-        if (entity instanceof EntityItemHighlighted && ((EntityItemHighlighted) entity).hasColor()) {
-            renderStack.push();
+    public void render(ItemEntity entity, float entityYaw, float a, PoseStack renderStack, MultiBufferSource buffer, int packedLight) {
+        if (entity instanceof EntityItemHighlighted && ((EntityItemHighlighted) entity).hasCustomColor()) {
+            renderStack.pushPose();
             renderStack.translate(0, 0.35F, 0);
             RenderingDrawUtils.renderLightRayFan(renderStack, buffer,
                     ((EntityItemHighlighted) entity).getHighlightColor(), 160420L + entity.getEntityId(),
                     16, 12, 15);
-            renderStack.pop();
+            renderStack.popPose();
         }
 
-        super.render(entity, entityYaw, partialTicks, renderStack, buffer, packedLight);
+        super.render(entity, entityYaw, a, renderStack, buffer, packedLight);
     }
 
     public static class Factory implements IRenderFactory<EntityItemHighlighted> {

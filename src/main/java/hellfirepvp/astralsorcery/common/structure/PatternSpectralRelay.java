@@ -29,11 +29,11 @@ public class PatternSpectralRelay extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        addBlock(BlocksAS.SPECTRAL_RELAY.getDefaultState(), 0, 0, 0);
+        addBlock(BlocksAS.SPECTRAL_RELAY.defaultBlockState(), 0, 0, 0);
 
-        BlockState chiseled = BlocksAS.MARBLE_CHISELED.getDefaultState();
-        BlockState arch = BlocksAS.MARBLE_ARCH.getDefaultState();
-        BlockState sooty = BlocksAS.BLACK_MARBLE_RAW.getDefaultState();
+        BlockState chiseled = BlocksAS.MARBLE_CHISELED.defaultBlockState();
+        BlockState arch = BlocksAS.MARBLE_ARCH.defaultBlockState();
+        BlockState sooty = BlocksAS.BLACK_MARBLE_RAW.defaultBlockState();
 
         addBlock(sooty, 0, -1, 0);
 

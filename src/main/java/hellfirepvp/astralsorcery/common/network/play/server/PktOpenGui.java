@@ -70,7 +70,7 @@ public class PktOpenGui extends ASPacket<PktOpenGui> {
             }
 
             @Override
-            public void handle(PktOpenGui packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktOpenGui packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

@@ -67,9 +67,9 @@ public class PatreonManager implements ITickHandler {
                         effectEntity = data.createEntity(player, effect);
                     }
 
-                    Level playerWorld = player.getServerWorld();
+                    Level playerWorld = player.getLevel();
                     if (effectEntity.getLastTickedDimension() != null &&
-                            !playerWorld.getDimensionKey().equals(effectEntity.getLastTickedDimension())) {
+                            !playerWorld.dimension().equals(effectEntity.getLastTickedDimension())) {
                         effectEntity.placeNear(player);
                     }
 
@@ -95,8 +95,8 @@ public class PatreonManager implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

@@ -33,12 +33,12 @@ public class TimeStopEffectHandler implements ITickHandler {
 
     @Override
     public void tick(TickEvent.Type type, Object... context) {
-        if (Minecraft.getInstance().world == null) {
+        if (Minecraft.getInstance().level == null) {
             return;
         }
 
         SyncDataHolder.executeClient(SyncDataHolder.DATA_TIME_FREEZE_EFFECTS, ClientTimeFreezeEffects.class, effects -> {
-            List<TimeStopEffectHelper> zoneEffects = effects.getTimeStopEffects(Minecraft.getInstance().world);
+            List<TimeStopEffectHelper> zoneEffects = effects.getTimeStopEffects(Minecraft.getInstance().level);
             zoneEffects.forEach(TimeStopEffectHelper::playClientTickEffect);
         });
     }
@@ -49,8 +49,8 @@ public class TimeStopEffectHandler implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

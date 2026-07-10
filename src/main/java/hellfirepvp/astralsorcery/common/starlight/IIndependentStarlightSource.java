@@ -28,10 +28,10 @@ import java.util.Random;
  */
 public interface IIndependentStarlightSource {
 
-    public static final Random rand = new Random();
+    public static final Random random = new Random();
 
     //As the purpose of the source, this should produce the starlight - called once every tick
-    public float produceStarlightTick(ServerLevel world, BlockPos pos);
+    public float produceStarlightTick(ServerLevel level, BlockPos pos);
 
     //Can be null or change per tick.
     @Nullable
@@ -55,8 +55,8 @@ public interface IIndependentStarlightSource {
 
     public SourceClassRegistry.SourceProvider getProvider();
 
-    public void readFromNBT(CompoundTag compound);
+    public void readFromNBT(CompoundTag pattern);
 
-    public void writeToNBT(CompoundTag compound);
+    public void save(CompoundTag pattern);
 
 }

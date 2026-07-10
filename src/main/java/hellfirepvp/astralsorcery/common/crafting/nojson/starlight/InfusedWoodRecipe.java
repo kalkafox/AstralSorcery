@@ -53,7 +53,7 @@ public class InfusedWoodRecipe extends LiquidStarlightRecipe {
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getOutputForRender() {
-        return Collections.singletonList(Ingredient.fromItems(BlocksAS.INFUSED_WOOD));
+        return Collections.singletonList(Ingredient.valueFromJson(BlocksAS.INFUSED_WOOD));
     }
 
     @Override
@@ -65,32 +65,32 @@ public class InfusedWoodRecipe extends LiquidStarlightRecipe {
     }
 
     @Override
-    public boolean matches(ItemEntity trigger, Level world, BlockPos at) {
+    public boolean matches(ItemEntity trigger, Level level, BlockPos at) {
         return true;
     }
 
     @Override
-    public void doServerCraftTick(ItemEntity trigger, Level world, BlockPos at) {
+    public void doServerCraftTick(ItemEntity trigger, Level level, BlockPos at) {
         if (getAndIncrementCraftingTick(trigger) > 5) {
-            if (consumeItemEntityInBlock(world, at, 1, (ItemStack stack) -> !stack.isEmpty() && stack.getItem().isIn(ItemTags.LOGS)) != null) {
-                ItemUtils.dropItemNaturally(world, trigger.getPosX(), trigger.getPosY(), trigger.getPosZ(), new ItemStack(BlocksAS.INFUSED_WOOD));
+            if (consumeItemEntityInBlock(level, at, 1, (ItemStack stack) -> !stack.isEmpty() && stack.getItem().isIn(ItemTags.LOGS)) != null) {
+                ItemUtils.dropItemNaturally(level, trigger.getX(), trigger.getY(), trigger.getZ(), new ItemStack(BlocksAS.INFUSED_WOOD));
             }
         }
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void doClientEffectTick(ItemEntity trigger, Level world, BlockPos at) {
+    public void doClientEffectTick(ItemEntity trigger, Level level, BlockPos at) {
         for (int i = 0; i < 4; i++) {
             Vector3 pos = new Vector3(at).add(0.5, 0.5, 0.5);
-            MiscUtils.applyRandomOffset(pos, rand, 0.5F);
+            MiscUtils.applyRandomOffset(pos, random, 0.5F);
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(pos)
                     .color(VFXColorFunction.constant(ColorsAS.DYE_BROWN))
-                    .alpha(VFXAlphaFunction.PYRAMID)
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.1F)
-                    .setMaxAge(30 + rand.nextInt(20));
+                    .alpha1arg(VFXAlphaFunction.PYRAMID)
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.1F)
+                    .setMaxAge(30 + random.nextInt(20));
         }
     }
 }

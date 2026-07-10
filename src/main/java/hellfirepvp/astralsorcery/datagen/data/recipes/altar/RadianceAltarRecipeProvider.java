@@ -42,12 +42,12 @@ import java.util.function.Consumer;
  */
 public class RadianceAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
         registerRecipes(registrar);
         registerConstellationRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<IFinishedRecipe> registrar) {
+    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
         SimpleAltarRecipeBuilder.builder()
                 .createRecipe(ItemsAS.MANTLE, AltarType.RADIANCE)
                 .setStarlightRequirement(0.6F)
@@ -71,7 +71,7 @@ public class RadianceAltarRecipeProvider {
                 .build(registrar);
 
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.NBT_COPY)
-                .createRecipe(NameUtil.suffixPath(ItemsAS.RESONATOR.getRegistryName(), "_upgrade_ichosic"), AltarType.RADIANCE)
+                .createRecipe(NameUtil.suffixPath(RegistryHelper.getKey(ItemsAS.RESONATOR), "_upgrade_ichosic"), AltarType.RADIANCE)
                 .modify(recipe -> recipe.addNBTCopyMatchIngredient(ItemsAS.RESONATOR))
                 .setFocusConstellation(ConstellationsAS.octans)
                 .setStarlightRequirement(0.8F)
@@ -220,7 +220,7 @@ public class RadianceAltarRecipeProvider {
         registerShiftingStarRecipe(registrar, ConstellationsAS.vicio, ItemsAS.SHIFTING_STAR_VICIO);
     }
 
-    private static void registerShiftingStarRecipe(Consumer<IFinishedRecipe> registrar, IMajorConstellation constellation, Item shiftingStarItem) {
+    private static void registerShiftingStarRecipe(Consumer<FinishedRecipe> registrar, IMajorConstellation constellation, Item shiftingStarItem) {
         Ingredient signature = constellation.getConstellationSignatureItems().get(0);
         SimpleAltarRecipeBuilder.builder()
                 .createRecipe(shiftingStarItem, AltarType.RADIANCE)
@@ -250,7 +250,7 @@ public class RadianceAltarRecipeProvider {
                 .build(registrar);
     }
 
-    private static void registerConstellationRecipes(Consumer<IFinishedRecipe> registrar) {
+    private static void registerConstellationRecipes(Consumer<FinishedRecipe> registrar) {
         RegistriesAS.REGISTRY_CONSTELLATIONS.forEach(cst -> {
             if (Mods.ASTRAL_SORCERY.owns(cst)) {
                 registerConstellationPaperRecipe(registrar, cst);
@@ -261,7 +261,7 @@ public class RadianceAltarRecipeProvider {
         });
     }
 
-    private static void registerMantleRecipe(Consumer<IFinishedRecipe> registrar, IWeakConstellation constellation) {
+    private static void registerMantleRecipe(Consumer<FinishedRecipe> registrar, IWeakConstellation constellation) {
         List<Ingredient> signature = constellation.getConstellationSignatureItems();
         if (signature.isEmpty()) {
             throw new IllegalArgumentException("Cannot create a mantle recipe for constellation without signature items: " + constellation.getRegistryName());
@@ -270,7 +270,7 @@ public class RadianceAltarRecipeProvider {
 
 
         SimpleAltarRecipeBuilder<ConstellationBaseNBTCopyRecipe> builder = SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.CONSTELLATION_BASE_NBT_COPY)
-                .createRecipe(AstralSorcery.key("mantle_" + constellation.getSimpleName()), AltarType.RADIANCE)
+                .createRecipe(AstralSorcery.key("mantle_" + constellation.getName()), AltarType.RADIANCE)
                 .modify(recipe ->
                         recipe.setConstellation(constellation)
                                 .addNBTCopyMatchIngredient(ItemsAS.MANTLE))
@@ -291,7 +291,7 @@ public class RadianceAltarRecipeProvider {
         builder.build(registrar);
     }
 
-    private static void registerConstellationPaperRecipe(Consumer<IFinishedRecipe> registrar, IConstellation constellation) {
+    private static void registerConstellationPaperRecipe(Consumer<FinishedRecipe> registrar, IConstellation constellation) {
         List<Ingredient> signature = constellation.getConstellationSignatureItems();
         if (signature.isEmpty()) {
             throw new IllegalArgumentException("Cannot create a constellation paper recipe for constellation without signature items: " + constellation.getRegistryName());
@@ -299,7 +299,7 @@ public class RadianceAltarRecipeProvider {
         Ingredient center = signature.get(0);
 
         SimpleAltarRecipeBuilder<ConstellationBaseItemRecipe> builder = SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.CONSTELLATION_ITEM_BASE)
-                .createRecipe(AstralSorcery.key("constellation_paper_" + constellation.getSimpleName()), AltarType.RADIANCE)
+                .createRecipe(AstralSorcery.key("constellation_paper_" + constellation.getName()), AltarType.RADIANCE)
                 .modify(recipe -> recipe.setConstellation(constellation))
                 .multiplyDuration(0.7F)
                 .setStarlightRequirement(0.4F)

@@ -8,20 +8,21 @@
 
 package hellfirepvp.astralsorcery.common.registry;
 
-import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.render.tile.*;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.tile.*;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.client.registry.ClientRegistry;
 
 import static hellfirepvp.astralsorcery.common.lib.TileEntityTypesAS.*;
 
@@ -64,36 +65,34 @@ public class RegistryTileEntities {
 
     @OnlyIn(Dist.CLIENT)
     public static void initClient() {
-        ClientRegistry.bindTileEntityRenderer(ALTAR, RenderAltar::new);
-        ClientRegistry.bindTileEntityRenderer(ATTUNEMENT_ALTAR, RenderAttunementAltar::new);
-        ClientRegistry.bindTileEntityRenderer(CHALICE, RenderChalice::new);
-        ClientRegistry.bindTileEntityRenderer(COLLECTOR_CRYSTAL, RenderCollectorCrystal::new);
-        ClientRegistry.bindTileEntityRenderer(INFUSER, RenderInfuser::new);
-        ClientRegistry.bindTileEntityRenderer(LENS, RenderLens::new);
-        ClientRegistry.bindTileEntityRenderer(OBSERVATORY, RenderObservatory::new);
-        ClientRegistry.bindTileEntityRenderer(PRISM, RenderPrism::new);
-        ClientRegistry.bindTileEntityRenderer(REFRACTION_TABLE, RenderRefractionTable::new);
-        ClientRegistry.bindTileEntityRenderer(RITUAL_PEDESTAL, RenderRitualPedestal::new);
-        ClientRegistry.bindTileEntityRenderer(SPECTRAL_RELAY, RenderSpectralRelay::new);
-        ClientRegistry.bindTileEntityRenderer(TELESCOPE, RenderTelescope::new);
-        ClientRegistry.bindTileEntityRenderer(TRANSLUCENT_BLOCK, RenderTileFakedState::new);
-        ClientRegistry.bindTileEntityRenderer(TREE_BEACON_COMPONENT, RenderTileFakedState::new);
-        ClientRegistry.bindTileEntityRenderer(WELL, RenderWell::new);
+        BlockEntityRenderers.register(ALTAR, RenderAltar::new);
+        BlockEntityRenderers.register(ATTUNEMENT_ALTAR, RenderAttunementAltar::new);
+        BlockEntityRenderers.register(CHALICE, RenderChalice::new);
+        BlockEntityRenderers.register(COLLECTOR_CRYSTAL, RenderCollectorCrystal::new);
+        BlockEntityRenderers.register(INFUSER, RenderInfuser::new);
+        BlockEntityRenderers.register(LENS, RenderLens::new);
+        BlockEntityRenderers.register(OBSERVATORY, RenderObservatory::new);
+        BlockEntityRenderers.register(PRISM, RenderPrism::new);
+        BlockEntityRenderers.register(REFRACTION_TABLE, RenderRefractionTable::new);
+        BlockEntityRenderers.register(RITUAL_PEDESTAL, RenderRitualPedestal::new);
+        BlockEntityRenderers.register(SPECTRAL_RELAY, RenderSpectralRelay::new);
+        BlockEntityRenderers.register(TELESCOPE, RenderTelescope::new);
+        BlockEntityRenderers.register(TRANSLUCENT_BLOCK, RenderTileFakedState::new);
+        BlockEntityRenderers.register(TREE_BEACON_COMPONENT, RenderTileFakedState::new);
+        BlockEntityRenderers.register(WELL, RenderWell::new);
     }
 
     private static <T extends BlockEntity> BlockEntityType<T> registerTile(Class<T> tileClass, Block... validBlocks) {
         ResourceLocation name = NameUtil.fromClass(tileClass, "Tile");
-        TileEntityType.Builder<T> typeBuilder = TileEntityType.Builder.create(() -> {
+        BlockEntityType.Builder<T> typeBuilder = BlockEntityType.Builder.of((pos, state) -> {
             try {
-                return tileClass.newInstance();
-            } catch (Exception exc) {
-                exc.printStackTrace();
+                return tileClass.getConstructor(BlockPos.class, BlockState.class).newInstance(pos, state);
+            } catch (ReflectiveOperationException exc) {
+                throw new IllegalArgumentException("Unexpected Constructor for class: " + tileClass.getName(), exc);
             }
-            throw new IllegalArgumentException("Unexpected Constructor for class: " + tileClass.getName());
         }, validBlocks);
 
         BlockEntityType<T> type = typeBuilder.build(null);
-        AstralSorcery.getProxy().getRegistryPrimer().register(Registries.BLOCK_ENTITY_TYPE, name, type);
-        return type;
+        return AstralRegistries.register(AstralRegistries.BLOCK_ENTITY_TYPES, name, type);
     }
 }

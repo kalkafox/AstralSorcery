@@ -34,14 +34,14 @@ public class ItemHandTelescope extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> onItemRightClick(Level world, Player player, InteractionHand hand) {
-        ItemStack held = player.getHeldItem(hand);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
         if (held.isEmpty()) {
-            return ActionResult.resultSuccess(held);
+            return InteractionResultHolder.success(held);
         }
-        if (world.isRemote()) {
+        if (level.isClientSide()) {
             AstralSorcery.getProxy().openGui(player, GuiType.HAND_TELESCOPE);
         }
-        return ActionResult.resultSuccess(held);
+        return InteractionResultHolder.success(held);
     }
 }

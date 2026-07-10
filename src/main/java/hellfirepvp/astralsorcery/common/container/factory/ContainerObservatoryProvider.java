@@ -39,27 +39,27 @@ public class ContainerObservatoryProvider extends CustomContainerProvider<Contai
 
     @Override
     protected void writeExtraData(FriendlyByteBuf buf) {
-        ByteBufUtils.writePos(buf, this.observatory.getPos());
+        ByteBufUtils.writePos(buf, this.observatory.getBlockPos());
     }
 
     @Nonnull
     @Override
-    public ContainerObservatory createMenu(int windowId, Inventory plInventory, Player player) {
-        return new ContainerObservatory(this.observatory, windowId);
+    public ContainerObservatory createMenu(int containerId, Inventory plInventory, Player player) {
+        return new ContainerObservatory(this.observatory, containerId);
     }
 
-    private static ContainerObservatory createFromPacket(int windowId, Inventory plInventory, FriendlyByteBuf data) {
+    private static ContainerObservatory createFromPacket(int containerId, Inventory plInventory, FriendlyByteBuf data) {
         BlockPos at = ByteBufUtils.readPos(data);
         Player player = plInventory.player;
-        TileObservatory observatory = MiscUtils.getTileAt(player.getEntityWorld(), at, TileObservatory.class, true);
-        return new ContainerObservatory(observatory, windowId);
+        TileObservatory observatory = MiscUtils.getTileAt(player.getCommandSenderWorld(), at, TileObservatory.class, true);
+        return new ContainerObservatory(observatory, containerId);
     }
 
     public static class Factory implements IContainerFactory<ContainerObservatory> {
 
         @Override
-        public ContainerObservatory create(int windowId, Inventory inv, FriendlyByteBuf data) {
-            return ContainerObservatoryProvider.createFromPacket(windowId, inv, data);
+        public ContainerObservatory create(int containerId, Inventory inv, FriendlyByteBuf data) {
+            return ContainerObservatoryProvider.createFromPacket(containerId, inv, data);
         }
     }
 }

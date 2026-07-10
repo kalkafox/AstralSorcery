@@ -36,7 +36,7 @@ import java.util.UUID;
  */
 public class PatreonPartialEntity {
 
-    protected static final Random rand = new Random();
+    protected static final Random random = new Random();
 
     private final UUID ownerUUID;
     private final UUID effectUUID;
@@ -60,7 +60,7 @@ public class PatreonPartialEntity {
         return ownerUUID;
     }
 
-    public Vector3 getPos() {
+    public Vector3 getBlockPos() {
         return pos;
     }
 
@@ -82,37 +82,37 @@ public class PatreonPartialEntity {
     public void tickClient() {}
 
     @OnlyIn(Dist.CLIENT)
-    public void tickEffects(Level world) {}
+    public void tickEffects(Level level) {}
 
-    public boolean tick(Level world) {
-        boolean changed = lastTickedDimension == null || !lastTickedDimension.equals(world.getDimensionKey());
-        lastTickedDimension = world.getDimensionKey();
+    public boolean tick(Level level) {
+        boolean changed = lastTickedDimension == null || !lastTickedDimension.equals(level.dimension());
+        lastTickedDimension = level.dimension();
 
-        if (updateMotion(world)) {
+        if (postMoveUpdate(level)) {
             changed = true;
         }
 
-        if (tryMoveEntity(world)) {
+        if (tryMoveEntity(level)) {
             changed = true;
         }
 
-        if (world.isRemote()) {
-            tickEffects(world);
+        if (level.isClientSide()) {
+            tickEffects(level);
         }
 
         return changed;
     }
 
-    private boolean updateMotion(LevelAccessor world) {
+    private boolean postMoveUpdate(LevelAccessor level) {
         Vector3 prevMot = this.motion.clone();
 
-        Player target = findOwner(world);
+        Player target = findOwner(level);
         if (target == null) {
             this.motion = new Vector3();
         } else {
             Vector3 moveTarget = Vector3.atEntityCenter(target).addY(1.5);
             if (moveTarget.distanceSquared(this.pos) <= 3D) {
-                this.motion.multiply(0.95F);
+                this.motion.mul(0.95F);
             } else {
                 double diffX = (moveTarget.getX() - pos.getX()) / 8;
                 double diffY = (moveTarget.getY() - pos.getY()) / 8;
@@ -124,10 +124,10 @@ public class PatreonPartialEntity {
         return !this.motion.equals(prevMot);
     }
 
-    private boolean tryMoveEntity(LevelAccessor world) {
+    private boolean tryMoveEntity(LevelAccessor level) {
         this.prevPos = this.pos.clone();
 
-        Player owner = findOwner(world);
+        Player owner = findOwner(level);
         if (owner != null && this.pos.distance(Vector3.atEntityCenter(owner)) >= 16) {
             placeNear(owner);
             return true;
@@ -138,7 +138,7 @@ public class PatreonPartialEntity {
 
     public void placeNear(Player player) {
         this.pos = Vector3.atEntityCenter(player)
-                .setY(player.getPosY())
+                .setY(player.getY())
                 .addY(player.getHeight())
                 .add(Vector3.random().setY(0).normalize());
         this.prevPos = this.pos.clone();
@@ -147,14 +147,14 @@ public class PatreonPartialEntity {
     }
 
     @Nullable
-    public Player findOwner(LevelAccessor world) {
-        return world.getPlayerByUuid(this.ownerUUID);
+    public Player findOwner(LevelAccessor level) {
+        return level.getPlayerByUuid(this.ownerUUID);
     }
 
     public void readFromNBT(CompoundTag cmp) {
         if (cmp.contains("lastTickedDimension")) {
-            ResourceLocation worldKey = new ResourceLocation(cmp.getString("lastTickedDimension"));
-            this.lastTickedDimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, worldKey);
+            ResourceLocation worldKey = ResourceLocation.parse(cmp.getString("lastTickedDimension"));
+            this.lastTickedDimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, worldKey);
         } else {
             this.lastTickedDimension = null;
         }
@@ -164,7 +164,7 @@ public class PatreonPartialEntity {
         }
     }
 
-    public void writeToNBT(CompoundTag cmp) {
+    public void save(CompoundTag cmp) {
         if (this.lastTickedDimension != null) {
             cmp.putString("lastTickedDimension", this.lastTickedDimension.getLocation().toString());
         }

@@ -54,39 +54,39 @@ public class CelestialStrike {
 
     private CelestialStrike() {}
 
-    public static void play(@Nullable LivingEntity attacker, ServerLevel world, Vector3 at, Vector3 displayPosition) {
+    public static void play(@Nullable LivingEntity attacker, ServerLevel level, Vector3 at, Vector3 displayPosition) {
         double radius = 16D;
-        List<LivingEntity> livingEntities = world.getEntitiesWithinAABB(LivingEntity.class,
+        List<LivingEntity> livingEntities = level.getEntitiesWithinAABB(LivingEntity.class,
                 EMPTY.grow(radius, radius / 2, radius)
-                        .offset(at.toBlockPos()), EntityPredicates.IS_ALIVE);
+                        .offset(at.toBlockPos()), EntitySelector.ENTITY_STILL_ALIVE);
         if (attacker != null) {
             livingEntities.remove(attacker);
         }
 
         DamageSource ds = CommonProxy.DAMAGE_SOURCE_STELLAR;
         if (attacker != null) {
-            ds = DamageSource.causeMobDamage(attacker);
+            ds = DamageSource.mobAttack(attacker);
             if (attacker instanceof Player) {
                 ds = DamageSource.causePlayerDamage((Player) attacker);
             }
         }
         float dmg = 25F;
-        dmg += SkyCollectionHelper.getSkyNoiseDistribution(world, at.toBlockPos()) * 10F;
+        dmg += SkyCollectionHelper.getSkyNoiseDistribution(level, at.toBlockPos()) * 10F;
         for (LivingEntity living : livingEntities) {
             if ((living instanceof Player) &&
                     (living.isSpectator() || ((Player) living).isCreative() ||
-                            (attacker != null && living.isOnSameTeam(attacker)))) {
+                            (attacker != null && living.isAlliedTo(attacker)))) {
                 continue;
             }
             float dstPerc = (float) (Vector3.atEntityCenter(living).distance(at) / radius);
-            dstPerc = 1F - MathHelper.clamp(dstPerc, 0F, 1F);
+            dstPerc = 1F - Mth.clamp(dstPerc, 0F, 1F);
             float dmgDealt = dstPerc * dmg;
             if (dmgDealt > 0.5) {
-                DamageUtil.attackEntityFrom(living, ds, dmgDealt);
+                DamageUtil.hurt(living, ds, dmgDealt);
 
                 if (attacker != null) {
                     int fireAspectLevel = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FIRE_ASPECT, attacker);
-                    if (fireAspectLevel > 0 && !living.isBurning()) {
+                    if (fireAspectLevel > 0 && !living.isOnFire()) {
                         living.setFire(fireAspectLevel * 4);
                     }
                 }
@@ -96,7 +96,7 @@ public class CelestialStrike {
                 .addData(buf -> {
                     ByteBufUtils.writeVector(buf, displayPosition);
                 });
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(world, at.toBlockPos(), 96));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, at.toBlockPos(), 96));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -108,7 +108,7 @@ public class CelestialStrike {
         EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                 .spawn(effectPos.clone().addY(-4))
                 .setup(effectPos.clone().addY(16), 9, 6)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.WHITE)
                 .setAlphaMultiplier(1F)
                 .setMaxAge(25);
@@ -117,7 +117,7 @@ public class CelestialStrike {
         EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                 .spawn(effectPos.clone().addY(-4))
                 .setup(effectPos.clone().addY(16).addY(r.nextFloat() * 2F), 9, 6)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.constant(ColorsAS.EFFECT_BLUE_LIGHT))
                 .setAlphaMultiplier(1F)
                 .setMaxAge(24 + r.nextInt(6));
@@ -126,7 +126,7 @@ public class CelestialStrike {
         EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                 .spawn(effectPos.clone().addY(-4))
                 .setup(effectPos.clone().addY(16).addY(r.nextFloat() * 2F), 9, 6)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.constant(ColorsAS.EFFECT_BLUE_DARK))
                 .setAlphaMultiplier(1F)
                 .setMaxAge(24 + r.nextInt(6));
@@ -136,10 +136,10 @@ public class CelestialStrike {
         EffectHelper.of(EffectTemplatesAS.TEXTURE_SPRITE)
                 .spawn(vec.clone().addY(0.1F))
                 .setAxis(Vector3.RotAxis.Y_AXIS.clone().negate())
-                .setSprite(tex)
+                .pickSprite(tex)
                 .setNoRotation(r.nextFloat() * 360F)
                 .setAlphaMultiplier(0.4F)
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .setScaleMultiplier(17F)
                 .setMaxAge(30 + r.nextInt(10));
 
@@ -169,22 +169,22 @@ public class CelestialStrike {
 
         List<Vector3> circle = MiscUtils.getCirclePositions(vec, Vector3.RotAxis.Y_AXIS, 7.5F + r.nextFloat(), 200 + r.nextInt(40));
         for (Vector3 at : circle) {
-            Vector3 dir = at.clone().subtract(vec).normalize().multiply(0.3 + 0.4 * r.nextFloat());
+            Vector3 dir = at.clone().subtract(vec).normalize().mul(0.3 + 0.4 * r.nextFloat());
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
                     .setAlphaMultiplier(0.4F)
-                    .setMotion(dir)
+                    .setDeltaMovement(dir)
                     .color(VFXColorFunction.constant(ColorsAS.EFFECT_BLUE_LIGHT))
                     .setScaleMultiplier(1.2F)
                     .setMaxAge(14 + r.nextInt(6));
         }
         circle = MiscUtils.getCirclePositions(vec, Vector3.RotAxis.Y_AXIS, 7.5F + r.nextFloat(), 100 + r.nextInt(40));
         for (Vector3 at : circle) {
-            Vector3 dir = at.clone().subtract(vec).normalize().multiply(0.2 + 0.1 * r.nextFloat());
+            Vector3 dir = at.clone().subtract(vec).normalize().mul(0.2 + 0.1 * r.nextFloat());
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at)
                     .setAlphaMultiplier(0.4F)
-                    .setMotion(dir)
+                    .setDeltaMovement(dir)
                     .color(VFXColorFunction.constant(ColorsAS.EFFECT_BLUE_DARK))
                     .setScaleMultiplier(1.5F)
                     .setMaxAge(14 + r.nextInt(6));

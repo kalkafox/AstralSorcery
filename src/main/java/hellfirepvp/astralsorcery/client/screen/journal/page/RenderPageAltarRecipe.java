@@ -52,7 +52,7 @@ public class RenderPageAltarRecipe extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
+    public void render(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
         this.clearFrameRectangles();
 
         this.renderRecipeGrid(renderStack, x, y, z, this.gridTexture);
@@ -88,17 +88,17 @@ public class RenderPageAltarRecipe extends RenderPageRecipeTemplate {
     }
 
     @Override
-    public boolean propagateMouseClick(double mouseX, double mouseZ) {
-        return this.handleRecipeNameCopyClick(mouseX, mouseZ, this.recipe) || this.handleBookLookupClick(mouseX, mouseZ);
+    public boolean propagateMouseClick(double xpos, double mouseZ) {
+        return this.handleRecipeNameCopyClick(xpos, mouseZ, this.recipe) || this.handleBookLookupClick(xpos, mouseZ);
     }
 
     @Override
-    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float mouseX, float mouseY) {
-        this.renderHoverTooltips(renderStack, mouseX, mouseY, z, this.recipe.getId());
-        this.renderInfoStarTooltips(renderStack, x, y, z, mouseX, mouseY, (toolTip) -> {
+    public void postRender(PoseStack renderStack, float x, float y, float z, float pTicks, float xpos, float ypos) {
+        this.renderHoverTooltips(renderStack, xpos, ypos, z, this.recipe.getId());
+        this.renderInfoStarTooltips(renderStack, x, y, z, xpos, ypos, (toolTip) -> {
             this.addAltarRecipeTooltip(this.recipe, toolTip);
             this.addConstellationInfoTooltip(this.recipe.getFocusConstellation(), toolTip);
         });
-        super.postRender(renderStack, x, y, z, pTicks, mouseX, mouseY);
+        super.postRender(renderStack, x, y, z, pTicks, xpos, ypos);
     }
 }

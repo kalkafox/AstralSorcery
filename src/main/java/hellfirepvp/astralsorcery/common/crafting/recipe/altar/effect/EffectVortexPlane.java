@@ -43,53 +43,53 @@ public class EffectVortexPlane extends AltarRecipeEffect {
                     i -> new RenderOffsetNoisePlane(1.2F));
             for (int i = 0; i < 3; i++) {
                 FXFacingParticle p = plane.createParticle(target);
-                p.alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMotion(new Vector3(
-                                rand.nextFloat() * 0.005 * (rand.nextBoolean() ? 1 : -1),
-                                rand.nextFloat() * 0.005 * (rand.nextBoolean() ? 1 : -1),
-                                rand.nextFloat() * 0.005 * (rand.nextBoolean() ? 1 : -1)))
-                        .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                        .setMaxAge(20 + rand.nextInt(15));
+                p.alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setDeltaMovement(new Vector3(
+                                random.nextFloat() * 0.005 * (random.nextBoolean() ? 1 : -1),
+                                random.nextFloat() * 0.005 * (random.nextBoolean() ? 1 : -1),
+                                random.nextFloat() * 0.005 * (random.nextBoolean() ? 1 : -1)))
+                        .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                        .setMaxAge(20 + random.nextInt(15));
             }
 
             plane = recipe.getEffectContained(INDEX_NOISE_PLANE_LAYER2,
                     i -> new RenderOffsetNoisePlane(1.6F));
             for (int i = 0; i < 3; i++) {
                 FXFacingParticle p = plane.createParticle(target);
-                p.alpha(VFXAlphaFunction.FADE_OUT)
-                        .setMotion(new Vector3(
-                                rand.nextFloat() * 0.005 * (rand.nextBoolean() ? 1 : -1),
-                                rand.nextFloat() * 0.005 * (rand.nextBoolean() ? 1 : -1),
-                                rand.nextFloat() * 0.005 * (rand.nextBoolean() ? 1 : -1)))
-                        .setScaleMultiplier(0.15F + rand.nextFloat() * 0.1F)
-                        .setMaxAge(20 + rand.nextInt(15));
+                p.alpha1arg(VFXAlphaFunction.FADE_OUT)
+                        .setDeltaMovement(new Vector3(
+                                random.nextFloat() * 0.005 * (random.nextBoolean() ? 1 : -1),
+                                random.nextFloat() * 0.005 * (random.nextBoolean() ? 1 : -1),
+                                random.nextFloat() * 0.005 * (random.nextBoolean() ? 1 : -1)))
+                        .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)
+                        .setMaxAge(20 + random.nextInt(15));
             }
 
             double scale = getRandomPillarOffset(altar.getAltarType()).getX();
             double edgeScale = (scale * 2 + 1);
             for (int i = 0; i < 2; i++) {
-                Vector3 pos = new Vector3(altar).add(-scale + rand.nextFloat() * edgeScale, 0.02, -scale + rand.nextFloat() * edgeScale);
-                Vector3 mot = pos.vectorFromHereTo(target).normalize().multiply(0.1F);
+                Vector3 pos = new Vector3(altar).add(-scale + random.nextFloat() * edgeScale, 0.02, -scale + random.nextFloat() * edgeScale);
+                Vector3 mot = pos.vectorFromHereTo(target).normalize().mul(0.1F);
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
-                        .alpha(VFXAlphaFunction.FADE_OUT)
+                        .alpha1arg(VFXAlphaFunction.FADE_OUT)
                         .color(VFXColorFunction.WHITE)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                        .setMotion(mot);
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                        .setDeltaMovement(mot);
             }
 
             for (int i = 0; i < 2; i++) {
-                Vector3 pos = target.clone().add(Vector3.random().multiply(4F));
+                Vector3 pos = target.clone().add(Vector3.random().mul(4F));
                 Vector3 dst = pos.vectorFromHereTo(target);
-                Vector3 mot = dst.clone().multiply(dst.length() / 250);
+                Vector3 mot = dst.clone().mul(dst.length() / 250);
 
                 EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(pos)
-                        .alpha(VFXAlphaFunction.PYRAMID)
+                        .alpha1arg(VFXAlphaFunction.PYRAMID)
                         .color(VFXColorFunction.WHITE)
-                        .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                        .setMotion(mot);
+                        .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                        .setDeltaMovement(mot);
             }
         }
     }

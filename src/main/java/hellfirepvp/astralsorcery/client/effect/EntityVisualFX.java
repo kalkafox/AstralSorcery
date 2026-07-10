@@ -74,11 +74,11 @@ public abstract class EntityVisualFX extends EntityComplexFX {
         return (T) this;
     }
 
-    public Vector3 getMotion() {
+    public Vector3 getDeltaMovement() {
         return motion.clone();
     }
 
-    public <T extends EntityVisualFX> T setMotion(Vector3 motion) {
+    public <T extends EntityVisualFX> T setDeltaMovement(Vector3 motion) {
         this.motion = motion.clone();
         return (T) this;
     }
@@ -92,9 +92,9 @@ public abstract class EntityVisualFX extends EntityComplexFX {
     public void tick() {
         super.tick();
 
-        this.motion = this.motionController.updateMotion(this, this.getMotion().addY(-this.gravityY));
+        this.motion = this.motionController.postMoveUpdate(this, this.getDeltaMovement().addY(-this.gravityY));
 
-        Vector3 newPos = this.positionController.updatePosition(this, this.getPosition(), this.getMotion());
+        Vector3 newPos = this.positionController.finalizePosition(this, this.getPosition(), this.getDeltaMovement());
         this.oldPos = this.pos.clone();
         this.pos = newPos;
     }
@@ -105,15 +105,15 @@ public abstract class EntityVisualFX extends EntityComplexFX {
         return (int) (this.alphaFunction.getAlpha(this, this.getAlphaMultiplier(), pTicks) * 255F);
     }
 
-    public float getScale(float pTicks) {
-        return this.scaleFunction.getScale(this, this.getScaleMultiplier(), pTicks);
+    public float getQuadSize(float pTicks) {
+        return this.scaleFunction.getQuadSize(this, this.getScaleMultiplier(), pTicks);
     }
 
     public Color getColor(float pTicks) {
         return this.colorFunction.getColor(this, pTicks);
     }
 
-    public Vector3 getRenderPosition(float pTicks) {
+    public Vector3 getCameraPosition(float pTicks) {
         return this.renderOffsetFunction.changeRenderPosition(this,
                 RenderingVectorUtils.interpolate(this.getOldPosition(), this.getPosition(), pTicks), pTicks);
     }
@@ -123,7 +123,7 @@ public abstract class EntityVisualFX extends EntityComplexFX {
         return (T) this;
     }
 
-    public <T extends EntityVisualFX> T alpha(VFXAlphaFunction<?> alphaFunction) {
+    public <T extends EntityVisualFX> T alpha1arg(VFXAlphaFunction<?> alphaFunction) {
         this.alphaFunction = alphaFunction;
         return (T) this;
     }

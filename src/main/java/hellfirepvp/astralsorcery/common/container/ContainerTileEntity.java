@@ -25,9 +25,9 @@ public abstract class ContainerTileEntity<T extends BlockEntity> extends Abstrac
 
     private final T te;
 
-    protected ContainerTileEntity(T tileEntity, @Nullable MenuType<?> type, int windowId) {
-        super(type, windowId);
-        this.te = tileEntity;
+    protected ContainerTileEntity(T entity, @Nullable MenuType<?> type, int containerId) {
+        super(type, containerId);
+        this.te = entity;
     }
 
     public T getTileEntity() {

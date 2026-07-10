@@ -45,24 +45,24 @@ public class ReaderFlatAttribute extends PerkAttributeReader {
     }
 
     @Override
-    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide side) {
+    public double getDefaultValue(PerkAttributeMap statMap, Player player, LogicalSide direction) {
         return this.defaultValue;
     }
 
     @Override
-    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide side, ModifierType mode) {
-        return statMap.getModifier(player, ResearchHelper.getProgress(player, side), this.getType(), mode);
+    public double getModifierValueForMode(PerkAttributeMap statMap, Player player, LogicalSide direction, ModifierType mode) {
+        return statMap.getAttributeInstance(player, ResearchHelper.getProgress(player, direction), this.getType(), mode);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public PerkStatistic getStatistics(PerkAttributeMap statMap, Player player) {
+    public PerkStatistic countParticles(PerkAttributeMap statMap, Player player) {
         String limitStr = "";
         Double limit = null;
         if (PerkAttributeLimiter.hasLimit(this.getType())) {
-            Pair<Double, Double> limits = PerkAttributeLimiter.getLimit(this.getType());
+            Pair<Double, Double> limits = PerkAttributeLimiter.getMaxResults(this.getType());
             limit = limits.getRight();
-            limitStr = I18n.format("perk.reader.astralsorcery.limit.default", MathHelper.floor(limit));
+            limitStr = I18n.format("perk.reader.astralsorcery.limit.default", Mth.floor(limit));
         }
 
         double value = statMap.modifyValue(player, ResearchHelper.getProgress(player, LogicalSide.CLIENT),
@@ -86,7 +86,7 @@ public class ReaderFlatAttribute extends PerkAttributeReader {
         if (this.formatAsDecimal) {
             valueStr = formatDecimal(value);
         } else {
-            valueStr = String.valueOf(MathHelper.floor(value));
+            valueStr = String.valueOf(Mth.floor(value));
         }
 
         return (value >= 0 ? "+" : "") + valueStr;

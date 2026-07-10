@@ -72,7 +72,7 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
         super.tick();
 
         if (colorType != null) {
-            if (world.isRemote()) {
+            if (level.isClientSide()) {
                 playColorEffects();
             }
             doColorEffects();
@@ -96,8 +96,8 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     private void doColorEffects() {
-        Level world = this.getWorld();
-        if (!world.isRemote() && !this.occupiedConnections.isEmpty()) {
+        Level level = this.getLevel();
+        if (!level.isClientSide() && !this.occupiedConnections.isEmpty()) {
             this.occupiedConnections.clear();
             markForUpdate();
             preventNetworkSync();
@@ -117,22 +117,22 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
         Vector3 thisVec = new Vector3(this).add(0.5, 0.5, 0.5);
 
         for (BlockPos linkedTo : linked) {
-            PartialEffectExecutor exec = new PartialEffectExecutor((1F / ((float) linked.size())) * effectMultiplier, rand);
+            PartialEffectExecutor exec = new PartialEffectExecutor((1F / ((float) linked.size())) * effectMultiplier, random);
 
             Vector3 to = new Vector3(linkedTo).add(0.5, 0.5, 0.5);
             RaytraceAssist rta = new RaytraceAssist(thisVec, to).includeEndPoint();
             if (colorType.getType().doBlockInteraction()) {
-                if (!rta.isClear(world) && rta.positionHit() != null) {
+                if (!rta.isClear(level) && rta.positionHit() != null) {
                     BlockPos posHit = rta.positionHit();
 
-                    BlockState stateHit = world.getBlockState(posHit);
-                    colorType.blockInBeam(world, posHit, stateHit, exec);
+                    BlockState stateHit = level.getBlockState(posHit);
+                    colorType.blockInBeam(level, posHit, stateHit, exec);
 
-                    if (!world.isRemote()) {
+                    if (!level.isClientSide()) {
                         this.occupiedConnections.add(posHit);
                     }
                 } else {
-                    if (!world.isRemote()) {
+                    if (!level.isClientSide()) {
                         this.occupiedConnections.add(linkedTo);
                     }
                 }
@@ -141,9 +141,9 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
                 exec.reset();
 
                 rta.setCollectEntities(0.5);
-                rta.isClear(world);
-                List<Entity> found = rta.collectedEntities(world);
-                found.forEach(e -> colorType.entityInBeam(world, thisVec, to, e, exec));
+                rta.isClear(level);
+                List<Entity> found = rta.collectedEntities(level);
+                found.forEach(e -> colorType.entityInBeam(level, thisVec, to, e, exec));
             }
         }
     }
@@ -156,9 +156,9 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(new Vector3(this)
                         .add(0.2, 0.2, 0.2)
-                        .add(rand.nextFloat() * 0.6, rand.nextFloat() * 0.6, rand.nextFloat() * 0.6))
+                        .add(random.nextFloat() * 0.6, random.nextFloat() * 0.6, random.nextFloat() * 0.6))
                 .color(VFXColorFunction.constant(lensColor))
-                .setScaleMultiplier(0.1F + rand.nextFloat() * 0.15F);
+                .setScaleMultiplier(0.1F + random.nextFloat() * 0.15F);
 
         if (getTicksExisted() % 40 == 0) {
             for (BlockPos connected : this.occupiedConnections) {
@@ -187,7 +187,7 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     public Direction getPlacedAgainst() {
-        BlockState state = world.getBlockState(getPos());
+        BlockState state = level.getBlockState(getBlockPos());
         if (!(state.getBlock() instanceof BlockLens)) {
             return Direction.DOWN;
         }
@@ -211,43 +211,43 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     @Override
-    public void readCustomNBT(CompoundTag compound) {
-        super.readCustomNBT(compound);
+    public void readCustomNBT(CompoundTag pattern) {
+        super.readCustomNBT(pattern);
 
-        this.attributes = CrystalAttributes.getCrystalAttributes(compound);
-        if (compound.contains("colorType")) {
-            this.colorType = LensColorType.byName(new ResourceLocation(compound.getString("colorType")));
+        this.attributes = CrystalAttributes.getCrystalAttributes(pattern);
+        if (pattern.contains("colorType")) {
+            this.colorType = LensColorType.byName(ResourceLocation.parse(pattern.getString("colorType")));
         } else {
             this.colorType = null;
         }
-        this.occupiedConnections = NBTHelper.readList(compound, "occupiedConnections", Constants.NBT.TAG_COMPOUND,
+        this.occupiedConnections = NBTHelper.readList(pattern, "occupiedConnections", Constants.NBT.TAG_COMPOUND,
                 nbt -> NBTHelper.readBlockPosFromNBT((CompoundTag) nbt));
     }
 
     @Override
-    public void readNetNBT(CompoundTag compound) {
-        super.readNetNBT(compound);
-        this.accumulatedStarlight = compound.getFloat("accumulatedStarlight");
+    public void readNetNBT(CompoundTag pattern) {
+        super.readNetNBT(pattern);
+        this.accumulatedStarlight = pattern.getFloat("accumulatedStarlight");
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag compound) {
-        super.writeCustomNBT(compound);
+    public void writeCustomNBT(CompoundTag pattern) {
+        super.writeCustomNBT(pattern);
 
         if (this.attributes != null) {
-            this.attributes.store(compound);
+            this.attributes.store(pattern);
         }
         if (this.colorType != null) {
-            compound.putString("colorType", this.colorType.getName().toString());
+            pattern.putString("colorType", this.colorType.getName().toString());
         }
-        NBTHelper.writeList(compound, "occupiedConnections", this.occupiedConnections,
+        NBTHelper.writeList(pattern, "occupiedConnections", this.occupiedConnections,
                 pos -> NBTHelper.writeBlockPosToNBT(pos, new CompoundTag()));
     }
 
     @Override
-    public void writeNetNBT(CompoundTag compound) {
-        super.writeNetNBT(compound);
-        compound.putFloat("accumulatedStarlight", this.accumulatedStarlight);
+    public void writeNetNBT(CompoundTag pattern) {
+        super.writeNetNBT(pattern);
+        pattern.putFloat("accumulatedStarlight", this.accumulatedStarlight);
     }
 
     @Nonnull

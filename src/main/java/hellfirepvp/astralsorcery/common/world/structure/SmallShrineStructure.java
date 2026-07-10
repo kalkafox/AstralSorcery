@@ -33,7 +33,7 @@ public class SmallShrineStructure extends TemplateStructure {
     }
 
     @Override
-    public ResourceLocation getStructureName() {
+    public ResourceLocation getFeatureName() {
         return WorldGenerationAS.Structures.KEY_SMALL_SHRINE;
     }
 }

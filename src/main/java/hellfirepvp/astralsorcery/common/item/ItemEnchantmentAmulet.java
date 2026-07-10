@@ -43,7 +43,7 @@ import java.util.*;
  */
 public class ItemEnchantmentAmulet extends Item implements ItemDynamicColor {
 
-    private static final Random rand = new Random();
+    private static final Random random = new Random();
 
     public ItemEnchantmentAmulet() {
         super(new Properties()
@@ -53,27 +53,27 @@ public class ItemEnchantmentAmulet extends Item implements ItemDynamicColor {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
 
         List<AmuletEnchantment> enchantments = getAmuletEnchantments(stack);
         for (AmuletEnchantment ench : enchantments) {
-            tooltip.add(ench.getDisplay().withStyle(TextFormatting.BLUE));
+            tooltip.add(ench.getDisplay().withStyle(ChatFormatting.BLUE));
         }
 
         if (getAmuletColor(stack).map(color -> color == 0xFFFFFFFF).orElse(false)) {
             tooltip.add(Component.translatable("astralsorcery.amulet.color.colorless")
-                    .withStyle(TextFormatting.ITALIC)
-                    .withStyle(TextFormatting.GRAY));
+                    .withStyle(ChatFormatting.ITALIC)
+                    .withStyle(ChatFormatting.GRAY));
         }
     }
 
     @Override
     public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
-        if (!worldIn.isRemote() && !getAmuletColor(stack).isPresent()) {
+        if (!worldIn.isClientSide() && !getAmuletColor(stack).isPresent()) {
             freezeAmuletColor(stack);
         }
-        if (!worldIn.isRemote() && getAmuletEnchantments(stack).isEmpty()) {
+        if (!worldIn.isClientSide() && getAmuletEnchantments(stack).isEmpty()) {
             AmuletRandomizeHelper.rollAmulet(stack);
         }
         super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
@@ -112,10 +112,10 @@ public class ItemEnchantmentAmulet extends Item implements ItemDynamicColor {
         if (tag.contains("amuletColor")) {
             return;
         }
-        if (rand.nextInt(400) == 0) {
+        if (random.nextInt(400) == 0) {
             tag.putInt("amuletColor", 0xFFFFFFFF);
         } else {
-            tag.putInt("amuletColor", Color.getHSBColor(rand.nextFloat(), 0.7F, 1.0F).getRGB() | 0xFF000000);
+            tag.putInt("amuletColor", Color.getHSBColor(random.nextFloat(), 0.7F, 1.0F).getRGB() | 0xFF000000);
         }
     }
 

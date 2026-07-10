@@ -64,8 +64,8 @@ public class AlignmentChargeRenderer implements ITickHandler {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
             return;
         }
-        if (Minecraft.getInstance().playerController != null &&
-                Minecraft.getInstance().playerController.getCurrentGameType() == GameType.SPECTATOR) {
+        if (Minecraft.getInstance().gameMode != null &&
+                Minecraft.getInstance().gameMode.getPlayerMode() == GameType.SPECTATOR) {
             return;
         }
         if (this.alphaReveal <= 0) {
@@ -74,8 +74,8 @@ public class AlignmentChargeRenderer implements ITickHandler {
 
         PoseStack renderStack = event.getPoseStack();
         Window window = event.getWindow();
-        int screenWidth = window.getScaledWidth();
-        int screenHeight = window.getScaledHeight();
+        int screenWidth = window.getGuiScaledWidth();
+        int screenHeight = window.getGuiScaledHeight();
         int barWidth = 194;
         int offsetLeft = screenWidth / 2 - barWidth / 2;
         int offsetTop = screenHeight + 3 - 81; //*sigh* vanilla
@@ -85,7 +85,7 @@ public class AlignmentChargeRenderer implements ITickHandler {
 
         boolean hasEnoughCharge = true;
         float usagePerc = 0F;
-        for (EquipmentSlot type : EquipmentSlotType.values()) {
+        for (EquipmentSlot type : EquipmentSlot.values()) {
             ItemStack equipped = player.getItemStackFromSlot(type);
             if (!equipped.isEmpty() && equipped.getItem() instanceof AlignmentChargeConsumer) {
                 float chargeRequired = ((AlignmentChargeConsumer) equipped.getItem()).getAlignmentChargeCost(player, equipped);
@@ -109,7 +109,7 @@ public class AlignmentChargeRenderer implements ITickHandler {
         RenderSystem.disableAlphaTest();
 
         SpritesAS.SPR_OVERLAY_CHARGE.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetLeft, offsetTop, 10, width, 54)
                     .color(1F, 1F, 1F, this.alphaReveal)
                     .tex(uvColored.getA(), uvColored.getB() + 0.002F, uLengthCharge, SpritesAS.SPR_OVERLAY_CHARGE.getVWidth() - 0.002F)
@@ -117,7 +117,7 @@ public class AlignmentChargeRenderer implements ITickHandler {
         });
 
         SpritesAS.SPR_OVERLAY_CHARGE_COLORLESS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetLeft + width, offsetTop, 10, usageWidth, 54)
                     .color(usageColor.getRed(), usageColor.getGreen(), usageColor.getBlue(), (int) (this.alphaReveal * 255F))
                     .tex(uvColorless.getA() + uLengthCharge, uvColorless.getB() + 0.002F, uLengthUsage, SpritesAS.SPR_OVERLAY_CHARGE_COLORLESS.getVWidth() - 0.002F)
@@ -137,7 +137,7 @@ public class AlignmentChargeRenderer implements ITickHandler {
                 revealCharge(20);
             }
 
-            for (EquipmentSlot slot : EquipmentSlotType.values()) {
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
                 ItemStack stack = player.getItemStackFromSlot(slot);
                 if (!stack.isEmpty() && stack.getItem() instanceof AlignmentChargeRevealer &&
                         ((AlignmentChargeRevealer) stack.getItem()).shouldReveal(stack)) {
@@ -175,8 +175,8 @@ public class AlignmentChargeRenderer implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

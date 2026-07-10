@@ -49,11 +49,11 @@ public class OreBlockRarityEntry implements ConfigDataSet {
     }
 
     @Nullable
-    public Block getRandomBlock(Random rand) {
-        return MiscUtils.getRandomEntry(this.blockTag.getAllElements()
+    public Block getRandomBlock(Random random) {
+        return MiscUtils.getRandomEntry(this.blockTag.getValues()
                 .stream()
                 .filter(item -> !GeneralConfig.CONFIG.modidOreBlacklist.get().contains(item.getRegistryName().getNamespace()))
-                .collect(Collectors.toList()), rand);
+                .collect(Collectors.toList()), random);
     }
 
     @Nullable
@@ -62,8 +62,8 @@ public class OreBlockRarityEntry implements ConfigDataSet {
         if (split.length != 2) {
             return null;
         }
-        ResourceLocation keyBlockTag = new ResourceLocation(split[0]);
-        Tag<Block> blockTag = BlockTags.getCollection().get(keyBlockTag);
+        ResourceLocation keyBlockTag = ResourceLocation.parse(split[0]);
+        Tag<Block> blockTag = BlockTags.getAllTags().get(keyBlockTag);
         if (blockTag == null) {
             return null;
         }

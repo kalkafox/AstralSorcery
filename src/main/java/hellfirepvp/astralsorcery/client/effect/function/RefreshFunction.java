@@ -51,8 +51,8 @@ public interface RefreshFunction<T extends EntityComplexFX> {
         private final Class<E> clazzExpected;
 
         public TileExists(E tile) {
-            this.dimType = tile.getWorld().getDimensionKey();
-            this.pos = tile.getPos();
+            this.dimType = tile.getLevel().dimension();
+            this.pos = tile.getBlockPos();
             this.clazzExpected = (Class<E>) tile.getClass();
         }
 
@@ -63,10 +63,10 @@ public interface RefreshFunction<T extends EntityComplexFX> {
 
         @Nullable
         protected E getTileIfValid() {
-            Level clWorld = Minecraft.getInstance().world;
+            Level clWorld = Minecraft.getInstance().level;
             E tile;
             if (clWorld != null &&
-                    clWorld.getDimensionKey().equals(dimType) &&
+                    clWorld.dimension().equals(dimType) &&
                     (tile = MiscUtils.getTileAt(clWorld, pos, clazzExpected, true)) != null &&
                     !tile.isRemoved()) {
                 return tile;

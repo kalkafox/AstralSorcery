@@ -35,7 +35,7 @@ public class ScreenContainerTome extends ScreenCustomContainer<ContainerTome> {
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(PoseStack matrixStack, int x, int y) {
+    protected void renderLabels(PoseStack matrixStack, int x, int y) {
         //Don't draw container names. (Currently all this does)
     }
 }

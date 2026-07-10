@@ -40,7 +40,7 @@ public class CommandAttune implements Command<CommandSourceStack> {
 
     public static ArgumentBuilder<CommandSourceStack, ?> register() {
         return Commands.literal("attune")
-                .requires(cs -> cs.hasPermissionLevel(2))
+                .requires(cs -> cs.hasPermission(2))
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("constellation", ArgumentTypeConstellation.major())
                                 .executes(CMD)));
@@ -52,12 +52,12 @@ public class CommandAttune implements Command<CommandSourceStack> {
         IMajorConstellation cst = (IMajorConstellation) context.getArgument("constellation", IConstellation.class);
 
         if (ResearchManager.setAttunedConstellation(player, cst)) {
-            context.getSource().sendFeedback(
-                    Component.literal("Success! Player has been attuned to ").append(cst.getConstellationName().withStyle(TextFormatting.BLUE))
-                            .withStyle(TextFormatting.GREEN), true);
+            context.getSource().customSuggestion(
+                    Component.literal("Success! Player has been attuned to ").append(cst.getConstellationName().withStyle(ChatFormatting.BLUE))
+                            .withStyle(ChatFormatting.GREEN), true);
         } else {
-            context.getSource().sendFeedback(
-                    Component.literal("Failed! Player specified doesn't seem to have the research progress necessary!").withStyle(TextFormatting.RED), true);
+            context.getSource().customSuggestion(
+                    Component.literal("Failed! Player specified doesn't seem to have the research progress necessary!").withStyle(ChatFormatting.RED), true);
         }
         return 0;
     }

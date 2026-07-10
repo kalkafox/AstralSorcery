@@ -47,7 +47,7 @@ public class DataLightBlockEndpoints extends AbstractData {
 
         Set<BlockPos> posBuffer = serverPositions.computeIfAbsent(dim, k -> new HashSet<>());
         posBuffer.add(pos);
-        markDirty();
+        setChanged();
     }
 
     public void updateNewEndpoints(ResourceKey<Level> dim, Collection<BlockPos> newPositions) {
@@ -58,7 +58,7 @@ public class DataLightBlockEndpoints extends AbstractData {
 
         Set<BlockPos> posBuffer = serverPositions.computeIfAbsent(dim, k -> new HashSet<>());
         posBuffer.addAll(newPositions);
-        markDirty();
+        setChanged();
     }
 
     public void removeEndpoints(ResourceKey<Level> dim, Collection<BlockPos> positions) {
@@ -69,12 +69,12 @@ public class DataLightBlockEndpoints extends AbstractData {
 
         Set<BlockPos> posBuffer = serverPositions.computeIfAbsent(dim, k -> new HashSet<>());
         if (posBuffer.removeAll(positions)) {
-            markDirty();
+            setChanged();
         }
     }
 
-    public boolean doesPositionReceiveStarlightServer(Level world, BlockPos pos) {
-        return this.serverPositions.getOrDefault(world.getDimensionKey(), Collections.emptySet()).contains(pos);
+    public boolean doesPositionReceiveStarlightServer(Level level, BlockPos pos) {
+        return this.serverPositions.getOrDefault(level.dimension(), Collections.emptySet()).contains(pos);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class DataLightBlockEndpoints extends AbstractData {
         if (this.serverPositions.remove(dim) != null) {
             this.serverChangeBuffer.remove(dim);
             this.dimensionClearBuffer.add(dim);
-            markDirty();
+            setChanged();
         }
     }
 
@@ -94,28 +94,28 @@ public class DataLightBlockEndpoints extends AbstractData {
     }
 
     @Override
-    public void writeAllDataToPacket(CompoundTag compound) {
+    public void writeAllDataToPacket(CompoundTag pattern) {
         for (ResourceKey<Level> dim : serverPositions.keySet()) {
             Set<BlockPos> dat = serverPositions.get(dim);
 
             ListTag dataList = new ListTag();
             for (BlockPos pos : dat) {
                 CompoundTag cmp = new CompoundTag();
-                cmp.putLong("pos", pos.toLong());
+                cmp.putLong("pos", pos.asLong());
                 dataList.add(cmp);
             }
 
-            compound.put(dim.getLocation().toString(), dataList);
+            pattern.put(dim.getLocation().toString(), dataList);
         }
     }
 
     @Override
-    public void writeDiffDataToPacket(CompoundTag compound) {
+    public void writeDiffDataToPacket(CompoundTag pattern) {
         ListTag clearList = new ListTag();
         for (ResourceKey<Level> dim : this.dimensionClearBuffer) {
-            clearList.add(StringNBT.valueOf(dim.getLocation().toString()));
+            clearList.add(StringTag.valueOf(dim.getLocation().toString()));
         }
-        compound.put("clear", clearList);
+        pattern.put("clear", clearList);
 
         for (ResourceKey<Level> dim : this.serverChangeBuffer.keySet()) {
             if (this.dimensionClearBuffer.contains(dim)) {
@@ -127,12 +127,12 @@ public class DataLightBlockEndpoints extends AbstractData {
             ListTag dataList = new ListTag();
             for (BlockPos pos : data.keySet()) {
                 CompoundTag cmp = new CompoundTag();
-                cmp.putLong("pos", pos.toLong());
+                cmp.putLong("pos", pos.asLong());
                 cmp.putBoolean("add", data.get(pos));
                 dataList.add(cmp);
             }
 
-            compound.put(dim.getLocation().toString(), dataList);
+            pattern.put(dim.getLocation().toString(), dataList);
         }
 
         this.dimensionClearBuffer.clear();

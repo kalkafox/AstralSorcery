@@ -34,19 +34,19 @@ public class ModelLensColored extends CustomModel {
         this.textureWidth = 32;
         this.textureHeight = 16;
         this.glass = new ModelPart(this, 0, 0);
-        this.glass.setRotationPoint(0.0F, 14.0F, 0.0F);
+        this.glass.setPos(0.0F, 14.0F, 0.0F);
         this.glass.addBox(-5.0F, -5.0F, -1.51F, 10, 10, 1, 0.0F);
         this.fitting1 = new ModelPart(this, 22, 0);
-        this.fitting1.setRotationPoint(0.0F, 14.0F, 0.0F);
+        this.fitting1.setPos(0.0F, 14.0F, 0.0F);
         this.fitting1.addBox(-5.0F, -7.0F, -1.5F, 2, 1, 2, 0.0F);
         this.detail1_1 = new ModelPart(this, 22, 3);
-        this.detail1_1.setRotationPoint(0.0F, 14.0F, 0.0F);
+        this.detail1_1.setPos(0.0F, 14.0F, 0.0F);
         this.detail1_1.addBox(3.0F, -6.0F, -1.5F, 2, 1, 1, 0.0F);
         this.fitting2 = new ModelPart(this, 22, 0);
-        this.fitting2.setRotationPoint(0.0F, 14.0F, 0.0F);
+        this.fitting2.setPos(0.0F, 14.0F, 0.0F);
         this.fitting2.addBox(3.0F, -7.0F, -1.5F, 2, 1, 2, 0.0F);
         this.detail1 = new ModelPart(this, 22, 3);
-        this.detail1.setRotationPoint(0.0F, 14.0F, 0.0F);
+        this.detail1.setPos(0.0F, 14.0F, 0.0F);
         this.detail1.addBox(-5.0F, -6.0F, -1.5F, 2, 1, 1, 0.0F);
     }
 

@@ -38,47 +38,47 @@ public class ChainingSkyRenderer implements ISkyRenderHandler {
     }
 
     @Override
-    public void render(int ticks, float partialTicks, PoseStack renderStack, ClientLevel world, Minecraft mc) {
+    public void render(int ticks, float a, PoseStack renderStack, ClientLevel level, Minecraft mc) {
         EventFlags.SKY_RENDERING.executeWithFlag(() -> {
-            ResourceKey<Level> dim = world.getDimensionKey();
-            if (world.func_239132_a_().func_241683_c_() == DimensionRenderInfo.FogType.NORMAL) {
+            ResourceKey<Level> dim = level.dimension();
+            if (level.effects().skyType() == DimensionSpecialEffects.FogType.NORMAL) {
                 if (RenderingConfig.CONFIG.dimensionsWithOnlyConstellationRendering.get().contains(dim.getLocation())) {
                     if (existingSkyRenderer != null) {
-                        existingSkyRenderer.render(ticks, partialTicks, renderStack, world, mc);
+                        existingSkyRenderer.render(ticks, a, renderStack, level, mc);
                     } else {
-                        ISkyRenderHandler existing = world.func_239132_a_().getSkyRenderHandler();
-                        world.func_239132_a_().setSkyRenderHandler(null);
-                        Minecraft.getInstance().worldRenderer.renderSky(renderStack, partialTicks);
-                        world.func_239132_a_().setSkyRenderHandler(existing);
+                        ISkyRenderHandler existing = level.effects().getSkyRenderHandler();
+                        level.effects().setSkyRenderHandler(null);
+                        Minecraft.getInstance().worldRenderer.renderSky(renderStack, a);
+                        level.effects().setSkyRenderHandler(existing);
                     }
 
-                    this.renderConstellations(world, renderStack, partialTicks);
+                    this.renderConstellations(level, renderStack, a);
                 } else {
-                    AstralSkyRenderer.INSTANCE.render(ticks, partialTicks, renderStack, world, mc);
+                    AstralSkyRenderer.INSTANCE.render(ticks, a, renderStack, level, mc);
                 }
             } else {
-                ISkyRenderHandler existing = world.func_239132_a_().getSkyRenderHandler();
-                world.func_239132_a_().setSkyRenderHandler(null);
+                ISkyRenderHandler existing = level.effects().getSkyRenderHandler();
+                level.effects().setSkyRenderHandler(null);
                 //Actually ends up calling renderEndSky
-                Minecraft.getInstance().worldRenderer.renderSky(renderStack, partialTicks);
-                world.func_239132_a_().setSkyRenderHandler(existing);
+                Minecraft.getInstance().worldRenderer.renderSky(renderStack, a);
+                level.effects().setSkyRenderHandler(existing);
             }
         });
     }
 
-    private void renderConstellations(ClientLevel world, PoseStack renderStack, float pTicks) {
+    private void renderConstellations(ClientLevel level, PoseStack renderStack, float pTicks) {
         RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         Blending.ADDITIVE_ALPHA.apply();
         RenderSystem.enableTexture();
         RenderSystem.depthMask(false);
-        float alphaSubRain = 1.0F - world.getRainStrength(pTicks);
+        float alphaSubRain = 1.0F - level.getRainStrength(pTicks);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alphaSubRain);
 
-        renderStack.push();
-        renderStack.rotate(Vector3f.XP.rotationDegrees(180));
-        AstralSkyRenderer.renderConstellationsSky(world, renderStack, pTicks);
-        renderStack.pop();
+        renderStack.pushPose();
+        renderStack.mirror(Axis.XP.rotationDegrees(180));
+        AstralSkyRenderer.renderConstellationsSky(level, renderStack, pTicks);
+        renderStack.popPose();
 
         RenderSystem.color4f(1F, 1F, 1F, 1F);
         RenderSystem.depthMask(true);

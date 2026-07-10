@@ -35,10 +35,10 @@ import java.awt.*;
 public class WellManager implements IRecipeManager {
     
     @ZenCodeType.Method
-    public void addRecipe(String name, Fluid output, IIngredient input, float productionMultiplier, float shatterMultiplier, @ZenCodeType.OptionalInt(0x00FF55FF) int color) {
+    public void addRecipe(String name, Fluid output, IIngredient from, float productionMultiplier, float shatterMultiplier, @ZenCodeType.OptionalInt(0x00FF55FF) int color) {
         name = fixRecipeName(name);
-        ResourceLocation recipeId = new ResourceLocation(name);
-        WellLiquefaction recipe = new WellLiquefaction(recipeId, input.asVanillaIngredient(), output, new Color(color, true), productionMultiplier, shatterMultiplier);
+        ResourceLocation recipeId = ResourceLocation.parse(name);
+        WellLiquefaction recipe = new WellLiquefaction(recipeId, from.asVanillaIngredient(), output, new Color(color, true), productionMultiplier, shatterMultiplier);
         CraftTweakerAPI.apply(new ActionAddRecipe(this, recipe));
     }
     

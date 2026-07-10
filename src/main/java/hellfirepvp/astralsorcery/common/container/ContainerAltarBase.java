@@ -34,10 +34,10 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
     private final Inventory playerInv;
     private final TileInventory invHandler;
 
-    protected ContainerAltarBase(TileAltar altar, @Nullable MenuType<?> type, Inventory inv, int windowId) {
-        super(altar, type, windowId);
+    protected ContainerAltarBase(TileAltar altar, @Nullable MenuType<?> type, Inventory inv, int containerId) {
+        super(altar, type, containerId);
         this.playerInv = inv;
-        this.invHandler = altar.getInventory();
+        this.invHandler = altar.getItems();
 
         bindPlayerInventory(this.playerInv);
         bindAltarInventory(this.invHandler);
@@ -53,11 +53,11 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
     public abstract int translateIndex(int fromIndex);
 
     @Override
-    public ItemStack transferStackInSlot(Player playerIn, int index) {
+    public ItemStack quickMoveStack(Player playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
+        Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.getHasStack()) {
+        if (slot != null && slot.hasItem()) {
             ItemStack slotStack = slot.getStack();
             itemstack = slotStack.copy();
 
@@ -79,9 +79,9 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
             }
 
             if (slotStack.getCount() == 0) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
 
             if (slotStack.getCount() == itemstack.getCount()) {
@@ -95,9 +95,9 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
     }
 
     @Override
-    public boolean canInteractWith(Player player) {
-        BlockPos pos = this.getTileEntity().getPos();
-        if (MiscUtils.getTileAt(this.getTileEntity().getWorld(), pos, TileEntity.class, false) != this.getTileEntity()) {
+    public boolean stillValid(Player player) {
+        BlockPos pos = this.getTileEntity().getBlockPos();
+        if (MiscUtils.getTileAt(this.getTileEntity().getLevel(), pos, BlockEntity.class, false) != this.getTileEntity()) {
             return false;
         } else {
             return player.getDistanceSq(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D;

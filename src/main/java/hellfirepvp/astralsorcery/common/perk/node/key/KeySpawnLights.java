@@ -43,26 +43,26 @@ public class KeySpawnLights extends KeyPerk implements PlayerTickPerk {
     }
 
     @Override
-    public void onPlayerTick(Player player, LogicalSide side) {
-        if (side.isServer()) {
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+    public void onPlayerTick(Player player, LogicalSide direction) {
+        if (direction.isServer()) {
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (!prog.isValid() || !prog.doPerkAbilities()) {
                 return;
             }
             int spawnRate = CONFIG.lightSpawnRate.get();
             spawnRate = Math.max(spawnRate, 1);
-            if (player.ticksExisted % spawnRate == 0) {
+            if (player.tickCount % spawnRate == 0) {
                 int attempts = 4;
                 while (attempts > 0) {
                     int radius = CONFIG.lightSpawnRadius.get();
-                    BlockPos pos = player.getPosition().add(
-                            rand.nextInt(radius) * (rand.nextBoolean() ? 1 : -1),
-                            rand.nextInt(radius) * (rand.nextBoolean() ? 1 : -1),
-                            rand.nextInt(radius) * (rand.nextBoolean() ? 1 : -1));
-                    if (MiscUtils.executeWithChunk(player.getEntityWorld(), pos, () -> {
-                        if (TileIlluminator.ILLUMINATOR_CHECK.test(player.getEntityWorld(), pos, player.getEntityWorld().getBlockState(pos)) &&
+                    BlockPos pos = player.position().add(
+                            random.nextInt(radius) * (random.nextBoolean() ? 1 : -1),
+                            random.nextInt(radius) * (random.nextBoolean() ? 1 : -1),
+                            random.nextInt(radius) * (random.nextBoolean() ? 1 : -1));
+                    if (MiscUtils.executeWithChunk(player.getCommandSenderWorld(), pos, () -> {
+                        if (TileIlluminator.ILLUMINATOR_CHECK.test(player.getCommandSenderWorld(), pos, player.getCommandSenderWorld().getBlockState(pos)) &&
                                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), true)) {
-                            if (player.getEntityWorld().setBlockState(pos, BlocksAS.FLARE_LIGHT.getDefaultState())) {
+                            if (player.getCommandSenderWorld().setBlock(pos, BlocksAS.FLARE_LIGHT.defaultBlockState())) {
                                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                                 return true;
                             }

@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 public class TileInventory extends ItemStackHandler implements Iterable<ItemStack> {
 
     protected final TileEntitySynchronized tile;
-    protected final Consumer<Integer> changeListener;
+    protected final Consumer<Integer> callback;
     protected final Supplier<Integer> slotCountProvider;
     protected Set<Direction> applicableSides = new HashSet<>();
     protected BiFunction<Integer, ItemStack, Integer> stackSizeLimiter;
@@ -49,19 +49,19 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
 
     public TileInventory(@Nonnull TileEntitySynchronized tile,
                          @Nonnull Supplier<Integer> slotCountProvider,
-                         @Nullable Consumer<Integer> changeListener,
+                         @Nullable Consumer<Integer> callback,
                          Direction... applicableSides) {
-        this(tile, slotCountProvider, changeListener, Arrays.asList(applicableSides), (slot, stack) -> stack.getMaxStackSize());
+        this(tile, slotCountProvider, callback, Arrays.asList(applicableSides), (slot, stack) -> stack.getMaxStackSize());
     }
 
     protected TileInventory(@Nonnull TileEntitySynchronized tile,
                             @Nonnull Supplier<Integer> slotCountProvider,
-                            @Nullable Consumer<Integer> changeListener,
+                            @Nullable Consumer<Integer> callback,
                             @Nonnull Collection<Direction> applicableSides,
                             @Nonnull BiFunction<Integer, ItemStack, Integer> stackSizeLimiter) {
         super(slotCountProvider.get());
         this.tile = tile;
-        this.changeListener = changeListener;
+        this.callback = callback;
         this.slotCountProvider = slotCountProvider;
         this.applicableSides.addAll(applicableSides);
         this.stackSizeLimiter = stackSizeLimiter;
@@ -73,7 +73,7 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
     }
 
     protected TileInventory makeNewInstance() {
-        return new TileInventory(this.tile, this.slotCountProvider, this.changeListener, MiscUtils.copySet(this.applicableSides), this.stackSizeLimiter);
+        return new TileInventory(this.tile, this.slotCountProvider, this.callback, MiscUtils.copySet(this.applicableSides), this.stackSizeLimiter);
     }
 
     @Nonnull
@@ -110,8 +110,8 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
         return facing == null || applicableSides.contains(facing);
     }
 
-    public boolean hasCapability(Capability<?> capability, @Nullable Direction facing) {
-        return hasHandlerForSide(facing) && CapabilityItemHandler.ITEM_HANDLER_CAPABILITY == capability;
+    public boolean hasCapability(Capability<?> state, @Nullable Direction facing) {
+        return hasHandlerForSide(facing) && CapabilityItemHandler.ITEM_HANDLER_CAPABILITY == state;
     }
 
     public LazyOptional<TileInventory> getCapability() {
@@ -122,8 +122,8 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
     protected void onContentsChanged(int slot) {
         super.onContentsChanged(slot);
 
-        if (changeListener != null) {
-            changeListener.accept(slot);
+        if (callback != null) {
+            callback.accept(slot);
         }
         tile.markForUpdate();
     }

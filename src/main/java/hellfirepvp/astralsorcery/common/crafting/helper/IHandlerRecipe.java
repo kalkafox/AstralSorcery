@@ -22,7 +22,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  */
 public interface IHandlerRecipe<I extends IItemHandler> extends Recipe<Container> {
 
-    boolean matches(I handler, Level world);
+    boolean matches(I handler, Level level);
 
     @Override
     default boolean matches(Container inv, Level worldIn) {

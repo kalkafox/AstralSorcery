@@ -32,7 +32,7 @@ public class EffectIncrementer {
         } else {
             this.current--;
         }
-        this.current = MathHelper.clamp(this.current, 0, this.cap);
+        this.current = Mth.clamp(this.current, 0, this.cap);
     }
 
     public int get() {

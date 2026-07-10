@@ -45,19 +45,19 @@ public class Face {
         averageV = averageV / textureCoordinates.length;
 
         for (int i = 0; i < vertices.length; ++i) {
-            float offsetU = textureOffset;
-            float offsetV = textureOffset;
+            float uOffset = textureOffset;
+            float vOffset = textureOffset;
 
             if (textureCoordinates[i].u > averageU) {
-                offsetU = -offsetU;
+                uOffset = -uOffset;
             }
             if (textureCoordinates[i].v > averageV) {
-                offsetV = -offsetV;
+                vOffset = -vOffset;
             }
 
-            vb.pos(vertices[i].x, vertices[i].y, vertices[i].z)
+            vb.vertex(vertices[i].x, vertices[i].y, vertices[i].z)
                     .color(255, 255, 255, 255)
-                    .tex(textureCoordinates[i].u + offsetU, textureCoordinates[i].v + offsetV)
+                    .tex(textureCoordinates[i].u + uOffset, textureCoordinates[i].v + vOffset)
                     .normal(faceNormal.x, faceNormal.y, faceNormal.z)
                     .endVertex();
         }
@@ -66,7 +66,7 @@ public class Face {
     Vertex calculateFaceNormal() {
         Vector3 v1 = new Vector3(vertices[1].x - vertices[0].x, vertices[1].y - vertices[0].y, vertices[1].z - vertices[0].z);
         Vector3 v2 = new Vector3(vertices[2].x - vertices[0].x, vertices[2].y - vertices[0].y, vertices[2].z - vertices[0].z);
-        Vector3 normalVector = v1.crossProduct(v2).normalize();
+        Vector3 normalVector = v1.cross(v2).normalize();
 
         return new Vertex((float) normalVector.getX(), (float) normalVector.getY(), (float) normalVector.getZ());
     }

@@ -82,7 +82,7 @@ public class PerkExperienceRenderer implements ITickHandler {
         RenderSystem.disableAlphaTest();
 
         TexturesAS.TEX_OVERLAY_EXP_FRAME.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, frameOffsetX, frameOffsetY, 10, frameWidth, frameHeight)
                     .color(1F, 1F, 1F, visibilityReveal * 0.9F)
                     .draw();
@@ -96,7 +96,7 @@ public class PerkExperienceRenderer implements ITickHandler {
         float expOffsetY =  27.5F + (1F - perc) * 78F;
 
         TexturesAS.TEX_OVERLAY_EXP_BAR.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, expOffsetX, expOffsetY, 10, expWidth, expHeight)
                     .color(1F, 0.9F, 0F, visibilityReveal * 0.9F)
                     .tex(0, 0, 1, 1 - perc)
@@ -105,9 +105,9 @@ public class PerkExperienceRenderer implements ITickHandler {
 
         String strLevel = String.valueOf(perkData.getPerkLevel(player, LogicalSide.CLIENT));
         MutableComponent txtLevel = Component.literal(strLevel);
-        int strLength = Minecraft.getInstance().fontRenderer.getStringPropertyWidth(txtLevel);
+        int strLength = Minecraft.getInstance().font.getStringPropertyWidth(txtLevel);
 
-        renderStack.push();
+        renderStack.pushPose();
         renderStack.translate(15 - (strLength / 2F), 94, 20);
         renderStack.scale(1.2F, 1.2F, 1F);
         int c = 0x00DDDDDD;
@@ -115,7 +115,7 @@ public class PerkExperienceRenderer implements ITickHandler {
         if (visibilityReveal > 0.1E-4) {
             RenderingDrawUtils.renderStringAt(txtLevel, renderStack, null, c, true);
         }
-        renderStack.pop();
+        renderStack.popPose();
 
         BlockAtlasTexture.getInstance().bindTexture();
     }
@@ -124,14 +124,14 @@ public class PerkExperienceRenderer implements ITickHandler {
     public void tick(TickEvent.Type type, Object... context) {
         Player player = Minecraft.getInstance().player;
         if (player != null) {
-            ItemStack held = player.getHeldItem(Hand.MAIN_HAND);
+            ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
             if (!held.isEmpty() &&
                     held.getItem() instanceof PerkExperienceRevealer &&
                     ((PerkExperienceRevealer) held.getItem()).shouldReveal(held)) {
                 revealExperience(20);
             }
 
-            held = player.getHeldItem(Hand.OFF_HAND);
+            held = player.getItemInHand(InteractionHand.OFF_HAND);
             if (!held.isEmpty() &&
                     held.getItem() instanceof PerkExperienceRevealer &&
                     ((PerkExperienceRevealer) held.getItem()).shouldReveal(held)) {
@@ -167,8 +167,8 @@ public class PerkExperienceRenderer implements ITickHandler {
     }
 
     @Override
-    public boolean canFire(TickEvent.Phase phase) {
-        return phase == TickEvent.Phase.END;
+    public boolean canFire(TickEvent.Phase currentPhase) {
+        return currentPhase == TickEvent.Phase.END;
     }
 
     @Override

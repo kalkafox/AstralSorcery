@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 09:52
  */
-@Mixin(VoxelShapeSpliterator.class)
+@Mixin(CollisionSpliterator.class)
 public class MixinVoxelShapeSpliterator {
 
     private boolean astralSorceryDidCustomCollision = false;
@@ -33,7 +33,7 @@ public class MixinVoxelShapeSpliterator {
     @Inject(method = "tryAdvance", at = @At("HEAD"), cancellable = true)
     public void addCustomCollision(Consumer<? super VoxelShape> collisionShapeIterator, CallbackInfoReturnable<Boolean> cir) {
         if (!this.astralSorceryDidCustomCollision) {
-            VoxelShapeSpliterator iterator = (VoxelShapeSpliterator)(Object) this;
+            CollisionSpliterator iterator = (CollisionSpliterator)(Object) this;
             if (CollisionHelper.onCollision(iterator, collisionShapeIterator)) {
                 cir.setReturnValue(true);
                 return;

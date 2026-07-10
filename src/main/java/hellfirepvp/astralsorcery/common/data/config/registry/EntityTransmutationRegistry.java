@@ -63,15 +63,15 @@ public class EntityTransmutationRegistry extends ConfigDataAdapter<EntityTransmu
     }
 
     @Nullable
-    public LivingEntity transmuteEntity(ServerLevel world, LivingEntity entity) {
+    public LivingEntity transmuteEntity(ServerLevel level, LivingEntity entity) {
         EntityType<?> transmute = getEntityTransmuteTo(entity.getType());
         if (transmute != null) {
             CompoundTag tag = new CompoundTag();
             entity.writeWithoutTypeId(tag);
-            world.removeEntity(entity);
+            level.removeEntity(entity);
             NBTHelper.removeUUID(tag, "UUID");
             try {
-                Entity e = transmute.create(world);
+                Entity e = transmute.create(level);
                 if (!(e instanceof LivingEntity)) {
                     return null;
                 }
@@ -85,7 +85,7 @@ public class EntityTransmutationRegistry extends ConfigDataAdapter<EntityTransmu
     }
 
     @Override
-    public String getSectionName() {
+    public String getMetadataSectionName() {
         return "entity_transmutation";
     }
 
@@ -96,7 +96,7 @@ public class EntityTransmutationRegistry extends ConfigDataAdapter<EntityTransmu
     }
 
     @Override
-    public String getTranslationKey() {
+    public String getDescriptionId() {
         return translationKey("data");
     }
 

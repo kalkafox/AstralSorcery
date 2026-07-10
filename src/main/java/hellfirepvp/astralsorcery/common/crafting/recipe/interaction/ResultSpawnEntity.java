@@ -40,32 +40,32 @@ public class ResultSpawnEntity extends InteractionResult {
     }
 
     public static ResultSpawnEntity spawnEntity(EntityType<?> type) {
-        if (!type.isSummonable()) {
-            throw new IllegalArgumentException("EntityType " + type.getRegistryName() + " is not summonable!");
+        if (!type.canSummon()) {
+            throw new IllegalArgumentException("EntityType " + RegistryHelper.getKey(type) + " is not summonable!");
         }
         ResultSpawnEntity drop = new ResultSpawnEntity();
         drop.entityType = type;
         return drop;
     }
 
-    public EntityType<?> getEntityType() {
+    public EntityType<?> getType() {
         return entityType;
     }
 
     @Override
-    public void doResult(Level world, Vector3 at) {
-        Entity e = this.entityType.create(world);
+    public void doResult(Level level, Vector3 at) {
+        Entity e = this.entityType.create(level);
         if (!(e instanceof LivingEntity)) {
             return;
         }
-        e.setLocationAndAngles(at.getX(), at.getY(), at.getZ(), world.rand.nextFloat() * 360.0F, 0.0F);
-        world.addEntity(e);
+        e.moveTo(at.getX(), at.getY(), at.getZ(), level.random.nextFloat() * 360.0F, 0.0F);
+        level.addEntity(e);
     }
 
     @Override
     public void read(JsonObject json) throws JsonParseException {
-        ResourceLocation key = new ResourceLocation(JSONUtils.getString(json, "entityType"));
-        EntityType<?> type = ForgeRegistries.ENTITIES.getValue(key);
+        ResourceLocation key = ResourceLocation.parse(GsonHelper.getString(json, "entityType"));
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(key);
         if (type == null) {
             throw new JsonParseException("Unknown entity type: " + key);
         }
@@ -74,7 +74,7 @@ public class ResultSpawnEntity extends InteractionResult {
 
     @Override
     public void write(JsonObject json) {
-        json.addProperty("entityType", this.entityType.getRegistryName().toString());
+        json.addProperty("entityType", RegistryHelper.getKey(this.entityType).toString());
     }
 
     @Override

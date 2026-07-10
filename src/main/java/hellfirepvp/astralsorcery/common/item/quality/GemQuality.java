@@ -24,13 +24,13 @@ import java.util.Locale;
  */
 public enum GemQuality {
 
-    BROKEN  (TextFormatting.GRAY,  0.1F),
-    FLAWED  (TextFormatting.GRAY,  0.35F),
-    MUNDANE (TextFormatting.WHITE, 0.5F),
-    CLEAR   (TextFormatting.AQUA,  0.6F),
-    FACETED (TextFormatting.AQUA,  0.7F),
-    GLEAMING(TextFormatting.GOLD,  0.8F),
-    FLAWLESS(TextFormatting.GOLD,  1.0F);
+    BROKEN  (ChatFormatting.GRAY,  0.1F),
+    FLAWED  (ChatFormatting.GRAY,  0.35F),
+    MUNDANE (ChatFormatting.WHITE, 0.5F),
+    CLEAR   (ChatFormatting.AQUA,  0.6F),
+    FACETED (ChatFormatting.AQUA,  0.7F),
+    GLEAMING(ChatFormatting.GOLD,  0.8F),
+    FLAWLESS(ChatFormatting.GOLD,  1.0F);
 
     private final ChatFormatting color;
     private final float degree;

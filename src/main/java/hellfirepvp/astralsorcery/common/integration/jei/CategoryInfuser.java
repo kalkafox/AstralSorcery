@@ -53,7 +53,7 @@ public class CategoryInfuser extends JEICategory<LiquidInfusion> {
     }
 
     @Override
-    public IDrawable getBackground() {
+    public IDrawable getNoItemIcon() {
         return this.background;
     }
 
@@ -73,7 +73,7 @@ public class CategoryInfuser extends JEICategory<LiquidInfusion> {
         ImmutableList.Builder<List<ItemStack>> itemInputs = ImmutableList.builder();
         ImmutableList.Builder<List<ItemStack>> itemOutputs = ImmutableList.builder();
 
-        itemInputs.add(Arrays.asList(liquidInfusion.getItemInput().getMatchingStacks()));
+        itemInputs.add(Arrays.asList(liquidInfusion.getItemInput().getItems()));
         itemOutputs.add(Collections.singletonList(liquidInfusion.getOutputForRender(Collections.emptyList())));
 
         FluidStack fInput = new FluidStack(liquidInfusion.getLiquidInput(), FluidAttributes.BUCKET_VOLUME);
@@ -88,10 +88,10 @@ public class CategoryInfuser extends JEICategory<LiquidInfusion> {
 
     @Override
     public void setRecipe(IRecipeLayout recipeLayout, LiquidInfusion liquidInfusion, IIngredients ingredients) {
-        IGuiItemStackGroup itemStacks = recipeLayout.getItemStacks();
+        IGuiItemStackGroup items = recipeLayout.getItems();
         IGuiFluidStackGroup fluidStacks = recipeLayout.getFluidStacks();
 
-        itemStacks.init(0, true, 49, 95);
+        items.init(0, true, 49, 95);
 
         initFluidInput(fluidStacks, 1, 30, 57);
         initFluidInput(fluidStacks, 2, 49, 57);
@@ -106,9 +106,9 @@ public class CategoryInfuser extends JEICategory<LiquidInfusion> {
         initFluidInput(fluidStacks, 11, 49, 133);
         initFluidInput(fluidStacks, 12, 68, 133);
 
-        itemStacks.init(13, false, 48, 18);
+        items.init(13, false, 48, 18);
 
-        itemStacks.set(ingredients);
+        items.set(ingredients);
         fluidStacks.set(ingredients);
     }
 }

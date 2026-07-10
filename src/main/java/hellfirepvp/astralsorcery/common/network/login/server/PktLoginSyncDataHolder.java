@@ -101,7 +101,7 @@ public class PktLoginSyncDataHolder extends ASLoginPacket<PktLoginSyncDataHolder
             }
 
             @Override
-            public void handle(PktLoginSyncDataHolder packet, NetworkEvent.Context context, LogicalSide side) {}
+            public void handle(PktLoginSyncDataHolder packet, NetworkEvent.Context context, LogicalSide direction) {}
         };
     }
 }

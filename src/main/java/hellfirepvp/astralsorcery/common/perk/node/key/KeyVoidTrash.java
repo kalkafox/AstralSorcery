@@ -66,7 +66,7 @@ public class KeyVoidTrash extends KeyPerk {
                     .comment("List items that should count as trash and should be voided.")
                     .translation(translationKey("trashItems"))
                     .define("trashItems", defaultTrashItems.stream()
-                            .map(item -> item.getRegistryName().toString())
+                            .map(item -> RegistryHelper.getKey(item).toString())
                             .collect(Collectors.toList()));
 
             this.oreChance = cfgBuilder
@@ -76,7 +76,7 @@ public class KeyVoidTrash extends KeyPerk {
         }
 
         public boolean isTrash(ItemStack stack) {
-            String key = stack.getItem().getRegistryName().toString();
+            String key = RegistryHelper.getKey(stack.getItem()).toString();
             return this.trashItems.get().contains(key);
         }
 

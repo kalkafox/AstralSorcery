@@ -52,8 +52,8 @@ public class AttunementUpgradeRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public boolean matches(LogicalSide side, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
-        return altar.getAltarType() == AltarType.DISCOVERY && super.matches(side, crafter, altar, ignoreStarlightRequirement);
+    public boolean matches(LogicalSide direction, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
+        return altar.getAltarType() == AltarType.DISCOVERY && super.matches(direction, crafter, altar, ignoreStarlightRequirement);
     }
 
     @Override
@@ -61,6 +61,6 @@ public class AttunementUpgradeRecipe extends SimpleAltarRecipe {
         super.onRecipeCompletion(altar, activeRecipe);
 
         ResearchManager.informCraftedAltar(altar, activeRecipe, new ItemStack(BlocksAS.ALTAR_ATTUNEMENT));
-        altar.getWorld().setBlockState(altar.getPos(), BlocksAS.ALTAR_ATTUNEMENT.getDefaultState(), Constants.BlockFlags.DEFAULT);
+        altar.getLevel().setBlock(altar.getBlockPos(), BlocksAS.ALTAR_ATTUNEMENT.defaultBlockState(), Constants.BlockFlags.DEFAULT);
     }
 }

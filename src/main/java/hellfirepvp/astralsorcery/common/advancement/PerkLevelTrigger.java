@@ -31,7 +31,7 @@ public class PerkLevelTrigger extends ListenerCriterionTrigger<PerkLevelInstance
     }
 
     @Override
-    public PerkLevelInstance deserialize(JsonObject object, ConditionArrayParser conditions) {
+    public PerkLevelInstance deserialize(JsonObject object, DeserializationContext conditions) {
         return PerkLevelInstance.deserialize(getId(), object);
     }
 

@@ -67,56 +67,56 @@ import java.util.stream.Collectors;
 public class MiscUtils {
 
     @Nullable
-    public static <T> T getTileAt(BlockGetter world, BlockPos pos, Class<T> tileClass, boolean forceChunkLoad) {
-        if (world == null || pos == null) return null; //Duh.
-        if (world instanceof LevelAccessor) {
-            if (!((LevelAccessor) world).getChunkProvider().isChunkLoaded(new ChunkPos(pos)) && !forceChunkLoad) {
+    public static <T> T getTileAt(BlockGetter level, BlockPos pos, Class<T> tileClass, boolean forceChunkLoad) {
+        if (level == null || pos == null) return null; //Duh.
+        if (level instanceof LevelAccessor) {
+            if (!((LevelAccessor) level).getChunkSource().isChunkLoaded(new ChunkPos(pos)) && !forceChunkLoad) {
                 return null;
             }
         }
-        BlockEntity te = world.getTileEntity(pos);
+        BlockEntity te = level.getTileEntity(pos);
         if (te == null) return null;
         if (tileClass.isInstance(te)) return (T) te;
         return null;
     }
 
-    public static boolean canEntityTickAt(LevelAccessor world, BlockPos pos) {
+    public static boolean canEntityTickAt(LevelAccessor level, BlockPos pos) {
         ChunkPos chPos = new ChunkPos(pos);
-        if (!world.getChunkProvider().isChunkLoaded(chPos)) {
+        if (!level.getChunkSource().isChunkLoaded(chPos)) {
             return false;
         }
-        if (world.isRemote() || !(world instanceof ServerLevel)) {
+        if (level.isClientSide() || !(level instanceof ServerLevel)) {
             //Assume if a chunk is present and loaded on the client that it is valid for the client.
             return true;
         }
-        ServerChunkCache chunkProvider = ((ServerLevel) world).getChunkProvider();
-        return !chunkProvider.chunkManager.isOutsideSpawningRadius(chPos);
+        ServerChunkCache chunkSource = ((ServerLevel) level).getChunkSource();
+        return !chunkSource.chunkMap.isOutsideSpawningRadius(chPos);
     }
 
-    public static List<BlockSnapshot> captureBlockChanges(Level world, Runnable r) {
-        world.captureBlockSnapshots = true;
+    public static List<BlockSnapshot> captureBlockChanges(Level level, Runnable r) {
+        level.captureBlockSnapshots = true;
         r.run();
-        world.captureBlockSnapshots = false;
-        List<BlockSnapshot> blockSnapshots = (List<BlockSnapshot>) world.capturedBlockSnapshots.clone();
-        world.capturedBlockSnapshots.clear();
+        level.captureBlockSnapshots = false;
+        List<BlockSnapshot> blockSnapshots = (List<BlockSnapshot>) level.capturedBlockSnapshots.clone();
+        level.capturedBlockSnapshots.clear();
         return blockSnapshots;
     }
 
     @Nullable
-    public static <T> T getRandomEntry(Collection<T> collection, Random rand) {
-        if (collection == null || collection.isEmpty()) {
+    public static <T> T getRandomEntry(Collection<T> HELPER, Random random) {
+        if (HELPER == null || HELPER.isEmpty()) {
             return null;
         }
-        int index = rand.nextInt(collection.size());
-        return Iterables.get(collection, index);
+        int index = random.nextInt(HELPER.size());
+        return Iterables.get(HELPER, index);
     }
 
     @Nullable
-    public static <T> T getRandomEntry(T[] array, Random rand) {
+    public static <T> T getRandomEntry(T[] array, Random random) {
         if (array == null || array.length <= 0) {
             return null;
         }
-        return array[rand.nextInt(array.length)];
+        return array[random.nextInt(array.length)];
     }
 
     @Nullable
@@ -133,11 +133,11 @@ public class MiscUtils {
         if (values.length == 0) {
             throw new IllegalArgumentException(enumClazz.getName() + " has no enum constants.");
         }
-        return values[MathHelper.clamp(index, 0, values.length - 1)];
+        return values[Mth.clamp(index, 0, values.length - 1)];
     }
 
     @Nullable
-    public static <T> T getWeightedRandomEntry(Collection<T> list, Random rand, Function<T, Integer> getWeightFunction) {
+    public static <T> T getWeightedRandomEntry(Collection<T> list, Random random, Function<T, Integer> getWeightFunction) {
         if (list.isEmpty()) {
             return null;
         }
@@ -145,7 +145,7 @@ public class MiscUtils {
         for (T e : list) {
             weightedItems.add(new WRItemObject<>(getWeightFunction.apply(e), e));
         }
-        WRItemObject<T> item = WeightedRandom.getRandomItem(rand, weightedItems);
+        WRItemObject<T> item = WeightedRandom.getRandomItem(random, weightedItems);
         return item != null ? item.getValue() : null;
     }
 
@@ -155,9 +155,9 @@ public class MiscUtils {
 
     public static <T extends Comparable<T>> T getMaxEntry(Collection<T> elements) {
         T maxElement = null;
-        for (T element : elements) {
-            if (maxElement == null || maxElement.compareTo(element) < 0) {
-                maxElement = element;
+        for (T value : elements) {
+            if (maxElement == null || maxElement.compareTo(value) < 0) {
+                maxElement = value;
             }
         }
         return maxElement;
@@ -169,31 +169,31 @@ public class MiscUtils {
 
     public static <T extends Comparable<T>> T getMinEntry(Collection<T> elements) {
         T minElement = null;
-        for (T element : elements) {
-            if (minElement == null || minElement.compareTo(element) > 0) {
-                minElement = element;
+        for (T value : elements) {
+            if (minElement == null || minElement.compareTo(value) > 0) {
+                minElement = value;
             }
         }
         return minElement;
     }
 
-    public static boolean canSeeSky(Level world, BlockPos at, boolean loadChunk, boolean defaultValue) {
-        return canSeeSky(world, at, loadChunk, false, defaultValue);
+    public static boolean canSeeSky(Level level, BlockPos at, boolean loadChunk, boolean defaultValue) {
+        return canSeeSky(level, at, loadChunk, false, defaultValue);
     }
 
-    public static boolean canSeeSky(Level world, BlockPos at, boolean loadChunk, boolean allowInNoSkyWorlds, boolean defaultValue) {
-        if (world.getGameRules().getBoolean(GameRulesAS.IGNORE_SKYLIGHT_CHECK_RULE)) {
+    public static boolean canSeeSky(Level level, BlockPos at, boolean loadChunk, boolean allowInNoSkyWorlds, boolean defaultValue) {
+        if (level.getGameRules().getBoolean(GameRulesAS.IGNORE_SKYLIGHT_CHECK_RULE)) {
             return true;
         }
-        if (allowInNoSkyWorlds && !world.getDimensionType().hasSkyLight()) {
+        if (allowInNoSkyWorlds && !level.dimensionType().hasSkyLight()) {
             return true;
         }
         if (!loadChunk) {
-            return MiscUtils.executeWithChunk(world, at, () -> {
-                return world.canBlockSeeSky(at);
+            return MiscUtils.executeWithChunk(level, at, () -> {
+                return level.canSeeSkyFromBelowWater(at);
             }, defaultValue);
         }
-        return world.canBlockSeeSky(at);
+        return level.canSeeSkyFromBelowWater(at);
     }
 
     public static <T> Runnable apply(Consumer<T> func, Supplier<T> supply) {
@@ -251,16 +251,16 @@ public class MiscUtils {
     }
 
     public static <T> void mergeList(Collection<T> src, List<T> dst) {
-        for (T element : src) {
-            if (!dst.contains(element)) {
-                dst.add(element);
+        for (T value : src) {
+            if (!dst.contains(value)) {
+                dst.add(value);
             }
         }
     }
 
     public static <T> void cutList(Collection<? extends T> toRemove, List<T> from) {
-        for (T element : toRemove) {
-            from.remove(element);
+        for (T value : toRemove) {
+            from.remove(value);
         }
     }
 
@@ -277,22 +277,22 @@ public class MiscUtils {
     }
 
     @Nullable
-    public static <T> T iterativeSearch(Collection<T> collection, Predicate<T> matchingFct) {
-        for (T element : collection) {
-            if (matchingFct.test(element)) {
-                return element;
+    public static <T> T iterativeSearch(Collection<T> HELPER, Predicate<T> matchingFct) {
+        for (T value : HELPER) {
+            if (matchingFct.test(value)) {
+                return value;
             }
         }
         return null;
     }
 
-    public static <T> boolean contains(Collection<T> collection, Predicate<T>  matchingFct) {
-        return iterativeSearch(collection, matchingFct) != null;
+    public static <T> boolean contains(Collection<T> HELPER, Predicate<T>  matchingFct) {
+        return iterativeSearch(HELPER, matchingFct) != null;
     }
 
-    public static <T> boolean matchesAny(T element, Collection<Predicate<T>> tests) {
+    public static <T> boolean matchesAny(T value, Collection<Predicate<T>> tests) {
         for (Predicate<T> test : tests) {
-            if (test.test(element)) {
+            if (test.test(value)) {
                 return true;
             }
         }
@@ -311,7 +311,7 @@ public class MiscUtils {
         if (state.getBlock() instanceof LiquidBlock) {
             FluidState fluidState = state.getFluidState();
             if (!fluidState.isEmpty()) {
-                return fluidState.getFluid();
+                return fluidState.getType();
             }
         }
         return null;
@@ -323,9 +323,9 @@ public class MiscUtils {
         }
         if (target instanceof Player) {
             Player plTarget = (Player) target;
-            if (target.getEntityWorld() instanceof ServerLevel &&
-                    target.getEntityWorld().getServer() != null &&
-                    target.getEntityWorld().getServer().isPVPEnabled()) {
+            if (target.getCommandSenderWorld() instanceof ServerLevel &&
+                    target.getCommandSenderWorld().getServer() != null &&
+                    target.getCommandSenderWorld().getServer().isPvpAllowed()) {
                 return false;
             }
             if (plTarget.isSpectator() || plTarget.isCreative()) {
@@ -340,19 +340,19 @@ public class MiscUtils {
     }
 
     public static boolean canPlayerBreakBlockPos(Player player, BlockPos tryBreak) {
-        BlockEvent.BreakEvent ev = new BlockEvent.BreakEvent(player.getEntityWorld(), tryBreak, player.getEntityWorld().getBlockState(tryBreak), player);
+        BlockEvent.BreakEvent ev = new BlockEvent.BreakEvent(player.getCommandSenderWorld(), tryBreak, player.getCommandSenderWorld().getBlockState(tryBreak), player);
         NeoForge.EVENT_BUS.post(ev);
         return !ev.isCanceled();
     }
 
     public static boolean canPlayerPlaceBlockPos(Player player, BlockState tryPlace, BlockPos pos, Direction againstSide) {
-        Level world = player.getEntityWorld();
-        world.captureBlockSnapshots = true;
-        world.setBlockState(pos, tryPlace);
-        world.captureBlockSnapshots = false;
+        Level level = player.getCommandSenderWorld();
+        level.captureBlockSnapshots = true;
+        level.setBlock(pos, tryPlace);
+        level.captureBlockSnapshots = false;
 
-        List<BlockSnapshot> blockSnapshots = (List<BlockSnapshot>) world.capturedBlockSnapshots.clone();
-        world.capturedBlockSnapshots.clear();
+        List<BlockSnapshot> blockSnapshots = (List<BlockSnapshot>) level.capturedBlockSnapshots.clone();
+        level.capturedBlockSnapshots.clear();
 
         boolean cancelPlacement = false;
         if (blockSnapshots.size() > 1) {
@@ -361,19 +361,19 @@ public class MiscUtils {
             cancelPlacement = ForgeEventFactory.onBlockPlace(player, blockSnapshots.get(0), againstSide);
         }
         for (BlockSnapshot blocksnapshot : Lists.reverse(blockSnapshots)) {
-            world.restoringBlockSnapshots = true;
+            level.restoringBlockSnapshots = true;
             blocksnapshot.restore(true, false);
-            world.restoringBlockSnapshots = false;
+            level.restoringBlockSnapshots = false;
         }
         return !cancelPlacement;
     }
 
     public static boolean isConnectionEstablished(ServerPlayer player) {
-        return player.connection != null && player.connection.netManager != null && player.connection.netManager.isChannelOpen();
+        return player.connection != null && player.connection.connection != null && player.connection.connection.isConnected();
     }
 
-    public static long getRandomWorldSeed(WorldGenLevel world) {
-        return new Random(world.getSeed()).nextLong();
+    public static long getRandomWorldSeed(WorldGenLevel level) {
+        return new Random(level.getSeed()).nextLong();
     }
 
     @Nullable
@@ -383,11 +383,11 @@ public class MiscUtils {
 
     @Nullable
     public static Tuple<InteractionHand, ItemStack> getMainOrOffHand(LivingEntity entity, Predicate<ItemStack> acceptorFnc) {
-        InteractionHand hand = Hand.MAIN_HAND;
-        ItemStack held = entity.getHeldItem(hand);
+        InteractionHand hand = InteractionHand.MAIN_HAND;
+        ItemStack held = entity.getItemInHand(hand);
         if (held.isEmpty() || !acceptorFnc.test(held)) {
-            hand = Hand.OFF_HAND;
-            held = entity.getHeldItem(hand);
+            hand = InteractionHand.OFF_HAND;
+            held = entity.getItemInHand(hand);
         }
         if (held.isEmpty() || !acceptorFnc.test(held)) {
             return null;
@@ -404,18 +404,18 @@ public class MiscUtils {
 
     @Nullable
     public static <T extends Entity> T transferEntityTo(T entity, ResourceKey<Level> target, BlockPos targetPos) {
-        if (entity.getEntityWorld().isRemote) {
+        if (entity.getCommandSenderWorld().isClientSide) {
             return null; //No transfers on clientside.
         }
-        entity.setSneaking(false);
-        ResourceKey<Level> src = entity.getEntityWorld().getDimensionKey();
+        entity.getZ(false);
+        ResourceKey<Level> src = entity.getCommandSenderWorld().dimension();
         if (!src.equals(target)) {
             if (!ForgeHooks.onTravelToDimension(entity, target)) {
                 return null;
             }
 
             MinecraftServer srv = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-            ServerLevel targetWorld = srv.getWorld(target);
+            ServerLevel targetWorld = srv.getLevel(target);
             if (targetWorld == null) {
                 return null;
             }
@@ -424,8 +424,8 @@ public class MiscUtils {
                         targetPos.getX() + 0.5,
                         targetPos.getY() + 0.1,
                         targetPos.getZ() + 0.5,
-                        entity.rotationYaw,
-                        entity.rotationPitch);
+                        entity.getYRot(),
+                        entity.getXRot());
             } else {
                 entity = (T) entity.changeDimension(targetWorld, new NoOpTeleporter(targetWorld, targetPos));
                 if (entity == null) {
@@ -438,14 +438,14 @@ public class MiscUtils {
     }
 
     @Nullable
-    public static BlockPos itDownTopBlock(Level world, BlockPos at) {
-        ChunkAccess chunk = world.getChunk(at);
+    public static BlockPos itDownTopBlock(Level level, BlockPos at) {
+        ChunkAccess chunk = level.getChunk(at);
         BlockPos downPos = null;
 
-        for (BlockPos blockpos = new BlockPos(at.getX(), chunk.getTopFilledSegment() + 16, at.getZ()); blockpos.getY() >= 0; blockpos = downPos) {
-            downPos = blockpos.down();
-            BlockState test = world.getBlockState(downPos);
-            if (!world.isAirBlock(downPos) && !test.isIn(BlockTags.LEAVES) && test.isSolidSide(world, downPos, Direction.UP)) {
+        for (BlockPos blockpos = new BlockPos(at.getX(), chunk.getHighestSectionPosition() + 16, at.getZ()); blockpos.getY() >= 0; blockpos = downPos) {
+            downPos = blockpos.below();
+            BlockState test = level.getBlockState(downPos);
+            if (!level.isEmptyBlock(downPos) && !test.isIn(BlockTags.LEAVES) && test.isFaceSturdy(level, downPos, Direction.UP)) {
                 break;
             }
         }
@@ -453,32 +453,32 @@ public class MiscUtils {
         return downPos;
     }
 
-    public static List<Vector3> getCirclePositions(Vector3 centerOffset, Vector3 axis, double radius, int amountOfPointsOnCircle) {
+    public static List<Vector3> getCirclePositions(Vector3 rotationPivot, Vector3 axis, double radius, int amountOfPointsOnCircle) {
         List<Vector3> out = new LinkedList<>();
-        Vector3 circleVec = axis.clone().perpendicular().normalize().multiply(radius);
+        Vector3 circleVec = axis.clone().perpendicular().normalize().mul(radius);
         double degPerPoint = 360D / ((double) amountOfPointsOnCircle);
         for (int i = 0; i < amountOfPointsOnCircle; i++) {
             double deg = i * degPerPoint;
-            out.add(circleVec.clone().rotate(Math.toRadians(deg), axis.clone()).add(centerOffset));
+            out.add(circleVec.clone().mirror(Math.toRadians(deg), axis.clone()).add(rotationPivot));
         }
         return out;
     }
 
-    public static Vector3 getRandomCirclePosition(Vector3 centerOffset, Vector3 axis, double radius) {
-        return getCirclePosition(centerOffset, axis, radius, Math.random() * 360);
+    public static Vector3 getRandomCirclePosition(Vector3 rotationPivot, Vector3 axis, double radius) {
+        return getCirclePosition(rotationPivot, axis, radius, Math.random() * 360);
     }
 
-    public static Vector3 getCirclePosition(Vector3 centerOffset, Vector3 axis, double radius, double degree) {
-        Vector3 circleVec = axis.clone().perpendicular().normalize().multiply(radius);
-        return circleVec.rotate(Math.toRadians(degree), axis.clone()).add(centerOffset);
+    public static Vector3 getCirclePosition(Vector3 rotationPivot, Vector3 axis, double radius, double degree) {
+        Vector3 circleVec = axis.clone().perpendicular().normalize().mul(radius);
+        return circleVec.mirror(Math.toRadians(degree), axis.clone()).add(rotationPivot);
     }
 
-    public static Vector3 limitVelocityToMinecraftLimit(Vector3 velocity) {
-        double maxDir = Math.max(Math.abs(velocity.getX()), Math.max(Math.abs(velocity.getY()), Math.abs(velocity.getZ())));
+    public static Vector3 limitVelocityToMinecraftLimit(Vector3 ap) {
+        double maxDir = Math.max(Math.abs(ap.getX()), Math.max(Math.abs(ap.getY()), Math.abs(ap.getZ())));
         if (maxDir <= 3.9) { //SEntityVelocityPacket 3.9 * 8000 short value limit
-            return velocity;
+            return ap;
         }
-        return velocity.multiply(3.9 / maxDir);
+        return ap.mul(3.9 / maxDir);
     }
 
     @Nullable
@@ -492,90 +492,90 @@ public class MiscUtils {
     }
 
     @Nullable
-    public static BlockHitResult rayTraceLookBlock(Player player, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode) {
-        return rayTraceLookBlock(player, blockMode, fluidMode, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
+    public static BlockHitResult rayTraceLookBlock(Player player, ClipContext.BlockMode block, ClipContext.FluidMode fluid) {
+        return rayTraceLookBlock(player, block, fluid, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
     }
 
     @Nonnull
-    public static HitResult rayTraceLook(Player player, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode) {
-        return rayTraceLook(player, blockMode, fluidMode, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
+    public static HitResult rayTraceLook(Player player, ClipContext.BlockMode block, ClipContext.FluidMode fluid) {
+        return rayTraceLook(player, block, fluid, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
     }
 
     @Nullable
     public static BlockHitResult rayTraceLookBlock(Player player, double reachDst) {
-        return rayTraceLookBlock(player, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.ANY, reachDst);
+        return rayTraceLookBlock(player, ClipContext.BlockMode.COLLIDER, ClipContext.FluidMode.ANY, reachDst);
     }
 
     @Nonnull
     public static HitResult rayTraceLook(Player player, double reachDst) {
-        return rayTraceLook(player, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.ANY, reachDst);
+        return rayTraceLook(player, ClipContext.BlockMode.COLLIDER, ClipContext.FluidMode.ANY, reachDst);
     }
 
     @Nullable
-    public static BlockHitResult rayTraceLookBlock(Entity entity, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode, double reachDst) {
-        HitResult rtr = rayTraceLook(entity, blockMode, fluidMode, reachDst);
-        if (rtr.getType() == RayTraceResult.Type.BLOCK && rtr instanceof BlockHitResult) {
+    public static BlockHitResult rayTraceLookBlock(Entity entity, ClipContext.BlockMode block, ClipContext.FluidMode fluid, double reachDst) {
+        HitResult rtr = rayTraceLook(entity, block, fluid, reachDst);
+        if (rtr.getType() == HitResult.Type.BLOCK && rtr instanceof BlockHitResult) {
             return (BlockHitResult) rtr;
         }
         return null;
     }
 
     @Nonnull
-    public static HitResult rayTraceLook(Entity entity, RayTraceContext.BlockMode blockMode, RayTraceContext.FluidMode fluidMode, double reachDst) {
-        Vec3 pos = new Vec3(entity.getPosX(), entity.getPosY() + entity.getEyeHeight(), entity.getPosZ());
-        Vec3 lookVec = entity.getLookVec();
+    public static HitResult rayTraceLook(Entity entity, ClipContext.BlockMode block, ClipContext.FluidMode fluid, double reachDst) {
+        Vec3 pos = new Vec3(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ());
+        Vec3 lookVec = entity.getLookAngle();
         Vec3 end = pos.add(lookVec.x * reachDst, lookVec.y * reachDst, lookVec.z * reachDst);
-        ClipContext ctx = new ClipContext(pos, end, blockMode, fluidMode, entity);
-        return entity.world.rayTraceBlocks(ctx);
+        ClipContext ctx = new ClipContext(pos, end, block, fluid, entity);
+        return entity.level().clipWithInteractionOverride(ctx);
     }
 
     public static Color calcRandomConstellationColor(float perc) {
         return new Color(Color.HSBtoRGB((230F + (50F * perc)) / 360F, 0.8F, 0.8F - (0.3F * perc)));
     }
 
-    public static void applyRandomOffset(Vector3 target, Random rand) {
-        applyRandomOffset(target, rand, 1F);
+    public static void applyRandomOffset(Vector3 target, Random random) {
+        applyRandomOffset(target, random, 1F);
     }
 
-    public static void applyRandomOffset(Vector3 target, Random rand, float multiplier) {
-        target.addX(rand.nextFloat() * multiplier * (rand.nextBoolean() ? 1 : -1));
-        target.addY(rand.nextFloat() * multiplier * (rand.nextBoolean() ? 1 : -1));
-        target.addZ(rand.nextFloat() * multiplier * (rand.nextBoolean() ? 1 : -1));
+    public static void applyRandomOffset(Vector3 target, Random random, float multiplier) {
+        target.addX(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
+        target.addY(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
+        target.addZ(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
     }
 
-    public static void applyRandomCircularOffset(Vector3 target, Random rand) {
-        applyRandomOffset(target, rand, 1F);
+    public static void applyRandomCircularOffset(Vector3 target, Random random) {
+        applyRandomOffset(target, random, 1F);
     }
 
-    public static void applyRandomCircularOffset(Vector3 target, Random rand, float multiplier) {
-        Vector3 v = Vector3.random().normalize().multiply(rand.nextFloat() * multiplier);
-        target.addX(v.getX() * (rand.nextBoolean() ? 1 : -1));
-        target.addY(v.getY() * (rand.nextBoolean() ? 1 : -1));
-        target.addZ(v.getZ() * (rand.nextBoolean() ? 1 : -1));
+    public static void applyRandomCircularOffset(Vector3 target, Random random, float multiplier) {
+        Vector3 v = Vector3.random().normalize().mul(random.nextFloat() * multiplier);
+        target.addX(v.getX() * (random.nextBoolean() ? 1 : -1));
+        target.addY(v.getY() * (random.nextBoolean() ? 1 : -1));
+        target.addZ(v.getZ() * (random.nextBoolean() ? 1 : -1));
     }
 
-    public static void executeWithChunk(LevelReader world, ChunkPos pos, Runnable run) {
-        executeWithChunk(world, pos.asBlockPos(), nullSupplier(run));
+    public static void executeWithChunk(LevelReader level, ChunkPos pos, Runnable run) {
+        executeWithChunk(level, pos.asBlockPos(), nullSupplier(run));
     }
 
-    public static void executeWithChunk(LevelReader world, BlockPos pos, Runnable run) {
-        executeWithChunk(world, pos, nullSupplier(run));
+    public static void executeWithChunk(LevelReader level, BlockPos pos, Runnable run) {
+        executeWithChunk(level, pos, nullSupplier(run));
     }
 
-    public static <T> T executeWithChunk(LevelReader world, BlockPos pos, Supplier<T> run) {
-        return executeWithChunk(world, pos, run, (T) null);
+    public static <T> T executeWithChunk(LevelReader level, BlockPos pos, Supplier<T> run) {
+        return executeWithChunk(level, pos, run, (T) null);
     }
 
-    public static <T> T executeWithChunk(LevelReader world, BlockPos pos, Supplier<T> run, T defaultValue) {
-        if (world instanceof ServerLevel && LogCategory.UNINTENDED_CHUNK_LOADING.isEnabled()) {
-            ServerChunkCache provider = ((ServerLevel) world).getChunkProvider();
+    public static <T> T executeWithChunk(LevelReader level, BlockPos pos, Supplier<T> run, T defaultValue) {
+        if (level instanceof ServerLevel && LogCategory.UNINTENDED_CHUNK_LOADING.isEnabled()) {
+            ServerChunkCache provider = ((ServerLevel) level).getChunkSource();
             int prev = provider.getLoadedChunkCount();
             try {
                 if (provider.isChunkLoaded(new ChunkPos(pos))) {
                     return run.get();
                 }
             } finally {
-                int current = ((ServerLevel) world).getChunkProvider().getLoadedChunkCount();
+                int current = ((ServerLevel) level).getChunkSource().getLoadedChunkCount();
                 if (current > prev) { //We... don't really care about unloading tbh.
                     AstralSorcery.log.warn("Astral Sorcery loaded a chunk when it intended not to!");
                     AstralSorcery.log.warn("Previous chunk count: " + prev);
@@ -584,37 +584,37 @@ public class MiscUtils {
                     AstralSorcery.log.warn("Stacktrace:", new Exception());
                 }
             }
-        } else if (world instanceof LevelAccessor) {
-            ChunkSource provider = ((LevelAccessor) world).getChunkProvider();
+        } else if (level instanceof LevelAccessor) {
+            ChunkSource provider = ((LevelAccessor) level).getChunkSource();
             if (provider.canTick(pos)) {
                 return run.get();
             }
         } else {
-            if (world.isBlockLoaded(pos)) {
+            if (level.hasChunkAt(pos)) {
                 return run.get();
             }
         }
         return defaultValue;
     }
 
-    public static <T> void executeWithChunk(LevelReader world, BlockPos pos, T obj, Consumer<T> run) {
-        executeWithChunk(world, pos, nullSupplier(apply(run, () -> obj)));
+    public static <T> void executeWithChunk(LevelReader level, BlockPos pos, T obj, Consumer<T> run) {
+        executeWithChunk(level, pos, nullSupplier(apply(run, () -> obj)));
     }
 
-    public static <T, U> void executeWithChunk(LevelReader world, BlockPos pos, T obj, U obj1, BiConsumer<T, U> run) {
-        executeWithChunk(world, pos, obj, apply(run, () -> obj1));
+    public static <T, U> void executeWithChunk(LevelReader level, BlockPos pos, T obj, U obj1, BiConsumer<T, U> run) {
+        executeWithChunk(level, pos, obj, apply(run, () -> obj1));
     }
 
-    public static <T, R> R executeWithChunk(LevelReader world, BlockPos pos, T obj, Function<T, R> run) {
-        return executeWithChunk(world, pos, apply(run, () -> obj));
+    public static <T, R> R executeWithChunk(LevelReader level, BlockPos pos, T obj, Function<T, R> run) {
+        return executeWithChunk(level, pos, apply(run, () -> obj));
     }
 
-    public static <T, R> R executeWithChunk(LevelReader world, BlockPos pos, T obj, Function<T, R> run, R _default) {
-        return executeWithChunk(world, pos, apply(run, () -> obj), _default);
+    public static <T, R> R executeWithChunk(LevelReader level, BlockPos pos, T obj, Function<T, R> run, R _default) {
+        return executeWithChunk(level, pos, apply(run, () -> obj), _default);
     }
 
-    public static <T> Function<T, T> mapWithChunk(LevelReader world, Function<T, BlockPos> posFn) {
-        return (val) -> executeWithChunk(world, posFn.apply(val), val, Function.identity());
+    public static <T> Function<T, T> mapWithChunk(LevelReader level, Function<T, BlockPos> posFn) {
+        return (val) -> executeWithChunk(level, posFn.apply(val), val, Function.identity());
     }
 
     public static <T> T eitherOf(Random r, T... selection) {
@@ -632,9 +632,9 @@ public class MiscUtils {
     }
 
     public static <T> Optional<T> tryMultiple(Supplier<T>... suppliers) {
-        for (Supplier<T> supplier : suppliers) {
+        for (Supplier<T> factory : suppliers) {
             try {
-                return Optional.ofNullable(supplier.get());
+                return Optional.ofNullable(factory.get());
             } catch (Exception exc) {
                 AstralSorcery.log.error(exc);
             }
@@ -654,13 +654,13 @@ public class MiscUtils {
             }
             Class<?> specificPlayerClass = mod.getExtendedPlayerClass();
             if (specificPlayerClass != null) {
-                if (player.getClass() != ServerPlayerEntity.class && player.getClass() == specificPlayerClass) {
+                if (player.getClass() != ServerPlayer.class && player.getClass() == specificPlayerClass) {
                     isModdedPlayer = true;
                     break;
                 }
             }
         }
-        if (!isModdedPlayer && player.getClass() != ServerPlayerEntity.class) {
+        if (!isModdedPlayer && player.getClass() != ServerPlayer.class) {
             return true;
         }
 
@@ -668,8 +668,8 @@ public class MiscUtils {
             return true;
         }
         try {
-            player.getPlayerIP().length();
-            player.connection.netManager.getRemoteAddress().toString();
+            player.getIpAddress().length();
+            player.connection.connection.getRemoteAddress().toString();
         } catch (Exception exc) {
             return true;
         }

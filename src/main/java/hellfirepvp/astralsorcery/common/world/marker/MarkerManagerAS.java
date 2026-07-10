@@ -36,55 +36,55 @@ import java.util.Random;
  */
 public class MarkerManagerAS {
 
-    public static void handleMarker(String marker, BlockPos pos, LevelAccessor genWorld, Random rand, BoundingBox box) {
+    public static void handleMarker(String marker, BlockPos pos, LevelAccessor genWorld, Random random, BoundingBox box) {
         switch (marker) {
             case "brick_shrine_chest":
-                if (rand.nextBoolean()) {
-                    makeChest(genWorld, pos, LootAS.SHRINE_CHEST, rand, box);
+                if (random.nextBoolean()) {
+                    makeChest(genWorld, pos, LootAS.SHRINE_CHEST, random, box);
                 } else {
-                    genWorld.setBlockState(pos, BlocksAS.MARBLE_BRICKS.getDefaultState(), Constants.BlockFlags.BLOCK_UPDATE);
+                    genWorld.setBlock(pos, BlocksAS.MARBLE_BRICKS.defaultBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
                 }
                 break;
             case "shrine_chest":
-                if (rand.nextBoolean()) {
-                    makeChest(genWorld, pos, LootAS.SHRINE_CHEST, rand, box);
+                if (random.nextBoolean()) {
+                    makeChest(genWorld, pos, LootAS.SHRINE_CHEST, random, box);
                 } else {
-                    genWorld.setBlockState(pos, Blocks.AIR.getDefaultState(), Constants.BlockFlags.BLOCK_UPDATE);
+                    genWorld.setBlock(pos, Blocks.AIR.defaultBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
                 }
                 break;
             case "random_top_block":
-                if (rand.nextFloat() < 0.7F) {
-                    genWorld.setBlockState(pos, genWorld.getBiome(pos).getGenerationSettings().getSurfaceBuilderConfig().getTop(), Constants.BlockFlags.BLOCK_UPDATE);
+                if (random.nextFloat() < 0.7F) {
+                    genWorld.setBlock(pos, genWorld.getBiome(pos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), Constants.BlockFlags.BLOCK_UPDATE);
                 } else {
-                    genWorld.setBlockState(pos, Blocks.AIR.getDefaultState(), Constants.BlockFlags.BLOCK_UPDATE);
+                    genWorld.setBlock(pos, Blocks.AIR.defaultBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
                 }
                 break;
             case "crystal":
-                makeCollectorCrystal(genWorld, pos, rand, box);
+                makeCollectorCrystal(genWorld, pos, random, box);
                 break;
         }
     }
 
-    private static void makeCollectorCrystal(LevelAccessor world, BlockPos pos, Random rand, BoundingBox box) {
-        if (box.isVecInside(pos) && world.getBlockState(pos).getBlock() != BlocksAS.ROCK_COLLECTOR_CRYSTAL) {
-            world.setBlockState(pos, BlocksAS.ROCK_COLLECTOR_CRYSTAL.getDefaultState(), Constants.BlockFlags.BLOCK_UPDATE);
+    private static void makeCollectorCrystal(LevelAccessor level, BlockPos pos, Random random, BoundingBox box) {
+        if (box.isInside(pos) && level.getBlockState(pos).getBlock() != BlocksAS.ROCK_COLLECTOR_CRYSTAL) {
+            level.setBlock(pos, BlocksAS.ROCK_COLLECTOR_CRYSTAL.defaultBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
 
-            TileCollectorCrystal tcc = MiscUtils.getTileAt(world, pos, TileCollectorCrystal.class, true);
+            TileCollectorCrystal tcc = MiscUtils.getTileAt(level, pos, TileCollectorCrystal.class, true);
             if (tcc != null) {
-                IMajorConstellation cst = MiscUtils.getRandomEntry(ConstellationRegistry.getMajorConstellations(), rand);
+                IMajorConstellation cst = MiscUtils.getRandomEntry(ConstellationRegistry.getMajorConstellations(), random);
                 tcc.setAttributes(CrystalPropertiesAS.WORLDGEN_SHRINE_COLLECTOR_ATTRIBUTES);
                 tcc.setAttunedConstellation(cst);
             }
         }
     }
 
-    private static void makeChest(LevelAccessor world, BlockPos pos, ResourceLocation tableName, Random rand, BoundingBox box) {
-        if (box.isVecInside(pos) && world.getBlockState(pos).getBlock() != Blocks.CHEST) {
-            BlockState chest = StructurePiece.correctFacing(world, pos, Blocks.CHEST.getDefaultState());
+    private static void makeChest(LevelAccessor level, BlockPos pos, ResourceLocation tableName, Random random, BoundingBox box) {
+        if (box.isInside(pos) && level.getBlockState(pos).getBlock() != Blocks.CHEST) {
+            BlockState chest = StructurePiece.correctFacing(level, pos, Blocks.CHEST.defaultBlockState());
 
-            world.setBlockState(pos, chest, Constants.BlockFlags.BLOCK_UPDATE);
+            level.setBlock(pos, chest, Constants.BlockFlags.BLOCK_UPDATE);
             // Static setLootTable used instead of manual tile fetch -> member setLootTable to provide compatibility with Lootr.
-            LockableLootTileEntity.setLootTable(world, rand, pos, tableName);
+            RandomizableContainerBlockEntity.setLootTable(level, random, pos, tableName);
         }
     }
 }

@@ -57,7 +57,7 @@ public class CEffectFornax extends CEffectAbstractList<ListEntries.PosEntry> {
     public static FornaxConfig CONFIG = new FornaxConfig();
 
     public CEffectFornax(@Nonnull ILocatable origin) {
-        super(origin, ConstellationsAS.fornax, 1, (world, pos, state) -> true);
+        super(origin, ConstellationsAS.fornax, 1, (level, pos, state) -> true);
         this.excludeRitualPositions();
         this.selectSphericalPositions();
     }
@@ -78,61 +78,61 @@ public class CEffectFornax extends CEffectAbstractList<ListEntries.PosEntry> {
 
     @Nullable
     @Override
-    public ListEntries.PosEntry createElement(Level world, BlockPos pos) {
+    public ListEntries.PosEntry createElement(Level level, BlockPos pos) {
         return new ListEntries.PosEntry(pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void playClientEffect(Level world, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
-        Vector3 motion = Vector3.random().multiply(0.04);
-        if (pos.equals(pedestal.getPos())) {
+    public void playClientEffect(Level level, BlockPos pos, TileRitualPedestal pedestal, float alphaMultiplier, boolean extended) {
+        Vector3 motion = Vector3.random().mul(0.04);
+        if (pos.equals(pedestal.getBlockPos())) {
             motion.setY(0);
         } else {
             motion.setY(Math.abs(motion.getY()) * -1);
         }
-        Color c = MiscUtils.eitherOf(rand,
+        Color c = MiscUtils.eitherOf(random,
                 () -> ColorsAS.CONSTELLATION_FORNAX.brighter(),
                 () -> ColorsAS.CONSTELLATION_FORNAX.darker(),
                 () -> ColorsAS.CONSTELLATION_FORNAX.darker(),
                 () -> ColorsAS.CONSTELLATION_FORNAX.darker().darker());
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(new Vector3(pos).add(0.5, 0.2, 0.5))
-                .alpha(VFXAlphaFunction.FADE_OUT)
+                .alpha1arg(VFXAlphaFunction.FADE_OUT)
                 .color(VFXColorFunction.constant(c))
-                .setScaleMultiplier(0.3F + rand.nextFloat() * 0.4F)
-                .setMotion(motion)
+                .setScaleMultiplier(0.3F + random.nextFloat() * 0.4F)
+                .setDeltaMovement(motion)
                 .setGravityStrength(-0.0015F)
-                .setMaxAge(60 + rand.nextInt(30));
+                .setMaxAge(60 + random.nextInt(30));
     }
 
     @Override
-    public boolean playEffect(Level world, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
-        if (!(world instanceof ServerLevel)) {
+    public boolean playEffect(Level level, BlockPos pos, ConstellationEffectProperties properties, @Nullable IMinorConstellation trait) {
+        if (!(level instanceof ServerLevel)) {
             return false;
         }
 
-        Consumer<ItemStack> dropResult = stack -> ItemUtils.dropItemNaturally(world, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, stack);
+        Consumer<ItemStack> dropResult = stack -> ItemUtils.dropItemNaturally(level, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, stack);
 
-        return this.peekNewPosition(world, pos, properties).mapLeft(newEntry -> {
-            BlockPos at = newEntry.getPos();
+        return this.peekNewPosition(level, pos, properties).mapLeft(newEntry -> {
+            BlockPos at = newEntry.getBlockPos();
 
             if (properties.isCorrupted()) {
-                WorldFreezingRecipe freezingRecipe = WorldFreezingRegistry.INSTANCE.getRecipeFor(world, at);
+                WorldFreezingRecipe freezingRecipe = WorldFreezingRegistry.INSTANCE.getRecipeFor(level, at);
                 if (freezingRecipe != null) {
-                    freezingRecipe.doOutput(world, at, world.getBlockState(at), dropResult);
+                    freezingRecipe.doOutput(level, at, level.getBlockState(at), dropResult);
                     return true;
                 }
-                sendConstellationPing(world, new Vector3(at).add(0.5, 0.5, 0.5));
+                sendConstellationPing(level, new Vector3(at).add(0.5, 0.5, 0.5));
                 return false;
             }
 
-            WorldMeltableRecipe meltRecipe = WorldMeltableRegistry.INSTANCE.getRecipeFor(world, at);
+            WorldMeltableRecipe meltRecipe = WorldMeltableRegistry.INSTANCE.getRecipeFor(level, at);
             if (meltRecipe != null) {
-                meltRecipe.doOutput(world, at, world.getBlockState(at), dropResult);
+                meltRecipe.doOutput(level, at, level.getBlockState(at), dropResult);
                 return true;
             }
-            sendConstellationPing(world, new Vector3(at).add(0.5, 0.5, 0.5));
+            sendConstellationPing(level, new Vector3(at).add(0.5, 0.5, 0.5));
             return false;
         }).left().orElse(false);
     }

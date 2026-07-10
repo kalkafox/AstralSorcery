@@ -30,7 +30,7 @@ public abstract class AbstractData {
         this.key = key;
     }
 
-    public final void markDirty() {
+    public final void setChanged() {
         SyncDataHolder.markForUpdate(this.key);
     }
 
@@ -38,8 +38,8 @@ public abstract class AbstractData {
 
     public abstract void clearServer();
 
-    public abstract void writeAllDataToPacket(CompoundTag compound);
+    public abstract void writeAllDataToPacket(CompoundTag pattern);
 
-    public abstract void writeDiffDataToPacket(CompoundTag compound);
+    public abstract void writeDiffDataToPacket(CompoundTag pattern);
 
 }

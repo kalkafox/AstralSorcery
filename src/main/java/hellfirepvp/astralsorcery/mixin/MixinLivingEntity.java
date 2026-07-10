@@ -29,8 +29,8 @@ public class MixinLivingEntity {
     @Inject(method = "getWaterSlowDown", at = @At("HEAD"), cancellable = true)
     public void preventWaterSlowdown(CallbackInfoReturnable<Float> cir) {
         LivingEntity entity = (LivingEntity)(Object) this;
-        if (!entity.getItemStackFromSlot(EquipmentSlotType.CHEST).isEmpty()) {
-            if (MantleEffectOctans.shouldPreventWaterSlowdown(entity.getItemStackFromSlot(EquipmentSlotType.CHEST), entity)) {
+        if (!entity.getItemStackFromSlot(EquipmentSlot.CHEST).isEmpty()) {
+            if (MantleEffectOctans.shouldPreventWaterSlowdown(entity.getItemStackFromSlot(EquipmentSlot.CHEST), entity)) {
                 cir.setReturnValue(0.92F);
             }
         }

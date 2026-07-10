@@ -38,7 +38,7 @@ public class BlockStairsTemplate extends StairBlock implements CustomItemBlock {
     }
 
     @Override
-    public int getHarvestLevel(BlockState state) {
-        return this.baseState.getHarvestLevel();
+    public int getLevel(BlockState state) {
+        return this.baseState.getLevel();
     }
 }

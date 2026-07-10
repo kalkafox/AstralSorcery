@@ -54,9 +54,9 @@ public class BuiltInEffectTraitRelayHighlight extends AltarRecipeEffect {
                 }
                 WrappedIngredient match = additionalIngredients.get(stack.getStackIndex());
 
-                TileSpectralRelay relay = MiscUtils.getTileAt(altar.getWorld(), stack.getRealPosition(), TileSpectralRelay.class, false);
+                TileSpectralRelay relay = MiscUtils.getTileAt(altar.getLevel(), stack.getRealPosition(), TileSpectralRelay.class, false);
                 if (relay != null) {
-                    ItemStack in = relay.getInventory().getStackInSlot(0);
+                    ItemStack in = relay.getItems().getStackInSlot(0);
                     if (!in.isEmpty() && match.getIngredient().test(in)) {
                         Color color = ColorizationHelper.getColor(in)
                                 .orElse(ColorsAS.CELESTIAL_CRYSTAL);
@@ -64,15 +64,15 @@ public class BuiltInEffectTraitRelayHighlight extends AltarRecipeEffect {
                         playLightbeam(altar, relay, color);
                         playRelayHighlightParticles(relay, color);
 
-                        if (rand.nextInt(4) == 0) {
+                        if (random.nextInt(4) == 0) {
                             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                                     .spawn(new Vector3(altar).add(
-                                            -3 + rand.nextInt(7),
+                                            -3 + random.nextInt(7),
                                             0.02,
-                                            -3 + rand.nextInt(7)))
+                                            -3 + random.nextInt(7)))
                                     .color(VFXColorFunction.constant(color))
-                                    .alpha(VFXAlphaFunction.FADE_OUT)
-                                    .setScaleMultiplier(0.15F + rand.nextFloat() * 0.2F);
+                                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                                    .setScaleMultiplier(0.15F + random.nextFloat() * 0.2F);
                         }
                     } else {
                         ItemStack chosen = match.getRandomMatchingStack(getClientTick());
@@ -89,15 +89,15 @@ public class BuiltInEffectTraitRelayHighlight extends AltarRecipeEffect {
 
     @OnlyIn(Dist.CLIENT)
     private void playRelayHighlightParticles(TileSpectralRelay relay, Color color) {
-        if (rand.nextBoolean()) {
+        if (random.nextBoolean()) {
             FXFacingParticle particle = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                    .spawn(new Vector3(relay).add(rand.nextFloat(), 0, rand.nextFloat()))
+                    .spawn(new Vector3(relay).add(random.nextFloat(), 0, random.nextFloat()))
                     .setAlphaMultiplier(0.7F)
-                    .setScaleMultiplier(0.2F + rand.nextFloat() * 0.1F)
-                    .setMaxAge(30 + rand.nextInt(50));
-            if (rand.nextInt(3) == 0) {
+                    .setScaleMultiplier(0.2F + random.nextFloat() * 0.1F)
+                    .setMaxAge(30 + random.nextInt(50));
+            if (random.nextInt(3) == 0) {
                 particle.color(VFXColorFunction.WHITE)
-                        .setScaleMultiplier(0.1F + rand.nextFloat() * 0.1F);
+                        .setScaleMultiplier(0.1F + random.nextFloat() * 0.1F);
             } else {
                 particle.color(VFXColorFunction.constant(color))
                         .setGravityStrength(-0.0015F);
@@ -128,16 +128,16 @@ public class BuiltInEffectTraitRelayHighlight extends AltarRecipeEffect {
                 }
 
                 WrappedIngredient match = additionalIngredients.get(stack.getStackIndex());
-                BlockPos offset = stack.getRealPosition().subtract(altar.getPos());
+                BlockPos offset = stack.getRealPosition().subtract(altar.getBlockPos());
 
-                TileSpectralRelay relay = MiscUtils.getTileAt(altar.getWorld(), stack.getRealPosition(), TileSpectralRelay.class, false);
+                TileSpectralRelay relay = MiscUtils.getTileAt(altar.getLevel(), stack.getRealPosition(), TileSpectralRelay.class, false);
 
-                if (relay == null || (!match.getIngredient().test(relay.getInventory().getStackInSlot(0)))) {
+                if (relay == null || (!match.getIngredient().test(relay.getItems().getStackInSlot(0)))) {
                     ItemStack potential = match.getRandomMatchingStack(getClientTick());
-                    renderStack.push();
+                    renderStack.pushPose();
                     renderStack.translate(0.5 + offset.getX(), 0.35 + offset.getY(), 0.5  + offset.getZ());
                     RenderingUtils.renderTranslucentItemStack(potential, renderStack, pTicks);
-                    renderStack.pop();
+                    renderStack.popPose();
                 }
             }
         }

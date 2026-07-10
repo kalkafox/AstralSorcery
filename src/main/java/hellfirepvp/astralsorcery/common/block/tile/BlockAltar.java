@@ -62,9 +62,9 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!world.isRemote() && player instanceof ServerPlayer) {
-            TileAltar altar = MiscUtils.getTileAt(world, pos, TileAltar.class, true);
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!level.isClientSide() && player instanceof ServerPlayer) {
+            TileAltar altar = MiscUtils.getTileAt(level, pos, TileAltar.class, true);
             if (altar != null) {
                 CustomContainerProvider<?> provider;
                 switch (altar.getAltarType()) {
@@ -95,17 +95,17 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
                 }
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void onReplaced(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+    public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
         if (!(newState.getBlock() instanceof BlockAltar)) {
             TileAltar ta = MiscUtils.getTileAt(worldIn, pos, TileAltar.class, true);
-            if (ta != null && !worldIn.isRemote) {
-                ItemUtils.dropInventory(ta.getInventory(), worldIn, pos);
+            if (ta != null && !worldIn.isClientSide) {
+                ItemUtils.dropEquipment(ta.getItems(), worldIn, pos);
             }
-            super.onReplaced(state, worldIn, pos, newState, isMoving);
+            super.onRemove(state, worldIn, pos, newState, isMoving);
         } else {
             AltarType thisType = ((BlockAltar)    state.getBlock()).type;
             AltarType thatType = ((BlockAltar) newState.getBlock()).type;
@@ -119,18 +119,18 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public boolean allowsMovement(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
         return false;
     }
 
     @Override
     public RenderShape getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+        return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter world) {
+    public BlockEntity newBlockEntity(BlockGetter level) {
         return new TileAltar().updateType(this.type, true);
     }
 }

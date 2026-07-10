@@ -62,34 +62,34 @@ public class BlockObservatory extends BaseEntityBlock implements LargeBlock, Cus
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.canPlaceAt(context) ? this.getDefaultState() : null;
+        return this.canPlaceAt(context) ? this.defaultBlockState() : null;
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
-        if (!worldIn.isRemote()) {
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        if (!worldIn.isClientSide()) {
             TileObservatory observatory = MiscUtils.getTileAt(worldIn, pos, TileObservatory.class, false);
-            if (observatory != null && observatory.isUsable() && !player.isSneaking()) {
+            if (observatory != null && observatory.isFlyEnabled() && !player.isShiftKeyDown()) {
                 Entity entity = observatory.findRideableObservatoryEntity();
                 if (entity != null) {
-                    if (player.getRidingEntity() != entity) {
+                    if (player.getVehicle() != entity) {
                         player.startRiding(entity);
                     }
                     new ContainerObservatoryProvider(observatory).openFor((ServerPlayer) player);
                 }
             }
         }
-        return ActionResultType.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        return VoxelShapes.empty();
+        return Shapes.empty();
     }
 
     @Nullable
     @Override
-    public BlockEntity createNewTileEntity(BlockGetter worldIn) {
+    public BlockEntity newBlockEntity(BlockGetter worldIn) {
         return new TileObservatory();
     }
 }

@@ -23,6 +23,6 @@ import java.util.Collection;
  */
 public interface AttributeModifierProvider {
 
-    Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide side, boolean ignoreRequirements);
+    Collection<PerkAttributeModifier> getModifiers(Player player, LogicalSide direction, boolean ignoreRequirements);
 
 }

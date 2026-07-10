@@ -71,12 +71,12 @@ public class CrystalGenerator {
             return attr; //Can't upgrade 'to' something then.
         }
         int existing = attr.getTotalTierLevel();
-        int expected = MathHelper.clamp(existing + 1,
+        int expected = Mth.clamp(existing + 1,
                 ((CrystalAttributeGenItem) stack.getItem()).getGeneratedPropertyTiers(),
                 ((CrystalAttributeGenItem) stack.getItem()).getMaxPropertyTiers());
         int generate = expected - attr.getTotalTierLevel();
 
-        CrystalAttributes.Builder builder = CrystalAttributes.Builder.newBuilder(false);
+        CrystalAttributes.Builder builder = CrystalAttributes.Builder.properties(false);
         builder.addAll(attr);
         for (int i = 0; i < generate; i++) {
             Collection<CrystalProperty> remaining = new ArrayList<>(RegistriesAS.REGISTRY_CRYSTAL_PROPERTIES.getValues());
@@ -117,7 +117,7 @@ public class CrystalGenerator {
         if (item.getItem() instanceof CrystalAttributeGenItem) {
             toGenerate = ((CrystalAttributeGenItem) item.getItem()).getGeneratedPropertyTiers();
         }
-        CrystalAttributes.Builder attrBuilder = CrystalAttributes.Builder.newBuilder(false);
+        CrystalAttributes.Builder attrBuilder = CrystalAttributes.Builder.properties(false);
 
         int totalAdded = 0;
         for (int x = 0; x < COUNT_PHYSICAL_PROPERTY_TIERS; x++) {

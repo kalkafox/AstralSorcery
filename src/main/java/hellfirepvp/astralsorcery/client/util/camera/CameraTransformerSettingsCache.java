@@ -25,7 +25,7 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
 
     private boolean active = false;
 
-    private boolean viewBobbing = false, hideGui = false, flying = false;
+    private boolean bobView = false, hideGui = false, isFlying = false;
     private CameraType thirdPersonView;
 
     private Vector3 startPosition;
@@ -35,29 +35,29 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
     public void onStartTransforming(float pTicks) {
         Minecraft mc = Minecraft.getInstance();
 
-        this.viewBobbing = mc.gameSettings.viewBobbing;
-        this.hideGui = mc.gameSettings.hideGUI;
-        this.thirdPersonView = mc.gameSettings.getPointOfView();
+        this.bobView = mc.options.bobView;
+        this.hideGui = mc.options.hideGUI;
+        this.thirdPersonView = mc.options.getCameraType();
         Player player = mc.player;
-        this.flying = player.abilities.isFlying;
-        this.startPosition = new Vector3(player.getPosX(), player.getPosY(), player.getPosZ());
-        this.startYaw = player.rotationYaw;
-        this.startPitch = player.rotationPitch;
-        player.setVelocity(0, 0, 0);
+        this.isFlying = player.abilities.flying;
+        this.startPosition = new Vector3(player.getX(), player.getY(), player.getZ());
+        this.startYaw = player.getYRot();
+        this.startPitch = player.getXRot();
+        player.lerpMotion(0, 0, 0);
         this.active = true;
     }
 
     @Override
     public void onStopTransforming(float pTicks) {
         if (active) {
-            Options settings = Minecraft.getInstance().gameSettings;
-            settings.viewBobbing = viewBobbing;
+            Options settings = Minecraft.getInstance().options;
+            settings.bobView = bobView;
             settings.hideGUI = hideGui;
             settings.setPointOfView(thirdPersonView);
             Player player = Minecraft.getInstance().player;
-            player.abilities.isFlying = flying;
+            player.abilities.flying = isFlying;
             player.setPositionAndRotation(startPosition.getX(), startPosition.getY(), startPosition.getZ(), startYaw, startPitch);
-            player.setVelocity(0, 0, 0);
+            player.lerpMotion(0, 0, 0);
             this.active = false;
         }
     }
@@ -68,12 +68,12 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
             return;
         }
 
-        Options settings = Minecraft.getInstance().gameSettings;
+        Options settings = Minecraft.getInstance().options;
         settings.hideGUI = true;
-        settings.viewBobbing = false;
-        settings.setPointOfView(PointOfView.THIRD_PERSON_BACK);
-        Minecraft.getInstance().player.abilities.isFlying = true;
-        Minecraft.getInstance().player.setVelocity(0, 0, 0);
+        settings.bobView = false;
+        settings.setPointOfView(CameraType.THIRD_PERSON_BACK);
+        Minecraft.getInstance().player.abilities.flying = true;
+        Minecraft.getInstance().player.lerpMotion(0, 0, 0);
     }
 
 }

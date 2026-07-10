@@ -27,7 +27,7 @@ public class CooldownSetEvent extends Event {
     public CooldownSetEvent(Player player, int originalCooldown) {
         this.player = player;
         this.originalCooldown = originalCooldown;
-        this.setCooldown(this.getOriginalCooldown());
+        this.addCooldown(this.getOriginalCooldown());
     }
 
     public Player getPlayer() {
@@ -38,7 +38,7 @@ public class CooldownSetEvent extends Event {
         return originalCooldown;
     }
 
-    public void setCooldown(int cooldown) {
+    public void addCooldown(int cooldown) {
         this.cooldown = cooldown;
     }
 

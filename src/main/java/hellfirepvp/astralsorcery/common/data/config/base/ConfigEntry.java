@@ -62,7 +62,7 @@ public abstract class ConfigEntry implements Consumer<ModConfigSpec.Builder> {
     }
 
     protected String translationKey(String key) {
-        return String.format("config.%s.%s.%s", this.configType.extension(), this.getFullPath(), key);
+        return String.format("config.%s.%s.%s", this.configType.extension(), this.getPathFromLocation(), key);
     }
 
     public abstract void createEntries(ModConfigSpec.Builder cfgBuilder);
@@ -73,7 +73,7 @@ public abstract class ConfigEntry implements Consumer<ModConfigSpec.Builder> {
         return this.path;
     }
 
-    public String getFullPath() {
+    public String getPathFromLocation() {
         return this.subPath.isEmpty() ? getPath() : String.format("%s.%s", this.subPath, getPath());
     }
 

@@ -34,13 +34,13 @@ public class PatternAltarAttunement extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        BlockState chiseled = BlocksAS.MARBLE_CHISELED.getDefaultState();
-        BlockState bricks = BlocksAS.MARBLE_BRICKS.getDefaultState();
-        BlockState arch = BlocksAS.MARBLE_ARCH.getDefaultState();
-        BlockState sootyRaw = BlocksAS.BLACK_MARBLE_RAW.getDefaultState();
+        BlockState chiseled = BlocksAS.MARBLE_CHISELED.defaultBlockState();
+        BlockState bricks = BlocksAS.MARBLE_BRICKS.defaultBlockState();
+        BlockState arch = BlocksAS.MARBLE_ARCH.defaultBlockState();
+        BlockState sootyRaw = BlocksAS.BLACK_MARBLE_RAW.defaultBlockState();
 
         addBlockCube(sootyRaw,-3, -1, -3, 3, -1, 3);
-        addBlock(BlocksAS.ALTAR_ATTUNEMENT.getDefaultState(), 0, 0, 0);
+        addBlock(BlocksAS.ALTAR_ATTUNEMENT.defaultBlockState(), 0, 0, 0);
 
         for (int i = -3; i <= 3; i++) {
             addBlock(arch,  4, -1,  i);
@@ -82,7 +82,7 @@ public class PatternAltarAttunement extends PatternBlockArray {
             @Nonnull
             @Override
             public BlockState getDescriptiveState(long tick) {
-                return BlocksAS.MARBLE_PILLAR.getDefaultState().with(BlockMarblePillar.PILLAR_TYPE, type);
+                return BlocksAS.MARBLE_PILLAR.defaultBlockState().setValue(BlockMarblePillar.PILLAR_TYPE, type);
             }
         };
     }

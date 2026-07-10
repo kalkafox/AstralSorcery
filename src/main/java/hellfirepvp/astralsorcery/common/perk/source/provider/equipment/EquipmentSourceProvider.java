@@ -42,9 +42,9 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
 
     @Override
     protected void update(ServerPlayer playerEntity) {
-        for (EquipmentSlot slot : EquipmentSlotType.values()) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
             //Items held in offhand will not provide modifers.
-            if (slot == EquipmentSlotType.OFFHAND) {
+            if (slot == EquipmentSlot.OFFHAND) {
                 continue;
             }
 
@@ -71,8 +71,8 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
 
     @Override
     protected void removeModifiers(ServerPlayer playerEntity) {
-        for (EquipmentSlot slot : EquipmentSlotType.values()) {
-            if (slot == EquipmentSlotType.OFFHAND) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot == EquipmentSlot.OFFHAND) {
                 continue;
             }
 
@@ -89,8 +89,8 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
 
     @Override
     public EquipmentModifierSource deserialize(FriendlyByteBuf buf) {
-        EquipmentSlot type = ByteBufUtils.readEnumValue(buf, EquipmentSlotType.class);
-        ItemStack stack = ByteBufUtils.readItemStack(buf);
+        EquipmentSlot type = ByteBufUtils.readEnumValue(buf, EquipmentSlot.class);
+        ItemStack stack = ByteBufUtils.readItem(buf);
         return new EquipmentModifierSource(type, stack);
     }
 

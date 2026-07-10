@@ -38,7 +38,7 @@ public abstract class CustomContainerProvider<C extends AbstractContainerMenu> i
 
     @Override
     public Component getDisplayName() {
-        ResourceLocation key = this.type.getRegistryName();
+        ResourceLocation key = RegistryHelper.getKey(this.type);
         return Component.translatable("screen.%s.%s", key.getNamespace(), key.getPath());
     }
 

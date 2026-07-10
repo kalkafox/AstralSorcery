@@ -53,7 +53,7 @@ public class TagsAS {
     }
 
     private static ITag.INamedTag<Block> blockTag(Mods mod, String name) {
-        return BlockTags.makeWrapperTag(mod.key(name).toString());
+        return BlockTags.bind(mod.key(name).toString());
     }
 
     private static ITag.INamedTag<Item> itemTagForge(String name) {
@@ -61,6 +61,6 @@ public class TagsAS {
     }
 
     private static ITag.INamedTag<Item> itemTag(Mods mod, String name) {
-        return ItemTags.makeWrapperTag(mod.key(name).toString());
+        return ItemTags.bind(mod.key(name).toString());
     }
 }

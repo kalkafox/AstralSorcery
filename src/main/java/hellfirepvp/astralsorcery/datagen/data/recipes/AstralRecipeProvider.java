@@ -37,7 +37,7 @@ public class AstralRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    protected void registerRecipes(Consumer<IFinishedRecipe> registrar) {
+    protected void registerRecipes(Consumer<FinishedRecipe> registrar) {
         DiscoveryAltarRecipeProvider.registerAltarRecipes(registrar);
         AttunementAltarRecipeProvider.registerAltarRecipes(registrar);
         CelestialAltarRecipeProvider.registerAltarRecipes(registrar);

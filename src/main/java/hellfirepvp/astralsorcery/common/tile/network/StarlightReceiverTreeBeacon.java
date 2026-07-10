@@ -30,15 +30,15 @@ public class StarlightReceiverTreeBeacon extends SimpleTransmissionReceiver<Tile
     }
 
     @Override
-    public void onStarlightReceive(Level world, IWeakConstellation type, double amount) {
-        TileTreeBeacon well = getTileAtPos(world);
+    public void onStarlightReceive(Level level, IWeakConstellation type, double amount) {
+        TileTreeBeacon well = getTileAtPos(level);
         if (well != null) {
             well.receiveStarlight(amount, type);
         }
     }
 
     @Override
-    public boolean syncTileData(Level world, TileTreeBeacon tile) {
+    public boolean syncTileData(Level level, TileTreeBeacon tile) {
         return true;
     }
 

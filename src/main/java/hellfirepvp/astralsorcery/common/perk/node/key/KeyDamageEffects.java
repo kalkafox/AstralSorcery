@@ -44,33 +44,33 @@ public class KeyDamageEffects extends KeyPerk {
     }
 
     @Override
-    public void attachListeners(LogicalSide side, IEventBus bus) {
-        super.attachListeners(side, bus);
+    public void attachListeners(LogicalSide direction, IEventBus bus) {
+        super.attachListeners(direction, bus);
 
         bus.addListener(EventPriority.LOWEST, this::onDamageResult);
     }
 
     private void onDamageResult(LivingDamageEvent event) {
         DamageSource source = event.getSource();
-        if (source.getTrueSource() != null && source.getTrueSource() instanceof Player) {
-            Player player = (Player) source.getTrueSource();
-            LogicalSide side = this.getSide(player);
-            PlayerProgress prog = ResearchHelper.getProgress(player, side);
+        if (source.getEntity() != null && source.getEntity() instanceof Player) {
+            Player player = (Player) source.getEntity();
+            LogicalSide direction = this.getSide(player);
+            PlayerProgress prog = ResearchHelper.getProgress(player, direction);
             if (prog.getPerkData().hasPerkEffect(this)) {
                 LivingEntity attacked = event.getEntityLiving();
-                float chance = PerkAttributeHelper.getOrCreateMap(player, side)
+                float chance = PerkAttributeHelper.getOrCreateMap(player, direction)
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.applicationChance.get().floatValue());
-                if (rand.nextFloat() < chance) {
-                    switch (rand.nextInt(3)) {
+                if (random.nextFloat() < chance) {
+                    switch (random.nextInt(3)) {
                         case 0:
-                            attacked.addPotionEffect(new MobEffectInstance(Effects.WITHER, 200, 1, false, false, true));
+                            attacked.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, 1, false, false, true));
                             break;
                         case 1:
-                            attacked.addPotionEffect(new MobEffectInstance(Effects.POISON, 200, 1, false, false, true));
+                            attacked.addEffect(new MobEffectInstance(MobEffects.POISON, 200, 1, false, false, true));
                             break;
                         case 2:
-                            attacked.addPotionEffect(new MobEffectInstance(Effects.SLOWNESS, 200, 1, false, false, true));
-                            attacked.addPotionEffect(new MobEffectInstance(Effects.WEAKNESS, 200, 1, false, false, true));
+                            attacked.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 1, false, false, true));
+                            attacked.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1, false, false, true));
                             break;
                         default:
                             break;

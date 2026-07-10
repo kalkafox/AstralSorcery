@@ -47,12 +47,12 @@ public class DataLightConnections extends AbstractData {
         Map<BlockPos, Set<BlockPos>> posBufferDim = serverPosBuffer.computeIfAbsent(dim, k -> new HashMap<>());
         for (TransmissionChain.LightConnection c : newlyAddedConnections) {
             BlockPos start = c.getStart();
-            Set<BlockPos> endpoints = posBufferDim.computeIfAbsent(start, k -> new HashSet<>());
-            endpoints.add(c.getEnd());
+            Set<BlockPos> channels = posBufferDim.computeIfAbsent(start, k -> new HashSet<>());
+            channels.add(c.getEnd());
         }
         notifyConnectionAdd(dim, newlyAddedConnections);
         if (newlyAddedConnections.size() > 0) {
-            markDirty();
+            setChanged();
         }
     }
 
@@ -73,7 +73,7 @@ public class DataLightConnections extends AbstractData {
         }
         notifyConnectionRemoval(dim, invalidConnections);
         if (invalidConnections.size() > 0) {
-            markDirty();
+            setChanged();
         }
     }
 
@@ -81,7 +81,7 @@ public class DataLightConnections extends AbstractData {
     public void clear(ResourceKey<Level> dim) {
         if (this.serverPosBuffer.remove(dim) != null) {
             this.dimensionClearBuffer.add(dim);
-            markDirty();
+            setChanged();
         }
     }
 
@@ -108,7 +108,7 @@ public class DataLightConnections extends AbstractData {
     }
 
     @Override
-    public void writeAllDataToPacket(CompoundTag compound) {
+    public void writeAllDataToPacket(CompoundTag pattern) {
         for (ResourceKey<Level> dim : serverPosBuffer.keySet()) {
             Map<BlockPos, Set<BlockPos>> dat = serverPosBuffer.get(dim);
             ListTag dataList = new ListTag();
@@ -120,23 +120,23 @@ public class DataLightConnections extends AbstractData {
 
                 for (BlockPos end : endPositions) {
                     CompoundTag cmp = new CompoundTag();
-                    cmp.putLong("start", start.toLong());
-                    cmp.putLong("end",   end.toLong());
+                    cmp.putLong("start", start.asLong());
+                    cmp.putLong("end",   end.asLong());
                     dataList.add(cmp);
                 }
             }
 
-            compound.put(dim.getLocation().toString(), dataList);
+            pattern.put(dim.getLocation().toString(), dataList);
         }
     }
 
     @Override
-    public void writeDiffDataToPacket(CompoundTag compound) {
+    public void writeDiffDataToPacket(CompoundTag pattern) {
         ListTag clearList = new ListTag();
         for (ResourceKey<Level> dim : this.dimensionClearBuffer) {
-            clearList.add(StringNBT.valueOf(dim.getLocation().toString()));
+            clearList.add(StringTag.valueOf(dim.getLocation().toString()));
         }
-        compound.put("clear", clearList);
+        pattern.put("clear", clearList);
 
         for (ResourceKey<Level> dim : serverChangeBuffer.keySet()) {
             if (this.dimensionClearBuffer.contains(dim)) {
@@ -148,12 +148,12 @@ public class DataLightConnections extends AbstractData {
                 ListTag list = new ListTag();
                 for (Tuple<TransmissionChain.LightConnection, Boolean> tuple : changes) {
                     CompoundTag connection = new CompoundTag();
-                    connection.putLong("start", tuple.getA().getStart().toLong());
-                    connection.putLong("end",   tuple.getA().getEnd().toLong());
+                    connection.putLong("start", tuple.getA().getStart().asLong());
+                    connection.putLong("end",   tuple.getA().getEnd().asLong());
                     connection.putBoolean("connect", tuple.getB());
                     list.add(connection);
                 }
-                compound.put(dim.getLocation().toString(), list);
+                pattern.put(dim.getLocation().toString(), list);
             }
         }
 

@@ -47,8 +47,8 @@ public class CrystalTransmissionNode extends SimpleTransmissionNode {
     }
 
     @Override
-    public void onTransmissionTick(Level world, float starlightAmt, IWeakConstellation type) {
-        TileLens lens = MiscUtils.getTileAt(world, getLocationPos(), TileLens.class, false);
+    public void onTransmissionTick(Level level, float starlightAmt, IWeakConstellation type) {
+        TileLens lens = MiscUtils.getTileAt(level, getLocationPos(), TileLens.class, false);
         if (lens != null) {
             lens.transmissionTick(starlightAmt, type);
         }
@@ -75,21 +75,21 @@ public class CrystalTransmissionNode extends SimpleTransmissionNode {
     }
 
     @Override
-    public void readFromNBT(CompoundTag compound) {
-        super.readFromNBT(compound);
+    public void readFromNBT(CompoundTag pattern) {
+        super.readFromNBT(pattern);
 
-        this.attributes = CrystalAttributes.getCrystalAttributes(compound);
-        this.additionalLoss = compound.getFloat("lossMultiplier");
+        this.attributes = CrystalAttributes.getCrystalAttributes(pattern);
+        this.additionalLoss = pattern.getFloat("lossMultiplier");
     }
 
     @Override
-    public void writeToNBT(CompoundTag compound) {
-        super.writeToNBT(compound);
+    public void save(CompoundTag pattern) {
+        super.save(pattern);
 
         if (this.attributes != null) {
-            this.attributes.store(compound);
+            this.attributes.store(pattern);
         }
-        compound.putFloat("lossMultiplier", this.additionalLoss);
+        pattern.putFloat("lossMultiplier", this.additionalLoss);
     }
 
     public static class Provider extends TransmissionProvider {

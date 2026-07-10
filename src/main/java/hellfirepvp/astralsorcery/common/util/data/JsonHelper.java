@@ -44,11 +44,11 @@ public class JsonHelper {
             .create();
 
     public static void parseMultipleStrings(JsonObject root, String key, Consumer<String> consumer) {
-        consumeJsonListConfiguration(root, key, "String", "Strings", JsonElement::isJsonPrimitive, JsonElement::getAsString, consumer);
+        consumeJsonListConfiguration(root, key, "String", "Strings", JsonElement::convertToLong, JsonElement::getAsString, consumer);
     }
 
     public static void parseMultipleJsonPrimitives(JsonObject root, String key, String singular, String plural, Consumer<JsonPrimitive> consumer) {
-        consumeJsonListConfiguration(root, key, singular, plural, JsonElement::isJsonPrimitive, JsonElement::getAsJsonPrimitive, consumer);
+        consumeJsonListConfiguration(root, key, singular, plural, JsonElement::convertToLong, JsonElement::getAsJsonPrimitive, consumer);
     }
 
     public static void parseMultipleJsonObjects(JsonObject root, String key, Consumer<JsonObject> consumer) {
@@ -66,7 +66,7 @@ public class JsonHelper {
         JsonElement el = root.get(key);
         if (verifier.test(el)) {
             consumer.accept(consumerTransformer.apply(el));
-        } else if (el.isJsonArray()) {
+        } else if (el.convertToDouble()) {
             JsonArray objectArray = el.getAsJsonArray();
             for (JsonElement arrayEl : objectArray) {
                 if (!verifier.test(arrayEl)) {
@@ -82,10 +82,10 @@ public class JsonHelper {
     @Nonnull
     public static FluidStack getFluidStack(JsonElement fluidElement, String infoKey) {
         FluidStack fluidStack;
-        if (fluidElement.isJsonPrimitive() && ((JsonPrimitive) fluidElement).isString()) {
+        if (fluidElement.convertToLong() && ((JsonPrimitive) fluidElement).isString()) {
             String strKey = fluidElement.getAsString();
-            ResourceLocation fluidKey = new ResourceLocation(strKey);
-            fluidStack = new FluidStack(ForgeRegistries.FLUIDS.getValue(fluidKey), FluidAttributes.BUCKET_VOLUME);
+            ResourceLocation fluidKey = ResourceLocation.parse(strKey);
+            fluidStack = new FluidStack(BuiltInRegistries.FLUID.get(fluidKey), FluidAttributes.BUCKET_VOLUME);
         } else if (fluidElement.isJsonObject()) {
             fluidStack = getFluidStack(fluidElement.getAsJsonObject(), true);
         } else {
@@ -96,26 +96,26 @@ public class JsonHelper {
 
     @Nonnull
     public static FluidStack getFluidStack(JsonObject json, boolean readNBT) {
-        String fluidName = JSONUtils.getString(json, "fluid");
-        Fluid fluid = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(fluidName));
+        String fluidName = GsonHelper.getString(json, "fluid");
+        Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidName));
         if (fluid == null || fluid == Fluids.EMPTY) {
             return FluidStack.EMPTY;
         }
         if (readNBT && json.has("nbt")) {
             //Copied from CraftingHelper.getItemStack's NBT deserialization.
             try {
-                JsonElement element = json.get("nbt");
+                JsonElement value = json.get("nbt");
                 CompoundTag nbt;
-                if (element.isJsonObject()) {
-                    nbt = JsonToNBT.getTagFromJson(GSON.toJson(element));
+                if (value.isJsonObject()) {
+                    nbt = TagParser.expect(GSON.getPos(value));
                 } else {
-                    nbt = JsonToNBT.getTagFromJson(JSONUtils.getString(element, "nbt"));
+                    nbt = TagParser.expect(GsonHelper.getString(value, "nbt"));
                 }
 
                 CompoundTag tempRead = new CompoundTag();
                 tempRead.put("Tag", nbt);
                 tempRead.putString("FluidName", fluidName);
-                tempRead.putInt("Amount", JSONUtils.getInt(json, "amount", FluidAttributes.BUCKET_VOLUME));
+                tempRead.putInt("Amount", GsonHelper.getInt(json, "amount", FluidAttributes.BUCKET_VOLUME));
 
                 return FluidStack.loadFluidStackFromNBT(tempRead);
             }
@@ -124,16 +124,16 @@ public class JsonHelper {
                 throw new JsonSyntaxException("Invalid NBT Entry: " + e.toString());
             }
         }
-        return new FluidStack(fluid, JSONUtils.getInt(json, "amount", FluidAttributes.BUCKET_VOLUME));
+        return new FluidStack(fluid, GsonHelper.getInt(json, "amount", FluidAttributes.BUCKET_VOLUME));
     }
 
     @Nonnull
     public static ItemStack getItemStack(JsonElement itemElement, String infoKey) {
         ItemStack itemstack;
-        if (itemElement.isJsonPrimitive() && ((JsonPrimitive) itemElement).isString()) {
+        if (itemElement.convertToLong() && ((JsonPrimitive) itemElement).isString()) {
             String strKey = itemElement.getAsString();
-            ResourceLocation itemKey = new ResourceLocation(strKey);
-            itemstack = new ItemStack(ForgeRegistries.ITEMS.getValue(itemKey));
+            ResourceLocation itemKey = ResourceLocation.parse(strKey);
+            itemstack = new ItemStack(BuiltInRegistries.ITEM.get(itemKey));
         } else if (itemElement.isJsonObject()) {
             itemstack = CraftingHelper.getItemStack(itemElement.getAsJsonObject(), true);
         } else {
@@ -144,16 +144,16 @@ public class JsonHelper {
 
     @Nonnull
     public static ItemStack getItemStack(JsonObject root, String key) {
-        if (!JSONUtils.hasField(root, key)) {
+        if (!GsonHelper.convertToInt(root, key)) {
             throw new JsonSyntaxException("Missing " + key + ", expected to find a string or object");
         }
         ItemStack itemstack;
         if (root.get(key).isJsonObject()) {
-            itemstack = CraftingHelper.getItemStack(JSONUtils.getJsonObject(root, key), true);
+            itemstack = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(root, key), true);
         } else {
-            String strKey = JSONUtils.getString(root, key);
-            ResourceLocation itemKey = new ResourceLocation(strKey);
-            itemstack = new ItemStack(ForgeRegistries.ITEMS.getValue(itemKey));
+            String strKey = GsonHelper.getString(root, key);
+            ResourceLocation itemKey = ResourceLocation.parse(strKey);
+            itemstack = new ItemStack(BuiltInRegistries.ITEM.get(itemKey));
         }
         return itemstack;
     }
@@ -161,7 +161,7 @@ public class JsonHelper {
     @Nonnull
     public static JsonObject serializeItemStack(ItemStack stack) {
         JsonObject object = new JsonObject();
-        object.addProperty("item", stack.getItem().getRegistryName().toString());
+        object.addProperty("item", RegistryHelper.getKey(stack.getItem()).toString());
         object.addProperty("count", stack.getCount());
         if (stack.hasTag()) {
             object.addProperty("nbt", stack.getTag().toString());
@@ -170,7 +170,7 @@ public class JsonHelper {
     }
 
     public static Color getColor(JsonObject object, String key) {
-        String value = JSONUtils.getString(object, key);
+        String value = GsonHelper.getString(object, key);
         if (value.startsWith("0x")) { //Assume hex color.
             String hexNbr = value.substring(2);
             try {

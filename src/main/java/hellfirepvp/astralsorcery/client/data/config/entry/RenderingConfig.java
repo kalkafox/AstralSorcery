@@ -62,7 +62,7 @@ public class RenderingConfig extends ConfigEntry {
         dimensionsWithSkyRendering = cfgBuilder
                 .comment("Whitelist of dimension ID's that will have special astral sorcery sky rendering")
                 .translation(translationKey("skyRenderingEnabled"))
-                .defineList("skyRenderingEnabled", Lists.newArrayList(World.OVERWORLD.getLocation().toString()), Predicates.alwaysTrue());
+                .defineList("skyRenderingEnabled", Lists.newArrayList(Level.OVERWORLD.getLocation().toString()), Predicates.alwaysTrue());
 
         dimensionsWithOnlyConstellationRendering = cfgBuilder
                 .comment("If a dimension is listed here, the skyrender will only render constellations on top of the existing skybox.")

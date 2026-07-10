@@ -46,33 +46,33 @@ public class PerkTree {
 
     private PerkTree() {}
 
-    public Optional<PreparedPerkTreeData> getData(LogicalSide side) {
-        return this.treeData.getData(side);
+    public Optional<PreparedPerkTreeData> getData(LogicalSide direction) {
+        return this.treeData.getData(direction);
     }
 
-    public Optional<AbstractPerk> getPerk(LogicalSide side, ResourceLocation key) {
-        return this.getPerk(side, perk -> key.equals(perk.getRegistryName()));
+    public Optional<AbstractPerk> getPerk(LogicalSide direction, ResourceLocation key) {
+        return this.getPerk(direction, perk -> key.equals(perk.getRegistryName()));
     }
 
-    public Optional<AbstractPerk> getPerk(LogicalSide side, Predicate<AbstractPerk> test) {
-        return this.getData(side).flatMap(data -> data.getPerk(test));
+    public Optional<AbstractPerk> getPerk(LogicalSide direction, Predicate<AbstractPerk> test) {
+        return this.getData(direction).flatMap(data -> data.getPerk(test));
     }
 
-    public Optional<? extends AbstractPerk> getPerk(LogicalSide side, float x, float y) {
-        return this.getData(side).flatMap(data -> data.getPerk(x, y));
+    public Optional<? extends AbstractPerk> getPerk(LogicalSide direction, float x, float y) {
+        return this.getData(direction).flatMap(data -> data.getPerk(x, y));
     }
 
     @Nullable
-    public RootPerk getRootPerk(LogicalSide side, IConstellation constellation) {
-        return this.getData(side).map(data -> data.getRootPerk(constellation)).orElse(null);
+    public RootPerk getRootPerk(LogicalSide direction, IConstellation constellation) {
+        return this.getData(direction).map(data -> data.getRootPerk(constellation)).orElse(null);
     }
 
-    public Collection<AbstractPerk> getConnectedPerks(LogicalSide side, AbstractPerk perk) {
-        return this.getData(side).map(data -> data.getConnectedPerks(perk)).orElse(Collections.emptyList());
+    public Collection<AbstractPerk> getConnectedPerks(LogicalSide direction, AbstractPerk perk) {
+        return this.getData(direction).map(data -> data.getConnectedPerks(perk)).orElse(Collections.emptyList());
     }
 
-    public Collection<PerkTreePoint<?>> getPerkPoints(LogicalSide side) {
-        return this.getData(side).map(PreparedPerkTreeData::getPerkPoints).orElse(Collections.emptyList());
+    public Collection<PerkTreePoint<?>> getPerkPoints(LogicalSide direction) {
+        return this.getData(direction).map(PreparedPerkTreeData::getPerkPoints).orElse(Collections.emptyList());
     }
 
     //Only for rendering purposes.
@@ -81,8 +81,8 @@ public class PerkTree {
         return this.getData(LogicalSide.CLIENT).map(PreparedPerkTreeData::getConnections).orElse(Collections.emptyList());
     }
 
-    public Optional<Long> getVersion(LogicalSide side) {
-        return this.getData(side).map(PreparedPerkTreeData::getVersion);
+    public Optional<Long> getVersion(LogicalSide direction) {
+        return this.getData(direction).map(PreparedPerkTreeData::getVersion);
     }
 
     public void updateOriginPerkTree(PerkTreeData perkTree) {
@@ -98,9 +98,9 @@ public class PerkTree {
         this.updateTreeData(LogicalSide.CLIENT, serverTreeData);
     }
 
-    public void clearCache(LogicalSide side) {
-        this.getData(side).ifPresent(data -> data.clearPerkCache(side));
-        this.updateTreeData(side, null);
+    public void clearCache(LogicalSide direction) {
+        this.getData(direction).ifPresent(data -> data.clearPerkCache(direction));
+        this.updateTreeData(direction, null);
     }
 
     public void setupServerPerkTree() {
@@ -112,17 +112,17 @@ public class PerkTree {
         }
     }
 
-    private void updateTreeData(LogicalSide side, @Nullable PreparedPerkTreeData newData) {
-        this.treeData.getData(side).ifPresent(data -> {
+    private void updateTreeData(LogicalSide direction, @Nullable PreparedPerkTreeData newData) {
+        this.treeData.getData(direction).ifPresent(data -> {
             data.getPerkPoints().stream()
                     .map(PerkTreePoint::getPerk)
-                    .forEach(perk -> perk.invalidate(side));
+                    .forEach(perk -> perk.invalidate(direction));
         });
-        this.treeData.setData(side, newData);
+        this.treeData.setData(direction, newData);
         if (newData != null) {
             newData.getPerkPoints().stream()
                     .map(PerkTreePoint::getPerk)
-                    .forEach(perk -> perk.validate(side));
+                    .forEach(perk -> perk.validate(direction));
         }
     }
 }

@@ -53,15 +53,15 @@ public class EffectFocusEdge extends AltarRecipeEffect implements IFocusEffect {
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.5F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .color(VFXColorFunction.constant(getFocusColor(focus, rand)))
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.5F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .color(VFXColorFunction.constant(getFocusColor(focus, random)))
                     .setMaxAge(50);
-            if (rand.nextInt(12) == 0) {
+            if (random.nextInt(12) == 0) {
                 EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                         .spawn(offset)
-                        .setup(offset.clone().addY(3 + rand.nextFloat() * 2), 1, 1)
-                        .color(VFXColorFunction.constant(getFocusColor(focus, rand)))
+                        .setup(offset.clone().addY(3 + random.nextFloat() * 2), 1, 1)
+                        .color(VFXColorFunction.constant(getFocusColor(focus, random)))
                         .setMaxAge(48);
             }
 
@@ -74,15 +74,15 @@ public class EffectFocusEdge extends AltarRecipeEffect implements IFocusEffect {
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(offset)
-                    .setScaleMultiplier(0.1F + rand.nextFloat() * 0.5F)
-                    .alpha(VFXAlphaFunction.FADE_OUT)
-                    .color(VFXColorFunction.constant(getFocusColor(focus, rand)))
+                    .setScaleMultiplier(0.1F + random.nextFloat() * 0.5F)
+                    .alpha1arg(VFXAlphaFunction.FADE_OUT)
+                    .color(VFXColorFunction.constant(getFocusColor(focus, random)))
                     .setMaxAge(50);
-            if (rand.nextInt(12) == 0) {
+            if (random.nextInt(12) == 0) {
                 EffectHelper.of(EffectTemplatesAS.LIGHTBEAM)
                         .spawn(offset)
-                        .setup(offset.clone().addY(3 + rand.nextFloat() * 2), 1, 1)
-                        .color(VFXColorFunction.constant(getFocusColor(focus, rand)))
+                        .setup(offset.clone().addY(3 + random.nextFloat() * 2), 1, 1)
+                        .color(VFXColorFunction.constant(getFocusColor(focus, random)))
                         .setMaxAge(48);
             }
         }

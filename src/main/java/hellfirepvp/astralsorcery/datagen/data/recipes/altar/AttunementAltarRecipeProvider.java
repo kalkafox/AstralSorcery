@@ -32,11 +32,11 @@ import java.util.function.Consumer;
  */
 public class AttunementAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<IFinishedRecipe> registrar) {
+    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
         registerRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<IFinishedRecipe> registrar) {
+    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.ALTAR_UPGRADE_CONSTELLATION)
                 .createRecipe(BlocksAS.ALTAR_CONSTELLATION, AltarType.ATTUNEMENT)
                 .setStarlightRequirement(0.7F)
@@ -57,7 +57,7 @@ public class AttunementAltarRecipeProvider {
                 .build(registrar);
 
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.NBT_COPY)
-                .createRecipe(NameUtil.suffixPath(ItemsAS.RESONATOR.getRegistryName(), "_upgrade_domic"), AltarType.ATTUNEMENT)
+                .createRecipe(NameUtil.suffixPath(RegistryHelper.getKey(ItemsAS.RESONATOR), "_upgrade_domic"), AltarType.ATTUNEMENT)
                 .modify(recipe -> recipe.addNBTCopyMatchIngredient(ItemsAS.RESONATOR))
                 .setStarlightRequirement(0.4F)
                 .setInputs(AltarRecipeGrid.builder()

@@ -54,20 +54,20 @@ public class BlockStructural extends Block {
 
     public static EnumProperty<BlockType> BLOCK_TYPE = EnumProperty.create("blocktype", BlockType.class);
 
-    private static final VoxelShape STRUCT_TELESCOPE = VoxelShapes.create(1D / 16D, -16D / 16D, 1D / 16D, 15D / 16D, 16D / 16D, 15D / 16D);
+    private static final VoxelShape STRUCT_TELESCOPE = Shapes.create(1D / 16D, -16D / 16D, 1D / 16D, 15D / 16D, 16D / 16D, 15D / 16D);
 
     public BlockStructural() {
         super(Block.Properties.create(Material.BARRIER, MaterialColor.AIR)
                 .sound(SoundType.GLASS));
 
-        this.setDefaultState(this.getDefaultState().with(BLOCK_TYPE, BlockType.TELESCOPE));
+        this.registerDefaultState(this.defaultBlockState().setValue(BLOCK_TYPE, BlockType.TELESCOPE));
     }
 
     @Override
-    public void fillItemGroup(CreativeModeTab group, NonNullList<ItemStack> items) {}
+    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {}
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(BLOCK_TYPE);
     }
 
@@ -87,26 +87,26 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public int getHarvestLevel(BlockState state) {
-        return state.get(BLOCK_TYPE).getSupportedState().getHarvestLevel();
+    public int getLevel(BlockState state) {
+        return state.get(BLOCK_TYPE).getSupportedState().getLevel();
     }
 
     @Override
-    public SoundType getSoundType(BlockState state, LevelReader world, BlockPos pos, @Nullable Entity entity) {
+    public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 return SoundType.WOOD;
         }
-        return super.getSoundType(state, world, pos, entity);
+        return super.getSoundType(state, level, pos, entity);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, Level world, BlockPos pos, ParticleEngine manager) {
+    public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
         EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
             switch (state.get(BLOCK_TYPE)) {
                 case TELESCOPE:
-                    manager.addBlockDestroyEffects(pos.down(), BlocksAS.TELESCOPE.getDefaultState());
+                    manager.addBlockDestroyEffects(pos.below(), BlocksAS.TELESCOPE.defaultBlockState());
                     break;
             }
         });
@@ -115,12 +115,12 @@ public class BlockStructural extends Block {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean addHitEffects(BlockState state, Level world, HitResult target, ParticleEngine manager) {
+    public boolean addHitEffects(BlockState state, Level level, HitResult target, ParticleEngine manager) {
         if (target instanceof BlockHitResult) {
             EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
                 switch (state.get(BLOCK_TYPE)) {
                     case TELESCOPE:
-                        manager.addBlockDestroyEffects(((BlockHitResult) target).getPos().down(), BlocksAS.TELESCOPE.getDefaultState());
+                        manager.addBlockDestroyEffects(((BlockHitResult) target).getBlockPos().below(), BlocksAS.TELESCOPE.defaultBlockState());
                         break;
                 }
             });
@@ -129,15 +129,15 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public InteractionResult onBlockActivated(BlockState state, Level world, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult rayTraceResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult hitResult) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
-                if (world.isRemote()) {
-                    AstralSorcery.getProxy().openGui(entity, GuiType.TELESCOPE, pos.down());
+                if (level.isClientSide()) {
+                    AstralSorcery.getProxy().openGui(entity, GuiType.TELESCOPE, pos.below());
                 }
-                return ActionResultType.SUCCESS;
+                return InteractionResult.SUCCESS;
         }
-        return super.onBlockActivated(state, world, pos, entity, hand, rayTraceResult);
+        return super.use(state, level, pos, entity, hand, hitResult);
     }
 
     @Override
@@ -178,48 +178,48 @@ public class BlockStructural extends Block {
     }*/
 
     @Override
-    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
-                return BlockType.TELESCOPE.getSupportedState().getPickBlock(target, world, pos.down(), player);
+                return BlockType.TELESCOPE.getSupportedState().getPickBlock(target, level, pos.below(), player);
         }
-        return super.getPickBlock(state, target, world, pos, player);
+        return super.getPickBlock(state, target, level, pos, player);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
-                if (world.isAirBlock(pos.down())) {
-                    world.removeBlock(pos, isMoving);
+                if (level.isEmptyBlock(pos.below())) {
+                    level.removeBlock(pos, isMoving);
                 }
                 return;
         }
-        super.neighborChanged(state, world, pos, block, fromPos, isMoving);
+        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
     }
 
     @Override
-    public void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbor) {
-        if (!(world instanceof IWorldWriter)) {
+    public void onNeighborChange(BlockState state, LevelReader level, BlockPos pos, BlockPos neighbor) {
+        if (!(level instanceof LevelWriter)) {
             return;
         }
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
-                if (world.isAirBlock(pos.down())) {
-                    ((IWorldWriter) world).removeBlock(pos, false);
+                if (level.isEmptyBlock(pos.below())) {
+                    ((LevelWriter) level).removeBlock(pos, false);
                 }
         }
     }
 
     @Override
     public RenderShape getRenderType(BlockState p_149645_1_) {
-        return BlockRenderType.INVISIBLE;
+        return RenderShape.INVISIBLE;
     }
 
     public static enum BlockType implements StringRepresentable {
 
-        DUMMY(Blocks.AIR.getDefaultState()),
-        TELESCOPE(BlocksAS.TELESCOPE.getDefaultState());
+        DUMMY(Blocks.AIR.defaultBlockState()),
+        TELESCOPE(BlocksAS.TELESCOPE.defaultBlockState());
 
         private final BlockState supportedState;
 

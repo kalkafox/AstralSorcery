@@ -38,9 +38,9 @@ public interface VFXMotionController<T extends EntityVisualFX> {
         return new VFXMotionController<T>() {
             @Nonnull
             @Override
-            public Vector3 updateMotion(@Nonnull T fx, @Nonnull Vector3 motion) {
+            public Vector3 postMoveUpdate(@Nonnull T fx, @Nonnull Vector3 motion) {
                 float perc = (float) fx.getAge() / (float) fx.getMaxAge();
-                return originalMotion.get().clone().multiply(perc);
+                return originalMotion.get().clone().mul(perc);
             }
         };
     }
@@ -49,15 +49,15 @@ public interface VFXMotionController<T extends EntityVisualFX> {
         return new VFXMotionController<T>() {
             @Nonnull
             @Override
-            public Vector3 updateMotion(@Nonnull T fx, @Nonnull Vector3 motion) {
+            public Vector3 postMoveUpdate(@Nonnull T fx, @Nonnull Vector3 motion) {
                 float perc = 1F - ((float) fx.getAge() / (float) fx.getMaxAge());
-                return originalMotion.get().clone().multiply(perc);
+                return originalMotion.get().clone().mul(perc);
             }
         };
     }
 
     @Nonnull
-    public Vector3 updateMotion(@Nonnull T fx, @Nonnull Vector3 motion);
+    public Vector3 postMoveUpdate(@Nonnull T fx, @Nonnull Vector3 motion);
 
     public static class VectorTarget<T extends EntityVisualFX> implements VFXMotionController<T> {
 
@@ -71,13 +71,13 @@ public interface VFXMotionController<T extends EntityVisualFX> {
 
         @Nonnull
         @Override
-        public Vector3 updateMotion(@Nonnull T fx, @Nonnull Vector3 motion) {
+        public Vector3 postMoveUpdate(@Nonnull T fx, @Nonnull Vector3 motion) {
             Vector3 target = positionSupplier.get();
             if (target == null) {
                 return motion;
             }
             EntityUtils.applyVortexMotion(fx::getPosition, motion::add, target, 256, this.velocityMultiplier);
-            return motion.multiply(0.9);
+            return motion.mul(0.9);
         }
     }
 }

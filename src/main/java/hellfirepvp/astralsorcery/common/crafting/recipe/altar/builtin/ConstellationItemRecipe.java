@@ -57,15 +57,15 @@ public class ConstellationItemRecipe extends SimpleAltarRecipe {
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {
         super.deserializeAdditionalJson(recipeObject);
 
-        if (JSONUtils.hasField(recipeObject, KEY_CONSTELLATION_ATTUNE)) {
-            ResourceLocation cstName = new ResourceLocation(JSONUtils.getString(recipeObject, KEY_CONSTELLATION_ATTUNE));
+        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_ATTUNE)) {
+            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getString(recipeObject, KEY_CONSTELLATION_ATTUNE));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst instanceof IWeakConstellation) {
                 this.attunedConstellation = (IWeakConstellation) cst;
             }
         }
-        if (JSONUtils.hasField(recipeObject, KEY_CONSTELLATION_TRAIT)) {
-            ResourceLocation cstName = new ResourceLocation(JSONUtils.getString(recipeObject, KEY_CONSTELLATION_TRAIT));
+        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_TRAIT)) {
+            ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getString(recipeObject, KEY_CONSTELLATION_TRAIT));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst instanceof IMinorConstellation) {
                 this.setTraitConstellation((IMinorConstellation) cst);
@@ -105,8 +105,8 @@ public class ConstellationItemRecipe extends SimpleAltarRecipe {
     @Override
     @Nonnull
     @OnlyIn(Dist.CLIENT)
-    public ItemStack getOutputForRender(Iterable<ItemStack> inventoryContents) {
-        ItemStack out = super.getOutputForRender(inventoryContents);
+    public ItemStack getOutputForRender(Iterable<ItemStack> items) {
+        ItemStack out = super.getOutputForRender(items);
         setConstellations(out);
         return out;
     }

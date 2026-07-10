@@ -35,8 +35,8 @@ public class PatternFountain extends PatternBlockArray {
     }
 
     private void makeStructure() {
-        BlockState runed = BlocksAS.MARBLE_RUNED.getDefaultState();
-        BlockState sooty = BlocksAS.BLACK_MARBLE_RAW.getDefaultState();
+        BlockState runed = BlocksAS.MARBLE_RUNED.defaultBlockState();
+        BlockState sooty = BlocksAS.BLACK_MARBLE_RAW.defaultBlockState();
 
         for (int xx = -3; xx <= 3; xx++) {
             for (int zz = -3; zz <= 3; zz++) {
@@ -110,7 +110,7 @@ public class PatternFountain extends PatternBlockArray {
             @Nonnull
             @Override
             public BlockState getDescriptiveState(long tick) {
-                return BlocksAS.MARBLE_PILLAR.getDefaultState().with(BlockMarblePillar.PILLAR_TYPE, type);
+                return BlocksAS.MARBLE_PILLAR.defaultBlockState().setValue(BlockMarblePillar.PILLAR_TYPE, type);
             }
         };
     }

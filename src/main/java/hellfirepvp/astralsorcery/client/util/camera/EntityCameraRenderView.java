@@ -34,7 +34,7 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
 
     public EntityCameraRenderView() {
         super(Minecraft.getInstance(),
-                Minecraft.getInstance().world,
+                Minecraft.getInstance().level,
                 Minecraft.getInstance().player.connection,
                 Minecraft.getInstance().player.getStats(),
                 Minecraft.getInstance().player.getRecipeBook(),
@@ -42,8 +42,8 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
                 false);
 
         abilities.allowFlying = true;
-        abilities.isFlying = true;
-        abilities.disableDamage = true;
+        abilities.flying = true;
+        abilities.invulnerable = true;
     }
 
     @Nullable
@@ -61,22 +61,22 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
 
     public void transformToFocusOnPoint(Vector3 toFocus, float pTicks, boolean propagate) {
         Vector3 angles = Vector3.atEntityCorner(this).subtract(toFocus).copyToPolar();
-        Vector3 prevAngles = new Vector3(prevPosX, prevPosY, prevPosZ).subtract(toFocus).copyToPolar();
+        Vector3 prevAngles = new Vector3(xo, yo, zo).subtract(toFocus).copyToPolar();
         double pitch = 90 - angles.getY();
         double pitchPrev = 90 - prevAngles.getY();
-        double yaw = -angles.getZ();
+        double yRot = -angles.getZ();
         double yawPrev = -prevAngles.getZ();
 
         if (propagate) {
-            ClientCameraUtil.positionCamera(this, pTicks, getPosX(), getPosY(), getPosZ(), prevPosX, prevPosY, prevPosZ, yaw, yawPrev, pitch, pitchPrev);
+            ClientCameraUtil.positionCamera(this, pTicks, getX(), getY(), getZ(), xo, yo, zo, yRot, yawPrev, pitch, pitchPrev);
         }
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void rotateTowards(double yaw, double pitch) {}
+    public void rotateTowards(double yRot, double pitch) {}
 
-    public abstract void moveEntityTick(EntityCameraRenderView entity, EntityClientReplacement replacementEntity, int ticksExisted);
+    public abstract void moveEntityTick(EntityCameraRenderView entity, EntityClientReplacement replacementEntity, int tickCount);
 
     public abstract void onStopTransforming();
 
@@ -91,7 +91,7 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
     }
 
     @Override
-    public Iterable<ItemStack> getArmorInventoryList() {
+    public Iterable<ItemStack> getArmorSlots() {
         return Collections.emptyList();
     }
 
@@ -102,10 +102,10 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
     }
 
     @Override
-    public void setItemStackToSlot(EquipmentSlot slotIn, @Nullable ItemStack stack) {}
+    public void thunderHit(EquipmentSlot slotIn, @Nullable ItemStack stack) {}
 
     @Override
-    public HumanoidArm getPrimaryHand() {
-        return HandSide.RIGHT;
+    public HumanoidArm getMainArm() {
+        return HumanoidArm.RIGHT;
     }
 }

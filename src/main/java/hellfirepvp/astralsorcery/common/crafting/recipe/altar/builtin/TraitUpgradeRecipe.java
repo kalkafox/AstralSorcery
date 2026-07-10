@@ -52,8 +52,8 @@ public class TraitUpgradeRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public boolean matches(LogicalSide side, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
-        return altar.getAltarType() == AltarType.CONSTELLATION && super.matches(side, crafter, altar, ignoreStarlightRequirement);
+    public boolean matches(LogicalSide direction, Player crafter, TileAltar altar, boolean ignoreStarlightRequirement) {
+        return altar.getAltarType() == AltarType.CONSTELLATION && super.matches(direction, crafter, altar, ignoreStarlightRequirement);
     }
 
     @Override
@@ -61,6 +61,6 @@ public class TraitUpgradeRecipe extends SimpleAltarRecipe {
         super.onRecipeCompletion(altar, activeRecipe);
 
         ResearchManager.informCraftedAltar(altar, activeRecipe, new ItemStack(BlocksAS.ALTAR_RADIANCE));
-        altar.getWorld().setBlockState(altar.getPos(), BlocksAS.ALTAR_RADIANCE.getDefaultState(), Constants.BlockFlags.DEFAULT);
+        altar.getLevel().setBlock(altar.getBlockPos(), BlocksAS.ALTAR_RADIANCE.defaultBlockState(), Constants.BlockFlags.DEFAULT);
     }
 }

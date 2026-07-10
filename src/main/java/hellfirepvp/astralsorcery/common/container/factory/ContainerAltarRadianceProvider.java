@@ -39,7 +39,7 @@ public class ContainerAltarRadianceProvider extends CustomContainerProvider<Cont
 
     @Override
     protected void writeExtraData(FriendlyByteBuf buf) {
-        ByteBufUtils.writePos(buf, this.ta.getPos());
+        ByteBufUtils.writePos(buf, this.ta.getBlockPos());
     }
 
     @Nonnull
@@ -51,15 +51,15 @@ public class ContainerAltarRadianceProvider extends CustomContainerProvider<Cont
     private static ContainerAltarTrait createFromPacket(int id, Inventory plInventory, FriendlyByteBuf data) {
         BlockPos at = ByteBufUtils.readPos(data);
         Player player = plInventory.player;
-        TileAltar ta = MiscUtils.getTileAt(player.getEntityWorld(), at, TileAltar.class, true);
+        TileAltar ta = MiscUtils.getTileAt(player.getCommandSenderWorld(), at, TileAltar.class, true);
         return new ContainerAltarTrait(ta, plInventory, id);
     }
 
     public static class Factory implements IContainerFactory<ContainerAltarTrait> {
 
         @Override
-        public ContainerAltarTrait create(int windowId, Inventory inv, FriendlyByteBuf data) {
-            return ContainerAltarRadianceProvider.createFromPacket(windowId, inv, data);
+        public ContainerAltarTrait create(int containerId, Inventory inv, FriendlyByteBuf data) {
+            return ContainerAltarRadianceProvider.createFromPacket(containerId, inv, data);
         }
     }
 }

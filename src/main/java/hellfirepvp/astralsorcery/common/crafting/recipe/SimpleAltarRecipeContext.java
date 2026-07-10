@@ -25,13 +25,13 @@ public class SimpleAltarRecipeContext extends RecipeCraftingContext<SimpleAltarR
 
     private final TileAltar altar;
     private final Player crafter;
-    private final LogicalSide side;
+    private final LogicalSide direction;
     private boolean ignoreStarlightRequirement = false;
 
-    public SimpleAltarRecipeContext(Player crafter, LogicalSide side, TileAltar altar) {
+    public SimpleAltarRecipeContext(Player crafter, LogicalSide direction, TileAltar altar) {
         this.altar = altar;
         this.crafter = crafter;
-        this.side = side;
+        this.direction = direction;
     }
 
     public SimpleAltarRecipeContext setIgnoreStarlightRequirement(boolean ignoreStarlightRequirement) {
@@ -40,7 +40,7 @@ public class SimpleAltarRecipeContext extends RecipeCraftingContext<SimpleAltarR
     }
 
     public LogicalSide getSide() {
-        return side;
+        return direction;
     }
 
     public Player getCrafter() {

@@ -41,9 +41,9 @@ public class BuiltInEffectConstellationFinish extends AltarRecipeEffect {
     public void onCraftingFinish(TileAltar altar, boolean isChaining) {
         EffectHelper.of(EffectTemplatesAS.TEXTURE_SPRITE)
                 .spawn(new Vector3(altar).add(0.5, 0.05, 0.5))
-                .setSprite(SpritesAS.SPR_CRAFT_BURST)
+                .pickSprite(SpritesAS.SPR_CRAFT_BURST)
                 .setAxis(Vector3.RotAxis.Y_AXIS)
-                .setNoRotation(rand.nextInt(360))
-                .setScaleMultiplier(5 + rand.nextInt(2));
+                .setNoRotation(random.nextInt(360))
+                .setScaleMultiplier(5 + random.nextInt(2));
     }
 }

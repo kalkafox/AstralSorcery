@@ -41,11 +41,11 @@ public class InputScreen extends Screen {
 
     protected void keyPressedTick(int key) {}
 
-    protected void mouseDragStart(double mouseX, double mouseY) {}
+    protected void mouseDragStart(double xpos, double ypos) {}
 
-    protected void mouseDragStop(double mouseX, double mouseY, double mouseDiffX, double mouseDiffY) {}
+    protected void mouseDragStop(double xpos, double ypos, double mouseDiffX, double mouseDiffY) {}
 
-    protected void mouseDragTick(double mouseX, double mouseY, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {}
+    protected void mouseDragTick(double xpos, double ypos, double mouseDiffX, double mouseDiffY, double mouseOffsetX, double mouseOffsetY) {}
 
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
@@ -63,39 +63,39 @@ public class InputScreen extends Screen {
         return this.dragging;
     }
 
-    protected void stopDragging(double mouseX, double mouseY) {
+    protected void stopDragging(double xpos, double ypos) {
         if (this.dragging) {
             this.dragging = false;
-            this.mouseDragStop(mouseX, mouseY, oMouseX, oMouseY);
+            this.mouseDragStop(xpos, ypos, oMouseX, oMouseY);
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int click) {
+    public boolean mouseClicked(double xpos, double ypos, int click) {
         if (click == 0) {
             this.dragging = true;
-            this.oMouseX = mouseX;
-            this.oMouseY = mouseY;
-            this.mouseDragStart(mouseX, mouseY);
+            this.oMouseX = xpos;
+            this.oMouseY = ypos;
+            this.mouseDragStart(xpos, ypos);
         }
-        return super.mouseClicked(mouseX, mouseY, click);
+        return super.mouseClicked(xpos, ypos, click);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int click) {
+    public boolean mouseReleased(double xpos, double ypos, int click) {
         if (click == 0) {
-            this.stopDragging(mouseX, mouseY);
+            this.stopDragging(xpos, ypos);
         }
-        return super.mouseReleased(mouseX, mouseY, click);
+        return super.mouseReleased(xpos, ypos, click);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int clickType, double offsetX, double offsetY) {
+    public boolean mouseDragged(double xpos, double ypos, int clickType, double offsetX, double offsetY) {
         if (clickType == 0 && this.dragging) {
-            double diffX = this.oMouseX - mouseX;
-            double diffY = this.oMouseY - mouseY;
-            this.mouseDragTick(mouseX, mouseY, diffX, diffY, offsetX, offsetY);
+            double diffX = this.oMouseX - xpos;
+            double diffY = this.oMouseY - ypos;
+            this.mouseDragTick(xpos, ypos, diffX, diffY, offsetX, offsetY);
         }
-        return super.mouseDragged(mouseX, mouseY, clickType, offsetX, offsetY);
+        return super.mouseDragged(xpos, ypos, clickType, offsetX, offsetY);
     }
 }

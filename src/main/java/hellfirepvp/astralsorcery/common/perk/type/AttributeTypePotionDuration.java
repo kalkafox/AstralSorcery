@@ -54,8 +54,8 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
     }
 
     private void modifyPotionDuration(Player player, MobEffectInstance newSetEffect, MobEffectInstance existingEffect) {
-        if (player.getEntityWorld().isRemote() ||
-                newSetEffect.getPotion().getEffectType().equals(EffectType.HARMFUL) ||
+        if (player.getCommandSenderWorld().isClientSide() ||
+                newSetEffect.getEffect().getCategory().equals(EffectType.HARMFUL) ||
                 existingEffect.getAmplifier() < newSetEffect.getAmplifier()) {
             return;
         }
@@ -66,7 +66,7 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
         newDuration = AttributeEvent.postProcessModded(player, this, newDuration);
 
         if (newSetEffect.getDuration() < newDuration) {
-            newSetEffect.duration = MathHelper.floor(newDuration);
+            newSetEffect.duration = Mth.floor(newDuration);
         }
     }
 
