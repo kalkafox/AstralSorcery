@@ -78,7 +78,7 @@ public class KeyDigTypes extends KeyPerk {
                             (broken.is(BlockTags.MINEABLE_WITH_AXE) || broken.is(BlockTags.MINEABLE_WITH_SHOVEL))) {
                         EventFlags.CHECK_BREAK_SPEED.executeWithFlag(() -> {
                             MiscUtils.tryMultiple(
-                                    () -> player.getDigSpeed(Blocks.STONE.defaultBlockState(), event.getBlockPos()),
+                                    () -> player.getDigSpeed(Blocks.STONE.defaultBlockState(), event.getPosition().orElse(player.blockPosition())),
                                     () -> player.getDigSpeed(Blocks.STONE.defaultBlockState(), null),
                                     () -> BlockUtils.getSimpleBreakSpeed(player, playerMainHand, Blocks.STONE.defaultBlockState())
                             ).ifPresent(speedModifier -> event.setNewSpeed(Math.max(event.getNewSpeed(), speedModifier)));

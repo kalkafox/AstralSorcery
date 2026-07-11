@@ -161,7 +161,7 @@ public class ResearchHelper {
     private static void informPlayersAboutProgressionLoss(UUID pUUID) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
-            ServerPlayer player = server.getPlayerList().getPlayerByUUID(pUUID);
+            ServerPlayer player = server.getPlayerList().getPlayer(pUUID);
             if (player != null) {
                 player.sendSystemMessage(Component.literal("AstralSorcery: Your progression could not be loaded and can't be recovered from backup. Please contact an administrator to lookup what went wrong and/or potentially recover your data from a backup.").withStyle(ChatFormatting.RED));
             }

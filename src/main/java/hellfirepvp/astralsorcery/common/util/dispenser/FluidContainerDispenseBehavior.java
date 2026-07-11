@@ -61,9 +61,9 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
 
     @Nonnull
     private ItemStack fillContainer(BlockSource source, ItemStack stack) {
-        Level level = source.getLevel();
+        Level level = source.level();
         Direction dispenserFacing = source.getBlockState().get(DispenserBlock.FACING);
-        BlockPos blockpos = source.getBlockPos().offset(dispenserFacing);
+        BlockPos blockpos = source.pos().offset(dispenserFacing);
 
         FluidActionResult actionResult = FluidUtil.tryPickUpFluid(stack, null, level, blockpos, dispenserFacing.getOpposite());
         ItemStack resultStack = actionResult.getObject();
@@ -74,7 +74,7 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
 
         if (stack.getCount() == 1) {
             return resultStack;
-        } else if (((DispenserBlockEntity)source.getEntity()).addItemStack(resultStack) < 0) {
+        } else if (((DispenserBlockEntity) source.blockEntity()).addItemStack(resultStack) < 0) {
             this.defaultBehavior.dispense(source, resultStack);
         }
 
@@ -85,7 +85,7 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
 
     @Nonnull
     private ItemStack dumpContainer(BlockSource source, @Nonnull ItemStack stack) {
-        ServerLevel level = source.getLevel();
+        ServerLevel level = source.level();
         ItemStack singleStack = stack.copy();
         singleStack.setCount(1);
         Optional<IFluidHandlerItem> itemFluidHandler = FluidUtil.getFluidHandler(singleStack);
@@ -96,16 +96,16 @@ public class FluidContainerDispenseBehavior extends DefaultDispenseItemBehavior 
                 .map(handler -> handler.drain(FluidType.BUCKET_VOLUME, IFluidHandler.FluidAction.EXECUTE))
                 .orElse(FluidStack.EMPTY);
         Direction dispenserFacing = source.getBlockState().get(DispenserBlock.FACING);
-        BlockPos pos = source.getBlockPos().offset(dispenserFacing);
+        BlockPos pos = source.pos().offset(dispenserFacing);
         Player player = AstralSorcery.getProxy().getASFakePlayerServer((ServerLevel) level);
-        FluidActionResult result = FluidUtil.tryPlaceFluid(player, source.getLevel(), InteractionHand.MAIN_HAND, pos, stack, drained);
+        FluidActionResult result = FluidUtil.tryPlaceFluid(player, source.level(), InteractionHand.MAIN_HAND, pos, stack, drained);
 
         if (result.shouldSwing()) {
             ItemStack drainedStack = result.getObject();
 
             if (drainedStack.getCount() == 1) {
                 return drainedStack;
-            } else if (!drainedStack.isEmpty() && ((DispenserBlockEntity) source.getEntity()).addItemStack(drainedStack) < 0) {
+            } else if (!drainedStack.isEmpty() && ((DispenserBlockEntity) source.blockEntity()).addItemStack(drainedStack) < 0) {
                 this.defaultBehavior.dispense(source, drainedStack);
             }
 

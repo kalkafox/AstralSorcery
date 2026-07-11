@@ -51,7 +51,7 @@ public class MixinServerPlayNetHandler {
             cancellable = true
     )
     public void allowInteractableEntity(ServerboundInteractPacket packet, CallbackInfo ci) {
-        ServerLevel level = this.player.getLevel();
+        ServerLevel level = this.player.serverLevel();
         Entity interacted = packet.getEntityFromWorld(level);
         if (interacted instanceof InteractableEntity) {
             this.player.attack(interacted);

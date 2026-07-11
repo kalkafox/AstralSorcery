@@ -80,12 +80,9 @@ public class WidthHeightScreen extends InputScreen {
         //Whoever disables blending on GUI overlays, your states bleed into following GUIs
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
 
         resource.bindTexture();
         RenderingGuiUtils.drawRect(renderStack, leftPos, topPos, this.getBlitOffset(), guiWidth, guiHeight);
-        RenderSystem.disableAlphaTest();
     }
 
     @Override

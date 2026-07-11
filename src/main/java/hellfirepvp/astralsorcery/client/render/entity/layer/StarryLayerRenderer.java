@@ -11,13 +11,17 @@ package hellfirepvp.astralsorcery.client.render.entity.layer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.registry.RegistryRenderTypes;
 import hellfirepvp.astralsorcery.common.util.object.CacheReference;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -39,17 +43,24 @@ public class StarryLayerRenderer<E extends LivingEntity, M extends HumanoidModel
     private static final List<CacheReference<RenderType>> RENDER_TYPES = IntStream.range(0, 2)
             .mapToObj((i) -> new CacheReference<>(() -> RegistryRenderTypes.createDepthProjectionType(i)))
             .collect(Collectors.toList());
-    private static final HumanoidModel MODEL_HEAD = new PlayerModel<>(-0.5F, false);
-    private static final HumanoidModel MODEL_ARMOR = new PlayerModel<>(0F, false);
-    private static final HumanoidModel MODEL_ARMOR_SMALL = new PlayerModel<>(0F, true);
+    // 1.21 port: PlayerModel is built from a baked LayerDefinition now
+    private static final HumanoidModel MODEL_HEAD = createModel(-0.5F, false);
+    private static final HumanoidModel MODEL_ARMOR = createModel(0F, false);
+    private static final HumanoidModel MODEL_ARMOR_SMALL = createModel(0F, true);
 
     private static BiPredicate<Player, EquipmentSlot> renderTest = (p, type) -> false;
 
     private final boolean slimRender;
 
     public StarryLayerRenderer(RenderLayerParent<E, M> entityRendererIn, boolean slimRender) {
-        super(entityRendererIn, MODEL_ARMOR, MODEL_ARMOR);
+        super(entityRendererIn, MODEL_ARMOR, MODEL_ARMOR, Minecraft.getInstance().getModelManager());
         this.slimRender = slimRender;
+    }
+
+    private static <T extends LivingEntity> PlayerModel<T> createModel(float inflate, boolean slim) {
+        return new PlayerModel<>(
+                LayerDefinition.create(PlayerModel.createMesh(new CubeDeformation(inflate), slim), 64, 64).bakeRoot(),
+                slim);
     }
 
     public static void addRender(BiPredicate<Player, EquipmentSlot> render) {
@@ -63,7 +74,7 @@ public class StarryLayerRenderer<E extends LivingEntity, M extends HumanoidModel
         }
 
         for (EquipmentSlot type : EquipmentSlot.values()) {
-            if (type.getType() == EquipmentSlot.Group.ARMOR) {
+            if (type.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
                 if (renderTest.test((Player) entity, type)) {
                     HumanoidModel<E> model = type == EquipmentSlot.HEAD ? MODEL_HEAD : this.slimRender ? MODEL_ARMOR_SMALL : MODEL_ARMOR;
                     this.renderArmorPart(renderStack, buffer, type, light, model);
@@ -73,10 +84,11 @@ public class StarryLayerRenderer<E extends LivingEntity, M extends HumanoidModel
     }
 
     private void renderArmorPart(PoseStack renderStack, MultiBufferSource buffer, EquipmentSlot type, int light, HumanoidModel<E> model) {
-        this.getEntityModel().getAttackArm(model);
+        this.getParentModel().copyPropertiesTo(model);
         this.setPartVisibility(model, type);
+        int color = FastColor.ARGB32.colorFromFloat(0.1F, 0.4F, 0.4F, 1F);
         for (CacheReference<RenderType> renderType : RENDER_TYPES) {
-            model.render(renderStack, buffer.getBuffer(renderType.get()), light, OverlayTexture.NO_OVERLAY, 0.4F, 0.4F, 1F, 0.1F);
+            model.renderToBuffer(renderStack, buffer.getBuffer(renderType.get()), light, OverlayTexture.NO_OVERLAY, color);
         }
     }
 }

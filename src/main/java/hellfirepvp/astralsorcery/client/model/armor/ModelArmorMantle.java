@@ -11,6 +11,13 @@ package hellfirepvp.astralsorcery.client.model.armor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.LivingEntity;
 
 /**
@@ -24,116 +31,95 @@ public class ModelArmorMantle extends CustomArmorModel<LivingEntity> {
 
     //TODO adjust arms at some point
 
-    private final ModelPart bodyReplacement, lArm, rArm, headReplacement;
-
-    private final ModelPart cowl;
-    private final ModelPart mantle_l;
-    private final ModelPart mantle_r;
-
-    private final ModelPart bodyAnchor;
-    private final ModelPart body;
-    private final ModelPart plate;
-
-    private final ModelPart armLAnchor;
-    private final ModelPart armLpauldron;
-    private final ModelPart fitting_l;
-
-    private final ModelPart armRAnchor;
-    private final ModelPart armRpauldron;
-    private final ModelPart fitting_r;
-
+    // 1.21 port: HumanoidModel parts are baked and final; instead of swapping the body/arm/head
+    // fields for replacement parts at render time, the humanoid skeleton is built with empty
+    // (cube-less) parts and the mantle geometry attached as their children.
     public ModelArmorMantle() {
-        float s = 0.01F;
-        this.textureWidth = 64;
-        this.textureHeight = 128;
+        super(createLayer().bakeRoot());
+    }
 
-        this.cowl = new ModelPart(this, 0, 33);
-        this.cowl.setPos(0.0F, 0.0F, 0.0F);
-        this.cowl.addBox(-4.5F, -4.0F, -4.0F, 9, 5, 9, s);
-        this.setRotateAngle(cowl, 0.2617993877991494F, 0.0F, 0.0F);
-        this.mantle_l = new ModelPart(this, 0, 47);
-        this.mantle_l.mirror = true;
-        this.mantle_l.setPos(6.25F, 2.0F, 0.0F);
-        this.mantle_l.addBox(-8.0F, -3.5F, 1.0F, 9, 21, 5, s);
-        this.setRotateAngle(mantle_l, 0.08726646259971647F, 0.2617993877991494F, 0.0F);
-        this.mantle_r = new ModelPart(this, 0, 47);
-        this.mantle_r.setPos(-6.25F, 2.0F, 0.0F);
-        this.mantle_r.addBox(-1.0F, -3.5F, 1.0F, 9, 21, 5, s);
-        this.setRotateAngle(mantle_r, 0.08726646259971647F, -0.2617993877991494F, 0.0F);
+    private static LayerDefinition createLayer() {
+        CubeDeformation s = new CubeDeformation(0.01F);
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
 
-        this.bodyAnchor = new ModelPart(this, 0, 41);
-        this.bodyAnchor.setPos(0.0F, 0.0F, 0.0F);
-        this.bodyAnchor.addBox(-1.0F, 0.0F, -1.0F, 2, 2, 2, s);
-        this.body = new ModelPart(this, 0, 0);
-        this.body.setPos(0.0F, 0.0F, 0.0F);
-        this.body.addBox(-4.5F, -0.5F, -3.0F, 9, 6, 6, s);
-        this.plate = new ModelPart(this, 0, 12);
-        this.plate.setPos(0.0F, 1.0F, -3.0F);
-        this.plate.addBox(-3.5F, -0.5F, -1.0F, 7, 7, 2, s);
-        this.setRotateAngle(plate, 0.08726646259971647F, 0.0F, 0.0F);
+        // empty humanoid skeleton (vanilla pivots), no cubes of its own
+        PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create(), PartPose.ZERO);
+        root.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
+        PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.ZERO);
+        PartDefinition rightArm = root.addOrReplaceChild("right_arm", CubeListBuilder.create(), PartPose.offset(-5.0F, 2.0F, 0.0F));
+        PartDefinition leftArm = root.addOrReplaceChild("left_arm", CubeListBuilder.create(), PartPose.offset(5.0F, 2.0F, 0.0F));
+        root.addOrReplaceChild("right_leg", CubeListBuilder.create(), PartPose.offset(-1.9F, 12.0F, 0.0F));
+        root.addOrReplaceChild("left_leg", CubeListBuilder.create(), PartPose.offset(1.9F, 12.0F, 0.0F));
 
-        this.armLAnchor = new ModelPart(this, 0, 41);
-        this.armLAnchor.mirror = true;
-        this.armLAnchor.setPos(4.0F, 2.0F, 0.0F);
-        this.armLAnchor.addBox(-6F, -2.0F, -1.0F, 2, 2, 2, s);
-        this.armLpauldron = new ModelPart(this, 0, 21);
-        this.armLpauldron.mirror = true;
-        this.armLpauldron.setPos(0.0F, 0.0F, -0.0F);
-        this.armLpauldron.addBox(-5.45F, -4.0F, -3.0F, 5, 6, 6, s);
-        this.fitting_l = new ModelPart(this, 18, 12);
-        this.fitting_l.setPos(0.5F, -3.0F, 0.0F);
-        this.fitting_l.addBox(-6.0F, -2.0F, -1.0F, 4, 1, 2, s);
-        this.setRotateAngle(fitting_l, 0.0F, 0.0F, 0.08726646259971647F);
+        head.addOrReplaceChild("cowl", CubeListBuilder.create()
+                .texOffs(0, 33)
+                .addBox(-4.5F, -4.0F, -4.0F, 9, 5, 9, s),
+                PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 0.2617993877991494F, 0.0F, 0.0F));
 
-        this.armRAnchor = new ModelPart(this, 0, 41);
-        this.armRAnchor.mirror = true;
-        this.armRAnchor.setPos(-4.0F, 2.0F, 0.0F);
-        this.armRAnchor.addBox(4F, -2.0F, -1.0F, 2, 2, 2, s);
-        this.armRpauldron = new ModelPart(this, 0, 21);
-        this.armRpauldron.setPos(0.0F, 0.0F, 0.0F);
-        this.armRpauldron.addBox(0.45F, -4.0F, -3.0F, 5, 6, 6, s);
-        this.fitting_r = new ModelPart(this, 18, 12);
-        this.fitting_r.setPos(0.0F, -3.0F, 0.0F);
-        this.fitting_r.addBox(1.5F, -2.0F, -1.0F, 4, 1, 2, s);
-        this.setRotateAngle(fitting_r, 0.0F, 0.0F, -0.08726646259971647F);
+        PartDefinition bodyAnchor = body.addOrReplaceChild("body_anchor", CubeListBuilder.create()
+                .texOffs(0, 41)
+                .addBox(-1.0F, 0.0F, -1.0F, 2, 2, 2, s), PartPose.ZERO);
+        PartDefinition torso = bodyAnchor.addOrReplaceChild("torso", CubeListBuilder.create()
+                .texOffs(0, 0)
+                .addBox(-4.5F, -0.5F, -3.0F, 9, 6, 6, s), PartPose.ZERO);
+        torso.addOrReplaceChild("plate", CubeListBuilder.create()
+                .texOffs(0, 12)
+                .addBox(-3.5F, -0.5F, -1.0F, 7, 7, 2, s),
+                PartPose.offsetAndRotation(0.0F, 1.0F, -3.0F, 0.08726646259971647F, 0.0F, 0.0F));
+        torso.addOrReplaceChild("mantle_l", CubeListBuilder.create()
+                .texOffs(0, 47)
+                .mirror()
+                .addBox(-8.0F, -3.5F, 1.0F, 9, 21, 5, s),
+                PartPose.offsetAndRotation(6.25F, 2.0F, 0.0F, 0.08726646259971647F, 0.2617993877991494F, 0.0F));
+        torso.addOrReplaceChild("mantle_r", CubeListBuilder.create()
+                .texOffs(0, 47)
+                .addBox(-1.0F, -3.5F, 1.0F, 9, 21, 5, s),
+                PartPose.offsetAndRotation(-6.25F, 2.0F, 0.0F, 0.08726646259971647F, -0.2617993877991494F, 0.0F));
 
-        this.bodyReplacement = new ModelPart(this);
-        this.bodyReplacement.addChild(this.bodyAnchor);
-        this.bodyAnchor.addChild(this.body);
-        this.body.addChild(this.plate);
-        this.body.addChild(this.mantle_l);
-        this.body.addChild(this.mantle_r);
+        PartDefinition armLAnchor = leftArm.addOrReplaceChild("arm_l_anchor", CubeListBuilder.create()
+                .texOffs(0, 41)
+                .mirror()
+                .addBox(-6.0F, -2.0F, -1.0F, 2, 2, 2, s), PartPose.offset(4.0F, 2.0F, 0.0F));
+        PartDefinition armLpauldron = armLAnchor.addOrReplaceChild("arm_l_pauldron", CubeListBuilder.create()
+                .texOffs(0, 21)
+                .mirror()
+                .addBox(-5.45F, -4.0F, -3.0F, 5, 6, 6, s), PartPose.ZERO);
+        armLpauldron.addOrReplaceChild("fitting_l", CubeListBuilder.create()
+                .texOffs(18, 12)
+                .addBox(-6.0F, -2.0F, -1.0F, 4, 1, 2, s),
+                PartPose.offsetAndRotation(0.5F, -3.0F, 0.0F, 0.0F, 0.0F, 0.08726646259971647F));
 
-        this.headReplacement = new ModelPart(this);
-        this.headReplacement.addChild(this.cowl);
+        PartDefinition armRAnchor = rightArm.addOrReplaceChild("arm_r_anchor", CubeListBuilder.create()
+                .texOffs(0, 41)
+                .mirror()
+                .addBox(4.0F, -2.0F, -1.0F, 2, 2, 2, s), PartPose.offset(-4.0F, 2.0F, 0.0F));
+        PartDefinition armRpauldron = armRAnchor.addOrReplaceChild("arm_r_pauldron", CubeListBuilder.create()
+                .texOffs(0, 21)
+                .addBox(0.45F, -4.0F, -3.0F, 5, 6, 6, s), PartPose.ZERO);
+        armRpauldron.addOrReplaceChild("fitting_r", CubeListBuilder.create()
+                .texOffs(18, 12)
+                .addBox(1.5F, -2.0F, -1.0F, 4, 1, 2, s),
+                PartPose.offsetAndRotation(0.0F, -3.0F, 0.0F, 0.0F, 0.0F, -0.08726646259971647F));
 
-        this.lArm = new ModelPart(this);
-        this.lArm.addChild(this.armLAnchor);
-        this.armLAnchor.addChild(this.armLpauldron);
-        this.armLpauldron.addChild(this.fitting_l);
+        return LayerDefinition.create(mesh, 64, 128);
+    }
 
-        this.rArm = new ModelPart(this);
-        this.rArm.addChild(this.armRAnchor);
-        this.armRAnchor.addChild(this.armRpauldron);
-        this.armRpauldron.addChild(this.fitting_r);
+    public void render(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+        this.renderToBuffer(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, FastColor.ARGB32.colorFromFloat(alpha, red, green, blue));
     }
 
     @Override
-    public void render(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        bodyAnchor.visible = true;
-        armRAnchor.visible = true;
-        armLAnchor.visible = true;
-        head.visible = true;
+    public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, int color) {
+        this.head.visible = true;
+        this.body.visible = true;
+        this.leftArm.visible = true;
+        this.rightArm.visible = true;
 
-        hat.visible = false;
-        rightLeg.visible = false;
-        leftLeg.visible = false;
+        this.hat.visible = false;
+        this.rightLeg.visible = false;
+        this.leftLeg.visible = false;
 
-        body = this.bodyReplacement;
-        rightArm = this.rArm;
-        leftArm = this.lArm;
-        head = this.headReplacement;
-
-        super.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        super.renderToBuffer(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, color);
     }
 }

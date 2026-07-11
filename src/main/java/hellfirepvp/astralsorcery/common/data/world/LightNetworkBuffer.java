@@ -112,7 +112,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         super.onLoad(level);
 
         if (LightNetworkConfig.CONFIG.performNetworkIntegrityCheck.get()) {
-            AstralSorcery.log.info("[LightNetworkIntegrityCheck] Performing StarlightNetwork integrity check for world " + level.dimension().getLocation());
+            AstralSorcery.log.info("[LightNetworkIntegrityCheck] Performing StarlightNetwork integrity check for world " + level.dimension().location());
             List<IPrismTransmissionNode> invalidRemoval = new LinkedList<>();
 
             for (ChunkNetworkData data : getSections()) {

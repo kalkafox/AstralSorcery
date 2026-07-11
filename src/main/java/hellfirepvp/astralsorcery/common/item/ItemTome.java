@@ -74,9 +74,9 @@ public class ItemTome extends Item implements PerkExperienceRevealer {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
-        BlockState blockstate = level.getBlockState(context.getBlockPos());
+        BlockState blockstate = level.getBlockState(context.getClickedPos());
         if (blockstate.getBlock() instanceof LecternBlock) {
-            return LecternBlock.tryPlaceBook(level, context.getBlockPos(), blockstate, context.getItem()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            return LecternBlock.tryPlaceBook(level, context.getClickedPos(), blockstate, context.getItemInHand()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         } else {
             return InteractionResult.PASS;
         }

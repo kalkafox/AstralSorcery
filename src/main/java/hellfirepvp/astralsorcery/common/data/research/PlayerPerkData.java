@@ -486,7 +486,7 @@ public class PlayerPerkData {
             UUID removeUUID = type.getLockUUID();
             for (int i = 0; i < allocations.size(); i++) {
                 CompoundTag tag = allocations.getCompound(i);
-                UUID lockUUID = tag.getUniqueId("uuid");
+                UUID lockUUID = tag.getUUID("uuid");
                 if (lockUUID.equals(removeUUID)) {
                     if (!simulate) {
                         allocations.remove(i);
@@ -551,7 +551,7 @@ public class PlayerPerkData {
             }
             for (int i = 0; i < allocations.size(); i++) {
                 CompoundTag tag = allocations.getCompound(i);
-                UUID lockUUID = tag.getUniqueId("uuid");
+                UUID lockUUID = tag.getUUID("uuid");
                 if (lockUUID.equals(newUUID)) {
                     return false;
                 }

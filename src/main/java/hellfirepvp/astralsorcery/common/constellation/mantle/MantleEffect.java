@@ -165,7 +165,7 @@ public abstract class MantleEffect extends AbstractAstralRegistryEntry<MantleEff
         if (entity == null) {
             return new CompoundTag();
         }
-        ItemStack stack = entity.getItemStackFromSlot(EquipmentSlot.CHEST);
+        ItemStack stack = entity.getItemBySlot(EquipmentSlot.CHEST);
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemMantle)) {
             return new CompoundTag();
         }

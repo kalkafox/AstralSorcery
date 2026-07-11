@@ -59,7 +59,7 @@ public class MantleEffectVicio extends MantleEffect {
             }
 
             EventHelperTemporaryFlight.allowFlight(player, 20);
-            if (player.getAbilities().flying && !player.isOnGround() && player.tickCount % 20 == 0) {
+            if (player.getAbilities().flying && !player.onGround() && player.tickCount % 20 == 0) {
                 if (!PlayerAffectionFlags.isPlayerAffected(player, CEffectVicio.FLAG)) {
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                 }

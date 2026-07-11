@@ -50,7 +50,7 @@ public class PatreonManager implements ITickHandler {
             Map<UUID, List<PatreonEffect>> playerEffects = PatreonEffectHelper.getPatreonEffects(server.getPlayerList().getPlayers());
 
             for (UUID playerUUID : playerEffects.keySet()) {
-                ServerPlayer player = server.getPlayerList().getPlayerByUUID(playerUUID);
+                ServerPlayer player = server.getPlayerList().getPlayer(playerUUID);
                 if (player == null) {
                     continue;
                 }
@@ -67,7 +67,7 @@ public class PatreonManager implements ITickHandler {
                         effectEntity = data.createEntity(player, effect);
                     }
 
-                    Level playerWorld = player.getLevel();
+                    Level playerWorld = player.level();
                     if (effectEntity.getLastTickedDimension() != null &&
                             !playerWorld.dimension().equals(effectEntity.getLastTickedDimension())) {
                         effectEntity.placeNear(player);

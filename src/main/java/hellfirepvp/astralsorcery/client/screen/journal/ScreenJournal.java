@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -129,7 +131,7 @@ public class ScreenJournal extends WidthHeightScreen {
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
         int actualWidth = width;
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetX, offsetY, blitOffset, actualWidth, height).draw();
         });
         RenderSystem.disableBlend();

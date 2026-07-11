@@ -55,11 +55,11 @@ public class Face {
                 vOffset = -vOffset;
             }
 
-            vb.vertex(vertices[i].x, vertices[i].y, vertices[i].z)
-                    .color(255, 255, 255, 255)
-                    .tex(textureCoordinates[i].u + uOffset, textureCoordinates[i].v + vOffset)
-                    .normal(faceNormal.x, faceNormal.y, faceNormal.z)
-                    .endVertex();
+            vb.addVertex(vertices[i].x, vertices[i].y, vertices[i].z)
+                    .setColor(255, 255, 255, 255)
+                    .setUv(textureCoordinates[i].u + uOffset, textureCoordinates[i].v + vOffset)
+                    .setNormal(faceNormal.x, faceNormal.y, faceNormal.z)
+                    ;
         }
     }
 

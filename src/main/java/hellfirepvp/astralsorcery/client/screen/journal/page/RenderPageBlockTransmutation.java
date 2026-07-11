@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
@@ -74,7 +76,7 @@ public class RenderPageBlockTransmutation extends RenderPageRecipeTemplate {
         RenderSystem.enableBlend();
         Blending.ADDITIVE_ALPHA.apply();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, renderX - 15, renderY + 10, z, 50, 120)
                     .tex(SpritesAS.SPR_LIGHTBEAM)
                     .draw();
@@ -89,7 +91,7 @@ public class RenderPageBlockTransmutation extends RenderPageRecipeTemplate {
         renderStack.pushPose();
         renderStack.translate(renderX + 11, renderY + 11, z);
         renderStack.scale(40, 40, 0);
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR, buf -> {
             RenderingDrawUtils.renderLightRayFan(renderStack, (renderType) -> buf, ColorsAS.ROCK_CRYSTAL, getNodePage(), 9, 9, 20);
         });
         renderStack.popPose();

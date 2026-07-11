@@ -75,13 +75,13 @@ public class FXLightbeam extends EntityVisualFX {
 
         Matrix4f matr = renderStack.last().pose();
         Vector3 vec = to.clone().add(perpTo.clone().mul(-1)).subtract(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u, v + vHeight).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u, v + vHeight);
         vec = to.clone().add(perpTo).subtract(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u + uWidth, v + vHeight).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u + uWidth, v + vHeight);
         vec = from.clone().add(perpFrom).subtract(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u + uWidth, v).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u + uWidth, v);
         vec = from.clone().add(perpFrom.clone().mul(-1)).subtract(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u, v).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u, v);
     }
 
 }

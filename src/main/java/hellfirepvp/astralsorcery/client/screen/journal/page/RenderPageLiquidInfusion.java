@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.Component;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -62,7 +64,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
 
         BlockAtlasTexture.getInstance().bindTexture();
         TextureAtlasSprite tas = RenderingUtils.getParticleIcon(new FluidStack(this.recipe.getLiquidInput(), FluidType.BUCKET_VOLUME));
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             renderStack.pushPose();
             renderStack.translate(x, y, z);
             this.renderLiquidInput(buf, renderStack, tas, 1, 0);

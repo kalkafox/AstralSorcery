@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.util.obj;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import net.minecraft.client.Minecraft;
@@ -276,14 +278,14 @@ public class WavefrontObject {
 
             if (tokens.length == 3) {
                 if (this.gLDrawingMode == 0) {
-                    this.gLDrawingMode = GL11.GL_TRIANGLES;
-                } else if (this.gLDrawingMode != GL11.GL_TRIANGLES) {
+                    this.gLDrawingMode = VertexFormat.Mode.TRIANGLES;
+                } else if (this.gLDrawingMode != VertexFormat.Mode.TRIANGLES) {
                     throw new ModelFormatException("Error parsing entry ('" + lineState + "'" + ", line " + lineCount + ") in file '" + fileName + "' - Invalid number of points for face (expected 4, found " + tokens.length + ")");
                 }
             } else if (tokens.length == 4) {
                 if (this.gLDrawingMode == 0) {
-                    this.gLDrawingMode = GL11.GL_QUADS;
-                } else if (this.gLDrawingMode != GL11.GL_QUADS) {
+                    this.gLDrawingMode = VertexFormat.Mode.QUADS;
+                } else if (this.gLDrawingMode != VertexFormat.Mode.QUADS) {
                     throw new ModelFormatException("Error parsing entry ('" + lineState + "'" + ", line " + lineCount + ") in file '" + fileName + "' - Invalid number of points for face (expected 3, found " + tokens.length + ")");
                 }
             }

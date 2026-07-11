@@ -8,6 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -57,7 +61,7 @@ public class RenderingDrawUtils {
             fr = Minecraft.getInstance().font;
         }
 
-        float strLength = fr.getStringPropertyWidth(text) * scale;
+        float strLength = fr.width(text) * scale;
         float offsetLeft = x - strLength;
 
         renderStack.pushPose();
@@ -107,9 +111,9 @@ public class RenderingDrawUtils {
         if (fr == null) {
             fr = Minecraft.getInstance().font;
         }
-        MultiBufferSource.Impl buffer = MultiBufferSource.getImpl(Tesselator.getInstance().getBuffer());
-        int length = fr.func_238416_a_(text, 0, 0, color, dropShadow, renderStack.last().pose(), buffer, false, 0, LightmapUtil.getPackedFullbrightCoords());
-        buffer.finish();
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(256));
+        int length = fr.drawInBatch(text, 0, 0, color, dropShadow, renderStack.last().pose(), buffer, Font.DisplayMode.NORMAL, 0, LightmapUtil.getPackedFullbrightCoords());
+        buffer.endBatch();
         return length;
     }
 
@@ -137,10 +141,10 @@ public class RenderingDrawUtils {
         Vector3 uv10   = new Vector3( widthHeight / 2D, -widthHeight / 2D, 0).mirror(deg, Vector3.RotAxis.Z_AXIS);
 
         Matrix4f matr = renderStack.last().pose();
-        vb.vertex(matr, (float) uv01.getX(),   (float) uv01.getY(),   0).tex(0, 1).endVertex();
-        vb.vertex(matr, (float) uv11.getX(),   (float) uv11.getY(),   0).tex(1, 1).endVertex();
-        vb.vertex(matr, (float) uv10.getX(),   (float) uv10.getY(),   0).tex(1, 0).endVertex();
-        vb.vertex(matr, (float) offset.getX(), (float) offset.getY(), 0).tex(0, 0).endVertex();
+        vb.addVertex(matr, (float) uv01.getX(),   (float) uv01.getY(),   0).setUv(0, 1);
+        vb.addVertex(matr, (float) uv11.getX(),   (float) uv11.getY(),   0).setUv(1, 1);
+        vb.addVertex(matr, (float) uv10.getX(),   (float) uv10.getY(),   0).setUv(1, 0);
+        vb.addVertex(matr, (float) offset.getX(), (float) offset.getY(), 0).setUv(0, 0);
     }
 
     public static void renderBlueTooltipComponents(PoseStack renderStack, float x, float y, float blitOffset,
@@ -168,7 +172,7 @@ public class RenderingDrawUtils {
                 if (customFR == null) {
                     customFR = font;
                 }
-                int width = customFR.getStringPropertyWidth(toolTip.getB());
+                int width = customFR.width(toolTip.getB());
                 if (!toolTip.getA().isEmpty()) {
                     anyItemFound = true;
                 }
@@ -307,20 +311,16 @@ public class RenderingDrawUtils {
         float endGreen   = (float) (endColor   >>  8 & 255) / 255.0F;
         float endBlue    = (float) (endColor         & 255) / 255.0F;
 
-        RenderSystem.disableTexture();
         Blending.DEFAULT.apply();
-        RenderSystem.shadeModel(GL11.GL_SMOOTH);
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, right,    top, blitOffset).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buf.vertex(offset,  left,    top, blitOffset).color(startRed, startGreen, startBlue, startAlpha).endVertex();
-            buf.vertex(offset,  left, bottom, blitOffset).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
-            buf.vertex(offset, right, bottom, blitOffset).color(  endRed,   endGreen,   endBlue,   endAlpha).endVertex();
+            buf.addVertex(offset, right,    top, blitOffset).setColor(startRed, startGreen, startBlue, startAlpha);
+            buf.addVertex(offset,  left,    top, blitOffset).setColor(startRed, startGreen, startBlue, startAlpha);
+            buf.addVertex(offset,  left, bottom, blitOffset).setColor(  endRed,   endGreen,   endBlue,   endAlpha);
+            buf.addVertex(offset, right, bottom, blitOffset).setColor(  endRed,   endGreen,   endBlue,   endAlpha);
         });
 
-        RenderSystem.shadeModel(GL11.GL_FLAT);
-        RenderSystem.enableTexture();
     }
 
     public static void renderLightRayFan(PoseStack renderStack, MultiBufferSource buffer, Color color, long seed, int minScale, float scale, int count) {
@@ -348,18 +348,18 @@ public class RenderingDrawUtils {
             fa /= 30.0F / (Math.min(minScale, 10 * scale) / 10.0F);
             f4 /= 30.0F / (Math.min(minScale, 10 * scale) / 10.0F);
 
-            vb.vertex(matr, 0F,      0F, 0F)        .color(color.getRed(), color.getGreen(), color.getBlue(), alpha).endVertex();
-            vb.vertex(matr, 0F,      0F, 0F)        .color(color.getRed(), color.getGreen(), color.getBlue(), alpha).endVertex();
-            vb.vertex(matr, -0.7F * f4, fa, -0.5F * f4).color(color.getRed(), color.getGreen(), color.getBlue(), 0).endVertex();
-            vb.vertex(matr,  0.7F * f4, fa, -0.5F * f4).color(color.getRed(), color.getGreen(), color.getBlue(), 0).endVertex();
-            vb.vertex(matr, 0F,     0F, 0F)        .color(color.getRed(), color.getGreen(), color.getBlue(), alpha).endVertex();
-            vb.vertex(matr, 0F,     0F, 0F)        .color(color.getRed(), color.getGreen(), color.getBlue(), alpha).endVertex();
-            vb.vertex(matr, 0.7F * f4, fa, -0.5F * f4).color(color.getRed(), color.getGreen(), color.getBlue(), 0).endVertex();
-            vb.vertex(matr, 0F,        fa,    1F * f4).color(color.getRed(), color.getGreen(), color.getBlue(), 0).endVertex();
-            vb.vertex(matr, 0F,      0F, 0F)        .color(color.getRed(), color.getGreen(), color.getBlue(), alpha).endVertex();
-            vb.vertex(matr, 0F,      0F, 0F)        .color(color.getRed(), color.getGreen(), color.getBlue(), alpha).endVertex();
-            vb.vertex(matr, 0F,         fa,    1F * f4).color(color.getRed(), color.getGreen(), color.getBlue(), 0).endVertex();
-            vb.vertex(matr, -0.7F * f4, fa, -0.5F * f4).color(color.getRed(), color.getGreen(), color.getBlue(), 0).endVertex();
+            vb.addVertex(matr, 0F,      0F, 0F)        .setColor(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+            vb.addVertex(matr, 0F,      0F, 0F)        .setColor(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+            vb.addVertex(matr, -0.7F * f4, fa, -0.5F * f4).setColor(color.getRed(), color.getGreen(), color.getBlue(), 0);
+            vb.addVertex(matr,  0.7F * f4, fa, -0.5F * f4).setColor(color.getRed(), color.getGreen(), color.getBlue(), 0);
+            vb.addVertex(matr, 0F,     0F, 0F)        .setColor(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+            vb.addVertex(matr, 0F,     0F, 0F)        .setColor(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+            vb.addVertex(matr, 0.7F * f4, fa, -0.5F * f4).setColor(color.getRed(), color.getGreen(), color.getBlue(), 0);
+            vb.addVertex(matr, 0F,        fa,    1F * f4).setColor(color.getRed(), color.getGreen(), color.getBlue(), 0);
+            vb.addVertex(matr, 0F,      0F, 0F)        .setColor(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+            vb.addVertex(matr, 0F,      0F, 0F)        .setColor(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+            vb.addVertex(matr, 0F,         fa,    1F * f4).setColor(color.getRed(), color.getGreen(), color.getBlue(), 0);
+            vb.addVertex(matr, -0.7F * f4, fa, -0.5F * f4).setColor(color.getRed(), color.getGreen(), color.getBlue(), 0);
 
             renderStack.popPose();
         }
@@ -425,10 +425,10 @@ public class RenderingDrawUtils {
         }
 
         Matrix4f matr = renderStack.last().pose();
-        pos.clone().add(v1).subtract(iPos).drawPos(matr, vb).color(r, g, b, alpha).tex(u + uLength, v + vLength).endVertex();
-        pos.clone().add(v2).subtract(iPos).drawPos(matr, vb).color(r, g, b, alpha).tex(u + uLength, v).endVertex();
-        pos.clone().add(v3).subtract(iPos).drawPos(matr, vb).color(r, g, b, alpha).tex(u, v ).endVertex();
-        pos.clone().add(v4).subtract(iPos).drawPos(matr, vb).color(r, g, b, alpha).tex(u, v + vLength).endVertex();
+        pos.clone().add(v1).subtract(iPos).drawPos(matr, vb).setColor(r, g, b, alpha).setUv(u + uLength, v + vLength);
+        pos.clone().add(v2).subtract(iPos).drawPos(matr, vb).setColor(r, g, b, alpha).setUv(u + uLength, v);
+        pos.clone().add(v3).subtract(iPos).drawPos(matr, vb).setColor(r, g, b, alpha).setUv(u, v );
+        pos.clone().add(v4).subtract(iPos).drawPos(matr, vb).setColor(r, g, b, alpha).setUv(u, v + vLength);
     }
 
     public static void renderTexturedCubeCentralColorLighted(VertexConsumer buf, PoseStack renderStack,
@@ -438,35 +438,35 @@ public class RenderingDrawUtils {
 
         Matrix4f matr = renderStack.last().pose();
 
-        buf.vertex(matr, -0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).uv2(combinedLight).endVertex();
+        buf.addVertex(matr, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setLight(combinedLight);
 
-        buf.vertex(matr, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u, v + vLength).uv2(combinedLight).endVertex();
+        buf.addVertex(matr, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setLight(combinedLight);
 
-        buf.vertex(matr, -0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u, v).uv2(combinedLight).endVertex();
+        buf.addVertex(matr, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setLight(combinedLight);
 
-        buf.vertex(matr,  0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u, v).uv2(combinedLight).endVertex();
+        buf.addVertex(matr,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setLight(combinedLight);
 
-        buf.vertex(matr,  0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u, v + vLength).uv2(combinedLight).endVertex();
+        buf.addVertex(matr,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setLight(combinedLight);
 
-        buf.vertex(matr, -0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v).uv2(combinedLight).endVertex();
-        buf.vertex(matr,  0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).uv2(combinedLight).endVertex();
-        buf.vertex(matr, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).uv2(combinedLight).endVertex();
+        buf.addVertex(matr, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setLight(combinedLight);
+        buf.addVertex(matr,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setLight(combinedLight);
+        buf.addVertex(matr, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setLight(combinedLight);
     }
 
     public static void renderTexturedCubeCentralColorNormal(PoseStack renderStack, VertexConsumer vb,
@@ -475,35 +475,35 @@ public class RenderingDrawUtils {
                                                             Matrix3f normalMatr) {
 
         Matrix4f offset = renderStack.last().pose();
-        vb.vertex(offset, -0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
+        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
 
-        vb.vertex(offset, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
+        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
 
-        vb.vertex(offset, -0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u, v).normal(normalMatr, 0, 0, 0).endVertex();
+        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
 
-        vb.vertex(offset,  0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u, v).normal(normalMatr, 0, 0, 0).endVertex();
+        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
 
-        vb.vertex(offset,  0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F, -0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F,  0.5F, -0.5F).color(r, g, b, a).tex(u, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
+        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
 
-        vb.vertex(offset, -0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F, -0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset,  0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u + uLength, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
-        vb.vertex(offset, -0.5F,  0.5F,  0.5F).color(r, g, b, a).tex(u, v + vLength).normal(normalMatr, 0, 0, 0).endVertex();
+        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
     }
 
     public static void renderAngleRotatedTexturedRectVB(VertexConsumer vb, PoseStack renderStack, Vector3 renderOffset, Vector3 axis, float angleRad, float scale, float u, float v, float uLength, float vLength, int r, int g, int b, int a) {
@@ -511,16 +511,16 @@ public class RenderingDrawUtils {
         Matrix4f matr = renderStack.last().pose();
 
         Vector3 vec = renderStart.clone().mirror(Math.toRadians(90), axis).normalize().mul(scale).add(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u, v + vLength).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u, v + vLength);
 
         vec = renderStart.clone().mul(-1).normalize().mul(scale).add(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u + uLength, v + vLength).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u + uLength, v + vLength);
 
         vec = renderStart.clone().mirror(Math.toRadians(270), axis).normalize().mul(scale).add(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u + uLength, v).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u + uLength, v);
 
         vec = renderStart.clone().normalize().mul(scale).add(renderOffset);
-        vec.drawPos(matr, vb).color(r, g, b, a).tex(u, v).endVertex();
+        vec.drawPos(matr, vb).setColor(r, g, b, a).setUv(u, v);
     }
 
 }

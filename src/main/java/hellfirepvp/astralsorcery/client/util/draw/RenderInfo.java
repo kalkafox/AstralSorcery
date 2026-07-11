@@ -53,11 +53,11 @@ public class RenderInfo implements ITickHandler {
     public void tick(TickEvent.Type type, Object... context) {
         Camera info = this.getARI();
         if (info != null) {
-            this.rotationX = Mth.cos(info.getYaw() * ((float)Math.PI / 180F));
-            this.rotationZ = Mth.sin(info.getYaw() * ((float)Math.PI / 180F));
-            this.rotationYZ = -this.rotationZ * Mth.sin(info.getPitch() * ((float)Math.PI / 180F));
-            this.rotationXY = this.rotationX * Mth.sin(info.getPitch() * ((float)Math.PI / 180F));
-            this.rotationXZ = Mth.cos(info.getPitch() * ((float)Math.PI / 180F));
+            this.rotationX = Mth.cos(info.getYRot() * ((float)Math.PI / 180F));
+            this.rotationZ = Mth.sin(info.getYRot() * ((float)Math.PI / 180F));
+            this.rotationYZ = -this.rotationZ * Mth.sin(info.getXRot() * ((float)Math.PI / 180F));
+            this.rotationXY = this.rotationX * Mth.sin(info.getXRot() * ((float)Math.PI / 180F));
+            this.rotationXZ = Mth.cos(info.getXRot() * ((float)Math.PI / 180F));
         }
     }
 

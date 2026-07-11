@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.Component;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -87,23 +89,23 @@ public class ScreenJournalConstellationOverview extends ScreenJournal implements
 
     private void drawConstellationBackground(PoseStack renderStack) {
         TexturesAS.TEX_BLACK.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, leftPos + 15,            topPos + guiHeight - 10, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 1).endVertex();
-            buf.vertex(offset, leftPos + guiWidth - 15, topPos + guiHeight - 10, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 1).endVertex();
-            buf.vertex(offset, leftPos + guiWidth - 15, topPos + 10,             this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 0).endVertex();
-            buf.vertex(offset, leftPos + 15,            topPos + 10,             this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 0).endVertex();
+            buf.addVertex(offset, leftPos + 15,            topPos + guiHeight - 10, this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(0, 1);
+            buf.addVertex(offset, leftPos + guiWidth - 15, topPos + guiHeight - 10, this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(1, 1);
+            buf.addVertex(offset, leftPos + guiWidth - 15, topPos + 10,             this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(1, 0);
+            buf.addVertex(offset, leftPos + 15,            topPos + 10,             this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(0, 0);
         });
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         TexturesAS.TEX_GUI_BACKGROUND_CONSTELLATIONS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, leftPos + 15,            topPos + guiHeight - 10, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.7F).tex(0.1F, 0.9F).endVertex();
-            buf.vertex(offset, leftPos + guiWidth - 15, topPos + guiHeight - 10, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.7F).tex(0.9F, 0.9F).endVertex();
-            buf.vertex(offset, leftPos + guiWidth - 15, topPos + 10,             this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.7F).tex(0.9F, 0.1F).endVertex();
-            buf.vertex(offset, leftPos + 15,            topPos + 10,             this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.7F).tex(0.1F, 0.1F).endVertex();
+            buf.addVertex(offset, leftPos + 15,            topPos + guiHeight - 10, this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.7F).setUv(0.1F, 0.9F);
+            buf.addVertex(offset, leftPos + guiWidth - 15, topPos + guiHeight - 10, this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.7F).setUv(0.9F, 0.9F);
+            buf.addVertex(offset, leftPos + guiWidth - 15, topPos + 10,             this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.7F).setUv(0.9F, 0.1F);
+            buf.addVertex(offset, leftPos + 15,            topPos + 10,             this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.7F).setUv(0.1F, 0.1F);
         });
         RenderSystem.disableBlend();
     }
@@ -143,7 +145,7 @@ public class ScreenJournalConstellationOverview extends ScreenJournal implements
         RenderSystem.disableBlend();
 
         FormattedText cstName = display.getConstellationName();
-        float fullLength = (width / 2F) - (font.getStringPropertyWidth(cstName) / 2F);
+        float fullLength = (width / 2F) - (font.width(cstName) / 2F);
 
         renderStack.translate(fullLength, 90, 10);
         RenderingDrawUtils.renderStringAt(cstName, renderStack, font, 0xBBDDDDDD, false);

@@ -15,7 +15,6 @@ import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.common.data.journal.JournalPage;
 import net.minecraft.client.gui.Font;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.text.*;
 
 import java.util.LinkedList;
 import java.util.List;

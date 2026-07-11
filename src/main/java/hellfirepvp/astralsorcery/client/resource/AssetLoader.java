@@ -52,7 +52,7 @@ public class AssetLoader {
 
     @OnlyIn(Dist.CLIENT)
     public static WavefrontObject loadObjModel(ModelLocation location, String name) {
-        return new WavefrontObject(ResourceLocation.parse(buildResourceString(AssetLocation.MODEL_BY_TYPE, location, name, ".obj")));
+        return new WavefrontObject(ResourceLocation.parse(buildResourceString(AssetLocation.MODELS, location, name, ".obj")));
     }
 
     public static interface SubLocation {

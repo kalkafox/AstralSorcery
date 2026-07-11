@@ -50,13 +50,13 @@ public class EquipmentSourceProvider extends ModifierSourceProvider<EquipmentMod
 
             ResourceLocation id = AstralSorcery.key("slot_" + slot.getName());
 
-            ItemStack stack = playerEntity.getItemStackFromSlot(slot);
+            ItemStack stack = playerEntity.getItemBySlot(slot);
             EquipmentModifierSource slotSource = new EquipmentModifierSource(slot, stack.copy());
             if (!stack.isEmpty()) {
                 Collection<PerkAttributeModifier> modifiers = slotSource.getModifiers(playerEntity, LogicalSide.SERVER, false);
                 if (!modifiers.isEmpty()) {
                     CompoundTag nbt = NBTHelper.getPersistentData(stack);
-                    if (!nbt.hasUniqueId(KEY_MOD_IDENTIFIER)) {
+                    if (!nbt.hasUUID(KEY_MOD_IDENTIFIER)) {
                         nbt.putUUID(KEY_MOD_IDENTIFIER, UUID.randomUUID());
                     }
                     updateSource(playerEntity, id, slotSource);

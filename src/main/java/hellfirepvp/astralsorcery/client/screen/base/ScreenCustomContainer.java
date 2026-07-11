@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
@@ -67,7 +69,7 @@ public abstract class ScreenCustomContainer<T extends AbstractContainerMenu> ext
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, this.leftPos, this.topPos, this.getBlitOffset(), this.sWidth, this.sHeight).draw();
         });
     }

@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -159,7 +161,6 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
         }
         float brMultiplier = angleOpacity;
 
-        RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
 
@@ -171,7 +172,6 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
 
             Blending.DEFAULT.apply();
             RenderSystem.disableBlend();
-            RenderSystem.enableAlphaTest();
             return;
         }
 
@@ -191,7 +191,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
 
             this.setBlitOffset(-9);
             TexturesAS.TEX_STAR_1.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 for (Point.Float star : usedStars) {
                     float size = 3 + gen.nextFloat() * 3F;
                     float brightness = 0.4F + (RenderingConstellationUtils.stdFlicker(ClientScheduler.getClientTick(), pTicks, 10 + gen.nextInt(20))) * 0.5F;
@@ -251,14 +251,13 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
         this.setBlitOffset(0);
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
     }
 
     private void drawFrame(PoseStack renderStack) {
         this.setBlitOffset(10);
         TexturesAS.TEX_GUI_OBSERVATORY.bindTexture();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
             RenderingGuiUtils.rect(buf, renderStack, this)
                     .at(0, 0).dim(FRAME_TEXTURE_SIZE, FRAME_TEXTURE_SIZE)

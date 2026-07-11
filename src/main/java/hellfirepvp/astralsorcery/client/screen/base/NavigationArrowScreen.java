@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -48,7 +50,7 @@ public interface NavigationArrowScreen {
         renderStack.translate(-(width / 2), -(height / 2), 0);
 
         TexturesAS.TEX_GUI_BOOK_ARROWS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, 0, 0, guiZLevel, width, height)
                     .tex(uFrom, vFrom, 0.5F, 0.5F)
                     .color(1F, 1F, 1F, 0.8F)

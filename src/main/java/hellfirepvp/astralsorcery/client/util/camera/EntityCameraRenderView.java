@@ -97,7 +97,7 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
 
     @Nonnull
     @Override
-    public ItemStack getItemStackFromSlot(EquipmentSlot slotIn) {
+    public ItemStack getItemBySlot(EquipmentSlot slotIn) {
         return ItemStack.EMPTY;
     }
 

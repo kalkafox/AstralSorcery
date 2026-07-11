@@ -145,7 +145,7 @@ public class BlockUtils {
             breakSpeed /= 5.0F;
         }
 
-        if (!entity.isOnGround()) {
+        if (!entity.onGround()) {
             breakSpeed /= 5.0F;
         }
         return breakSpeed;

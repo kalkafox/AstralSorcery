@@ -14,6 +14,11 @@ import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,34 +37,44 @@ public class ModelLens extends CustomModel {
 
     public ModelLens() {
         super((resKey) -> RenderTypesAS.MODEL_LENS_SOLID);
-        this.textureWidth = 64;
-        this.textureHeight = 32;
-        this.base = new ModelPart(this, 0, 13);
-        this.base.setPos(0.0F, 16.0F, 0.0F);
-        this.base.addBox(-6.0F, 4.0F, -6.0F, 12, 2, 12, 0.0F);
-        this.frame1 = new ModelPart(this, 0, 13);
-        this.frame1.setPos(0.0F, 16.0F, 0.0F);
-        this.frame1.addBox(-8.0F, -4.0F, -1.0F, 2, 10, 2, 0.0F);
-        this.frame2 = new ModelPart(this, 0, 13);
-        this.frame2.mirror = true;
-        this.frame2.setPos(0.0F, 16.0F, 0.0F);
-        this.frame2.addBox(6.0F, -4.0F, -1.0F, 2, 10, 2, 0.0F);
-        this.lens = new ModelPart(this, 0, 0);
-        this.lens.setPos(0.0F, 14.0F, 0.0F);
-        this.lens.addBox(-6.0F, -6.0F, -0.5F, 12, 12, 1, 0.0F);
+        ModelPart root = createLayer().bakeRoot();
+        this.base = root.getChild("base");
+        this.frame1 = root.getChild("frame1");
+        this.frame2 = root.getChild("frame2");
+        this.lens = root.getChild("lens");
+    }
+
+    private static LayerDefinition createLayer() {
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        root.addOrReplaceChild("base", CubeListBuilder.create()
+                .texOffs(0, 13)
+                .addBox(-6.0F, 4.0F, -6.0F, 12, 2, 12), PartPose.offset(0.0F, 16.0F, 0.0F));
+        root.addOrReplaceChild("frame1", CubeListBuilder.create()
+                .texOffs(0, 13)
+                .addBox(-8.0F, -4.0F, -1.0F, 2, 10, 2), PartPose.offset(0.0F, 16.0F, 0.0F));
+        root.addOrReplaceChild("frame2", CubeListBuilder.create()
+                .texOffs(0, 13)
+                .mirror()
+                .addBox(6.0F, -4.0F, -1.0F, 2, 10, 2), PartPose.offset(0.0F, 16.0F, 0.0F));
+        root.addOrReplaceChild("lens", CubeListBuilder.create()
+                .texOffs(0, 0)
+                .addBox(-6.0F, -6.0F, -0.5F, 12, 12, 1), PartPose.offset(0.0F, 14.0F, 0.0F));
+        return LayerDefinition.create(mesh, 64, 32);
     }
 
     public void renderFrame(PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
         VertexConsumer vb = buffer.getBuffer(RenderTypesAS.MODEL_LENS_SOLID);
-        this.base.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.frame1.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.frame2.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        int color = packColor(red, green, blue, alpha);
+        this.base.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, color);
+        this.frame1.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, color);
+        this.frame2.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, color);
         RenderingUtils.refreshDrawing(vb, RenderTypesAS.MODEL_LENS_SOLID);
     }
 
     public void renderGlass(PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
         VertexConsumer vb = buffer.getBuffer(RenderTypesAS.MODEL_LENS_GLASS);
-        this.lens.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        this.lens.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, packColor(red, green, blue, alpha));
 
         this.lens.xRot = 0;
         RenderingUtils.refreshDrawing(vb, RenderTypesAS.MODEL_LENS_GLASS);

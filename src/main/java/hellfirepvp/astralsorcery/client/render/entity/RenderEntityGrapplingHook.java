@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.render.entity;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -21,13 +23,11 @@ import hellfirepvp.astralsorcery.common.entity.technical.EntityGrapplingHook;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.fml.client.registry.IRenderFactory;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -40,8 +40,8 @@ import java.util.List;
  */
 public class RenderEntityGrapplingHook extends EntityRenderer<EntityGrapplingHook> {
 
-    protected RenderEntityGrapplingHook(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public RenderEntityGrapplingHook(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -59,7 +59,6 @@ public class RenderEntityGrapplingHook extends EntityRenderer<EntityGrapplingHoo
         Vector3 entityPos = RenderingVectorUtils.interpolatePosition(entity, a);
         List<Vector3> lineState = entity.buildLine(a);
 
-        RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
         RenderSystem.disableCull();
@@ -67,7 +66,7 @@ public class RenderEntityGrapplingHook extends EntityRenderer<EntityGrapplingHoo
         //Main grappling hook sprite
         SpritesAS.SPR_GRAPPLING_HOOK.bindTexture();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingDrawUtils.renderFacingSpriteVB(buf, matrixStack,
                     entityPos.getX(), entityPos.getY(), entityPos.getZ(),
                     1.3F, 0F,
@@ -79,7 +78,7 @@ public class RenderEntityGrapplingHook extends EntityRenderer<EntityGrapplingHoo
         TexturesAS.TEX_PARTICLE_LARGE.bindTexture();
         Blending.ADDITIVE_ALPHA.apply();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             for (Vector3 pos : lineState) {
                 Vector3 at = pos.mul(2).add(entityPos);
                 RenderingDrawUtils.renderFacingFullQuadVB(buf, matrixStack,
@@ -92,19 +91,10 @@ public class RenderEntityGrapplingHook extends EntityRenderer<EntityGrapplingHoo
         RenderSystem.enableCull();
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
     }
 
     @Override
     public ResourceLocation getTextureLocation(EntityGrapplingHook entity) {
-        return TextureAtlas.LOCATION_BLOCKS_TEXTURE;
-    }
-
-    public static class Factory implements IRenderFactory<EntityGrapplingHook> {
-
-        @Override
-        public EntityRenderer<? super EntityGrapplingHook> createRenderFor(EntityRenderDispatcher manager) {
-            return new RenderEntityGrapplingHook(manager);
-        }
+        return TextureAtlas.LOCATION_BLOCKS;
     }
 }

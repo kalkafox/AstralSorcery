@@ -91,7 +91,7 @@ public class GatewayCache extends GlobalWorldData {
         }
         setChanged();
         CelestialGatewayHandler.INSTANCE.addPosition(level, node);
-        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Added new gateway node at: dim=" + level.dimension().getLocation() + ", " + pos.toString());
+        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Added new gateway node at: dim=" + level.dimension().location() + ", " + pos.toString());
         return true;
     }
 
@@ -99,7 +99,7 @@ public class GatewayCache extends GlobalWorldData {
         if (gatewayPositions.removeIf(node -> node.getBlockPos().equals(pos))) {
             setChanged();
             CelestialGatewayHandler.INSTANCE.removePosition(level, pos);
-            LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Removed gateway node at: dim=" + level.dimension().getLocation() + ", " + pos.toString());
+            LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Removed gateway node at: dim=" + level.dimension().location() + ", " + pos.toString());
         }
     }
 
@@ -110,7 +110,7 @@ public class GatewayCache extends GlobalWorldData {
     public void onLoad(Level level) {
         super.onLoad(level);
 
-        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Checking GatewayCache integrity for dimension " + level.dimension().getLocation());
+        LogUtil.info(LogCategory.GATEWAY_CACHE, () -> "Checking GatewayCache integrity for dimension " + level.dimension().location());
         long msStart = System.currentTimeMillis();
 
         Iterator<GatewayNode> iterator = gatewayPositions.iterator();

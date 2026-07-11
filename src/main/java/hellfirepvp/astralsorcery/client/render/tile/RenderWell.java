@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.awt.*;
@@ -43,7 +44,7 @@ public class RenderWell extends CustomTileEntityRenderer<TileWell> {
         if (!tank.getType().isEmpty() && tank.getFluidAmount() > 0) {
             FluidStack contained = tank.getType();
             TextureAtlasSprite tas = RenderingUtils.getParticleIcon(contained);
-            Color fluidColor = new Color(contained.getType().getAttributes().getColor(tile.getLevel(), tile.getBlockPos()));
+            Color fluidColor = new Color(IClientFluidTypeExtensions.of(contained.getFluid()).getTintColor(contained), true);
             VertexConsumer buf = renderTypeBuffer.getBuffer(RenderTypesAS.TER_WELL_LIQUID);
 
             Vector3 offset = new Vector3(0.5D, 0.32D, 0.5D).addY(tank.getPercentageFilled() * 0.6);

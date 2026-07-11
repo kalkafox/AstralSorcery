@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.item.wand;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.MutableComponent;
 
 import net.minecraft.network.chat.Component;
@@ -52,10 +54,13 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.util.text.*;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -106,7 +111,6 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
             return true;
         }
 
-        RenderSystem.enableTexture();
         BlockAtlasTexture.getInstance().bindTexture();
 
         int[] fullBright = new int[] { 15, 15 };
@@ -116,9 +120,8 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         RenderSystem.enableBlend();
         Blending.ADDITIVEDARK.apply();
         RenderSystem.disableDepthTest();
-        RenderSystem.disableAlphaTest();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.BLOCK, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK, buf -> {
             placeStates.forEach((pos, state) -> {
                 renderStack.pushPose();
                 renderStack.translate(pos.getX() - offset.getX() + 0.1F, pos.getY() - offset.getY() + 0.1F, pos.getZ() - offset.getZ() + 0.1F);
@@ -128,7 +131,6 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
             });
         });
 
-        RenderSystem.enableAlphaTest();
         RenderSystem.enableDepthTest();
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
@@ -148,7 +150,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         Level level = context.getLevel();
         Player player = context.getPlayer();
         ItemStack held = player.getItemInHand(context.getHand());
-        BlockPos pos = context.getBlockPos();
+        BlockPos pos = context.getClickedPos();
         if (level.isClientSide() || !(player instanceof ServerPlayer) || held.isEmpty()) {
             return InteractionResult.SUCCESS;
         }
@@ -156,7 +158,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
             ItemBlockStorage.storeBlockState(held, level, pos);
             return InteractionResult.SUCCESS;
         } else {
-            return attemptPlaceBlocks(level, player, held).getType();
+            return attemptPlaceBlocks(level, player, held).getResult();
         }
     }
 

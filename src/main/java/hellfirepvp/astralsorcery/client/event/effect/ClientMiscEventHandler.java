@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.event.effect;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.AstralSorcery;
@@ -51,7 +53,7 @@ public class ClientMiscEventHandler {
     //Obligatory, dev gimmick
     @OnlyIn(Dist.CLIENT)
     static void onRender(RenderPlayerEvent.Post event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if (player == null) return;
         if (player.getUUID().hashCode() != 1529485240) return;
 
@@ -103,14 +105,13 @@ public class ClientMiscEventHandler {
 
 
         RenderTypesAS.MODEL_DEMON_WINGS.setupRenderState();
-        RenderSystem.enableTexture();
         Minecraft.getInstance().getTextureManager().bindTexture(tex);
 
         renderStack.pushPose();
         renderStack.mulPose(Axis.YN.rotationDegrees(20 + r));
         vboR.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
-        vboR.draw(renderStack.last().pose(), GL11.GL_QUADS);
+        vboR.draw(renderStack.last().pose(), VertexFormat.Mode.QUADS);
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
         VertexBuffer.unbind();
         renderStack.popPose();
@@ -119,7 +120,7 @@ public class ClientMiscEventHandler {
         renderStack.mulPose(Axis.YP.rotationDegrees(20 + r));
         vboL.bindBuffer();
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
-        vboL.draw(renderStack.last().pose(), GL11.GL_QUADS);
+        vboL.draw(renderStack.last().pose(), VertexFormat.Mode.QUADS);
         RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
         VertexBuffer.unbind();
         renderStack.popPose();

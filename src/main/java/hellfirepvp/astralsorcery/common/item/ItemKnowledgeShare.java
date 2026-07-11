@@ -31,7 +31,10 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.*;
-import net.minecraft.util.text.*;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -101,7 +104,7 @@ public class ItemKnowledgeShare extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        ItemStack stack = context.getItem();
+        ItemStack stack = context.getItemInHand();
         Player player = context.getPlayer();
         if (stack.isEmpty() || player == null || context.getLevel().isClientSide() || !(stack.getItem() instanceof ItemKnowledgeShare)) {
             return InteractionResult.SUCCESS;
@@ -148,7 +151,7 @@ public class ItemKnowledgeShare extends Item {
         if (owner == null) {
             return null;
         }
-        return server.getPlayerList().getPlayerByUUID(owner);
+        return server.getPlayerList().getPlayer(owner);
     }
 
     @Nullable

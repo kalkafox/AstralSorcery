@@ -56,7 +56,7 @@ public class LightbeamRenderHelper implements ITickHandler {
         tickCount++;
         if (tickCount % 48 == 0) {
             tickCount = 0;
-            Entity rView = Minecraft.getInstance().getRenderViewEntity();
+            Entity rView = Minecraft.getInstance().getCameraEntity();
             if (rView == null) {
                 rView = Minecraft.getInstance().player;
             }

@@ -68,7 +68,7 @@ public class GatewayInteractionHandler {
     }
 
     private static void onAccessRevoke(PlayerInteractEvent.RightClickBlock event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         Level level = event.getLevel();
         if (player == null || level == null || !level.isClientSide() || event.getHand() != InteractionHand.MAIN_HAND) {
             return;
@@ -86,7 +86,7 @@ public class GatewayInteractionHandler {
             return;
         }
 
-        BlockPos clickedPos = event.getBlockPos();
+        BlockPos clickedPos = event.getPos();
         MapStream.of(node.getAllowedUsers())
                 .filter(tpl -> TileCelestialGateway.getAllowedUserOffset(tpl.getA())
                         .offset(node.getBlockPos())

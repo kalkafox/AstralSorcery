@@ -8,11 +8,9 @@
 
 package hellfirepvp.astralsorcery.client.lib;
 
-import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.client.renderer.RenderType;
 import com.mojang.blaze3d.vertex.VertexFormat;
-
-import static net.minecraft.client.renderer.vertex.DefaultVertexFormats.*;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,7 +21,10 @@ import static net.minecraft.client.renderer.vertex.DefaultVertexFormats.*;
  */
 public class RenderTypesAS {
 
-    public static VertexFormat POSITION_COLOR_TEX_NORMAL = new VertexFormat(ImmutableList.of(ELEMENT_POSITION, ELEMENT_COLOR, ELEMENT_UV0, ELEMENT_NORMAL));
+    // 1.21 port: vanilla's POSITION_TEX_COLOR_NORMAL (clouds format) carries the same elements;
+    // element order differs from the old custom format but the 1.21 chain setters write by
+    // element offset, so vertex-building call order is unaffected.
+    public static VertexFormat POSITION_COLOR_TEX_NORMAL = DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL;
 
     //Effects/FX/VFX
     public static RenderType EFFECT_FX_GENERIC_PARTICLE;

@@ -49,7 +49,7 @@ public class OverlayRenderer {
 
         PoseStack renderStack = event.getPoseStack();
         for (EquipmentSlot type : EquipmentSlot.values()) {
-            if (doHudRender(renderStack, player.getItemStackFromSlot(type), pTicks)) {
+            if (doHudRender(renderStack, player.getItemBySlot(type), pTicks)) {
                 break;
             }
         }

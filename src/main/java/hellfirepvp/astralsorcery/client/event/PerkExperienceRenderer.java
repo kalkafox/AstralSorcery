@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.event;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.MutableComponent;
 
 import net.minecraft.network.chat.Component;
@@ -79,10 +81,9 @@ public class PerkExperienceRenderer implements ITickHandler {
         float frameOffsetY =   5F;
 
         RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
 
         TexturesAS.TEX_OVERLAY_EXP_FRAME.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, frameOffsetX, frameOffsetY, 10, frameWidth, frameHeight)
                     .color(1F, 1F, 1F, visibilityReveal * 0.9F)
                     .draw();
@@ -96,7 +97,7 @@ public class PerkExperienceRenderer implements ITickHandler {
         float expOffsetY =  27.5F + (1F - perc) * 78F;
 
         TexturesAS.TEX_OVERLAY_EXP_BAR.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, expOffsetX, expOffsetY, 10, expWidth, expHeight)
                     .color(1F, 0.9F, 0F, visibilityReveal * 0.9F)
                     .tex(0, 0, 1, 1 - perc)
@@ -105,7 +106,7 @@ public class PerkExperienceRenderer implements ITickHandler {
 
         String strLevel = String.valueOf(perkData.getPerkLevel(player, LogicalSide.CLIENT));
         MutableComponent txtLevel = Component.literal(strLevel);
-        int strLength = Minecraft.getInstance().font.getStringPropertyWidth(txtLevel);
+        int strLength = Minecraft.getInstance().font.width(txtLevel);
 
         renderStack.pushPose();
         renderStack.translate(15 - (strLength / 2F), 94, 20);

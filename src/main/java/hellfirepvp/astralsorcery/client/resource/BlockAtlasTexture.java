@@ -8,11 +8,10 @@
 
 package hellfirepvp.astralsorcery.client.resource;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureManager;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,12 +34,11 @@ public class BlockAtlasTexture extends AbstractRenderableTexture.Full {
 
     @Override
     public void bindTexture() {
-        TextureManager mgr = Minecraft.getInstance().getTextureManager();
-        mgr.bindTexture(TextureAtlas.LOCATION_BLOCKS_TEXTURE);
+        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
     }
 
     @Override
     public RenderStateShard.TextureStateShard asState() {
-        return new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS_TEXTURE, false, false);
+        return new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, false, false);
     }
 }

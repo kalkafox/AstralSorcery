@@ -23,8 +23,8 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 //Again, another version, another ripoff of net.minecraft.client.renderer.entity.model.ArmorStandArmorModel
 public class CustomArmorModel<T extends LivingEntity> extends HumanoidModel<T> {
 
-    public CustomArmorModel() {
-        super(0F);
+    public CustomArmorModel(ModelPart root) {
+        super(root);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class CustomArmorModel<T extends LivingEntity> extends HumanoidModel<T> {
             this.rightLeg.yRot = ((float)Math.PI / 180F) * armorStand.getRightLegPose().getY();
             this.rightLeg.zRot = ((float)Math.PI / 180F) * armorStand.getRightLegPose().getZ();
             this.rightLeg.setPos(-1.9F, 11.0F, 0.0F);
-            this.hat.copyModelAngles(this.head);
+            this.hat.copyFrom(this.head);
         } else {
             super.setupAnim(entity, animationPosition, animationSpeed, ageInTicks, netHeadYaw, yHeadRot);
         }

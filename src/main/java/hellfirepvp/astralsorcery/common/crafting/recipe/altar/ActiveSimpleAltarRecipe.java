@@ -111,7 +111,7 @@ public class ActiveSimpleAltarRecipe {
     @Nullable
     public Player tryGetCraftingPlayerServer() {
         MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
-        return srv.getPlayerList().getPlayerByUUID(this.getPlayerCraftingUUID());
+        return srv.getPlayerList().getPlayer(this.getPlayerCraftingUUID());
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -283,7 +283,7 @@ public class ActiveSimpleAltarRecipe {
             return null;
         }
         SimpleAltarRecipe altarRecipe = (SimpleAltarRecipe) recipe.get();
-        UUID uuidCraft = pattern.getUniqueId("playerCraftingUUID");
+        UUID uuidCraft = pattern.getUUID("playerCraftingUUID");
         int tick = pattern.getInt("ticksCrafting");
         int total = pattern.getInt("totalCraftingTime");
         CraftingState state = CraftingState.values()[pattern.getInt("state")];

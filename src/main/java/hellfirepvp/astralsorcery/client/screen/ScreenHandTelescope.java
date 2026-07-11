@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.Component;
 
 import com.google.common.collect.Lists;
@@ -113,7 +115,6 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
 
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
-        RenderSystem.disableAlphaTest();
 
         this.setBlitOffset(-10);
         this.drawSkyBackground(renderStack, pTicks, canSeeSky, angleOpacity);
@@ -121,7 +122,6 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
         if (!this.isInitialized()) {
             this.setBlitOffset(0);
 
-            RenderSystem.enableAlphaTest();
             Blending.DEFAULT.apply();
             RenderSystem.disableBlend();
             return;
@@ -144,7 +144,7 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
             this.setBlitOffset(-9);
             float starSize = 5F;
             TexturesAS.TEX_STAR_1.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 for (Point.Float pos : this.usedStars) {
                     float brightness = 0.4F + (RenderingConstellationUtils.stdFlicker(ClientScheduler.getClientTick(), pTicks, 10 + gen.nextInt(20))) * 0.5F;
                     brightness = this.multiplyStarBrightness(pTicks, brightness);
@@ -209,7 +209,6 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
         }
 
         this.setBlitOffset(0);
-        RenderSystem.enableAlphaTest();
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
     }

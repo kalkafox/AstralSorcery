@@ -45,7 +45,7 @@ public class ItemHeldEffectRenderer {
 
 
         for (EquipmentSlot type : EquipmentSlot.values()) {
-            if (doHeldRender(Minecraft.getInstance().player.getItemStackFromSlot(type), renderStack, pTicks)) {
+            if (doHeldRender(Minecraft.getInstance().player.getItemBySlot(type), renderStack, pTicks)) {
                 break;
             }
         }

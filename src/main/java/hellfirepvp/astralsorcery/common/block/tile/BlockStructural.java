@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.GuiType;
 import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.client.particle.ParticleEngine;

@@ -33,11 +33,11 @@ public class ItemIlluminationPowder extends ItemUsableDust {
 
     @Override
     boolean dispense(BlockSource dispenser) {
-        BlockPos at = dispenser.getBlockPos();
+        BlockPos at = dispenser.pos();
         Direction face = dispenser.getBlockState().get(DispenserBlock.FACING);
-        EntityIlluminationSpark nocSpark = new EntityIlluminationSpark(at.getX(), at.getY(), at.getZ(), dispenser.getLevel());
+        EntityIlluminationSpark nocSpark = new EntityIlluminationSpark(at.getX(), at.getY(), at.getZ(), dispenser.level());
         nocSpark.shoot(face.getXOffset(), face.getMyRidingOffset() + 0.1F, face.getZOffset(), 0.7F, 0.9F);
-        return dispenser.getLevel().addEntity(nocSpark);
+        return dispenser.level().addFreshEntity(nocSpark);
     }
 
     @Override
@@ -48,21 +48,21 @@ public class ItemIlluminationPowder extends ItemUsableDust {
     @Override
     boolean rightClickBlock(UseOnContext ctx) {
         Level level = ctx.getLevel();
-        BlockPos pos = ctx.getBlockPos();
+        BlockPos pos = ctx.getClickedPos();
         Player player = ctx.getPlayer();
         if (player == null) {
             return false;
         }
 
         if (!BlockUtils.isReplaceable(level, pos)) {
-            pos = pos.offset(ctx.getFace());
+            pos = pos.offset(ctx.getClickedFace());
         }
 
         if (!BlockUtils.isReplaceable(level, pos)) {
             return false;
         }
 
-        if (player.mayUseItemAt(pos, ctx.getFace(), ctx.getItem()) && !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, pos), ctx.getFace())) {
+        if (player.mayUseItemAt(pos, ctx.getClickedFace(), ctx.getItemInHand()) && !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, pos), ctx.getClickedFace())) {
             return level.setBlock(pos, BlocksAS.FLARE_LIGHT.defaultBlockState());
         }
         return false;

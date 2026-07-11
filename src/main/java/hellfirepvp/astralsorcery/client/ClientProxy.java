@@ -44,6 +44,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -52,10 +53,8 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.resource.SelectiveReloadStateHandler;
-import net.neoforged.neoforge.resource.VanillaResourceType;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -80,15 +79,13 @@ public class ClientProxy extends CommonProxy {
             resMgr.registerReloadListener(AssetLibrary.INSTANCE);
             resMgr.registerReloadListener(AssetPreLoader.INSTANCE);
             resMgr.registerReloadListener(ColorizationHelper.onReload());
+            // 1.21 port: selective (resource-type-filtered) reloads are gone; clear perk text caches
+            // on every resource reload.
             resMgr.registerReloadListener((stage, resourceManager, preparationsProfiler, reloadProfiler, executor, gameExecutor) ->
-                    stage.wait(Unit.INSTANCE).thenRunAsync(() -> {
-                        if (!SelectiveReloadStateHandler.INSTANCE.get().test(VanillaResourceType.LANGUAGES)) {
-                            return;
-                        }
+                    stage.wait(Unit.INSTANCE).thenRunAsync(() ->
                         PerkTree.PERK_TREE.getPerkPoints(LogicalSide.CLIENT).stream()
                                 .map(PerkTreePoint::getPerk)
-                                .forEach(AbstractPerk::clearClientTextCaches);
-                    }));
+                                .forEach(AbstractPerk::clearClientTextCaches)));
         }
 
         this.clientConfig = new ClientConfig();
@@ -115,6 +112,8 @@ public class ClientProxy extends CommonProxy {
         modEventBus.addListener(RegistryItems::registerColors);
         modEventBus.addListener(RegistryBlocks::registerColors);
         modEventBus.addListener(this::onClientSetup);
+        modEventBus.addListener(this::onRegisterRenderers);
+        modEventBus.addListener(this::onAddLayers);
     }
 
     @Override
@@ -177,18 +176,24 @@ public class ClientProxy extends CommonProxy {
 
     private void onClientSetup(FMLClientSetupEvent event) {
         RegistryContainerTypes.initClient();
-        RegistryEntities.initClient();
-        RegistryTileEntities.initClient();
         RegistryKeyBindings.init();
         RegistryBlockRenderTypes.initBlocks();
         RegistryBlockRenderTypes.initFluids();
         RegistryItems.registerItemProperties();
+    }
 
-        Map<String, PlayerRenderer> playerRenderMap = Minecraft.getInstance().getRenderManager().getSkinMap();
-        PlayerRenderer renderer = playerRenderMap.get("slim");
-        renderer.addLayer(new StarryLayerRenderer<>(renderer, true));
-        renderer = playerRenderMap.get("default");
-        renderer.addLayer(new StarryLayerRenderer<>(renderer, false));
+    private void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        RegistryEntities.initClient(event);
+        RegistryTileEntities.initClient();
+    }
+
+    private void onAddLayers(EntityRenderersEvent.AddLayers event) {
+        for (PlayerSkin.Model skin : event.getSkins()) {
+            PlayerRenderer renderer = event.getSkin(skin);
+            if (renderer != null) {
+                renderer.addLayer(new StarryLayerRenderer<>(renderer, skin == PlayerSkin.Model.SLIM));
+            }
+        }
     }
 
     private void addTomeBookmarks() {

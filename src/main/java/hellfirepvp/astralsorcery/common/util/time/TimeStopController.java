@@ -104,7 +104,7 @@ public class TimeStopController implements ITickHandler {
             if (!e.isAlive() || e.getHealth() <= 0) {
                 shouldFreeze = false;
             }
-            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getType() == EnderDragonPhase.DYING) {
+            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getPhase() == EnderDragonPhase.DYING) {
                 shouldFreeze = false;
             }
             if (shouldFreeze) {

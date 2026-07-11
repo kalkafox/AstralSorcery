@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -151,7 +153,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
         Supplier<Float> brightnessFn = () -> RenderingConstellationUtils.conCFlicker(ClientScheduler.getClientTick(), pTicks, 5 + random.nextInt(10));
         TexturesAS.TEX_STAR_CONNECTION.bindTexture();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             for (DrawnLine lineState : drawnLines) {
                 drawLine(buf, renderStack, pTicks, lineState.from, lineState.to, brightnessFn, lineBreadth);
             }
@@ -187,7 +189,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
             int v = ((i + 2) & 2) >> 1;
 
             Vector3 pos = vec00.clone().add(dir.clone().mul(u)).add(vecV.clone().mul(v));
-            pos.drawPos(offset, buf).color(starBr, starBr, starBr, Math.max(0, starBr)).tex(u, v).endVertex();
+            pos.drawPos(offset, buf).setColor(starBr, starBr, starBr, Math.max(0, starBr)).setUv(u, v);
         }
     }
 

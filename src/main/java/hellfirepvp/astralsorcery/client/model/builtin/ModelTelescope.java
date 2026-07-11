@@ -12,6 +12,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,55 +29,52 @@ public class ModelTelescope extends CustomModel {
 
     private final ModelPart mountpiece;
     private final ModelPart opticalTube;
-    private final ModelPart leg;
-    private final ModelPart mountpiece_1;
-    private final ModelPart aperture;
-    private final ModelPart extension;
-    private final ModelPart detail;
-    private final ModelPart aperture_1;
 
     public ModelTelescope() {
         super((resKey) -> RenderTypesAS.MODEL_TELESCOPE);
-        this.textureWidth = 64;
-        this.textureHeight = 64;
+        ModelPart root = createLayer().bakeRoot();
+        this.mountpiece = root.getChild("mountpiece");
+        this.opticalTube = root.getChild("optical_tube");
+    }
 
-        this.leg = new ModelPart(this, 56, 0);
-        this.leg.setPos(0.0F, 8.0F, 0.0F);
-        this.leg.addBox(-1.0F, -10.0F, -1.0F, 2, 36, 2, 0.0F);
-        this.mountpiece_1 = new ModelPart(this, 32, 0);
-        this.mountpiece_1.setPos(0.0F, 0.0F, -1.0F);
-        this.mountpiece_1.addBox(-2.0F, 20.0F, -1.0F, 4, 6, 4, 0.0F);
-        this.aperture_1 = new ModelPart(this, 28, 28);
-        this.aperture_1.setPos(0.0F, 0.0F, 0.0F);
-        this.aperture_1.addBox(-1.0F, -3.0F, -6.0F, 6, 6, 2, 0.0F);
-        this.aperture = new ModelPart(this, 0, 28);
-        this.aperture.setPos(0.0F, 0.0F, 0.0F);
-        this.aperture.addBox(-1.0F, -3.0F, -16.0F, 6, 6, 8, 0.0F);
-        this.extension = new ModelPart(this, 0, 12);
-        this.extension.setPos(0.0F, 0.0F, 0.0F);
-        this.extension.addBox(-2.0F, -6.0F, 6.0F, 2, 6, 2, 0.0F);
-        this.detail = new ModelPart(this, 0, 8);
-        this.detail.setPos(0.0F, 0.0F, 0.0F);
-        this.detail.addBox(1.0F, -1.0F, 10.0F, 2, 2, 2, 0.0F);
-        this.opticalTube = new ModelPart(this, 0, 0);
-        this.opticalTube.setPos(1.0F, -3.0F, 0.0F);
-        this.opticalTube.addBox(0.0F, -2.0F, -14.0F, 4, 4, 24, 0.0F);
-        this.setRotateAngle(opticalTube, -0.7853981633974483F, 0.0F, 0.0F);
-        this.mountpiece = new ModelPart(this, 0, 0);
-        this.mountpiece.setPos(0.0F, -2.0F, 0.0F);
-        this.mountpiece.addBox(-2.0F, 4.0F, -2.0F, 4, 4, 4, 0.0F);
+    private static LayerDefinition createLayer() {
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
 
-        this.opticalTube.addChild(this.extension);
-        this.opticalTube.addChild(this.aperture_1);
-        this.opticalTube.addChild(this.aperture);
-        this.opticalTube.addChild(this.detail);
-        this.mountpiece.addChild(this.leg);
-        this.mountpiece.addChild(this.mountpiece_1);
+        PartDefinition mountpiece = root.addOrReplaceChild("mountpiece", CubeListBuilder.create()
+                .texOffs(0, 0)
+                .addBox(-2.0F, 4.0F, -2.0F, 4, 4, 4), PartPose.offset(0.0F, -2.0F, 0.0F));
+        mountpiece.addOrReplaceChild("leg", CubeListBuilder.create()
+                .texOffs(56, 0)
+                .addBox(-1.0F, -10.0F, -1.0F, 2, 36, 2), PartPose.offset(0.0F, 8.0F, 0.0F));
+        mountpiece.addOrReplaceChild("mountpiece_1", CubeListBuilder.create()
+                .texOffs(32, 0)
+                .addBox(-2.0F, 20.0F, -1.0F, 4, 6, 4), PartPose.offset(0.0F, 0.0F, -1.0F));
+
+        PartDefinition opticalTube = root.addOrReplaceChild("optical_tube", CubeListBuilder.create()
+                .texOffs(0, 0)
+                .addBox(0.0F, -2.0F, -14.0F, 4, 4, 24),
+                PartPose.offsetAndRotation(1.0F, -3.0F, 0.0F, -0.7853981633974483F, 0.0F, 0.0F));
+        opticalTube.addOrReplaceChild("extension", CubeListBuilder.create()
+                .texOffs(0, 12)
+                .addBox(-2.0F, -6.0F, 6.0F, 2, 6, 2), PartPose.ZERO);
+        opticalTube.addOrReplaceChild("aperture_1", CubeListBuilder.create()
+                .texOffs(28, 28)
+                .addBox(-1.0F, -3.0F, -6.0F, 6, 6, 2), PartPose.ZERO);
+        opticalTube.addOrReplaceChild("aperture", CubeListBuilder.create()
+                .texOffs(0, 28)
+                .addBox(-1.0F, -3.0F, -16.0F, 6, 6, 8), PartPose.ZERO);
+        opticalTube.addOrReplaceChild("detail", CubeListBuilder.create()
+                .texOffs(0, 8)
+                .addBox(1.0F, -1.0F, 10.0F, 2, 2, 2), PartPose.ZERO);
+
+        return LayerDefinition.create(mesh, 64, 64);
     }
 
     @Override
     public void render(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        this.mountpiece.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.opticalTube.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        int color = packColor(red, green, blue, alpha);
+        this.mountpiece.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, color);
+        this.opticalTube.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, color);
     }
 }

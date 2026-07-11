@@ -91,10 +91,10 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
-        Direction dir = context.getFace();
-        BlockPos pos = context.getBlockPos();
+        Direction dir = context.getClickedFace();
+        BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
-        ItemStack stack = context.getItem();
+        ItemStack stack = context.getItemInHand();
 
         if (level.isClientSide() || player == null || stack.isEmpty() || !(stack.getItem() instanceof ItemIlluminationWand)) {
             return InteractionResult.SUCCESS;

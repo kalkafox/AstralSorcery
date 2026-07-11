@@ -260,7 +260,7 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
         setAttributes(CrystalAttributes.getCrystalAttributes(pattern));
         this.crystalAttributes = CrystalAttributes.getCrystalAttributes(pattern);;
         this.collectorType = NBTHelper.readEnum(pattern, "collectorType", CollectorCrystalType.class);
-        this.playerUUID = NBTHelper.readOptional(pattern, "playerUUID", (nbt) -> nbt.getUniqueId("playerUUID"));
+        this.playerUUID = NBTHelper.readOptional(pattern, "playerUUID", (nbt) -> nbt.getUUID("playerUUID"));
     }
 
     @Override

@@ -97,7 +97,7 @@ public class FeatureGenerationConfig extends ConfigEntry {
 
         //TODO Structures..
         List<String> defaultWorlds = levels.stream()
-                .map(ResourceKey::getLocation)
+                .map(ResourceKey::location)
                 .map(ResourceLocation::getPath)
                 .collect(Collectors.toList());
         this.worldNames = cfgBuilder

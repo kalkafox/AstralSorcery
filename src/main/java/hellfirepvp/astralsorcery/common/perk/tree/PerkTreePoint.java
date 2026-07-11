@@ -17,7 +17,7 @@ import hellfirepvp.astralsorcery.client.screen.journal.perk.group.PerkPointRende
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.AllocationStatus;
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import hellfirepvp.astralsorcery.client.util.draw.BufferContext;
 import net.minecraft.util.Tuple;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -81,7 +81,7 @@ public class PerkTreePoint<T extends AbstractPerk> implements PerkRender {
         if (grp == null) {
             return new Rectangle.Float();
         }
-        BufferBuilder buf = drawCtx.getContext(grp);
+        BufferContext buf = drawCtx.getContext(grp);
 
         float size = renderSize * scale;
         Tuple<Float, Float> frameUV = tex.getUVOffset(spriteOffsetTick);

@@ -199,14 +199,124 @@ attributes auto-sync.
 - Custom `Rarity.create` values (`RARITY_CELESTIAL` etc.) still use the
   removed enum-extension API — open item-cluster follow-up.
 
+## Rendering infrastructure (done)
+
+The low-level vertex/buffer/render-type layer is on 1.21 APIs:
+
+- `RenderingUtils.draw(mode, format, fn)` keeps its immediate-mode shape but
+  now sets a core shader chosen by vertex format (`shaderFor`), begins via
+  `Tesselator.getInstance().begin`, and uploads the built `MeshData` with
+  `BufferUploader.drawWithShader` (or `RenderType.draw`). `refreshDrawing`
+  returns a fresh `BufferBuilder` — callers still ignoring the return value
+  compile but must be fixed when their files are ported.
+- `BufferContext` no longer extends `BufferBuilder`; it wraps a persistent
+  `ByteBufferBuilder` and a per-`begin()` `BufferBuilder`, implementing
+  `VertexConsumer`. Manual `sortVertexData` is gone — translucency sorting
+  must come from `sortOnUpload`/`MeshData.sortQuads` (runtime caveat for
+  `BatchRenderContext`, which previously distance-sorted quads per frame).
+- `RenderStateBuilder` wraps `RenderType.CompositeState.CompositeStateBuilder`.
+  Alpha-test, shade-model, and diffuse-lighting builder calls are no-ops
+  (removed fixed-function state; shaders handle these — alpha thresholds are
+  a runtime caveat). `RegistryRenderTypes.createType` injects a
+  shader-by-format state when none is set; `POSITION_COLOR_TEX` usages became
+  vanilla `POSITION_TEX_COLOR`, `ENTITY` -> `NEW_ENTITY`, and the custom
+  `POSITION_COLOR_TEX_NORMAL` aliases vanilla `POSITION_TEX_COLOR_NORMAL`
+  (its normal attribute is unused by the chosen shader). The depth-projection
+  type approximates the old GL texture-matrix/texgen trick with
+  `RenderSystem.setTextureMatrix` only.
+- `BatchedVertexList` uploads `MeshData` into a
+  `VertexBuffer(Usage.STATIC)` and renders via `drawWithShader`.
+- Resource layer: `AssetLibrary`/`AssetPreLoader` implement
+  `ResourceManagerReloadListener` (selective `IResourceType` reloads are
+  gone). `TextureManager.register/release` replace `loadTexture`/
+  `deleteTexture`; binds go through `RenderSystem.setShaderTexture`;
+  `NativeImage.Format`/`upload` replace `PixelFormat`/`uploadTextureSub`.
+- Mechanical sweep landed repo-wide: `VertexConsumer` chains ending in
+  `endVertex()` renamed (`vertex`->`addVertex`, `color`->`setColor`,
+  `tex`/`uv`->`setUv`, packed `uv2`/`lightmap`->`setLight`, two-arg ->
+  `setUv2`, `overlay`->`setOverlay`, `normal`->`setNormal`, `endVertex`
+  dropped); `GL11.GL_*` draw modes -> `VertexFormat.Mode.*` (plain GL lines
+  map to `DEBUG_LINES`/`DEBUG_LINE_STRIP`); removed `RenderSystem`
+  fixed-function toggles deleted; `color4f` -> `setShaderColor`;
+  `MultiBufferSource.Impl/getImpl/finish` -> `BufferSource/immediate/endBatch`;
+  `getStringPropertyWidth` -> `Font.width`; `LOCATION_BLOCKS_TEXTURE` ->
+  `LOCATION_BLOCKS`.
+- Item/block model rendering in `RenderingUtils` uses `ClientHooks
+  .handleCameraTransforms`, `ItemDisplayContext`, `IClientItemExtensions`
+  (custom renderer, font), NeoForge `getRenderPasses`, `putBulkData`,
+  `renderBatched`/`tesselateBlock` with `RandomSource`/`ModelData`, and
+  `IClientFluidTypeExtensions` for fluid still textures. `ItemEntity`
+  age/bob offset are set via `ReflectionHelper` (fields are private now).
+
+## Model classes (done)
+
+`client/model/builtin` and `client/model/armor` are on the 1.21 baked-part
+API: each model builds a static `LayerDefinition`
+(`MeshDefinition`/`CubeListBuilder`/`PartPose`) and bakes it in its
+constructor (`bakeRoot()` + `getChild`) — no `RegisterLayerDefinitions`
+event needed since these are hand-rendered `Model`s, not entity layers.
+`ModelPart.render` takes a packed ARGB color now; `CustomModel` keeps the
+old float-color `render(...)` entry point and bridges via
+`FastColor.ARGB32.colorFromFloat` (`packColor` helper). `ModelArmorMantle`
+can no longer swap `HumanoidModel`'s final body/arm/head fields for
+replacement parts; the humanoid skeleton is built with empty (cube-less)
+parts at vanilla pivots and the mantle geometry attached as children, with
+visibility flags handled in `renderToBuffer`. `ModelRefractionTable`'s 20
+frame parts are grouped under one `frame` parent part.
+
+## Entity renderers and sky (done)
+
+- Entity renderers take `EntityRendererProvider.Context`; the `IRenderFactory`
+  inner classes are gone and registration happens in
+  `EntityRenderersEvent.RegisterRenderers` (`RegistryEntities.initClient(event)`,
+  wired from `ClientProxy.onRegisterRenderers` on the mod bus, along with the
+  existing `BlockEntityRenderers.register` calls).
+- The starry player layers are added in `EntityRenderersEvent.AddLayers`
+  (iterating `PlayerSkin.Model`), replacing the old skin-map mutation in
+  client setup. `StarryLayerRenderer` builds its `PlayerModel`s from baked
+  `LayerDefinition`s, passes the `ModelManager` to the 1.21
+  `HumanoidArmorLayer` constructor, and renders with a packed ARGB color.
+- **Sky rendering**: `ISkyRenderHandler`/`setSkyRenderHandler` no longer exist.
+  `ChainingSkyRenderer` was deleted; `SkyRenderEventHandler.onRender` now
+  listens to `RenderLevelStageEvent` at `Stage.AFTER_SKY` and draws the astral
+  sky *on top of* the vanilla sky (runtime caveat: vanilla sun/moon/stars are
+  not suppressed — full replacement needs a custom `DimensionSpecialEffects`
+  registration). Fog tint uses `ViewportEvent.ComputeFogColor`.
+  `AstralSkyRenderer` no longer implements a handler interface; removed
+  `RenderSystem.enable/disableFog` (shader-driven now), `getSunriseColor`,
+  `getRainLevel`, `getSunAngle`, `getEyePosition`, and texture binds via
+  `RenderSystem.setShaderTexture`. `AstralSkyRendererSetup` no longer calls
+  `begin` (the `BatchedVertexList` provides an already-begun builder).
+- `ClientProxy` also lost the selective-reload language check (perk text
+  caches now clear on every resource reload).
+- Tile renderers: `ItemRenderer.renderStatic` (was `render`),
+  `ItemBlockRenderTypes.getRenderType(state, false)` (was `func_239221_b_`),
+  fluid tint via `IClientFluidTypeExtensions.getTintColor`.
+
+## Accessor and package residue sweep (done)
+
+- Removed stale `net.minecraft.util.text.*` imports and added explicit 1.21
+  imports for chat, interaction, block-state, position, and direction types.
+- Mechanical accessors now use the 1.21 names: equipment `getItemBySlot`,
+  player-list `getPlayer(UUID)`, entity `onGround`/`level`, player-event
+  `getEntity`, `ResourceKey.location`, dragon phase `getPhase`, and compound
+  tag `getUUID`/`hasUUID`.
+- Item/block contexts use `getClickedPos`, `getClickedFace`, and
+  `getItemInHand`; dispenser `BlockSource` uses `level`, `pos`, and
+  `blockEntity`.
+- `FluidStack.getType()` call sites now use `getFluid()`. Old fluid-attribute
+  and component/NBT APIs remain for their structural subsystem ports.
+
 ## Current compile boundary
 
 The registration mechanism itself compiles clean. After the member-name
-remap, `gradlew compileJava` (configured with `-Xmaxerrs 10000`) stops at
-structural 1.16 -> 1.21 API changes rather than naming: `Recipe<Container>`
-vs the new `RecipeInput` bound, creative tab construction, fluid
-attributes/`ForgeFlowingFluid`, the entity/block model class rewrite
-(`addBox`, `setRotationPoint`, `addChild`), vertex formats and
-`VertexConsumer` (`vertex` -> `addVertex`), and the systems built on those
-(world generation, rendering, items/creative tabs, datagen). Roughly 4,700
-errors across ~630 files remain at this point.
+remap and the rendering-infrastructure port, `gradlew compileJava`
+(configured with `-Xmaxerrs 10000`) stops at structural 1.16 -> 1.21 API
+changes rather than naming: the entity/block model class rewrite to
+`LayerDefinition` (`addBox`, `setRotationPoint`, `addChild`), screens on
+`GuiGraphics` (`setBlitOffset`, tooltip/font helpers), BER render
+signatures and the sky renderer (`ISkyRenderHandler` ->
+`DimensionSpecialEffects`), `Recipe<Container>` vs the new `RecipeInput`
+bound, fluid attributes/`ForgeFlowingFluid`, world generation, loot/datagen
+packages, and `.normal(Matrix3f, ...)` chain calls that now take a
+`PoseStack.Pose`. Roughly 3,027 errors across 525 files remain at this point.

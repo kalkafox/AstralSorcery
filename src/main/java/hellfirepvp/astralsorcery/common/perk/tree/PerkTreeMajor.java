@@ -16,7 +16,7 @@ import hellfirepvp.astralsorcery.client.screen.journal.perk.group.PerkPointHaloR
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.common.perk.AllocationStatus;
 import hellfirepvp.astralsorcery.common.perk.node.MajorPerk;
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import hellfirepvp.astralsorcery.client.util.draw.BufferContext;
 import net.minecraft.util.Tuple;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -57,7 +57,7 @@ public class PerkTreeMajor<T extends MajorPerk> extends PerkTreePoint<T> {
         if (grp == null) {
             return new Rectangle.Float();
         }
-        BufferBuilder buf = drawCtx.getContext(grp);
+        BufferContext buf = drawCtx.getContext(grp);
 
         float haloSize = getRenderSize() * 0.8F * scale;
         if (status.isAllocated()) {

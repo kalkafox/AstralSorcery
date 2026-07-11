@@ -32,7 +32,7 @@ public class EventHandlerBlockStorage {
     private static void onClickBlockServer(PlayerInteractEvent.LeftClickBlock event) {
         ItemStack held = event.getItemStack();
         if (!event.getLevel().isClientSide() && !held.isEmpty() && held.getItem() instanceof ItemBlockStorage) {
-            ItemBlockStorage.clearContainerFor(event.getPlayer());
+            ItemBlockStorage.clearContainerFor(event.getEntity());
         }
     }
 

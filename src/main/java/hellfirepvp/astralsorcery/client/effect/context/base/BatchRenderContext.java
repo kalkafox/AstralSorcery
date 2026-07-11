@@ -9,7 +9,6 @@
 package hellfirepvp.astralsorcery.client.effect.context.base;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.effect.EntityDynamicFX;
 import hellfirepvp.astralsorcery.client.effect.EntityVisualFX;
@@ -18,14 +17,10 @@ import hellfirepvp.astralsorcery.client.render.IDrawRenderTypeBuffer;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
-import hellfirepvp.astralsorcery.client.util.draw.RenderInfo;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.order.OrderSortable;
 import hellfirepvp.observerlib.client.util.RenderTypeDecorator;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -95,13 +90,9 @@ public class BatchRenderContext<T extends EntityVisualFX> extends OrderSortable 
 
         RenderType drawType = this.getRenderType();
         if (this.drawWithTexture) {
-            drawType = RenderTypeDecorator.wrapSetup(this.getRenderType(), () -> {
-                RenderSystem.enableTexture();
-                this.getSprite().bindTexture();
-            }, () -> {
-                BlockAtlasTexture.getInstance().bindTexture();
-                RenderSystem.disableTexture();
-            });
+            drawType = RenderTypeDecorator.wrapSetup(this.getRenderType(),
+                    () -> this.getSprite().bindTexture(),
+                    () -> BlockAtlasTexture.getInstance().bindTexture());
         }
         VertexConsumer buf = drawBuffer.getBuffer(drawType);
         effects.forEach(effect -> effect.getEffect().render(this, renderStack, buf, pTicks));
@@ -109,10 +100,8 @@ public class BatchRenderContext<T extends EntityVisualFX> extends OrderSortable 
     }
 
     private void drawBatched(VertexConsumer buf, IDrawRenderTypeBuffer renderTypeBuffer) {
-        if (buf instanceof BufferBuilder && this.getRenderType().mode() == GL11.GL_QUADS) {
-            Vec3 viewDistance = RenderInfo.getInstance().getARI().getPosition();
-            ((BufferBuilder) buf).sortVertexData((float) viewDistance.x, (float) viewDistance.y, (float) viewDistance.z);
-        }
+        // 1.21 port: manual sortVertexData is gone; translucency sorting happens via
+        // MeshData.sortQuads/sortOnUpload inside the buffer source when the RenderType requests it.
         renderTypeBuffer.draw();
     }
 

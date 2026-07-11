@@ -144,11 +144,11 @@ public class PrecisionSingleFluidTank implements IFluidTank {
     }
 
     public boolean canFillFluidType(FluidStack fluidStack) {
-        return canFill() && (this.fluid == Fluids.EMPTY || fluidStack.getType().equals(this.fluid));
+        return canFill() && (this.fluid == Fluids.EMPTY || fluidStack.getFluid().equals(this.fluid));
     }
 
     public boolean canDrainFluidType(FluidStack fluidStack) {
-        return canDrain() && (this.fluid != Fluids.EMPTY && fluidStack.getType().equals(this.fluid));
+        return canDrain() && (this.fluid != Fluids.EMPTY && fluidStack.getFluid().equals(this.fluid));
     }
 
     public float getPercentageFilled() {
@@ -164,7 +164,7 @@ public class PrecisionSingleFluidTank implements IFluidTank {
         int addable = Mth.floor(getMaxAddable(maxAdded));
         if (action.execute()) {
             if (addable > 0 && this.fluid == Fluids.EMPTY) {
-                setFluid(resource.getType());
+                setFluid(resource.getFluid());
             }
             addable -= addAmount(addable);
         }

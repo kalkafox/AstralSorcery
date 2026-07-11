@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.Component;
 
 import com.google.common.collect.Maps;
@@ -265,7 +267,7 @@ public class ScreenJournalProgression extends ScreenJournal {
         TexturesAS.TEX_GUI_TEXT_FIELD.bindTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, leftPos + 300, topPos + 16, this.getGuiZLevel(), 88.5F, 15).draw();
         });
         RenderSystem.disableBlend();
@@ -311,7 +313,7 @@ public class ScreenJournalProgression extends ScreenJournal {
             }
             renderStack.translate(-(width / 2F), -(height / 2F), 0);
             TexturesAS.TEX_GUI_BOOK_ARROWS.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 RenderingGuiUtils.rect(buf, renderStack, 0, 0, 0, width, height)
                         .tex(uFrom, vFrom, 0.5F, 0.5F)
                         .color(1F, 1F, 1F, 0.8F)
@@ -339,7 +341,7 @@ public class ScreenJournalProgression extends ScreenJournal {
             }
             renderStack.translate(-(width / 2F), -(height / 2F), 0);
             TexturesAS.TEX_GUI_BOOK_ARROWS.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 RenderingGuiUtils.rect(buf, renderStack, 0, 0, 0, width, height)
                         .tex(uFrom, vFrom, 0.5F, 0.5F)
                         .color(1F, 1F, 1F, 0.8F)

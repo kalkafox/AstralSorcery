@@ -67,7 +67,7 @@ public class KeyDisarm extends KeyPerk {
                         continue;
                     }
                     LivingEntity attacked = event.getEntity();
-                    ItemStack stack = attacked.getItemStackFromSlot(slot);
+                    ItemStack stack = attacked.getItemBySlot(slot);
                     if (!stack.isEmpty()) {
                         attacked.thunderHit(slot, ItemStack.EMPTY);
                         ItemUtils.dropItemNaturally(attacked.level(), attacked.getX(), attacked.getY(), attacked.getZ(), stack);

@@ -15,12 +15,11 @@ import hellfirepvp.astralsorcery.common.entity.EntitySpectralTool;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.client.registry.IRenderFactory;
 import com.mojang.math.Axis;
 
 /**
@@ -32,8 +31,8 @@ import com.mojang.math.Axis;
  */
 public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool> {
 
-    protected RenderEntitySpectralTool(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher);
+    public RenderEntitySpectralTool(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -44,7 +43,7 @@ public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool>
         }
 
         renderStack.pushPose();
-        renderStack.translate(0, entity.getHeight() / 2, 0);
+        renderStack.translate(0, entity.getBbHeight() / 2, 0);
         renderStack.mulPose(Axis.YP.rotationDegrees(-entityYaw - 90));
         if (stack.getItem() instanceof AxeItem) {
             renderStack.mulPose(Axis.XP.rotationDegrees(180));
@@ -58,14 +57,6 @@ public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool>
 
     @Override
     public ResourceLocation getTextureLocation(EntitySpectralTool entity) {
-        return TextureAtlas.LOCATION_BLOCKS_TEXTURE;
-    }
-
-    public static class Factory implements IRenderFactory<EntitySpectralTool> {
-
-        @Override
-        public EntityRenderer<? super EntitySpectralTool> createRenderFor(EntityRenderDispatcher manager) {
-            return new RenderEntitySpectralTool(manager);
-        }
+        return TextureAtlas.LOCATION_BLOCKS;
     }
 }

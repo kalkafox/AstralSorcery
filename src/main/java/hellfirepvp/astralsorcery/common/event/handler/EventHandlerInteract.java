@@ -43,8 +43,8 @@ public class EventHandlerInteract {
         ItemStack held = event.getItemStack();
         if (held.getItem() instanceof OverrideInteractItem) {
             OverrideInteractItem item = (OverrideInteractItem) held.getItem();
-            if (item.shouldInterceptEntityInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getTarget()) &&
-                    item.doEntityInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getTarget())) {
+            if (item.shouldInterceptEntityInteract(event.getSide(), event.getEntity(), event.getHand(), event.getTarget()) &&
+                    item.doEntityInteract(event.getSide(), event.getEntity(), event.getHand(), event.getTarget())) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);
             }
@@ -55,8 +55,8 @@ public class EventHandlerInteract {
         ItemStack held = event.getItemStack();
         if (held.getItem() instanceof OverrideInteractItem) {
             OverrideInteractItem item = (OverrideInteractItem) held.getItem();
-            if (item.shouldInterceptBlockInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getBlockPos(), event.getFace()) &&
-                    item.doBlockInteract(event.getSide(), event.getPlayer(), event.getHand(), event.getBlockPos(), event.getFace())) {
+            if (item.shouldInterceptBlockInteract(event.getSide(), event.getEntity(), event.getHand(), event.getPos(), event.getFace()) &&
+                    item.doBlockInteract(event.getSide(), event.getEntity(), event.getHand(), event.getPos(), event.getFace())) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);
             }
@@ -71,7 +71,7 @@ public class EventHandlerInteract {
         if (level.isClientSide() || !(event.getEntity() instanceof Player)) {
             return;
         }
-        handleOwnerPlacement(level, event.getBlockPos(), (Player) event.getEntity());
+        handleOwnerPlacement(level, event.getPos(), (Player) event.getEntity());
     }
 
     private static void onMultiPlace(BlockEvent.EntityMultiPlaceEvent event) {
@@ -81,7 +81,7 @@ public class EventHandlerInteract {
         }
         Player placer = (Player) event.getEntity();
         for (BlockSnapshot snapshot : event.getReplacedBlockSnapshots()) {
-            handleOwnerPlacement(level, snapshot.getBlockPos(), placer);
+            handleOwnerPlacement(level, snapshot.getPos(), placer);
         }
     }
 

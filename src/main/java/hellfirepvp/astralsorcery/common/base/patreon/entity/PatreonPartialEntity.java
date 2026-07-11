@@ -166,7 +166,7 @@ public class PatreonPartialEntity {
 
     public void save(CompoundTag cmp) {
         if (this.lastTickedDimension != null) {
-            cmp.putString("lastTickedDimension", this.lastTickedDimension.getLocation().toString());
+            cmp.putString("lastTickedDimension", this.lastTickedDimension.location().toString());
         }
         if (updatePos) {
             cmp.put("pos", NBTHelper.writeVector3(this.pos));

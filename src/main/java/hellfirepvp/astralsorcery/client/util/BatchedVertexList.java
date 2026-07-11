@@ -8,12 +8,14 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import org.lwjgl.opengl.GL11;
+import org.joml.Matrix4f;
 
 import java.util.function.Consumer;
 
@@ -39,30 +41,34 @@ public class BatchedVertexList {
             return;
         }
 
-        BufferBuilder buf = Tesselator.getInstance().getBuffer();
-        this.vbo = new VertexBuffer(this.vFormat);
+        BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, this.vFormat);
         batchFn.accept(buf);
-        buf.end();
-        this.vbo.upload(buf);
+        MeshData data = buf.build();
+        if (data != null) {
+            this.vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
+            this.vbo.bind();
+            this.vbo.upload(data);
+            VertexBuffer.unbind();
+        }
 
         this.initialized = true;
     }
 
     public void render(PoseStack renderStack) {
-        if (!this.initialized) {
+        if (!this.initialized || this.vbo == null) {
             return;
         }
 
-        this.vbo.bindBuffer();
-        this.vFormat.setupBufferState(0L);
-        this.vbo.draw(renderStack.last().pose(), GL11.GL_QUADS);
-        this.vFormat.clearBufferState();
+        Matrix4f modelView = new Matrix4f(RenderSystem.getModelViewMatrix()).mul(renderStack.last().pose());
+        this.vbo.bind();
+        this.vbo.drawWithShader(modelView, RenderSystem.getProjectionMatrix(), RenderingUtils.shaderFor(this.vFormat).get());
         VertexBuffer.unbind();
     }
 
     public void reset() {
         if (this.vbo != null) {
             this.vbo.close();
+            this.vbo = null;
         }
 
         this.initialized = false;

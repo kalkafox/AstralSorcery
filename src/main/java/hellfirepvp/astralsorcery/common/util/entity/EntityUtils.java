@@ -73,7 +73,7 @@ public class EntityUtils {
         if (server == null) {
             return null;
         }
-        return server.getPlayerList().getPlayerByUUID(playerUUID);
+        return server.getPlayerList().getPlayer(playerUUID);
     }
 
     @Nullable

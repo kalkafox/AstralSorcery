@@ -18,6 +18,7 @@ import hellfirepvp.astralsorcery.common.tile.base.TileFakedState;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

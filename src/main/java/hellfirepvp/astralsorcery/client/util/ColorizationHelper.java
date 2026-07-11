@@ -66,7 +66,7 @@ public class ColorizationHelper {
         if (stack.isEmpty()) {
             return Optional.empty();
         }
-        Fluid fluid = stack.getType();
+        Fluid fluid = stack.getFluid();
 
         if (!fluidColors.containsKey(fluid)) {
             TextureAtlasSprite tas = RenderingUtils.getParticleIcon(stack);

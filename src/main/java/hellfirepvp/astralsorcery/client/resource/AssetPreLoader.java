@@ -11,11 +11,7 @@ package hellfirepvp.astralsorcery.client.resource;
 import hellfirepvp.astralsorcery.client.registry.*;
 import hellfirepvp.astralsorcery.client.screen.journal.ScreenJournalPerkTree;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.neoforged.neoforge.resource.IResourceType;
-import net.neoforged.neoforge.resource.ISelectiveResourceReloadListener;
-import net.neoforged.neoforge.resource.VanillaResourceType;
-
-import java.util.function.Predicate;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,7 +20,7 @@ import java.util.function.Predicate;
  * Created by HellFirePvP
  * Date: 11.07.2019 / 20:29
  */
-public class AssetPreLoader implements ISelectiveResourceReloadListener {
+public class AssetPreLoader implements ResourceManagerReloadListener {
 
     public static final AssetPreLoader INSTANCE = new AssetPreLoader();
 
@@ -33,20 +29,18 @@ public class AssetPreLoader implements ISelectiveResourceReloadListener {
     private AssetPreLoader() {}
 
     @Override
-    public void onResourceManagerReload(ResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
-        if (resourcePredicate.test(VanillaResourceType.TEXTURES)) {
-            if (initialized) {
-                return;
-            }
-            RegistryTextures.loadTextures();
-            RegistrySprites.loadSprites();
-            RegistryRenderTypes.init();
-            RegistryEffectTemplates.init();
-            RegistryEffectTypes.init();
-            ScreenJournalPerkTree.refreshDrawBuffer();
-
-            initialized = true;
+    public void onResourceManagerReload(ResourceManager resourceManager) {
+        if (initialized) {
+            return;
         }
+        RegistryTextures.loadTextures();
+        RegistrySprites.loadSprites();
+        RegistryRenderTypes.init();
+        RegistryEffectTemplates.init();
+        RegistryEffectTypes.init();
+        ScreenJournalPerkTree.refreshDrawBuffer();
+
+        initialized = true;
     }
 
 }

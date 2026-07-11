@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.base.patreon.types;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -113,7 +115,7 @@ public class TypeBlockRing extends PatreonEffect {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void onRenderPost(RenderPlayerEvent.Post ev) {
-        Player player = ev.getPlayer();
+        Player player = ev.getEntity();
         if (!player.getUUID().equals(playerUUID)) {
             return;
         }
@@ -130,10 +132,8 @@ public class TypeBlockRing extends PatreonEffect {
             addedRotationAngle = (rot / ((float) (rotationSpeed))) * 360F + this.rotationPart * pTicks;
         }
 
-        RenderSystem.enableTexture();
         BlockAtlasTexture.getInstance().bindTexture();
 
-        RenderSystem.disableAlphaTest();
         RenderSystem.disableCull();
         RenderSystem.enableBlend();
         Blending.ADDITIVE_ALPHA.apply();
@@ -157,7 +157,7 @@ public class TypeBlockRing extends PatreonEffect {
                 renderStack.translate(dir.getX(), dir.getY(), dir.getZ());
                 renderStack.scale(0.09F, 0.09F, 0.09F);
 
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, buf -> {
+                RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, buf -> {
                     RenderingDrawUtils.renderTexturedCubeCentralColorLighted(buf, renderStack,
                             tas.getU0(), tas.getV0(),
                             tas.getU1() - tas.getU0(), tas.getV1() - tas.getV0(),
@@ -170,8 +170,6 @@ public class TypeBlockRing extends PatreonEffect {
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
         RenderSystem.enableCull();
-        RenderSystem.enableAlphaTest();
 
-        RenderSystem.disableTexture();
     }
 }

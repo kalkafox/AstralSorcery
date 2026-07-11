@@ -126,7 +126,7 @@ public class DataLightConnections extends AbstractData {
                 }
             }
 
-            pattern.put(dim.getLocation().toString(), dataList);
+            pattern.put(dim.location().toString(), dataList);
         }
     }
 
@@ -134,7 +134,7 @@ public class DataLightConnections extends AbstractData {
     public void writeDiffDataToPacket(CompoundTag pattern) {
         ListTag clearList = new ListTag();
         for (ResourceKey<Level> dim : this.dimensionClearBuffer) {
-            clearList.add(StringTag.valueOf(dim.getLocation().toString()));
+            clearList.add(StringTag.valueOf(dim.location().toString()));
         }
         pattern.put("clear", clearList);
 
@@ -153,7 +153,7 @@ public class DataLightConnections extends AbstractData {
                     connection.putBoolean("connect", tuple.getB());
                     list.add(connection);
                 }
-                pattern.put(dim.getLocation().toString(), list);
+                pattern.put(dim.location().toString(), list);
             }
         }
 

@@ -325,7 +325,7 @@ public class ActiveLiquidInfusionRecipe {
     @Nullable
     public Player tryGetCraftingPlayerServer() {
         MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
-        return srv.getPlayerList().getPlayerByUUID(this.getPlayerCraftingUUID());
+        return srv.getPlayerList().getPlayer(this.getPlayerCraftingUUID());
     }
 
     @Nullable
@@ -343,7 +343,7 @@ public class ActiveLiquidInfusionRecipe {
         }
         LiquidInfusion altarRecipe = (LiquidInfusion) recipe.get();
 
-        UUID uuidCraft = pattern.getUniqueId("playerCraftingUUID");
+        UUID uuidCraft = pattern.getUUID("playerCraftingUUID");
         int tick = pattern.getInt("ticksCrafting");
         ListTag chalices = pattern.getList("supportingChalices", Constants.NBT.TAG_COMPOUND);
 

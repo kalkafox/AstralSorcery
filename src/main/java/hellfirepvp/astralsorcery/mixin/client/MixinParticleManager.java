@@ -37,12 +37,11 @@ public class MixinParticleManager {
             at = @At("RETURN"),
             remap = false
     )
-    public void render(PoseStack matrixStack, MultiBufferSource.Impl buffer, LightTexture lightTexture, Camera ari, float pTicks, Frustum clippingHelper, CallbackInfo ci) {
+    public void render(PoseStack matrixStack, MultiBufferSource.BufferSource buffer, LightTexture lightTexture, Camera ari, float pTicks, Frustum clippingHelper, CallbackInfo ci) {
         EffectHandler.getInstance().render(matrixStack, pTicks);
 
         //Setup GL states again
         //Seriously, keep a clean GL state for once mojang.
-        RenderSystem.enableAlphaTest();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
                 GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         GlStateManager.enableDepthTest();

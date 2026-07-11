@@ -12,17 +12,14 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.sky.astral.AstralSkyRenderer;
 import hellfirepvp.astralsorcery.common.util.object.CacheReference;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.resource.IResourceType;
-import net.neoforged.neoforge.resource.ISelectiveResourceReloadListener;
-import net.neoforged.neoforge.resource.VanillaResourceType;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -32,7 +29,7 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 09.08.2016 / 11:00
  */
-public class AssetLibrary implements ISelectiveResourceReloadListener {
+public class AssetLibrary implements ResourceManagerReloadListener {
 
     public static AssetLibrary INSTANCE = new AssetLibrary();
     private static boolean fadeIn = false;
@@ -48,7 +45,7 @@ public class AssetLibrary implements ISelectiveResourceReloadListener {
     }
 
     public static AbstractRenderableTexture loadTexture(AssetLoader.TextureLocation location, String... path) {
-        String name = String.checkExceptions("/", path);
+        String name = String.join("/", path);
         if (name.endsWith(".png")) {
             throw new IllegalArgumentException("Tried to loadTexture with appended .png from the AssetLibrary!");
         }
@@ -77,8 +74,8 @@ public class AssetLibrary implements ISelectiveResourceReloadListener {
     }
 
     @Override
-    public void onResourceManagerReload(ResourceManager resourceManager, Predicate<IResourceType> resourcePredicate) {
-        if (fadeIn || !resourcePredicate.test(VanillaResourceType.TEXTURES)) {
+    public void onResourceManagerReload(ResourceManager resourceManager) {
+        if (fadeIn) {
             return;
         }
         fadeIn = true;

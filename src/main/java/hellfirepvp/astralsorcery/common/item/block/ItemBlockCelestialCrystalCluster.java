@@ -83,7 +83,7 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
     protected BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState toPlace = super.getStateForPlacement(context);
         if (toPlace != null) {
-            return toPlace.setValue(BlockCelestialCrystalCluster.STAGE, this.getDamage(context.getItem()));
+            return toPlace.setValue(BlockCelestialCrystalCluster.STAGE, this.getDamage(context.getItemInHand()));
         }
         return null;
     }

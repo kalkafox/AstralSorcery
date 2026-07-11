@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.effect;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
@@ -64,7 +66,7 @@ public abstract class EffectCustomTexture extends MobEffect {
         ssr.bindTexture();
 
         Tuple<Float, Float> uvTpl = ssr.getUVOffset(ClientScheduler.getClientTick());
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetX, offsetY, z, wh, wh)
                     .color(red, green, blue, 1F)
                     .tex(uvTpl.getA(), uvTpl.getB(), ssr.getUWidth(), ssr.getVWidth())
@@ -86,7 +88,7 @@ public abstract class EffectCustomTexture extends MobEffect {
         ssr.bindTexture();
 
         Tuple<Float, Float> uvTpl = ssr.getUVOffset(ClientScheduler.getClientTick());
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetX, offsetY, z, wh, wh)
                     .color(red, green, blue, 1F)
                     .tex(uvTpl.getA(), uvTpl.getB(), ssr.getUWidth(), ssr.getVWidth())

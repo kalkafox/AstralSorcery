@@ -148,8 +148,8 @@ public class TimeStopZone {
 
         if (e instanceof EnderDragon) {
             DragonPhaseInstance currentPhase = ((EnderDragon) e).getPhaseManager().getCurrentPhase();
-            if (currentPhase.getType() != EnderDragonPhase.HOLDING_PATTERN &&
-                    currentPhase.getType() != EnderDragonPhase.DYING) {
+            if (currentPhase.getPhase() != EnderDragonPhase.HOLDING_PATTERN &&
+                    currentPhase.getPhase() != EnderDragonPhase.DYING) {
                 ((EnderDragon) e).getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
             }
         }
@@ -171,7 +171,7 @@ public class TimeStopZone {
             if (!e.isAlive() || e.getHealth() <= 0) {
                 return false;
             }
-            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getType() == EnderDragonPhase.DYING) {
+            if (e instanceof EnderDragon && ((EnderDragon) e).getPhaseManager().getCurrentPhase().getPhase() == EnderDragonPhase.DYING) {
                 return false;
             }
             if (hasOwner && e.getId() == ownerId) {

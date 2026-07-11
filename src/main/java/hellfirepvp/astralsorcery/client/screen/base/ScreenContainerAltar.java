@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
@@ -61,10 +63,9 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
     protected void renderStarlightBar(PoseStack renderStack, int offsetX, int offsetZ, int width, int height) {
         TileAltar altar = this.getMenuProvider().getTileEntity();
 
-        RenderSystem.disableAlphaTest();
 
         TexturesAS.TEX_BLACK.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, leftPos + offsetX, topPos + offsetZ, this.getBlitOffset(), width, height)
                     .draw();
         });
@@ -85,7 +86,7 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
 
             int tick = altar.getTicksExisted();
             Tuple<Float, Float> uvOffset = spriteStarlight.getUVOffset(tick);
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 RenderingGuiUtils.rect(buf, renderStack, leftPos + offsetX, topPos + offsetZ, this.getBlitOffset(), (int) (width * percFilled), height)
                         .tex(uvOffset.getA(), uvOffset.getB(), spriteStarlight.getULength() * percFilled, spriteStarlight.getVLength())
                         .color(barColor)
@@ -103,7 +104,7 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
                         int from = (int) (width * percFilled);
                         int to = (int) (width * percReq);
 
-                        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+                        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                             RenderingGuiUtils.rect(buf, renderStack, leftPos + offsetX + from, topPos + offsetZ, this.getBlitOffset(), to, height)
                                     .tex(uvOffset.getA() + spriteStarlight.getULength() * percFilled, uvOffset.getB(), spriteStarlight.getULength() * percReq, spriteStarlight.getVLength())
                                     .color(0.2F, 0.5F, 1.0F, 0.4F)
@@ -113,7 +114,6 @@ public abstract class ScreenContainerAltar<T extends ContainerAltarBase> extends
                 }
             }
         }
-        RenderSystem.enableAlphaTest();
     }
 
     public abstract void renderGuiBackground(PoseStack renderStack, float a, int xpos, int ypos);

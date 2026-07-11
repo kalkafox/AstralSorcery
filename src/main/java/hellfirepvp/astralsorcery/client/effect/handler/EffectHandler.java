@@ -91,7 +91,7 @@ public final class EffectHandler {
             this.cleanRequested = false;
         }
 
-        Entity rView = Minecraft.getInstance().getRenderViewEntity();
+        Entity rView = Minecraft.getInstance().getCameraEntity();
         if (rView == null) {
             rView = Minecraft.getInstance().player;
         }

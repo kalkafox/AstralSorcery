@@ -137,7 +137,7 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     void onRender(RenderPlayerEvent.Post event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if (!shouldDoEffect(player)) {
             return;
         }

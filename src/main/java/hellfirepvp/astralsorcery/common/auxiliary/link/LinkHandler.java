@@ -177,7 +177,7 @@ public class LinkHandler implements ITickHandler {
         while (iterator.hasNext()) {
             UUID uuid = iterator.next();
             LinkSession user = players.get(uuid);
-            Player player = server.getPlayerList().getPlayerByUUID(uuid);
+            Player player = server.getPlayerList().getPlayer(uuid);
             if (player == null) {
                 iterator.remove();
                 continue;

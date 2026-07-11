@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -131,7 +133,6 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
     private void drawConstellationCell(PoseStack renderStack, float pTicks) {
         boolean canSeeSky = this.canObserverSeeSky(this.getTile().getBlockPos(), 1);
 
-        RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
 
@@ -143,7 +144,6 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
 
             Blending.DEFAULT.apply();
             RenderSystem.disableBlend();
-            RenderSystem.enableAlphaTest();
             return;
         }
 
@@ -159,7 +159,7 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
             this.setBlitOffset(-9);
             float starSize = 5F;
             TexturesAS.TEX_STAR_1.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 for (int i = 0; i < 72 + gen.nextInt(108); i++) {
                     float innerOffsetX = starSize + gen.nextFloat() * (guiWidth  - starSize * 2) + this.getGuiLeft();
                     float innerOffsetY = starSize + gen.nextFloat() * (guiHeight - starSize * 2) + this.getGuiTop();
@@ -207,7 +207,6 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
 
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
     }
 
     private void drawSkyBackground(PoseStack renderStack, float pTicks, boolean canSeeSky) {

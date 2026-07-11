@@ -51,7 +51,7 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
     }
 
     public void invalidateAndReload() {
-        Minecraft.getInstance().getTextureManager().deleteTexture(this.getKey());
+        Minecraft.getInstance().getTextureManager().release(this.getKey());
         this.resource = null;
     }
 
@@ -64,7 +64,7 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         if (resource != null) {
             return resource;
         }
-        mgr.loadTexture(this.getKey(), new SimpleTexture(ResourceLocation.parse(this.getPath())));
+        mgr.register(this.getKey(), new SimpleTexture(ResourceLocation.parse(this.getPath())));
         return mgr.getTexture(this.getKey());
     }
 
@@ -79,7 +79,7 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         if (this.resource == null) {
             return;
         }
-        RenderSystem.bindTexture(this.resource.getId());
+        RenderSystem.setShaderTexture(0, this.resource.getId());
     }
 
     @Override
@@ -87,9 +87,10 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         return new RenderStateShard.TextureStateShard(this.getKey(), false, false) {
             @Override
             public void setupRenderState() {
-                RenderSystem.enableTexture();
                 BindableResource.this.bindTexture();
-                BindableResource.this.resource.setBlurMipmap(false, false);
+                if (BindableResource.this.resource != null) {
+                    BindableResource.this.resource.setFilter(false, false);
+                }
             }
         };
     }

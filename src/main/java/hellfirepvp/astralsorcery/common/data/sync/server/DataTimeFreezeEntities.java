@@ -91,7 +91,7 @@ public class DataTimeFreezeEntities extends AbstractData {
         entities.forEach((dim, entityIds) -> {
             ListTag nbtEntities = new ListTag();
             entityIds.forEach(id -> nbtEntities.add(IntTag.valueOf(id)));
-            dimTag.put(dim.getLocation().toString(), nbtEntities);
+            dimTag.put(dim.location().toString(), nbtEntities);
         });
         out.put("dimTypes", dimTag);
     }

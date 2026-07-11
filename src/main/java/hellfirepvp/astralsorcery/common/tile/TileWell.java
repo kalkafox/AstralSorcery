@@ -153,7 +153,7 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
 
         if (tank.getType().isEmpty()) {
             tank.setFluid(produced);
-        } else if (!produced.equals(tank.getType().getType())) {
+        } else if (!produced.equals(tank.getType().getFluid())) {
             return;
         }
         tank.addAmount(gain);
@@ -190,7 +190,7 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
                 doCatalystEffect(color);
             }
         }
-        if (tank.getFluidAmount() > 0 && tank.getType().getType() instanceof FluidLiquidStarlight) {
+        if (tank.getFluidAmount() > 0 && tank.getType().getFluid() instanceof FluidLiquidStarlight) {
             BlockLiquidStarlight.playLiquidStarlightBlockEffect(random,
                     new Vector3(this).add(0, 0.4 + tank.getPercentageFilled() * 0.5, 0),
                     0.7F);

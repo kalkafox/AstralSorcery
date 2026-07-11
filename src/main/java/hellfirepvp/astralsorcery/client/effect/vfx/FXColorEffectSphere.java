@@ -61,7 +61,7 @@ public class FXColorEffectSphere extends EntityVisualFX {
         if (fadeDistance > 0) {
             this.alphaFadeMaxDist = fadeDistance;
             this.alpha1arg((fx, alpha, pTicks) -> {
-                Entity rView = Minecraft.getInstance().getRenderViewEntity();
+                Entity rView = Minecraft.getInstance().getCameraEntity();
                 if (rView == null) {
                     rView = Minecraft.getInstance().player;
                 }
@@ -99,9 +99,9 @@ public class FXColorEffectSphere extends EntityVisualFX {
         Vector3 pos = this.getCameraPosition(pTicks);
         pos.subtract(RenderingVectorUtils.getStandardTranslationRemovalVector(pTicks));
         for (SphereBuilder.TriangleFace face : this.sphereFaces) {
-            pos.clone().add(face.getV1()).drawPos(matr, vb).color(r, g, b, alpha).endVertex();
-            pos.clone().add(face.getV2()).drawPos(matr, vb).color(r, g, b, alpha).endVertex();
-            pos.clone().add(face.getV3()).drawPos(matr, vb).color(r, g, b, alpha).endVertex();
+            pos.clone().add(face.getV1()).drawPos(matr, vb).setColor(r, g, b, alpha);
+            pos.clone().add(face.getV2()).drawPos(matr, vb).setColor(r, g, b, alpha);
+            pos.clone().add(face.getV3()).drawPos(matr, vb).setColor(r, g, b, alpha);
         }
     }
 }

@@ -18,7 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.joml.Vector3f;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.world.item.ItemStack;
 import com.mojang.math.Axis;
@@ -47,7 +47,7 @@ public class RenderRefractionTable extends CustomTileEntityRenderer<TileRefracti
             renderStack.translate(0.5F, 0.85F, 0.5F);
             renderStack.scale(0.625F, 0.625F, 0.625F);
 
-            Minecraft.getInstance().getItemRenderer().render(from, ItemTransforms.TransformType.GROUND, combinedLight, combinedOverlay, renderStack, renderTypeBuffer);
+            Minecraft.getInstance().getItemRenderer().renderStatic(from, ItemDisplayContext.GROUND, combinedLight, combinedOverlay, renderStack, renderTypeBuffer, tile.getLevel(), 0);
 
             renderStack.popPose();
         }

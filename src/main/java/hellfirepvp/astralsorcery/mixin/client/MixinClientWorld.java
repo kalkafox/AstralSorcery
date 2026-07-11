@@ -34,7 +34,7 @@ public class MixinClientWorld {
         Level level = (Level)(Object) this;
 
         WorldContext ctx = SkyHandler.getContext(level, LogicalSide.CLIENT);
-        String strDimKey = level.dimension().getLocation().toString();
+        String strDimKey = level.dimension().location().toString();
         if (ctx != null &&
                 RenderingConfig.CONFIG.dimensionsWithSkyRendering.get().contains(strDimKey) &&
                 ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {

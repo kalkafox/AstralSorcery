@@ -88,7 +88,7 @@ public class CelestialGatewayFilter {
         try {
             ListTag list = new ListTag();
             for (ResourceKey<Level> dimType : cache) {
-                list.add(StringTag.valueOf(dimType.getLocation().toString()));
+                list.add(StringTag.valueOf(dimType.location().toString()));
             }
             CompoundTag cmp = new CompoundTag();
             cmp.put("list", list);

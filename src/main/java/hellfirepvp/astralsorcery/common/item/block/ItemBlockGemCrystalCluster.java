@@ -50,7 +50,7 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
     protected BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState toPlace = super.getStateForPlacement(context);
         if (toPlace != null) {
-            return toPlace.setValue(BlockGemCrystalCluster.STAGE, this.getGrowthStage(context.getItem()));
+            return toPlace.setValue(BlockGemCrystalCluster.STAGE, this.getGrowthStage(context.getItemInHand()));
         }
         return null;
     }

@@ -9,8 +9,6 @@
 package hellfirepvp.astralsorcery.client.sky.astral;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Random;
 
@@ -34,10 +32,10 @@ class AstralSkyRendererSetup {
     }
 
     private static void prepareSky(BufferBuilder buf, float offsetY, boolean flip) {
+        // 1.21 port: the buffer arrives already begun by BatchedVertexList.batch
         int scale = 64;
         int bodyCubes = 6;
         int width = bodyCubes * scale;
-        buf.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION);
 
         for (int x = -width; x <= width; x += scale) {
             for (int z = -width; z <= width; z += scale) {
@@ -48,17 +46,15 @@ class AstralSkyRendererSetup {
                     x0 = (float) (x + scale);
                 }
 
-                buf.vertex(x0, offsetY, z).endVertex();
-                buf.vertex(x1, offsetY, z).endVertex();
-                buf.vertex(x1, offsetY, z + scale).endVertex();
-                buf.vertex(x0, offsetY, z + scale).endVertex();
+                buf.addVertex(x0, offsetY, z);
+                buf.addVertex(x1, offsetY, z);
+                buf.addVertex(x1, offsetY, z + scale);
+                buf.addVertex(x0, offsetY, z + scale);
             }
         }
     }
 
     static void createStars(BufferBuilder starBuffer, int amount, float sizeMultiplier) {
-        starBuffer.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX);
-
         for (int i = 0; i < amount; ++i) { //Amount of stars.
             double x = -1F + RAND.nextFloat() * 2F;
             double y = -1F + RAND.nextFloat() * 2F;
@@ -107,9 +103,9 @@ class AstralSkyRendererSetup {
                     double d26 = d22 * d9 + d24 * d10;
 
                     starBuffer
-                            .vertex(d5 + d25, d6 + d23, d7 + d26)
-                            .tex(((j + 1) & 2) >> 1, ((j + 2) & 2) >> 1)
-                            .endVertex();
+                            .addVertex((float) (d5 + d25), (float) (d6 + d23), (float) (d7 + d26))
+                            .setUv(((j + 1) & 2) >> 1, ((j + 2) & 2) >> 1)
+                            ;
                 }
             }
         }

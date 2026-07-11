@@ -121,7 +121,7 @@ public class ScreenJournalPages extends ScreenJournal implements NavigationArrow
 
         //Headline
         if (this.currentPageOffset == 0) {
-            int width = font.getStringPropertyWidth(this.getTitle());
+            int width = font.width(this.getTitle());
 
             renderStack.pushPose();
             renderStack.translate(leftPos + 117, topPos + 22, this.getGuiZLevel());

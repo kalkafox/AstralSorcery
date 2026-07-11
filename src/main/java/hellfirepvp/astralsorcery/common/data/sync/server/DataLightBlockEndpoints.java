@@ -105,7 +105,7 @@ public class DataLightBlockEndpoints extends AbstractData {
                 dataList.add(cmp);
             }
 
-            pattern.put(dim.getLocation().toString(), dataList);
+            pattern.put(dim.location().toString(), dataList);
         }
     }
 
@@ -113,7 +113,7 @@ public class DataLightBlockEndpoints extends AbstractData {
     public void writeDiffDataToPacket(CompoundTag pattern) {
         ListTag clearList = new ListTag();
         for (ResourceKey<Level> dim : this.dimensionClearBuffer) {
-            clearList.add(StringTag.valueOf(dim.getLocation().toString()));
+            clearList.add(StringTag.valueOf(dim.location().toString()));
         }
         pattern.put("clear", clearList);
 
@@ -132,7 +132,7 @@ public class DataLightBlockEndpoints extends AbstractData {
                 dataList.add(cmp);
             }
 
-            pattern.put(dim.getLocation().toString(), dataList);
+            pattern.put(dim.location().toString(), dataList);
         }
 
         this.dimensionClearBuffer.clear();

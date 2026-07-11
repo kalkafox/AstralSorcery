@@ -44,7 +44,7 @@ public abstract class ItemUsableDust extends Item implements DispenseItemBehavio
         if (!ctx.getLevel().isClientSide()) {
             if (this.rightClickBlock(ctx)) {
                 if (!ctx.getPlayer().isCreative()) {
-                    ctx.getItem().shrink(1);
+                    ctx.getItemInHand().shrink(1);
                 }
             }
         }

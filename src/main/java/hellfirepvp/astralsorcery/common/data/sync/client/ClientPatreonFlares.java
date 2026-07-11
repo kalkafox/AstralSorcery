@@ -69,14 +69,14 @@ public class ClientPatreonFlares extends ClientData<ClientPatreonFlares> {
             for (Tag iNBT : entities) {
                 CompoundTag tag = (CompoundTag) iNBT;
 
-                UUID playerUUID = tag.getUniqueId("playerUUID");
+                UUID playerUUID = tag.getUUID("playerUUID");
                 Set<PatreonPartialEntity> entitySet = new HashSet<>();
 
                 ListTag entityList = tag.getList("entityList", Constants.NBT.TAG_COMPOUND);
                 for (Tag iEntityTag : entityList) {
                     CompoundTag entityNBT = (CompoundTag) iEntityTag;
 
-                    UUID effectUUID = entityNBT.getUniqueId("id");
+                    UUID effectUUID = entityNBT.getUUID("id");
                     PatreonEffect effect = PatreonEffectHelper.getPatreonEffects(LogicalSide.CLIENT, playerUUID)
                             .stream()
                             .filter(eff -> eff.getEffectUUID().equals(effectUUID))
@@ -103,14 +103,14 @@ public class ClientPatreonFlares extends ClientData<ClientPatreonFlares> {
             for (Tag iNBT : entities) {
                 CompoundTag tag = (CompoundTag) iNBT;
 
-                UUID playerUUID = tag.getUniqueId("playerUUID");
+                UUID playerUUID = tag.getUUID("playerUUID");
                 Set<PatreonPartialEntity> entitySet = data.entitiesClient.computeIfAbsent(playerUUID, p -> new HashSet<>());
 
                 ListTag entityList = tag.getList("entityList", Constants.NBT.TAG_COMPOUND);
                 for (Tag iEntityTag : entityList) {
                     CompoundTag entityNBT = (CompoundTag) iEntityTag;
 
-                    UUID effectUUID = entityNBT.getUniqueId("id");
+                    UUID effectUUID = entityNBT.getUUID("id");
                     PatreonEffect effect = PatreonEffectHelper.getPatreonEffects(LogicalSide.CLIENT, playerUUID)
                             .stream()
                             .filter(eff -> eff.getEffectUUID().equals(effectUUID))
@@ -138,7 +138,7 @@ public class ClientPatreonFlares extends ClientData<ClientPatreonFlares> {
             for (Tag iNBT : removals) {
                 CompoundTag tag = (CompoundTag) iNBT;
 
-                UUID playerUUID = tag.getUniqueId("playerUUID");
+                UUID playerUUID = tag.getUUID("playerUUID");
                 data.entitiesClient.remove(playerUUID);
             }
         }

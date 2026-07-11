@@ -106,7 +106,7 @@ public class BlockMarblePillar extends BlockMarbleTemplate implements SimpleWate
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        BlockPos blockpos = ctx.getBlockPos();
+        BlockPos blockpos = ctx.getClickedPos();
         Level level = ctx.getLevel();
         FluidState ifluidstate = level.getFluidState(blockpos);
         return this.getThisState(level, blockpos).setValue(WATERLOGGED, ifluidstate.getType() == Fluids.WATER);

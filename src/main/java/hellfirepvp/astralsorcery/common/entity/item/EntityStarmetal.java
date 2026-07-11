@@ -111,9 +111,9 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
 
     @Override
     public void tick() {
-        boolean onGround = this.isOnGround();
+        boolean onGround = this.onGround();
         super.tick();
-        if (this.isOnGround() != onGround) {
+        if (this.onGround() != onGround) {
             refreshDimensions();
         }
     }
@@ -129,7 +129,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
 
     @Override
     public EntityDimensions getSize(Pose poseIn) {
-        if (!this.isOnGround()) {
+        if (!this.onGround()) {
             return EntityType.ITEM.getSize();
         }
         return this.getType().getSize();

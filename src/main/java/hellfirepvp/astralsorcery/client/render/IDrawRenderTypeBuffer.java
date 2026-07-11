@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.render;
 
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -27,10 +29,10 @@ public interface IDrawRenderTypeBuffer extends MultiBufferSource {
     public void draw(RenderType type);
 
     public static IDrawRenderTypeBuffer defaultBuffer() {
-        return of(MultiBufferSource.getImpl(Tesselator.getInstance().getBuffer()));
+        return of(MultiBufferSource.immediate(new ByteBufferBuilder(256)));
     }
 
-    public static IDrawRenderTypeBuffer of(MultiBufferSource.Impl drawBuffer) {
+    public static IDrawRenderTypeBuffer of(MultiBufferSource.BufferSource drawBuffer) {
         return new IDrawRenderTypeBuffer() {
             @Override
             public void draw() {

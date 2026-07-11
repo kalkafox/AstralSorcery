@@ -78,13 +78,13 @@ public class MantleEffectOctans extends MantleEffect {
     }
 
     private void handleUnderwaterBreakSpeed(PlayerEvent.BreakSpeed event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         if (player.areEyesInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(player)) {
             LogicalSide direction = player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
             MantleEffectOctans octans = ItemMantle.getEffect(player, ConstellationsAS.octans);
             if (octans != null && AlignmentChargeHandler.INSTANCE.hasCharge(player, direction, CONFIG.chargeCostPerBreakSpeed.get())) {
                 //Grab helmet
-                ItemStack existing = player.getItemStackFromSlot(EquipmentSlot.HEAD);
+                ItemStack existing = player.getItemBySlot(EquipmentSlot.HEAD);
 
                 //Set aqua affinity
                 ItemStack st = new ItemStack(Items.LEATHER_HELMET);
@@ -93,7 +93,7 @@ public class MantleEffectOctans extends MantleEffect {
 
                 //Recalc breakspeed
                 EventFlags.CHECK_UNDERWATER_BREAK_SPEED.executeWithFlag(() -> {
-                    event.setNewSpeed(player.getDigSpeed(event.getState(), event.getBlockPos()));
+                    event.setNewSpeed(player.getDigSpeed(event.getState(), event.getPosition().orElse(player.blockPosition())));
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, direction, CONFIG.chargeCostPerBreakSpeed.get(), false);
                 });
 

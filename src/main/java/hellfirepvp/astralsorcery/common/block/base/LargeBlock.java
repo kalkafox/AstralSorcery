@@ -26,7 +26,7 @@ public interface LargeBlock {
     public AABB getBlockSpace();
 
     default public boolean canPlaceAt(BlockPlaceContext ctx) {
-        BlockPos pos = ctx.getBlockPos();
+        BlockPos pos = ctx.getClickedPos();
         Level level = ctx.getLevel();
         AABB box = this.getBlockSpace();
 

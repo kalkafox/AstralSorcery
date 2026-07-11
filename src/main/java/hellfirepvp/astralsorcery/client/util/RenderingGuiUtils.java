@@ -13,12 +13,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.screen.base.WidthHeightScreen;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.util.Tuple;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
 
@@ -35,7 +34,7 @@ public class RenderingGuiUtils {
 
     @Deprecated
     public static void drawTexturedRectAtCurrentPos(float width, float height, float blitOffset, float uFrom, float vFrom, float uWidth, float vWidth) {
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             rect(buf, 0, 0, blitOffset, width, height)
                     .tex(uFrom, vFrom, uWidth, vWidth)
                     .draw();
@@ -53,7 +52,7 @@ public class RenderingGuiUtils {
     }
 
     public static void drawRect(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float width, float height) {
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             rect(buf, renderStack, offsetX, offsetY, blitOffset, width, height)
                     .draw();
         });
@@ -74,7 +73,7 @@ public class RenderingGuiUtils {
     }
 
     public static void drawTexturedRect(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float width, float height, float uFrom, float vFrom, float uWidth, float vWidth) {
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             rect(buf, renderStack, offsetX, offsetY, blitOffset, width, height)
                     .tex(uFrom, vFrom, uWidth, vWidth)
                     .draw();
@@ -182,10 +181,10 @@ public class RenderingGuiUtils {
             int b = this.color.getBlue();
             int a = this.color.getAlpha();
             Matrix4f offset = this.renderStack.last().pose();
-            buf.vertex(offset, offsetX,         offsetY + height, offsetZ).color(r, g, b, a).tex(u, v + vWidth).endVertex();
-            buf.vertex(offset, offsetX + width, offsetY + height, offsetZ).color(r, g, b, a).tex(u + uWidth, v + vWidth).endVertex();
-            buf.vertex(offset, offsetX + width, offsetY,          offsetZ).color(r, g, b, a).tex(u + uWidth, v).endVertex();
-            buf.vertex(offset, offsetX,         offsetY,          offsetZ).color(r, g, b, a).tex(u, v).endVertex();
+            buf.addVertex(offset, offsetX,         offsetY + height, offsetZ).setColor(r, g, b, a).setUv(u, v + vWidth);
+            buf.addVertex(offset, offsetX + width, offsetY + height, offsetZ).setColor(r, g, b, a).setUv(u + uWidth, v + vWidth);
+            buf.addVertex(offset, offsetX + width, offsetY,          offsetZ).setColor(r, g, b, a).setUv(u + uWidth, v);
+            buf.addVertex(offset, offsetX,         offsetY,          offsetZ).setColor(r, g, b, a).setUv(u, v);
             return this;
         }
     }

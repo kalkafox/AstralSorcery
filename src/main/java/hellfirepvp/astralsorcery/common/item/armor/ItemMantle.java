@@ -168,7 +168,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
         if (entity == null) {
             return null;
         }
-        ItemStack stack = entity.getItemStackFromSlot(EquipmentSlot.CHEST);
+        ItemStack stack = entity.getItemBySlot(EquipmentSlot.CHEST);
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemMantle)) {
             return null;
         }

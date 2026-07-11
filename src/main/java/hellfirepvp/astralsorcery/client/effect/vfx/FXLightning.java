@@ -160,13 +160,13 @@ public class FXLightning extends EntityVisualFX {
 
         Matrix4f matr = renderStack.last().pose();
         Vector3 vec = from.clone().add(perpFrom.clone().mul(-1));
-        vec.drawPos(matr, buf).color(r, g, b, a).tex(1, 1).endVertex();
+        vec.drawPos(matr, buf).setColor(r, g, b, a).setUv(1, 1);
         vec = from.clone().add(perpFrom);
-        vec.drawPos(matr, buf).color(r, g, b, a).tex(1, 0).endVertex();
+        vec.drawPos(matr, buf).setColor(r, g, b, a).setUv(1, 0);
         vec = to.clone().add(perpTo);
-        vec.drawPos(matr, buf).color(r, g, b, a).tex(0, 0).endVertex();
+        vec.drawPos(matr, buf).setColor(r, g, b, a).setUv(0, 0);
         vec = to.clone().add(perpTo.clone().mul(-1));
-        vec.drawPos(matr, buf).color(r, g, b, a).tex(0, 1).endVertex();
+        vec.drawPos(matr, buf).setColor(r, g, b, a).setUv(0, 1);
     }
 
     @Override

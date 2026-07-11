@@ -78,7 +78,7 @@ public class DataTimeFreezeEffects extends AbstractData {
             for (TimeStopEffectHelper effect : this.serverActiveFreezeZones.get(dim)) {
                 list.add(effect.serializeNBT());
             }
-            dimTag.put(dim.getLocation().toString(), list);
+            dimTag.put(dim.location().toString(), list);
         }
         pattern.put("dimTypes", dimTag);
     }
@@ -110,7 +110,7 @@ public class DataTimeFreezeEffects extends AbstractData {
         private CompoundTag serializeNBT() {
             CompoundTag out = new CompoundTag();
             out.putInt("type", type.ordinal());
-            out.putString("dimType", this.dim.getLocation().toString());
+            out.putString("dimType", this.dim.location().toString());
             switch (type) {
                 case ADD:
                 case REMOVE:

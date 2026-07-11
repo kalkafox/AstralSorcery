@@ -64,12 +64,12 @@ public class EventHandlerMisc {
         if (event.getLevel().isClientSide()) {
             return;
         }
-        LecternBlockEntity lectern = MiscUtils.getTileAt(event.getLevel(), event.getBlockPos(), LecternBlockEntity.class, false);
+        LecternBlockEntity lectern = MiscUtils.getTileAt(event.getLevel(), event.getPos(), LecternBlockEntity.class, false);
         if (lectern != null) {
             ItemStack contained = lectern.getBook();
             if (contained.getItem() instanceof ItemTome) {
                 event.setCanceled(true);
-                AstralSorcery.getProxy().openGui(event.getPlayer(), GuiType.TOME);
+                AstralSorcery.getProxy().openGui(event.getEntity(), GuiType.TOME);
             }
         }
     }

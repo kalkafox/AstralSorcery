@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.math.*;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
@@ -74,15 +75,15 @@ public class AttributeTypeMiningSize extends PerkAttributeType {
                     BlockHitResult brtr = MiscUtils.rayTraceLookBlock(player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.NONE);
                     if (brtr != null && brtr.getType() == HitResult.Type.BLOCK) {
                         int levelBroken = event.getState().getLevel();
-                        float hardnessBroken = event.getState().getDestroySpeed(level, event.getBlockPos());
+                        float hardnessBroken = event.getState().getDestroySpeed(level, event.getPos());
                         BlockPredicate miningTest = (worldIn, posIn, stateIn) ->
                                 stateIn.getLevel() <= levelBroken &&
                                         stateIn.getDestroySpeed(worldIn, posIn) <= hardnessBroken;
                         Direction dir = brtr.getFace();
                         if (dir.getAxis() == Direction.Axis.Y) {
-                            this.breakBlocksPlaneHorizontal((ServerPlayer) player, dir, (Level) level, event.getBlockPos(), miningTest, Mth.floor(size));
+                            this.breakBlocksPlaneHorizontal((ServerPlayer) player, dir, (Level) level, event.getPos(), miningTest, Mth.floor(size));
                         } else {
-                            this.breakBlocksPlaneVertical((ServerPlayer) player, dir, (Level) level, event.getBlockPos(), miningTest, Mth.floor(size));
+                            this.breakBlocksPlaneVertical((ServerPlayer) player, dir, (Level) level, event.getPos(), miningTest, Mth.floor(size));
                         }
                     }
                 }

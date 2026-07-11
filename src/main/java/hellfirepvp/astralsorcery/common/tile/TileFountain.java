@@ -167,7 +167,7 @@ public class TileFountain extends TileEntityTick {
                 TileChalice chalice = MiscUtils.getTileAt(level, pos.above(), TileChalice.class, false);
                 if (chalice != null) {
                     FluidStack fluid = chalice.getTank().drain(400, IFluidHandler.FluidAction.SIMULATE);
-                    if (!fluid.isEmpty() && fluid.getType() instanceof FluidLiquidStarlight) {
+                    if (!fluid.isEmpty() && fluid.getFluid() instanceof FluidLiquidStarlight) {
                         FluidStack drained = chalice.getTank().drain(new FluidStack(fluid, 400), IFluidHandler.FluidAction.EXECUTE);
                         this.mbLiquidStarlight += drained.getAmount();
                         this.markForUpdate();

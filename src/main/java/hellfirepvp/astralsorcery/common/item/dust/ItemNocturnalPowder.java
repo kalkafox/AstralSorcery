@@ -29,11 +29,11 @@ public class ItemNocturnalPowder extends ItemUsableDust {
 
     @Override
     boolean dispense(BlockSource dispenser) {
-        BlockPos at = dispenser.getBlockPos();
+        BlockPos at = dispenser.pos();
         Direction face = dispenser.getBlockState().get(DispenserBlock.FACING);
-        EntityNocturnalSpark nocSpark = new EntityNocturnalSpark(at.getX(), at.getY(), at.getZ(), dispenser.getLevel());
+        EntityNocturnalSpark nocSpark = new EntityNocturnalSpark(at.getX(), at.getY(), at.getZ(), dispenser.level());
         nocSpark.shoot(face.getXOffset(), face.getMyRidingOffset() + 0.1F, face.getZOffset(), 0.7F, 0.9F);
-        return dispenser.getLevel().addEntity(nocSpark);
+        return dispenser.level().addFreshEntity(nocSpark);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class ItemNocturnalPowder extends ItemUsableDust {
 
     @Override
     boolean rightClickBlock(UseOnContext ctx) {
-        BlockPos pos = ctx.getBlockPos().offset(ctx.getFace());
+        BlockPos pos = ctx.getClickedPos().offset(ctx.getClickedFace());
         EntityNocturnalSpark noc = new EntityNocturnalSpark(ctx.getPlayer(), ctx.getLevel());
         noc.setPosition(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
         noc.setSpawning();

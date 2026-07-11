@@ -81,12 +81,12 @@ public class WorldNetworkHandler {
                 IPrismTransmissionNode node = getTransmissionNode(source.getA());
                 if (node == null) {
                     AstralSorcery.log.warn("Didn't find a TransmissionNode at a position that's supposed to be a source!");
-                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().getLocation() + " at " + source.getA());
+                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().location() + " at " + source.getA());
                     continue;
                 }
                 if (!(node instanceof ITransmissionSource)) {
                     AstralSorcery.log.warn("Found TransmissionNode that isn't a source at a source position!");
-                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().getLocation() + " at " + source.getA());
+                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().location() + " at " + source.getA());
                     continue;
                 }
                 ITransmissionSource sourceNode = (ITransmissionSource) node;
@@ -111,12 +111,12 @@ public class WorldNetworkHandler {
                 IPrismTransmissionNode node = getTransmissionNode(source.getA());
                 if (node == null) {
                     AstralSorcery.log.warn("Didn't find a TransmissionNode at a position that's supposed to be a source!");
-                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().getLocation() + " at " + source.getA());
+                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().location() + " at " + source.getA());
                     continue;
                 }
                 if (!(node instanceof ITransmissionSource)) {
                     AstralSorcery.log.warn("Found TransmissionNode that isn't a source at a source position!");
-                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().getLocation() + " at " + source.getA());
+                    AstralSorcery.log.warn("Details: Dim=" + getLevel().dimension().location() + " at " + source.getA());
                     continue;
                 }
                 ITransmissionSource sourceNode = (ITransmissionSource) node;

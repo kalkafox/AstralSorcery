@@ -177,7 +177,7 @@ public class DynamicAttributeModifier extends PerkAttributeModifier {
         if (attrType == null) {
             return null;
         }
-        UUID id = tag.getUniqueId("id");
+        UUID id = tag.getUUID("id");
         ModifierType mode = ModifierType.values()[tag.getInt("mode")];
         float val = tag.getFloat("baseValue");
         return new DynamicAttributeModifier(id, attrType, mode, val);

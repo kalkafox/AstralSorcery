@@ -11,13 +11,10 @@ package hellfirepvp.astralsorcery.client.render.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.common.entity.item.EntityItemHighlighted;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.neoforged.fml.client.registry.IRenderFactory;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,8 +25,8 @@ import net.neoforged.fml.client.registry.IRenderFactory;
  */
 public class RenderEntityItemHighlighted extends ItemEntityRenderer {
 
-    protected RenderEntityItemHighlighted(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, Minecraft.getInstance().getItemRenderer());
+    public RenderEntityItemHighlighted(EntityRendererProvider.Context context) {
+        super(context);
     }
 
     @Override
@@ -44,13 +41,5 @@ public class RenderEntityItemHighlighted extends ItemEntityRenderer {
         }
 
         super.render(entity, entityYaw, a, renderStack, buffer, packedLight);
-    }
-
-    public static class Factory implements IRenderFactory<EntityItemHighlighted> {
-
-        @Override
-        public EntityRenderer<? super EntityItemHighlighted> createRenderFor(EntityRenderDispatcher manager) {
-            return new RenderEntityItemHighlighted(manager);
-        }
     }
 }

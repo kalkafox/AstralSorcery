@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.common.util.reflection;
 
 import net.minecraft.world.entity.item.ItemEntity;
-import net.neoforged.fml.common.ObfuscationReflectionHelper;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
@@ -29,6 +29,8 @@ import java.util.function.Function;
 public class ReflectionHelper {
 
     private static BiConsumer<ItemEntity, Boolean> itemEntitySkipPhysicRenderer;
+    private static BiConsumer<ItemEntity, Integer> itemEntityAge;
+    private static BiConsumer<ItemEntity, Float> itemEntityBobOffset;
 
     public static void setSkipItemPhysicsRender(ItemEntity entity) {
         if (itemEntitySkipPhysicRenderer == null) {
@@ -36,6 +38,22 @@ public class ReflectionHelper {
         }
 
         itemEntitySkipPhysicRenderer.accept(entity, true);
+    }
+
+    public static void setItemEntityAge(ItemEntity entity, int age) {
+        if (itemEntityAge == null) {
+            itemEntityAge = getFieldSetter(ItemEntity.class, "age", Field::setInt);
+        }
+
+        itemEntityAge.accept(entity, age);
+    }
+
+    public static void setItemEntityBobOffset(ItemEntity entity, float bobOffset) {
+        if (itemEntityBobOffset == null) {
+            itemEntityBobOffset = getFieldSetter(ItemEntity.class, "bobOffs", Field::setFloat);
+        }
+
+        itemEntityBobOffset.accept(entity, bobOffset);
     }
 
     private static <T, V> BiConsumer<T, V> getFieldSetter(Class<T> owningClass, String fieldName, FieldSetter<T, V> fieldSetter) {

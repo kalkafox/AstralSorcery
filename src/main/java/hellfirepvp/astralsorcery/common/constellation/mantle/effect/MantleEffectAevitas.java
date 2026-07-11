@@ -123,7 +123,7 @@ public class MantleEffectAevitas extends MantleEffect {
     }
 
     public static boolean isStandingOnAir(Entity entity) {
-        if (entity.isOnGround()) {
+        if (entity.onGround()) {
             Level level = entity.getCommandSenderWorld();
             BlockPos at = entity.position().below();
             return level.getBlockState(at).isAir();

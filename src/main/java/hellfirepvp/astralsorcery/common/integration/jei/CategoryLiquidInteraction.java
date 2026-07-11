@@ -95,7 +95,7 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
 
             Font fr = Minecraft.getInstance().font;
             MutableComponent txt = Component.translatable("jei.astralsorcery.tip.chance", FORMAT_CHANCE.format(perc));
-            int width = fr.getStringPropertyWidth(txt);
+            int width = fr.width(txt);
             fr.draw(renderStack, txt, 74 - width, 44, 0x333333);
         }
     }

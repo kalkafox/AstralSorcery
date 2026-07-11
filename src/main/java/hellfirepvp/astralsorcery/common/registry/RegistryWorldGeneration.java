@@ -144,7 +144,7 @@ public class RegistryWorldGeneration {
                 GenerationStep.Decoration stage = FEATURE_STAGE.get(feature);
                 if (stage == null) {
                     ResourceLocation key = BuiltinRegistries.CONFIGURED_FEATURE.getOptionalKey(feature)
-                            .map(ResourceKey::getLocation)
+                            .map(ResourceKey::location)
                             .orElse(ResourceLocation.parse("not_registered"));
                     throw new IllegalArgumentException("Unknown generation stage for feature " + key + "!");
                 }

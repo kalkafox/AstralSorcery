@@ -106,7 +106,7 @@ public class BlockBlackMarblePillar extends BlockBlackMarbleTemplate implements 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        BlockPos blockpos = ctx.getBlockPos();
+        BlockPos blockpos = ctx.getClickedPos();
         Level level = ctx.getLevel();
         FluidState fluidState = level.getFluidState(blockpos);
         return this.getThisState(level, blockpos).setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);

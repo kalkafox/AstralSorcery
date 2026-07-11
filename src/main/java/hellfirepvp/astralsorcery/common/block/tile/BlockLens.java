@@ -111,7 +111,7 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(PLACED_AGAINST, context.getFace().getOpposite());
+        return this.defaultBlockState().setValue(PLACED_AGAINST, context.getClickedFace().getOpposite());
     }
 
     @Override

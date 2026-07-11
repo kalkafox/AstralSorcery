@@ -96,7 +96,7 @@ public class FluidIngredient extends Ingredient {
         }
 
         FluidStack contained = FluidUtil.getFluidContained(from).orElse(FluidStack.EMPTY);
-        if (contained.isEmpty() || contained.getType() == null || contained.getAmount() <= 0) {
+        if (contained.isEmpty() || contained.getFluid() == null || contained.getAmount() <= 0) {
             return false;
         }
 
@@ -134,7 +134,7 @@ public class FluidIngredient extends Ingredient {
         JsonArray array = new JsonArray();
         for (FluidStack stack : this.fluids) {
             JsonObject fluidStackObject = new JsonObject();
-            fluidStackObject.addProperty("fluid", stack.getType().getRegistryName().toString());
+            fluidStackObject.addProperty("fluid", stack.getFluid().getRegistryName().toString());
             fluidStackObject.addProperty("amount", stack.getAmount());
 
             array.add(fluidStackObject);

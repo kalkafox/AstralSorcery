@@ -141,6 +141,6 @@ public class EventHandlerCache {
 
     @SubscribeEvent
     public static void onPlayerClone(PlayerEvent.Clone event) {
-        PerkEffectHelper.onPlayerCloneEvent((ServerPlayer) event.getOriginal(), (ServerPlayer) event.getPlayer());
+        PerkEffectHelper.onPlayerCloneEvent((ServerPlayer) event.getOriginal(), (ServerPlayer) event.getEntity());
     }
 }

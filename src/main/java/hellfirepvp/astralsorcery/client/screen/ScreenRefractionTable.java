@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -177,13 +179,12 @@ public class ScreenRefractionTable extends TileEntityScreen<TileRefractionTable>
 
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
-        RenderSystem.disableAlphaTest();
 
         renderStack.pushPose();
         renderStack.translate(guiWidth / 2F, guiHeight / 2F, 0);
         renderStack.scale(-scale / 2, -scale / 2, 1);
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, this)
                     .dim(scale, scale)
                     .color(1F, 1F, 1F, this.getTile().getRunProgress())
@@ -193,7 +194,6 @@ public class ScreenRefractionTable extends TileEntityScreen<TileRefractionTable>
 
         renderStack.popPose();
 
-        RenderSystem.enableAlphaTest();
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
     }
@@ -325,29 +325,25 @@ public class ScreenRefractionTable extends TileEntityScreen<TileRefractionTable>
 
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
-        RenderSystem.disableAlphaTest();
         RenderSystem.lineWidth(2F);
-        RenderSystem.disableTexture();
         RenderSystem.disableDepthTest();
 
-        RenderingUtils.draw(GL11.GL_LINES, DefaultVertexFormat.POSITION_COLOR, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, offsetX, offsetY, 0).color(r, g, b, alpha.get()).endVertex();
-            buf.vertex(offset, offsetX +width, offsetY, 0).color(r, g, b, alpha.get()).endVertex();
+            buf.addVertex(offset, offsetX, offsetY, 0).setColor(r, g, b, alpha.get());
+            buf.addVertex(offset, offsetX +width, offsetY, 0).setColor(r, g, b, alpha.get());
 
-            buf.vertex(offset, offsetX + width, offsetY, 0).color(r, g, b, alpha.get()).endVertex();
-            buf.vertex(offset, offsetX + width, offsetY + height, 0).color(r, g, b, alpha.get()).endVertex();
+            buf.addVertex(offset, offsetX + width, offsetY, 0).setColor(r, g, b, alpha.get());
+            buf.addVertex(offset, offsetX + width, offsetY + height, 0).setColor(r, g, b, alpha.get());
 
-            buf.vertex(offset, offsetX + width, offsetY + height, 0).color(r, g, b, alpha.get()).endVertex();
-            buf.vertex(offset, offsetX, offsetY + height, 0).color(r, g, b, alpha.get()).endVertex();
+            buf.addVertex(offset, offsetX + width, offsetY + height, 0).setColor(r, g, b, alpha.get());
+            buf.addVertex(offset, offsetX, offsetY + height, 0).setColor(r, g, b, alpha.get());
 
-            buf.vertex(offset, offsetX, offsetY + height, 0).color(r, g, b, alpha.get()).endVertex();
-            buf.vertex(offset, offsetX, offsetY, 0).color(r, g, b, alpha.get()).endVertex();
+            buf.addVertex(offset, offsetX, offsetY + height, 0).setColor(r, g, b, alpha.get());
+            buf.addVertex(offset, offsetX, offsetY, 0).setColor(r, g, b, alpha.get());
         });
 
         RenderSystem.enableDepthTest();
-        RenderSystem.enableTexture();
-        RenderSystem.enableAlphaTest();
         Blending.DEFAULT.apply();
         RenderSystem.disableBlend();
     }

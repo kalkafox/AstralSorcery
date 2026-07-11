@@ -181,12 +181,12 @@ public class LiquidInteraction extends CustomMatcherRecipe {
     }
 
     public final void write(JsonObject object) {
-        object.addProperty("reactant1", this.reactant1.getType().getRegistryName().toString());
+        object.addProperty("reactant1", this.reactant1.getFluid().getRegistryName().toString());
         object.addProperty("reactant1Amount", this.reactant1.getAmount());
         if (this.reactant1.hasTag()) {
             object.addProperty("reactant1Tag", this.reactant1.getTag().toString());
         }
-        object.addProperty("reactant2", this.reactant2.getType().getRegistryName().toString());
+        object.addProperty("reactant2", this.reactant2.getFluid().getRegistryName().toString());
         object.addProperty("reactant2Amount", this.reactant2.getAmount());
         if (this.reactant2.hasTag()) {
             object.addProperty("reactant2Tag", this.reactant2.getTag().toString());

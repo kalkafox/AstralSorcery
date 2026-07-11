@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.Component;
 
 import com.google.common.collect.Lists;
@@ -161,7 +163,7 @@ public class RenderPageStructure extends RenderablePage {
             BlockAtlasTexture.getInstance().bindTexture();
             RenderSystem.depthMask(false);
 
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.BLOCK, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK, buf -> {
                 renderStack.pushPose();
                 renderStack.translate(switchRequiredAir.x + 13, switchRequiredAir.y + 11, blitOffset + 60);
                 renderStack.scale(7, -7, 7);
@@ -224,7 +226,7 @@ public class RenderPageStructure extends RenderablePage {
         Font fr = RenderablePage.getFont();
         float scale = 1.3F;
         FormattedText description = Component.literal(String.format("%s - %s - %s", size.getBlockX(), size.getBlockY(), size.getBlockZ()));
-        float length = fr.getStringPropertyWidth(description) * scale;
+        float length = fr.width(description) * scale;
 
         RenderSystem.disableDepthTest();
 

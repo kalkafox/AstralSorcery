@@ -65,7 +65,7 @@ public class KeyLastBreath extends KeyPerk {
     }
 
     private void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         LogicalSide direction = this.getSide(player);
         PlayerProgress prog = ResearchHelper.getProgress(player, direction);
         if (prog.getPerkData().hasPerkEffect(this)) {

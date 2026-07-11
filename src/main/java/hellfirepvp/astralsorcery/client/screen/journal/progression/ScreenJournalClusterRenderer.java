@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.progression;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -238,24 +240,24 @@ public class ScreenJournalClusterRenderer {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
 
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+                RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                     Matrix4f matr = renderStack.last().pose();
-                    buf.vertex(matr, pxWH, zoomedWH - pxWH, blitOffset)
-                            .color(r, g, b, a)
-                            .tex(uvTexture.getA(), uvTexture.getB() + res.getVLength())
-                            .endVertex();
-                    buf.vertex(matr, zoomedWH - pxWH, zoomedWH - pxWH, blitOffset)
-                            .color(r, g, b, a)
-                            .tex(uvTexture.getA() + res.getULength(), uvTexture.getB() + res.getVLength())
-                            .endVertex();
-                    buf.vertex(matr, zoomedWH - pxWH, pxWH, blitOffset)
-                            .color(r, g, b, a)
-                            .tex(uvTexture.getA() + res.getULength(), uvTexture.getB())
-                            .endVertex();
-                    buf.vertex(matr, pxWH, pxWH, blitOffset)
-                            .color(r, g, b, a)
-                            .tex(uvTexture.getA(), uvTexture.getB())
-                            .endVertex();
+                    buf.addVertex(matr, pxWH, zoomedWH - pxWH, blitOffset)
+                            .setColor(r, g, b, a)
+                            .setUv(uvTexture.getA(), uvTexture.getB() + res.getVLength())
+                            ;
+                    buf.addVertex(matr, zoomedWH - pxWH, zoomedWH - pxWH, blitOffset)
+                            .setColor(r, g, b, a)
+                            .setUv(uvTexture.getA() + res.getULength(), uvTexture.getB() + res.getVLength())
+                            ;
+                    buf.addVertex(matr, zoomedWH - pxWH, pxWH, blitOffset)
+                            .setColor(r, g, b, a)
+                            .setUv(uvTexture.getA() + res.getULength(), uvTexture.getB())
+                            ;
+                    buf.addVertex(matr, pxWH, pxWH, blitOffset)
+                            .setColor(r, g, b, a)
+                            .setUv(uvTexture.getA(), uvTexture.getB())
+                            ;
                 });
 
                 RenderSystem.defaultBlendFunc();
@@ -269,7 +271,6 @@ public class ScreenJournalClusterRenderer {
     }
 
     private void drawConnection(PoseStack renderStack, float originX, float originY, float targetX, float targetY, float blitOffset) {
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
@@ -281,7 +282,7 @@ public class ScreenJournalClusterRenderer {
         int bodyCubes = (int) Math.ceil(lineState.length() / 1); //1 = max line segment length
         int activeSegment = (int) (clientTicks % bodyCubes);
         Vector3 segmentIter = lineState.divide(bodyCubes);
-        RenderingUtils.draw(GL11.GL_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.DEBUG_LINE_STRIP, DefaultVertexFormat.POSITION_COLOR, buf -> {
             for (int i = bodyCubes; i >= 0; i--) {
                 double lx = origin.getX();
                 double ly = origin.getY();
@@ -297,17 +298,16 @@ public class ScreenJournalClusterRenderer {
         RenderSystem.lineWidth(2.0F);
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 
     private void drawLinePart(VertexConsumer buf, PoseStack renderStack, double lx, double ly, double hx, double hy, float blitOffset, float brightness) {
         Matrix4f offset = renderStack.last().pose();
-        buf.vertex(offset, (float) lx, (float) ly, blitOffset)
-                .color(brightness * alpha, brightness * alpha, brightness * alpha, 0.4F * alpha)
-                .endVertex();
-        buf.vertex(offset, (float) hx, (float) hy, blitOffset)
-                .color(brightness * alpha, brightness * alpha, brightness * alpha, 0.4F * alpha)
-                .endVertex();
+        buf.addVertex(offset, (float) lx, (float) ly, blitOffset)
+                .setColor(brightness * alpha, brightness * alpha, brightness * alpha, 0.4F * alpha)
+                ;
+        buf.addVertex(offset, (float) hx, (float) hy, blitOffset)
+                .setColor(brightness * alpha, brightness * alpha, brightness * alpha, 0.4F * alpha)
+                ;
     }
 
     private float evaluateBrightness(int segment, int activeSegment) {
@@ -318,11 +318,11 @@ public class ScreenJournalClusterRenderer {
 
     private void drawResearchItemBackground(double zoomedWH, double xAdd, double yAdd, float blitOffset) {
         RenderSystem.enableBlend();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
-            buf.vertex(xAdd,            yAdd + zoomedWH, blitOffset).color(alpha, alpha, alpha, alpha).tex(0, 1).endVertex();
-            buf.vertex(xAdd + zoomedWH, yAdd + zoomedWH, blitOffset).color(alpha, alpha, alpha, alpha).tex(1, 1).endVertex();
-            buf.vertex(xAdd + zoomedWH, yAdd,            blitOffset).color(alpha, alpha, alpha, alpha).tex(1, 0).endVertex();
-            buf.vertex(xAdd,            yAdd,            blitOffset).color(alpha, alpha, alpha, alpha).tex(0, 0).endVertex();
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
+            buf.addVertex(xAdd,            yAdd + zoomedWH, blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(0, 1);
+            buf.addVertex(xAdd + zoomedWH, yAdd + zoomedWH, blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(1, 1);
+            buf.addVertex(xAdd + zoomedWH, yAdd,            blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(1, 0);
+            buf.addVertex(xAdd,            yAdd,            blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(0, 0);
         });
         RenderSystem.disableBlend();
     }

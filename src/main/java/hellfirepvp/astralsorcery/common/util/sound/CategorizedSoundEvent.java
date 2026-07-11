@@ -36,7 +36,7 @@ public class CategorizedSoundEvent {
     }
 
     public ResourceLocation getLocation() {
-        return event.getLocation();
+        return event.location();
     }
 
     public SoundSource getCategory() {

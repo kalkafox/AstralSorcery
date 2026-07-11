@@ -56,7 +56,7 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
             return resource;
         }
         InMemoryTexture texture = new InMemoryTexture(this.imageGen, this.blur, this.clamp);
-        mgr.loadTexture(this.getKey(), texture);
+        mgr.register(this.getKey(), texture);
         return mgr.getTexture(this.getKey());
     }
 
@@ -72,8 +72,8 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
         }
 
         @Override
-        public void loadTexture(ResourceManager manager) throws IOException {
-            NativeImage image = NativeImage.read(NativeImage.PixelFormat.RGBA, createMemInput());
+        public void load(ResourceManager manager) throws IOException {
+            NativeImage image = NativeImage.read(NativeImage.Format.RGBA, createMemInput());
             if (!RenderSystem.isOnRenderThreadOrInit()) {
                 RenderSystem.recordRenderCall(() -> this.doLoad(image, this.blur, this.clamp));
             } else {
@@ -83,7 +83,7 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
 
         private void doLoad(NativeImage imageIn, boolean blurIn, boolean clampIn) {
             TextureUtil.prepareImage(this.getId(), 0, imageIn.getWidth(), imageIn.getHeight());
-            imageIn.uploadTextureSub(0, 0, 0, 0, 0, imageIn.getWidth(), imageIn.getHeight(), blurIn, clampIn, false, true);
+            imageIn.upload(0, 0, 0, 0, 0, imageIn.getWidth(), imageIn.getHeight(), blurIn, clampIn, false, true);
         }
 
         private InputStream createMemInput() throws IOException {

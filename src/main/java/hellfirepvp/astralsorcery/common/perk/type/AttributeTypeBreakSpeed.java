@@ -44,7 +44,7 @@ public class AttributeTypeBreakSpeed extends PerkAttributeType {
             return;
         }
 
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
         LogicalSide direction = this.getSide(player);
         if (!hasTypeApplied(player, direction)) {
             return;

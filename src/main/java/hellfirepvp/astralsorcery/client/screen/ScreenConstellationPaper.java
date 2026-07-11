@@ -91,7 +91,7 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
 
     private void drawHeader(PoseStack renderStack) {
         MutableComponent name = this.constellation.getConstellationName();
-        float length = font.getStringPropertyWidth(name) * 1.8F;
+        float length = font.width(name) * 1.8F;
         double offsetLeft = (width >> 1) - (length / 2);
         int offsetTop = topPos + 45;
 

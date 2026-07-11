@@ -13,7 +13,6 @@ import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.resource.BlockAtlasTexture;
 import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.RenderStateUtil;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import org.lwjgl.opengl.GL11;
@@ -27,48 +26,59 @@ import org.lwjgl.opengl.GL11;
  */
 public class RenderStateBuilder {
 
-    private final RenderType.State.Builder builder;
+    private final RenderType.CompositeState.CompositeStateBuilder builder;
+    private boolean shaderSet = false;
 
-    private RenderStateBuilder(RenderType.State.Builder builder) {
+    private RenderStateBuilder(RenderType.CompositeState.CompositeStateBuilder builder) {
         this.builder = builder;
     }
 
     public static RenderStateBuilder builder() {
-        return new RenderStateBuilder(RenderType.State.builder());
+        return new RenderStateBuilder(RenderType.CompositeState.builder());
     }
 
     public RenderStateBuilder texture(AbstractRenderableTexture texture) {
-        this.builder.texture(texture.asState());
+        this.builder.setTextureState(texture.asState());
         return this;
     }
 
     public RenderStateBuilder altasTexture() {
-        this.builder.texture(BlockAtlasTexture.getInstance().asState());
+        this.builder.setTextureState(BlockAtlasTexture.getInstance().asState());
         return this;
     }
 
     public RenderStateBuilder disableTexture() {
-        this.builder.texture(new RenderStateShard.TextureStateShard());
+        this.builder.setTextureState(RenderStateAccess.NO_TEXTURE_STATE);
         return this;
     }
 
+    public RenderStateBuilder shader(RenderStateShard.ShaderStateShard shader) {
+        this.builder.setShaderState(shader);
+        this.shaderSet = true;
+        return this;
+    }
+
+    public boolean hasShader() {
+        return this.shaderSet;
+    }
+
     public RenderStateBuilder blend(Blending blendMode) {
-        this.builder.transparency(blendMode.asState());
+        this.builder.setTransparencyState(blendMode.asState());
         return this;
     }
 
     public RenderStateBuilder smoothShade() {
-        this.builder.shadeModel(new RenderStateShard.ShadeModelState(true));
+        // 1.21 port: shade model state removed; smooth shading is the default in core-shader rendering.
         return this;
     }
 
     public RenderStateBuilder enableItemRendering() {
-        this.builder.diffuseLighting(new RenderStateShard.DiffuseLightingState(true));
+        // 1.21 port: diffuse lighting state removed; entity/item shaders bake diffuse lighting.
         return this;
     }
 
     public RenderStateBuilder disableDepth() {
-        this.builder.depthTest(new RenderStateShard.DepthTestStateShard("always", GL11.GL_ALWAYS) {
+        this.builder.setDepthTestState(new RenderStateShard.DepthTestStateShard("always", GL11.GL_ALWAYS) {
             @Override
             public void setupRenderState() {
                 //For some ungodly reason this might not be reset to disable depth testing by default...
@@ -81,32 +91,32 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder disableDepthMask() {
-        this.builder.writeMask(new RenderStateUtil.WriteMaskState(true, false));
+        this.builder.setWriteMaskState(new RenderStateUtil.WriteMaskState(true, false));
         return this;
     }
 
     public RenderStateBuilder enableLighting() {
-        this.builder.uv2(new RenderStateShard.LightmapStateShard(true));
+        this.builder.setLightmapState(new RenderStateShard.LightmapStateShard(true));
         return this;
     }
 
     public RenderStateBuilder enableDiffuseLighting() {
-        this.builder.diffuseLighting(new RenderStateShard.DiffuseLightingState(true));
+        // 1.21 port: diffuse lighting state removed; entity/item shaders bake diffuse lighting.
         return this;
     }
 
     public RenderStateBuilder enableOverlay() {
-        this.builder.overlayCoords(new RenderStateShard.OverlayStateShard(true));
+        this.builder.setOverlayState(new RenderStateShard.OverlayStateShard(true));
         return this;
     }
 
     public RenderStateBuilder disableCull() {
-        this.builder.cull(new RenderStateUtil.CullState(false));
+        this.builder.setCullState(new RenderStateUtil.CullState(false));
         return this;
     }
 
     public RenderStateBuilder alpha1arg(float alphaThreshold) {
-        this.builder.alpha1arg(new RenderStateShard.AlphaState(alphaThreshold));
+        // 1.21 port: fixed-function alpha test removed; core shaders discard at their own thresholds.
         return this;
     }
 
@@ -114,37 +124,35 @@ public class RenderStateBuilder {
         return alpha1arg(1F / 255F);
     }
 
-    public RenderStateBuilder particleShaderTarget() {
-        this.builder.target(ParticleTarget.INSTANCE);
+    public RenderStateBuilder texturing(RenderStateShard.TexturingStateShard texturing) {
+        this.builder.setTexturingState(texturing);
         return this;
     }
 
-    public RenderType.State.Builder vanillaBuilder() {
+    public RenderStateBuilder particleShaderTarget() {
+        this.builder.setOutputState(RenderStateAccess.PARTICLES_TARGET_STATE);
+        return this;
+    }
+
+    public RenderType.CompositeState.CompositeStateBuilder vanillaBuilder() {
         return this.builder;
     }
 
-    public RenderType.State buildAsOverlay() {
-        return this.builder.build(true);
+    public RenderType.CompositeState buildAsOverlay() {
+        return this.builder.createCompositeState(true);
     }
 
-    public RenderType.State build() {
-        return this.builder.build(false);
+    public RenderType.CompositeState build() {
+        return this.builder.createCompositeState(false);
     }
 
-    private static class ParticleTarget extends RenderStateShard.OutputStateShard {
+    private static class RenderStateAccess extends RenderStateShard {
 
-        private static final ParticleTarget INSTANCE = new ParticleTarget();
+        private static final EmptyTextureStateShard NO_TEXTURE_STATE = NO_TEXTURE;
+        private static final OutputStateShard PARTICLES_TARGET_STATE = PARTICLES_TARGET;
 
-        private ParticleTarget() {
-            super("as_particle_target", () -> {
-                if (Minecraft.useShaderTransparency()) {
-                    Minecraft.getInstance().worldRenderer.getParticlesTarget().bindFramebuffer(false);
-                }
-            }, () -> {
-                if (Minecraft.useShaderTransparency()) {
-                    Minecraft.getInstance().getFramebuffer().bindFramebuffer(false);
-                }
-            });
+        private RenderStateAccess(String name, Runnable setup, Runnable clear) {
+            super(name, setup, clear);
         }
     }
 }

@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.progression;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -286,7 +288,7 @@ public class ScreenJournalProgressionRenderer {
             }
 
             FormattedText name = focusedClusterMouse.getName();
-            float length = Minecraft.getInstance().font.getStringPropertyWidth(name) * 1.4F;
+            float length = Minecraft.getInstance().font.width(name) * 1.4F;
             int alpha = 0xCC;
             alpha *= br;
             alpha = Math.max(alpha, 5);
@@ -344,12 +346,12 @@ public class ScreenJournalProgressionRenderer {
 
         RenderSystem.enableBlend();
         Blending.ADDITIVEDARK.apply();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, pCluster.x + 0,     pCluster.y + height, blitOffset).color(br, br, br, br).tex(0, 1).endVertex();
-            buf.vertex(offset, pCluster.x + width, pCluster.y + height, blitOffset).color(br, br, br, br).tex(1, 1).endVertex();
-            buf.vertex(offset, pCluster.x + width, pCluster.y + 0,      blitOffset).color(br, br, br, br).tex(1, 0).endVertex();
-            buf.vertex(offset, pCluster.x + 0,     pCluster.y + 0,      blitOffset).color(br, br, br, br).tex(0, 0).endVertex();
+            buf.addVertex(offset, pCluster.x + 0,     pCluster.y + height, blitOffset).setColor(br, br, br, br).setUv(0, 1);
+            buf.addVertex(offset, pCluster.x + width, pCluster.y + height, blitOffset).setColor(br, br, br, br).setUv(1, 1);
+            buf.addVertex(offset, pCluster.x + width, pCluster.y + 0,      blitOffset).setColor(br, br, br, br).setUv(1, 0);
+            buf.addVertex(offset, pCluster.x + 0,     pCluster.y + 0,      blitOffset).setColor(br, br, br, br).setUv(0, 0);
         });
 
         Blending.DEFAULT.apply();
@@ -371,12 +373,12 @@ public class ScreenJournalProgressionRenderer {
         RenderSystem.enableBlend();
         Blending.ADDITIVEDARK.apply();
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, br).tex(0, 1).endVertex();
-            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, br).tex(1, 1).endVertex();
-            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    blitOffset).color(br, br, br, br).tex(1, 0).endVertex();
-            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY,                    blitOffset).color(br, br, br, br).tex(0, 0).endVertex();
+            buf.addVertex(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, blitOffset).setColor(br, br, br, br).setUv(0, 1);
+            buf.addVertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, blitOffset).setColor(br, br, br, br).setUv(1, 1);
+            buf.addVertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    blitOffset).setColor(br, br, br, br).setUv(1, 0);
+            buf.addVertex(offset, realCoordLowerX,                   realCoordLowerY,                    blitOffset).setColor(br, br, br, br).setUv(0, 0);
         });
 
         RenderSystem.defaultBlendFunc();
@@ -386,12 +388,12 @@ public class ScreenJournalProgressionRenderer {
     private void drawBackground(PoseStack renderStack, float blitOffset) {
         float br = 0.35F;
         TexturesAS.TEX_GUI_BACKGROUND_DEFAULT.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, 1.0F).tex(0, 1).endVertex();
-            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, blitOffset).color(br, br, br, 1.0F).tex(1, 1).endVertex();
-            buf.vertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    blitOffset).color(br, br, br, 1.0F).tex(1, 0).endVertex();
-            buf.vertex(offset, realCoordLowerX,                   realCoordLowerY,                    blitOffset).color(br, br, br, 1.0F).tex(0, 0).endVertex();
+            buf.addVertex(offset, realCoordLowerX,                   realCoordLowerY + realRenderHeight, blitOffset).setColor(br, br, br, 1.0F).setUv(0, 1);
+            buf.addVertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY + realRenderHeight, blitOffset).setColor(br, br, br, 1.0F).setUv(1, 1);
+            buf.addVertex(offset, realCoordLowerX + realRenderWidth, realCoordLowerY,                    blitOffset).setColor(br, br, br, 1.0F).setUv(1, 0);
+            buf.addVertex(offset, realCoordLowerX,                   realCoordLowerY,                    blitOffset).setColor(br, br, br, 1.0F).setUv(0, 0);
         });
     }
 
@@ -403,7 +405,7 @@ public class ScreenJournalProgressionRenderer {
         float offsetX = scalePosX / 2000F;
         float offsetY = scalePosY / 1000F;
 
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 2F);
             drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 1.5F);
             drawStarOverlay(buf, renderStack, blitOffset, offsetX, offsetY, 1F);
@@ -434,13 +436,13 @@ public class ScreenJournalProgressionRenderer {
         }
 
         Matrix4f offset = renderStack.last().pose();
-        buf.vertex(offset, x, y + height, blitOffset)
-                .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u,  v + vL).endVertex();
-        buf.vertex(offset, x + width, y + height, blitOffset)
-                .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u + uL, v + vL).endVertex();
-        buf.vertex(offset, x + width, y, blitOffset)
-                .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u + uL, v).endVertex();
-        buf.vertex(offset, x, y, blitOffset)
-                .color(0.75F, 0.75F, 0.75F, 0.7F).tex(u, v).endVertex();
+        buf.addVertex(offset, x, y + height, blitOffset)
+                .setColor(0.75F, 0.75F, 0.75F, 0.7F).setUv(u,  v + vL);
+        buf.addVertex(offset, x + width, y + height, blitOffset)
+                .setColor(0.75F, 0.75F, 0.75F, 0.7F).setUv(u + uL, v + vL);
+        buf.addVertex(offset, x + width, y, blitOffset)
+                .setColor(0.75F, 0.75F, 0.75F, 0.7F).setUv(u + uL, v);
+        buf.addVertex(offset, x, y, blitOffset)
+                .setColor(0.75F, 0.75F, 0.75F, 0.7F).setUv(u, v);
     }
 }

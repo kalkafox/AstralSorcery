@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.event;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.lib.SpritesAS;
@@ -86,7 +88,7 @@ public class AlignmentChargeRenderer implements ITickHandler {
         boolean hasEnoughCharge = true;
         float usagePerc = 0F;
         for (EquipmentSlot type : EquipmentSlot.values()) {
-            ItemStack equipped = player.getItemStackFromSlot(type);
+            ItemStack equipped = player.getItemBySlot(type);
             if (!equipped.isEmpty() && equipped.getItem() instanceof AlignmentChargeConsumer) {
                 float chargeRequired = ((AlignmentChargeConsumer) equipped.getItem()).getAlignmentChargeCost(player, equipped);
                 float max = AlignmentChargeHandler.INSTANCE.getMaximumCharge(player, LogicalSide.CLIENT);
@@ -106,10 +108,9 @@ public class AlignmentChargeRenderer implements ITickHandler {
         Color usageColor = hasEnoughCharge ? ColorsAS.OVERLAY_CHARGE_USAGE : ColorsAS.OVERLAY_CHARGE_MISSING;
 
         RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
 
         SpritesAS.SPR_OVERLAY_CHARGE.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetLeft, offsetTop, 10, width, 54)
                     .color(1F, 1F, 1F, this.alphaReveal)
                     .tex(uvColored.getA(), uvColored.getB() + 0.002F, uLengthCharge, SpritesAS.SPR_OVERLAY_CHARGE.getVWidth() - 0.002F)
@@ -117,14 +118,13 @@ public class AlignmentChargeRenderer implements ITickHandler {
         });
 
         SpritesAS.SPR_OVERLAY_CHARGE_COLORLESS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offsetLeft + width, offsetTop, 10, usageWidth, 54)
                     .color(usageColor.getRed(), usageColor.getGreen(), usageColor.getBlue(), (int) (this.alphaReveal * 255F))
                     .tex(uvColorless.getA() + uLengthCharge, uvColorless.getB() + 0.002F, uLengthUsage, SpritesAS.SPR_OVERLAY_CHARGE_COLORLESS.getVWidth() - 0.002F)
                     .draw();
         });
 
-        RenderSystem.enableAlphaTest();
         RenderSystem.disableBlend();
         BlockAtlasTexture.getInstance().bindTexture();
     }
@@ -138,7 +138,7 @@ public class AlignmentChargeRenderer implements ITickHandler {
             }
 
             for (EquipmentSlot slot : EquipmentSlot.values()) {
-                ItemStack stack = player.getItemStackFromSlot(slot);
+                ItemStack stack = player.getItemBySlot(slot);
                 if (!stack.isEmpty() && stack.getItem() instanceof AlignmentChargeRevealer &&
                         ((AlignmentChargeRevealer) stack.getItem()).shouldReveal(stack)) {
                     revealCharge(20);

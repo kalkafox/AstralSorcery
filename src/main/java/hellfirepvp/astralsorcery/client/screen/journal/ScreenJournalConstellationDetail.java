@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -315,7 +317,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
             info = Component.translatable("astralsorcery.journal.constellation.unknown");
         }
 
-        int width = font.getStringPropertyWidth(info);
+        int width = font.width(info);
         float chX = 305 - (width / 2F);
         renderStack.pushPose();
         renderStack.translate(leftPos + chX, topPos + 44, this.getGuiZLevel());
@@ -347,7 +349,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
             FormattedText none = Component.translatable("astralsorcery.journal.constellation.unknown");
             float scale = 1.8F;
-            float length = font.getStringPropertyWidth(none) * scale;
+            float length = font.width(none) * scale;
             float offsetLeft = leftPos + 296 - length / 2;
             int offsetTop = topPos + 199;
 
@@ -380,7 +382,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
                     RenderSystem.defaultBlendFunc();
                     brightness = 0.7F;
                 }
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+                RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                     RenderingGuiUtils.rect(buf, renderStack, offsetX + (index * (size + 2)), offsetY, this.getGuiZLevel(), size, size)
                             .color(brightness, brightness, brightness, brightness)
                             .draw();
@@ -393,7 +395,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
     private void drawPageConstellation(PoseStack renderStack, float partial) {
         FormattedText cstName = this.constellation.getConstellationName();
-        int width = font.getStringPropertyWidth(cstName);
+        int width = font.width(cstName);
 
         renderStack.pushPose();
         renderStack.translate(leftPos + (305 - (width * 1.8F / 2F)), topPos + 26, this.getGuiZLevel());
@@ -405,7 +407,7 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
         if (!detailed) {
             dstInfo = Component.translatable("astralsorcery.journal.constellation.unknown");
         }
-        width = font.getStringPropertyWidth(dstInfo);
+        width = font.width(dstInfo);
 
         renderStack.pushPose();
         renderStack.translate(leftPos + (305 - (width / 2F)), topPos + 219, this.getGuiZLevel());
@@ -446,23 +448,23 @@ public class ScreenJournalConstellationDetail extends ScreenJournal implements N
 
     private void drawCstBackground(PoseStack renderStack) {
         TexturesAS.TEX_BLACK.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, leftPos + 15,  topPos + 240, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 1).endVertex();
-            buf.vertex(offset, leftPos + 200, topPos + 240, this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 1).endVertex();
-            buf.vertex(offset, leftPos + 200, topPos + 10,  this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(1, 0).endVertex();
-            buf.vertex(offset, leftPos + 15,  topPos + 10,  this.getGuiZLevel()).color(1F, 1F, 1F, 1F).tex(0, 0).endVertex();
+            buf.addVertex(offset, leftPos + 15,  topPos + 240, this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(0, 1);
+            buf.addVertex(offset, leftPos + 200, topPos + 240, this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(1, 1);
+            buf.addVertex(offset, leftPos + 200, topPos + 10,  this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(1, 0);
+            buf.addVertex(offset, leftPos + 15,  topPos + 10,  this.getGuiZLevel()).setColor(1F, 1F, 1F, 1F).setUv(0, 0);
         });
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         TexturesAS.TEX_GUI_BACKGROUND_CONSTELLATIONS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Matrix4f offset = renderStack.last().pose();
-            buf.vertex(offset, leftPos + 15,  topPos + 240, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.3F, 0.9F).endVertex();
-            buf.vertex(offset, leftPos + 200, topPos + 240, this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.7F, 0.9F).endVertex();
-            buf.vertex(offset, leftPos + 200, topPos + 10,  this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.7F, 0.1F).endVertex();
-            buf.vertex(offset, leftPos + 15,  topPos + 10,  this.getGuiZLevel()).color(0.8F, 0.8F, 1F, 0.5F).tex(0.3F, 0.1F).endVertex();
+            buf.addVertex(offset, leftPos + 15,  topPos + 240, this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.5F).setUv(0.3F, 0.9F);
+            buf.addVertex(offset, leftPos + 200, topPos + 240, this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.5F).setUv(0.7F, 0.9F);
+            buf.addVertex(offset, leftPos + 200, topPos + 10,  this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.5F).setUv(0.7F, 0.1F);
+            buf.addVertex(offset, leftPos + 15,  topPos + 10,  this.getGuiZLevel()).setColor(0.8F, 0.8F, 1F, 0.5F).setUv(0.3F, 0.1F);
         });
         RenderSystem.disableBlend();
     }

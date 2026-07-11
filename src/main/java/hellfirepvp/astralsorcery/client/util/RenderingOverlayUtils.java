@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.Component;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -58,23 +60,23 @@ public class RenderingOverlayUtils {
             if (first) {
                 //Draw upper half of the 1st slot
                 TexturesAS.TEX_OVERLAY_ITEM_FRAME.bindTexture();
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+                RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
                     Matrix4f offset = renderStack.last().pose();
-                    buf.vertex(offset, offsetX,            currentY + heightSplit, 10).tex(0, 0.5F).endVertex();
-                    buf.vertex(offset, offsetX + width, currentY + heightSplit, 10).tex(1, 0.5F).endVertex();
-                    buf.vertex(offset, offsetX + width,    currentY,               10).tex(1, 0)  .endVertex();
-                    buf.vertex(offset, offsetX,               currentY,               10).tex(0, 0)  .endVertex();
+                    buf.addVertex(offset, offsetX,            currentY + heightSplit, 10).setUv(0, 0.5F);
+                    buf.addVertex(offset, offsetX + width, currentY + heightSplit, 10).setUv(1, 0.5F);
+                    buf.addVertex(offset, offsetX + width,    currentY,               10).setUv(1, 0)  ;
+                    buf.addVertex(offset, offsetX,               currentY,               10).setUv(0, 0)  ;
                 });
                 tempY += heightSplit;
             } else {
                 //Draw lower half and upper next half of the sequence
                 TexturesAS.TEX_OVERLAY_ITEM_FRAME_EXTENSION.bindTexture();
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+                RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
                     Matrix4f offset = renderStack.last().pose();
-                    buf.vertex(offset, offsetX,            currentY + heightNormal, 10).tex(0, 1).endVertex();
-                    buf.vertex(offset, offsetX + width, currentY + heightNormal, 10).tex(1, 1).endVertex();
-                    buf.vertex(offset, offsetX + width,    currentY,                10).tex(1, 0).endVertex();
-                    buf.vertex(offset, offsetX,               currentY,                10).tex(0, 0).endVertex();
+                    buf.addVertex(offset, offsetX,            currentY + heightNormal, 10).setUv(0, 1);
+                    buf.addVertex(offset, offsetX + width, currentY + heightNormal, 10).setUv(1, 1);
+                    buf.addVertex(offset, offsetX + width,    currentY,                10).setUv(1, 0);
+                    buf.addVertex(offset, offsetX,               currentY,                10).setUv(0, 0);
                 });
                 tempY += heightNormal;
             }
@@ -82,12 +84,12 @@ public class RenderingOverlayUtils {
                 float drawY = tempY;
                 //Draw lower half of the slot
                 TexturesAS.TEX_OVERLAY_ITEM_FRAME.bindTexture();
-                RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
+                RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX, buf -> {
                     Matrix4f offset = renderStack.last().pose();
-                    buf.vertex(offset, offsetX,            drawY + heightSplit, 10).tex(0, 1)  .endVertex();
-                    buf.vertex(offset, offsetX + width, drawY + heightSplit, 10).tex(1, 1)  .endVertex();
-                    buf.vertex(offset, offsetX + width,    drawY,               10).tex(1, 0.5F).endVertex();
-                    buf.vertex(offset, offsetX,               drawY,               10).tex(0, 0.5F).endVertex();
+                    buf.addVertex(offset, offsetX,            drawY + heightSplit, 10).setUv(0, 1)  ;
+                    buf.addVertex(offset, offsetX + width, drawY + heightSplit, 10).setUv(1, 1)  ;
+                    buf.addVertex(offset, offsetX + width,    drawY,               10).setUv(1, 0.5F);
+                    buf.addVertex(offset, offsetX,               drawY,               10).setUv(0, 0.5F);
                 });
                 tempY += heightSplit;
             }
@@ -122,7 +124,7 @@ public class RenderingOverlayUtils {
                 amountStr = "\u221E"; //+Inf
             }
             FormattedText prop = Component.literal(amountStr);
-            int length = font.getStringPropertyWidth(prop);
+            int length = font.width(prop);
 
             renderStack.pushPose();
             renderStack.translate(-length / 3F, 0, 500);

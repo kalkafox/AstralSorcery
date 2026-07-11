@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.crafting.recipe.interaction.jei;
 
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.util.LightmapUtil;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
@@ -61,10 +63,10 @@ public class JEIHandlerSpawnEntity extends JEIInteractionResultHandler {
         renderStack.scale(15, 15, 15);
         renderStack.mulPose(Axis.XP.rotationDegrees(180));
         renderStack.mulPose(Axis.YP.rotationDegrees(145));
-        MultiBufferSource.Impl buffer = MultiBufferSource.getImpl(Tesselator.getInstance().getBuffer());
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(256));
         Minecraft.getInstance().getRenderManager()
                 .renderEntityStatic(le, 0, 0, 0, 0, 0, renderStack, buffer, LightmapUtil.getPackedFullbrightCoords());
-        buffer.finish();
+        buffer.endBatch();
         renderStack.popPose();
     }
 }

@@ -230,7 +230,7 @@ public class ScreenJournalOverlayPerkStatistics extends ScreenJournalOverlay {
 
         for (PerkStatistic stat : this.statistics) {
             FormattedText name = Component.translatable(stat.getUnlocPerkTypeName());
-            int nameWidth = Math.min(font.getStringPropertyWidth(name), ((int) (HEADER_WIDTH / 1.5F)));
+            int nameWidth = Math.min(font.width(name), ((int) (HEADER_WIDTH / 1.5F)));
             int valueWidth = font.width(stat.getPerkValue());
             int suffixWidth = font.width(stat.getSuffix());
 

@@ -415,7 +415,7 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
     protected void readFromNBT(CompoundTag nbt) {
         super.readFromNBT(nbt);
 
-        this.playerUUID = nbt.getUniqueId("playerUUID");
+        this.playerUUID = nbt.getUUID("playerUUID");
         this.constellation = (IMajorConstellation) RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(ResourceLocation.parse(nbt.getString("constellation")));
     }
 }

@@ -352,9 +352,9 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
                     FormattedText cmp = null;
                     for (FluidStack f : fluids) {
                         if (cmp == null) {
-                            cmp = f.getType().getAttributes().getDisplayName(f);
+                            cmp = f.getFluid().getAttributes().getDisplayName(f);
                         } else {
-                            cmp = Component.translatable("astralsorcery.misc.input.fluid.chain", cmp, f.getType().getAttributes().getDisplayName(f)).withStyle(ChatFormatting.GRAY);
+                            cmp = Component.translatable("astralsorcery.misc.input.fluid.chain", cmp, f.getFluid().getAttributes().getDisplayName(f)).withStyle(ChatFormatting.GRAY);
                         }
                     }
                     tooltip.add(MutableComponent.EMPTY);

@@ -66,7 +66,7 @@ public class MantleEffectBootes extends MantleEffect {
     protected void tickServer(Player player) {
         super.tickServer(player);
 
-        ItemStack mantle = player.getItemStackFromSlot(EquipmentSlot.CHEST);
+        ItemStack mantle = player.getItemBySlot(EquipmentSlot.CHEST);
         if (mantle.isEmpty() || !(mantle.getItem() instanceof ItemMantle)) {
             return;
         }
@@ -128,7 +128,7 @@ public class MantleEffectBootes extends MantleEffect {
     }
 
     protected void forEachFlare(LivingEntity owner, Consumer<EntityFlare> fn) {
-        ItemStack mantle = owner.getItemStackFromSlot(EquipmentSlot.CHEST);
+        ItemStack mantle = owner.getItemBySlot(EquipmentSlot.CHEST);
         if (mantle.isEmpty() || !(mantle.getItem() instanceof ItemMantle)) {
             return;
         }

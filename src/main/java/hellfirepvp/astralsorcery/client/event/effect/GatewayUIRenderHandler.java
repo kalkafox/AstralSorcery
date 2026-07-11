@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.event.effect;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -191,12 +193,11 @@ public class GatewayUIRenderHandler implements ITickHandler {
 
         RenderSystem.enableBlend();
         Blending.DEFAULT.apply();
-        RenderSystem.enableTexture();
         RenderSystem.enableDepthTest();
         RenderSystem.depthMask(false);
 
         TexturesAS.TEX_STAR_1.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             for (int i = 0; i < 300; i++) {
                 Vector3 at = Vector3.random(random).normalize().mul(this.currentUI.getSphereRadius() * 0.9).add(renderOffset);
                 if (at.getY() >= this.currentUI.getBlockPos().getY()) {

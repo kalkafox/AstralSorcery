@@ -208,7 +208,7 @@ public class TileChalice extends TileEntityTick {
             return false;
         }
         FluidStack thisFluid = this.getTank().getType();
-        if (!thisFluid.isEmpty() && (!(thisFluid.getType() instanceof FluidLiquidStarlight) || thisFluid.getAmount() + 100 >= TANK_SIZE)) {
+        if (!thisFluid.isEmpty() && (!(thisFluid.getFluid() instanceof FluidLiquidStarlight) || thisFluid.getAmount() + 100 >= TANK_SIZE)) {
             return false;
         }
 
@@ -226,7 +226,7 @@ public class TileChalice extends TileEntityTick {
             TileWell well = MiscUtils.getTileAt(level, wellPos, TileWell.class, true);
             if (well != null) {
                 FluidStack drained = well.getTank().drain(400, IFluidHandler.FluidAction.SIMULATE);
-                if (drained.getType() instanceof FluidLiquidStarlight && drained.getAmount() > 100) {
+                if (drained.getFluid() instanceof FluidLiquidStarlight && drained.getAmount() > 100) {
                     int maxFillable = this.getTank().getMaxAddable(drained.getAmount());
                     if (maxFillable > 0) {
                         FluidStack actual = well.getTank().drain(new FluidStack(drained, maxFillable), IFluidHandler.FluidAction.EXECUTE);
@@ -277,7 +277,7 @@ public class TileChalice extends TileEntityTick {
 
     @OnlyIn(Dist.CLIENT)
     private static void playLineFluidParticles(Vector3 from, Vector3 to, float width, FluidStack fluid) {
-        Color c = new Color(fluid.getType().getAttributes().getColor(fluid));
+        Color c = new Color(fluid.getFluid().getAttributes().getColor(fluid));
         playLineParticles(from, to, width, at -> EffectHelper.of(EffectTemplatesAS.CUBE_TRANSLUCENT_ATLAS)
                 .spawn(at)
                 .setTextureAtlasSprite(RenderingUtils.getParticleIcon(fluid))

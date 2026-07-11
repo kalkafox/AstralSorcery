@@ -62,7 +62,7 @@ public class MantleEffectLucerna extends MantleEffect {
             this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_SPAWNER, (entity) -> entity instanceof SpawnerBlockEntity);
         }
         if (CONFIG.findChests.get() && random.nextInt(10) == 0) {
-            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (entity) -> entity.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, entity.getBlockPos(), null) != null);
+            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (entity) -> entity.level().getCapability(Capabilities.ItemHandler.BLOCK, entity.getBlockPos(), null) != null);
         }
     }
 

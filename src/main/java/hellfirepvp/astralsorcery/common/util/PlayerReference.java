@@ -79,7 +79,7 @@ public class PlayerReference {
         if (server == null) {
             throw new IllegalArgumentException("Called getOnlinePlayer on clientside or while no server is running!");
         }
-        return server.getPlayerList().getPlayerByUUID(this.playerUUID);
+        return server.getPlayerList().getPlayer(this.playerUUID);
     }
 
     public CompoundTag serialize() {
@@ -99,7 +99,7 @@ public class PlayerReference {
     }
 
     public static PlayerReference deserialize(CompoundTag tag) {
-        return new PlayerReference(tag.getUniqueId("playerUUID"), Component.Serializer.getComponentFromJson(tag.getString("playerName")));
+        return new PlayerReference(tag.getUUID("playerUUID"), Component.Serializer.getComponentFromJson(tag.getString("playerName")));
     }
 
     public static PlayerReference read(FriendlyByteBuf buf) {

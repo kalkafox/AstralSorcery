@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.container;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
@@ -80,7 +82,7 @@ public class ScreenContainerAltarRadiance extends ScreenContainerAltar<Container
 
             float brightness = 0.3F + (RenderingConstellationUtils.stdFlicker(ClientScheduler.getClientTick(), pTicks, 10 + random.nextInt(20))) * 0.6F;
 
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 RenderingGuiUtils.rect(buf, renderStack, 15 + x, 39 + y, this.getBlitOffset(), 5, 5)
                         .color(brightness, brightness, brightness, brightness)
                         .draw();

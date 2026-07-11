@@ -8,7 +8,11 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 
 import net.minecraft.network.chat.Component;
 
@@ -67,7 +71,6 @@ import net.minecraft.util.Tuple;
 import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
-import net.minecraft.util.text.*;
 import net.neoforged.fml.LogicalSide;
 import org.lwjgl.opengl.GL11;
 
@@ -408,7 +411,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             TexturesAS.TEX_GUI_MENU_SLOT_GEM_CONTEXT.bindTexture();
-            RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+            RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
                 for (int index = 0; index < found.size(); index++) {
                     float addedX = (index % 5) * scaledSlotSize;
                     float addedY = (index / 5) * scaledSlotSize;
@@ -463,7 +466,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         TexturesAS.TEX_GUI_TEXT_FIELD.bindTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, leftPos + 300, topPos + 16, this.getGuiZLevel(), 88.5F, 15).draw();
         });
         RenderSystem.disableBlend();
@@ -499,7 +502,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         RenderSystem.defaultBlendFunc();
 
         TexturesAS.TEX_GUI_LINE_CONNECTION.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             for (Tuple<AbstractPerk, AbstractPerk> perkConnection : PerkTree.PERK_TREE.getConnections()) {
                 if (!perkConnection.getA().isVisible(progress, player) ||
                         !perkConnection.getB().isVisible(progress, player)) {
@@ -578,7 +581,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         RenderSystem.defaultBlendFunc();
 
         SpritesAS.SPR_PERK_SEAL.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             Point.Float pOffset = perk.getPoint().getOffset();
             drawSeal(buf, renderStack, sealWidth, offset.x, offset.y, ClientScheduler.getClientTick() + (int) pOffset.x + (int) pOffset.y, sealFade * 0.75F);
         });
@@ -588,7 +591,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         Tuple<Float, Float> uv = sealBreakSprite.getUVOffset(count);
 
         sealBreakSprite.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offset.x - sealWidth, offset.y - sealWidth, this.getGuiZLevel(), sealWidth * 2, sealWidth * 2)
                     .color(1F, 1F, 1F, 0.85F)
                     .tex(uv.getA(), uv.getB(), uLength, vLength)
@@ -621,7 +624,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         RenderSystem.defaultBlendFunc();
 
         spritePerkUnlock.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, offset.x - unlockWidth, offset.y - unlockWidth, this.getGuiZLevel(), unlockWidth * 2, unlockWidth * 2)
                     .tex(uv.getA(), uv.getB(), uLength, vLength)
                     .draw();
@@ -694,9 +697,9 @@ public class ScreenJournalPerkTree extends ScreenJournal {
 
             Vector3 pos = starVec.clone().addX(size * u * 2).addY(size * v * 2);
             pos.drawPos(offset, vb)
-                    .color(1F, 1F, 1F, alpha)
-                    .tex(frameUV.getA() + uLength * u, frameUV.getB() + vLength * v)
-                    .endVertex();
+                    .setColor(1F, 1F, 1F, alpha)
+                    .setUv(frameUV.getA() + uLength * u, frameUV.getB() + vLength * v)
+                    ;
         }
     }
 
@@ -721,9 +724,9 @@ public class ScreenJournalPerkTree extends ScreenJournal {
 
             Vector3 pos = starVec.clone().addX(size * u * 2).addY(size * v * 2);
             pos.drawPos(offset, batch)
-                    .color(0.8F, 0.1F, 0.1F, 1F)
-                    .tex(frameUV.getA() + uLength * u, frameUV.getB() + vLength * v)
-                    .endVertex();
+                    .setColor(0.8F, 0.1F, 0.1F, 1F)
+                    .setUv(frameUV.getA() + uLength * u, frameUV.getB() + vLength * v)
+                    ;
         }
     }
 
@@ -757,9 +760,9 @@ public class ScreenJournalPerkTree extends ScreenJournal {
 
             Vector3 pos = vec00.clone().add(dir.clone().mul(u)).add(vecV.clone().mul(v));
             pos.drawPos(offset, vb)
-                    .color(rR, rG, rB, rA)
-                    .tex(u, v)
-                    .endVertex();
+                    .setColor(rR, rG, rB, rA)
+                    .setUv(u, v)
+                    ;
         }
     }
 
@@ -804,15 +807,12 @@ public class ScreenJournalPerkTree extends ScreenJournal {
     private void drawBackground(PoseStack renderStack) {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
         TexturesAS.TEX_GUI_BACKGROUND_PERKS.bindTexture();
-        RenderingUtils.draw(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, buf -> {
+        RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
             RenderingGuiUtils.rect(buf, renderStack, leftPos - 10, topPos - 10, this.getGuiZLevel(), guiWidth + 20, guiHeight + 20)
                     .color(0.5F ,0.5F, 0.5F, 1F)
                     .draw();
         });
-        RenderSystem.disableAlphaTest();
     }
 
     private void updateSearchHighlight() {

@@ -12,6 +12,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,228 +29,119 @@ import net.minecraft.client.model.geom.ModelPart;
 public class ModelObservatory extends CustomModel {
 
     private final ModelPart base;
-    private final ModelPart tube;
     private final ModelPart seat;
-    private final ModelPart base1;
-    private final ModelPart base2;
-    private final ModelPart base3;
-    private final ModelPart base4;
-    private final ModelPart base5;
-    private final ModelPart base6;
-    private final ModelPart base7;
-    private final ModelPart base8;
-
-    private final ModelPart seat1;
-    private final ModelPart seat2;
-    private final ModelPart seat3;
-    private final ModelPart seat4;
-    private final ModelPart seat5;
-    private final ModelPart seat6;
-    private final ModelPart seat7;
-    private final ModelPart seat8;
-    private final ModelPart seat9;
-    private final ModelPart seat10;
-    private final ModelPart seat11;
-    private final ModelPart seat12;
-    private final ModelPart seat13;
-    private final ModelPart seat14;
-
-    private final ModelPart tube1;
-    private final ModelPart tube2;
-    private final ModelPart tube3;
-    private final ModelPart tube4;
-    private final ModelPart tube5;
-    private final ModelPart tube6;
-    private final ModelPart tube7;
-    private final ModelPart tube8;
-    private final ModelPart tube9;
-    private final ModelPart tube10;
-    private final ModelPart tube11;
-    private final ModelPart tube12;
-    private final ModelPart tube13;
-    private final ModelPart tube14;
-    private final ModelPart tube15;
+    private final ModelPart tube;
 
     public ModelObservatory() {
         super((resKey) -> RenderTypesAS.MODEL_OBSERVATORY);
-        this.textureWidth = 256;
-        this.textureHeight = 128;
+        ModelPart root = createLayer().bakeRoot();
+        this.base = root.getChild("base");
+        this.seat = root.getChild("seat");
+        this.tube = this.seat.getChild("tube");
+    }
+
+    private static LayerDefinition createLayer() {
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
 
         //base
-        this.base = new ModelPart(this, 0, 82);
-        this.base.setPos(0.0F, -4.0F, 0.0F);
-        this.base.addBox(-12.0F, 18.0F, -16.0F, 24, 6, 28, 0.1F);
-
-        this.base1 = new ModelPart(this, 120, 82);
-        this.base1.setPos(0.0F, 0.0F, 0.0F);
-        this.base1.addBox(-14.0F, 4.0F, -18.0F, 6, 18, 12, 0.0F);
-        this.base2 = new ModelPart(this, 224, 52);
-        this.base2.setPos(0.0F, 0.0F, 0.0F);
-        this.base2.addBox(-7.0F, 4.0F, -18.0F, 2, 18, 12, 0.0F);
-        this.base3 = new ModelPart(this, 224, 52);
-        this.base3.setPos(0.0F, 0.0F, 0.0F);
-        this.base3.addBox(-4.0F, 4.0F, -18.0F, 2, 18, 12, 0.0F);
-        this.base4 = new ModelPart(this, 224, 52);
-        this.base4.setPos(0.0F, 0.0F, 0.0F);
-        this.base4.addBox(-1.0F, 4.0F, -18.0F, 2, 18, 12, 0.0F);
-        this.base5 = new ModelPart(this, 180, 52);
-        this.base5.setPos(0.0F, 0.0F, 0.0F);
-        this.base5.addBox(2.0F, 4.0F, -18.0F, 10, 18, 12, 0.0F);
-        this.base6 = new ModelPart(this, 192, 0);
-        this.base6.setPos(0.0F, 0.0F, 0.0F);
-        this.base6.addBox(12.0F, -18.0F, -18.0F, 8, 40, 12, 0.0F);
-        this.base7 = new ModelPart(this, 156, 82);
-        this.base7.setPos(0.0F, 0.0F, 0.0F);
-        this.base7.addBox(8.0F, 4.0F, -6.0F, 8, 18, 20, 0.0F);
-        this.base8 = new ModelPart(this, 192, 82);
-        this.base8.setPos(0.0F, -4.0F, 0.0F);
-        this.base8.addBox(-8.0F, 28.0F, -8.0F, 16, 4, 16, 0.0F);
+        PartDefinition base = root.addOrReplaceChild("base", CubeListBuilder.create()
+                .texOffs(0, 82)
+                .addBox(-12.0F, 18.0F, -16.0F, 24, 6, 28, new CubeDeformation(0.1F)), PartPose.offset(0.0F, -4.0F, 0.0F));
+        base.addOrReplaceChild("base1", CubeListBuilder.create()
+                .texOffs(120, 82).addBox(-14.0F, 4.0F, -18.0F, 6, 18, 12), PartPose.ZERO);
+        base.addOrReplaceChild("base2", CubeListBuilder.create()
+                .texOffs(224, 52).addBox(-7.0F, 4.0F, -18.0F, 2, 18, 12), PartPose.ZERO);
+        base.addOrReplaceChild("base3", CubeListBuilder.create()
+                .texOffs(224, 52).addBox(-4.0F, 4.0F, -18.0F, 2, 18, 12), PartPose.ZERO);
+        base.addOrReplaceChild("base4", CubeListBuilder.create()
+                .texOffs(224, 52).addBox(-1.0F, 4.0F, -18.0F, 2, 18, 12), PartPose.ZERO);
+        base.addOrReplaceChild("base5", CubeListBuilder.create()
+                .texOffs(180, 52).addBox(2.0F, 4.0F, -18.0F, 10, 18, 12), PartPose.ZERO);
+        base.addOrReplaceChild("base6", CubeListBuilder.create()
+                .texOffs(192, 0).addBox(12.0F, -18.0F, -18.0F, 8, 40, 12), PartPose.ZERO);
+        base.addOrReplaceChild("base7", CubeListBuilder.create()
+                .texOffs(156, 82).addBox(8.0F, 4.0F, -6.0F, 8, 18, 20), PartPose.ZERO);
+        base.addOrReplaceChild("base8", CubeListBuilder.create()
+                .texOffs(192, 82).addBox(-8.0F, 28.0F, -8.0F, 16, 4, 16), PartPose.offset(0.0F, -4.0F, 0.0F));
 
         //seat
-        this.seat = new ModelPart(this, 144, 28);
-        this.seat.setPos(0.0F, -4.0F, 0.0F);
-        this.seat.addBox(-9.0F, 16.0F, 6.0F, 12, 4, 10, 0.0F);
-
-        this.seat1 = new ModelPart(this, 144, 42);
-        this.seat1.setPos(0.0F, 0.0F, 0.0F);
-        this.seat1.addBox(-9.0F, 16.0F, 0.0F, 12, 2, 4, 0.0F);
-        this.seat2 = new ModelPart(this, 144, 10);
-        this.seat2.setPos(0.0F, 0.0F, 0.0F);
-        this.seat2.addBox(-9.0F, 6.0F, 16.0F, 12, 14, 4, 0.0F);
-        this.seat3 = new ModelPart(this, 144, 0);
-        this.seat3.setPos(0.0F, -4.0F, 0.0F);
-        this.seat3.addBox(-7.0F, 2.0F, 16.0F, 8, 6, 4, 0.0F);
-        this.seat4 = new ModelPart(this, 140, 82);
-        this.seat4.setPos(0.0F, -4.0F, 0.0F);
-        this.seat4.addBox(-1.0F, 18.0F, 12.0F, 2, 4, 8, 0.0F);
-        this.seat5 = new ModelPart(this, 156, 82);
-        this.seat5.setPos(0.0F, -4.0F, 0.0F);
-        this.seat5.addBox(-1.0F, 22.0F, 12.0F, 2, 4, 8, 0.0F);
-        this.seat6 = new ModelPart(this, 156, 82);
-        this.seat6.setPos(0.0F, -4.0F, 0.0F);
-        this.seat6.addBox(-7.0F, 22.0F, 12.0F, 2, 4, 8, 0.0F);
-        this.seat7 = new ModelPart(this, 232, 0);
-        this.seat7.setPos(0.0F, -4.0F, 0.0F);
-        this.seat7.addBox(-1.0F, -2.0F, 20.0F, 2, 28, 2, 0.0F);
-        this.seat8 = new ModelPart(this, 232, 0);
-        this.seat8.setPos(0.0F, -4.0F, 0.0F);
-        this.seat8.addBox(-7.0F, -2.0F, 20.0F, 2, 28, 2, 0.0F);
-        this.seat9 = new ModelPart(this, 232, 2);
-        this.seat9.setPos(0.0F, -4.0F, 0.0F);
-        this.seat9.addBox(2.0F, -2.0F, 20.0F, 2, 22, 2, 0.0F);
-        this.seat10 = new ModelPart(this, 232, 30);
-        this.seat10.setPos(0.0F, -4.0F, 0.0F);
-        this.seat10.addBox(-4.0F, -4.0F, 20.0F, 2, 20, 2, 0.0F);
-        this.seat11 = new ModelPart(this, 232, 2);
-        this.seat11.setPos(0.0F, -4.0F, 0.0F);
-        this.seat11.addBox(-10.0F, -2.0F, 20.0F, 2, 22, 2, 0.0F);
-        this.seat12 = new ModelPart(this, 240, 0);
-        this.seat12.setPos(0.0F, -4.0F, 0.0F);
-        this.seat12.addBox(2.0F, -6.0F, 20.0F, 2, 4, 4, 0.0F);
-        this.seat13 = new ModelPart(this, 240, 0);
-        this.seat13.setPos(0.0F, -4.0F, 0.0F);
-        this.seat13.addBox(-4.0F, -8.0F, 20.0F, 2, 4, 4, 0.0F);
-        this.seat14 = new ModelPart(this, 240, 0);
-        this.seat14.setPos(0.0F, -4.0F, 0.0F);
-        this.seat14.addBox(-10.0F, -6.0F, 20.0F, 2, 4, 4, 0.0F);
+        PartDefinition seat = root.addOrReplaceChild("seat", CubeListBuilder.create()
+                .texOffs(144, 28)
+                .addBox(-9.0F, 16.0F, 6.0F, 12, 4, 10), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat1", CubeListBuilder.create()
+                .texOffs(144, 42).addBox(-9.0F, 16.0F, 0.0F, 12, 2, 4), PartPose.ZERO);
+        seat.addOrReplaceChild("seat2", CubeListBuilder.create()
+                .texOffs(144, 10).addBox(-9.0F, 6.0F, 16.0F, 12, 14, 4), PartPose.ZERO);
+        seat.addOrReplaceChild("seat3", CubeListBuilder.create()
+                .texOffs(144, 0).addBox(-7.0F, 2.0F, 16.0F, 8, 6, 4), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat4", CubeListBuilder.create()
+                .texOffs(140, 82).addBox(-1.0F, 18.0F, 12.0F, 2, 4, 8), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat5", CubeListBuilder.create()
+                .texOffs(156, 82).addBox(-1.0F, 22.0F, 12.0F, 2, 4, 8), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat6", CubeListBuilder.create()
+                .texOffs(156, 82).addBox(-7.0F, 22.0F, 12.0F, 2, 4, 8), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat7", CubeListBuilder.create()
+                .texOffs(232, 0).addBox(-1.0F, -2.0F, 20.0F, 2, 28, 2), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat8", CubeListBuilder.create()
+                .texOffs(232, 0).addBox(-7.0F, -2.0F, 20.0F, 2, 28, 2), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat9", CubeListBuilder.create()
+                .texOffs(232, 2).addBox(2.0F, -2.0F, 20.0F, 2, 22, 2), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat10", CubeListBuilder.create()
+                .texOffs(232, 30).addBox(-4.0F, -4.0F, 20.0F, 2, 20, 2), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat11", CubeListBuilder.create()
+                .texOffs(232, 2).addBox(-10.0F, -2.0F, 20.0F, 2, 22, 2), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat12", CubeListBuilder.create()
+                .texOffs(240, 0).addBox(2.0F, -6.0F, 20.0F, 2, 4, 4), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat13", CubeListBuilder.create()
+                .texOffs(240, 0).addBox(-4.0F, -8.0F, 20.0F, 2, 4, 4), PartPose.offset(0.0F, -4.0F, 0.0F));
+        seat.addOrReplaceChild("seat14", CubeListBuilder.create()
+                .texOffs(240, 0).addBox(-10.0F, -6.0F, 20.0F, 2, 4, 4), PartPose.offset(0.0F, -4.0F, 0.0F));
 
         //tube
-        this.tube = new ModelPart(this, 0, 32);
-        this.tube.setPos(0.0F, -12.0F, -12.0F);
-        this.tube.addBox(-2.0F, -4.0F, -4.0F, 14, 8, 8, 0.0F);
-        this.setRotateAngle(tube, -0.7853981633974483F, 0.0F, 0.0F);
+        PartDefinition tube = seat.addOrReplaceChild("tube", CubeListBuilder.create()
+                .texOffs(0, 32)
+                .addBox(-2.0F, -4.0F, -4.0F, 14, 8, 8),
+                PartPose.offsetAndRotation(0.0F, -12.0F, -12.0F, -0.7853981633974483F, 0.0F, 0.0F));
+        tube.addOrReplaceChild("tube1", CubeListBuilder.create()
+                .texOffs(92, 0).addBox(-2.0F, -4.0F, -36.0F, 14, 6, 6), PartPose.ZERO);
+        tube.addOrReplaceChild("tube2", CubeListBuilder.create()
+                .texOffs(78, 90).addBox(2.0F, -2.0F, -30.0F, 2, 2, 26), PartPose.ZERO);
+        tube.addOrReplaceChild("tube3", CubeListBuilder.create()
+                .texOffs(78, 90).addBox(6.0F, -2.0F, -30.0F, 2, 2, 26), PartPose.ZERO);
+        tube.addOrReplaceChild("tube4", CubeListBuilder.create()
+                .texOffs(92, 28).addBox(-2.0F, -16.0F, -2.0F, 14, 8, 2), PartPose.ZERO);
+        tube.addOrReplaceChild("tube5", CubeListBuilder.create()
+                .texOffs(92, 12).addBox(-2.0F, -7.0F, -2.0F, 14, 2, 2), PartPose.ZERO);
+        tube.addOrReplaceChild("tube6", CubeListBuilder.create()
+                .texOffs(92, 12).addBox(-2.0F, -16.0F, -34.0F, 14, 8, 2), PartPose.ZERO);
+        tube.addOrReplaceChild("tube7", CubeListBuilder.create()
+                .texOffs(92, 12).addBox(-2.0F, -7.0F, -34.0F, 14, 2, 2), PartPose.ZERO);
+        tube.addOrReplaceChild("tube8", CubeListBuilder.create()
+                .texOffs(92, 12).addBox(-2.0F, -16.0F, -40.0F, 14, 14, 2), PartPose.ZERO);
+        tube.addOrReplaceChild("tube9", CubeListBuilder.create()
+                .texOffs(0, 0).addBox(-2.0F, -16.0F, -60.0F, 14, 14, 18), PartPose.ZERO);
+        tube.addOrReplaceChild("tube10", CubeListBuilder.create()
+                .texOffs(0, 0).addBox(0.0F, -14.0F, -56.0F, 10, 10, 68), PartPose.ZERO);
+        tube.addOrReplaceChild("tube11", CubeListBuilder.create()
+                .texOffs(92, 50).addBox(-4.0F, -10.0F, 2.0F, 4, 4, 12), PartPose.ZERO);
+        tube.addOrReplaceChild("tube12", CubeListBuilder.create()
+                .texOffs(44, 32).addBox(-4.0F, -10.0F, 14.0F, 2, 2, 6), PartPose.ZERO);
+        tube.addOrReplaceChild("tube13", CubeListBuilder.create()
+                .texOffs(0, 48).addBox(2.0F, -12.0F, 12.0F, 6, 6, 4), PartPose.ZERO);
+        tube.addOrReplaceChild("tube14", CubeListBuilder.create()
+                .texOffs(92, 0).addBox(6.0F, -18.0F, -44.0F, 2, 2, 48), PartPose.ZERO);
+        tube.addOrReplaceChild("tube15", CubeListBuilder.create()
+                .texOffs(92, 0).addBox(2.0F, -18.0F, -44.0F, 2, 2, 48), PartPose.ZERO);
 
-        this.tube1 = new ModelPart(this, 92, 0);
-        this.tube1.setPos(0.0F, 0.0F, 0.0F);
-        this.tube1.addBox(-2.0F, -4.0F, -36.0F, 14, 6, 6, 0.0F);
-        this.tube2 = new ModelPart(this, 78, 90);
-        this.tube2.setPos(0.0F, 0.0F, 0.0F);
-        this.tube2.addBox(2.0F, -2.0F, -30.0F, 2, 2, 26, 0.0F);
-        this.tube3 = new ModelPart(this, 78, 90);
-        this.tube3.setPos(0.0F, 0.0F, 0.0F);
-        this.tube3.addBox(6.0F, -2.0F, -30.0F, 2, 2, 26, 0.0F);
-        this.tube4 = new ModelPart(this, 92, 28);
-        this.tube4.setPos(0.0F, 0.0F, 0.0F);
-        this.tube4.addBox(-2.0F, -16.0F, -2.0F, 14, 8, 2, 0.0F);
-        this.tube5 = new ModelPart(this, 92, 12);
-        this.tube5.setPos(0.0F, 0.0F, 0.0F);
-        this.tube5.addBox(-2.0F, -7.0F, -2.0F, 14, 2, 2, 0.0F);
-        this.tube6 = new ModelPart(this, 92, 12);
-        this.tube6.setPos(0.0F, 0.0F, 0.0F);
-        this.tube6.addBox(-2.0F, -16.0F, -34.0F, 14, 8, 2, 0.0F);
-        this.tube7 = new ModelPart(this, 92, 12);
-        this.tube7.setPos(0.0F, 0.0F, 0.0F);
-        this.tube7.addBox(-2.0F, -7.0F, -34.0F, 14, 2, 2, 0.0F);
-        this.tube8 = new ModelPart(this, 92, 12);
-        this.tube8.setPos(0.0F, 0.0F, 0.0F);
-        this.tube8.addBox(-2.0F, -16.0F, -40.0F, 14, 14, 2, 0.0F);
-        this.tube9 = new ModelPart(this, 0, 0);
-        this.tube9.setPos(0.0F, 0.0F, 0.0F);
-        this.tube9.addBox(-2.0F, -16.0F, -60.0F, 14, 14, 18, 0.0F);
-        this.tube10 = new ModelPart(this, 0, 0);
-        this.tube10.setPos(0.0F, 0.0F, 0.0F);
-        this.tube10.addBox(0.0F, -14.0F, -56.0F, 10, 10, 68, 0.0F);
-        this.tube11 = new ModelPart(this, 92, 50);
-        this.tube11.setPos(0.0F, 0.0F, 0.0F);
-        this.tube11.addBox(-4.0F, -10.0F, 2.0F, 4, 4, 12, 0.0F);
-        this.tube12 = new ModelPart(this, 44, 32);
-        this.tube12.setPos(0.0F, 0.0F, 0.0F);
-        this.tube12.addBox(-4.0F, -10.0F, 14.0F, 2, 2, 6, 0.0F);
-        this.tube13 = new ModelPart(this, 0, 48);
-        this.tube13.setPos(0.0F, 0.0F, 0.0F);
-        this.tube13.addBox(2.0F, -12.0F, 12.0F, 6, 6, 4, 0.0F);
-        this.tube14 = new ModelPart(this, 92, 0);
-        this.tube14.setPos(0.0F, 0.0F, 0.0F);
-        this.tube14.addBox(6.0F, -18.0F, -44.0F, 2, 2, 48, 0.0F);
-        this.tube15 = new ModelPart(this, 92, 0);
-        this.tube15.setPos(0.0F, 0.0F, 0.0F);
-        this.tube15.addBox(2.0F, -18.0F, -44.0F, 2, 2, 48, 0.0F);
-
-        this.tube.addChild(this.tube6);
-        this.seat.addChild(this.seat7);
-        this.tube.addChild(this.tube5);
-        this.seat.addChild(this.seat3);
-        this.seat.addChild(this.seat9);
-        this.tube.addChild(this.tube1);
-        this.tube.addChild(this.tube14);
-        this.seat.addChild(this.seat6);
-        this.seat.addChild(this.seat11);
-        this.base.addChild(this.base4);
-        this.tube.addChild(this.tube11);
-        this.seat.addChild(this.seat13);
-        this.seat.addChild(this.seat8);
-        this.seat.addChild(this.seat12);
-        this.seat.addChild(this.seat14);
-        this.tube.addChild(this.tube3);
-        this.tube.addChild(this.tube13);
-        this.tube.addChild(this.tube15);
-        this.base.addChild(this.base6);
-        this.tube.addChild(this.tube8);
-        this.base.addChild(this.base1);
-        this.seat.addChild(this.seat10);
-        this.tube.addChild(this.tube12);
-        this.tube.addChild(this.tube2);
-        this.tube.addChild(this.tube4);
-        this.seat.addChild(this.seat5);
-        this.base.addChild(this.base5);
-        this.base.addChild(this.base7);
-        this.tube.addChild(this.tube7);
-        this.seat.addChild(this.seat1);
-        this.seat.addChild(this.seat2);
-        this.base.addChild(this.base3);
-        this.seat.addChild(this.seat4);
-        this.base.addChild(this.base8);
-        this.base.addChild(this.base2);
-        this.tube.addChild(this.tube10);
-        this.tube.addChild(this.tube9);
-
-        this.seat.addChild(this.tube);
+        return LayerDefinition.create(mesh, 256, 128);
     }
 
     @Override
     public void render(PoseStack matrixStackIn, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        this.seat.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        this.base.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        int color = packColor(red, green, blue, alpha);
+        this.seat.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, color);
+        this.base.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, color);
     }
 
     public void setupRotations(float iYawDegree, float iPitchDegree) {
