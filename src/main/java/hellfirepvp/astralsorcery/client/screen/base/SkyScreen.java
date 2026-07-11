@@ -38,7 +38,7 @@ public interface SkyScreen {
         int rgbFrom, rgbTo;
         if (canSeeSky && angleTransparency > 1.0E-4) {
             float starBr = renderWorld.getStarBrightness(a) * 2;
-            float rain = renderWorld.getRainStrength(a);
+            float rain = renderWorld.getRainLevel(a);
             rgbFrom = RenderingUtils.clampToColorWithMultiplier(calcRGBFromWithRain(starBr, rain), angleTransparency).getRGB();
             rgbTo = RenderingUtils.clampToColorWithMultiplier(calcRGBToWithRain(starBr, rain), angleTransparency).getRGB();
         } else {

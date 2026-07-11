@@ -8,9 +8,12 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,8 +31,43 @@ public class InputScreen extends Screen {
     private double oMouseX, oMouseY;
     private boolean dragging = false;
 
+    // 1.21 port: Screen lost get/setBlitOffset; the mod's own gui draw helpers still layer by z,
+    // so the offset is kept here as a plain field.
+    private int blitOffset = 0;
+
+    @Nullable
+    private GuiGraphics currentGraphics = null;
+
     protected InputScreen(Component name) {
         super(name);
+    }
+
+    public int getBlitOffset() {
+        return this.blitOffset;
+    }
+
+    public void setBlitOffset(int blitOffset) {
+        this.blitOffset = blitOffset;
+    }
+
+    // 1.21 port: vanilla render() takes GuiGraphics; the mod's screens draw through their own
+    // PoseStack-based helpers, so bridge here and let subclasses keep overriding the PoseStack variant.
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+        this.currentGraphics = graphics;
+        this.render(graphics.pose(), mouseX, mouseY, pTicks);
+        this.currentGraphics = null;
+    }
+
+    public void render(PoseStack renderStack, int mouseX, int mouseY, float pTicks) {
+        if (this.currentGraphics != null) {
+            super.render(this.currentGraphics, mouseX, mouseY, pTicks);
+        }
+    }
+
+    @Nullable
+    public GuiGraphics getCurrentGraphics() {
+        return this.currentGraphics;
     }
 
     @Override

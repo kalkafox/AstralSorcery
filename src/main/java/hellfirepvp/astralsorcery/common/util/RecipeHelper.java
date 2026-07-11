@@ -18,9 +18,10 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
@@ -68,19 +69,16 @@ public class RecipeHelper {
     @Nonnull
     public static Optional<Tuple<ItemStack, Float>> findSmeltingResult(Level level, ItemStack from) {
         RecipeManager mgr = level.getRecipeManager();
-        Container inv = new SimpleContainer(from);
-        Optional<Recipe<Container>> optRecipe = (Optional<Recipe<Container>>) ObjectUtils.firstNonNull(
-                mgr.getRecipe(RecipeType.SMELTING, inv, level),
-                mgr.getRecipe(RecipeType.CAMPFIRE_COOKING, inv, level),
-                mgr.getRecipe(RecipeType.SMOKING, inv, level),
+        SingleRecipeInput input = new SingleRecipeInput(from);
+        Optional<? extends RecipeHolder<? extends AbstractCookingRecipe>> optRecipe = ObjectUtils.<Optional<? extends RecipeHolder<? extends AbstractCookingRecipe>>>firstNonNull(
+                mgr.getRecipeFor(RecipeType.SMELTING, input, level),
+                mgr.getRecipeFor(RecipeType.CAMPFIRE_COOKING, input, level),
+                mgr.getRecipeFor(RecipeType.SMOKING, input, level),
                 Optional.empty());
-        return optRecipe.map(recipe -> {
-            ItemStack smeltResult = recipe.assemble(inv).copy();
-            float futureXp = 0;
-            if (recipe instanceof AbstractCookingRecipe) {
-                futureXp = ((AbstractCookingRecipe) recipe).getExperience();
-            }
-            return new Tuple<>(smeltResult, futureXp);
+        return optRecipe.map(holder -> {
+            AbstractCookingRecipe recipe = holder.value();
+            ItemStack smeltResult = recipe.assemble(input, level.registryAccess()).copy();
+            return new Tuple<>(smeltResult, recipe.getExperience());
         });
     }
 

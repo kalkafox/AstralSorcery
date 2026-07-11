@@ -12,7 +12,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -41,7 +43,8 @@ public class RenderPageRecipe extends RenderPageRecipeTemplate {
         this.recipeId = recipeId;
     }
 
-    public static RenderPageRecipe fromRecipe(@Nullable ResearchNode node, int nodePage, Recipe<?> recipe) {
+    public static RenderPageRecipe fromRecipe(@Nullable ResearchNode node, int nodePage, RecipeHolder<?> recipeHolder) {
+        Recipe<?> recipe = recipeHolder.value();
         NonNullList<Ingredient> ingredients = recipe.getIngredients();
         Map<Integer, Ingredient> map = new HashMap<>();
         for (int i = 0; i < 9; i++) {
@@ -63,7 +66,8 @@ public class RenderPageRecipe extends RenderPageRecipeTemplate {
                 }
             }
         }
-        return new RenderPageRecipe(node, nodePage, map, recipe.getResultItem(), recipe.getId());
+        return new RenderPageRecipe(node, nodePage, map,
+                recipe.getResultItem(Minecraft.getInstance().level.registryAccess()), recipeHolder.id());
     }
 
     @Override

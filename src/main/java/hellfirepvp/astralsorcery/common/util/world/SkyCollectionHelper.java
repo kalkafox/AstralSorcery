@@ -73,7 +73,7 @@ public class SkyCollectionHelper {
     }
 
     private static float noiseSettings(long seed, int posX, int posZ) {
-        sharedRand.initNoise(
+        sharedRand.setSeed(
                 simple_hash(new int[] {
                         (int) (seed),
                         (int) (seed >> 32),

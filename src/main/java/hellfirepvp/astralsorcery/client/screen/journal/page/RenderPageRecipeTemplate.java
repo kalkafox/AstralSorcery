@@ -138,7 +138,7 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
     protected void renderItemStack(PoseStack renderStack, float offsetX, float offsetY, float blitOffset, float scale, ItemStack stack) {
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
-        Lighting.turnBackOn();
+        Lighting.setupFor3DItems();
 
         renderStack.pushPose();
         renderStack.translate(offsetX, offsetY, blitOffset);
@@ -146,16 +146,16 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
         RenderingUtils.renderItemStackGUI(renderStack, stack, null);
         renderStack.popPose();
 
-        Lighting.turnOff();
+        Lighting.setupForFlatItems();
         RenderSystem.depthMask(false);
     }
 
     public boolean handleRecipeNameCopyClick(double xpos, double mouseZ, SimpleAltarRecipe recipe) {
-        if (Minecraft.getInstance().options.renderDebug &&
+        if (Minecraft.getInstance().getDebugOverlay().showDebugScreen() &&
                 Screen.hasControlDown() &&
                 this.thisFrameOuputStack.getA().contains(xpos, mouseZ)) {
             String recipeName = recipe.getId().toString();
-            Minecraft.getInstance().keyboardHandler.setClipboardString(recipeName);
+            Minecraft.getInstance().keyboardHandler.setClipboard(recipeName);
             Minecraft.getInstance().player.sendSystemMessage(Component.translatable("astralsorcery.misc.ctrlcopy.copied", recipeName));
             return true;
         }
@@ -317,7 +317,7 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
             ItemStack stack = this.thisFrameOuputStack.getB();
             addInputInformation(stack, null, tooltip);
 
-            if (Minecraft.getInstance().options.renderDebug) {
+            if (Minecraft.getInstance().getDebugOverlay().showDebugScreen()) {
                 tooltip.add(MutableComponent.EMPTY);
                 tooltip.add(Component.translatable("astralsorcery.misc.recipename", recipeName.toString()).withStyle(ChatFormatting.LIGHT_PURPLE).withStyle(ChatFormatting.ITALIC));
                 tooltip.add(Component.translatable("astralsorcery.misc.ctrlcopy", recipeName.toString()).withStyle(ChatFormatting.LIGHT_PURPLE).withStyle(ChatFormatting.ITALIC));
@@ -327,7 +327,7 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
 
     protected void addInputInformation(ItemStack stack, @Nullable Ingredient stackIngredient, List<FormattedText> tooltip) {
         try {
-            tooltip.addAll(stack.getTooltipLines(Minecraft.getInstance().player, Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.TooltipFlags.ADVANCED : TooltipFlag.TooltipFlags.NORMAL));
+            tooltip.addAll(stack.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(Minecraft.getInstance().level), Minecraft.getInstance().player, Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL));
         } catch (Exception exc) {
             tooltip.add(Component.translatable("astralsorcery.misc.tooltipError").withStyle(ChatFormatting.RED));
         }
@@ -352,9 +352,9 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
                     FormattedText cmp = null;
                     for (FluidStack f : fluids) {
                         if (cmp == null) {
-                            cmp = f.getFluid().getAttributes().getDisplayName(f);
+                            cmp = f.getFluid().getFluidType().getDescription(f);
                         } else {
-                            cmp = Component.translatable("astralsorcery.misc.input.fluid.chain", cmp, f.getFluid().getAttributes().getDisplayName(f)).withStyle(ChatFormatting.GRAY);
+                            cmp = Component.translatable("astralsorcery.misc.input.fluid.chain", cmp, f.getFluid().getFluidType().getDescription(f)).withStyle(ChatFormatting.GRAY);
                         }
                     }
                     tooltip.add(MutableComponent.EMPTY);

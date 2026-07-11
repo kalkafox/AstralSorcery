@@ -36,11 +36,12 @@ public abstract class ScreenJournalOverlay extends ScreenJournal {
         return origin.isPauseScreen();
     }
 
+    // 1.21 port: init(Minecraft, int, int) is final now; re-init the origin screen from the protected hook.
     @Override
-    public void init(Minecraft mc, int width, int height) {
-        super.init(mc, width, height);
+    protected void init() {
+        super.init();
 
-        origin.init(mc, width, height);
+        origin.init(Minecraft.getInstance(), this.width, this.height);
     }
 
     @Override

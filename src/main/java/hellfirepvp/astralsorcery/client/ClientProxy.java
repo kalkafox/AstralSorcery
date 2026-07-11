@@ -114,6 +114,7 @@ public class ClientProxy extends CommonProxy {
         modEventBus.addListener(this::onClientSetup);
         modEventBus.addListener(this::onRegisterRenderers);
         modEventBus.addListener(this::onAddLayers);
+        modEventBus.addListener(RegistryContainerTypes::initClient);
     }
 
     @Override
@@ -175,7 +176,6 @@ public class ClientProxy extends CommonProxy {
     }
 
     private void onClientSetup(FMLClientSetupEvent event) {
-        RegistryContainerTypes.initClient();
         RegistryKeyBindings.init();
         RegistryBlockRenderTypes.initBlocks();
         RegistryBlockRenderTypes.initFluids();

@@ -78,6 +78,10 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
     }
 
     @Override
+    public ContainerObservatory getMenu() {
+        return container;
+    }
+
     public ContainerObservatory getMenuProvider() {
         return container;
     }
@@ -126,7 +130,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
     @Override
     public void onClose() {
         super.onClose();
-        EventFlags.GUI_CLOSING.executeWithFlag(() -> Minecraft.getInstance().player.onClose());
+        EventFlags.GUI_CLOSING.executeWithFlag(() -> Minecraft.getInstance().player.closeContainer());
     }
 
     @Override
@@ -134,7 +138,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
         RenderSystem.enableDepthTest();
         super.render(renderStack, xpos, ypos, pTicks);
 
-        Minecraft.getInstance().options.setPointOfView(CameraType.FIRST_PERSON);
+        Minecraft.getInstance().options.setCameraType(CameraType.FIRST_PERSON);
 
         double guiFactor = Minecraft.getInstance().getWindow().getGuiScale();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -151,7 +155,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
     private void drawObservatoryScreen(PoseStack renderStack, float pTicks) {
         boolean canSeeSky = this.canObserverSeeSky(this.getTile().getBlockPos(), 2);
         double guiFactor = Minecraft.getInstance().getWindow().getGuiScale();
-        float pitch = Minecraft.getInstance().player.getPitch(pTicks);
+        float pitch = Minecraft.getInstance().player.getViewXRot(pTicks);
         float angleOpacity = 0F;
         if (pitch < -30F) {
             angleOpacity = 1F;
@@ -183,7 +187,7 @@ public class ScreenObservatory extends TileConstellationDiscoveryScreen<TileObse
             playerYaw -= 360F;
         }
         float playerPitch = Minecraft.getInstance().player.getXRot();
-        float rainBr = 1F - Minecraft.getInstance().level.getRainStrength(pTicks);
+        float rainBr = 1F - Minecraft.getInstance().level.getRainLevel(pTicks);
 
         WorldContext ctx = SkyHandler.getContext(Minecraft.getInstance().level, LogicalSide.CLIENT);
         if (ctx != null && canSeeSky) {

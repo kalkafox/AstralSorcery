@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.base;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.container.ContainerTileEntity;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.entity.player.Inventory;
@@ -30,18 +30,17 @@ public abstract class ContainerBaseScreen<T extends BlockEntity, C extends Conta
     }
 
     @Override
-    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
-        this.renderBackground(renderStack);
-        super.render(renderStack, xpos, ypos, pTicks);
-        this.renderHoveredTooltip(renderStack, xpos, ypos);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+        super.render(graphics, mouseX, mouseY, pTicks);
+        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    protected void containerTick() {
+        super.containerTick();
 
-        BlockEntity te = this.container.getTileEntity();
-        if (te.isRemoved() || !this.container.stillValid(Minecraft.getInstance().player)) {
+        BlockEntity te = this.getMenu().getTileEntity();
+        if (te.isRemoved() || !this.getMenu().stillValid(Minecraft.getInstance().player)) {
             this.onClose();
         }
     }

@@ -12,6 +12,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.GuiGraphics;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
@@ -34,6 +35,9 @@ public abstract class ScreenCustomContainer<T extends AbstractContainerMenu> ext
 
     private final int sWidth, sHeight;
 
+    // 1.21 port: Screen lost get/setBlitOffset; kept as a plain field for the mod's own z-layered helpers.
+    private int blitOffset = 0;
+
     public ScreenCustomContainer(T screenContainer, Inventory inv, Component name, int width, int height) {
         super(screenContainer, inv, name);
         this.sWidth = width;
@@ -44,25 +48,43 @@ public abstract class ScreenCustomContainer<T extends AbstractContainerMenu> ext
 
     @Override
     protected void init() {
-        this.xSize = sWidth;
-        this.ySize = sHeight;
+        this.imageWidth = sWidth;
+        this.imageHeight = sHeight;
         super.init();
     }
 
-    @Override
     public T getMenuProvider() {
-        return this.container;
+        return this.getMenu();
     }
 
+    public int getBlitOffset() {
+        return this.blitOffset;
+    }
 
-    @Override
-    public void render(PoseStack renderStack, int xpos, int ypos, float pTicks) {
-        this.renderBackground(renderStack);
-        super.render(renderStack, xpos, ypos, pTicks);
-        this.renderHoveredTooltip(renderStack, xpos, ypos);
+    public void setBlitOffset(int blitOffset) {
+        this.blitOffset = blitOffset;
     }
 
     @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float pTicks) {
+        super.render(graphics, mouseX, mouseY, pTicks);
+        this.renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    // 1.21 port: bridge the GuiGraphics-based vanilla hooks to the PoseStack-based
+    // methods the mod's screens actually implement.
+    @Override
+    protected void renderBg(GuiGraphics graphics, float pTicks, int mouseX, int mouseY) {
+        this.drawGuiContainerBackgroundLayer(graphics.pose(), pTicks, mouseX, mouseY);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        this.renderLabels(graphics.pose(), mouseX, mouseY);
+    }
+
+    protected void renderLabels(PoseStack renderStack, int mouseX, int mouseY) {}
+
     protected void drawGuiContainerBackgroundLayer(PoseStack renderStack, float a, int xpos, int ypos) {
         this.getBackgroundTexture().bindTexture();
 

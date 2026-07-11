@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -168,7 +170,7 @@ public class RenderingDrawUtils {
 
             int maxWidth = 0;
             for (Tuple<ItemStack, FormattedText> toolTip : tooltipData) {
-                Font customFR = toolTip.getA().getItem().getFont(toolTip.getA());
+                Font customFR = IClientItemExtensions.of(toolTip.getA()).getFont(toolTip.getA(), IClientItemExtensions.FontContext.TOOLTIP);
                 if (customFR == null) {
                     customFR = font;
                 }
@@ -190,7 +192,7 @@ public class RenderingDrawUtils {
             int formatWidth = anyItemFound ? maxWidth - stackBoxSize : maxWidth;
             List<Tuple<ItemStack, List<FormattedCharSequence>>> lengthLimitedToolTip = new LinkedList<>();
             for (Tuple<ItemStack, FormattedText> toolTip : tooltipData) {
-                Font customFR = toolTip.getA().getItem().getFont(toolTip.getA());
+                Font customFR = IClientItemExtensions.of(toolTip.getA()).getFont(toolTip.getA(), IClientItemExtensions.FontContext.TOOLTIP);
                 if (customFR == null) {
                     customFR = font;
                 }
@@ -256,7 +258,7 @@ public class RenderingDrawUtils {
                     renderStack.translate(0, 2, 0);
                 }
                 for (FormattedCharSequence text : toolTip.getB()) {
-                    Font customFR = toolTip.getA().getItem().getFont(toolTip.getA());
+                    Font customFR = IClientItemExtensions.of(toolTip.getA()).getFont(toolTip.getA(), IClientItemExtensions.FontContext.TOOLTIP);
                     if (customFR == null) {
                         customFR = font;
                     }
@@ -324,7 +326,7 @@ public class RenderingDrawUtils {
     }
 
     public static void renderLightRayFan(PoseStack renderStack, MultiBufferSource buffer, Color color, long seed, int minScale, float scale, int count) {
-        random.initNoise(seed);
+        random.setSeed(seed);
 
         float f1 = ClientScheduler.getClientTick() / 400.0F;
         float f2 = 0.0F;

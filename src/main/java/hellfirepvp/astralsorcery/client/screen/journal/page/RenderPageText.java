@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal.page;
 
+import net.minecraft.locale.Language;
+
 import net.minecraft.network.chat.Component;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -42,7 +44,7 @@ public class RenderPageText extends RenderablePage {
     }
 
     private List<FormattedCharSequence> buildLines(String unlocText) {
-        String text = Language.getInstance().func_230503_a_(unlocText);
+        String text = Language.getInstance().getOrDefault(unlocText);
         List<FormattedCharSequence> lines = new LinkedList<>();
         for (String segment : text.split("<NL>")) {
             lines.addAll(font.split(Component.literal(segment), JournalPage.DEFAULT_WIDTH));

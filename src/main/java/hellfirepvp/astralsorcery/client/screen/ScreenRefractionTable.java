@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen;
 
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -286,12 +288,12 @@ public class ScreenRefractionTable extends TileEntityScreen<TileRefractionTable>
             renderStack.popPose();
 
             if (itemRct.contains(xpos, ypos)) {
-                Font custom = from.getItem().getFont(from);
+                Font custom = IClientItemExtensions.of(from).getFont(from, IClientItemExtensions.FontContext.TOOLTIP);
                 if (custom != null) {
                     tooltipRenderer = custom;
                 }
-                tooltip.addAll(from.getTooltipLines(getMinecraft().player, Minecraft.getInstance().options.advancedItemTooltips ?
-                        TooltipFlag.TooltipFlags.ADVANCED : TooltipFlag.TooltipFlags.NORMAL));
+                tooltip.addAll(from.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(Minecraft.getInstance().level), getMinecraft().player, Minecraft.getInstance().options.advancedItemTooltips ?
+                        TooltipFlag.ADVANCED : TooltipFlag.NORMAL));
             }
         }
         ItemStack glass = this.getTile().getGlassStack();
@@ -303,12 +305,12 @@ public class ScreenRefractionTable extends TileEntityScreen<TileRefractionTable>
             renderStack.popPose();
 
             if (itemRct.contains(xpos, ypos)) {
-                Font custom = glass.getItem().getFont(glass);
+                Font custom = IClientItemExtensions.of(glass).getFont(glass, IClientItemExtensions.FontContext.TOOLTIP);
                 if (custom != null) {
                     tooltipRenderer = custom;
                 }
-                tooltip.addAll(glass.getTooltipLines(getMinecraft().player, Minecraft.getInstance().options.advancedItemTooltips ?
-                        TooltipFlag.TooltipFlags.ADVANCED : TooltipFlag.TooltipFlags.NORMAL));
+                tooltip.addAll(glass.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(Minecraft.getInstance().level), getMinecraft().player, Minecraft.getInstance().options.advancedItemTooltips ?
+                        TooltipFlag.ADVANCED : TooltipFlag.NORMAL));
             }
         }
 

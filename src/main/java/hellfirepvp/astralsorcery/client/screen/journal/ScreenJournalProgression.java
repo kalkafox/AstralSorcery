@@ -222,7 +222,7 @@ public class ScreenJournalProgression extends ScreenJournal {
             if (this.searchHoverNode == null) {
                 Rectangle rctDrawn = new Rectangle(offsetX - 2, startOffsetY - 2, (int) (maxLength + 4), offsetY - startOffsetY);
                 if (rctDrawn.contains(xpos, ypos)) {
-                    fill(renderStack, rctDrawn.x, rctDrawn.y, rctDrawn.x + rctDrawn.width, rctDrawn.y + rctDrawn.height, boxColor.getRGB());
+                    this.getCurrentGraphics().fill(rctDrawn.x, rctDrawn.y, rctDrawn.x + rctDrawn.width, rctDrawn.y + rctDrawn.height, boxColor.getRGB());
                     this.searchHoverNode = node;
                 }
             }
@@ -252,7 +252,7 @@ public class ScreenJournalProgression extends ScreenJournal {
             if (this.searchHoverNode == null) {
                 Rectangle rctDrawn = new Rectangle(offsetX - 2, startOffsetY - 2,  (int) (maxLength + 4), offsetY - startOffsetY);
                 if (rctDrawn.contains(xpos, ypos)) {
-                    fill(renderStack, rctDrawn.x, rctDrawn.y, rctDrawn.x + rctDrawn.width, rctDrawn.y + rctDrawn.height, boxColor.getRGB());
+                    this.getCurrentGraphics().fill(rctDrawn.x, rctDrawn.y, rctDrawn.x + rctDrawn.width, rctDrawn.y + rctDrawn.height, boxColor.getRGB());
                     this.searchHoverNode = node;
                 }
             }
@@ -420,7 +420,7 @@ public class ScreenJournalProgression extends ScreenJournal {
     }
 
     @Override
-    public boolean mouseScrolled(double xpos, double ypos, double scroll) {
+    public boolean mouseScrolled(double xpos, double ypos, double scrollX, double scroll) {
         if (this.inProgressView()) {
             if (scroll < 0) {
                 progressionRenderer.handleZoomOut();

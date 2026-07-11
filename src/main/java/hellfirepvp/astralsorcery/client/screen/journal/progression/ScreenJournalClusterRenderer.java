@@ -215,10 +215,10 @@ public class ScreenJournalClusterRenderer {
                 renderStack.translate(3, 3, 100);
                 renderStack.scale(0.75F, 0.75F, 1);
 
-                Lighting.turnBackOn();
+                Lighting.setupFor3DItems();
                 RenderingUtils.renderTranslucentItemStackModelGUI(node.getRenderItemStack(ClientScheduler.getClientTick()),
                         renderStack, Color.WHITE, Blending.DEFAULT, Mth.clamp((int) (alpha * 255F), 0, 255));
-                Lighting.turnOff();
+                Lighting.setupForFlatItems();
 
                 renderStack.popPose();
                 break;
@@ -319,10 +319,10 @@ public class ScreenJournalClusterRenderer {
     private void drawResearchItemBackground(double zoomedWH, double xAdd, double yAdd, float blitOffset) {
         RenderSystem.enableBlend();
         RenderingUtils.draw(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR, buf -> {
-            buf.addVertex(xAdd,            yAdd + zoomedWH, blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(0, 1);
-            buf.addVertex(xAdd + zoomedWH, yAdd + zoomedWH, blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(1, 1);
-            buf.addVertex(xAdd + zoomedWH, yAdd,            blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(1, 0);
-            buf.addVertex(xAdd,            yAdd,            blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(0, 0);
+            buf.addVertex((float) xAdd,            (float) (yAdd + zoomedWH), blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(0, 1);
+            buf.addVertex((float) (xAdd + zoomedWH), (float) (yAdd + zoomedWH), blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(1, 1);
+            buf.addVertex((float) (xAdd + zoomedWH), (float) yAdd,            blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(1, 0);
+            buf.addVertex((float) xAdd,            (float) yAdd,            blitOffset).setColor(alpha, alpha, alpha, alpha).setUv(0, 0);
         });
         RenderSystem.disableBlend();
     }

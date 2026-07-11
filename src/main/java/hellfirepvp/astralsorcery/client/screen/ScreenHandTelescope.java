@@ -100,8 +100,8 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
     }
 
     private void drawTelescopeCell(PoseStack renderStack, float pTicks) {
-        boolean canSeeSky = this.canObserverSeeSky(Minecraft.getInstance().player.position(), 1);
-        float pitch = Minecraft.getInstance().player.getPitch(pTicks);
+        boolean canSeeSky = this.canObserverSeeSky(Minecraft.getInstance().player.blockPosition(), 1);
+        float pitch = Minecraft.getInstance().player.getViewXRot(pTicks);
         float angleOpacity = 0F;
         if (pitch < -60F) {
             angleOpacity = 1F;
@@ -172,7 +172,7 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
                     if ((Math.abs(diffYaw) <= maxDistance || Math.abs(playerYaw + 360F) <= maxDistance) &&
                             Math.abs(diffPitch) <= maxDistance) {
 
-                        float rainBr = 1F - Minecraft.getInstance().level.getRainStrength(pTicks);
+                        float rainBr = 1F - Minecraft.getInstance().level.getRainLevel(pTicks);
                         int wPart = Mth.floor(this.getGuiWidth() * 0.1F);
                         int hPart = Mth.floor(this.getGuiHeight() * 0.1F);
                         float xFactor = diffYaw   / 8F;
@@ -226,7 +226,7 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
         double xDiff = mc.mouseHandler.xpos() - (x / ((double) mc.getWindow().getGuiScaledWidth()  / mc.getWindow().getWidth()));
         double yDiff = mc.mouseHandler.ypos() - (y / ((double) mc.getWindow().getGuiScaledHeight() / mc.getWindow().getHeight()));
         if (Minecraft.getInstance().player != null &&
-                Minecraft.getInstance().player.getPitch(1.0F) <= -89.99F && yDiff > 0) {
+                Minecraft.getInstance().player.getViewXRot(1.0F) <= -89.99F && yDiff > 0) {
             yDiff = 0;
         }
 

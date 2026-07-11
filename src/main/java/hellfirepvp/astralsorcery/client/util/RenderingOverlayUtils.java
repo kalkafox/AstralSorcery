@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.network.chat.Component;
@@ -116,7 +118,7 @@ public class RenderingOverlayUtils {
         for (Tuple<ItemStack, Integer> stackTpl : items) {
             ItemStack stack = stackTpl.getA();
             Font fr;
-            if ((fr = stack.getItem().getFont(stack)) == null) {
+            if ((fr = IClientItemExtensions.of(stack).getFont(stack, IClientItemExtensions.FontContext.TOOLTIP)) == null) {
                 fr = font;
             }
             String amountStr = String.valueOf(stackTpl.getB());

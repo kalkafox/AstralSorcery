@@ -126,7 +126,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
 
     protected float multiplyStarBrightness(float pTicks, float brightnessIn) {
         brightnessIn *= Minecraft.getInstance().level.getStarBrightness(pTicks) * 2;
-        return Mth.clamp(brightnessIn * (1F - Minecraft.getInstance().level.getRainStrength(pTicks)), 0, 1);
+        return Mth.clamp(brightnessIn * (1F - Minecraft.getInstance().level.getRainLevel(pTicks)), 0, 1);
     }
 
     @Override
@@ -260,7 +260,7 @@ public abstract class ConstellationDiscoveryScreen<D extends ConstellationDiscov
     protected boolean canDraw() {
         return !Minecraft.getInstance().mouseHandler.isMouseGrabbed() &&
                 DayTimeHelper.isNight(Minecraft.getInstance().level) &&
-                Minecraft.getInstance().level.getRainStrength(1.0F) <= 0.1F;
+                Minecraft.getInstance().level.getRainLevel(1.0F) <= 0.1F;
     }
 
     protected void clearDrawing() {

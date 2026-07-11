@@ -26,7 +26,6 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
 
@@ -99,7 +98,7 @@ public class RenderPageLiquidInfusion extends RenderPageRecipeTemplate {
         this.renderHoverTooltips(renderStack, xpos, ypos, z, this.recipe.getId());
         this.renderInfoStarTooltips(renderStack, x, y, z, xpos, ypos, (toolTip) -> {
             toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.liquid",
-                    this.recipe.getLiquidInput().getAttributes().getDisplayName(new FluidStack(this.recipe.getLiquidInput(), FluidType.BUCKET_VOLUME))));
+                    this.recipe.getLiquidInput().getFluidType().getDescription(new FluidStack(this.recipe.getLiquidInput(), FluidType.BUCKET_VOLUME))));
             toolTip.add(Component.translatable("astralsorcery.journal.recipe.infusion.chance.format",
                     this.getInfuserChanceDescription(this.recipe.getConsumptionChance())));
             if (this.recipe.doesConsumeMultipleFluids()) {

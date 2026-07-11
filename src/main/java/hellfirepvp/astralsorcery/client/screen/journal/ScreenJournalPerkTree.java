@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.client.screen.journal;
 
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.network.chat.MutableComponent;
@@ -61,6 +63,7 @@ import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.sound.SoundHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.world.item.TooltipFlag;
@@ -288,12 +291,12 @@ public class ScreenJournalPerkTree extends ScreenJournal {
                 Integer slot = this.slotsSocketMenu.get(r);
                 ItemStack in = player.getInventory().getItem(slot);
                 if (!in.isEmpty()) {
-                    Font fr = in.getItem().getFont(in);
+                    Font fr = IClientItemExtensions.of(in).getFont(in, IClientItemExtensions.FontContext.TOOLTIP);
                     if (fr == null) {
                         fr = Minecraft.getInstance().font;
                     }
                     List<FormattedText> toolTip = new ArrayList<>();
-                    toolTip.addAll(this.getTooltipFromItem(in));
+                    toolTip.addAll(getTooltipFromItem(Minecraft.getInstance(), in));
                     RenderingDrawUtils.renderBlueTooltipComponents(renderStack, xpos, ypos, this.getGuiZLevel(), toolTip, fr, true);
                 }
                 return;
@@ -308,8 +311,8 @@ public class ScreenJournalPerkTree extends ScreenJournal {
 
         if (!this.foundSeals.isEmpty() && rectSealBox.contains(xpos - leftPos, ypos - topPos)) {
             List<FormattedText> toolTip = new ArrayList<>();
-            toolTip.addAll(this.foundSeals.getTooltipLines(Minecraft.getInstance().player,
-                    Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.TooltipFlags.ADVANCED : TooltipFlag.TooltipFlags.NORMAL));
+            toolTip.addAll(this.foundSeals.getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(Minecraft.getInstance().level), Minecraft.getInstance().player,
+                    Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL));
             toolTip.add(MutableComponent.EMPTY);
             toolTip.add(Component.translatable("perk.info.astralsorcery.sealed.usage").withStyle(ChatFormatting.GRAY));
 
@@ -350,7 +353,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
                             toolTip.add(cmp.withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC));
                         }
                     }
-                    if (Minecraft.getInstance().options.renderDebug) {
+                    if (Minecraft.getInstance().getDebugOverlay().showDebugScreen()) {
                         toolTip.add(MutableComponent.EMPTY);
                         toolTip.add(Component.literal(perk.getRegistryName().toString()).withStyle(ChatFormatting.GRAY));
                         toolTip.add(Component.translatable("astralsorcery.misc.ctrlcopy").withStyle(ChatFormatting.GRAY));
@@ -679,7 +682,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         drawSeal(batch, renderStack, size, x, y, spriteOffsetTick, 1F);
     }
 
-    private void drawSeal(BufferBuilder vb, PoseStack renderStack, double size, double x, double y, long spriteOffsetTick, float alpha) {
+    private void drawSeal(VertexConsumer vb, PoseStack renderStack, double size, double x, double y, long spriteOffsetTick, float alpha) {
         SpriteSheetResource tex = SpritesAS.SPR_PERK_SEAL;
         if (tex == null) {
             return;
@@ -903,7 +906,7 @@ public class ScreenJournalPerkTree extends ScreenJournal {
     }
 
     @Override
-    public boolean mouseScrolled(double xpos, double ypos, double scroll) {
+    public boolean mouseScrolled(double xpos, double ypos, double scrollX, double scroll) {
         if (scroll < 0) {
             this.sizeHandler.handleZoomOut();
             this.rescaleMouse();
@@ -1006,9 +1009,9 @@ public class ScreenJournalPerkTree extends ScreenJournal {
         for (Map.Entry<AbstractPerk, Rectangle.Float> rctPerk : this.thisFramePerks.entrySet()) {
             if (rctPerk.getValue().contains(xpos, ypos) && this.guiBox.isInBox(xpos - leftPos, ypos - topPos)) {
                 AbstractPerk perk = rctPerk.getKey();
-                if (mouseButton == 0 && mc.options.renderDebug && hasControlDown()) {
+                if (mouseButton == 0 && mc.getDebugOverlay().showDebugScreen() && hasControlDown()) {
                     String perkKey = perk.getRegistryName().toString();
-                    Minecraft.getInstance().keyboardHandler.setClipboardString(perkKey);
+                    Minecraft.getInstance().keyboardHandler.setClipboard(perkKey);
                     mc.player.sendSystemMessage(Component.translatable("astralsorcery.misc.ctrlcopy.copied", perkKey));
                     break;
                 }

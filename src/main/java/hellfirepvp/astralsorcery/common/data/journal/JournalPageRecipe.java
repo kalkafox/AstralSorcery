@@ -17,7 +17,8 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchNode;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.util.RecipeHelper;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.resources.ResourceLocation;
@@ -37,9 +38,9 @@ import java.util.function.Supplier;
  */
 public class JournalPageRecipe implements JournalPage {
 
-    private final Supplier<Recipe<?>> recipeProvider;
+    private final Supplier<RecipeHolder<?>> recipeProvider;
 
-    private JournalPageRecipe(Supplier<Recipe<?>> recipeProvider) {
+    private JournalPageRecipe(Supplier<RecipeHolder<?>> recipeProvider) {
         this.recipeProvider = recipeProvider;
     }
 
@@ -50,16 +51,7 @@ public class JournalPageRecipe implements JournalPage {
                 throw new IllegalStateException("Not connected to a server, but calling GUI code?");
             }
 
-            Recipe<?> recipe = mgr.getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).get(recipeId);
-            if (recipe != null) {
-                return recipe;
-            }
-
-            recipe = mgr.getRecipes(RecipeType.CRAFTING).get(recipeId);
-            if (recipe != null) {
-                return recipe;
-            }
-            return null;
+            return mgr.byKey(recipeId).orElse(null);
         });
     }
 
@@ -70,25 +62,20 @@ public class JournalPageRecipe implements JournalPage {
                 throw new IllegalStateException("Not connected to a server, but calling GUI code?");
             }
 
-            Recipe<?> recipe = mgr.getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).values()
+            RecipeHolder<?> recipe = mgr.getAllRecipesFor(RecipeTypesAS.TYPE_ALTAR.getType())
                     .stream()
-                    .map(r -> (SimpleAltarRecipe) r)
-                    .filter(r -> outputTest.test(r.getOutputForRender(Collections.emptyList())))
+                    .filter(h -> outputTest.test(((SimpleAltarRecipe) h.value()).getOutputForRender(Collections.emptyList())))
                     .findFirst()
                     .orElse(null);
             if (recipe != null) {
                 return recipe;
             }
 
-            recipe = mgr.getRecipes(RecipeType.CRAFTING).values()
+            return mgr.getAllRecipesFor(RecipeType.CRAFTING)
                     .stream()
-                    .filter(r -> outputTest.test(r.getResultItem()))
+                    .filter(h -> outputTest.test(h.value().getResultItem(Minecraft.getInstance().level.registryAccess())))
                     .findFirst()
                     .orElse(null);
-            if (recipe != null) {
-                return recipe;
-            }
-            return null;
         });
     }
 
@@ -99,34 +86,29 @@ public class JournalPageRecipe implements JournalPage {
                 throw new IllegalStateException("Not connected to a server, but calling GUI code?");
             }
 
-            Recipe<?> recipe = mgr.getRecipes(RecipeType.CRAFTING).values()
+            RecipeHolder<?> recipe = mgr.getAllRecipesFor(RecipeType.CRAFTING)
                     .stream()
-                    .filter(r -> outputTest.test(r.getResultItem()))
+                    .filter(h -> outputTest.test(h.value().getResultItem(Minecraft.getInstance().level.registryAccess())))
                     .findFirst()
                     .orElse(null);
             if (recipe != null) {
                 return recipe;
             }
 
-            recipe = mgr.getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).values()
+            return mgr.getAllRecipesFor(RecipeTypesAS.TYPE_ALTAR.getType())
                     .stream()
-                    .map(r -> (SimpleAltarRecipe) r)
-                    .filter(r -> outputTest.test(r.getOutputForRender(Collections.emptyList())))
+                    .filter(h -> outputTest.test(((SimpleAltarRecipe) h.value()).getOutputForRender(Collections.emptyList())))
                     .findFirst()
                     .orElse(null);
-            if (recipe != null) {
-                return recipe;
-            }
-            return null;
         });
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public RenderablePage buildRenderPage(ResearchNode node, int nodePage) {
-        Recipe<?> recipe = this.recipeProvider.get();
-        if (recipe instanceof SimpleAltarRecipe) {
-            return new RenderPageAltarRecipe(node, nodePage, (SimpleAltarRecipe) recipe);
+        RecipeHolder<?> recipe = this.recipeProvider.get();
+        if (recipe != null && recipe.value() instanceof SimpleAltarRecipe altarRecipe) {
+            return new RenderPageAltarRecipe(node, nodePage, altarRecipe);
         } else if (recipe != null) {
             return RenderPageRecipe.fromRecipe(node, nodePage, recipe);
         } else {

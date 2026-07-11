@@ -183,7 +183,7 @@ public class ScreenTelescope extends TileConstellationDiscoveryScreen<TileTelesc
                     Point pos = info.getCameraPosition();
                     int size = (int) info.getRenderSize();
 
-                    float rainBr = 1F - Minecraft.getInstance().level.getRainStrength(pTicks);
+                    float rainBr = 1F - Minecraft.getInstance().level.getRainLevel(pTicks);
                     Map<StarLocation, Rectangle.Float> cstRenderInfo = RenderingConstellationUtils.renderConstellationIntoGUI(
                             cst, renderStack,
                             pos.x + leftPos,

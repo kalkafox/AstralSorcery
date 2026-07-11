@@ -14,14 +14,15 @@ import hellfirepvp.astralsorcery.client.screen.container.*;
 import hellfirepvp.astralsorcery.common.container.ContainerObservatory;
 import hellfirepvp.astralsorcery.common.container.factory.*;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.network.IContainerFactory;
 
 import static hellfirepvp.astralsorcery.common.lib.ContainerTypesAS.*;
@@ -48,18 +49,13 @@ public class RegistryContainerTypes {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void initClient() {
-        ScreenManager.registerFactory(TOME, ScreenContainerTome::new);
-        ScreenManager.registerFactory(OBSERVATORY, new ScreenManager.IScreenFactory<ContainerObservatory, ScreenObservatory>() {
-            @Override
-            public ScreenObservatory create(ContainerObservatory observatory, Inventory inventory, Component name) {
-                return new ScreenObservatory(observatory);
-            }
-        });
-        ScreenManager.registerFactory(ALTAR_DISCOVERY, ScreenContainerAltarDiscovery::new);
-        ScreenManager.registerFactory(ALTAR_ATTUNEMENT, ScreenContainerAltarAttunement::new);
-        ScreenManager.registerFactory(ALTAR_CONSTELLATION, ScreenContainerAltarConstellation::new);
-        ScreenManager.registerFactory(ALTAR_RADIANCE, ScreenContainerAltarRadiance::new);
+    public static void initClient(RegisterMenuScreensEvent event) {
+        event.register(TOME, ScreenContainerTome::new);
+        event.register(OBSERVATORY, (ContainerObservatory observatory, Inventory inventory, Component name) -> new ScreenObservatory(observatory));
+        event.register(ALTAR_DISCOVERY, ScreenContainerAltarDiscovery::new);
+        event.register(ALTAR_ATTUNEMENT, ScreenContainerAltarAttunement::new);
+        event.register(ALTAR_CONSTELLATION, ScreenContainerAltarConstellation::new);
+        event.register(ALTAR_RADIANCE, ScreenContainerAltarRadiance::new);
     }
 
     private static <C extends AbstractContainerMenu, T extends MenuType<C>> T register(String name, IContainerFactory<C> containerFactory) {
@@ -67,7 +63,7 @@ public class RegistryContainerTypes {
     }
 
     private static <C extends AbstractContainerMenu, T extends MenuType<C>> T register(ResourceLocation name, IContainerFactory<C> containerFactory) {
-        MenuType<C> type = new MenuType<>(containerFactory);
+        MenuType<C> type = new MenuType<>(containerFactory, FeatureFlags.DEFAULT_FLAGS);
         AstralRegistries.register(AstralRegistries.MENU_TYPES, name, type);
         return (T) type;
     }

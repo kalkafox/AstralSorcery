@@ -307,16 +307,210 @@ frame parts are grouped under one `frame` parent part.
 - `FluidStack.getType()` call sites now use `getFluid()`. Old fluid-attribute
   and component/NBT APIs remain for their structural subsystem ports.
 
+## Recipe subsystem (done)
+
+`common/crafting/helper`, `common/crafting/recipe/**` (including `altar/*`),
+`common/crafting/serializer/*`, `common/crafting/custom/RecipeDyeableChangeColor`,
+and the recipe-type/serializer registration in `common/registry` are ported
+to the 1.21 `Recipe`/`RecipeSerializer` API. The `common/crafting/nojson/**`
+and `common/crafting/builder/**` (datagen recipe builders) trees, and the
+custom-ingredient subsystem (`common/crafting/helper/ingredient/*`,
+`RegistryIngredientTypes`, `IngredientSerializersAS`), are separate,
+still-unported subsystems and were deliberately left alone - see the caveats
+below.
+
+- **`RecipeInput` bound.** `Recipe<T>` now requires `T extends RecipeInput`
+  instead of `Container`. None of these recipes are ever matched in a
+  vanilla crafting grid - `IHandlerRecipe<I extends IItemHandler>` real
+  matching always went through `matches(I handler, Level)` with the
+  `Container` overload hardwired to return `false` - so `IHandlerRecipe` now
+  extends `Recipe<IHandlerRecipe.NoopInput>`, a nested zero-size marker
+  `RecipeInput` (`getItem` always `ItemStack.EMPTY`, `size()` always `0`).
+  `CustomMatcherRecipe.assemble`/`getResultItem` were updated to the new
+  `(NoopInput, HolderLookup.Provider)` / `(HolderLookup.Provider)`
+  signatures (still always returning `ItemStack.EMPTY` - actual output is
+  produced through each recipe's own application-specific methods, e.g.
+  `SimpleAltarRecipe.getOutputs(TileAltar)`).
+- **Recipes no longer self-report their own id.** `Recipe.getId()` is gone;
+  `RecipeManager` now attaches a `ResourceLocation` externally by wrapping
+  the decoded recipe in a `RecipeHolder<T>`, and neither
+  `RecipeSerializer.codec()` nor `.streamCodec()` are told that id during
+  decode. `BaseHandlerRecipe` keeps its `recipeId` field/constructor (no
+  longer `@Override`-ing anything) purely as this object's own identity for
+  the lifetime of the decoded instance - `CustomRecipeSerializer.generateDynamicId()`
+  synthesizes a `astralsorcery:dynamic/<uuid>` placeholder for every
+  JSON/network-decoded recipe. **Caveat:** this means the NBT-persisted
+  "recipe in progress" round-trip in `ActiveSimpleAltarRecipe.serialize()`/
+  `deserialize()` only resolves back to the same recipe object within the
+  RecipeManager reload cycle it was crafted in (a `/reload` or datapack swap
+  while a craft is in progress will fail to find the recipe again). Fixing
+  this properly would mean threading `RecipeHolder<T>` through
+  `ResolvingRecipeType`/`ActiveSimpleAltarRecipe` instead of raw recipe
+  instances - left as a follow-up.
+- **Codec/stream codec wrapping.** `RecipeSerializer<T>` dropped
+  `read(ResourceLocation, JsonObject)` / `read(ResourceLocation, FriendlyByteBuf)`
+  / `write(FriendlyByteBuf, T)` for `codec()` (`MapCodec<T>`) and
+  `streamCodec()` (`StreamCodec<RegistryFriendlyByteBuf, T>`). Rather than
+  rewrite the hand-written imperative `GsonHelper`-based parsers as codec
+  combinator chains, `CustomRecipeSerializer` wraps each subclass's existing
+  `read(JsonObject)`/`write(JsonObject, T)` pair via
+  `LegacyRecipeCodecs.ofLegacyJson(...)` (round-trips through
+  `JsonOps.INSTANCE` internally, `MapCodec.assumeMapUnsafe`-wrapped) and each
+  `read(RegistryFriendlyByteBuf)`/`write(RegistryFriendlyByteBuf, T)` pair
+  via `StreamCodec.of(...)`. Buffer parameters throughout the recipe classes
+  were widened from `FriendlyByteBuf` to `RegistryFriendlyByteBuf` since
+  `Ingredient.CONTENTS_STREAM_CODEC` (see below) requires it specifically.
+- **`Ingredient` lost `serialize()`/`deserialize()`/`read()`/`write()`.**
+  It's `Ingredient.CODEC` (JSON) and `Ingredient.CONTENTS_STREAM_CODEC`
+  (network) now. `common/crafting/helper/IngredientIO` is a small adapter
+  back to the old four-method call shape so the many hand-written recipe
+  (de)serializers didn't each need their own codec plumbing.
+  `Ingredient.fromTag`/`valueFromJson`/`fromStacks`/`deserialize` calls
+  became `Ingredient.of(...)` overloads + `IngredientIO`.
+- **`assemble`/`getResultItem` gained a `HolderLookup.Provider registries`
+  parameter**; updated on every recipe/serializer touched here.
+- **`FluidStack` lost its raw-NBT constructor** (`FluidStack(Fluid, int,
+  CompoundTag)` -> data components replaced free-form NBT tags on stacks).
+  `LiquidInteraction`'s optional per-reactant `reactant1Tag`/`reactant2Tag`
+  JSON fields are now parsed-and-discarded - reactant matching is
+  fluid+amount only until/unless this is redesigned around
+  `DataComponentPatch`.
+- **`CustomRecipeBuilder` (datagen-facing)** now hands recipes to a
+  `RecipeOutput` instead of building a `FinishedRecipe`/`IFinishedRecipe`
+  shim - `RecipeOutput.accept(id, recipe, advancement)` serializes through
+  the recipe's own `RecipeSerializer.codec()` automatically, so the old
+  per-recipe `write(JsonObject)` plumbing datagen used to invoke by hand is
+  no longer needed for that path (still used for the JSON codec above). The
+  existing recipe datagen providers under `datagen/data/recipes/**` were
+  **not** touched - they're on much older 1.16 datagen APIs
+  (`net.minecraft.data.IFinishedRecipe`, a `DataGenerator`-constructor
+  `RecipeProvider`) that are broken independent of anything in this pass and
+  are out of scope for this subsystem.
+- **`RecipeDyeableChangeColor`** is the one real vanilla 3x3-grid
+  `CustomRecipe` in this package (not one of the handler-based recipes
+  above). Ported to `CraftingInput`/`CraftingBookCategory` (constructor no
+  longer takes an id) and `SimpleCraftingRecipeSerializer<T>` (vanilla's
+  1.21 replacement for the old `SpecialRecipeSerializer`).
+- **Registration.** `RegistryRecipeSerializers`/`RegistryRecipeTypes` and
+  the `AstralRegistries.RECIPE_TYPES`/`RECIPE_SERIALIZERS` `DeferredRegister`
+  declarations needed no bound changes - they were already
+  `DeferredRegister<RecipeType<?>>`/`DeferredRegister<RecipeSerializer<?>>`.
+  `ResolvingRecipeType`'s constructor used to double-register directly
+  against the (now-removed) static `Registry.RECIPE_TYPE`; that call was
+  dropped since `RegistryRecipeTypes.register()` already routes through
+  `AstralRegistries.RECIPE_TYPES`. `ResolvingRecipeType.getAllRecipes()` now
+  reads `RecipeManager.getAllRecipesFor(type)` (`List<RecipeHolder<T>>`,
+  unwrapped via `RecipeHolder::value`) instead of the removed
+  `getRecipes(RecipeType)`.
+- **Out-of-scope call-site fix:** `ActiveSimpleAltarRecipe.deserialize()`
+  used `RecipeManager.getRecipe(ResourceLocation)`, which no longer exists;
+  changed to `RecipeManager.byKey(...)` (`Optional<RecipeHolder<?>>`,
+  unwrapped via `.value()`). This file still has unrelated pre-existing
+  errors (`FluidActionResult.shouldSwing()`/`getObject()`, and its use of
+  the still-unported `FluidIngredient`) that are out of scope here.
+- **Mis-remapped calls fixed in-line** (pre-existing corruption from the
+  automated MCP->Mojmap member remap, not new porting work, but they were
+  blocking compilation of files in scope): several `JSONUtils.hasField(json, key)`
+  calls had been mangled into `GsonHelper.convertToInt(json, key)` /
+  `convertToDouble(json, key)` (int/double compared as a `boolean`) across
+  `SimpleAltarRecipeSerializer`, `BlockTransmutationSerializer`, and four
+  `altar/builtin/*` recipes - restored to `json.has(key)` (or
+  `GsonHelper.isArrayNode` where the original used `isJsonArray`).
+  `GsonHelper.getAsString(JsonElement, String)`/`GsonHelper.toString(JsonElement)`
+  don't exist in 1.21's `GsonHelper` (only the `JsonObject`-keyed overload
+  does) - restored to `GsonHelper.convertToString(JsonElement, String)` /
+  plain `toString()`. `AltarRecipeGrid`'s pattern-padding calls were
+  garbled from `StringUtils.repeat` (still imported, just unused) into a
+  nonexistent `StringUtil.zoom` - restored. `LiquidInteraction`'s
+  `Strings.checkExceptions(...)` was similarly garbled from `Strings.join(...)`.
+- **Deliberately left alone / follow-ups:**
+  - `common/crafting/helper/ingredient/{CrystalIngredient,FluidIngredient,*Serializer}`
+    subclass `Ingredient`, which became `final` in 1.21; custom ingredient
+    behavior now goes through NeoForge's `ICustomIngredient`/`IngredientType`
+    (registered against `NeoForgeRegistries.Keys.INGREDIENT_TYPES`) instead
+    of subclassing. This is its own subsystem port and was left broken
+    (unchanged from before this pass). `AltarRecipeGrid.Builder`'s
+    `key(Character, Fluid)` convenience overload (the only in-scope caller
+    of `FluidIngredient`) was removed rather than worked around, since
+    nothing else in scope used it.
+  - `common/crafting/builder/*` (non-datagen recipe builders used by
+    `AstralRecipeBuilder`/datagen) and `common/crafting/nojson/**` were not
+    touched; both were already broken before this pass for unrelated
+    reasons (old `RegistryHelper`/`FluidStack`/world-gen APIs) and remain so.
+  - `common/crafting/recipe/interaction/**` (`InteractionResult`,
+    `ResultDropItem`, `ResultSpawnEntity`, and the whole `interaction/jei/*`
+    subpackage) fail to compile because the JEI (`mezz.jei.*`) dependency
+    isn't wired into this build at all - unrelated to the `Recipe`/
+    `RecipeSerializer` API and out of scope here. `LiquidInteraction` itself
+    (which references `InteractionResult`) compiles fine.
+
+## Screens and GUI (done)
+
+The `client/screen/**` tree compiles against the 1.21 screen API. Vanilla's
+render entry points now take `GuiGraphics` instead of `PoseStack`; since the
+mod's screens draw exclusively through their own PoseStack-based helpers
+(`RenderingGuiUtils`/`RenderingDrawUtils`/`RenderingUtils`), the port bridges
+at the mod's base classes instead of rewriting every screen:
+
+- **`InputScreen`** (root of all non-container screens) overrides
+  `render(GuiGraphics, ...)`, stashes the `GuiGraphics` in a field
+  (accessible via `getCurrentGraphics()` during the render pass), and calls a
+  mod-side `render(PoseStack, ...)` that all subclasses keep overriding. The
+  PoseStack IS `graphics.pose()`, so transforms carry through. The default
+  PoseStack body forwards to vanilla `super.render` (background + widgets).
+- **Blit offset**: `Screen.get/setBlitOffset` are gone in vanilla; the mod's
+  own z-layered draw helpers still consume it, so it's kept as a plain field
+  on `InputScreen` and `ScreenCustomContainer` with the old accessor names.
+- **Container screens** (`ScreenCustomContainer`, dead-but-compiling
+  `ContainerBaseScreen`): vanilla's abstract `renderBg(GuiGraphics, ...)` and
+  `renderLabels(GuiGraphics, ...)` are implemented as bridges that call the
+  1.16-shaped `drawGuiContainerBackgroundLayer(PoseStack, ...)` /
+  `renderLabels(PoseStack, ...)` hooks the altar/tome screens override.
+  `renderHoveredTooltip` -> `renderTooltip(GuiGraphics, x, y)`;
+  `tick()` (now final) -> `containerTick()`; `xSize/ySize` ->
+  `imageWidth/imageHeight`; `this.container` -> `this.getMenu()`.
+- **Screen registration** moved from `ScreenManager.registerFactory` (in
+  `FMLClientSetupEvent`) to `RegisterMenuScreensEvent` on the mod bus
+  (`RegistryContainerTypes.initClient(event)`); `MenuType` construction now
+  needs `FeatureFlags.DEFAULT_FLAGS`.
+- **Tooltip/text APIs**: `stack.getTooltipLines(player, flag)` gained a
+  leading `Item.TooltipContext.of(level)`; `TooltipFlag.TooltipFlags.*` ->
+  `TooltipFlag.*`; `Screen.getTooltipFromItem` is static and takes the
+  `Minecraft` instance; item-stack custom fonts go through
+  `IClientItemExtensions.of(stack).getFont(stack, FontContext.TOOLTIP)`;
+  `I18n.format` -> `I18n.get`; `Language.getInstance().func_230503_a_` ->
+  `getOrDefault`; `font.func_243245_a` -> `font.width`.
+- **Misc renames**: `mouseScrolled` gained a `scrollX` parameter;
+  `Screen.init(Minecraft, w, h)` is final (re-init hooks moved into
+  `init()`); `options.renderDebug` ->
+  `Minecraft.getDebugOverlay().showDebugScreen()`;
+  `keyboardHandler.setClipboardString` -> `setClipboard`;
+  `options.setPointOfView` -> `setCameraType`; `player.getPitch(pt)` ->
+  `getViewXRot(pt)`; `player.onClose()` -> `closeContainer()`;
+  `Lighting.turnBackOn/turnOff` -> `setupFor3DItems/setupForFlatItems`;
+  `Random.initNoise` was a bad remap of `setSeed`;
+  `getRainStrength` -> `getRainLevel` (repo-wide);
+  `Screen.fill(PoseStack, ...)` -> `getCurrentGraphics().fill(...)`;
+  fluid display names via `fluid.getFluidType().getDescription(stack)`.
+- **Journal recipe pages** now flow `RecipeHolder<?>` (which carries the id
+  vanished from `Recipe.getId()`) through `JournalPageRecipe` ->
+  `RenderPageRecipe.fromRecipe`; lookups use `RecipeManager.byKey` /
+  `getAllRecipesFor`. `RecipeHelper.findSmeltingResult` was ported to
+  `SingleRecipeInput`/`getRecipeFor`.
+- **`RenderPageStructure`**: ObserverLib's client `StructureRenderer` isn't
+  part of the vendored copy; a compatibility shell
+  (`hellfirepvp.observerlib.api.client.StructureRenderer`) keeps the page
+  compiling with the 3D structure slice rendering stubbed out (restored in a
+  later client-rendering pass, same approach as `StructurePreview`).
+
 ## Current compile boundary
 
-The registration mechanism itself compiles clean. After the member-name
-remap and the rendering-infrastructure port, `gradlew compileJava`
-(configured with `-Xmaxerrs 10000`) stops at structural 1.16 -> 1.21 API
-changes rather than naming: the entity/block model class rewrite to
-`LayerDefinition` (`addBox`, `setRotationPoint`, `addChild`), screens on
-`GuiGraphics` (`setBlitOffset`, tooltip/font helpers), BER render
-signatures and the sky renderer (`ISkyRenderHandler` ->
-`DimensionSpecialEffects`), `Recipe<Container>` vs the new `RecipeInput`
-bound, fluid attributes/`ForgeFlowingFluid`, world generation, loot/datagen
-packages, and `.normal(Matrix3f, ...)` chain calls that now take a
-`PoseStack.Pose`. Roughly 3,027 errors across 525 files remain at this point.
+The registration mechanism, the recipe/serializer subsystem, rendering
+infrastructure, models, renderers, and screens now compile clean. `gradlew
+compileJava` (configured with `-Xmaxerrs 10000`) stops at structural
+1.16 -> 1.21 API changes rather than naming: the custom-ingredient
+(`ICustomIngredient`) port, fluid attributes/`ForgeFlowingFluid`, world
+generation, loot/datagen packages, `MiscUtils`/entity helpers, and
+`.normal(Matrix3f, ...)` chain calls that now take a `PoseStack.Pose`.
+2,705 errors across 456 files remain, measured off a full
+`gradlew compileJava` run.

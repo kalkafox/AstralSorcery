@@ -89,7 +89,7 @@ public class ScreenJournalOverlayPerkStatistics extends ScreenJournalOverlay {
             }
         }
 
-        statistics.sort(Comparator.comparing(perkStatistic -> I18n.format(perkStatistic.getUnlocPerkTypeName())));
+        statistics.sort(Comparator.comparing(perkStatistic -> I18n.get(perkStatistic.getUnlocPerkTypeName())));
     }
 
     @Override
@@ -123,7 +123,7 @@ public class ScreenJournalOverlayPerkStatistics extends ScreenJournalOverlay {
 
         for (int i = 0; i < lines.size(); i++) {
             FormattedCharSequence lineState = lines.get(i);
-            float offsetLeft = width / 2F - (font.func_243245_a(lineState) * 1.4F) / 2F;
+            float offsetLeft = width / 2F - (font.width(lineState) * 1.4F) / 2F;
 
             renderStack.pushPose();
             renderStack.translate(offsetLeft, i * step, 0);
