@@ -19,7 +19,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.Level;
 import hellfirepvp.astralsorcery.common.util.Constants;
 
@@ -40,8 +42,8 @@ public abstract class TileSourceBase<T extends ITransmissionSource> extends Tile
     private boolean linked = false;
     private final List<BlockPos> positions = new LinkedList<>();
 
-    protected TileSourceBase(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileSourceBase(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     public boolean hasBeenLinked() {
@@ -49,8 +51,8 @@ public abstract class TileSourceBase<T extends ITransmissionSource> extends Tile
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
         positions.clear();
 
         if (pattern.contains("linked")) {
@@ -65,8 +67,8 @@ public abstract class TileSourceBase<T extends ITransmissionSource> extends Tile
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         ListTag list = new ListTag();
         for (BlockPos pos : positions) {

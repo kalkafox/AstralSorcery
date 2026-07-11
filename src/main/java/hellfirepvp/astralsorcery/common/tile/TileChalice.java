@@ -42,6 +42,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
@@ -78,8 +80,8 @@ public class TileChalice extends TileEntityTick {
     private Vector3 prevRotation = new Vector3();
     private Vector3 rotationVec = null;
 
-    public TileChalice() {
-        super(TileEntityTypesAS.CHALICE);
+    public TileChalice(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.CHALICE, pos, state);
 
         this.tank = new SimpleSingleFluidTank(TANK_SIZE);
         this.tank.addUpdateFunction(this::markForUpdate);
@@ -315,15 +317,15 @@ public class TileChalice extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.tank.load(pattern.getCompound("tank"));
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.put("tank", this.tank.fillDefaultJigsawNBT());
     }

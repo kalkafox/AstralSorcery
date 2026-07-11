@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
@@ -57,9 +58,8 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide) {
-            ItemStack held = player.getItemInHand(hand);
             TileInfuser ti = MiscUtils.getTileAt(level, pos, TileInfuser.class, true);
             if (ti != null) {
                 ItemStack stored = ti.getItemInput();
@@ -71,7 +71,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
                     }
 
                     if (!level.isEmptyBlock(pos.above())) {
-                        return InteractionResult.PASS;
+                        return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
                     }
 
                     ti.setItemInput(ItemUtils.copyStackWithSize(held, 1));
@@ -89,7 +89,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
                 }
             }
         }
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         TileInfuser ti = MiscUtils.getTileAt(level, pos, TileInfuser.class, false);
         if (ti != null) {
             return ti.getItemInput().isEmpty() ? 0 : 15;
@@ -107,18 +107,18 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileInfuser();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileInfuser(pos, state);
     }
 }

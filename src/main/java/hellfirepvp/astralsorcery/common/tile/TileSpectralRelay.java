@@ -33,6 +33,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
@@ -62,8 +64,8 @@ public class TileSpectralRelay extends TileEntityTick {
     private BlockPos closestRelayPos;
     private float proximityMultiplier = 1F;
 
-    public TileSpectralRelay() {
-        super(TileEntityTypesAS.SPECTRAL_RELAY);
+    public TileSpectralRelay(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.SPECTRAL_RELAY, pos, state);
 
         this.inventory = new TileInventory(this, () -> 1);
     }
@@ -275,8 +277,8 @@ public class TileSpectralRelay extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
         if (pattern.contains("altarPos")) {
@@ -292,8 +294,8 @@ public class TileSpectralRelay extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.put("inventory", this.inventory.serialize());
         if (this.altarPos != null) {

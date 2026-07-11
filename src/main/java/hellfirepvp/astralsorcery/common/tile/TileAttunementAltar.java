@@ -55,6 +55,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -91,8 +93,8 @@ public class TileAttunementAltar extends TileEntityTick {
     public int prevActivationTick = 0;
     public boolean animate = false, tesrLocked = true;
 
-    public TileAttunementAltar() {
-        super(TileEntityTypesAS.ATTUNEMENT_ALTAR);
+    public TileAttunementAltar(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.ATTUNEMENT_ALTAR, pos, state);
     }
 
     @Override
@@ -524,8 +526,8 @@ public class TileAttunementAltar extends TileEntityTick {
     }
 
     @Override
-    public void writeNetNBT(CompoundTag pattern) {
-        super.writeNetNBT(pattern);
+    public void writeNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeNetNBT(pattern, registries);
 
         if (this.activeConstellation != null) {
             pattern.putString("activeConstellation", this.activeConstellation.getRegistryName().toString());
@@ -540,8 +542,8 @@ public class TileAttunementAltar extends TileEntityTick {
     }
 
     @Override
-    public void readNetNBT(CompoundTag pattern) {
-        super.readNetNBT(pattern);
+    public void readNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readNetNBT(pattern, registries);
 
         if (pattern.contains("activeConstellation")) {
             this.activeConstellation = ConstellationRegistry.getConstellation(ResourceLocation.parse(pattern.getString("activeConstellation")));

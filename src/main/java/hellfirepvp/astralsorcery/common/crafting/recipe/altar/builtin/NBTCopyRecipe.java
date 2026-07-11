@@ -14,16 +14,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import hellfirepvp.astralsorcery.common.block.tile.altar.AltarType;
+import hellfirepvp.astralsorcery.common.crafting.helper.IngredientIO;
 import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipe;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeGrid;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -54,15 +57,15 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
     }
 
     public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(TagKey<Item> tag) {
-        return this.addNBTCopyMatchIngredient(Ingredient.fromTag(tag));
+        return this.addNBTCopyMatchIngredient(Ingredient.of(tag));
     }
 
     public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(ItemStack... items) {
-        return this.addNBTCopyMatchIngredient(Ingredient.fromStacks(items));
+        return this.addNBTCopyMatchIngredient(Ingredient.of(items));
     }
 
     public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(ItemLike... items) {
-        return this.addNBTCopyMatchIngredient(Ingredient.valueFromJson(items));
+        return this.addNBTCopyMatchIngredient(Ingredient.of(items));
     }
 
     public <T extends NBTCopyRecipe> T addNBTCopyMatchIngredient(Ingredient ingredient) {
@@ -76,7 +79,7 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
 
         JsonArray list = GsonHelper.getAsJsonArray(recipeObject, KEY_SEARCH_ITEMS, new JsonArray());
         for (JsonElement value : list) {
-            this.searchIngredients.add(Ingredient.deserialize(value));
+            this.searchIngredients.add(IngredientIO.deserialize(value));
         }
     }
 
@@ -86,7 +89,7 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
 
         JsonArray list = new JsonArray();
         for (Ingredient ingredient : this.searchIngredients) {
-            list.add(ingredient.serialize());
+            list.add(IngredientIO.serialize(ingredient));
         }
         recipeObject.add(KEY_SEARCH_ITEMS, list);
     }
@@ -99,31 +102,30 @@ public class NBTCopyRecipe extends SimpleAltarRecipe {
         List<CompoundTag> foundTags = Lists.newArrayList();
         for (ItemStack existing : altar.getItems()) {
             for (Ingredient match : this.searchIngredients) {
-                if (match.test(existing) && existing.hasTag()) {
-                    foundTags.add(existing.getTag().copy());
+                if (match.test(existing) && existing.has(DataComponents.CUSTOM_DATA)) {
+                    foundTags.add(existing.get(DataComponents.CUSTOM_DATA).copyTag());
                 }
             }
         }
         for (ItemStack output : outputs) {
-            CompoundTag tag = output.getOrCreateTag();
             for (CompoundTag foundTag : foundTags) {
-                NBTHelper.deepMerge(tag, foundTag, true);
+                CustomData.update(DataComponents.CUSTOM_DATA, output, tag -> NBTHelper.deepMerge(tag, foundTag, true));
             }
         }
         return outputs;
     }
 
     @Override
-    public void readRecipeSync(FriendlyByteBuf buf) {
+    public void readRecipeSync(RegistryFriendlyByteBuf buf) {
         super.readRecipeSync(buf);
 
-        this.searchIngredients = ByteBufUtils.readList(buf, Ingredient::read);
+        this.searchIngredients = ByteBufUtils.readList(buf, b -> IngredientIO.read((RegistryFriendlyByteBuf) b));
     }
 
     @Override
-    public void writeRecipeSync(FriendlyByteBuf buf) {
+    public void writeRecipeSync(RegistryFriendlyByteBuf buf) {
         super.writeRecipeSync(buf);
 
-        ByteBufUtils.writeCollection(buf, this.searchIngredients, (buffer, ingredient) -> ingredient.write(buffer));
+        ByteBufUtils.writeCollection(buf, this.searchIngredients, (buffer, ingredient) -> IngredientIO.write((RegistryFriendlyByteBuf) buffer, ingredient));
     }
 }

@@ -24,7 +24,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.util.*;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -57,9 +63,8 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide()) {
-            ItemStack held = player.getItemInHand(hand);
             TileSpectralRelay tar = MiscUtils.getTileAt(level, pos, TileSpectralRelay.class, true);
             if (tar != null) {
                 TileInventory inv = tar.getItems();
@@ -73,7 +78,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
                     }
 
                     if (!level.isEmptyBlock(pos.above())) {
-                        return InteractionResult.PASS;
+                        return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
                     }
 
                     inv.setStackInSlot(0, ItemUtils.copyStackWithSize(held, 1));
@@ -95,7 +100,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
                 }
             }
         }
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -108,14 +113,14 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
 
     @Override
     public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, level, pos)) {
+        if (!this.canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return hasSolidSideOnTop(level, pos.below());
     }
 
@@ -125,7 +130,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         TileSpectralRelay tsr = MiscUtils.getTileAt(level, pos, TileSpectralRelay.class, false);
         if (tsr != null) {
             return tsr.getItems().getStackInSlot(0).isEmpty() ? 0 : 15;
@@ -134,18 +139,18 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState p_149645_1_) {
+    public RenderShape getRenderShape(BlockState p_149645_1_) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileSpectralRelay();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileSpectralRelay(pos, state);
     }
 }

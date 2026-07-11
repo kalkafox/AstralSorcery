@@ -65,7 +65,7 @@ public class BlockObservatory extends BaseEntityBlock implements LargeBlock, Cus
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult hit) {
         if (!worldIn.isClientSide()) {
             TileObservatory observatory = MiscUtils.getTileAt(worldIn, pos, TileObservatory.class, false);
             if (observatory != null && observatory.isFlyEnabled() && !player.isShiftKeyDown()) {
@@ -88,7 +88,7 @@ public class BlockObservatory extends BaseEntityBlock implements LargeBlock, Cus
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileObservatory();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileObservatory(pos, state);
     }
 }

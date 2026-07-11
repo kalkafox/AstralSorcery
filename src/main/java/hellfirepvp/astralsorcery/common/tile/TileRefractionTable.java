@@ -36,6 +36,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -63,8 +66,8 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
 
     private Object effectHalo;
 
-    public TileRefractionTable() {
-        super(TileEntityTypesAS.REFRACTION_TABLE);
+    public TileRefractionTable(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.REFRACTION_TABLE, pos, state);
     }
 
     @Override
@@ -282,8 +285,8 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.runTick = pattern.getInt("runTick");
 
@@ -293,8 +296,8 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.putInt("runTick", this.runTick);
 

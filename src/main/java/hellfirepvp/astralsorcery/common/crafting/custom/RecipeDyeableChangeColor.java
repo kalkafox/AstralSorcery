@@ -14,15 +14,16 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.item.crafting.SpecialRecipeSerializer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Tuple;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -35,6 +36,14 @@ import java.util.function.Supplier;
  * Class: RecipeDyeableChangeColor
  * Created by HellFirePvP
  * Date: 29.11.2019 / 13:24
+ *
+ * Unlike the rest of this package, this is a real 3x3-grid vanilla {@link CustomRecipe} (not one
+ * of the handler-based recipes routed through {@code IHandlerRecipe}), so it follows vanilla's own
+ * 1.21 shape: {@link CraftingInput} instead of {@code CraftingContainer}, a
+ * {@link CraftingBookCategory} instead of a self-carried id (recipes don't self-report an id
+ * anymore - see {@code BaseHandlerRecipe#getId()} for the other family of recipes in this mod),
+ * and {@link SimpleCraftingRecipeSerializer} (vanilla's replacement for the old
+ * {@code SpecialRecipeSerializer}) instead of a hand-rolled one.
  */
 public class RecipeDyeableChangeColor extends CustomRecipe {
 
@@ -42,21 +51,21 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
     private final Item targetItem;
     private final BiConsumer<ItemStack, DyeColor> colorFn;
 
-    public RecipeDyeableChangeColor(ResourceLocation idIn, Supplier<RecipeSerializer<?>> serializer, Item targetItem, BiConsumer<ItemStack, DyeColor> colorFn) {
-        super(idIn);
+    public RecipeDyeableChangeColor(CraftingBookCategory category, Supplier<RecipeSerializer<?>> serializer, Item targetItem, BiConsumer<ItemStack, DyeColor> colorFn) {
+        super(category);
         this.serializer = serializer;
         this.targetItem = targetItem;
         this.colorFn = colorFn;
     }
 
     @Override
-    public boolean matches(CraftingContainer inv, Level worldIn) {
-        return tryFindValidRecipeAndDye(inv) != null;
+    public boolean matches(CraftingInput input, Level worldIn) {
+        return tryFindValidRecipeAndDye(input) != null;
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer inv) {
-        Tuple<DyeColor, ItemStack> itemColorTpl = tryFindValidRecipeAndDye(inv);
+    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+        Tuple<DyeColor, ItemStack> itemColorTpl = tryFindValidRecipeAndDye(input);
         if (itemColorTpl == null) {
             return ItemStack.EMPTY;
         }
@@ -66,13 +75,13 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
     }
 
     @Nullable
-    private Tuple<DyeColor, ItemStack> tryFindValidRecipeAndDye(CraftingContainer inv) {
+    private Tuple<DyeColor, ItemStack> tryFindValidRecipeAndDye(CraftingInput input) {
         ItemStack itemFound = ItemStack.EMPTY;
         DyeColor dyeColorFound = null;
         int nonEmptyItemsFound = 0;
 
-        for (int slot = 0; slot < inv.getContainerSize(); slot++) {
-            ItemStack in = inv.getStackInSlot(slot);
+        for (int slot = 0; slot < input.size(); slot++) {
+            ItemStack in = input.getItem(slot);
             if (!in.isEmpty()) {
                 nonEmptyItemsFound++;
 
@@ -104,21 +113,19 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
         return this.serializer.get();
     }
 
-    public static class IlluminationWandColorSerializer extends SimpleRecipeSerializer<RecipeDyeableChangeColor> {
+    public static class IlluminationWandColorSerializer extends SimpleCraftingRecipeSerializer<RecipeDyeableChangeColor> {
 
         public IlluminationWandColorSerializer() {
-            super(id -> new RecipeDyeableChangeColor(id, () -> RecipeSerializersAS.CUSTOM_CHANGE_WAND_COLOR_SERIALIZER,
+            super(category -> new RecipeDyeableChangeColor(category, () -> RecipeSerializersAS.CUSTOM_CHANGE_WAND_COLOR_SERIALIZER,
                     ItemsAS.ILLUMINATION_WAND, ItemIlluminationWand::setConfiguredColor));
-            this.setRegistryName(RecipeSerializersAS.CUSTOM_CHANGE_WAND_COLOR);
         }
     }
 
-    public static class CelestialGatewayColorSerializer extends SimpleRecipeSerializer<RecipeDyeableChangeColor> {
+    public static class CelestialGatewayColorSerializer extends SimpleCraftingRecipeSerializer<RecipeDyeableChangeColor> {
 
         public CelestialGatewayColorSerializer() {
-            super(id -> new RecipeDyeableChangeColor(id, () -> RecipeSerializersAS.CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER,
-                    Item.canBeHurtBy(BlocksAS.GATEWAY), BlockCelestialGateway::setColor));
-            this.setRegistryName(RecipeSerializersAS.CUSTOM_CHANGE_GATEWAY_COLOR);
+            super(category -> new RecipeDyeableChangeColor(category, () -> RecipeSerializersAS.CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER,
+                    Item.byBlock(BlocksAS.GATEWAY), BlockCelestialGateway::setColor));
         }
     }
 }

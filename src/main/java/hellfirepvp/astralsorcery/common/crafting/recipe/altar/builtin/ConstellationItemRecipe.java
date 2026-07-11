@@ -21,7 +21,7 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
@@ -57,14 +57,14 @@ public class ConstellationItemRecipe extends SimpleAltarRecipe {
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {
         super.deserializeAdditionalJson(recipeObject);
 
-        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_ATTUNE)) {
+        if (recipeObject.has(KEY_CONSTELLATION_ATTUNE)) {
             ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getAsString(recipeObject, KEY_CONSTELLATION_ATTUNE));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst instanceof IWeakConstellation) {
                 this.attunedConstellation = (IWeakConstellation) cst;
             }
         }
-        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_TRAIT)) {
+        if (recipeObject.has(KEY_CONSTELLATION_TRAIT)) {
             ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getAsString(recipeObject, KEY_CONSTELLATION_TRAIT));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst instanceof IMinorConstellation) {
@@ -131,7 +131,7 @@ public class ConstellationItemRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public void writeRecipeSync(FriendlyByteBuf buf) {
+    public void writeRecipeSync(RegistryFriendlyByteBuf buf) {
         super.writeRecipeSync(buf);
 
         ByteBufUtils.writeOptional(buf, this.getAttunedConstellation(), ByteBufUtils::writeRegistryEntry);
@@ -139,7 +139,7 @@ public class ConstellationItemRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public void readRecipeSync(FriendlyByteBuf buf) {
+    public void readRecipeSync(RegistryFriendlyByteBuf buf) {
         super.readRecipeSync(buf);
 
         this.attunedConstellation = ByteBufUtils.readOptional(buf, ByteBufUtils::readRegistryEntry);

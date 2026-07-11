@@ -8,9 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.block.properties;
 
-import hellfirepvp.astralsorcery.common.lib.MaterialsAS;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.material.MapColor;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,9 +22,9 @@ import net.minecraft.world.level.block.SoundType;
 public class PropertiesWood {
 
     public static Block.Properties defaultInfusedWood() {
-        return Block.Properties.create(MaterialsAS.INFUSED_WOOD)
-                .hardnessAndResistance(2.5F, 7F)
-
+        return Block.Properties.of()
+                .mapColor(MapColor.COLOR_BROWN)
+                .strength(2.5F, 7F)
                 .sound(SoundType.WOOD);
     }
 

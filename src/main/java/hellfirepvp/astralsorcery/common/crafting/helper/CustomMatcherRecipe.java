@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.crafting.helper;
 
-import net.minecraft.world.Container;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -38,12 +38,12 @@ public abstract class CustomMatcherRecipe extends BaseHandlerRecipe<IItemHandler
     }
 
     @Override
-    public final ItemStack assemble(Container inv) {
-        return getResultItem();
+    public final ItemStack assemble(IHandlerRecipe.NoopInput input, HolderLookup.Provider registries) {
+        return getResultItem(registries);
     }
 
     @Override
-    public final ItemStack getResultItem() {
+    public final ItemStack getResultItem(HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 

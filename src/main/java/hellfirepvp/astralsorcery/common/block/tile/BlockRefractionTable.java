@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
@@ -100,8 +101,7 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        ItemStack held = player.getItemInHand(hand);
+    public ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide()) {
             TileRefractionTable tft = MiscUtils.getTileAt(level, pos, TileRefractionTable.class, true);
             if (tft != null) {
@@ -111,14 +111,14 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
                         if (!remaining.isEmpty()) {
                             ItemUtils.dropItemNaturally(level, player.getX(), player.getY(), player.getZ(), remaining);
                         }
-                        return InteractionResult.SUCCESS;
+                        return ItemInteractionResult.SUCCESS;
                     }
                     if (!tft.getGlassStack().isEmpty()) {
                         ItemStack remaining = ItemUtils.dropItemToPlayer(player, tft.setGlassStack(ItemStack.EMPTY));
                         if (!remaining.isEmpty()) {
                             ItemUtils.dropItemNaturally(level, player.getX(), player.getY(), player.getZ(), remaining);
                         }
-                        return InteractionResult.SUCCESS;
+                        return ItemInteractionResult.SUCCESS;
                     }
                 } else if (!held.isEmpty()) {
                     if (held.getItem() instanceof ItemParchment && tft.getParchmentCount() < 64) {
@@ -146,7 +146,7 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
                                 player.setItemInHand(hand, held);
                             }
                         }
-                        return InteractionResult.PASS;
+                        return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
                     } else if (tft.getInputStack().isEmpty()) {
                         ItemStack cameFrom = tft.setInputStack(ItemUtils.copyStackWithSize(held, 1));
                         if (!cameFrom.isEmpty()) {
@@ -168,7 +168,7 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
                 }
             }
         }
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -182,13 +182,13 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileRefractionTable();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileRefractionTable(pos, state);
     }
 }

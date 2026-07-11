@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -59,12 +60,12 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     //So we can tell the client to render beams eventhough the actual connection doesn't exist.
     private List<BlockPos> occupiedConnections = new LinkedList<>();
 
-    protected TileLens(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileLens(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
-    public TileLens() {
-        super(TileEntityTypesAS.LENS);
+    public TileLens(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.LENS, pos, state);
     }
 
     @Override
@@ -211,8 +212,8 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.attributes = CrystalAttributes.getCrystalAttributes(pattern);
         if (pattern.contains("colorType")) {
@@ -225,14 +226,14 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     @Override
-    public void readNetNBT(CompoundTag pattern) {
-        super.readNetNBT(pattern);
+    public void readNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readNetNBT(pattern, registries);
         this.accumulatedStarlight = pattern.getFloat("accumulatedStarlight");
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         if (this.attributes != null) {
             this.attributes.store(pattern);
@@ -245,8 +246,8 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
     }
 
     @Override
-    public void writeNetNBT(CompoundTag pattern) {
-        super.writeNetNBT(pattern);
+    public void writeNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeNetNBT(pattern, registries);
         pattern.putFloat("accumulatedStarlight", this.accumulatedStarlight);
     }
 

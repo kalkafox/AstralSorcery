@@ -41,6 +41,8 @@ import net.minecraft.world.Nameable;
 import net.minecraft.util.Tuple;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
@@ -98,8 +100,8 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
 
     private Object clientGatewaySphereEffect = null;
 
-    public TileCelestialGateway() {
-        super(TileEntityTypesAS.GATEWAY);
+    public TileCelestialGateway(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.GATEWAY, pos, state);
     }
 
     @Override
@@ -389,8 +391,8 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.networkRegistered = pattern.getBoolean("networkRegistered");
         this.chatComponent = pattern.contains("displayText") ? Component.Serializer.getComponentFromJson(pattern.getString("displayText")) : null;
@@ -406,8 +408,8 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.putBoolean("networkRegistered", this.networkRegistered);
         if (this.chatComponent != null) {

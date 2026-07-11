@@ -11,8 +11,11 @@ package hellfirepvp.astralsorcery.common.tile.base;
 import hellfirepvp.astralsorcery.common.starlight.WorldNetworkHandler;
 import hellfirepvp.astralsorcery.common.starlight.transmission.IPrismTransmissionNode;
 import hellfirepvp.astralsorcery.common.starlight.transmission.TransmissionNetworkHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -32,8 +35,8 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
     private T cachedNetworkNode = null;
     private boolean needsNetworkSync = false;
 
-    protected TileNetwork(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileNetwork(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     @Nullable
@@ -102,8 +105,8 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
     public void onBreak() {}
 
     @Override
-    public void remove() {
-        super.remove();
+    public void setRemoved() {
+        super.setRemoved();
 
         if (this.getLevel() == null || this.getLevel().isClientSide()) {
             return;
@@ -113,15 +116,15 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
     }
 
     @Override
-    public void writeSaveNBT(CompoundTag pattern) {
-        super.writeSaveNBT(pattern);
+    public void writeSaveNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeSaveNBT(pattern, registries);
 
         pattern.putBoolean("needsNetworkSync", this.needsNetworkSync);
     }
 
     @Override
-    public void readSaveNBT(CompoundTag pattern) {
-        super.readSaveNBT(pattern);
+    public void readSaveNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readSaveNBT(pattern, registries);
 
         this.needsNetworkSync = pattern.getBoolean("needsNetworkSync");
     }

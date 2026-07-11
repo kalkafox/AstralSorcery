@@ -47,6 +47,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -99,8 +101,8 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
 
     private Object clientCraftSound = null;
 
-    public TileInfuser() {
-        super(TileEntityTypesAS.INFUSER);
+    public TileInfuser(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.INFUSER, pos, state);
         this.inventory = new TileInventory(this, () -> 1);
     }
 
@@ -317,8 +319,8 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
         this.knownRecipes = NBTHelper.readSet(pattern, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> ResourceLocation.parse(nbt.getString()));
@@ -334,8 +336,8 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.put("inventory", this.inventory.serialize());
         NBTHelper.writeList(pattern, "knownRecipes", this.knownRecipes, key -> StringTag.valueOf(key.toString()));

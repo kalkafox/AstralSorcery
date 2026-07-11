@@ -85,18 +85,18 @@ public class BlockIlluminator extends BaseEntityBlock implements CustomItemBlock
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter level) {
-        return new TileIlluminator();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileIlluminator(pos, state);
     }
 }

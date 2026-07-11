@@ -8,8 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.block.base;
 
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 /**
@@ -18,10 +17,14 @@ import net.minecraft.world.level.material.PushReaction;
  * Class: MaterialBuilderAS
  * Created by HellFirePvP
  * Date: 30.05.2019 / 23:00
+ *
+ * NOTE: as of 1.21 vanilla no longer has a standalone `Material` type (it was folded into
+ * BlockBehaviour.Properties / MapColor). This builder is kept as a thin MapColor holder for the
+ * few flags callers still configure; it no longer produces a distinct "material" object.
  */
 public class MaterialBuilderAS {
 
-    private final MaterialColor color;
+    private final MapColor color;
     private PushReaction pushReaction = PushReaction.NORMAL;
     private boolean blocksMovement = true;
     private boolean flammable = false;
@@ -30,7 +33,7 @@ public class MaterialBuilderAS {
     private boolean isSolid = true;
     private boolean isOpaque = true;
 
-    public MaterialBuilderAS(MaterialColor color) {
+    public MaterialBuilderAS(MapColor color) {
         this.color = color;
     }
 
@@ -74,15 +77,7 @@ public class MaterialBuilderAS {
         return this;
     }
 
-    public Material build() {
-        return new Material(
-                this.color,
-                this.liquid,
-                this.isSolid,
-                this.blocksMovement,
-                this.isOpaque,
-                this.flammable,
-                this.isReplaceable,
-                this.pushReaction);
+    public MapColor build() {
+        return this.color;
     }
 }

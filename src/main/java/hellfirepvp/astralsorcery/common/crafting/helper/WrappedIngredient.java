@@ -14,7 +14,6 @@ import hellfirepvp.astralsorcery.common.util.IngredientHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundTag;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 
 import javax.annotation.Nullable;
 
@@ -46,13 +45,13 @@ public class WrappedIngredient {
         if (!tag.contains("ingredient")) {
             return null;
         }
-        JsonElement jsonElement = new JsonParser().parse(tag.getString("ingredient"));
-        return new WrappedIngredient(CraftingHelper.getIngredient(jsonElement));
+        JsonElement jsonElement = JsonParser.parseString(tag.getString("ingredient"));
+        return new WrappedIngredient(IngredientIO.deserialize(jsonElement));
     }
 
     public CompoundTag serialize() {
         CompoundTag tag = new CompoundTag();
-        tag.putString("ingredient", this.ingredient.serialize().toString());
+        tag.putString("ingredient", IngredientIO.serialize(this.ingredient).toString());
         return tag;
     }
 }

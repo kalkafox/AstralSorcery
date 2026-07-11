@@ -14,8 +14,11 @@ import hellfirepvp.astralsorcery.common.util.log.LogCategory;
 import hellfirepvp.observerlib.api.ChangeSubscriber;
 import hellfirepvp.observerlib.api.ObserverHelper;
 import hellfirepvp.observerlib.common.change.ChangeObserverStructure;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -37,8 +40,8 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
 
     protected int tickCount = 0;
 
-    protected TileEntityTick(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileEntityTick(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     @Override
@@ -144,17 +147,17 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     protected void notifyMultiblockStateUpdate(boolean hadMultiblockPrev, boolean hasMultiblockNow) {}
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
-        
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
+
         this.tickCount = pattern.getInt("ticksExisted");
         this.doesSeeSky = pattern.getBoolean("doesSeeSky");
         this.hasMultiblock = pattern.getBoolean("hasMultiblock");
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.putInt("ticksExisted", this.tickCount);
         pattern.putBoolean("doesSeeSky", this.doesSeeSky);

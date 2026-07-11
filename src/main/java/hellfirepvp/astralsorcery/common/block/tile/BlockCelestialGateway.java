@@ -34,6 +34,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
@@ -85,7 +86,7 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
     }
 
     @Override
-    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
         ItemStack stack = new ItemStack(BlocksAS.GATEWAY);
         TileCelestialGateway gateway = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, true);
         if (gateway != null) {
@@ -103,7 +104,7 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         TileCelestialGateway gateway = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, false);
         if (gateway != null &&
                 gateway.getOwner() != null &&
@@ -118,18 +119,26 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
                     gateway.unlock();
                 }
                 return InteractionResult.SUCCESS;
-            } else {
-                ItemStack held = player.getItemInHand(hand);
-                if (held.getItem() instanceof ItemAquamarine) {
-                    if (!level.isClientSide()) {
-                        held.shrink(1);
-                        gateway.lock();
-                    }
-                    return InteractionResult.SUCCESS;
-                }
             }
         }
         return InteractionResult.PASS;
+    }
+
+    @Override
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        TileCelestialGateway gateway = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, false);
+        if (gateway != null &&
+                gateway.getOwner() != null &&
+                gateway.getOwner().isAlwaysExperienceDropper(player) &&
+                !gateway.isLocked() &&
+                stack.getItem() instanceof ItemAquamarine) {
+            if (!level.isClientSide()) {
+                stack.shrink(1);
+                gateway.lock();
+            }
+            return ItemInteractionResult.SUCCESS;
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -186,14 +195,14 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
 
     @Override
     public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, level, pos)) {
+        if (!this.canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         TileCelestialGateway gateway = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, true);
         if (gateway != null && gateway.isLocked()) {
             return true;
@@ -230,18 +239,18 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter level) {
-        return new TileCelestialGateway();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileCelestialGateway(pos, state);
     }
 }

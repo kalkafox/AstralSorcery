@@ -15,6 +15,7 @@ import hellfirepvp.astralsorcery.common.tile.base.TileNetwork;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
@@ -31,8 +32,8 @@ import java.util.List;
  */
 public abstract class TileReceiverBase<T extends ITransmissionReceiver> extends TileNetwork<T> implements IStarlightReceiver<T>, LinkableTileEntity {
 
-    protected TileReceiverBase(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileReceiverBase(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     @Override

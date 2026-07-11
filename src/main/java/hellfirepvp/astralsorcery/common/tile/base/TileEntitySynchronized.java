@@ -16,7 +16,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.phys.AABB;
@@ -24,6 +27,7 @@ import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import javax.annotation.Nullable;
 import java.util.Random;
 
 /**
@@ -38,8 +42,8 @@ public abstract class TileEntitySynchronized extends BlockEntity implements ILoc
     protected static final Random random = new Random();
     protected static final AABB BOX = new AABB(0, 0, 0, 1, 1, 1);
 
-    protected TileEntitySynchronized(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileEntitySynchronized(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     @Override
@@ -48,59 +52,58 @@ public abstract class TileEntitySynchronized extends BlockEntity implements ILoc
     }
 
     @Override
-    public void read(BlockState state, CompoundTag nbt) {
-        super.read(state, nbt);
-        readCustomNBT(nbt);
-        readSaveNBT(nbt);
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
+        readCustomNBT(nbt, registries);
+        readSaveNBT(nbt, registries);
     }
 
     //Both Network & Chunk-saving
-    public void readCustomNBT(CompoundTag pattern) {}
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {}
 
     //Only Network-read
-    public void readNetNBT(CompoundTag pattern) {}
+    public void readNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {}
 
     //Only Chunk-read
-    public void readSaveNBT(CompoundTag pattern) {}
+    public void readSaveNBT(CompoundTag pattern, HolderLookup.Provider registries) {}
 
     @Override
-    public final CompoundTag write(CompoundTag pattern) {
-        pattern = super.write(pattern);
-        writeCustomNBT(pattern);
-        writeSaveNBT(pattern);
-        return pattern;
+    protected final void saveAdditional(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.saveAdditional(pattern, registries);
+        writeCustomNBT(pattern, registries);
+        writeSaveNBT(pattern, registries);
     }
 
     //Both Network & Chunk-saving
-    public void writeCustomNBT(CompoundTag pattern) {}
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {}
 
     //Only Network-write
-    public void writeNetNBT(CompoundTag pattern) {}
+    public void writeNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {}
 
     //Only Chunk-write
-    public void writeSaveNBT(CompoundTag pattern) {}
+    public void writeSaveNBT(CompoundTag pattern, HolderLookup.Provider registries) {}
 
     @Override
-    public final ClientboundBlockEntityDataPacket getUpdatePacket() {
-        CompoundTag pattern = new CompoundTag();
-        super.write(pattern);
-        writeCustomNBT(pattern);
-        writeNetNBT(pattern);
-        return new ClientboundBlockEntityDataPacket(getBlockPos(), 255, pattern);
+    public final Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this, (be, registries) -> {
+            CompoundTag pattern = new CompoundTag();
+            writeCustomNBT(pattern, registries);
+            writeNetNBT(pattern, registries);
+            return pattern;
+        });
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag pattern = new CompoundTag();
-        super.write(pattern);
-        writeCustomNBT(pattern);
+        writeCustomNBT(pattern, registries);
         return pattern;
     }
 
-    public final void onDataPacket(Connection manager, ClientboundBlockEntityDataPacket packet) {
-        super.onDataPacket(manager, packet);
-        readCustomNBT(packet.getTag());
-        readNetNBT(packet.getTag());
+    @Override
+    public final void onDataPacket(Connection manager, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
+        readCustomNBT(packet.getTag(), registries);
+        readNetNBT(packet.getTag(), registries);
         this.onDataReceived();
     }
 

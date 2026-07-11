@@ -23,6 +23,7 @@ import hellfirepvp.astralsorcery.common.util.tile.TileInventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -277,12 +278,15 @@ public class ActiveSimpleAltarRecipe {
         }
 
         ResourceLocation recipeKey = ResourceLocation.parse(pattern.getString("recipeToCraft"));
-        Optional<?> recipe = mgr.getRecipe(recipeKey);
-        if (!recipe.isPresent() || !(recipe.get() instanceof SimpleAltarRecipe)) {
+        // Recipes decoded from JSON get a synthesized, per-load-cycle id now (see
+        // CustomRecipeSerializer#generateDynamicId) - the id stored here will only resolve back
+        // to the same recipe object within the same RecipeManager reload cycle it was crafted in.
+        Optional<RecipeHolder<?>> recipe = mgr.byKey(recipeKey);
+        if (recipe.isEmpty() || !(recipe.get().value() instanceof SimpleAltarRecipe)) {
             AstralSorcery.log.info("Recipe with unknown/invalid name found: " + recipeKey);
             return null;
         }
-        SimpleAltarRecipe altarRecipe = (SimpleAltarRecipe) recipe.get();
+        SimpleAltarRecipe altarRecipe = (SimpleAltarRecipe) recipe.get().value();
         UUID uuidCraft = pattern.getUUID("playerCraftingUUID");
         int tick = pattern.getInt("ticksCrafting");
         int total = pattern.getInt("totalCraftingTime");

@@ -61,7 +61,7 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide() && player instanceof ServerPlayer) {
             TileAltar altar = MiscUtils.getTileAt(level, pos, TileAltar.class, true);
             if (altar != null) {
@@ -118,18 +118,18 @@ public abstract class BlockAltar extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter level) {
-        return new TileAltar().updateType(this.type, true);
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileAltar(pos, state).updateType(this.type, true);
     }
 }

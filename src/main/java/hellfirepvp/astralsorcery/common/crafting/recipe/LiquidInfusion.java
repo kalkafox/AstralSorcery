@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.crafting.recipe;
 import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomMatcherRecipe;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
+import hellfirepvp.astralsorcery.common.crafting.helper.IngredientIO;
 import hellfirepvp.astralsorcery.common.data.research.ResearchProgression;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
@@ -138,9 +139,9 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
         return copyNBTToOutputs;
     }
 
-    public static LiquidInfusion read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+    public static LiquidInfusion read(ResourceLocation recipeId, RegistryFriendlyByteBuf buffer) {
         Fluid fluidIn = ByteBufUtils.readRegistryEntry(buffer);
-        Ingredient itemIn = Ingredient.read(buffer);
+        Ingredient itemIn = IngredientIO.read(buffer);
         ItemStack output = ByteBufUtils.readItem(buffer);
         float consumptionChance = buffer.readFloat();
         int duration = buffer.readInt();
@@ -150,9 +151,9 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
         return new LiquidInfusion(recipeId, duration, fluidIn, itemIn, output, consumptionChance, consumeMultiple, acceptChalice, copyNBTToOutputs);
     }
 
-    public final void write(FriendlyByteBuf buffer) {
+    public final void write(RegistryFriendlyByteBuf buffer) {
         ByteBufUtils.writeRegistryEntry(buffer, this.getLiquidInput());
-        this.getItemInput().write(buffer);
+        IngredientIO.write(buffer, this.getItemInput());
         ByteBufUtils.writeItemStack(buffer, this.output);
         buffer.writeFloat(this.getConsumptionChance());
         buffer.writeInt(this.getCraftingTickTime());
@@ -163,7 +164,7 @@ public class LiquidInfusion extends CustomMatcherRecipe implements GatedRecipe.P
 
     public void write(JsonObject object) {
         object.addProperty("fluidInput", RegistryHelper.getKey(this.getLiquidInput()).toString());
-        object.add("input", this.getItemInput().serialize());
+        object.add("input", IngredientIO.serialize(this.getItemInput()));
         object.add("output", JsonHelper.serializeItemStack(this.output));
         object.addProperty("consumptionChance", this.getConsumptionChance());
         object.addProperty("duration", this.getCraftingTickTime());

@@ -13,6 +13,9 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntitySynchronized;
 import hellfirepvp.astralsorcery.common.util.tile.NamedInventoryTile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -25,8 +28,8 @@ public class TileTelescope extends TileEntitySynchronized implements NamedInvent
 
     private TelescopeRotation rotation = TelescopeRotation.N;
 
-    public TileTelescope() {
-        super(TileEntityTypesAS.TELESCOPE);
+    public TileTelescope(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.TELESCOPE, pos, state);
     }
 
     public TelescopeRotation getRotation() {
@@ -39,15 +42,15 @@ public class TileTelescope extends TileEntitySynchronized implements NamedInvent
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.rotation = TelescopeRotation.values()[pattern.getInt("rotation")];
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.putInt("rotation", rotation.ordinal());
     }

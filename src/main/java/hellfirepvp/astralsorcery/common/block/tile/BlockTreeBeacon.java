@@ -71,30 +71,30 @@ public class BlockTreeBeacon extends BlockStarlightNetwork implements CustomItem
 
     @Override
     public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, level, pos)) {
+        if (!this.canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return hasSolidSideOnTop(level, pos.below());
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter level) {
-        return new TileTreeBeacon();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileTreeBeacon(pos, state);
     }
 }

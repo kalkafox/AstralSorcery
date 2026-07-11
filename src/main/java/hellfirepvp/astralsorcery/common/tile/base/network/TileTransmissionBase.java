@@ -22,8 +22,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Style;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.Level;
@@ -44,8 +46,8 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
 
     private final List<BlockPos> positions = new LinkedList<>();
 
-    protected TileTransmissionBase(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileTransmissionBase(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     @Override
@@ -63,8 +65,8 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
     public abstract boolean isSingleLink();
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         ListTag list = new ListTag();
         for (BlockPos pos : positions) {
@@ -76,8 +78,8 @@ public abstract class TileTransmissionBase<T extends IPrismTransmissionNode> ext
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
         positions.clear();
 
         if (pattern.contains("linked")) {

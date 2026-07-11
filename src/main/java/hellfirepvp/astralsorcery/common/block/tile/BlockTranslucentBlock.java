@@ -46,7 +46,7 @@ public class BlockTranslucentBlock extends BlockFakedState {
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter level) {
-        return new TileTranslucentBlock();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileTranslucentBlock(pos, state);
     }
 }

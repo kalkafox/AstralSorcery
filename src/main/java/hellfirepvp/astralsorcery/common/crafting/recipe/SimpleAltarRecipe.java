@@ -16,6 +16,7 @@ import hellfirepvp.astralsorcery.common.block.tile.altar.AltarType;
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomMatcherRecipe;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
+import hellfirepvp.astralsorcery.common.crafting.helper.IngredientIO;
 import hellfirepvp.astralsorcery.common.crafting.helper.WrappedIngredient;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.ActiveSimpleAltarRecipe;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeGrid;
@@ -34,7 +35,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -220,11 +221,11 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
 
     public void serializeAdditionalJson(JsonObject recipeObject) {}
 
-    public void writeRecipeSync(FriendlyByteBuf buf) {}
+    public void writeRecipeSync(RegistryFriendlyByteBuf buf) {}
 
-    public void readRecipeSync(FriendlyByteBuf buf) {}
+    public void readRecipeSync(RegistryFriendlyByteBuf buf) {}
 
-    public static SimpleAltarRecipe read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+    public static SimpleAltarRecipe read(ResourceLocation recipeId, RegistryFriendlyByteBuf buffer) {
         AltarType type = ByteBufUtils.readEnumValue(buffer, AltarType.class);
         int duration = buffer.readInt();
         int starlight = buffer.readInt();
@@ -239,7 +240,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
         List<ItemStack> outputs = ByteBufUtils.readList(buffer, ByteBufUtils::readItem);
         outputs.forEach(recipe::addOutput);
         recipe.setFocusConstellation(ByteBufUtils.readOptional(buffer, ByteBufUtils::readRegistryEntry));
-        ByteBufUtils.readList(buffer, Ingredient::read).forEach(recipe::addRelayInput);
+        ByteBufUtils.readList(buffer, buf -> IngredientIO.read((RegistryFriendlyByteBuf) buf)).forEach(recipe::addRelayInput);
         List<AltarRecipeEffect> effects = ByteBufUtils.readList(buffer, ByteBufUtils::readRegistryEntry);
         for (AltarRecipeEffect effect : effects) {
             recipe.addAltarEffect(effect);
@@ -248,7 +249,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
         return recipe;
     }
 
-    public final void write(FriendlyByteBuf buffer) {
+    public final void write(RegistryFriendlyByteBuf buffer) {
         ByteBufUtils.writeEnumValue(buffer, this.getAltarType());
         buffer.writeInt(this.getDuration());
         buffer.writeInt(this.getStarlightRequirement());
@@ -257,7 +258,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
 
         ByteBufUtils.writeCollection(buffer, this.outputs, ByteBufUtils::writeItemStack);
         ByteBufUtils.writeOptional(buffer, this.getFocusConstellation(), ByteBufUtils::writeRegistryEntry);
-        ByteBufUtils.writeCollection(buffer, this.getRelayInputs(), (buf, ingredient) -> ingredient.getIngredient().write(buf));
+        ByteBufUtils.writeCollection(buffer, this.getRelayInputs(), (buf, ingredient) -> IngredientIO.write((RegistryFriendlyByteBuf) buf, ingredient.getIngredient()));
         ByteBufUtils.writeCollection(buffer, this.getCraftingEffects(), ByteBufUtils::writeRegistryEntry);
         this.writeRecipeSync(buffer);
     }
@@ -291,7 +292,7 @@ public class SimpleAltarRecipe extends CustomMatcherRecipe implements GatedRecip
         if (!this.getRelayInputs().isEmpty()) {
             JsonArray map = new JsonArray();
             for (WrappedIngredient traitInput : this.getRelayInputs()) {
-                map.add(traitInput.getIngredient().serialize());
+                map.add(IngredientIO.serialize(traitInput.getIngredient()));
             }
             object.add("relay_inputs", map);
         }

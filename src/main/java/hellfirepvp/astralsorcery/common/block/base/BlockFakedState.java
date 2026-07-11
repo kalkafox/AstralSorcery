@@ -13,21 +13,18 @@ import hellfirepvp.astralsorcery.client.effect.function.VFXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.VFXColorFunction;
 import hellfirepvp.astralsorcery.client.effect.handler.EffectHelper;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
-import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.tile.base.TileFakedState;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -81,19 +78,11 @@ public abstract class BlockFakedState extends BaseEntityBlock {
         }
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
-        BlockState fakeState = this.getFakedState(level, pos);
-        RenderingUtils.playBlockBreakParticles(pos, state, fakeState);
-        return true;
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean addHitEffects(BlockState state, Level worldObj, HitResult target, ParticleEngine manager) {
-        return true;
-    }
+    // NOTE: addDestroyEffects/addHitEffects moved off Block in 1.21 onto the client-only
+    // IClientBlockExtensions (registered via Block#initializeClient), so they are no longer
+    // overrides here. Left as a caveat for the client-rendering porting pass; the break-particle
+    // logic previously here (RenderingUtils.playBlockBreakParticles) needs to be reattached via
+    // that new registration mechanism.
 
     @Override
     public boolean addLandingEffects(BlockState state1, ServerLevel worldserver, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
@@ -123,13 +112,8 @@ public abstract class BlockFakedState extends BaseEntityBlock {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         return Lists.newArrayList();
-    }
-
-    @Override
-    public OffsetType getOffsetType() {
-        return OffsetType.NONE;
     }
 
     //TODO custom states via state container
@@ -168,21 +152,21 @@ public abstract class BlockFakedState extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         BlockState fakeState = this.getFakedState(level, pos);
         try {
-            return fakeState.use(level, player, handIn, hit);
+            return fakeState.useWithoutItem(level, player, hit);
         } catch (Exception exc) {
             //Ignore the result if we can't interact
         }
-        return super.use(state, level, pos, player, handIn, hit);
+        return super.useWithoutItem(state, level, pos, player, hit);
     }
 
     @Override
-    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
         BlockState fakeState = this.getFakedState(level, pos);
         try {
-            return fakeState.getPickBlock(target, level, pos, player);
+            return fakeState.getCloneItemStack(target, level, pos, player);
         } catch (Exception exc) {
             //Ignore the result. If we can't pick that stuff here, well.. guess we can't at all.
         }
@@ -196,7 +180,7 @@ public abstract class BlockFakedState extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.INVISIBLE;
     }
 }

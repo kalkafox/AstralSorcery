@@ -157,18 +157,18 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState p_149645_1_) {
+    public RenderShape getRenderShape(BlockState p_149645_1_) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileCollectorCrystal();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileCollectorCrystal(pos, state);
     }
 }

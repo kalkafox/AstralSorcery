@@ -19,6 +19,7 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -33,8 +34,8 @@ public class TileGemCrystals extends TileEntityTick {
 
     public static final int TICK_GROWTH_CHANCE = 10_000;
 
-    public TileGemCrystals() {
-        super(TileEntityTypesAS.GEM_CRYSTAL_CLUSTER);
+    public TileGemCrystals(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.GEM_CRYSTAL_CLUSTER, pos, state);
     }
 
     @Override

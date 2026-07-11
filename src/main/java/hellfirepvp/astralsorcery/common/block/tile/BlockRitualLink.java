@@ -45,13 +45,13 @@ public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock 
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileRitualLink();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileRitualLink(pos, state);
     }
 }

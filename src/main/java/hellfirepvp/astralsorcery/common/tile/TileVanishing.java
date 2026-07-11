@@ -21,6 +21,8 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -37,8 +39,8 @@ public class TileVanishing extends TileEntityTick {
 
     private static final AABB SEARCH_BOX = new AABB(-4,0, -4, 4, 3, 4);
 
-    public TileVanishing() {
-        super(TileEntityTypesAS.VANISHING);
+    public TileVanishing(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.VANISHING, pos, state);
     }
 
     @Override

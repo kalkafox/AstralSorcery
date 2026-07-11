@@ -36,14 +36,14 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
 
     @Override
     public BlockState updateShape(BlockState state, Direction dir, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
-        if (!state.isValidPosition(level, pos)) {
+        if (!state.canSurvive(level, pos)) {
             return Blocks.AIR.defaultBlockState();
         }
         return super.updateShape(state, dir, facingState, level, pos, facingPos);
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos blockpos = pos.below();
         if (state.getBlock() == this) {
             return level.getBlockState(blockpos).canSustainPlant(level, blockpos, Direction.UP, this);

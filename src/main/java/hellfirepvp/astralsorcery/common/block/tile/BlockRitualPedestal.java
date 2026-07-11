@@ -25,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
@@ -83,16 +84,14 @@ public class BlockRitualPedestal extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rtr) {
+    public ItemInteractionResult useItemOn(ItemStack heldItem, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rtr) {
         if (level.isClientSide()) {
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
         TileRitualPedestal pedestal = MiscUtils.getTileAt(level, pos, TileRitualPedestal.class, true);
         if (pedestal == null) {
-            return InteractionResult.PASS;
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-
-        ItemStack heldItem = player.getItemInHand(hand);
 
         ItemStack in = pedestal.getCurrentCrystal();
         if (player.isShiftKeyDown()) {
@@ -105,7 +104,7 @@ public class BlockRitualPedestal extends BlockStarlightNetwork implements Custom
         } else {
             player.setItemInHand(hand, pedestal.tryPlaceCrystalInPedestal(heldItem));
         }
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -140,18 +139,18 @@ public class BlockRitualPedestal extends BlockStarlightNetwork implements Custom
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileRitualPedestal();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileRitualPedestal(pos, state);
     }
 }

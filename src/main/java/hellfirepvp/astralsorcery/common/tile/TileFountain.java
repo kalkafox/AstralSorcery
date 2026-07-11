@@ -28,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -63,8 +64,8 @@ public class TileFountain extends TileEntityTick {
     private final FluidTankAccess access;
     private final SimpleSingleFluidTank tank;
 
-    public TileFountain() {
-        super(TileEntityTypesAS.FOUNTAIN);
+    public TileFountain(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.FOUNTAIN, pos, state);
 
         this.tank = new SimpleSingleFluidTank(TANK_SIZE);
         this.tank.addUpdateFunction(this::markForUpdate);
@@ -264,8 +265,8 @@ public class TileFountain extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.tickActiveFountainEffect = pattern.getInt("tickActiveFountainEffect");
         this.mbLiquidStarlight = pattern.getInt("mbLiquidStarlight");
@@ -290,8 +291,8 @@ public class TileFountain extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.putInt("tickActiveFountainEffect", this.tickActiveFountainEffect);
         pattern.putInt("mbLiquidStarlight", this.mbLiquidStarlight);

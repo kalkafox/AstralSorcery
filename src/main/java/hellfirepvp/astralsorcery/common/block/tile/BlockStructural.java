@@ -64,9 +64,6 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {}
-
-    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(BLOCK_TYPE);
     }
@@ -118,7 +115,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player entity, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player entity, BlockHitResult hitResult) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
                 if (level.isClientSide()) {
@@ -126,7 +123,7 @@ public class BlockStructural extends Block {
                 }
                 return InteractionResult.SUCCESS;
         }
-        return super.use(state, level, pos, entity, hand, hitResult);
+        return super.useWithoutItem(state, level, pos, entity, hitResult);
     }
 
     @Override
@@ -167,12 +164,12 @@ public class BlockStructural extends Block {
     }*/
 
     @Override
-    public ItemStack getPickBlock(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
         switch (state.get(BLOCK_TYPE)) {
             case TELESCOPE:
-                return BlockType.TELESCOPE.getSupportedState().getPickBlock(target, level, pos.below(), player);
+                return BlockType.TELESCOPE.getSupportedState().getCloneItemStack(target, level, pos.below(), player);
         }
-        return super.getPickBlock(state, target, level, pos, player);
+        return super.getCloneItemStack(state, target, level, pos, player);
     }
 
     @Override
@@ -201,7 +198,7 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public RenderShape getRenderType(BlockState p_149645_1_) {
+    public RenderShape getRenderShape(BlockState p_149645_1_) {
         return RenderShape.INVISIBLE;
     }
 

@@ -68,13 +68,13 @@ public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemB
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileAttunementAltar();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileAttunementAltar(pos, state);
     }
 }

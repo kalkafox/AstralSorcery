@@ -34,6 +34,8 @@ import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -70,8 +72,8 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
 
     private Object[] effectOrbitals = new Object[4];
 
-    public TileCollectorCrystal() {
-        super(TileEntityTypesAS.COLLECTOR_CRYSTAL);
+    public TileCollectorCrystal(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.COLLECTOR_CRYSTAL, pos, state);
     }
 
     @Override
@@ -240,8 +242,8 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.constellationType = NBTHelper.readOptional(pattern, "constellationType", (nbt) -> {
             IConstellation cst = IConstellation.readFromNBT(nbt);
@@ -264,8 +266,8 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         if (getAttributes() != null) {
             getAttributes().store(pattern);
@@ -276,9 +278,8 @@ public class TileCollectorCrystal extends TileSourceBase<SimpleTransmissionSourc
         NBTHelper.writeOptional(pattern, "playerUUID", this.playerUUID, (nbt, uuid) -> nbt.putUUID("playerUUID", uuid));
     }
 
-    @Override
     public AABB getBoundingBoxForCulling() {
-        return BOX.grow(1).offset(getBlockPos());
+        return BOX.inflate(1).move(getBlockPos());
     }
 
     @Nonnull

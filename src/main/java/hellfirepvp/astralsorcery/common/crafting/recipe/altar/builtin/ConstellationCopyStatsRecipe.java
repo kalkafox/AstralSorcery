@@ -59,7 +59,7 @@ public class ConstellationCopyStatsRecipe extends ConstellationBaseAverageStatsR
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {
         super.deserializeAdditionalJson(recipeObject);
 
-        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION_SLOT)) {
+        if (recipeObject.has(KEY_CONSTELLATION_SLOT)) {
             this.constellationSlot = GsonHelper.getAsInt(recipeObject, KEY_CONSTELLATION_SLOT);
         }
     }

@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
@@ -60,8 +61,8 @@ public class TileIlluminator extends TileEntityTick {
 
     private DyeColor color = DyeColor.YELLOW;
 
-    public TileIlluminator() {
-        super(TileEntityTypesAS.ILLUMINATOR);
+    public TileIlluminator(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.ILLUMINATOR, pos, state);
     }
 
     @Override
@@ -220,8 +221,8 @@ public class TileIlluminator extends TileEntityTick {
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.putBoolean("playerPlaced", this.playerPlaced);
         pattern.putInt("color", this.color.getId());
@@ -229,8 +230,8 @@ public class TileIlluminator extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.playerPlaced = pattern.getBoolean("playerPlaced");
         this.color = DyeColor.byId(pattern.getInt("color"));

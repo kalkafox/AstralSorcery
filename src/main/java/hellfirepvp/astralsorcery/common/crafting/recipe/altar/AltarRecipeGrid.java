@@ -15,25 +15,21 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import hellfirepvp.astralsorcery.common.block.tile.altar.AltarType;
-import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredient;
-import net.minecraft.world.level.material.Fluid;
+import hellfirepvp.astralsorcery.common.crafting.helper.IngredientIO;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.util.GsonHelper;
-import net.neoforged.neoforge.fluids.FluidAttributes;
-import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -207,24 +203,24 @@ public class AltarRecipeGrid {
     }
     */
 
-    public void write(FriendlyByteBuf buffer) {
+    public void write(RegistryFriendlyByteBuf buffer) {
         buffer.writeInt(this.width);
         buffer.writeInt(this.height);
         buffer.writeInt(this.gridParts.size());
         this.gridParts.forEach((key, value) -> {
             buffer.writeInt(key);
-            value.write(buffer);
+            IngredientIO.write(buffer, value);
         });
     }
 
-    public static AltarRecipeGrid read(FriendlyByteBuf buffer) {
+    public static AltarRecipeGrid read(RegistryFriendlyByteBuf buffer) {
         int width = buffer.readInt();
         int height = buffer.readInt();
         int gridParts = buffer.readInt();
         Map<Integer, Ingredient> ingredientMap = new HashMap<>();
         for (int i = 0; i < gridParts; i++) {
             int slot = buffer.readInt();
-            Ingredient ingredient = Ingredient.read(buffer);
+            Ingredient ingredient = IngredientIO.read(buffer);
             ingredientMap.put(slot, ingredient);
         }
         return new AltarRecipeGrid(ingredientMap, width, height);
@@ -242,7 +238,7 @@ public class AltarRecipeGrid {
         for (Map.Entry<Integer, Ingredient> entry : this/*.centralizeGrid()*/.gridParts.entrySet()) {
             Integer slotIndex = entry.getKey();
             Ingredient value = entry.getValue();
-            JsonElement jsonIngredient = value.serialize();
+            JsonElement jsonIngredient = IngredientIO.serialize(value);
             if (!revMap.containsKey(jsonIngredient)) {
                 String strKey = String.valueOf(c);
                 revMap.put(jsonIngredient, strKey);
@@ -279,7 +275,7 @@ public class AltarRecipeGrid {
         }
 
         for (int i = 0; i < Math.min(pattern.size(), GRID_SIZE); i++) {
-            String str = GsonHelper.getAsString(pattern.get(i), String.format("pattern[%s]", i));
+            String str = GsonHelper.convertToString(pattern.get(i), String.format("pattern[%s]", i));
             if (str.length() > GRID_SIZE) {
                 throw new JsonSyntaxException("Invalid pattern: too many columns, " + GRID_SIZE + " is maximum");
             }
@@ -311,7 +307,7 @@ public class AltarRecipeGrid {
                 throw new JsonSyntaxException("Invalid Key: '" + key + "'! Not used in the pattern map!");
             }
 
-            Ingredient i = Ingredient.deserialize(jEntry.getValue());
+            Ingredient i = IngredientIO.deserialize(jEntry.getValue());
             for (int index = 0; index < MAX_INVENTORY_SIZE; index++) {
                 if (patternMap.get(index) == c) {
                     mappedIngredients.put(index, i);
@@ -352,16 +348,18 @@ public class AltarRecipeGrid {
         }
 
         public Builder key(Character key, TagKey<Item> tagIn) {
-            return this.key(key, Ingredient.fromTag(tagIn));
+            return this.key(key, Ingredient.of(tagIn));
         }
 
         public Builder key(Character key, ItemLike itemIn) {
-            return this.key(key, Ingredient.valueFromJson(itemIn));
+            return this.key(key, Ingredient.of(itemIn));
         }
 
-        public Builder key(Character key, Fluid fluid) {
-            return this.key(key, new FluidIngredient(new FluidStack(fluid, FluidType.BUCKET_VOLUME)));
-        }
+        // Fluid-keyed altar recipe inputs used FluidIngredient, a custom Ingredient subclass.
+        // Ingredient became final in 1.21 - custom ingredients now go through NeoForge's
+        // ICustomIngredient/IngredientType registry instead of subclassing. FluidIngredient and
+        // its sibling CrystalIngredient (common.crafting.helper.ingredient) still need that port;
+        // see PORTING.md. Left out here since no in-scope caller used this overload.
 
         public Builder key(Character key, Ingredient from) {
             if (this.inputMapping.containsKey(key)) {
@@ -387,16 +385,16 @@ public class AltarRecipeGrid {
             }
             int shiftZ = (GRID_SIZE - mostHeight) / 2;
             for (int i = 0; i < shiftZ; i++) {
-                this.pattern.addFirst(StringUtil.zoom('_', GRID_SIZE));
+                this.pattern.addFirst(StringUtils.repeat('_', GRID_SIZE));
             }
             for (int i = 0; i < (GRID_SIZE - mostHeight - shiftZ); i++) {
-                this.pattern.add(StringUtil.zoom('_', GRID_SIZE));
+                this.pattern.add(StringUtils.repeat('_', GRID_SIZE));
             }
 
             List<String> patternLines = new LinkedList<>();
             int shiftX = (GRID_SIZE - mostWidth) / 2;
             for (String lineState : this.pattern) {
-                String newLine = StringUtil.zoom("_", shiftX) + lineState + StringUtil.zoom("_", GRID_SIZE - mostWidth - shiftX);
+                String newLine = StringUtils.repeat("_", shiftX) + lineState + StringUtils.repeat("_", GRID_SIZE - mostWidth - shiftX);
                 patternLines.add(newLine);
             }
 

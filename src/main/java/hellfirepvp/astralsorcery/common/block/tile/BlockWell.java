@@ -27,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
@@ -85,23 +86,22 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack heldItem, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide()) {
-            ItemStack heldItem = player.getItemInHand(hand);
             if (!heldItem.isEmpty()) {
                 TileWell tw = MiscUtils.getTileAt(level, pos, TileWell.class, false);
                 if (tw == null) {
-                    return InteractionResult.PASS;
+                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                 }
 
                 WellLiquefaction entry = RecipeTypesAS.TYPE_WELL.findRecipe(new WellLiquefactionContext(heldItem));
                 if (entry != null) {
                     ItemStackHandler handle = tw.getItems();
                     if (!handle.getStackInSlot(0).isEmpty()) {
-                        return InteractionResult.PASS;
+                        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                     }
                     if (!level.isEmptyBlock(pos.above())) {
-                        return InteractionResult.PASS;
+                        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                     }
 
                     handle.setStackInSlot(0, ItemUtils.copyStackWithSize(heldItem, 1));
@@ -129,7 +129,7 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
                         });
             }
         }
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -151,7 +151,7 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         TileWell tw = MiscUtils.getTileAt(level, pos, TileWell.class, false);
         if (tw != null) {
             int fluidPart = Mth.ceil(tw.getTank().getPercentageFilled() * 8F);
@@ -161,19 +161,19 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState p_149645_1_) {
+    public RenderShape getRenderShape(BlockState p_149645_1_) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileWell();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileWell(pos, state);
     }
 
 }

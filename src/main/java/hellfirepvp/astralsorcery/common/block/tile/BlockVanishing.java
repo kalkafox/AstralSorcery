@@ -76,7 +76,7 @@ public class BlockVanishing extends BaseEntityBlock {
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileVanishing();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileVanishing(pos, state);
     }
 }

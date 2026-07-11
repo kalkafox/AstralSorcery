@@ -19,6 +19,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -41,8 +43,8 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
     public float observatoryYaw = 0, prevObservatoryYaw = 0;
     public float observatoryPitch = -45, prevObservatoryPitch = -45;
 
-    public TileObservatory() {
-        super(TileEntityTypesAS.OBSERVATORY);
+    public TileObservatory(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.OBSERVATORY, pos, state);
     }
 
     @Override
@@ -134,15 +136,14 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         this.prevObservatoryYaw = prevYaw;
     }
 
-    @Override
     @OnlyIn(Dist.CLIENT)
     public AABB getBoundingBoxForCulling() {
-        return TileObservatory.INFINITE_EXTENT_AABB;
+        return AABB.INFINITE;
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.entityHelperRef = NBTHelper.getUUID(pattern, "entity", null);
         this.observatoryYaw = pattern.getFloat("oYaw");
@@ -152,8 +153,8 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         if(this.entityHelperRef != null) {
             pattern.putUUID("entity", this.entityHelperRef);

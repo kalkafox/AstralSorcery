@@ -32,8 +32,8 @@ import javax.annotation.Nullable;
  */
 public class TilePrism extends TileLens {
 
-    public TilePrism() {
-        super(TileEntityTypesAS.PRISM);
+    public TilePrism(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.PRISM, pos, state);
     }
 
     @Override

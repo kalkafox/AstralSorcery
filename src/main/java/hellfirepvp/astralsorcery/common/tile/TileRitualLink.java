@@ -23,6 +23,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -41,8 +43,8 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
 
     private BlockPos linkedTo = null;
 
-    public TileRitualLink() {
-        super(TileEntityTypesAS.RITUAL_LINK);
+    public TileRitualLink(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.RITUAL_LINK, pos, state);
     }
 
     @Override
@@ -97,15 +99,15 @@ public class TileRitualLink extends TileEntityTick implements LinkableTileEntity
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.linkedTo = NBTHelper.readFromSubTag(pattern, "posLink", NBTHelper::readBlockPosFromNBT);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         if (this.linkedTo != null) {
             NBTHelper.setAsSubTag(pattern, "posLink", nbt -> NBTHelper.writeBlockPosToNBT(this.linkedTo, nbt));

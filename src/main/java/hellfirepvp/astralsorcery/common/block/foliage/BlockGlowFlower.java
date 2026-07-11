@@ -10,21 +10,26 @@ package hellfirepvp.astralsorcery.common.block.foliage;
 
 import hellfirepvp.astralsorcery.common.block.base.template.BlockFlowerTemplate;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.neoforge.common.IPlantable;
 import net.neoforged.neoforge.common.PlantType;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -38,8 +43,8 @@ public class BlockGlowFlower extends BlockFlowerTemplate implements IPlantable {
     private final VoxelShape shape;
 
     public BlockGlowFlower() {
-        super(PropertiesMisc.defaultTickingPlant()
-                .isRedstoneConductor(state -> 5));
+        super(MobEffects.LUCK, 2.0F, PropertiesMisc.defaultTickingPlant()
+                .lightLevel(state -> 5));
         this.shape = createShape();
     }
 
@@ -53,22 +58,15 @@ public class BlockGlowFlower extends BlockFlowerTemplate implements IPlantable {
         return this.shape.offset(offset.x, offset.y, offset.z);
     }
 
-    @Nonnull
     @Override
-    public MobEffect getStewEffect() {
-        return MobEffects.LUCK;
-    }
-
-    @Override
-    public int getEffectDuration() {
-        return 40;
-    }
-
-    @Override
-    public int getExpDrop(BlockState state, LevelReader level, BlockPos pos, int fortune, int silktouch) {
+    public int getExpDrop(BlockState state, LevelAccessor level, BlockPos pos, @Nullable BlockEntity blockEntity, @Nullable Entity breaker, ItemStack tool) {
+        int silktouch = EnchantmentHelper.getItemEnchantmentLevel(
+                level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.SILK_TOUCH), tool);
         if (silktouch == 0) {
             return 0;
         }
+        int fortune = EnchantmentHelper.getItemEnchantmentLevel(
+                level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FORTUNE), tool);
         if (fortune > 0) {
             return fortune * Mth.nextInt(RANDOM, 2, 5);
         }

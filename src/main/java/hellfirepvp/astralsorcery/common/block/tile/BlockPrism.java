@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
@@ -90,7 +91,7 @@ public class BlockPrism extends BlockStarlightNetwork implements CustomItemBlock
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public ItemInteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!level.isClientSide() && player.isShiftKeyDown()) {
             TilePrism lens = MiscUtils.getTileAt(level, pos, TilePrism.class, true);
             if (lens != null && lens.getColorType() != null) {
@@ -106,10 +107,10 @@ public class BlockPrism extends BlockStarlightNetwork implements CustomItemBlock
                 }
                 SoundHelper.playSoundAround(SoundsAS.BLOCK_COLOREDLENS_ATTACH, level, pos, 0.8F, 1.5F);
                 lens.setColorType(null);
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
         }
-        return InteractionResult.PASS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -166,18 +167,18 @@ public class BlockPrism extends BlockStarlightNetwork implements CustomItemBlock
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TilePrism();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TilePrism(pos, state);
     }
 }

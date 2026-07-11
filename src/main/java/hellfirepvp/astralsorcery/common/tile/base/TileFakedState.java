@@ -9,6 +9,8 @@
 package hellfirepvp.astralsorcery.common.tile.base;
 
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
@@ -32,8 +34,8 @@ public abstract class TileFakedState extends TileEntityTick {
     private BlockState fakedState = Blocks.AIR.defaultBlockState();
     private Color overlayColor = Color.WHITE;
 
-    protected TileFakedState(BlockEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    protected TileFakedState(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
     }
 
     public boolean revert() {
@@ -64,16 +66,16 @@ public abstract class TileFakedState extends TileEntityTick {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.fakedState = NBTHelper.getBlockStateFromTag(pattern.getCompound("fakedState"), Blocks.AIR.defaultBlockState());
         this.overlayColor = new Color(pattern.getInt("color"), false);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         NBTHelper.setBlock(pattern, "fakedState", this.fakedState);
         pattern.putInt("color", this.overlayColor.getRGB());

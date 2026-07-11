@@ -11,8 +11,6 @@ package hellfirepvp.astralsorcery.common.registry;
 import hellfirepvp.astralsorcery.common.crafting.custom.RecipeDyeableChangeColor;
 import hellfirepvp.astralsorcery.common.crafting.serializer.*;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import static hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS.*;
@@ -35,11 +33,15 @@ public class RegistryRecipeSerializers {
         ALTAR_RECIPE_SERIALIZER = register(new SimpleAltarRecipeSerializer());
         LIQUID_INTERACTION_SERIALIZER = register(new LiquidInteractionSerializer());
 
-        CUSTOM_CHANGE_WAND_COLOR_SERIALIZER = register(new RecipeDyeableChangeColor.IlluminationWandColorSerializer());
-        CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER = register(new RecipeDyeableChangeColor.CelestialGatewayColorSerializer());
+        // These two don't carry an AstralRegistryEntry name of their own (they're built on
+        // vanilla's category-only SimpleCraftingRecipeSerializer), so register by explicit id.
+        CUSTOM_CHANGE_WAND_COLOR_SERIALIZER = AstralRegistries.register(AstralRegistries.RECIPE_SERIALIZERS,
+                CUSTOM_CHANGE_WAND_COLOR, new RecipeDyeableChangeColor.IlluminationWandColorSerializer());
+        CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER = AstralRegistries.register(AstralRegistries.RECIPE_SERIALIZERS,
+                CUSTOM_CHANGE_GATEWAY_COLOR, new RecipeDyeableChangeColor.CelestialGatewayColorSerializer());
     }
 
-    private static <C extends Container, R extends Recipe<C>, T extends RecipeSerializer<R>> T register(T serializer) {
+    private static <T extends RecipeSerializer<?>> T register(T serializer) {
         return AstralRegistries.register(AstralRegistries.RECIPE_SERIALIZERS, serializer);
     }
 

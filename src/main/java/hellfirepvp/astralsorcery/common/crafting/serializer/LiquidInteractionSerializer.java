@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -31,8 +31,8 @@ public class LiquidInteractionSerializer extends CustomRecipeSerializer<LiquidIn
     }
 
     @Override
-    public LiquidInteraction read(ResourceLocation recipeId, JsonObject json) {
-        return LiquidInteraction.read(recipeId, json);
+    public LiquidInteraction read(JsonObject json) {
+        return LiquidInteraction.read(json);
     }
 
     @Override
@@ -42,12 +42,12 @@ public class LiquidInteractionSerializer extends CustomRecipeSerializer<LiquidIn
 
     @Nullable
     @Override
-    public LiquidInteraction read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-        return LiquidInteraction.read(recipeId, buffer);
+    public LiquidInteraction read(RegistryFriendlyByteBuf buffer) {
+        return LiquidInteraction.read(generateDynamicId(), buffer);
     }
 
     @Override
-    public void write(FriendlyByteBuf buffer, LiquidInteraction recipe) {
+    public void write(RegistryFriendlyByteBuf buffer, LiquidInteraction recipe) {
         recipe.write(buffer);
     }
 }

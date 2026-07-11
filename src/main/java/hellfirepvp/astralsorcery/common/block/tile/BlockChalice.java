@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
@@ -61,8 +62,7 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult brtr) {
-        ItemStack interact = player.getItemInHand(hand);
+    public ItemInteractionResult useItemOn(ItemStack interact, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         TileChalice tc = MiscUtils.getTileAt(level, pos, TileChalice.class, true);
         if (tc != null) {
             IFluidHandlerItem handlerItem = FluidUtil.getFluidHandler(interact).orElse(null);
@@ -91,10 +91,10 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
                         }
                     }
                 }
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
         }
-        return InteractionResult.PASS;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
@@ -103,7 +103,7 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public int getComparatorInputOverride(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         TileChalice tc = MiscUtils.getTileAt(level, pos, TileChalice.class, false);
         if (tc != null) {
             return Mth.ceil(tc.getTank().getPercentageFilled() * 15F);
@@ -112,18 +112,18 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileChalice();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileChalice(pos, state);
     }
 }

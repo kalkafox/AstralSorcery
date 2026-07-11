@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.common.crafting.recipe;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomMatcherRecipe;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.InteractionResult;
@@ -19,15 +18,14 @@ import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.tile.TileChalice;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import joptsimple.internal.Strings;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -128,23 +126,19 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         return MiscUtils.getWeightedRandomEntry(recipes, random, interaction -> interaction.weight);
     }
 
-    public static LiquidInteraction read(ResourceLocation recipeId, JsonObject json) {
+    public static LiquidInteraction read(JsonObject json) {
+        // Recipes no longer receive their own id during JSON decode in 1.21 - RecipeManager
+        // attaches the real id externally via RecipeHolder. See CustomRecipeSerializer.
+        ResourceLocation recipeId = ResourceLocation.fromNamespaceAndPath("astralsorcery", "dynamic/" + java.util.UUID.randomUUID());
         String fluidKey1 = GsonHelper.getAsString(json, "reactant1");
         Fluid reactant1 = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey1));
         if (reactant1 == null) {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey1);
         }
         int amount1 = GsonHelper.getAsInt(json, "reactant1Amount");
-        CompoundTag tag1 = null;
-        if (GsonHelper.convertToInt(json, "reactant1Tag")) {
-            String jsonTag1 = GsonHelper.getAsString(json, "reactant1Tag");
-            try {
-                tag1 = TagParser.expect(jsonTag1);
-            } catch (CommandSyntaxException e) {
-                throw new JsonSyntaxException("Invalid Json: " + jsonTag1);
-            }
-        }
-        FluidStack r1 = new FluidStack(reactant1, amount1, tag1);
+        // Note: FluidStack lost its raw-NBT constructor in 1.21 (data components replaced it);
+        // reactant1Tag/reactant2Tag are intentionally no longer read - see PORTING.md.
+        FluidStack r1 = new FluidStack(reactant1, amount1);
 
         String fluidKey2 = GsonHelper.getAsString(json, "reactant2");
         Fluid reactant2 = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey2));
@@ -152,16 +146,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
             throw new JsonSyntaxException("Unknown fluid: " + fluidKey2);
         }
         int amount2 = GsonHelper.getAsInt(json, "reactant2Amount");
-        CompoundTag tag2 = null;
-        if (GsonHelper.convertToInt(json, "reactant2Tag")) {
-            String jsonTag2 = GsonHelper.getAsString(json, "reactant2Tag");
-            try {
-                tag2 = TagParser.expect(jsonTag2);
-            } catch (CommandSyntaxException e) {
-                throw new JsonSyntaxException("Invalid Json: " + jsonTag2);
-            }
-        }
-        FluidStack r2 = new FluidStack(reactant2, amount2, tag2);
+        FluidStack r2 = new FluidStack(reactant2, amount2);
 
         float chance1 = GsonHelper.getAsFloat(json, "chanceConsumeReactant1");
         float chance2 = GsonHelper.getAsFloat(json, "chanceConsumeReactant2");
@@ -172,7 +157,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         InteractionResult result = InteractionResultRegistry.create(id);
         if (result == null) {
             throw new JsonSyntaxException("Unknown result type: " + id.toString() +
-                    "; expected one of " + Strings.checkExceptions(InteractionResultRegistry.getKeysAsStrings(), ", "));
+                    "; expected one of " + Strings.join(InteractionResultRegistry.getKeysAsStrings(), ", "));
         }
         JsonObject resultData = GsonHelper.getAsJsonObject(ctResult, "data");
         result.read(resultData);
@@ -181,16 +166,10 @@ public class LiquidInteraction extends CustomMatcherRecipe {
     }
 
     public final void write(JsonObject object) {
-        object.addProperty("reactant1", this.reactant1.getFluid().getRegistryName().toString());
+        object.addProperty("reactant1", RegistryHelper.getKey(this.reactant1.getFluid()).toString());
         object.addProperty("reactant1Amount", this.reactant1.getAmount());
-        if (this.reactant1.hasTag()) {
-            object.addProperty("reactant1Tag", this.reactant1.getTag().toString());
-        }
-        object.addProperty("reactant2", this.reactant2.getFluid().getRegistryName().toString());
+        object.addProperty("reactant2", RegistryHelper.getKey(this.reactant2.getFluid()).toString());
         object.addProperty("reactant2Amount", this.reactant2.getAmount());
-        if (this.reactant2.hasTag()) {
-            object.addProperty("reactant2Tag", this.reactant2.getTag().toString());
-        }
         object.addProperty("chanceConsumeReactant1", this.chanceConsumeReactant1);
         object.addProperty("chanceConsumeReactant2", this.chanceConsumeReactant2);
         object.addProperty("weight", this.weight);
@@ -203,7 +182,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         object.add("result", ctResult);
     }
 
-    public static LiquidInteraction read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+    public static LiquidInteraction read(ResourceLocation recipeId, RegistryFriendlyByteBuf buffer) {
         FluidStack reactant1 = ByteBufUtils.readFluidStack(buffer);
         FluidStack reactant2 = ByteBufUtils.readFluidStack(buffer);
         float chanceConsumeReactant1 = buffer.readFloat();
@@ -218,7 +197,7 @@ public class LiquidInteraction extends CustomMatcherRecipe {
         return new LiquidInteraction(recipeId, reactant1, chanceConsumeReactant1, reactant2, chanceConsumeReactant2, weight, result);
     }
 
-    public final void write(FriendlyByteBuf buffer) {
+    public final void write(RegistryFriendlyByteBuf buffer) {
         ByteBufUtils.writeFluidStack(buffer, this.reactant1);
         ByteBufUtils.writeFluidStack(buffer, this.reactant2);
         buffer.writeFloat(this.chanceConsumeReactant1);

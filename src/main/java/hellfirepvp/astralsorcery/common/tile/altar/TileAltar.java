@@ -50,9 +50,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ForgeHooks;
@@ -88,8 +90,8 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     private Object clientCraftSound = null;
     private Object clientWaitSound = null;
 
-    public TileAltar() {
-        super(TileEntityTypesAS.ALTAR);
+    public TileAltar(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.ALTAR, pos, state);
         this.inventory = new TileInventoryFiltered(this, () -> 25);
     }
 
@@ -433,12 +435,11 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         return inventory;
     }
 
-    @Override
     @OnlyIn(Dist.CLIENT)
     public AABB getBoundingBoxForCulling() {
-        AABB box = super.getBoundingBoxForCulling().expand(0, 5, 0);
+        AABB box = new AABB(getBlockPos()).expandTowards(0, 5, 0);
         if (this.getAltarType().isThisGEThan(AltarType.RADIANCE)) {
-            box = box.grow(3, 0, 3);
+            box = box.inflate(3, 0, 3);
         }
         return box;
     }
@@ -451,8 +452,9 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         this.altarType = newType;
 
         CompoundTag thisTag = new CompoundTag();
-        this.writeCustomNBT(thisTag);
-        this.readCustomNBT(thisTag);
+        HolderLookup.Provider registries = this.level != null ? this.level.registryAccess() : null;
+        this.writeCustomNBT(thisTag, registries);
+        this.readCustomNBT(thisTag, registries);
         if (!initialPlacement) {
             this.markForUpdate();
 
@@ -462,22 +464,22 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     @Override
-    public void readNetNBT(CompoundTag pattern) {
-        super.readNetNBT(pattern);
+    public void readNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readNetNBT(pattern, registries);
 
         this.starlightStorage.load(pattern);
     }
 
     @Override
-    public void writeNetNBT(CompoundTag pattern) {
-        super.writeNetNBT(pattern);
+    public void writeNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeNetNBT(pattern, registries);
 
         this.starlightStorage.fillDefaultJigsawNBT(pattern);
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.altarType = AltarType.values()[pattern.getInt("altarType")];
         this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
@@ -492,8 +494,8 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.putInt("altarType", this.altarType.ordinal());
         pattern.put("inventory", this.inventory.serialize());

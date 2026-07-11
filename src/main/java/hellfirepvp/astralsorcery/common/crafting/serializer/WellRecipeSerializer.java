@@ -11,13 +11,14 @@ package hellfirepvp.astralsorcery.common.crafting.serializer;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer;
+import hellfirepvp.astralsorcery.common.crafting.helper.IngredientIO;
 import hellfirepvp.astralsorcery.common.crafting.recipe.WellLiquefaction;
 import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -39,8 +40,9 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
     }
 
     @Override
-    public WellLiquefaction read(ResourceLocation recipeId, JsonObject json) {
-        Ingredient from = Ingredient.deserialize(GsonHelper.getAsJsonObject(json, "input"));
+    public WellLiquefaction read(JsonObject json) {
+        ResourceLocation recipeId = generateDynamicId();
+        Ingredient from = IngredientIO.deserialize(GsonHelper.getAsJsonObject(json, "input"));
         String fluidKey = GsonHelper.getAsString(json, "output");
         Fluid fluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(fluidKey));
         if (fluid == null) {
@@ -56,8 +58,9 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
     }
 
     @Override
-    public WellLiquefaction read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
-        Ingredient from = Ingredient.read(buffer);
+    public WellLiquefaction read(RegistryFriendlyByteBuf buffer) {
+        ResourceLocation recipeId = generateDynamicId();
+        Ingredient from = IngredientIO.read(buffer);
         Fluid fluid = ByteBufUtils.readRegistryEntry(buffer);
         float shatter = buffer.readFloat();
         float production = buffer.readFloat();
@@ -66,8 +69,8 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
     }
 
     @Override
-    public void write(FriendlyByteBuf buffer, WellLiquefaction recipe) {
-        recipe.getInput().write(buffer);
+    public void write(RegistryFriendlyByteBuf buffer, WellLiquefaction recipe) {
+        IngredientIO.write(buffer, recipe.getInput());
         ByteBufUtils.writeRegistryEntry(buffer, recipe.getFluidOutput());
         buffer.writeFloat(recipe.getShatterMultiplier());
         buffer.writeFloat(recipe.getProductionMultiplier());
@@ -76,7 +79,7 @@ public class WellRecipeSerializer extends CustomRecipeSerializer<WellLiquefactio
 
     @Override
     public void write(JsonObject object, WellLiquefaction recipe) {
-        object.add("input", recipe.getInput().serialize());
+        object.add("input", IngredientIO.serialize(recipe.getInput()));
         object.addProperty("output", RegistryHelper.getKey(recipe.getFluidOutput()).toString());
         object.addProperty("productionMultiplier", recipe.getProductionMultiplier());
         object.addProperty("shatterMultiplier", recipe.getShatterMultiplier());

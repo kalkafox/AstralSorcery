@@ -8,14 +8,10 @@
 
 package hellfirepvp.astralsorcery.common.crafting.helper;
 
-import com.google.gson.JsonObject;
-import hellfirepvp.astralsorcery.AstralSorcery;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
-import org.apache.logging.log4j.Level;
+import net.minecraft.world.item.crafting.RecipeType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,7 +19,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,16 +26,22 @@ import java.util.function.Consumer;
  * Class: CustomRecipeBuilder
  * Created by HellFirePvP
  * Date: 07.03.2020 / 09:57
+ *
+ * {@code IFinishedRecipe}/{@code FinishedRecipe} (manual JSON serialization callback) is gone in
+ * 1.21 - datagen now hands recipes straight to a {@link RecipeOutput}, which serializes them
+ * itself via {@link net.minecraft.world.item.crafting.RecipeSerializer#codec()}, so there's no
+ * more need for the {@code WrappedCustomRecipe}/{@code FinishedRecipe} shim this class used to
+ * build.
  */
 public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
 
     private static final Map<RecipeType<?>, Set<ResourceLocation>> builtRecipes = new HashMap<>();
 
-    public void build(Consumer<FinishedRecipe> consumerIn) {
-        this.build(consumerIn, null);
+    public void build(RecipeOutput output) {
+        this.build(output, null);
     }
 
-    public void build(Consumer<FinishedRecipe> consumerIn, @Nullable String directory) {
+    public void build(RecipeOutput output, @Nullable String directory) {
         R recipe = this.validateAndGet();
 
         String saveId = recipe.getId().getPath();
@@ -51,52 +52,13 @@ public abstract class CustomRecipeBuilder<R extends CustomMatcherRecipe> {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(recipe.getId().getNamespace(), saveId);
 
         if (!builtRecipes.computeIfAbsent(recipe.getType(), type -> new HashSet<>()).add(id)) {
-            throw new IllegalArgumentException("Tried to register recipe with id " + id + " twice for type " + Registry.RECIPE_TYPE.getKey(recipe.getType()));
+            throw new IllegalArgumentException("Tried to register recipe with id " + id + " twice for type " + BuiltInRegistries.RECIPE_TYPE.getKey(recipe.getType()));
         }
-        consumerIn.accept(new WrappedCustomRecipe(recipe, id));
+        output.accept(id, recipe, null);
     }
 
     @Nonnull
     protected abstract R validateAndGet();
 
     protected abstract CustomRecipeSerializer<R> getSerializer();
-
-    private class WrappedCustomRecipe implements FinishedRecipe {
-
-        private final R recipe;
-        private final ResourceLocation id;
-
-        private WrappedCustomRecipe(R recipe, ResourceLocation id) {
-            this.recipe = recipe;
-            this.id = id;
-        }
-
-        @Override
-        public void serialize(JsonObject json) {
-            AstralSorcery.log.log(Level.INFO, this.id.toString());
-            CustomRecipeBuilder.this.getSerializer().write(json, this.recipe);
-        }
-
-        @Override
-        public ResourceLocation getID() {
-            return id;
-        }
-
-        @Override
-        public RecipeSerializer<?> getSerializer() {
-            return this.recipe.getSerializer();
-        }
-
-        @Nullable
-        @Override
-        public JsonObject serializeAdvancement() {
-            return null;
-        }
-
-        @Nullable
-        @Override
-        public ResourceLocation getAdvancementID() {
-            return ResourceLocation.parse("");
-        }
-    }
 }

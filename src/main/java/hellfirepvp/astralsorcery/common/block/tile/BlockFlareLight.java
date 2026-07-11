@@ -137,7 +137,7 @@ public class BlockFlareLight extends Block {
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.INVISIBLE;
     }
 }

@@ -58,13 +58,13 @@ public class BlockFountain extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
     @Override
     @Nullable
-    public BlockEntity newBlockEntity(BlockGetter level) {
-        return new TileFountain();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileFountain(pos, state);
     }
 }

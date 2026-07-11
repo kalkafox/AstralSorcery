@@ -12,6 +12,9 @@ import hellfirepvp.astralsorcery.common.lib.TileEntityTypesAS;
 import hellfirepvp.astralsorcery.common.tile.base.TileFakedState;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -27,8 +30,8 @@ public class TileTranslucentBlock extends TileFakedState {
 
     private UUID playerUUID = null;
 
-    public TileTranslucentBlock() {
-        super(TileEntityTypesAS.TRANSLUCENT_BLOCK);
+    public TileTranslucentBlock(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.TRANSLUCENT_BLOCK, pos, state);
     }
 
     @Nullable
@@ -42,15 +45,15 @@ public class TileTranslucentBlock extends TileFakedState {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.playerUUID = NBTHelper.getUUID(pattern, "playerUUID", null);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         if (this.playerUUID != null) {
             pattern.putUUID("playerUUID", this.playerUUID);

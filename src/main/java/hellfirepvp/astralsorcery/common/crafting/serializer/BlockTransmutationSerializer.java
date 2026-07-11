@@ -23,7 +23,7 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 
@@ -45,7 +45,8 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
     }
 
     @Override
-    public BlockTransmutation read(ResourceLocation recipeId, JsonObject json) {
+    public BlockTransmutation read(JsonObject json) {
+        ResourceLocation recipeId = generateDynamicId();
         List<BlockMatchInformation> matchInformation = new ArrayList<>();
         JsonHelper.parseMultipleJsonObjects(json, "input", object -> matchInformation.add(BlockMatchInformation.read(object)));
         if (matchInformation.isEmpty()) {
@@ -59,7 +60,7 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
 
         BlockState output = BlockStateHelper.deserializeObject(GsonHelper.getAsJsonObject(json, "output"));
         ItemStack outputDisplay = new ItemStack(output.getBlock());
-        if (GsonHelper.convertToInt(json, "display")) {
+        if (json.has("display")) {
             outputDisplay = JsonHelper.getItemStack(json, "display");
         }
         float starlight = GsonHelper.getAsFloat(json, "starlight");
@@ -84,7 +85,8 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
 
     @Nullable
     @Override
-    public BlockTransmutation read(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+    public BlockTransmutation read(RegistryFriendlyByteBuf buffer) {
+        ResourceLocation recipeId = generateDynamicId();
         List<BlockMatchInformation> matchInformation = ByteBufUtils.readList(buffer, BlockMatchInformation::read);
         BlockState output = ByteBufUtils.readBlockState(buffer);
         ItemStack display = ByteBufUtils.readItem(buffer);
@@ -114,7 +116,7 @@ public class BlockTransmutationSerializer extends CustomRecipeSerializer<BlockTr
     }
 
     @Override
-    public void write(FriendlyByteBuf buffer, BlockTransmutation recipe) {
+    public void write(RegistryFriendlyByteBuf buffer, BlockTransmutation recipe) {
         ByteBufUtils.writeCollection(buffer, recipe.getInputOptions(), (buf, match) -> match.serialize(buf));
         ByteBufUtils.writeBlockState(buffer, recipe.getOutput());
         ByteBufUtils.writeItemStack(buffer, recipe.getOutputDisplay());

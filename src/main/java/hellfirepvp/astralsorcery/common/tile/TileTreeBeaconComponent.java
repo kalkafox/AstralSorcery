@@ -14,6 +14,8 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nonnull;
 
@@ -28,8 +30,8 @@ public class TileTreeBeaconComponent extends TileFakedState {
 
     private BlockPos treeBeaconPos = BlockPos.ZERO;
 
-    public TileTreeBeaconComponent() {
-        super(TileEntityTypesAS.TREE_BEACON_COMPONENT);
+    public TileTreeBeaconComponent(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.TREE_BEACON_COMPONENT, pos, state);
     }
 
     @Override
@@ -59,15 +61,15 @@ public class TileTreeBeaconComponent extends TileFakedState {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.treeBeaconPos = NBTHelper.readFromSubTag(pattern, "treeBeaconPos", NBTHelper::readBlockPosFromNBT);
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         NBTHelper.setAsSubTag(pattern, "treeBeaconPos", tag -> NBTHelper.writeBlockPosToNBT(this.treeBeaconPos, tag));
     }

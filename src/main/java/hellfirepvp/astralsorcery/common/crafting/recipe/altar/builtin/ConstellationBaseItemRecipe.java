@@ -19,7 +19,7 @@ import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
 import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
@@ -53,7 +53,7 @@ public class ConstellationBaseItemRecipe extends SimpleAltarRecipe {
     public void deserializeAdditionalJson(JsonObject recipeObject) throws JsonSyntaxException {
         super.deserializeAdditionalJson(recipeObject);
 
-        if (GsonHelper.convertToInt(recipeObject, KEY_CONSTELLATION)) {
+        if (recipeObject.has(KEY_CONSTELLATION)) {
             ResourceLocation cstName = ResourceLocation.parse(GsonHelper.getAsString(recipeObject, KEY_CONSTELLATION));
             IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(cstName);
             if (cst != null) {
@@ -105,14 +105,14 @@ public class ConstellationBaseItemRecipe extends SimpleAltarRecipe {
     }
 
     @Override
-    public void writeRecipeSync(FriendlyByteBuf buf) {
+    public void writeRecipeSync(RegistryFriendlyByteBuf buf) {
         super.writeRecipeSync(buf);
 
         ByteBufUtils.writeOptional(buf, this.getConstellation(), ByteBufUtils::writeRegistryEntry);
     }
 
     @Override
-    public void readRecipeSync(FriendlyByteBuf buf) {
+    public void readRecipeSync(RegistryFriendlyByteBuf buf) {
         super.readRecipeSync(buf);
 
         this.setConstellation(ByteBufUtils.readOptional(buf, ByteBufUtils::readRegistryEntry));

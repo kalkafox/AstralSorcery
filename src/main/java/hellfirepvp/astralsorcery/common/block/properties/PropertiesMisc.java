@@ -10,7 +10,6 @@ package hellfirepvp.astralsorcery.common.block.properties;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.material.MapColor;
 
 /**
@@ -23,50 +22,53 @@ import net.minecraft.world.level.material.MapColor;
 public class PropertiesMisc {
 
     public static Block.Properties defaultAir() {
-        return Block.Properties.create(Material.AIR, MapColor.NONE)
-                .doesNotBlockMovement();
+        return Block.Properties.of()
+                .mapColor(MapColor.NONE)
+                .noCollission();
     }
 
     public static Block.Properties defaultSand() {
-        return Block.Properties.create(Material.SAND, MapColor.SAND)
-                .hardnessAndResistance(0.5F)
-
+        return Block.Properties.of()
+                .mapColor(MapColor.SAND)
+                .strength(0.5F)
                 .sound(SoundType.SAND);
     }
 
     public static Block.Properties defaultRock() {
-        return Block.Properties.create(Material.STONE, MapColor.STONE)
-                .hardnessAndResistance(1.5F, 6.0F)
-
+        return Block.Properties.of()
+                .mapColor(MapColor.STONE)
+                .strength(1.5F, 6.0F)
                 .sound(SoundType.STONE);
     }
 
-    public static Block.Properties defaultMetal(MaterialColor color) {
-        return Block.Properties.create(Material.IRON, color)
-                .hardnessAndResistance(1.5F, 6.0F)
-
-
+    public static Block.Properties defaultMetal(MapColor color) {
+        return Block.Properties.of()
+                .mapColor(color)
+                .strength(1.5F, 6.0F)
                 .sound(SoundType.METAL);
     }
 
     public static Block.Properties defaultPlant() {
-        return Block.Properties.create(Material.PLANT)
-                .doesNotBlockMovement()
-                .hardnessAndResistance(0)
+        return Block.Properties.of()
+                .mapColor(MapColor.PLANT)
+                .noCollission()
+                .strength(0)
                 .sound(SoundType.PLANT);
     }
 
     public static Block.Properties defaultTickingPlant() {
-        return Block.Properties.create(Material.PLANT)
-                .doesNotBlockMovement()
+        return Block.Properties.of()
+                .mapColor(MapColor.PLANT)
+                .noCollission()
                 .randomTicks()
-                .hardnessAndResistance(0)
+                .strength(0)
                 .sound(SoundType.PLANT);
     }
 
     public static Block.Properties defaultGoldMachinery() {
-        return Block.Properties.create(Material.IRON, MapColor.GOLD)
-                .hardnessAndResistance(1.0F, 4.0F)
+        return Block.Properties.of()
+                .mapColor(MapColor.GOLD)
+                .strength(1.0F, 4.0F)
                 .sound(SoundType.STONE);
     }
 

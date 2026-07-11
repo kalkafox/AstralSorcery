@@ -11,12 +11,10 @@ package hellfirepvp.astralsorcery.common.crafting.helper;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.RecipeHelper;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
@@ -57,7 +55,9 @@ public class ResolvingRecipeType<C extends IItemHandler, T extends IHandlerRecip
                 return ResolvingRecipeType.this.id.getPath();
             }
         };
-        Registry.register(Registry.RECIPE_TYPE, this.getRegistryName(), this.getType());
+        // Actual registration happens through AstralRegistries.RECIPE_TYPES, driven by
+        // RegistryRecipeTypes.register() - this constructor used to double-register directly
+        // against the (now-removed) static Registry.RECIPE_TYPE.
     }
 
     @Nonnull
@@ -66,10 +66,10 @@ public class ResolvingRecipeType<C extends IItemHandler, T extends IHandlerRecip
         if (mgr == null) {
             return Collections.emptyList();
         }
-        Collection<Recipe<Container>> recipeSet = mgr.getRecipes(this.type).values();
+        List<RecipeHolder<T>> recipeSet = mgr.getAllRecipesFor(this.type);
         List<T> recipes = new ArrayList<>(recipeSet.size());
-        for (Recipe<Container> rec : recipeSet) {
-            recipes.add((T) rec);
+        for (RecipeHolder<T> rec : recipeSet) {
+            recipes.add(rec.value());
         }
         return recipes;
     }

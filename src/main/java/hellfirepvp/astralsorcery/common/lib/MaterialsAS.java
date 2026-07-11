@@ -8,7 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.lib;
 
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.level.material.MapColor;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -21,8 +21,8 @@ public class MaterialsAS {
 
     private MaterialsAS() {}
 
-    public static Material MARBLE;
-    public static Material BLACK_MARBLE;
-    public static Material INFUSED_WOOD;
+    public static MapColor MARBLE;
+    public static MapColor BLACK_MARBLE;
+    public static MapColor INFUSED_WOOD;
 
 }

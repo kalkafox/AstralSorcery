@@ -66,7 +66,7 @@ public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (level.isClientSide()) {
             AstralSorcery.getProxy().openGui(player, GuiType.TELESCOPE, pos);
         }
@@ -88,13 +88,13 @@ public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
     }
 
     @Override
-    public RenderShape getRenderType(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.INVISIBLE;
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileTelescope();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileTelescope(pos, state);
     }
 }

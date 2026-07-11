@@ -46,7 +46,7 @@ public class BlockTreeBeaconComponent extends BlockFakedState {
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockGetter worldIn) {
-        return new TileTreeBeaconComponent();
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileTreeBeaconComponent(pos, state);
     }
 }

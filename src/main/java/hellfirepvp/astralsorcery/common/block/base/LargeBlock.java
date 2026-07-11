@@ -30,12 +30,12 @@ public interface LargeBlock {
         Level level = ctx.getLevel();
         AABB box = this.getBlockSpace();
 
-        BlockPos.Mutable mPos = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos();
         for (int xx = (int) box.minX; xx <= box.maxX; xx++) {
             for (int yy = (int) box.minY; yy <= box.maxY; yy++) {
                 for (int zz = (int) box.minZ; zz <= box.maxZ; zz++) {
-                    mPos.setPos(pos.getX() + xx, pos.getY() + yy, pos.getZ() + zz);
-                    if (!level.isEmptyBlock(mPos) && !level.getBlockState(mPos).isReplaceable(BlockPlaceContext.at(ctx, mPos, Direction.DOWN))) {
+                    mPos.set(pos.getX() + xx, pos.getY() + yy, pos.getZ() + zz);
+                    if (!level.isEmptyBlock(mPos) && !level.getBlockState(mPos).canBeReplaced(BlockPlaceContext.at(ctx, mPos, Direction.DOWN))) {
                         return false;
                     }
                 }

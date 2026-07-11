@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.block.properties;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.level.material.MapColor;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,8 +22,9 @@ import net.minecraft.client.resources.model.Material;
 public class PropertiesGlass {
 
     public static Block.Properties coatedGlass() {
-        return Block.Properties.create(Material.GLASS)
-                .hardnessAndResistance(1F, 5F)
+        return Block.Properties.of()
+                .mapColor(MapColor.NONE)
+                .strength(1F, 5F)
                 .sound(SoundType.GLASS);
     }
 

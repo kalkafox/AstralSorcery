@@ -42,14 +42,14 @@ public abstract class BlockFountainPrime extends Block implements CustomItemBloc
 
     @Override
     public BlockState updateShape(BlockState state, Direction placedAgainst, BlockState facingState, LevelAccessor level, BlockPos pos, BlockPos facingPos) {
-        if (!this.isValidPosition(state, level, pos)) {
+        if (!this.canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         }
         return state;
     }
 
     @Override
-    public boolean isValidPosition(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return level.getBlockState(pos.above()).getBlock() instanceof BlockFountain;
     }
 }

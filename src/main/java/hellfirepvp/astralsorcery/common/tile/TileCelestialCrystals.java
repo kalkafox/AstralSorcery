@@ -25,6 +25,8 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -43,8 +45,8 @@ public class TileCelestialCrystals extends TileEntityTick implements CrystalAttr
 
     private CrystalAttributes attributes = null;
 
-    public TileCelestialCrystals() {
-        super(TileEntityTypesAS.CELESTIAL_CRYSTAL_CLUSTER);
+    public TileCelestialCrystals(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.CELESTIAL_CRYSTAL_CLUSTER, pos, state);
     }
 
     @Override
@@ -136,8 +138,8 @@ public class TileCelestialCrystals extends TileEntityTick implements CrystalAttr
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         if (this.attributes != null) {
             this.attributes.store(pattern);
@@ -147,8 +149,8 @@ public class TileCelestialCrystals extends TileEntityTick implements CrystalAttr
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.attributes = CrystalAttributes.getCrystalAttributes(pattern);
     }
