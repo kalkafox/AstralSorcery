@@ -19,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 import javax.annotation.Nonnull;
 import net.minecraft.tags.TagKey;
@@ -49,8 +49,8 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
         this.id = id;
     }
 
-    public static LiquidInfusionBuilder builder(ForgeRegistryEntry<?> nameProvider) {
-        return new LiquidInfusionBuilder(AstralSorcery.key(nameProvider.getRegistryName().getPath()));
+    public static LiquidInfusionBuilder builder(Object nameProvider) {
+        return new LiquidInfusionBuilder(AstralSorcery.key(RegistryHelper.getKey(nameProvider).getPath()));
     }
 
     public static LiquidInfusionBuilder builder(ResourceLocation id) {

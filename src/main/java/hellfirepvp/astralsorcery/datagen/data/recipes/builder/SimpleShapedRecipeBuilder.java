@@ -11,24 +11,21 @@ package hellfirepvp.astralsorcery.datagen.data.recipes.builder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import hellfirepvp.astralsorcery.common.util.data.JsonHelper;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.registries.BuiltInRegistries;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
-import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -62,11 +59,11 @@ public class SimpleShapedRecipeBuilder {
     }
 
     public SimpleShapedRecipeBuilder key(Character symbol, TagKey<Item> tag) {
-        return this.key(symbol, Ingredient.fromTag(tag));
+        return this.key(symbol, Ingredient.of(tag));
     }
 
     public SimpleShapedRecipeBuilder key(Character symbol, ItemLike item) {
-        return this.key(symbol, Ingredient.valueFromJson(item));
+        return this.key(symbol, Ingredient.of(item));
     }
 
     public SimpleShapedRecipeBuilder key(Character symbol, Ingredient ingredientIn) {
@@ -94,18 +91,19 @@ public class SimpleShapedRecipeBuilder {
         return this;
     }
 
-    public void build(Consumer<FinishedRecipe> consumerIn) {
-        this.build(consumerIn, BuiltInRegistries.ITEM.getKey(this.result.getItem()));
+    public void build(RecipeOutput output) {
+        this.build(output, BuiltInRegistries.ITEM.getKey(this.result.getItem()));
     }
 
-    public void build(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+    public void build(RecipeOutput output, ResourceLocation id) {
         this.validate(id);
         String path = id.getPath();
         if (this.subDirectory != null && !this.subDirectory.isEmpty()) {
             path = this.subDirectory + "/" + path;
         }
         id = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "shaped/" + path);
-        consumerIn.accept(new Result(id, this.result, this.pattern, this.key));
+        ShapedRecipePattern shapedPattern = ShapedRecipePattern.of(this.key, this.pattern);
+        output.accept(id, new ShapedRecipe("", CraftingBookCategory.MISC, shapedPattern, this.result), null);
     }
 
     private void validate(ResourceLocation id) {
@@ -131,55 +129,6 @@ public class SimpleShapedRecipeBuilder {
             } else if (this.pattern.size() == 1 && this.pattern.get(0).length() == 1) {
                 throw new IllegalStateException("Shaped recipe " + id + " only takes in a single item - should it be a shapeless recipe instead?");
             }
-        }
-    }
-
-    public static class Result implements FinishedRecipe {
-
-        private final ResourceLocation id;
-        private final ItemStack result;
-        private final List<String> pattern;
-        private final Map<Character, Ingredient> key;
-
-        public Result(ResourceLocation idIn, ItemStack resultIn, List<String> patternIn, Map<Character, Ingredient> keyIn) {
-            this.id = idIn;
-            this.result = resultIn;
-            this.pattern = patternIn;
-            this.key = keyIn;
-        }
-
-        public void serialize(JsonObject json) {
-            JsonArray jsonarray = new JsonArray();
-            for(String s : this.pattern) {
-                jsonarray.add(s);
-            }
-            json.add("pattern", jsonarray);
-
-            JsonObject keys = new JsonObject();
-            for(Map.Entry<Character, Ingredient> entry : this.key.entrySet()) {
-                keys.add(String.valueOf(entry.getKey()), entry.getValue().serialize());
-            }
-            json.add("key", keys);
-
-            json.add("result", JsonHelper.serializeItemStack(this.result));
-        }
-
-        public RecipeSerializer<?> getSerializer() {
-            return RecipeSerializer.SHAPED_RECIPE;
-        }
-
-        public ResourceLocation getID() {
-            return this.id;
-        }
-
-        @Nullable
-        public JsonObject serializeAdvancement() {
-            return null;
-        }
-
-        @Nullable
-        public ResourceLocation getAdvancementID() {
-            return ResourceLocation.parse("");
         }
     }
 }

@@ -15,13 +15,12 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeGrid;
 import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeTypeHandler;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.tags.ItemTags;
 import net.neoforged.neoforge.common.Tags;
 
-import java.util.function.Consumer;
 import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
@@ -33,12 +32,12 @@ import hellfirepvp.astralsorcery.common.util.RegistryHelper;
  */
 public class CelestialAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerAltarRecipes(RecipeOutput registrar) {
         registerRecipes(registrar);
         registerColoredLensRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
+    private static void registerRecipes(RecipeOutput registrar) {
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.ALTAR_UPGRADE_TRAIT)
                 .createRecipe(BlocksAS.ALTAR_RADIANCE, AltarType.CONSTELLATION)
                 .setStarlightRequirement(0.8F)
@@ -48,7 +47,7 @@ public class CelestialAltarRecipeProvider {
                         .patternLine("  C  ")
                         .patternLine("AR RA")
                         .patternLine("RM MR")
-                        .key('C', new CrystalIngredient(false, true))
+                        .key('C', new CrystalIngredient(false, true).toVanilla())
                         .key('L', ItemsAS.GLASS_LENS)
                         .key('A', ItemsAS.RESONATING_GEM)
                         .key('M', BlocksAS.BLACK_MARBLE_RAW)
@@ -124,7 +123,7 @@ public class CelestialAltarRecipeProvider {
                         .patternLine(" LCL ")
                         .patternLine("EPSPE")
                         .patternLine("RR RR")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('S', TagsAS.Items.DUSTS_STARDUST)
                         .key('A', ItemsAS.RESONATING_GEM)
                         .key('L', ItemsAS.GLASS_LENS)
@@ -146,7 +145,7 @@ public class CelestialAltarRecipeProvider {
                         .patternLine("S E S")
                         .patternLine(" S S ")
                         .key('G', Tags.Items.INGOTS_GOLD)
-                        .key('T', Tags.Items.STRING)
+                        .key('T', Tags.Items.STRINGS)
                         .key('E', Items.ENDER_EYE)
                         .key('Z', ItemsAS.SHIFTING_STAR)
                         .key('S', TagsAS.Items.DUSTS_STARDUST)
@@ -202,7 +201,7 @@ public class CelestialAltarRecipeProvider {
                         .patternLine("  C  ")
                         .patternLine("R   R")
                         .patternLine("SI IS")
-                        .key('C', new CrystalIngredient(true, false, false, false))
+                        .key('C', new CrystalIngredient(true, false, false, false).toVanilla())
                         .key('R', ItemsAS.RESONATING_GEM)
                         .key('S', TagsAS.Items.DUSTS_STARDUST)
                         .key('I', ItemsAS.ILLUMINATION_POWDER)
@@ -220,7 +219,7 @@ public class CelestialAltarRecipeProvider {
                         .patternLine("  C  ")
                         .patternLine("R   R")
                         .patternLine("SI IS")
-                        .key('C', new CrystalIngredient(true, true, false, true))
+                        .key('C', new CrystalIngredient(true, true, false, true).toVanilla())
                         .key('R', ItemsAS.RESONATING_GEM)
                         .key('S', TagsAS.Items.DUSTS_STARDUST)
                         .key('I', ItemsAS.ILLUMINATION_POWDER)
@@ -264,7 +263,7 @@ public class CelestialAltarRecipeProvider {
                 .build(registrar);
     }
 
-    private static void registerColoredLensRecipes(Consumer<FinishedRecipe> registrar) {
+    private static void registerColoredLensRecipes(RecipeOutput registrar) {
         SimpleAltarRecipeBuilder.builder()
                 .createRecipe(ItemsAS.COLORED_LENS_SPECTRAL, AltarType.CONSTELLATION)
                 .setStarlightRequirement(0.5F)

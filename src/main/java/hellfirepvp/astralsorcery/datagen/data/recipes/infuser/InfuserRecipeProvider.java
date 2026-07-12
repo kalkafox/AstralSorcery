@@ -13,12 +13,11 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.common.Tags;
 
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,7 +28,7 @@ import java.util.function.Consumer;
  */
 public class InfuserRecipeProvider {
 
-    public static void registerInfuserRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerInfuserRecipes(RecipeOutput registrar) {
         LiquidInfusionBuilder.builder(ItemsAS.AQUAMARINE)
                 .setLiquidInput(FluidsAS.LIQUID_STARLIGHT_SOURCE)
                 .setItemInput(ItemsAS.AQUAMARINE)
@@ -63,7 +62,7 @@ public class InfuserRecipeProvider {
 
         LiquidInfusionBuilder.builder(Items.SAND)
                 .setLiquidInput(FluidsAS.LIQUID_STARLIGHT_SOURCE)
-                .setItemInput(Tags.Items.SAND)
+                .setItemInput(Tags.Items.SANDS)
                 .setOutput(Items.CLAY)
                 .multiplyDuration(0.5F)
                 .setFluidConsumptionChance(0.1F)
@@ -79,7 +78,7 @@ public class InfuserRecipeProvider {
 
         LiquidInfusionBuilder.builder(Items.GUNPOWDER)
                 .setLiquidInput(FluidsAS.LIQUID_STARLIGHT_SOURCE)
-                .setItemInput(Tags.Items.GUNPOWDER)
+                .setItemInput(Tags.Items.GUNPOWDERS)
                 .setOutput(Items.GLOWSTONE_DUST)
                 .multiplyDuration(0.5F)
                 .setFluidConsumptionChance(0.1F)
@@ -191,7 +190,7 @@ public class InfuserRecipeProvider {
 
         LiquidInfusionBuilder.builder(Items.GLASS)
                 .setLiquidInput(FluidsAS.LIQUID_STARLIGHT_SOURCE)
-                .setItemInput(Tags.Items.GLASS)
+                .setItemInput(Tags.Items.GLASS_BLOCKS)
                 .setOutput(Items.ICE)
                 .multiplyDuration(0.5F)
                 .setFluidConsumptionChance(0.1F)

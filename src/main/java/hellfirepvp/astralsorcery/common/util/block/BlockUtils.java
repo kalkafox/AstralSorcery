@@ -19,7 +19,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
@@ -32,6 +34,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
@@ -67,28 +70,27 @@ public class BlockUtils {
 
     @Nonnull
     public static List<ItemStack> getDrops(ServerLevel level, BlockPos pos, BlockState state, int harvestFortune, Random random, ItemStack tool) {
-        LootContext.Builder builder = new LootContext.Builder(level)
-                .withParameter(LootContextParams.ORIGIN, Vec3.copyCentered(pos))
+        LootParams.Builder builder = new LootParams.Builder(level)
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
                 .withParameter(LootContextParams.BLOCK_STATE, state)
                 .withParameter(LootContextParams.TOOL, tool)
                 .withOptionalParameter(LootContextParams.BLOCK_ENTITY, MiscUtils.getTileAt(level, pos, BlockEntity.class, true))
-                .create(random)
                 .withLuck(harvestFortune);
         return state.getDrops(builder);
     }
 
     @Nonnull
-    public static BlockPos getWorldTopPos(BlockPos at) {
+    public static BlockPos getWorldTopPos(LevelHeightAccessor level, BlockPos at) {
         BlockPos it = at;
-        while (!Level.isOutsideBuildHeight(it)) {
-            it = it.up();
+        while (!level.isOutsideBuildHeight(it)) {
+            it = it.above();
         }
         return it;
     }
 
     public static BlockPos firstSolidDown(BlockGetter level, BlockPos at) {
         BlockState state = level.getBlockState(at);
-        while (at.getY() > 0 && !state.getMaterial().blocksMotion() && state.getFluidState().isEmpty()) {
+        while (at.getY() > 0 && !state.blocksMotion() && state.getFluidState().isEmpty()) {
             at = at.below();
             state = level.getBlockState(at);
         }
@@ -104,14 +106,15 @@ public class BlockUtils {
             return true;
         }
         BlockPlaceContext ctx = TestBlockUseContext.getHandContext(level, null, InteractionHand.MAIN_HAND, pos, Direction.UP);
-        return state.isReplaceable(ctx);
+        return state.canBeReplaced(ctx);
     }
 
     //Same as PlayerEntity#getDigSpeed, but without firing an event and not position-based
     public static float getSimpleBreakSpeed(LivingEntity entity, ItemStack tool, BlockState state) {
         float breakSpeed = tool.getDestroySpeed(state);
         if (breakSpeed > 1.0F) {
-            float efficiencyLevel = EnchantmentHelper.getEfficiencyModifier(entity);
+            int efficiencyLevel = EnchantmentHelper.getEnchantmentLevel(
+                    entity.level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.EFFICIENCY), entity);
             if (efficiencyLevel > 0 && !tool.isEmpty()) {
                 breakSpeed += efficiencyLevel * efficiencyLevel + 1;
             }
@@ -121,9 +124,9 @@ public class BlockUtils {
             breakSpeed *= 1.0F + (MobEffectUtil.getDigSpeedAmplification(entity) + 1F) * 0.2F;
         }
 
-        if (entity.isPotionActive(MobEffects.DIG_SLOWDOWN)) {
+        if (entity.hasEffect(MobEffects.DIG_SLOWDOWN)) {
             float fatigueMultiplier;
-            switch (entity.getActivePotionEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
+            switch (entity.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
                 case 0:
                     fatigueMultiplier = (float) Math.pow(0.3F, 1);
                     break;
@@ -141,7 +144,8 @@ public class BlockUtils {
             breakSpeed *= fatigueMultiplier;
         }
 
-        if (entity.areEyesInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(entity)) {
+        if (entity.isEyeInFluid(FluidTags.WATER) && EnchantmentHelper.getEnchantmentLevel(
+                entity.level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.AQUA_AFFINITY), entity) <= 0) {
             breakSpeed /= 5.0F;
         }
 
@@ -156,7 +160,7 @@ public class BlockUtils {
     }
 
     public static boolean isFluidBlock(BlockState state) {
-        return state == state.getFluidState().getBlockState();
+        return state == state.getFluidState().createLegacyBlock();
     }
 
     @Nullable
@@ -181,9 +185,9 @@ public class BlockUtils {
         }
 
         for (Property<?> prop : state.getProperties()) {
-            Comparable<?> original = state.get(prop);
+            Comparable<?> original = state.getValue(prop);
             try {
-                Comparable<?> test = stateToTest.get(prop);
+                Comparable<?> test = stateToTest.getValue(prop);
                 if (!original.equals(test)) {
                     return false;
                 }
@@ -206,7 +210,7 @@ public class BlockUtils {
     }
 
     public static boolean breakBlockWithPlayer(BlockPos pos, ServerPlayer playerMP) {
-        return playerMP.gameMode.setLevel(pos);
+        return playerMP.gameMode.destroyBlock(pos);
     }
 
     //Copied from ForgeHooks.onBlockBreak & PlayerInteractionManager.tryHarvestBlock
@@ -223,35 +227,27 @@ public class BlockUtils {
 
     public static boolean breakBlockWithoutPlayer(ServerLevel level, BlockPos pos, BlockState stateBroken, ItemStack heldItem, boolean breakBlock, boolean ignoreHarvestRestrictions) {
         FakePlayer fakePlayer = AstralSorcery.getProxy().getASFakePlayerServer(level);
-        int xp;
         try {
-            boolean preCancelEvent = false;
-            if (!heldItem.isEmpty() && !heldItem.getItem().canPlayerBreakBlockWhileHolding(stateBroken, level, pos, fakePlayer)) {
-                preCancelEvent = true;
-            }
+            // 1.21 port: IItemExtension#canPlayerBreakBlockWhileHolding/ItemStack#onBlockStartBreak were
+            // removed from NeoForge without a direct replacement - the pre-check they gated is dropped,
+            // same as the surrounding best-effort emulation of a real player break. BreakEvent also no
+            // longer carries an editable xp-to-drop field (see ServerPlayerGameMode#destroyBlock in
+            // 1.21.1 - xp is now dropped internally by the block's own loot-table experience function,
+            // triggered further down via Block#playerDestroy, same as vanilla does).
             BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, stateBroken, fakePlayer);
-            event.setCanceled(preCancelEvent);
             NeoForge.EVENT_BUS.post(event);
 
             if (event.isCanceled()) {
                 return false;
             }
-            xp = event.getExpToDrop();
         } catch (Exception exc) {
-            return false;
-        }
-        if (xp == -1) {
-            return false;
-        }
-
-        if (heldItem.onBlockStartBreak(pos, fakePlayer)) {
             return false;
         }
 
         boolean harvestable = true;
         try {
             if (!ignoreHarvestRestrictions) {
-                harvestable = stateBroken.isCorrectToolForDrops(level, pos, fakePlayer);
+                harvestable = stateBroken.canHarvestBlock(level, pos, fakePlayer);
             }
         } catch (Exception exc) {
             return false;
@@ -259,7 +255,7 @@ public class BlockUtils {
 
         ItemStack heldCopy = heldItem.isEmpty() ? ItemStack.EMPTY : heldItem.copy();
         try {
-            heldCopy.onBlockDestroyed(level, stateBroken, pos, fakePlayer);
+            heldCopy.mineBlock(level, stateBroken, pos, fakePlayer);
         } catch (Exception exc) {
             return false;
         }
@@ -270,19 +266,17 @@ public class BlockUtils {
         level.captureBlockSnapshots = true;
         try {
             if (breakBlock) {
-                if (!stateBroken.removedByPlayer(level, pos, fakePlayer, harvestable, Fluids.EMPTY.defaultBlockState())) {
+                if (!stateBroken.onDestroyedByPlayer(level, pos, fakePlayer, harvestable, Fluids.EMPTY.defaultFluidState())) {
                     restoreWorldState(level, wasCapturingStates, previousCapturedStates);
                     return false;
                 }
-            } else {
-                stateBroken.getBlock().onBlockHarvested(level, pos, stateBroken, fakePlayer);
             }
+            // 1.21 port: Block#onBlockHarvested/#onPlayerDestroy were removed from vanilla; block removal
+            // and growth-neighbor handling now happen inside onDestroyedByPlayer/playerDestroy below.
         } catch (Exception exc) {
             restoreWorldState(level, wasCapturingStates, previousCapturedStates);
             return false;
         }
-
-        stateBroken.getBlock().onPlayerDestroy(level, pos, stateBroken);
 
         if (harvestable) {
             try {
@@ -295,17 +289,14 @@ public class BlockUtils {
             }
         }
 
-        if (xp > 0) {
-            stateBroken.getBlock().dropXpOnBlockBreak(level, pos, xp);
-        }
         BlockDropCaptureAssist.startCapturing();
         try {
             //Capturing block snapshots is aids. don't try that at home kids.
             level.captureBlockSnapshots = false;
             level.restoringBlockSnapshots = true;
-            level.capturedBlockSnapshots.forEach((s) -> s.restore(true));
+            level.capturedBlockSnapshots.forEach((s) -> s.restore());
             level.restoringBlockSnapshots = false;
-            level.capturedBlockSnapshots.forEach((s) -> level.setBlock(s.getBlockPos(), Blocks.AIR.defaultBlockState()));
+            level.capturedBlockSnapshots.forEach((s) -> level.setBlockAndUpdate(s.getPos(), Blocks.AIR.defaultBlockState()));
         } finally {
             BlockDropCaptureAssist.getCapturedStacksAndStop(); //Discard
 
@@ -321,7 +312,7 @@ public class BlockUtils {
         level.captureBlockSnapshots = false;
 
         level.restoringBlockSnapshots = true;
-        level.capturedBlockSnapshots.forEach((s) -> s.restore(true));
+        level.capturedBlockSnapshots.forEach((s) -> s.restore());
         level.restoringBlockSnapshots = false;
 
         level.capturedBlockSnapshots.clear();

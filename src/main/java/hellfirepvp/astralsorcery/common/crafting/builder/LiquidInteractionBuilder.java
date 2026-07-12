@@ -17,7 +17,7 @@ import hellfirepvp.astralsorcery.common.lib.RecipeSerializersAS;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 import javax.annotation.Nonnull;
 
@@ -41,8 +41,8 @@ public class LiquidInteractionBuilder extends CustomRecipeBuilder<LiquidInteract
         this.id = id;
     }
 
-    public static LiquidInteractionBuilder builder(ForgeRegistryEntry<?> nameProvider) {
-        return new LiquidInteractionBuilder(AstralSorcery.key(nameProvider.getRegistryName().getPath()));
+    public static LiquidInteractionBuilder builder(Object nameProvider) {
+        return new LiquidInteractionBuilder(AstralSorcery.key(RegistryHelper.getKey(nameProvider).getPath()));
     }
 
     public static LiquidInteractionBuilder builder(ResourceLocation id) {

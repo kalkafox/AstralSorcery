@@ -25,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.resources.ResourceKey;
@@ -32,6 +33,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
@@ -266,24 +268,17 @@ public class ByteBufUtils {
         return new Vector3(x, y, z);
     }
 
+    // 1.21 port: ItemStack (de)serialization needs a HolderLookup.Provider for its data
+    // components. Every real network buffer is a RegistryFriendlyByteBuf at runtime even where
+    // legacy call sites here still declare the base FriendlyByteBuf, same idiom used by
+    // SimpleAltarRecipe/IngredientIO.
     public static void writeItemStack(FriendlyByteBuf byteBuf, @Nonnull ItemStack stack) {
-        boolean defined = !stack.isEmpty();
-        byteBuf.writeBoolean(defined);
-        if (defined) {
-            CompoundTag tag = new CompoundTag();
-            stack.write(tag);
-            writeNBTTag(byteBuf, tag);
-        }
+        ItemStack.OPTIONAL_STREAM_CODEC.encode((RegistryFriendlyByteBuf) byteBuf, stack);
     }
 
     @Nonnull
     public static ItemStack readItem(FriendlyByteBuf byteBuf) {
-        boolean defined = byteBuf.readBoolean();
-        if (defined) {
-            return ItemStack.read(readNBTTag(byteBuf));
-        } else {
-            return ItemStack.EMPTY;
-        }
+        return ItemStack.OPTIONAL_STREAM_CODEC.decode((RegistryFriendlyByteBuf) byteBuf);
     }
 
     public static void writeBlockState(FriendlyByteBuf byteBuf, @Nonnull BlockState state) {
@@ -293,7 +288,7 @@ public class ByteBufUtils {
         byteBuf.writeInt(properties.size());
         for (Property prop : properties) {
             ByteBufUtils.writeString(byteBuf, prop.getName());
-            ByteBufUtils.writeString(byteBuf, prop.getName(state.get(prop)));
+            ByteBufUtils.writeString(byteBuf, prop.getName(state.getValue(prop)));
         }
     }
 
@@ -316,13 +311,20 @@ public class ByteBufUtils {
         return state;
     }
 
+    // 1.21 port: FluidStack.STREAM_CODEC needs a RegistryFriendlyByteBuf (for its data-component
+    // patch), which most callers of this legacy helper don't have on hand. Components aren't used
+    // by any caller here, so fluid+amount is encoded manually instead, same scope limitation as
+    // LiquidInteraction's reactant matching.
     public static void writeFluidStack(FriendlyByteBuf byteBuf, @Nonnull FluidStack stack) {
-        stack.writeToPacket(byteBuf);
+        ByteBufUtils.writeRegistryEntry(byteBuf, stack.getFluid());
+        byteBuf.writeVarInt(stack.getAmount());
     }
 
     @Nonnull
     public static FluidStack readFluidStack(FriendlyByteBuf byteBuf) {
-        return FluidStack.readFromPacket(byteBuf);
+        Fluid fluid = ByteBufUtils.readRegistryEntry(byteBuf);
+        int amount = byteBuf.readVarInt();
+        return new FluidStack(fluid, amount);
     }
 
     public static void writeNBTTag(FriendlyByteBuf byteBuf, @Nonnull CompoundTag tag) {

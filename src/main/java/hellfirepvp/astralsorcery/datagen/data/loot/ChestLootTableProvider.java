@@ -10,14 +10,16 @@ package hellfirepvp.astralsorcery.datagen.data.loot;
 
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.lib.LootAS;
-import net.minecraft.data.loot.ChestLootTables;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.loot.LootTableSubProvider;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Items;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.loot.RandomValueRange;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 import java.util.function.BiConsumer;
 
@@ -28,25 +30,25 @@ import java.util.function.BiConsumer;
  * Created by HellFirePvP
  * Date: 02.05.2020 / 15:37
  */
-public class ChestLootTableProvider extends ChestLoot {
+public record ChestLootTableProvider(HolderLookup.Provider registries) implements LootTableSubProvider {
 
     @Override
-    public void accept(BiConsumer<ResourceLocation, LootTable.Builder> registrar) {
-        registrar.accept(LootAS.SHRINE_CHEST,
-                LootTable.builder()
-                    .addLootPool(LootPool.builder()
-                            .rolls(RandomValueBounds.of(3, 5))
-                            .bonusRolls(1, 2)
-                            .addEntry(LootItem.builder(ItemsAS.CONSTELLATION_PAPER).weight(18))
-                            .addEntry(LootItem.builder(ItemsAS.AQUAMARINE).weight(12).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
-                            .addEntry(LootItem.builder(Items.BONE).weight(10).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
-                            .addEntry(LootItem.builder(Items.GOLD_INGOT).weight(5).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 2))))
-                            .addEntry(LootItem.builder(Items.IRON_INGOT).weight(15).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
-                            .addEntry(LootItem.builder(Items.DIAMOND).weight(2))
-                            .addEntry(LootItem.builder(Items.GLOWSTONE_DUST).weight(8).apply(SetItemCountFunction.builder(RandomValueBounds.of(1, 3))))
-                            .addEntry(LootItem.builder(Items.EMERALD).weight(1))
-                            .addEntry(LootItem.builder(Items.ENDER_PEARL).weight(2))
-                    )
+    public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        output.accept(ResourceKey.create(Registries.LOOT_TABLE, LootAS.SHRINE_CHEST),
+                LootTable.lootTable()
+                        .withPool(LootPool.lootPool()
+                                .setRolls(UniformGenerator.between(3, 5))
+                                .setBonusRolls(UniformGenerator.between(1, 2))
+                                .add(LootItem.lootTableItem(ItemsAS.CONSTELLATION_PAPER).setWeight(18))
+                                .add(LootItem.lootTableItem(ItemsAS.AQUAMARINE).setWeight(12).apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3))))
+                                .add(LootItem.lootTableItem(Items.BONE).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3))))
+                                .add(LootItem.lootTableItem(Items.GOLD_INGOT).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 2))))
+                                .add(LootItem.lootTableItem(Items.IRON_INGOT).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3))))
+                                .add(LootItem.lootTableItem(Items.DIAMOND).setWeight(2))
+                                .add(LootItem.lootTableItem(Items.GLOWSTONE_DUST).setWeight(8).apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 3))))
+                                .add(LootItem.lootTableItem(Items.EMERALD).setWeight(1))
+                                .add(LootItem.lootTableItem(Items.ENDER_PEARL).setWeight(2))
+                        )
         );
     }
 }

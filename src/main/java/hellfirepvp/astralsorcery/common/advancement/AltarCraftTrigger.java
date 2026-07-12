@@ -8,14 +8,14 @@
 
 package hellfirepvp.astralsorcery.common.advancement;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.advancement.instance.AltarRecipeInstance;
 import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipe;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.loot.ConditionArrayParser;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,24 +24,16 @@ import net.minecraft.resources.ResourceLocation;
  * Created by HellFirePvP
  * Date: 27.10.2018 / 14:23
  */
-public class AltarCraftTrigger extends ListenerCriterionTrigger<AltarRecipeInstance> {
+public class AltarCraftTrigger extends SimpleCriterionTrigger<AltarRecipeInstance> {
 
     public static final ResourceLocation ID = AstralSorcery.key("altar_craft");
 
-    public AltarCraftTrigger() {
-        super(ID);
-    }
-
     @Override
-    public AltarRecipeInstance deserialize(JsonObject object, DeserializationContext conditions) {
-        return AltarRecipeInstance.deserialize(getId(), object);
+    public Codec<AltarRecipeInstance> codec() {
+        return AltarRecipeInstance.CODEC;
     }
 
     public void trigger(ServerPlayer player, SimpleAltarRecipe recipe, ItemStack output) {
-        Listeners<AltarRecipeInstance> listeners = this.listeners.get(player.getAdvancements());
-        if (listeners != null) {
-            listeners.trigger((i) -> i.test(recipe, output));
-        }
+        this.trigger(player, (i) -> i.test(recipe, output));
     }
-
 }

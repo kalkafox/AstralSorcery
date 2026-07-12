@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -49,8 +49,8 @@ public class BlockTransmutationBuilder extends CustomRecipeBuilder<BlockTransmut
         this.id = id;
     }
 
-    public static BlockTransmutationBuilder builder(ForgeRegistryEntry<?> nameProvider) {
-        return new BlockTransmutationBuilder(AstralSorcery.key(nameProvider.getRegistryName().getPath()));
+    public static BlockTransmutationBuilder builder(Object nameProvider) {
+        return new BlockTransmutationBuilder(AstralSorcery.key(RegistryHelper.getKey(nameProvider).getPath()));
     }
 
     public static BlockTransmutationBuilder builder(ResourceLocation id) {

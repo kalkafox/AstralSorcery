@@ -29,6 +29,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -56,18 +58,18 @@ public class CelestialStrike {
 
     public static void play(@Nullable LivingEntity attacker, ServerLevel level, Vector3 at, Vector3 displayPosition) {
         double radius = 16D;
-        List<LivingEntity> livingEntities = level.getEntitiesWithinAABB(LivingEntity.class,
-                EMPTY.grow(radius, radius / 2, radius)
-                        .offset(at.toBlockPos()), EntitySelector.ENTITY_STILL_ALIVE);
+        List<LivingEntity> livingEntities = level.getEntities(EntityTypeTest.forClass(LivingEntity.class),
+                EMPTY.inflate(radius, radius / 2, radius)
+                        .move(at.toBlockPos()), EntitySelector.ENTITY_STILL_ALIVE);
         if (attacker != null) {
             livingEntities.remove(attacker);
         }
 
         DamageSource ds = CommonProxy.DAMAGE_SOURCE_STELLAR;
         if (attacker != null) {
-            ds = DamageSource.mobAttack(attacker);
+            ds = level.damageSources().mobAttack(attacker);
             if (attacker instanceof Player) {
-                ds = DamageSource.causePlayerDamage((Player) attacker);
+                ds = level.damageSources().playerAttack((Player) attacker);
             }
         }
         float dmg = 25F;
@@ -85,9 +87,10 @@ public class CelestialStrike {
                 DamageUtil.hurt(living, ds, dmgDealt);
 
                 if (attacker != null) {
-                    int fireAspectLevel = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FIRE_ASPECT, attacker);
+                    int fireAspectLevel = EnchantmentHelper.getEnchantmentLevel(
+                            level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FIRE_ASPECT), attacker);
                     if (fireAspectLevel > 0 && !living.isOnFire()) {
-                        living.setFire(fireAspectLevel * 4);
+                        living.igniteForSeconds(fireAspectLevel * 4);
                     }
                 }
             }

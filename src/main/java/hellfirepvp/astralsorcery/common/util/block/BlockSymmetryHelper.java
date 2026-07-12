@@ -75,7 +75,7 @@ public class BlockSymmetryHelper {
     }
 
     private static void checkMirrorSymmetry(BlockGetter level, Vec3i offset, BlockPos center, SymmetryResult result, Set<BlockPos> visitedBlocks) {
-        BlockPos at = center.add(offset);
+        BlockPos at = center.offset(offset);
         BlockState state = level.getBlockState(at);
         visitedBlocks.add(at);
 

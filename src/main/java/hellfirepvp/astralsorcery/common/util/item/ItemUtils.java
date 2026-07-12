@@ -60,8 +60,8 @@ public class ItemUtils {
         }
         ItemEntity ei = new ItemEntity(level, x, y, z, stack);
         ei.setDeltaMovement(new Vec3(0, 0, 0));
-        level.addEntity(ei);
-        ei.setPickupDelay(20);
+        level.addFreshEntity(ei);
+        ei.setPickUpDelay(20);
         return ei;
     }
 
@@ -71,8 +71,8 @@ public class ItemUtils {
         }
         ItemEntity ei = new ItemEntity(level, x, y, z, stack);
         applyRandomDropOffset(ei);
-        level.addEntity(ei);
-        ei.setPickupDelay(20);
+        level.addFreshEntity(ei);
+        ei.setPickUpDelay(20);
         return ei;
     }
 
@@ -117,7 +117,7 @@ public class ItemUtils {
     public static boolean isEquippableArmor(Entity entity, ItemStack stack) {
         for (EquipmentSlot type : EquipmentSlot.values()) {
             if (type.getType() == EquipmentSlot.Group.ARMOR) {
-                if (stack.canEquip(type, entity)) {
+                if (entity instanceof net.minecraft.world.entity.LivingEntity living && stack.canEquip(type, living)) {
                     return true;
                 }
             }
@@ -134,7 +134,7 @@ public class ItemUtils {
         if (item.getItem().isEmpty()) {
             return stack;
         }
-        item.setNoPickupDelay();
+        item.setNoPickUpDelay();
         try {
             item.playerTouch(player);
         } catch (Exception ignored) {
@@ -155,9 +155,9 @@ public class ItemUtils {
 
     @Nonnull
     public static ItemStack changeItem(@Nonnull ItemStack stack, @Nonnull Item item) {
-        CompoundTag nbt = stack.write(new CompoundTag());
-        nbt.putString("id", item.getRegistryName().toString());
-        return ItemStack.read(nbt);
+        ItemStack changed = new ItemStack(item, stack.getCount());
+        changed.applyComponents(stack.getComponents());
+        return changed;
     }
 
     @Nonnull
@@ -167,7 +167,7 @@ public class ItemUtils {
 
     @Nullable
     public static BlockState createBlockState(ItemStack stack) {
-        Block b = Block.getBlockFromItem(stack.getItem());
+        Block b = Block.byItem(stack.getItem());
         if (b == Blocks.AIR) {
             return null;
         }
@@ -421,6 +421,10 @@ public class ItemUtils {
         }
 
         @Override
+        public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+            return false;
+        }
+
         public boolean mayPlace(int slot, @Nonnull ItemStack stack) {
             return false;
         }

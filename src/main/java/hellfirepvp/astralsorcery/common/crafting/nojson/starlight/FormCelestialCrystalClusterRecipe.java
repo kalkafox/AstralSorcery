@@ -55,7 +55,7 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getInputForRender() {
         return Arrays.asList(Ingredient.fromStacks(new ItemStack(ItemsAS.STARDUST)),
-                new CrystalIngredient(false, false));
+                new CrystalIngredient(false, false).toVanilla());
     }
 
     @Override

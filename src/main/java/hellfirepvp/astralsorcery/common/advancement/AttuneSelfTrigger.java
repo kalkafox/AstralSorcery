@@ -8,40 +8,31 @@
 
 package hellfirepvp.astralsorcery.common.advancement;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.advancement.instance.ConstellationInstance;
-import hellfirepvp.astralsorcery.common.constellation.IMajorConstellation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.loot.ConditionArrayParser;
+import hellfirepvp.astralsorcery.common.constellation.IConstellation;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on github.
  * Class: AttuneSelfTrigger
  * Created by HellFirePvP
- * Date: 27.10.2018 / 13:05
+ * Date: 27.10.2018 / 13:53
  */
-public class AttuneSelfTrigger extends ListenerCriterionTrigger<ConstellationInstance> {
+public class AttuneSelfTrigger extends SimpleCriterionTrigger<ConstellationInstance> {
 
     public static final ResourceLocation ID = AstralSorcery.key("attune_self");
 
-    public AttuneSelfTrigger() {
-        super(ID);
-    }
-
     @Override
-    public ConstellationInstance deserialize(JsonObject object, DeserializationContext conditions) {
-        return ConstellationInstance.deserialize(getId(), object);
+    public Codec<ConstellationInstance> codec() {
+        return ConstellationInstance.CODEC;
     }
 
-    public void trigger(ServerPlayer player, IMajorConstellation attuned) {
-        Listeners<ConstellationInstance> listeners = this.listeners.get(player.getAdvancements());
-        if (listeners != null) {
-            listeners.trigger((i) -> i.test(attuned));
-        }
+    public void trigger(ServerPlayer player, IConstellation cst) {
+        this.trigger(player, (i) -> i.test(cst));
     }
-
 }

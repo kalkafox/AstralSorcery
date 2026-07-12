@@ -12,7 +12,6 @@ import hellfirepvp.astralsorcery.common.util.block.BlockPredicate;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.object.ObjectReference;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
@@ -79,13 +78,13 @@ public class RaytraceAssist {
     public void setCollectEntities(double radius) {
         this.collectEntities = true;
         this.collectBox = new AABB(0, 0, 0, 0, 0, 0);
-        this.collectBox = this.collectBox.grow(radius).offset(radius, 0, radius);
+        this.collectBox = this.collectBox.inflate(radius).move(radius, 0, radius);
     }
 
     public boolean isClear(Level level) {
         return this.forEachBlockPos(at -> {
             if (collectEntities) {
-                List<Entity> entities = level.getEntitiesWithinAABB(Entity.class, collectBox.offset(at));
+                List<Entity> entities = level.getEntities((Entity) null, collectBox.move(at), e -> true);
                 for (Entity b : entities) {
                     collected.add(b.getId());
                 }
@@ -162,8 +161,11 @@ public class RaytraceAssist {
         passable.add(predicate);
     }
 
+    // 1.21 port: the vanilla block Material system (Material.GLASS) is gone; approximate the old
+    // "glass is passable" check via canOcclude(), which glass-like blocks (vanilla and this mod's
+    // own, via PropertiesGlass's .noOcclusion()) set false.
     static {
-        addPassable(((level, pos, state) -> state.getFluidState().isEmpty() && state.getMaterial().equals(Material.GLASS)));
+        addPassable(((level, pos, state) -> state.getFluidState().isEmpty() && !state.canOcclude()));
     }
 
 }

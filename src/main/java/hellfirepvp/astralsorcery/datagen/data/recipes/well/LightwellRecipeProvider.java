@@ -13,12 +13,11 @@ import hellfirepvp.astralsorcery.common.crafting.builder.WellRecipeBuilder;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.item.Items;
 
 import java.awt.*;
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,7 +28,7 @@ import java.util.function.Consumer;
  */
 public class LightwellRecipeProvider {
 
-    public static void registerLightwellRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerLightwellRecipes(RecipeOutput registrar) {
         WellRecipeBuilder.builder(AstralSorcery.key("starlight_aquamarine"))
                 .setItemInput(ItemsAS.AQUAMARINE)
                 .setLiquidOutput(FluidsAS.LIQUID_STARLIGHT_SOURCE)

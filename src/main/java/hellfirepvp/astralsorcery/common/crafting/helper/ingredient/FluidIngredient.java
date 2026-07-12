@@ -8,23 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.crafting.helper.ingredient;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.IngredientSerializersAS;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntComparators;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.core.NonNullList;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,20 +28,19 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 30.05.2019 / 17:27
  */
-public class FluidIngredient extends Ingredient {
+public class FluidIngredient implements ICustomIngredient {
+
+    public static final MapCodec<FluidIngredient> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+            FluidStack.CODEC.listOf().fieldOf("fluid").forGetter(FluidIngredient::getFluids)
+    ).apply(inst, FluidIngredient::new));
 
     private final List<FluidStack> fluids;
-    private IntList itemIds = null;
-    private ItemStack[] itemArray = null;
-    private int cacheItemStacks = -1, cacheItemIds = -1;
 
     public FluidIngredient(List<FluidStack> fluidStacks) {
-        super(Stream.empty());
         this.fluids = fluidStacks;
     }
 
     public FluidIngredient(FluidStack... fluidStacks) {
-        super(Stream.empty());
         this.fluids = Arrays.asList(fluidStacks);
     }
 
@@ -58,67 +49,27 @@ public class FluidIngredient extends Ingredient {
     }
 
     @Override
-    public ItemStack[] getItems() {
-        if (itemArray == null || this.cacheItemStacks != this.fluids.size()) {
-            NonNullList<ItemStack> lst = NonNullList.create();
-
-            for (FluidStack fluid : this.fluids) {
-                lst.add(FluidUtil.getBucket(fluid));
-            }
-
-            this.itemArray = lst.toArray(new ItemStack[lst.size()]);
-            this.cacheItemStacks = this.fluids.size();
-        }
-        return this.itemArray;
+    public Stream<ItemStack> getItems() {
+        return this.fluids.stream().map(FluidUtil::getFilledBucket);
     }
 
     @Override
-    public IntList getStackingIds() {
-        if (this.itemIds == null || this.cacheItemIds != fluids.size()) {
-            this.itemIds = new IntArrayList(this.fluids.size());
-
-            for (FluidStack fluid : this.fluids) {
-                ItemStack bucketFluid = FluidUtil.getBucket(fluid);
-                this.itemIds.add(StackedContents.pack(bucketFluid));
-            }
-
-            this.itemIds.sort(IntComparators.NATURAL_COMPARATOR);
-            this.cacheItemIds = this.fluids.size();
-        }
-
-        return this.itemIds;
-    }
-
-    @Override
-    public boolean test(@Nullable ItemStack from) {
-        if (from == null) {
+    public boolean test(ItemStack from) {
+        if (from == null || from.isEmpty()) {
             return false;
         }
 
         FluidStack contained = FluidUtil.getFluidContained(from).orElse(FluidStack.EMPTY);
-        if (contained.isEmpty() || contained.getFluid() == null || contained.getAmount() <= 0) {
+        if (contained.isEmpty()) {
             return false;
         }
 
         for (FluidStack target : this.fluids) {
-            if (contained.containsFluid(target)) {
+            if (FluidStack.isSameFluidSameComponents(contained, target) && contained.getAmount() >= target.getAmount()) {
                 return true;
             }
         }
         return false;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.fluids.isEmpty();
-    }
-
-    @Override
-    protected void invalidate() {
-        super.invalidate();
-
-        this.itemIds = null;
-        this.itemArray = null;
     }
 
     @Override
@@ -127,24 +78,7 @@ public class FluidIngredient extends Ingredient {
     }
 
     @Override
-    public JsonElement serialize() {
-        JsonObject object = new JsonObject();
-        object.addProperty("type", CraftingHelper.getID(IngredientSerializersAS.FLUID_SERIALIZER).toString());
-
-        JsonArray array = new JsonArray();
-        for (FluidStack stack : this.fluids) {
-            JsonObject fluidStackObject = new JsonObject();
-            fluidStackObject.addProperty("fluid", stack.getFluid().getRegistryName().toString());
-            fluidStackObject.addProperty("amount", stack.getAmount());
-
-            array.add(fluidStackObject);
-        }
-        object.add("fluid", array);
-        return object;
-    }
-
-    @Override
-    public IIngredientSerializer<? extends Ingredient> getSerializer() {
-        return IngredientSerializersAS.FLUID_SERIALIZER;
+    public IngredientType<?> getType() {
+        return IngredientSerializersAS.FLUID_INGREDIENT_TYPE;
     }
 }

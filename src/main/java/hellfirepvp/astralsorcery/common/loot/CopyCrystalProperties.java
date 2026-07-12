@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.loot;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributeItem;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributeTile;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
@@ -22,6 +22,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import java.util.List;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on github.
@@ -31,19 +33,23 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public class CopyCrystalProperties extends LootItemConditionalFunction {
 
-    private CopyCrystalProperties(LootItemCondition[] conditionsIn) {
+    public static final MapCodec<CopyCrystalProperties> CODEC = RecordCodecBuilder.mapCodec(
+            inst -> commonFields(inst).apply(inst, CopyCrystalProperties::new)
+    );
+
+    private CopyCrystalProperties(List<LootItemCondition> conditionsIn) {
         super(conditionsIn);
     }
 
     @Override
-    public LootItemFunctionType getType() {
+    public LootItemFunctionType<CopyCrystalProperties> getType() {
         return LootAS.Functions.COPY_CRYSTAL_PROPERTIES;
     }
 
     @Override
     protected ItemStack run(ItemStack stack, LootContext context) {
-        if (context.has(LootContextParams.BLOCK_ENTITY)) {
-            BlockEntity tile = context.get(LootContextParams.BLOCK_ENTITY);
+        if (context.hasParam(LootContextParams.BLOCK_ENTITY)) {
+            BlockEntity tile = context.getParam(LootContextParams.BLOCK_ENTITY);
             if (tile instanceof CrystalAttributeTile && stack.getItem() instanceof CrystalAttributeItem) {
                 CrystalAttributes attr = ((CrystalAttributeTile) tile).getAttributes();
                 if (attr == null) {
@@ -56,14 +62,6 @@ public class CopyCrystalProperties extends LootItemConditionalFunction {
     }
 
     public static LootItemConditionalFunction.Builder<?> builder() {
-        return builder(CopyCrystalProperties::new);
-    }
-
-    public static class Serializer extends LootItemConditionalFunction.Serializer<CopyCrystalProperties> {
-
-        @Override
-        public CopyCrystalProperties deserialize(JsonObject jsonObject, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-            return new CopyCrystalProperties(conditions);
-        }
+        return simpleBuilder(CopyCrystalProperties::new);
     }
 }

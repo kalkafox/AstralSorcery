@@ -20,13 +20,12 @@ import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.client.model.generators.*;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.registries.IForgeRegistryEntry;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Collection;
@@ -44,8 +43,8 @@ import hellfirepvp.astralsorcery.common.util.RegistryHelper;
  */
 public class AstralBlockStateMappingProvider extends BlockStateProvider {
 
-    public AstralBlockStateMappingProvider(DataGenerator gen, ExistingFileHelper exFileHelper) {
-        super(gen, AstralSorcery.MODID, exFileHelper);
+    public AstralBlockStateMappingProvider(PackOutput output, ExistingFileHelper exFileHelper) {
+        super(output, AstralSorcery.MODID, exFileHelper);
     }
 
     @Override
@@ -108,17 +107,17 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         this.multiLayerBlockState(BlocksAS.ROCK_COLLECTOR_CRYSTAL);
         this.multiLayerBlockState(BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL);
         this.getVariantBuilder(BlocksAS.LENS)
-                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.UP)
+                .partialState().with(BlockLens.PLACED_AGAINST, Direction.UP)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 180, 0, false))
-                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.DOWN)
+                .partialState().with(BlockLens.PLACED_AGAINST, Direction.DOWN)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 0, 0, false))
-                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.NORTH)
+                .partialState().with(BlockLens.PLACED_AGAINST, Direction.NORTH)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 180, false))
-                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.SOUTH)
+                .partialState().with(BlockLens.PLACED_AGAINST, Direction.SOUTH)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 0, false))
-                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.EAST)
+                .partialState().with(BlockLens.PLACED_AGAINST, Direction.EAST)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 270, false))
-                .partialState().setValue(BlockLens.PLACED_AGAINST, Direction.WEST)
+                .partialState().with(BlockLens.PLACED_AGAINST, Direction.WEST)
                     .addModels(new ConfiguredModel(model(AstralSorcery.key("lens_base")), 90, 90, false));
 
         ResourceLocation prism = RegistryHelper.getKey(BlocksAS.PRISM);
@@ -158,25 +157,25 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         this.simpleBlockState(BlocksAS.TRANSLUCENT_BLOCK, this.modelNothing());
         this.simpleBlockState(BlocksAS.VANISHING, this.modelNothing());
         this.getVariantBuilder(BlocksAS.STRUCTURAL)
-                .partialState().setValue(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE)
+                .partialState().with(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE)
                 .addModels(new ConfiguredModel(model(BlocksAS.TELESCOPE)))
-                .partialState().setValue(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.DUMMY)
+                .partialState().with(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.DUMMY)
                 .addModels(new ConfiguredModel(modelNothing()));
     }
 
     private <T extends Comparable<T>> void pillarModel(Block b, Property<T> pillarType, T middle, T top, T bottom) {
         ResourceLocation key = RegistryHelper.getKey(b);
         this.getVariantBuilder(b)
-                .partialState().setValue(pillarType, middle)
+                .partialState().with(pillarType, middle)
                 .addModels(new ConfiguredModel(model(key)))
-                .partialState().setValue(pillarType, top)
+                .partialState().with(pillarType, top)
                 .addModels(new ConfiguredModel(model(suffixPath(key, "_top"))))
-                .partialState().setValue(pillarType, bottom)
+                .partialState().with(pillarType, bottom)
                 .addModels(new ConfiguredModel(model(suffixPath(key, "_bottom"))));
     }
 
     private <T extends Comparable<T>> void allStateSuffixModel(Block b) {
-        Collection<Property<?>> properties = b.getStateContainer().getProperties();
+        Collection<Property<?>> properties = b.getStateDefinition().getProperties();
         if (properties.size() != 1) {
             throw new IllegalArgumentException("Can only make path-suffix enumeration for blockstates with exactly 1 property!");
         }
@@ -185,13 +184,13 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         Property<T> property = (Property<T>) Iterables.getFirst(properties, null);
         VariantBlockStateBuilder builder = this.getVariantBuilder(b);
         for (T value : property.getPossibleValues()) {
-            builder.partialState().setValue(property, value)
+            builder.partialState().with(property, value)
                     .addModels(new ConfiguredModel(model(suffixPath(key, "_" + value.toString()))));
         }
     }
 
     private <T extends Comparable<T>> void allStateSuffixMultiLayerModel(Block b) {
-        Collection<Property<?>> properties = b.getStateContainer().getProperties();
+        Collection<Property<?>> properties = b.getStateDefinition().getProperties();
         if (properties.size() != 1) {
             throw new IllegalArgumentException("Can only make path-suffix enumeration for blockstates with exactly 1 property!");
         }
@@ -200,7 +199,7 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         Property<T> property = (Property<T>) Iterables.getFirst(properties, null);
         VariantBlockStateBuilder builder = this.getVariantBuilder(b);
         for (T value : property.getPossibleValues()) {
-            builder.partialState().setValue(property, value)
+            builder.partialState().with(property, value)
                     .addModels(new ConfiguredModel(multiLayerModel(suffixPath(key, "_" + value.toString()))));
         }
     }
@@ -235,8 +234,8 @@ public class AstralBlockStateMappingProvider extends BlockStateProvider {
         return model(AstralSorcery.key(name));
     }
 
-    private ModelFile model(IForgeRegistryEntry<?> entry) {
-        return model(entry.getRegistryName());
+    private ModelFile model(Block entry) {
+        return model(RegistryHelper.getKey(entry));
     }
 
     private ModelFile model(ResourceLocation name) {

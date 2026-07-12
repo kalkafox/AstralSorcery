@@ -22,7 +22,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -77,10 +77,10 @@ public class TimeStopEffectHelper {
 
     @OnlyIn(Dist.CLIENT)
     static void playEntityParticles(LivingEntity e) {
-        EntityDimensions size = e.getSize(e.getPose());
-        double x = e.getX() - size.width / 2F + random.nextFloat() * size.width;
-        double y = e.getY() + random.nextFloat() * size.height;
-        double z = e.getZ() - size.width / 2F + random.nextFloat() * size.width;
+        EntityDimensions size = e.getDimensions(e.getPose());
+        double x = e.getX() - size.width() / 2F + random.nextFloat() * size.width();
+        double y = e.getY() + random.nextFloat() * size.height();
+        double z = e.getZ() - size.width() / 2F + random.nextFloat() * size.width();
         showBreakingParticles(x, y, z);
     }
 
@@ -107,9 +107,9 @@ public class TimeStopEffectHelper {
             return;
         }
 
-        List<LivingEntity> entities = level.getEntitiesWithinAABB(LivingEntity.class,
-                new AABB(-range, -range, -range, range, range, range).offset(position.getX(), position.getY(), position.getZ()),
-                EntitySelector.withinRange(position.getX(), position.getY(), position.getZ(), range));
+        List<LivingEntity> entities = level.getEntities(EntityTypeTest.forClass(LivingEntity.class),
+                new AABB(-range, -range, -range, range, range, range).move(position.getX(), position.getY(), position.getZ()),
+                e -> e.distanceToSqr(position.getX(), position.getY(), position.getZ()) <= (double) range * range);
 
         for (LivingEntity e : entities) {
             if (e != null && e.isAlive() && targetController.shouldFreezeEntity(e) && random.nextInt(3) == 0) {
@@ -130,7 +130,7 @@ public class TimeStopEffectHelper {
                     for (Map.Entry<BlockPos, BlockEntity> teEntry : map.entrySet()) {
 
                         BlockEntity te = teEntry.getValue();
-                        if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) && te.getBlockPos().distSqr(position, range)) {
+                        if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) && te.getBlockPos().distSqr(position) <= range * range) {
 
                             double x = te.getBlockPos().getX() + random.nextFloat();
                             double y = te.getBlockPos().getY() + random.nextFloat();

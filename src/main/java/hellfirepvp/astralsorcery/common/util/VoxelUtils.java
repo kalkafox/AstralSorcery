@@ -34,7 +34,7 @@ public class VoxelUtils {
         }
         VoxelShape first = shapeByIndex.get(0);
         for (int i = 1; i < shapeByIndex.size(); i++) {
-            first = Shapes.combine(first, shapeByIndex.get(i), fct);
+            first = Shapes.join(first, shapeByIndex.get(i), fct);
         }
         return first;
     }

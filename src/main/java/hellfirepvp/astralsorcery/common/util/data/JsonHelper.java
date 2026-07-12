@@ -18,8 +18,6 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.Registry;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.neoforged.neoforge.fluids.FluidAttributes;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -46,11 +44,11 @@ public class JsonHelper {
             .create();
 
     public static void parseMultipleStrings(JsonObject root, String key, Consumer<String> consumer) {
-        consumeJsonListConfiguration(root, key, "String", "Strings", JsonElement::convertToLong, JsonElement::getAsString, consumer);
+        consumeJsonListConfiguration(root, key, "String", "Strings", JsonElement::isJsonPrimitive, JsonElement::getAsString, consumer);
     }
 
     public static void parseMultipleJsonPrimitives(JsonObject root, String key, String singular, String plural, Consumer<JsonPrimitive> consumer) {
-        consumeJsonListConfiguration(root, key, singular, plural, JsonElement::convertToLong, JsonElement::getAsJsonPrimitive, consumer);
+        consumeJsonListConfiguration(root, key, singular, plural, JsonElement::isJsonPrimitive, JsonElement::getAsJsonPrimitive, consumer);
     }
 
     public static void parseMultipleJsonObjects(JsonObject root, String key, Consumer<JsonObject> consumer) {
@@ -68,7 +66,7 @@ public class JsonHelper {
         JsonElement el = root.get(key);
         if (verifier.test(el)) {
             consumer.accept(consumerTransformer.apply(el));
-        } else if (el.convertToDouble()) {
+        } else if (el.isJsonArray()) {
             JsonArray objectArray = el.getAsJsonArray();
             for (JsonElement arrayEl : objectArray) {
                 if (!verifier.test(arrayEl)) {
@@ -84,7 +82,7 @@ public class JsonHelper {
     @Nonnull
     public static FluidStack getFluidStack(JsonElement fluidElement, String infoKey) {
         FluidStack fluidStack;
-        if (fluidElement.convertToLong() && ((JsonPrimitive) fluidElement).isString()) {
+        if (fluidElement.isJsonPrimitive() && fluidElement.getAsJsonPrimitive().isString()) {
             String strKey = fluidElement.getAsString();
             ResourceLocation fluidKey = ResourceLocation.parse(strKey);
             fluidStack = new FluidStack(BuiltInRegistries.FLUID.get(fluidKey), FluidType.BUCKET_VOLUME);
@@ -96,6 +94,9 @@ public class JsonHelper {
         return fluidStack;
     }
 
+    // 1.21 port: FluidStack lost its raw-NBT constructor/loadFluidStackFromNBT (data components
+    // replaced free-form NBT tags on stacks); the "nbt" field is parsed-and-discarded here, same
+    // fluid+amount-only scope limitation as LiquidInteraction's reactant matching.
     @Nonnull
     public static FluidStack getFluidStack(JsonObject json, boolean readNBT) {
         String fluidName = GsonHelper.getAsString(json, "fluid");
@@ -103,41 +104,18 @@ public class JsonHelper {
         if (fluid == null || fluid == Fluids.EMPTY) {
             return FluidStack.EMPTY;
         }
-        if (readNBT && json.has("nbt")) {
-            //Copied from CraftingHelper.getItemStack's NBT deserialization.
-            try {
-                JsonElement value = json.get("nbt");
-                CompoundTag nbt;
-                if (value.isJsonObject()) {
-                    nbt = TagParser.expect(GSON.getPos(value));
-                } else {
-                    nbt = TagParser.expect(GsonHelper.getAsString(value, "nbt"));
-                }
-
-                CompoundTag tempRead = new CompoundTag();
-                tempRead.put("Tag", nbt);
-                tempRead.putString("FluidName", fluidName);
-                tempRead.putInt("Amount", GsonHelper.getAsInt(json, "amount", FluidType.BUCKET_VOLUME));
-
-                return FluidStack.loadFluidStackFromNBT(tempRead);
-            }
-            catch (CommandSyntaxException e)
-            {
-                throw new JsonSyntaxException("Invalid NBT Entry: " + e.toString());
-            }
-        }
         return new FluidStack(fluid, GsonHelper.getAsInt(json, "amount", FluidType.BUCKET_VOLUME));
     }
 
     @Nonnull
     public static ItemStack getItemStack(JsonElement itemElement, String infoKey) {
         ItemStack itemstack;
-        if (itemElement.convertToLong() && ((JsonPrimitive) itemElement).isString()) {
+        if (itemElement.isJsonPrimitive() && itemElement.getAsJsonPrimitive().isString()) {
             String strKey = itemElement.getAsString();
             ResourceLocation itemKey = ResourceLocation.parse(strKey);
             itemstack = new ItemStack(BuiltInRegistries.ITEM.get(itemKey));
         } else if (itemElement.isJsonObject()) {
-            itemstack = CraftingHelper.getItemStack(itemElement.getAsJsonObject(), true);
+            itemstack = parseItemStackObject(itemElement.getAsJsonObject());
         } else {
             throw new JsonSyntaxException("Missing " + infoKey + ", expected to find a string or object");
         }
@@ -146,12 +124,12 @@ public class JsonHelper {
 
     @Nonnull
     public static ItemStack getItemStack(JsonObject root, String key) {
-        if (!GsonHelper.convertToInt(root, key)) {
+        if (!root.has(key)) {
             throw new JsonSyntaxException("Missing " + key + ", expected to find a string or object");
         }
         ItemStack itemstack;
         if (root.get(key).isJsonObject()) {
-            itemstack = CraftingHelper.getItemStack(GsonHelper.getAsJsonObject(root, key), true);
+            itemstack = parseItemStackObject(GsonHelper.getAsJsonObject(root, key));
         } else {
             String strKey = GsonHelper.getAsString(root, key);
             ResourceLocation itemKey = ResourceLocation.parse(strKey);
@@ -160,14 +138,24 @@ public class JsonHelper {
         return itemstack;
     }
 
+    // 1.21 port: CraftingHelper.getItemStack(JsonObject, boolean) is gone (ItemStack's NBT tag was
+    // replaced by data components, which need a HolderLookup.Provider this static utility doesn't
+    // have). Item + count only; a "nbt" field is parsed-and-discarded, same scope limitation as
+    // getFluidStack's "nbt" field.
+    @Nonnull
+    private static ItemStack parseItemStackObject(JsonObject object) {
+        String itemName = GsonHelper.getAsString(object, "item");
+        ResourceLocation itemKey = ResourceLocation.parse(itemName);
+        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(itemKey));
+        stack.setCount(GsonHelper.getAsInt(object, "count", 1));
+        return stack;
+    }
+
     @Nonnull
     public static JsonObject serializeItemStack(ItemStack stack) {
         JsonObject object = new JsonObject();
         object.addProperty("item", RegistryHelper.getKey(stack.getItem()).toString());
         object.addProperty("count", stack.getCount());
-        if (stack.hasTag()) {
-            object.addProperty("nbt", stack.getTag().toString());
-        }
         return object;
     }
 

@@ -54,13 +54,13 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
 
     @Override
     public List<Ingredient> getInputForRender() {
-        return Collections.singletonList(new CrystalIngredient(false, false));
+        return Collections.singletonList(new CrystalIngredient(false, false).toVanilla());
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getOutputForRender() {
-        return Collections.singletonList(new CrystalIngredient(false, false));
+        return Collections.singletonList(new CrystalIngredient(false, false).toVanilla());
     }
 
     @Override

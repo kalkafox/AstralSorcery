@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import hellfirepvp.astralsorcery.common.block.tile.altar.AltarType;
 import hellfirepvp.astralsorcery.common.crafting.helper.IngredientIO;
+import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredient;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -23,7 +24,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.util.GsonHelper;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.StringUtils;
 
@@ -355,11 +359,9 @@ public class AltarRecipeGrid {
             return this.key(key, Ingredient.of(itemIn));
         }
 
-        // Fluid-keyed altar recipe inputs used FluidIngredient, a custom Ingredient subclass.
-        // Ingredient became final in 1.21 - custom ingredients now go through NeoForge's
-        // ICustomIngredient/IngredientType registry instead of subclassing. FluidIngredient and
-        // its sibling CrystalIngredient (common.crafting.helper.ingredient) still need that port;
-        // see PORTING.md. Left out here since no in-scope caller used this overload.
+        public Builder key(Character key, Fluid fluid) {
+            return this.key(key, new FluidIngredient(new FluidStack(fluid, FluidType.BUCKET_VOLUME)).toVanilla());
+        }
 
         public Builder key(Character key, Ingredient from) {
             if (this.inputMapping.containsKey(key)) {

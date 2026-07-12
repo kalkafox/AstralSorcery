@@ -8,14 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.advancement;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.advancement.instance.ConstellationInstance;
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.loot.ConditionArrayParser;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,24 +23,16 @@ import net.minecraft.resources.ResourceLocation;
  * Created by HellFirePvP
  * Date: 27.10.2018 / 10:54
  */
-public class DiscoverConstellationTrigger extends ListenerCriterionTrigger<ConstellationInstance> {
+public class DiscoverConstellationTrigger extends SimpleCriterionTrigger<ConstellationInstance> {
 
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(AstralSorcery.MODID, "find_constellation");
 
-    public DiscoverConstellationTrigger() {
-        super(ID);
-    }
-
     @Override
-    public ConstellationInstance deserialize(JsonObject object, DeserializationContext conditions) {
-        return ConstellationInstance.deserialize(getId(), object);
+    public Codec<ConstellationInstance> codec() {
+        return ConstellationInstance.CODEC;
     }
 
     public void trigger(ServerPlayer player, IConstellation cst) {
-        Listeners<ConstellationInstance> listeners = this.listeners.get(player.getAdvancements());
-        if (listeners != null) {
-            listeners.trigger((i) -> i.test(cst));
-        }
+        this.trigger(player, (i) -> i.test(cst));
     }
-
 }

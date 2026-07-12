@@ -8,24 +8,25 @@
 
 package hellfirepvp.astralsorcery.common.advancement.instance;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import hellfirepvp.astralsorcery.common.advancement.AltarCraftTrigger;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipe;
-import net.minecraft.advancements.criterion.CriterionInstance;
+import hellfirepvp.astralsorcery.common.lib.AdvancementsAS;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.loot.ConditionArraySerializer;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.*;
-import java.util.stream.Collectors;
 import net.minecraft.tags.TagKey;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,89 +35,56 @@ import net.minecraft.tags.TagKey;
  * Created by HellFirePvP
  * Date: 11.05.2020 / 20:28
  */
-public class AltarRecipeInstance extends AbstractCriterionTriggerInstance {
+public record AltarRecipeInstance(Optional<ContextAwarePredicate> player,
+                                  List<ResourceLocation> recipeNames,
+                                  List<Ingredient> recipeOutputs) implements SimpleCriterionTrigger.SimpleInstance {
 
-    private final Set<ResourceLocation> recipeNames = new HashSet<>();
-    private final List<Ingredient> recipeOutputs = new ArrayList<>();
+    public static final Codec<AltarRecipeInstance> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+            EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(AltarRecipeInstance::player),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("recipeNames", List.of()).forGetter(AltarRecipeInstance::recipeNames),
+            Ingredient.CODEC.listOf().optionalFieldOf("recipeOutputs", List.of()).forGetter(AltarRecipeInstance::recipeOutputs)
+    ).apply(inst, AltarRecipeInstance::new));
 
-    private AltarRecipeInstance(ResourceLocation id) {
-        super(id, EntityPredicate.AndPredicate.ANY);
+    public static Criterion<AltarRecipeInstance> craftRecipe(ResourceLocation... recipeIds) {
+        return criterion(new AltarRecipeInstance(Optional.empty(), List.of(recipeIds), List.of()));
     }
 
-    public static AltarRecipeInstance craftRecipe(ResourceLocation... recipeIds) {
-        AltarRecipeInstance instance = new AltarRecipeInstance(AltarCraftTrigger.ID);
-        instance.recipeNames.addAll(Arrays.asList(recipeIds));
-        return instance;
+    public static Criterion<AltarRecipeInstance> craftRecipe(SimpleAltarRecipe... recipes) {
+        return criterion(new AltarRecipeInstance(Optional.empty(),
+                Arrays.stream(recipes).map(SimpleAltarRecipe::getId).collect(Collectors.toList()),
+                List.of()));
     }
 
-    public static AltarRecipeInstance craftRecipe(SimpleAltarRecipe... recipes) {
-        AltarRecipeInstance instance = new AltarRecipeInstance(AltarCraftTrigger.ID);
-        Arrays.asList(recipes).forEach(recipe -> instance.recipeNames.add(recipe.getId()));
-        return instance;
+    public static Criterion<AltarRecipeInstance> withOutput(ItemLike... outputs) {
+        return withOutput(Ingredient.of(outputs));
     }
 
-    public static AltarRecipeInstance withOutput(ItemLike... outputs) {
-        return withOutput(Ingredient.valueFromJson(outputs));
+    public static Criterion<AltarRecipeInstance> withOutput(ItemStack... outputs) {
+        return withOutput(Ingredient.of(outputs));
     }
 
-    public static AltarRecipeInstance withOutput(ItemStack... outputs) {
-        return withOutput(Ingredient.fromStacks(outputs));
+    @SafeVarargs
+    public static Criterion<AltarRecipeInstance> withOutput(TagKey<Item>... outputs) {
+        return withOutput(Arrays.stream(outputs).map(Ingredient::of).collect(Collectors.toList()));
     }
 
-    public static AltarRecipeInstance withOutput(TagKey<Item>... outputs) {
-        return withOutput(Arrays.stream(outputs).map(Ingredient::fromTag).collect(Collectors.toList()));
-    }
-
-    public static AltarRecipeInstance withOutput(Ingredient... outputs) {
+    public static Criterion<AltarRecipeInstance> withOutput(Ingredient... outputs) {
         return withOutput(Arrays.asList(outputs));
     }
 
-    public static AltarRecipeInstance withOutput(List<Ingredient> outputs) {
-        AltarRecipeInstance instance = new AltarRecipeInstance(AltarCraftTrigger.ID);
-        instance.recipeOutputs.addAll(outputs);
-        return instance;
+    public static Criterion<AltarRecipeInstance> withOutput(List<Ingredient> outputs) {
+        return criterion(new AltarRecipeInstance(Optional.empty(), List.of(), List.copyOf(outputs)));
     }
 
-    @Override
-    public JsonObject serialize(SerializationContext conditions) {
-        JsonObject out = super.serialize(conditions);
-        if (!this.recipeNames.isEmpty()) {
-            JsonArray names = new JsonArray();
-            for (ResourceLocation name : this.recipeNames) {
-                names.add(name.toString());
-            }
-            out.add("recipeNames", names);
-        }
-        if (!this.recipeOutputs.isEmpty()) {
-            JsonArray outputs = new JsonArray();
-            for (Ingredient output : this.recipeOutputs) {
-                outputs.add(output.serialize());
-            }
-            out.add("recipeOutputs", outputs);
-        }
-        return out;
-    }
-
-    public static AltarRecipeInstance deserialize(ResourceLocation id, JsonObject json) {
-        AltarRecipeInstance instance = new AltarRecipeInstance(id);
-        JsonArray recipeNames = GsonHelper.getAsJsonArray(json, "recipeNames", new JsonArray());
-        for (int idx = 0; idx < recipeNames.size(); idx++) {
-            JsonElement value = recipeNames.get(idx);
-            String key = GsonHelper.getAsString(value, String.format("recipeNames[%s]", idx));
-            instance.recipeNames.add(ResourceLocation.parse(key));
-        }
-        for (JsonElement value : GsonHelper.getAsJsonArray(json, "recipeOutputs", new JsonArray())) {
-            instance.recipeOutputs.add(Ingredient.deserialize(value));
-        }
-        return instance;
+    private static Criterion<AltarRecipeInstance> criterion(AltarRecipeInstance instance) {
+        return AdvancementsAS.ALTAR_CRAFT.createCriterion(instance);
     }
 
     public boolean test(SimpleAltarRecipe recipe, ItemStack output) {
         if (this.recipeNames.isEmpty() && this.recipeOutputs.isEmpty()) {
             return true;
         }
-        ResourceLocation recipeName = recipe.getId();
-        if (this.recipeNames.contains(recipeName)) {
+        if (this.recipeNames.contains(recipe.getId())) {
             return true;
         }
         for (Ingredient i : this.recipeOutputs) {

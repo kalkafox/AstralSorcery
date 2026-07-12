@@ -13,7 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapeSpliterator;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,7 +39,7 @@ public class CollisionHelper {
         }
 
         VoxelShape floor = Shapes.create(box);
-        if (Shapes.compare(floor, Shapes.create(iterator.aabb.grow(1.0E-7D)), BooleanOp.AND)) {
+        if (Shapes.joinIsNotEmpty(floor, Shapes.create(iterator.aabb.inflate(1.0E-7D)), BooleanOp.AND)) {
             action.accept(floor);
             return true;
         }
@@ -53,9 +52,9 @@ public class CollisionHelper {
             return null;
         }
         List<AABB> additionalBoxes = CollisionManager.getAdditionalBoundingBoxes(entity);
-        AABB entityBox = entity.getBoundingBox().grow(1.0E-7D);
+        AABB entityBox = entity.getBoundingBox().inflate(1.0E-7D);
         for (AABB box : additionalBoxes) {
-            double newYMovement = Shapes.create(box).getAllowedOffset(Direction.Axis.Y, entityBox, allowedMovement.y);
+            double newYMovement = Shapes.create(box).collide(Direction.Axis.Y, entityBox, allowedMovement.y);
             allowedMovement = new Vec3(allowedMovement.x, newYMovement, allowedMovement.z);
         }
 

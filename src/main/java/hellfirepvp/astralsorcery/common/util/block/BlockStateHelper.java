@@ -59,7 +59,7 @@ public class BlockStateHelper {
                 }
                 name.append(prop.getName());
                 name.append('=');
-                name.append(prop.getName(state.get(prop)));
+                name.append(prop.getName(state.getValue(prop)));
             }
             name.append(']');
         }
@@ -82,7 +82,7 @@ public class BlockStateHelper {
 
                 JsonObject objProperty = new JsonObject();
                 objProperty.addProperty("name", prop.getName());
-                objProperty.addProperty("value", prop.getName(state.get(prop)));
+                objProperty.addProperty("value", prop.getName(state.getValue(prop)));
                 properties.add(objProperty);
             }
             out.add("properties", properties);
@@ -136,10 +136,10 @@ public class BlockStateHelper {
         if (isMissingStateInformation(object)) {
             return state;
         }
-        if (GsonHelper.convertToInt(object, "properties")) {
+        if (object.has("properties")) {
             JsonArray properties = GsonHelper.getAsJsonArray(object, "properties");
             for (JsonElement elemProperty : properties) {
-                JsonObject objProperty = GsonHelper.getAsJsonObject(elemProperty, "properties[?]");
+                JsonObject objProperty = elemProperty.getAsJsonObject();
                 String propName = GsonHelper.getAsString(objProperty, "name");
                 Property<T> property = (Property<T>) MiscUtils.iterativeSearch(state.getProperties(), prop -> prop.getName().equalsIgnoreCase(propName));
                 if (property != null) {

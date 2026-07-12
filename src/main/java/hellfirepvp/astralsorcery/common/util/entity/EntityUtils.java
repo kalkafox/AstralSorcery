@@ -19,28 +19,31 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraft.world.gen.feature.structure.StructureManager;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.util.random.WeightedRandomList;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ForgeHooks;
-import net.neoforged.neoforge.event.ForgeEventFactory;
-import net.neoforged.bus.api.Event;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
@@ -83,13 +86,13 @@ public class EntityUtils {
         if (clWorld == null) {
             return null;
         }
-        return clWorld.getPlayerByUuid(playerUUID);
+        return clWorld.getPlayerByUUID(playerUUID);
     }
 
     public static void applyPotionEffectAtHalf(LivingEntity entity, MobEffectInstance effect) {
-        MobEffectInstance activeEffect = entity.getActivePotionEffect(effect.getEffect());
+        MobEffectInstance activeEffect = entity.getEffect(effect.getEffect());
         if (activeEffect != null) {
-            if (activeEffect.duration <= effect.duration / 2) {
+            if (activeEffect.getDuration() <= effect.getDuration() / 2) {
                 entity.addEffect(effect);
             }
         } else {
@@ -115,16 +118,17 @@ public class EntityUtils {
 
     @Nullable
     public static LivingEntity performWorldSpawningAt(ServerLevel level, BlockPos pos, MobCategory category, MobSpawnType reason, boolean ignoreWeighting, int ignoreSpawnCheckFlags) {
-        Biome b = level.getBiome(pos);
-        StructureManager mgr = level.structureFeatureManager();
-        List<MobSpawnSettings.Spawners> spawnList = level.getChunkSource().getChunkGenerator().getMobsAt(b, mgr, MobCategory.MONSTER, pos);
-        spawnList = ForgeEventFactory.getPotentialSpawns(level, category, pos, spawnList);
+        Holder<Biome> b = level.getBiome(pos);
+        StructureManager mgr = level.structureManager();
+        List<MobSpawnSettings.SpawnerData> spawnList = new ArrayList<>(
+                level.getChunkSource().getGenerator().getMobsAt(b, mgr, MobCategory.MONSTER, pos).unwrap());
+        spawnList = new ArrayList<>(EventHooks.getPotentialSpawns(level, category, pos, WeightedRandomList.create(spawnList)).unwrap());
         spawnList.removeIf(s -> !s.type.canSummon());
-        MobSpawnSettings.Spawners entry;
+        MobSpawnSettings.SpawnerData entry;
         if (ignoreWeighting) {
             entry = MiscUtils.getRandomEntry(spawnList, random);
         } else {
-            entry = MiscUtils.getWeightedRandomEntry(spawnList, random, ee -> ee.weight);
+            entry = MiscUtils.getWeightedRandomEntry(spawnList, random, ee -> ee.getWeight().asInt());
         }
 
         if (entry != null) {
@@ -133,7 +137,7 @@ public class EntityUtils {
             float z = pos.getZ() + 0.5F;
 
             BlockState state = level.getBlockState(pos);
-            if (!state.isNormalCube(level, pos) && canEntitySpawnHere(level, pos, entry.type, reason, ignoreSpawnCheckFlags, null)) {
+            if (!state.isCollisionShapeFullBlock(level, pos) && canEntitySpawnHere(level, pos, entry.type, reason, ignoreSpawnCheckFlags, null)) {
                 Mob entity;
                 try {
                     entity = (Mob) entry.type.create(level);
@@ -145,14 +149,11 @@ public class EntityUtils {
                 }
 
                 entity.moveTo(x, y, z, random.nextFloat() * 360F, 0F);
-                int result = ForgeHooks.canEntitySpawn(entity, level, x, y, z, null, reason); //We already did the default test before.
-                if (result == -1) {
+                if (!EventHooks.checkSpawnPosition(entity, level, reason)) { //We already did the default test before.
                     return null;
                 }
 
-                if (!ForgeEventFactory.doSpecialSpawn(entity, level, x, y, z, null, reason)) {
-                    entity.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), reason, null, null);
-                }
+                EventHooks.finalizeMobSpawn(entity, level, level.getCurrentDifficultyAt(pos), reason, null);
 
                 level.addFreshEntityWithPassengers(entity);
                 return entity;
@@ -162,20 +163,19 @@ public class EntityUtils {
     }
 
     public static boolean canEntitySpawnHere(ServerLevel level, BlockPos at, EntityType<? extends Entity> type, MobSpawnType spawnReason, int ignoreCheckFlags, @Nullable Consumer<Entity> preCheckEntity) {
-        if (type.getCategory() == MobCategory.MISC || !type.canSummon() || !level.getWorldBorder().contains(at)) {
+        if (type.getCategory() == MobCategory.MISC || !type.canSummon() || !level.getWorldBorder().isWithinBounds(at)) {
             return false;
         }
         if (!SpawnConditionFlags.isSet(ignoreCheckFlags, SpawnConditionFlags.IGNORE_PLACEMENT_RULES)) {
-            SpawnPlacements.PlacementType placement = SpawnPlacements.getPlacementType(type);
-            if (!NaturalSpawner.canSpawnAtBody(placement, level, at, type)) {
+            if (!SpawnPlacements.isSpawnPositionOk(type, level, at)) {
                 return false;
             }
-            if (!SpawnPlacements.checkSpawnRules(type, level, spawnReason, at, random)) {
+            if (!SpawnPlacements.checkSpawnRules(type, level, spawnReason, at, RandomSource.create(random.nextLong()))) {
                 return false;
             }
         }
         if (!SpawnConditionFlags.isSet(ignoreCheckFlags, SpawnConditionFlags.IGNORE_BLOCK_COLLISION)) {
-            if (!level.noCollision(type.getBoundingBoxWithSizeApplied(at.getX() + 0.5, at.getY(), at.getZ() + 0.5))) {
+            if (!level.noCollision(type.getSpawnAABB(at.getX() + 0.5, at.getY(), at.getZ() + 0.5))) {
                 return false;
             }
         }
@@ -189,23 +189,15 @@ public class EntityUtils {
             preCheckEntity.accept(entity);
         }
 
-        if (entity instanceof LivingEntity) {
-            if (entity instanceof Mob) {
-                Mob mobEntity = (Mob) entity;
-                Event.Result canSpawn = ForgeEventFactory.canEntitySpawn(mobEntity, level, entity.getX(), entity.getY(), entity.getZ(), null, spawnReason);
-                if (canSpawn == Event.Result.DENY) {
+        if (entity instanceof Mob mobEntity) {
+            if (!SpawnConditionFlags.isSet(ignoreCheckFlags, SpawnConditionFlags.IGNORE_ENTITY_SPAWN_CONDITIONS)) {
+                if (!mobEntity.checkSpawnRules(level, spawnReason)) {
                     return false;
-                } else if (canSpawn == Event.Result.DEFAULT) {
-                    if (!SpawnConditionFlags.isSet(ignoreCheckFlags, SpawnConditionFlags.IGNORE_ENTITY_SPAWN_CONDITIONS)) {
-                        if (!mobEntity.checkBatSpawnRules(level, spawnReason)) {
-                            return false;
-                        }
-                    }
-                    if (!SpawnConditionFlags.isSet(ignoreCheckFlags, SpawnConditionFlags.IGNORE_ENTITY_COLLISION)) {
-                        if (!mobEntity.isNotColliding(level)) {
-                            return false;
-                        }
-                    }
+                }
+            }
+            if (!SpawnConditionFlags.isSet(ignoreCheckFlags, SpawnConditionFlags.IGNORE_ENTITY_COLLISION)) {
+                if (!mobEntity.checkSpawnObstruction(level)) {
+                    return false;
                 }
             }
         }
@@ -221,15 +213,14 @@ public class EntityUtils {
             return Collections.emptyList();
         }
 
-        ResourceLocation lootTableKey = entity.getLootTable();
-        LootTable name = srv.getLootTables().serialize(lootTableKey);
-        LootContext.Builder builder = new LootContext.Builder(sw)
-                .create(random)
+        ResourceKey<LootTable> lootTableKey = entity.getLootTable();
+        LootTable table = srv.reloadableRegistries().getLootTable(lootTableKey);
+        LootParams.Builder builder = new LootParams.Builder(sw)
                 .withParameter(LootContextParams.THIS_ENTITY, entity)
                 .withParameter(LootContextParams.ORIGIN, entity.position())
                 .withParameter(LootContextParams.DAMAGE_SOURCE, srcDeath)
-                .withOptionalParameter(LootContextParams.KILLER_ENTITY, srcDeath.getEntity())
-                .withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, srcDeath.getDirectEntity());
+                .withOptionalParameter(LootContextParams.ATTACKING_ENTITY, srcDeath.getEntity())
+                .withOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, srcDeath.getDirectEntity());
         if (lastAttacker != null) {
             if (lastAttacker instanceof Player) {
                 builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, (Player) lastAttacker)
@@ -237,12 +228,12 @@ public class EntityUtils {
             }
         }
 
-        return name.place(builder.build(LootContextParamSets.ENTITY));
+        return table.getRandomItems(builder.create(LootContextParamSets.ENTITY), RandomSource.create(random.nextLong()));
     }
 
     @Nullable
     public static <T extends Entity> T getNearestEntity(LevelAccessor level, Class<T> type, AABB box, Vector3 closestTo) {
-        List<T> entities = level.getEntitiesWithinAABB(type, box, Entity::isAlive);
+        List<T> entities = level.getEntities(EntityTypeTest.forClass(type), box, Entity::isAlive);
         return selectClosest(entities, closestTo::distanceSquared);
     }
 

@@ -33,9 +33,6 @@ public class RegistryLoot {
     private RegistryLoot() {}
 
     public static void init() {
-        // TODO 1.21 loot port: the referenced CODEC constants replace the removed
-        // GlobalLootModifierSerializer / LootFunction.Serializer classes and still
-        // need to be implemented on the loot modifier and loot function classes.
         registerGlobalModifier(LootModifierScorchingHeat.CODEC, AstralSorcery.key("scorching_heat"));
         registerGlobalModifier(LootModifierPerkVoidTrash.CODEC, AstralSorcery.key("perk_void_trash"));
 

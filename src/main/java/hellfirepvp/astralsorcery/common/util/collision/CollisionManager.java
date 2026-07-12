@@ -12,7 +12,6 @@ import hellfirepvp.astralsorcery.common.constellation.mantle.effect.MantleEffect
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShapeSpliterator;
 
 import javax.annotation.Nullable;
 import java.util.*;

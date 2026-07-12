@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.util.time;
 import hellfirepvp.astralsorcery.common.data.config.registry.TileAccelerationBlacklistRegistry;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -75,9 +76,13 @@ public class TimeStopZone {
                     for (Map.Entry<BlockPos, BlockEntity> teEntry : map.entrySet()) {
                         BlockEntity te = teEntry.getValue();
                         if (TileAccelerationBlacklistRegistry.INSTANCE.canBeInfluenced(te) &&
-                                te.getBlockPos().distSqr(offset, range) &&
-                                level.tickableBlockEntities.contains(te)) {
-                            level.tickableBlockEntities.remove(te);
+                                te.getBlockPos().distSqr(offset) <= range * range &&
+                                !te.isRemoved()) {
+                            // 1.21 port: Level#tickableBlockEntities is gone (block-entity ticking now lives
+                            // in a private LevelChunk map with no public add/remove accessor). The chunk's
+                            // ticker wrapper only invokes tick() while !BlockEntity#isRemoved(), so toggling
+                            // that flag directly freezes/resumes ticking without touching the tick registry.
+                            te.setRemoved();
                             safeCacheTile(te);
                         }
                     }
@@ -104,11 +109,8 @@ public class TimeStopZone {
     void stopEffect() {
         for (BlockEntity cached : cachedTiles) {
             BlockState state = level.getBlockState(cached.getBlockPos());
-            if (state.getBlock().hasTileEntity(state)) {
-                BlockEntity te = state.getBlock().createTileEntity(state, level);
-                if (te != null && te.getClass().isAssignableFrom(cached.getClass())) {
-                    level.tickableBlockEntities.add(cached);
-                }
+            if (state.getBlock() instanceof EntityBlock) {
+                cached.clearRemoved();
             }
         }
         this.cachedTiles.clear();
@@ -134,12 +136,14 @@ public class TimeStopZone {
         e.xo = e.getX();
         e.yo = e.getY();
         e.zo = e.getZ();
-        e.animationSpeedOld = e.animationSpeed;
+        // 1.21 port: animationSpeed/animationSpeedOld are gone - walking animation interpolation now
+        // lives in the encapsulated Entity#walkAnimation (WalkAnimationState), which only advances via
+        // its own update(...) call (not invoked here, since movement/AI ticking is what's being frozen).
         e.yBodyRotO = e.yBodyRot;
         e.xRotO = e.getXRot();
         e.yRotO = e.getYRot();
         e.yHeadRotO = e.yHeadRot;
-        e.oAttackAnim = e.swingProgress;
+        e.oAttackAnim = e.attackAnim;
         e.walkDistO = e.walkDist;
 
         if (!e.getCommandSenderWorld().isClientSide()) {

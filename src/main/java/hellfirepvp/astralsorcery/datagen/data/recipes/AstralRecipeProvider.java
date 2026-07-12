@@ -17,11 +17,12 @@ import hellfirepvp.astralsorcery.datagen.data.recipes.interaction.InteractionRec
 import hellfirepvp.astralsorcery.datagen.data.recipes.transmutation.BlockTransmutationRecipeProvider;
 import hellfirepvp.astralsorcery.datagen.data.recipes.vanilla.VanillaTypedRecipeProvider;
 import hellfirepvp.astralsorcery.datagen.data.recipes.well.LightwellRecipeProvider;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,12 +33,12 @@ import java.util.function.Consumer;
  */
 public class AstralRecipeProvider extends RecipeProvider {
 
-    public AstralRecipeProvider(DataGenerator generatorIn) {
-        super(generatorIn);
+    public AstralRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, lookupProvider);
     }
 
     @Override
-    protected void registerRecipes(Consumer<FinishedRecipe> registrar) {
+    protected void buildRecipes(RecipeOutput registrar) {
         DiscoveryAltarRecipeProvider.registerAltarRecipes(registrar);
         AttunementAltarRecipeProvider.registerAltarRecipes(registrar);
         CelestialAltarRecipeProvider.registerAltarRecipes(registrar);

@@ -13,21 +13,20 @@ import hellfirepvp.astralsorcery.common.fluid.BlockLiquidStarlight;
 import hellfirepvp.astralsorcery.common.fluid.FluidLiquidStarlight;
 import hellfirepvp.astralsorcery.common.fluid.ItemLiquidStarlightBucket;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
+import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.item.Item;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.registries.Registries;
-import net.neoforged.neoforge.fluids.FluidAttributes;
-import net.neoforged.neoforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.fluids.FluidType;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static hellfirepvp.astralsorcery.common.lib.FluidsAS.*;
 
@@ -46,37 +45,28 @@ public class RegistryFluids {
     private RegistryFluids() {}
 
     public static void registerFluids() {
-        makeProperties();
+        FluidsAS.LIQUID_STARLIGHT_FLUID_TYPE = AstralRegistries.register(
+                AstralRegistries.FLUID_TYPES,
+                AstralSorcery.key("liquid_starlight"),
+                new FluidType(FluidType.Properties.create()
+                        .rarity(Rarity.EPIC)
+                        .lightLevel(15)
+                        .density(1001)
+                        .viscosity(300)
+                        .temperature(40)));
 
-        LIQUID_STARLIGHT_SOURCE = registerFluid(new FluidLiquidStarlight.Source(LIQUID_STARLIGHT_PROPERTIES));
-        LIQUID_STARLIGHT_FLOWING = registerFluid(new FluidLiquidStarlight.Flowing(LIQUID_STARLIGHT_PROPERTIES));
+        FluidsAS.LIQUID_STARLIGHT_PROPERTIES = new BaseFlowingFluid.Properties(
+                () -> LIQUID_STARLIGHT_FLUID_TYPE,
+                () -> LIQUID_STARLIGHT_SOURCE,
+                () -> LIQUID_STARLIGHT_FLOWING)
+                .block(() -> BlocksAS.FLUID_LIQUID_STARLIGHT)
+                .bucket(() -> ItemsAS.BUCKET_LIQUID_STARLIGHT);
+
+        FluidsAS.LIQUID_STARLIGHT_SOURCE = registerFluid(new FluidLiquidStarlight.Source(LIQUID_STARLIGHT_PROPERTIES));
+        FluidsAS.LIQUID_STARLIGHT_FLOWING = registerFluid(new FluidLiquidStarlight.Flowing(LIQUID_STARLIGHT_PROPERTIES));
 
         FLUID_BLOCKS.add(BlocksAS.FLUID_LIQUID_STARLIGHT = new BlockLiquidStarlight(() -> LIQUID_STARLIGHT_SOURCE));
         FLUID_HOLDER_ITEMS.add(ItemsAS.BUCKET_LIQUID_STARLIGHT = new ItemLiquidStarlightBucket(() -> LIQUID_STARLIGHT_SOURCE));
-    }
-
-    private static void makeProperties() {
-        LIQUID_STARLIGHT_PROPERTIES = makeProperties(FluidLiquidStarlight.class, FluidLiquidStarlight::addAttributes,
-                () -> LIQUID_STARLIGHT_SOURCE, () -> LIQUID_STARLIGHT_FLOWING)
-                .block(() -> BlocksAS.FLUID_LIQUID_STARLIGHT)
-                .bucket(() -> ItemsAS.BUCKET_LIQUID_STARLIGHT);
-    }
-
-    private static ForgeFlowingFluid.Properties makeProperties(Class<? extends ForgeFlowingFluid> fluidClass,
-                                                               Function<FluidAttributes.Builder, FluidAttributes.Builder> postProcess,
-                                                               Supplier<ForgeFlowingFluid> stillFluidSupplier,
-                                                               Supplier<ForgeFlowingFluid> flowingFluidSupplier) {
-        String name = NameUtil.fromClass(fluidClass, "Fluid").getPath();
-        return new ForgeFlowingFluid.Properties(
-                stillFluidSupplier,
-                flowingFluidSupplier,
-                postProcess.apply(builderFor(name)));
-    }
-
-    private static FluidAttributes.Builder builderFor(String fluidName) {
-        ResourceLocation still = AstralSorcery.key("fluid/" + fluidName + "_still");
-        ResourceLocation flowing = AstralSorcery.key("fluid/" + fluidName + "_flowing");
-        return FluidAttributes.builder(still, flowing);
     }
 
     private static <T extends Fluid> T registerFluid(T fluid) {

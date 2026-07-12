@@ -8,7 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.loot.global;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.data.config.registry.OreItemRarityRegistry;
 import hellfirepvp.astralsorcery.common.data.research.PlayerProgress;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
@@ -25,14 +26,13 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.loot.GlobalLootModifierSerializer;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.common.loot.LootModifier;
 import net.neoforged.fml.LogicalSide;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Random;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -43,17 +43,21 @@ import java.util.stream.Collectors;
  */
 public class LootModifierPerkVoidTrash extends LootModifier {
 
+    public static final MapCodec<LootModifierPerkVoidTrash> CODEC = RecordCodecBuilder.mapCodec(
+            inst -> codecStart(inst).apply(inst, LootModifierPerkVoidTrash::new)
+    );
+
     private LootModifierPerkVoidTrash(LootItemCondition[] conditionsIn) {
         super(conditionsIn);
     }
 
     @Nonnull
     @Override
-    protected List<ItemStack> run(List<ItemStack> lootTable, LootContext context) {
+    protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> lootTable, LootContext context) {
         if (!LootUtil.doesContextFulfillSet(context, LootContextParamSets.BLOCK)) {
             return lootTable;
         }
-        Entity e = context.get(LootContextParams.THIS_ENTITY);
+        Entity e = context.getParamOrNull(LootContextParams.THIS_ENTITY);
         if (!(e instanceof Player)) {
             return lootTable;
         }
@@ -69,35 +73,32 @@ public class LootModifierPerkVoidTrash extends LootModifier {
         double chance = KeyVoidTrash.CONFIG.getOreChance() *
                 PerkAttributeHelper.getOrCreateMap(player, LogicalSide.SERVER).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
 
-        return lootTable.stream()
-                .filter(stack -> !stack.isEmpty())
-                .map(result -> {
-                    if (KeyVoidTrash.CONFIG.isTrash(result)) {
-                        result = ItemStack.EMPTY;
+        Random random = new Random(context.getRandom().nextLong());
+        ObjectArrayList<ItemStack> result = new ObjectArrayList<>();
+        for (ItemStack stack : lootTable) {
+            if (stack.isEmpty()) {
+                continue;
+            }
+            ItemStack resultStack = stack;
+            if (KeyVoidTrash.CONFIG.isTrash(resultStack)) {
+                resultStack = ItemStack.EMPTY;
 
-                        if (context.getRandom().nextFloat() < chance) {
-                            Item drop = OreItemRarityRegistry.VOID_TRASH_REWARD.getRandomItem(context.getRandom());
-                            if (drop != null) {
-                                result = new ItemStack(drop);
-                            }
-                        }
+                if (context.getRandom().nextFloat() < chance) {
+                    Item drop = OreItemRarityRegistry.VOID_TRASH_REWARD.getRandomItem(random);
+                    if (drop != null) {
+                        resultStack = new ItemStack(drop);
                     }
-                    return result;
-                })
-                .filter(stack -> !stack.isEmpty())
-                .collect(Collectors.toList());
+                }
+            }
+            if (!resultStack.isEmpty()) {
+                result.add(resultStack);
+            }
+        }
+        return result;
     }
 
-    public static class Serializer extends GlobalLootModifierSerializer<LootModifierPerkVoidTrash> {
-
-        @Override
-        public LootModifierPerkVoidTrash read(ResourceLocation location, JsonObject object, LootItemCondition[] conditions) {
-            return new LootModifierPerkVoidTrash(conditions);
-        }
-
-        @Override
-        public JsonObject write(LootModifierPerkVoidTrash instance) {
-            return this.makeConditions(instance.conditions);
-        }
+    @Override
+    public MapCodec<? extends IGlobalLootModifier> codec() {
+        return CODEC;
     }
 }

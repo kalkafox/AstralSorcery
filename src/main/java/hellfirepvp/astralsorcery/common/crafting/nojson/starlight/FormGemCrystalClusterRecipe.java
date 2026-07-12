@@ -51,7 +51,7 @@ public class FormGemCrystalClusterRecipe extends LiquidStarlightRecipe {
     @Override
     public List<Ingredient> getInputForRender() {
         return Arrays.asList(Ingredient.fromStacks(new ItemStack(ItemsAS.ILLUMINATION_POWDER)),
-                new CrystalIngredient(false, false));
+                new CrystalIngredient(false, false).toVanilla());
     }
 
     @Override

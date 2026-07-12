@@ -11,17 +11,18 @@ package hellfirepvp.astralsorcery.datagen.data.tags;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.data.BlockTagsProvider;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.world.item.Item;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
+import javax.annotation.Nullable;
+import java.util.concurrent.CompletableFuture;
+
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Items.*;
-import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,12 +33,13 @@ import net.minecraft.tags.TagKey;
  */
 public class AstralItemTagsProvider extends ItemTagsProvider {
 
-    public AstralItemTagsProvider(DataGenerator generator, BlockTagsProvider blockTagsProvider, ExistingFileHelper fileHelper) {
-        super(generator, blockTagsProvider, AstralSorcery.MODID, fileHelper);
+    public AstralItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
+                                  CompletableFuture<TagLookup<Block>> blockTags, @Nullable ExistingFileHelper fileHelper) {
+        super(output, lookupProvider, blockTags, AstralSorcery.MODID, fileHelper);
     }
 
     @Override
-    protected void addTags() {
+    protected void addTags(HolderLookup.Provider provider) {
         this.tag(ItemTags.LECTERN_BOOKS)
                 .add(ItemsAS.TOME);
 
@@ -64,9 +66,5 @@ public class AstralItemTagsProvider extends ItemTagsProvider {
                 .add(BlocksAS.STARMETAL_ORE.asItem())
                 .add(BlocksAS.AQUAMARINE_SAND_ORE.asItem())
                 .add(BlocksAS.ROCK_CRYSTAL_ORE.asItem());
-    }
-
-    private TagsProvider.Builder<Item> tag(TagKey<Item> tag) {
-        return this.getOrCreateBuilder(tag);
     }
 }

@@ -46,7 +46,7 @@ public class BlockDiscoverer {
             }
             Collections.shuffle(faces);
             for (Direction face : faces) {
-                BlockPos at = offset.offset(face);
+                BlockPos at = offset.relative(face);
                 if (out.contains(at)) {
                     continue;
                 }
@@ -79,7 +79,7 @@ public class BlockDiscoverer {
                             ch.getBlockEntities()
                                     .values()
                                     .stream()
-                                    .filter(tile -> tile.getBlockPos().distSqr(origin, distance))
+                                    .filter(tile -> tile.getBlockPos().distSqr(origin) <= distance * distance)
                                     .filter(match)
                                     .map(BlockEntity::getBlockPos)
                                     .collect(Collectors.toList())
@@ -94,11 +94,11 @@ public class BlockDiscoverer {
     public static List<BlockPos> searchForBlocksAround(Level level, BlockPos origin, int cubeSize, BlockPredicate match) {
         List<BlockPos> out = new ArrayList<>();
 
-        BlockPos.Mutable offset = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos offset = new BlockPos.MutableBlockPos();
         for (int xx = -cubeSize; xx <= cubeSize; xx++) {
             for (int zz = -cubeSize; zz <= cubeSize; zz++) {
                 for (int yy = -cubeSize; yy <= cubeSize; yy++) {
-                    offset.setPos(origin.getX() + xx, origin.getY() + yy, origin.getZ() + zz);
+                    offset.set(origin.getX() + xx, origin.getY() + yy, origin.getZ() + zz);
                     MiscUtils.executeWithChunk(level, offset, () -> {
                         BlockState atState = level.getBlockState(offset);
                         if (match.test(level, offset, atState)) {
@@ -195,7 +195,7 @@ public class BlockDiscoverer {
                     }
                 } else {
                     for (Direction face : Direction.values()) {
-                        BlockPos search = relativePos.offset(face);
+                        BlockPos search = relativePos.relative(face);
                         if (closed.contains(search)) continue;
                         if (getCubeDistance(search, origin) > cubeSize) continue;
                         if (limit != -1 && foundResult.size() + 1 > limit) continue;
@@ -225,7 +225,7 @@ public class BlockDiscoverer {
 
     private static boolean isExposedToAir(Level level, BlockPos pos) {
         for (Direction face : Direction.values()) {
-            BlockPos offset = pos.offset(face);
+            BlockPos offset = pos.relative(face);
             if (MiscUtils.executeWithChunk(level, offset, () -> BlockUtils.isReplaceable(level, offset), false)) {
                 return true;
             }

@@ -9,12 +9,11 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
-import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.CrystalIngredientSerializer;
-import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredientSerializer;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-
-import static hellfirepvp.astralsorcery.common.lib.IngredientSerializersAS.CRYSTAL_SERIALIZER;
-import static hellfirepvp.astralsorcery.common.lib.IngredientSerializersAS.FLUID_SERIALIZER;
+import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.CrystalIngredient;
+import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredient;
+import hellfirepvp.astralsorcery.common.lib.IngredientSerializersAS;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,11 +27,10 @@ public class RegistryIngredientTypes {
     private RegistryIngredientTypes() {}
 
     public static void init() {
-        FLUID_SERIALIZER = new FluidIngredientSerializer();
-        CRYSTAL_SERIALIZER = new CrystalIngredientSerializer();
-
-        CraftingHelper.register(AstralSorcery.key("fluid"), FLUID_SERIALIZER);
-        CraftingHelper.register(AstralSorcery.key("crystal"), CRYSTAL_SERIALIZER);
+        IngredientSerializersAS.FLUID_INGREDIENT_TYPE = AstralRegistries.register(
+                AstralRegistries.INGREDIENT_TYPES, AstralSorcery.key("fluid"), new IngredientType<>(FluidIngredient.CODEC));
+        IngredientSerializersAS.CRYSTAL_INGREDIENT_TYPE = AstralRegistries.register(
+                AstralRegistries.INGREDIENT_TYPES, AstralSorcery.key("crystal"), new IngredientType<>(CrystalIngredient.CODEC));
     }
 
 }

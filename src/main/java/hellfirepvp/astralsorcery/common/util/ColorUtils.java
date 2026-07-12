@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
@@ -87,7 +88,7 @@ public class ColorUtils {
         if (stack.isEmpty()) {
             return 0xFFFFFFFF;
         }
-        return stack.getType().getAttributes().getColor(stack);
+        return IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(stack);
     }
 
     @OnlyIn(Dist.CLIENT)

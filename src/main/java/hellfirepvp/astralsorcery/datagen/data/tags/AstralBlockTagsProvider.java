@@ -10,16 +10,17 @@ package hellfirepvp.astralsorcery.datagen.data.tags;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.data.BlockTagsProvider;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+
+import javax.annotation.Nullable;
+import java.util.concurrent.CompletableFuture;
 
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Blocks.MARBLE;
 import static hellfirepvp.astralsorcery.common.lib.TagsAS.Blocks.ORES;
-import net.minecraft.tags.TagKey;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -30,12 +31,12 @@ import net.minecraft.tags.TagKey;
  */
 public class AstralBlockTagsProvider extends BlockTagsProvider {
 
-    public AstralBlockTagsProvider(DataGenerator generatorIn, ExistingFileHelper existingFileHelper) {
-        super(generatorIn, AstralSorcery.MODID, existingFileHelper);
+    public AstralBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
+        super(output, lookupProvider, AstralSorcery.MODID, existingFileHelper);
     }
 
     @Override
-    protected void addTags() {
+    protected void addTags(HolderLookup.Provider provider) {
         this.tag(BlockTags.BEACON_BASE_BLOCKS)
                 .add(BlocksAS.STARMETAL);
 
@@ -52,9 +53,5 @@ public class AstralBlockTagsProvider extends BlockTagsProvider {
                 .add(BlocksAS.STARMETAL_ORE)
                 .add(BlocksAS.AQUAMARINE_SAND_ORE)
                 .add(BlocksAS.ROCK_CRYSTAL_ORE);
-    }
-
-    private TagsProvider.Builder<Block> tag(TagKey<Block> tag) {
-        return this.getOrCreateBuilder(tag);
     }
 }

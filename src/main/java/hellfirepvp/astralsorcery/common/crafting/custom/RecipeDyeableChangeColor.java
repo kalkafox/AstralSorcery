@@ -113,19 +113,27 @@ public class RecipeDyeableChangeColor extends CustomRecipe {
         return this.serializer.get();
     }
 
+    public static RecipeDyeableChangeColor wandColorRecipe(CraftingBookCategory category) {
+        return new RecipeDyeableChangeColor(category, () -> RecipeSerializersAS.CUSTOM_CHANGE_WAND_COLOR_SERIALIZER,
+                ItemsAS.ILLUMINATION_WAND, ItemIlluminationWand::setConfiguredColor);
+    }
+
+    public static RecipeDyeableChangeColor gatewayColorRecipe(CraftingBookCategory category) {
+        return new RecipeDyeableChangeColor(category, () -> RecipeSerializersAS.CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER,
+                Item.byBlock(BlocksAS.GATEWAY), BlockCelestialGateway::setColor);
+    }
+
     public static class IlluminationWandColorSerializer extends SimpleCraftingRecipeSerializer<RecipeDyeableChangeColor> {
 
         public IlluminationWandColorSerializer() {
-            super(category -> new RecipeDyeableChangeColor(category, () -> RecipeSerializersAS.CUSTOM_CHANGE_WAND_COLOR_SERIALIZER,
-                    ItemsAS.ILLUMINATION_WAND, ItemIlluminationWand::setConfiguredColor));
+            super(RecipeDyeableChangeColor::wandColorRecipe);
         }
     }
 
     public static class CelestialGatewayColorSerializer extends SimpleCraftingRecipeSerializer<RecipeDyeableChangeColor> {
 
         public CelestialGatewayColorSerializer() {
-            super(category -> new RecipeDyeableChangeColor(category, () -> RecipeSerializersAS.CUSTOM_CHANGE_GATEWAY_COLOR_SERIALIZER,
-                    Item.byBlock(BlocksAS.GATEWAY), BlockCelestialGateway::setColor));
+            super(RecipeDyeableChangeColor::gatewayColorRecipe);
         }
     }
 }

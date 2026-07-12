@@ -24,7 +24,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -155,8 +155,8 @@ public class SimpleAltarRecipeBuilder<T extends SimpleAltarRecipe> extends Custo
             this.type = type;
         }
 
-        public SimpleAltarRecipeBuilder<T> createRecipe(ForgeRegistryEntry<?> nameProvider, AltarType altarType) {
-            return this.createRecipe(AstralSorcery.key(nameProvider.getRegistryName().getPath()), altarType);
+        public SimpleAltarRecipeBuilder<T> createRecipe(Object nameProvider, AltarType altarType) {
+            return this.createRecipe(AstralSorcery.key(RegistryHelper.getKey(nameProvider).getPath()), altarType);
         }
 
         public SimpleAltarRecipeBuilder<T> createRecipe(ResourceLocation recipeId, AltarType altarType) {

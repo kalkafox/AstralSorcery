@@ -9,16 +9,21 @@
 package hellfirepvp.astralsorcery.common.loot;
 
 import com.google.common.collect.Sets;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.block.tile.BlockCelestialGateway;
 import hellfirepvp.astralsorcery.common.lib.LootAS;
 import hellfirepvp.astralsorcery.common.tile.TileCelestialGateway;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.loot.*;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,7 +35,11 @@ import java.util.Set;
  */
 public class CopyGatewayColor extends LootItemConditionalFunction {
 
-    private CopyGatewayColor(LootItemCondition[] conditionsIn) {
+    public static final MapCodec<CopyGatewayColor> CODEC = RecordCodecBuilder.mapCodec(
+            inst -> commonFields(inst).apply(inst, CopyGatewayColor::new)
+    );
+
+    private CopyGatewayColor(List<LootItemCondition> conditionsIn) {
         super(conditionsIn);
     }
 
@@ -40,13 +49,13 @@ public class CopyGatewayColor extends LootItemConditionalFunction {
     }
 
     @Override
-    public LootItemFunctionType getType() {
+    public LootItemFunctionType<CopyGatewayColor> getType() {
         return LootAS.Functions.COPY_GATEWAY_COLOR;
     }
 
     @Override
     protected ItemStack run(ItemStack stack, LootContext context) {
-        BlockEntity tile = context.get(LootContextParams.BLOCK_ENTITY);
+        BlockEntity tile = context.getParamOrNull(LootContextParams.BLOCK_ENTITY);
         if (tile instanceof TileCelestialGateway) {
             ((TileCelestialGateway) tile).getColor().ifPresent(color -> {
                 BlockCelestialGateway.setColor(stack, color);
@@ -56,14 +65,6 @@ public class CopyGatewayColor extends LootItemConditionalFunction {
     }
 
     public static LootItemConditionalFunction.Builder<?> builder() {
-        return builder(CopyGatewayColor::new);
-    }
-
-    public static class Serializer extends LootItemConditionalFunction.Serializer<CopyGatewayColor> {
-
-        @Override
-        public CopyGatewayColor deserialize(JsonObject object, JsonDeserializationContext deserializationContext, LootItemCondition[] conditions) {
-            return new CopyGatewayColor(conditions);
-        }
+        return simpleBuilder(CopyGatewayColor::new);
     }
 }

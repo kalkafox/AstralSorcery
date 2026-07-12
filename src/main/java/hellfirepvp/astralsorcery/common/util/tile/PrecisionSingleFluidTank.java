@@ -101,11 +101,16 @@ public class PrecisionSingleFluidTank implements IFluidTank {
 
     @Nonnull
     @Override
-    public FluidStack getType() {
+    public FluidStack getFluid() {
         if (fluid == Fluids.EMPTY) {
             return FluidStack.EMPTY;
         }
         return new FluidStack(fluid, getFluidAmount());
+    }
+
+    // Kept for Astral Sorcery's existing tank-facing API.
+    public FluidStack getType() {
+        return getFluid();
     }
 
     public void setFluid(@Nonnull Fluid fluid) {

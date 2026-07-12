@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.util.data;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -23,69 +23,53 @@ import net.neoforged.neoforge.fluids.FluidStack;
 public class ASDataSerializers {
 
     public static EntityDataSerializer<Long> LONG = new EntityDataSerializer<Long>() {
+        private final StreamCodec<RegistryFriendlyByteBuf, Long> codec = StreamCodec.of(
+                (buf, value) -> buf.writeLongLE(value),
+                buf -> buf.readLongLE());
+
         @Override
-        public void write(FriendlyByteBuf buf, Long value) {
-            buf.writeLongLE(value);
+        public StreamCodec<? super RegistryFriendlyByteBuf, Long> codec() {
+            return codec;
         }
 
         @Override
-        public Long read(FriendlyByteBuf buf) {
-            return buf.readLongLE();
-        }
-
-        @Override
-        public EntityDataAccessor<Long> createKey(int id) {
-            return new EntityDataAccessor<>(id, this);
-        }
-
-        @Override
-        public Long read(Long value) {
-            return new Long(value);
+        public Long copy(Long value) {
+            return value;
         }
     };
 
     public static EntityDataSerializer<Vector3> VECTOR = new EntityDataSerializer<Vector3>() {
+        private final StreamCodec<RegistryFriendlyByteBuf, Vector3> codec = StreamCodec.of(
+                (buf, value) -> {
+                    buf.writeDouble(value.getX());
+                    buf.writeDouble(value.getY());
+                    buf.writeDouble(value.getZ());
+                },
+                buf -> new Vector3(buf.readDouble(), buf.readDouble(), buf.readDouble()));
+
         @Override
-        public void write(FriendlyByteBuf buf, Vector3 value) {
-            buf.writeDouble(value.getX());
-            buf.writeDouble(value.getY());
-            buf.writeDouble(value.getZ());
+        public StreamCodec<? super RegistryFriendlyByteBuf, Vector3> codec() {
+            return codec;
         }
 
         @Override
-        public Vector3 read(FriendlyByteBuf buf) {
-            return new Vector3(buf.readDouble(), buf.readDouble(), buf.readDouble());
-        }
-
-        @Override
-        public EntityDataAccessor<Vector3> createKey(int id) {
-            return new EntityDataAccessor<>(id, this);
-        }
-
-        @Override
-        public Vector3 read(Vector3 value) {
+        public Vector3 copy(Vector3 value) {
             return value.clone();
         }
     };
 
     public static EntityDataSerializer<FluidStack> FLUID = new EntityDataSerializer<FluidStack>() {
+        private final StreamCodec<RegistryFriendlyByteBuf, FluidStack> codec = StreamCodec.of(
+                (buf, value) -> ByteBufUtils.writeFluidStack(buf, value),
+                buf -> ByteBufUtils.readFluidStack(buf));
+
         @Override
-        public void write(FriendlyByteBuf buf, FluidStack value) {
-            ByteBufUtils.writeFluidStack(buf, value);
+        public StreamCodec<? super RegistryFriendlyByteBuf, FluidStack> codec() {
+            return codec;
         }
 
         @Override
-        public FluidStack read(FriendlyByteBuf buf) {
-            return ByteBufUtils.readFluidStack(buf);
-        }
-
-        @Override
-        public EntityDataAccessor<FluidStack> createKey(int id) {
-            return new EntityDataAccessor<>(id, this);
-        }
-
-        @Override
-        public FluidStack read(FluidStack value) {
+        public FluidStack copy(FluidStack value) {
             return value.copy();
         }
     };

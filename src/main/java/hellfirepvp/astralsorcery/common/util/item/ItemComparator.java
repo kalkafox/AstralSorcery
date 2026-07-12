@@ -11,8 +11,12 @@ package hellfirepvp.astralsorcery.common.util.item;
 import com.google.common.collect.Sets;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTComparator;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.nbt.CompoundTag;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -47,13 +51,15 @@ public class ItemComparator {
             }
         }
 
-        boolean thisHasTag = thisStack.hasTag() && !thisStack.getTag().isEmpty();
-        boolean sampleHasTag = sampleCompare.hasTag() && !sampleCompare.getTag().isEmpty();
+        CompoundTag thisTag = customData(thisStack);
+        CompoundTag sampleTag = customData(sampleCompare);
+        boolean thisHasTag = thisTag != null && !thisTag.isEmpty();
+        boolean sampleHasTag = sampleTag != null && !sampleTag.isEmpty();
 
         if (lClauses.contains(Clause.NBT_STRICT)) {
             if (!thisHasTag && sampleHasTag) {
                 return false;
-            } else if (thisHasTag && (!sampleHasTag || !thisStack.getTag().equals(sampleCompare.getTag()))) {
+            } else if (thisHasTag && (!sampleHasTag || !thisTag.equals(sampleTag))) {
                 return false;
             }
         } else if (lClauses.contains(Clause.NBT_LEAST)) {
@@ -62,19 +68,24 @@ public class ItemComparator {
                     return false;
                 }
 
-                if (!NBTComparator.contains(thisStack.getTag(), sampleCompare.getTag())) {
+                if (!NBTComparator.contains(thisTag, sampleTag)) {
                     return false;
                 }
             }
         }
 
         if (lClauses.contains(Clause.CAPABILITIES_COMPATIBLE)) {
-            if (!thisStack.areCapsCompatible(sampleCompare)) {
-                return false;
-            }
+            // Capabilities are no longer part of ItemStack in 1.21; their data is
+            // represented by registered data components and was handled above.
         }
 
         return true;
+    }
+
+    @Nullable
+    private static CompoundTag customData(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        return data == null ? null : data.copyTag();
     }
 
     public static enum Clause {

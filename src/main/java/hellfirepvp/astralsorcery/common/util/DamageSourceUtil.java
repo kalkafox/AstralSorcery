@@ -8,14 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Holder;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.IndirectEntityDamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.Entity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,102 +23,36 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 17.11.2018 / 08:29
  */
+// 1.21 port: DamageSource is an immutable holder around a data-driven DamageType (Holder<DamageType>)
+// instead of a class hierarchy with per-instance mutable flags (bypassArmor/setIsFire/etc. are gone -
+// that behavior is now expressed by tagging the DamageType itself, e.g. DamageTypeTags.BYPASSES_ARMOR,
+// via datapack JSON). newType() below builds an unregistered (direct) Holder<DamageType>, which keeps
+// this compiling and preserves msgId/death-message behavior, but the mod's own damage sources will NOT
+// be seen as matching those vanilla tags by generic combat code (e.g. armor damage reduction) until
+// they're registered for real via data/astralsorcery/damage_type/*.json + tag JSON additions - left as
+// a follow-up, same as other data-driven-registry caveats in this port.
 public class DamageSourceUtil {
 
     public static DamageSource newType(@Nonnull String damageType) {
-        return new DamageSource(damageType);
+        return new DamageSource(Holder.direct(new DamageType(damageType, 0.1F)));
     }
 
     public static DamageSource withEntityDirect(@Nonnull String damageType, @Nullable Entity source) {
-        return new EntityDamageSource(damageType, source);
+        return new DamageSource(Holder.direct(new DamageType(damageType, 0.1F)), source);
     }
 
     public static DamageSource withEntityIndirect(@Nonnull String damageType, @Nullable Entity actualSource, @Nullable Entity indirectSource) {
-        return new IndirectEntityDamageSource(damageType, indirectSource, actualSource);
+        return new DamageSource(Holder.direct(new DamageType(damageType, 0.1F)), indirectSource, actualSource);
     }
 
-    @Nullable
+    @Nonnull
     public static DamageSource withEntityDirect(@Nonnull DamageSource damageType, @Nullable Entity source) {
-        return override(damageType, source, null);
+        return source != null ? new DamageSource(damageType.typeHolder(), source) : damageType;
     }
 
-    @Nullable
+    @Nonnull
     public static DamageSource withEntityIndirect(@Nonnull DamageSource damageType, @Nullable Entity actualSource, @Nullable Entity indirectSource) {
-        return override(damageType, indirectSource, actualSource);
-    }
-
-    @Nullable
-    public static DamageSource setToFireDamage(@Nonnull DamageSource src) {
-        return changeAttribute(src, DamageSource::setIsFire);
-    }
-
-    @Nullable
-    public static DamageSource setToBypassArmor(@Nonnull DamageSource src) {
-        return changeAttribute(src, DamageSource::bypassArmor);
-    }
-
-    @Nullable
-    public static DamageSource changeAttribute(@Nonnull DamageSource src, Consumer<DamageSource> update) {
-        return overrideWithChanges(src, update);
-    }
-
-    private static boolean mayChangeAttributes(DamageSource src) {
-        Class<?> srcClass = src.getClass();
-        return srcClass.equals(DamageSource.class) || srcClass.equals(EntityDamageSource.class) ||
-                srcClass.equals(IndirectEntityDamageSource.class);
-    }
-
-    @Nullable
-    private static DamageSource overrideWithChanges(@Nonnull DamageSource source, Consumer<DamageSource> run) {
-        DamageSource dst = override(source, null, null);
-        if (dst != null) {
-            run.accept(dst);
-        }
-        return dst;
-    }
-
-    @Nullable
-    private static DamageSource override(DamageSource src, @Nullable Entity directSource, @Nullable Entity trueSource) {
-        if (!mayChangeAttributes(src)) {
-            return null;
-        }
-        DamageSource dst;
-        if (src.getClass().equals(DamageSource.class)) {
-            dst = new DamageSource(src.getMsgId());
-        } else if (src.getClass().equals(EntityDamageSource.class)) {
-            dst = new EntityDamageSource(src.getMsgId(),
-                    directSource != null ? directSource : src.getDirectEntity());
-        } else { // equals EntityDamageSourceIndirect.class
-            dst = new IndirectEntityDamageSource(src.getMsgId(),
-                    directSource != null ? directSource : src.getDirectEntity(),
-                    trueSource != null ? trueSource : (directSource != null ? directSource : src.getEntity()));
-        }
-        copy(src, dst);
-        return dst;
-    }
-
-    private static void copy(DamageSource src, DamageSource dest) {
-        if (src.isBypassInvul()) {
-            dest.bypassInvul();
-        }
-        if (src.isBypassMagic()) {
-            dest.bypassMagic();
-        }
-        if (src.isProjectile()) {
-            dest.setProjectile();
-        }
-        if (src.isExplosion()) {
-            dest.setExplosion();
-        }
-        if (src.isFire()) {
-            dest.setIsFire();
-        }
-        if (src.isMagic()) {
-            dest.setMagic();
-        }
-        if (src.scalesWithDifficulty()) {
-            dest.setScalesWithDifficulty();
-        }
+        return new DamageSource(damageType.typeHolder(), indirectSource, actualSource);
     }
 
 }

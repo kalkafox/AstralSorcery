@@ -8,16 +8,18 @@
 
 package hellfirepvp.astralsorcery.common.advancement.instance;
 
-import com.google.gson.JsonObject;
-import hellfirepvp.astralsorcery.common.advancement.PerkLevelTrigger;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
-import net.minecraft.advancements.criterion.CriterionInstance;
+import hellfirepvp.astralsorcery.common.lib.AdvancementsAS;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.loot.ConditionArraySerializer;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.LogicalSide;
+
+import java.util.Optional;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,31 +28,16 @@ import net.neoforged.fml.LogicalSide;
  * Created by HellFirePvP
  * Date: 11.05.2020 / 20:23
  */
-public class PerkLevelInstance extends AbstractCriterionTriggerInstance {
+public record PerkLevelInstance(Optional<ContextAwarePredicate> player,
+                                int levelNeeded) implements SimpleCriterionTrigger.SimpleInstance {
 
-    private int levelNeeded = 0;
+    public static final Codec<PerkLevelInstance> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+            EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(PerkLevelInstance::player),
+            Codec.INT.fieldOf("levelNeeded").forGetter(PerkLevelInstance::levelNeeded)
+    ).apply(inst, PerkLevelInstance::new));
 
-    private PerkLevelInstance(ResourceLocation criterionIn) {
-        super(criterionIn, EntityPredicate.AndPredicate.ANY);
-    }
-
-    public static PerkLevelInstance reachLevel(int level) {
-        PerkLevelInstance instance = new PerkLevelInstance(PerkLevelTrigger.ID);
-        instance.levelNeeded = level;
-        return instance;
-    }
-
-    @Override
-    public JsonObject serialize(SerializationContext conditions) {
-        JsonObject out = super.serialize(conditions);
-        out.addProperty("levelNeeded", this.levelNeeded);
-        return out;
-    }
-
-    public static PerkLevelInstance deserialize(ResourceLocation id, JsonObject json) {
-        PerkLevelInstance instance = new PerkLevelInstance(id);
-        instance.levelNeeded = GsonHelper.getAsInt(json, "levelNeeded");
-        return instance;
+    public static Criterion<PerkLevelInstance> reachLevel(int level) {
+        return AdvancementsAS.PERK_LEVEL.createCriterion(new PerkLevelInstance(Optional.empty(), level));
     }
 
     public boolean test(ServerPlayer player) {

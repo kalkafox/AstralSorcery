@@ -35,6 +35,7 @@ import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.GuiType;
 import hellfirepvp.astralsorcery.common.base.patreon.manager.PatreonManagerClient;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
+import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
 import hellfirepvp.astralsorcery.common.perk.tree.PerkTreePoint;
@@ -49,11 +50,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.util.Unit;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 import java.util.function.Consumer;
 
@@ -114,7 +118,22 @@ public class ClientProxy extends CommonProxy {
         modEventBus.addListener(this::onClientSetup);
         modEventBus.addListener(this::onRegisterRenderers);
         modEventBus.addListener(this::onAddLayers);
+        modEventBus.addListener(this::onRegisterClientExtensions);
         modEventBus.addListener(RegistryContainerTypes::initClient);
+    }
+
+    private void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerFluidType(new IClientFluidTypeExtensions() {
+            @Override
+            public ResourceLocation getStillTexture() {
+                return AstralSorcery.key("fluid/liquid_starlight_still");
+            }
+
+            @Override
+            public ResourceLocation getFlowingTexture() {
+                return AstralSorcery.key("fluid/liquid_starlight_flowing");
+            }
+        }, FluidsAS.LIQUID_STARLIGHT_FLUID_TYPE);
     }
 
     @Override

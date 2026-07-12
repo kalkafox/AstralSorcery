@@ -113,12 +113,12 @@ public class CommonProxy {
 
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("b0c3097f-8391-4b4b-a89a-553ef730b13a");
 
-    public static DamageSource DAMAGE_SOURCE_BLEED   = DamageSourceUtil.newType("astralsorcery.bleed")
-            .bypassArmor();
-    public static DamageSource DAMAGE_SOURCE_STELLAR = DamageSourceUtil.newType("astralsorcery.stellar")
-            .bypassArmor().setMagic();
-    public static DamageSource DAMAGE_SOURCE_REFLECT = DamageSourceUtil.newType("thorns")
-            .bypassArmor().bypassMagic();
+    // 1.21 port: bypassArmor/setMagic/bypassMagic were per-instance DamageSource flags in 1.16;
+    // that behavior is now driven by DamageType datapack tags, which DamageSourceUtil.newType's
+    // unregistered Holder can't participate in - see DamageSourceUtil's class javadoc caveat.
+    public static DamageSource DAMAGE_SOURCE_BLEED   = DamageSourceUtil.newType("astralsorcery.bleed");
+    public static DamageSource DAMAGE_SOURCE_STELLAR = DamageSourceUtil.newType("astralsorcery.stellar");
+    public static DamageSource DAMAGE_SOURCE_REFLECT = DamageSourceUtil.newType("thorns");
 
     // 1.21 port: tab contents show every registered item in the main tab for now;
     // the old per-item group assignments (papers/crystals) still need re-curation.

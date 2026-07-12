@@ -14,14 +14,13 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.ResultDropIt
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.ResultSpawnEntity;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.fluids.FluidStack;
 
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,7 +31,7 @@ import java.util.function.Consumer;
  */
 public class InteractionRecipeProvider {
 
-    public static void registerLiquidInteractionRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerLiquidInteractionRecipes(RecipeOutput registrar) {
         // Lava/Water
         LiquidInteractionBuilder.builder(AstralSorcery.key("water_lava_cobblestone"))
                 .setReactant1(new FluidStack(Fluids.WATER, 10))

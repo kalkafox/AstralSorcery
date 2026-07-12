@@ -8,12 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.advancement;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.advancement.instance.PerkLevelInstance;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.loot.ConditionArrayParser;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,23 +22,16 @@ import net.minecraft.resources.ResourceLocation;
  * Created by HellFirePvP
  * Date: 11.05.2020 / 20:30
  */
-public class PerkLevelTrigger extends ListenerCriterionTrigger<PerkLevelInstance> {
+public class PerkLevelTrigger extends SimpleCriterionTrigger<PerkLevelInstance> {
 
     public static final ResourceLocation ID = AstralSorcery.key("perk_level");
 
-    public PerkLevelTrigger() {
-        super(ID);
-    }
-
     @Override
-    public PerkLevelInstance deserialize(JsonObject object, DeserializationContext conditions) {
-        return PerkLevelInstance.deserialize(getId(), object);
+    public Codec<PerkLevelInstance> codec() {
+        return PerkLevelInstance.CODEC;
     }
 
     public void trigger(ServerPlayer player) {
-        Listeners<PerkLevelInstance> listeners = this.listeners.get(player.getAdvancements());
-        if (listeners != null) {
-            listeners.trigger((i) -> i.test(player));
-        }
+        this.trigger(player, (i) -> i.test(player));
     }
 }

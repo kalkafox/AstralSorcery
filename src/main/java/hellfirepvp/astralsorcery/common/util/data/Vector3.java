@@ -116,9 +116,9 @@ public class Vector3 {
     }
 
     public Vector3 add(Vec3 vec) {
-        this.x += vec.getX();
-        this.y += vec.getY();
-        this.z += vec.getZ();
+        this.x += vec.x;
+        this.y += vec.y;
+        this.z += vec.z;
         return this;
     }
 
@@ -180,9 +180,9 @@ public class Vector3 {
     }
 
     public Vector3 subtract(Vec3 vec) {
-        this.x -= vec.getX();
-        this.y -= vec.getY();
-        this.z -= vec.getZ();
+        this.x -= vec.x;
+        this.y -= vec.y;
+        this.z -= vec.z;
         return this;
     }
 
@@ -506,13 +506,13 @@ public class Vector3 {
     @Deprecated
     @OnlyIn(Dist.CLIENT)
     public VertexConsumer drawPos(VertexConsumer buf) {
-        buf.vertex((float) this.x, (float) this.y, (float) this.z);
+        buf.addVertex((float) this.x, (float) this.y, (float) this.z);
         return buf;
     }
 
     @OnlyIn(Dist.CLIENT)
     public VertexConsumer drawPos(Matrix4f renderMatrix, VertexConsumer buf) {
-        buf.vertex(renderMatrix, (float) this.x, (float) this.y, (float) this.z);
+        buf.addVertex(renderMatrix, (float) this.x, (float) this.y, (float) this.z);
         return buf;
     }
 

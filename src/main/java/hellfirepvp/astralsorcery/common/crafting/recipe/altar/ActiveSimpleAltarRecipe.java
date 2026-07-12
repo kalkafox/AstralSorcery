@@ -34,7 +34,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import hellfirepvp.astralsorcery.common.util.Constants;
 import net.neoforged.neoforge.fluids.FluidActionResult;
-import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.templates.VoidFluidHandler;
 import net.neoforged.fml.LogicalSide;
@@ -134,11 +134,11 @@ public class ActiveSimpleAltarRecipe {
 
         for (int slot = 0; slot < AltarRecipeGrid.MAX_INVENTORY_SIZE; slot++) {
             Ingredient from = grid.getIngredient(slot);
-            if (from instanceof FluidIngredient) {
+            if (from.getCustomIngredient() instanceof FluidIngredient) {
                 ItemStack stack = inv.getStackInSlot(slot);
                 FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidType.BUCKET_VOLUME, null, true);
-                if (far.shouldSwing()) {
-                    inv.setStackInSlot(slot, far.getObject());
+                if (far.isSuccess()) {
+                    inv.setStackInSlot(slot, far.getResult());
                 }
             } else {
                 ItemUtils.decrementItem(inv, slot, altar::dropItemOnTop);
@@ -149,11 +149,11 @@ public class ActiveSimpleAltarRecipe {
             TileSpectralRelay tar = MiscUtils.getTileAt(altar.getLevel(), from.getRealPosition(), TileSpectralRelay.class, true);
             if (tar != null) {
                 TileInventory tarInventory = tar.getItems();
-                if (from.getInput() != null && from.getInput().getIngredient() instanceof FluidIngredient) {
+                if (from.getInput() != null && from.getInput().getIngredient().getCustomIngredient() instanceof FluidIngredient) {
                     ItemStack stack = tarInventory.getStackInSlot(0);
                     FluidActionResult far = FluidUtil.tryEmptyContainer(stack, VoidFluidHandler.INSTANCE, FluidType.BUCKET_VOLUME, null, true);
-                    if (far.shouldSwing()) {
-                        tarInventory.setStackInSlot(0, far.getObject());
+                    if (far.isSuccess()) {
+                        tarInventory.setStackInSlot(0, far.getResult());
                     }
                 } else {
                     ItemUtils.decrementItem(tarInventory, 0, altar::dropItemOnTop);

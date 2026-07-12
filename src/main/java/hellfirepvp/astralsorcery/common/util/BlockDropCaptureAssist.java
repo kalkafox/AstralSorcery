@@ -8,11 +8,12 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.neoforge.event.entity.EntityJoinWorldEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 
 import java.util.Stack;
 
@@ -31,7 +32,7 @@ public class BlockDropCaptureAssist {
 
     private BlockDropCaptureAssist() {}
 
-    public void onDrop(EntityJoinWorldEvent event) {
+    public void onDrop(EntityJoinLevelEvent event) {
         if (event.getLevel() instanceof ServerLevel && event.getEntity() instanceof ItemEntity) {
             ItemStack itemStack = ((ItemEntity) event.getEntity()).getItem();
             if (!capturing.isEmpty()) {
@@ -42,17 +43,17 @@ public class BlockDropCaptureAssist {
                         capturing.peek().add(itemStack);
                     }
                 }
-                event.getEntity().remove();
+                event.getEntity().remove(Entity.RemovalReason.DISCARDED);
             }
         }
     }
 
     public static void startCapturing() {
-        capturing.pushPose(NonNullList.create());
+        capturing.push(NonNullList.create());
     }
 
     public static NonNullList<ItemStack> getCapturedStacksAndStop() {
-        return capturing.popPose();
+        return capturing.pop();
     }
 
 }

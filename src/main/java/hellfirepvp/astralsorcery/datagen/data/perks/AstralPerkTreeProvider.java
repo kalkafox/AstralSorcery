@@ -16,7 +16,7 @@ import hellfirepvp.astralsorcery.common.perk.data.builder.PerkDataBuilder;
 import hellfirepvp.astralsorcery.common.perk.data.builder.PerkDataProvider;
 import hellfirepvp.astralsorcery.common.perk.modifier.AttributeModifierPerk;
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.resources.ResourceLocation;
 
@@ -36,8 +36,8 @@ import static hellfirepvp.astralsorcery.common.perk.data.PerkTypeHandler.*;
  */
 public class AstralPerkTreeProvider extends PerkDataProvider {
 
-    public AstralPerkTreeProvider(DataGenerator generator) {
-        super(generator);
+    public AstralPerkTreeProvider(PackOutput output) {
+        super(output);
     }
 
     @Override

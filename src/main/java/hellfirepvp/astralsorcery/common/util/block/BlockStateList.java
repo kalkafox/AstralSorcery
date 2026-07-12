@@ -35,7 +35,7 @@ public class BlockStateList implements BlockPredicate, Predicate<BlockState> {
                 List<BlockState> applicable = new ArrayList<>();
                 stateList.configuredMatches.forEach(predicate -> {
                     predicate.validMatch.ifLeft(applicable::addAll).ifRight(block -> {
-                        applicable.addAll(block.getStateContainer().getPossibleStates());
+                        applicable.addAll(block.getStateDefinition().getPossibleStates());
                     });
                 });
                 return applicable;

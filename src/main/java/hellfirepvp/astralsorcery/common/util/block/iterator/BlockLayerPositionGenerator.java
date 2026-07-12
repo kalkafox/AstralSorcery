@@ -40,7 +40,7 @@ public class BlockLayerPositionGenerator extends BlockPositionGenerator {
         while (currentPositions.isEmpty()) {
             generatePositions(size);
         }
-        return this.currentPositions.popPose();
+        return this.currentPositions.pop();
     }
 
     private void generatePositions(int maxLayers) {
@@ -53,7 +53,7 @@ public class BlockLayerPositionGenerator extends BlockPositionGenerator {
             this.layeringState = -maxLayers;
         }
         Collection<BlockPos> positions = BlockGeometry.getPlane(Direction.UP, maxLayers);
-        positions.forEach(pos -> this.currentPositions.offset(pos.add(0, this.layeringState, 0)));
+        positions.forEach(pos -> this.currentPositions.add(pos.offset(0, this.layeringState, 0)));
         Collections.shuffle(this.currentPositions, new Random(0xF518E23A05B27C19L));
     }
 

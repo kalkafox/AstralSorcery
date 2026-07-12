@@ -10,7 +10,7 @@ package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.CrystalIngredient;
 import hellfirepvp.astralsorcery.common.crafting.helper.ingredient.FluidIngredient;
-import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,7 +23,7 @@ public class IngredientSerializersAS {
 
     private IngredientSerializersAS() {}
 
-    public static IIngredientSerializer<FluidIngredient> FLUID_SERIALIZER;
-    public static IIngredientSerializer<CrystalIngredient> CRYSTAL_SERIALIZER;
+    public static IngredientType<FluidIngredient> FLUID_INGREDIENT_TYPE;
+    public static IngredientType<CrystalIngredient> CRYSTAL_INGREDIENT_TYPE;
 
 }

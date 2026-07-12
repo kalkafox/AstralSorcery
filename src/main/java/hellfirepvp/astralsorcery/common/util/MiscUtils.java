@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.material.Fluid;
@@ -29,20 +30,29 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.*;
-import net.minecraft.util.math.*;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.*;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.neoforge.common.ForgeHooks;
-import net.neoforged.neoforge.common.ForgeMod;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.ForgeEventFactory;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.ModContainer;
@@ -72,11 +82,12 @@ public class MiscUtils {
     public static <T> T getTileAt(BlockGetter level, BlockPos pos, Class<T> tileClass, boolean forceChunkLoad) {
         if (level == null || pos == null) return null; //Duh.
         if (level instanceof LevelAccessor) {
-            if (!((LevelAccessor) level).getChunkSource().isChunkLoaded(new ChunkPos(pos)) && !forceChunkLoad) {
+            ChunkPos chPos = new ChunkPos(pos);
+            if (!((LevelAccessor) level).getChunkSource().hasChunk(chPos.x, chPos.z) && !forceChunkLoad) {
                 return null;
             }
         }
-        BlockEntity te = level.getTileEntity(pos);
+        BlockEntity te = level.getBlockEntity(pos);
         if (te == null) return null;
         if (tileClass.isInstance(te)) return (T) te;
         return null;
@@ -84,15 +95,14 @@ public class MiscUtils {
 
     public static boolean canEntityTickAt(LevelAccessor level, BlockPos pos) {
         ChunkPos chPos = new ChunkPos(pos);
-        if (!level.getChunkSource().isChunkLoaded(chPos)) {
+        if (!level.getChunkSource().hasChunk(chPos.x, chPos.z)) {
             return false;
         }
         if (level.isClientSide() || !(level instanceof ServerLevel)) {
             //Assume if a chunk is present and loaded on the client that it is valid for the client.
             return true;
         }
-        ServerChunkCache chunkSource = ((ServerLevel) level).getChunkSource();
-        return !chunkSource.chunkMap.isOutsideSpawningRadius(chPos);
+        return ((ServerLevel) level).shouldTickBlocksAt(chPos.toLong());
     }
 
     public static List<BlockSnapshot> captureBlockChanges(Level level, Runnable r) {
@@ -147,8 +157,9 @@ public class MiscUtils {
         for (T e : list) {
             weightedItems.add(new WRItemObject<>(getWeightFunction.apply(e), e));
         }
-        WRItemObject<T> item = WeightedRandom.getRandomItem(random, weightedItems);
-        return item != null ? item.getValue() : null;
+        return net.minecraft.util.random.WeightedRandom.getRandomItem(RandomSource.create(random.nextLong()), weightedItems)
+                .map(WRItemObject::getValue)
+                .orElse(null);
     }
 
     public static <T, V extends Comparable<V>> V getMaxEntry(Collection<T> elements, Function<T, V> valueFunction) {
@@ -334,7 +345,7 @@ public class MiscUtils {
                 return false;
             }
             if (source instanceof Player &&
-                    !((Player) source).canAttackPlayer(plTarget)) {
+                    !((Player) source).canHarmPlayer(plTarget)) {
                 return false;
             }
         }
@@ -350,7 +361,7 @@ public class MiscUtils {
     public static boolean canPlayerPlaceBlockPos(Player player, BlockState tryPlace, BlockPos pos, Direction againstSide) {
         Level level = player.getCommandSenderWorld();
         level.captureBlockSnapshots = true;
-        level.setBlock(pos, tryPlace);
+        level.setBlockAndUpdate(pos, tryPlace);
         level.captureBlockSnapshots = false;
 
         List<BlockSnapshot> blockSnapshots = (List<BlockSnapshot>) level.capturedBlockSnapshots.clone();
@@ -358,20 +369,20 @@ public class MiscUtils {
 
         boolean cancelPlacement = false;
         if (blockSnapshots.size() > 1) {
-            cancelPlacement = ForgeEventFactory.onMultiBlockPlace(player, blockSnapshots, againstSide);
+            cancelPlacement = EventHooks.onMultiBlockPlace(player, blockSnapshots, againstSide);
         } else if (blockSnapshots.size() == 1) {
-            cancelPlacement = ForgeEventFactory.onBlockPlace(player, blockSnapshots.get(0), againstSide);
+            cancelPlacement = EventHooks.onBlockPlace(player, blockSnapshots.get(0), againstSide);
         }
         for (BlockSnapshot blocksnapshot : Lists.reverse(blockSnapshots)) {
             level.restoringBlockSnapshots = true;
-            blocksnapshot.restore(true, false);
+            blocksnapshot.restore();
             level.restoringBlockSnapshots = false;
         }
         return !cancelPlacement;
     }
 
     public static boolean isConnectionEstablished(ServerPlayer player) {
-        return player.connection != null && player.connection.connection != null && player.connection.connection.isConnected();
+        return player.connection != null && player.connection.getConnection() != null && player.connection.getConnection().isConnected();
     }
 
     public static long getRandomWorldSeed(WorldGenLevel level) {
@@ -409,10 +420,9 @@ public class MiscUtils {
         if (entity.getCommandSenderWorld().isClientSide) {
             return null; //No transfers on clientside.
         }
-        entity.getZ(false);
         ResourceKey<Level> src = entity.getCommandSenderWorld().dimension();
         if (!src.equals(target)) {
-            if (!ForgeHooks.onTravelToDimension(entity, target)) {
+            if (!CommonHooks.onTravelToDimension(entity, target)) {
                 return null;
             }
 
@@ -422,20 +432,23 @@ public class MiscUtils {
                 return null;
             }
             if (entity instanceof ServerPlayer) {
-                ((ServerPlayer) entity).teleport(targetWorld,
+                ((ServerPlayer) entity).teleportTo(targetWorld,
                         targetPos.getX() + 0.5,
                         targetPos.getY() + 0.1,
                         targetPos.getZ() + 0.5,
                         entity.getYRot(),
                         entity.getXRot());
+                return entity;
             } else {
-                entity = (T) entity.changeDimension(targetWorld, new NoOpTeleporter(targetWorld, targetPos));
-                if (entity == null) {
-                    return null;
-                }
+                // 1.21 port: ITeleporter/PortalForcer is gone; DimensionTransition is the direct
+                // replacement for a plain (non-portal) cross-dimension teleport.
+                Vec3 destPos = new Vec3(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
+                entity = (T) entity.changeDimension(new DimensionTransition(targetWorld, destPos, Vec3.ZERO,
+                        entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING));
+                return entity;
             }
         }
-        entity.setPositionAndUpdate(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
+        entity.teleportTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
         return entity;
     }
 
@@ -447,7 +460,7 @@ public class MiscUtils {
         for (BlockPos blockpos = new BlockPos(at.getX(), chunk.getHighestSectionPosition() + 16, at.getZ()); blockpos.getY() >= 0; blockpos = downPos) {
             downPos = blockpos.below();
             BlockState test = level.getBlockState(downPos);
-            if (!level.isEmptyBlock(downPos) && !test.isIn(BlockTags.LEAVES) && test.isFaceSturdy(level, downPos, Direction.UP)) {
+            if (!level.isEmptyBlock(downPos) && !test.is(BlockTags.LEAVES) && test.isFaceSturdy(level, downPos, Direction.UP)) {
                 break;
             }
         }
@@ -485,36 +498,36 @@ public class MiscUtils {
 
     @Nullable
     public static BlockHitResult rayTraceLookBlock(Player player) {
-        return rayTraceLookBlock(player, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
+        return rayTraceLookBlock(player, player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE));
     }
 
     @Nonnull
     public static HitResult rayTraceLook(Player player) {
-        return rayTraceLook(player, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
+        return rayTraceLook(player, player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE));
     }
 
     @Nullable
-    public static BlockHitResult rayTraceLookBlock(Player player, ClipContext.BlockMode block, ClipContext.FluidMode fluid) {
-        return rayTraceLookBlock(player, block, fluid, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
+    public static BlockHitResult rayTraceLookBlock(Player player, ClipContext.Block block, ClipContext.Fluid fluid) {
+        return rayTraceLookBlock(player, block, fluid, player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE));
     }
 
     @Nonnull
-    public static HitResult rayTraceLook(Player player, ClipContext.BlockMode block, ClipContext.FluidMode fluid) {
-        return rayTraceLook(player, block, fluid, player.getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue());
+    public static HitResult rayTraceLook(Player player, ClipContext.Block block, ClipContext.Fluid fluid) {
+        return rayTraceLook(player, block, fluid, player.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE));
     }
 
     @Nullable
     public static BlockHitResult rayTraceLookBlock(Player player, double reachDst) {
-        return rayTraceLookBlock(player, ClipContext.BlockMode.COLLIDER, ClipContext.FluidMode.ANY, reachDst);
+        return rayTraceLookBlock(player, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, reachDst);
     }
 
     @Nonnull
     public static HitResult rayTraceLook(Player player, double reachDst) {
-        return rayTraceLook(player, ClipContext.BlockMode.COLLIDER, ClipContext.FluidMode.ANY, reachDst);
+        return rayTraceLook(player, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, reachDst);
     }
 
     @Nullable
-    public static BlockHitResult rayTraceLookBlock(Entity entity, ClipContext.BlockMode block, ClipContext.FluidMode fluid, double reachDst) {
+    public static BlockHitResult rayTraceLookBlock(Entity entity, ClipContext.Block block, ClipContext.Fluid fluid, double reachDst) {
         HitResult rtr = rayTraceLook(entity, block, fluid, reachDst);
         if (rtr.getType() == HitResult.Type.BLOCK && rtr instanceof BlockHitResult) {
             return (BlockHitResult) rtr;
@@ -523,12 +536,12 @@ public class MiscUtils {
     }
 
     @Nonnull
-    public static HitResult rayTraceLook(Entity entity, ClipContext.BlockMode block, ClipContext.FluidMode fluid, double reachDst) {
+    public static HitResult rayTraceLook(Entity entity, ClipContext.Block block, ClipContext.Fluid fluid, double reachDst) {
         Vec3 pos = new Vec3(entity.getX(), entity.getY() + entity.getEyeHeight(), entity.getZ());
         Vec3 lookVec = entity.getLookAngle();
         Vec3 end = pos.add(lookVec.x * reachDst, lookVec.y * reachDst, lookVec.z * reachDst);
         ClipContext ctx = new ClipContext(pos, end, block, fluid, entity);
-        return entity.level().clipWithInteractionOverride(ctx);
+        return entity.level().clip(ctx);
     }
 
     public static Color calcRandomConstellationColor(float perc) {
@@ -557,7 +570,7 @@ public class MiscUtils {
     }
 
     public static void executeWithChunk(LevelReader level, ChunkPos pos, Runnable run) {
-        executeWithChunk(level, pos.asBlockPos(), nullSupplier(run));
+        executeWithChunk(level, pos.getWorldPosition(), nullSupplier(run));
     }
 
     public static void executeWithChunk(LevelReader level, BlockPos pos, Runnable run) {
@@ -571,13 +584,14 @@ public class MiscUtils {
     public static <T> T executeWithChunk(LevelReader level, BlockPos pos, Supplier<T> run, T defaultValue) {
         if (level instanceof ServerLevel && LogCategory.UNINTENDED_CHUNK_LOADING.isEnabled()) {
             ServerChunkCache provider = ((ServerLevel) level).getChunkSource();
-            int prev = provider.getLoadedChunkCount();
+            int prev = provider.getLoadedChunksCount();
+            ChunkPos chPos = new ChunkPos(pos);
             try {
-                if (provider.isChunkLoaded(new ChunkPos(pos))) {
+                if (provider.hasChunk(chPos.x, chPos.z)) {
                     return run.get();
                 }
             } finally {
-                int current = ((ServerLevel) level).getChunkSource().getLoadedChunkCount();
+                int current = ((ServerLevel) level).getChunkSource().getLoadedChunksCount();
                 if (current > prev) { //We... don't really care about unloading tbh.
                     AstralSorcery.log.warn("Astral Sorcery loaded a chunk when it intended not to!");
                     AstralSorcery.log.warn("Previous chunk count: " + prev);
@@ -588,7 +602,8 @@ public class MiscUtils {
             }
         } else if (level instanceof LevelAccessor) {
             ChunkSource provider = ((LevelAccessor) level).getChunkSource();
-            if (provider.canTick(pos)) {
+            ChunkPos chPos = new ChunkPos(pos);
+            if (provider.hasChunk(chPos.x, chPos.z)) {
                 return run.get();
             }
         } else {
@@ -671,7 +686,7 @@ public class MiscUtils {
         }
         try {
             player.getIpAddress().length();
-            player.connection.connection.getRemoteAddress().toString();
+            player.connection.getConnection().getRemoteAddress().toString();
         } catch (Exception exc) {
             return true;
         }

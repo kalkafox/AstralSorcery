@@ -9,6 +9,11 @@
 package hellfirepvp.astralsorcery.common.lib;
 
 import hellfirepvp.astralsorcery.AstralSorcery;
+import hellfirepvp.astralsorcery.common.loot.CopyConstellation;
+import hellfirepvp.astralsorcery.common.loot.CopyCrystalProperties;
+import hellfirepvp.astralsorcery.common.loot.CopyGatewayColor;
+import hellfirepvp.astralsorcery.common.loot.LinearLuckBonus;
+import hellfirepvp.astralsorcery.common.loot.RandomCrystalProperty;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,11 +34,11 @@ public class LootAS {
 
     public static class Functions {
 
-        public static LootItemFunctionType LINEAR_LUCK_BONUS;
-        public static LootItemFunctionType RANDOM_CRYSTAL_PROPERTIES;
-        public static LootItemFunctionType COPY_CRYSTAL_PROPERTIES;
-        public static LootItemFunctionType COPY_CONSTELLATION;
-        public static LootItemFunctionType COPY_GATEWAY_COLOR;
+        public static LootItemFunctionType<LinearLuckBonus> LINEAR_LUCK_BONUS;
+        public static LootItemFunctionType<RandomCrystalProperty> RANDOM_CRYSTAL_PROPERTIES;
+        public static LootItemFunctionType<CopyCrystalProperties> COPY_CRYSTAL_PROPERTIES;
+        public static LootItemFunctionType<CopyConstellation> COPY_CONSTELLATION;
+        public static LootItemFunctionType<CopyGatewayColor> COPY_GATEWAY_COLOR;
 
     }
 }

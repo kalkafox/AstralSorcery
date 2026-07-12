@@ -12,11 +12,10 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.builder.BlockTransmutationBuilder;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.Tags;
 
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -27,7 +26,7 @@ import java.util.function.Consumer;
  */
 public class BlockTransmutationRecipeProvider {
 
-    public static void registerTransmutationRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerTransmutationRecipes(RecipeOutput registrar) {
         BlockTransmutationBuilder.builder(AstralSorcery.key("iron_starmetal"))
                 .multiplyStarlightCost(0.5F)
                 .addInputCheck(Tags.Blocks.ORES_IRON, new ItemStack(Blocks.IRON_ORE))

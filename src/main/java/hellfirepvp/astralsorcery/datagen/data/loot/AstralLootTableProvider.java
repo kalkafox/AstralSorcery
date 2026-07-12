@@ -8,18 +8,14 @@
 
 package hellfirepvp.astralsorcery.datagen.data.loot;
 
-import com.google.common.collect.Lists;
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.loot.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,24 +24,21 @@ import java.util.function.Supplier;
  * Created by HellFirePvP
  * Date: 06.03.2020 / 21:42
  */
-public final class AstralLootTableProvider extends LootTableProvider {
+public final class AstralLootTableProvider {
 
-    public AstralLootTableProvider(DataGenerator dataGeneratorIn) {
-        super(dataGeneratorIn);
-    }
+    private AstralLootTableProvider() {}
 
-    @Override
-    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
-        return Lists.newArrayList(
-                Pair.of(BlockLootTableProvider::new, LootContextParamSets.BLOCK),
-                Pair.of(EntityLootTableProvider::new, LootContextParamSets.ENTITY),
-                Pair.of(ChestLootTableProvider::new, LootContextParamSets.CHEST),
-                Pair.of(GameplayLootTableProvider::new, LootContextParamSets.GIFT)
+    public static LootTableProvider create(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+        return new LootTableProvider(
+                output,
+                Set.of(),
+                List.of(
+                        new LootTableProvider.SubProviderEntry(BlockLootTableProvider::new, LootContextParamSets.BLOCK),
+                        new LootTableProvider.SubProviderEntry(EntityLootTableProvider::new, LootContextParamSets.ENTITY),
+                        new LootTableProvider.SubProviderEntry(ChestLootTableProvider::new, LootContextParamSets.CHEST),
+                        new LootTableProvider.SubProviderEntry(GameplayLootTableProvider::new, LootContextParamSets.GIFT)
+                ),
+                registries
         );
-    }
-
-    @Override
-    protected void validate(Map<ResourceLocation, LootTable> tables, ValidationContext progressListener) {
-        tables.forEach((key, name) -> LootTables.validateLootTable(progressListener, key, name));
     }
 }

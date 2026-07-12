@@ -23,7 +23,7 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.altar.builtin.Constellat
 import hellfirepvp.astralsorcery.common.item.ItemResonator;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,7 +31,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
-import java.util.function.Consumer;
 import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
@@ -43,12 +42,12 @@ import hellfirepvp.astralsorcery.common.util.RegistryHelper;
  */
 public class RadianceAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerAltarRecipes(RecipeOutput registrar) {
         registerRecipes(registrar);
         registerConstellationRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
+    private static void registerRecipes(RecipeOutput registrar) {
         SimpleAltarRecipeBuilder.builder()
                 .createRecipe(ItemsAS.MANTLE, AltarType.RADIANCE)
                 .setStarlightRequirement(0.6F)
@@ -58,7 +57,7 @@ public class RadianceAltarRecipeProvider {
                         .patternLine("RIAIR")
                         .patternLine("SI IS")
                         .patternLine("S   S")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('A', Items.LEATHER_CHESTPLATE)
                         .key('I', ItemsAS.ILLUMINATION_POWDER)
                         .key('R', ItemsAS.RESONATING_GEM)
@@ -104,7 +103,7 @@ public class RadianceAltarRecipeProvider {
                         .patternLine("WGRGW")
                         .patternLine(" MRM ")
                         .patternLine("     ")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('G', Tags.Items.INGOTS_GOLD)
                         .key('W', BlocksAS.INFUSED_WOOD_PLANKS)
                         .key('S', BlocksAS.BLACK_MARBLE_RAW)
@@ -221,7 +220,7 @@ public class RadianceAltarRecipeProvider {
         registerShiftingStarRecipe(registrar, ConstellationsAS.vicio, ItemsAS.SHIFTING_STAR_VICIO);
     }
 
-    private static void registerShiftingStarRecipe(Consumer<FinishedRecipe> registrar, IMajorConstellation constellation, Item shiftingStarItem) {
+    private static void registerShiftingStarRecipe(RecipeOutput registrar, IMajorConstellation constellation, Item shiftingStarItem) {
         Ingredient signature = constellation.getConstellationSignatureItems().get(0);
         SimpleAltarRecipeBuilder.builder()
                 .createRecipe(shiftingStarItem, AltarType.RADIANCE)
@@ -251,7 +250,7 @@ public class RadianceAltarRecipeProvider {
                 .build(registrar);
     }
 
-    private static void registerConstellationRecipes(Consumer<FinishedRecipe> registrar) {
+    private static void registerConstellationRecipes(RecipeOutput registrar) {
         RegistriesAS.REGISTRY_CONSTELLATIONS.forEach(cst -> {
             if (Mods.ASTRAL_SORCERY.owns(cst)) {
                 registerConstellationPaperRecipe(registrar, cst);
@@ -262,7 +261,7 @@ public class RadianceAltarRecipeProvider {
         });
     }
 
-    private static void registerMantleRecipe(Consumer<FinishedRecipe> registrar, IWeakConstellation constellation) {
+    private static void registerMantleRecipe(RecipeOutput registrar, IWeakConstellation constellation) {
         List<Ingredient> signature = constellation.getConstellationSignatureItems();
         if (signature.isEmpty()) {
             throw new IllegalArgumentException("Cannot create a mantle recipe for constellation without signature items: " + constellation.getRegistryName());
@@ -292,7 +291,7 @@ public class RadianceAltarRecipeProvider {
         builder.build(registrar);
     }
 
-    private static void registerConstellationPaperRecipe(Consumer<FinishedRecipe> registrar, IConstellation constellation) {
+    private static void registerConstellationPaperRecipe(RecipeOutput registrar, IConstellation constellation) {
         List<Ingredient> signature = constellation.getConstellationSignatureItems();
         if (signature.isEmpty()) {
             throw new IllegalArgumentException("Cannot create a constellation paper recipe for constellation without signature items: " + constellation.getRegistryName());

@@ -8,7 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
-import net.minecraft.util.WeightedRandom;
+import net.minecraft.util.random.Weight;
+import net.minecraft.util.random.WeightedEntry;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -17,13 +18,19 @@ import net.minecraft.util.WeightedRandom;
  * Created by HellFirePvP
  * Date: 07.05.2016 / 15:20
  */
-public class WRItemObject<T> extends WeightedRandom.Item {
+public class WRItemObject<T> implements WeightedEntry {
 
+    private final Weight weight;
     private final T object;
 
     public WRItemObject(int itemWeightIn, T value) {
-        super(itemWeightIn);
+        this.weight = Weight.of(itemWeightIn);
         this.object = value;
+    }
+
+    @Override
+    public Weight getWeight() {
+        return this.weight;
     }
 
     public T getValue() {

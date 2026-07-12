@@ -33,7 +33,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.LogicalSide;
-import net.neoforged.neoforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,7 +60,7 @@ public class ResearchManager {
         LinkedList<ResearchProgression> progToGive = new LinkedList<>();
         progToGive.add(prog);
         while (!progToGive.isEmpty()) {
-            ResearchProgression give = progToGive.popPose();
+            ResearchProgression give = progToGive.pop();
             if (!progress.hasResearch(give)) {
                 progress.forceGainResearch(give);
             }
@@ -155,7 +154,7 @@ public class ResearchManager {
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (!progress.isValid()) return false;
 
-        progress.setStoredConstellationPapers(papers.stream().map(IForgeRegistryEntry::getRegistryName).collect(Collectors.toList()));
+        progress.setStoredConstellationPapers(papers.stream().map(IConstellation::getRegistryName).collect(Collectors.toList()));
 
         ResearchSyncHelper.pushProgressToClientUnsafe(progress, player);
         ResearchHelper.savePlayerKnowledge(player);
@@ -526,7 +525,7 @@ public class ResearchManager {
 
     public static void informCrafted(@Nonnull Player player, @Nonnull ItemStack out) {
         if (!out.isEmpty()) {
-            informCraftCompletion(player, out, out.getItem(), Block.getBlockFromItem(out.getItem()));
+            informCraftCompletion(player, out, out.getItem(), Block.byItem(out.getItem()));
         }
     }
 

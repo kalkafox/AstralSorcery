@@ -345,8 +345,8 @@ public abstract class RenderPageRecipeTemplate extends RenderablePage {
                 tooltip.add(Component.translatable("astralsorcery.misc.input.tag",
                         itemTag.location().toString()).withStyle(ChatFormatting.GRAY));
             }
-            if (stackIngredient instanceof FluidIngredient) {
-                List<FluidStack> fluids = ((FluidIngredient) stackIngredient).getFluids();
+            if (stackIngredient.getCustomIngredient() instanceof FluidIngredient fluidIngredient) {
+                List<FluidStack> fluids = fluidIngredient.getFluids();
 
                 if (!fluids.isEmpty()) {
                     FormattedText cmp = null;

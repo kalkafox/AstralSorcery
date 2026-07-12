@@ -8,8 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.loot;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributeGenItem;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
 import hellfirepvp.astralsorcery.common.crystal.CrystalGenerator;
@@ -20,6 +20,8 @@ import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunct
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
+import java.util.List;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on github.
@@ -29,12 +31,16 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
  */
 public class RandomCrystalProperty extends LootItemConditionalFunction {
 
-    private RandomCrystalProperty(LootItemCondition[] conditions) {
+    public static final MapCodec<RandomCrystalProperty> CODEC = RecordCodecBuilder.mapCodec(
+            inst -> commonFields(inst).apply(inst, RandomCrystalProperty::new)
+    );
+
+    private RandomCrystalProperty(List<LootItemCondition> conditions) {
         super(conditions);
     }
 
     @Override
-    public LootItemFunctionType getType() {
+    public LootItemFunctionType<RandomCrystalProperty> getType() {
         return LootAS.Functions.RANDOM_CRYSTAL_PROPERTIES;
     }
 
@@ -48,14 +54,6 @@ public class RandomCrystalProperty extends LootItemConditionalFunction {
     }
 
     public static LootItemConditionalFunction.Builder<?> builder() {
-        return builder(RandomCrystalProperty::new);
-    }
-
-    public static class Serializer extends LootItemConditionalFunction.Serializer<RandomCrystalProperty> {
-
-        @Override
-        public RandomCrystalProperty deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] iLootConditions) {
-            return new RandomCrystalProperty(iLootConditions);
-        }
+        return simpleBuilder(RandomCrystalProperty::new);
     }
 }

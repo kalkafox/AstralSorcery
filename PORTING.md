@@ -78,19 +78,17 @@ replaced with NeoForge `DeferredRegister`s, all owned by
 
 Registry-related follow-ups tracked for later milestones:
 
-1. **Enchantments** are a datapack registry in 1.21;
-   `RegistryEnchantments` is now a `BootstrapContext<Enchantment>` bootstrap
-   that must be wired into a `DatapackBuiltinEntriesProvider` when datagen is
-   ported (until then the two enchantment JSONs could also be committed as
-   plain data files).
+1. **Enchantments** (done): `RegistryEnchantments` is a
+   `BootstrapContext<Enchantment>` bootstrap wired into the
+   `DatapackBuiltinEntriesProvider` in `AstralDataGenerator`; datagen emits
+   the enchantment definition JSONs.
 2. **World generation** (`RegistryWorldGeneration`) is untouched 1.16 code;
    configured/placed features and structures are datapack-driven in 1.21 and
    biome injection happens via biome modifier JSONs. Whole subsystem needs
    its own port.
-3. **Loot** (`RegistryLoot`) is rewritten against MapCodec-based
-   registration, but the referenced `CODEC` constants on the loot modifier /
-   loot function classes still need to be implemented when that subsystem is
-   ported.
+3. **Loot** (done): `RegistryLoot` registers MapCodec-based loot function
+   types and global loot modifiers; the `CODEC` constants are implemented on
+   the loot function/modifier classes (`common/loot/**`).
 
 ## Sounds and block-entity types (done)
 
@@ -312,12 +310,34 @@ frame parts are grouped under one `frame` parent part.
 `common/crafting/helper`, `common/crafting/recipe/**` (including `altar/*`),
 `common/crafting/serializer/*`, `common/crafting/custom/RecipeDyeableChangeColor`,
 and the recipe-type/serializer registration in `common/registry` are ported
-to the 1.21 `Recipe`/`RecipeSerializer` API. The `common/crafting/nojson/**`
-and `common/crafting/builder/**` (datagen recipe builders) trees, and the
-custom-ingredient subsystem (`common/crafting/helper/ingredient/*`,
-`RegistryIngredientTypes`, `IngredientSerializersAS`), are separate,
-still-unported subsystems and were deliberately left alone - see the caveats
-below.
+to the 1.21 `Recipe`/`RecipeSerializer` API. The `common/crafting/builder/**`
+(datagen recipe builders) tree and the custom-ingredient subsystem
+(`common/crafting/helper/ingredient/*` as `ICustomIngredient`s with
+`IngredientType` registration, `RegistryIngredientTypes`,
+`IngredientSerializersAS`) are now ported as part of the datagen port;
+call sites obtain vanilla `Ingredient`s via `ICustomIngredient.toVanilla()`
+and detect them via `Ingredient.getCustomIngredient()`. `common/crafting/nojson/**`
+is partially ported (starlight/freezing recipes compile; the rest follows
+its own subsystem port).
+
+## Datagen (done)
+
+All providers under `datagen/**` compile against the 1.21 datagen APIs:
+`PackOutput` + `CompletableFuture<HolderLookup.Provider>` constructors, tag
+providers on NeoForge's `BlockTagsProvider`/vanilla `ItemTagsProvider`,
+advancements on NeoForge's `AdvancementProvider` with codec-based custom
+criteria (see `common/advancement/**`: `SimpleCriterionTrigger` subclasses
+with record `SimpleInstance`s, registered via the `TRIGGER_TYPE` deferred
+register), recipes on `RecipeOutput` (custom builders construct real vanilla
+`Recipe` objects), the perk tree provider on `CachedOutput`/
+`DataProvider.saveStable`, and the blockstate provider on the 1.21 NeoForge
+`BlockStateProvider`. `AstralDataGenerator` wires everything through
+`GatherDataEvent` including a `DatapackBuiltinEntriesProvider` for the
+enchantment datapack registry. The liquid starlight fluid is ported to
+`BaseFlowingFluid`/`FluidType` (client textures via
+`RegisterClientExtensionsEvent` in `ClientProxy`). `runData` has not been
+executed yet - do that once `compileJava` passes to regenerate
+`src/generated/resources`.
 
 - **`RecipeInput` bound.** `Recipe<T>` now requires `T extends RecipeInput`
   instead of `Container`. None of these recipes are ever matched in a
@@ -510,7 +530,77 @@ infrastructure, models, renderers, and screens now compile clean. `gradlew
 compileJava` (configured with `-Xmaxerrs 10000`) stops at structural
 1.16 -> 1.21 API changes rather than naming: the custom-ingredient
 (`ICustomIngredient`) port, fluid attributes/`ForgeFlowingFluid`, world
-generation, loot/datagen packages, `MiscUtils`/entity helpers, and
+generation, loot/datagen packages, and
 `.normal(Matrix3f, ...)` chain calls that now take a `PoseStack.Pose`.
 2,705 errors across 456 files remain, measured off a full
 `gradlew compileJava` run.
+
+### `common/util/**` leaf helpers (done)
+
+`EntityUtils`, `BlockUtils`, `MiscUtils`, `CollisionManager`/`CollisionHelper`,
+`FluidContainerDispenseBehavior`, `TimeStopZone`, `CelestialStrike`,
+`TestBlockUseContext`, `NBTHelper`, and `LootUtil` now compile clean. Notable
+API-shape changes hit in this pass, for the next session's reference:
+
+- `ForgeHooks`/`ForgeEventFactory` -> NeoForge's `net.neoforged.neoforge.event.EventHooks`
+  (`getPotentialSpawns`, `checkSpawnPosition`, `finalizeMobSpawn`); the old
+  `Event.Result` tri-state spawn checks collapse into plain `boolean`s.
+- `LootContext.Builder` no longer builds contexts directly; drops/loot now go
+  through `LootParams.Builder` (`.withLuck` moved there), and
+  `LootTable.getRandomItems(LootParams, RandomSource)` skips manually
+  constructing a `LootContext` for the common case.
+  `LivingEntity#getLootTable()` returns `ResourceKey<LootTable>`, resolved via
+  `MinecraftServer#reloadableRegistries().getLootTable(key)`.
+- `BlockEvent.BreakEvent` no longer carries an editable xp-to-drop field; xp
+  is dropped internally by the block's own loot-table experience function via
+  `Block#playerDestroy`, same as vanilla's `ServerPlayerGameMode#destroyBlock`.
+- `IItemExtension#canPlayerBreakBlockWhileHolding`/`ItemStack#onBlockStartBreak`
+  were removed from NeoForge with no replacement found; the pre-checks they
+  gated were dropped from `BlockUtils#breakBlockWithoutPlayer`.
+- `Level#tickableBlockEntities` (the public list Forge/vanilla used to expose
+  for per-tick block-entity ticking) is gone; block-entity ticking is now
+  driven by a private `LevelChunk` map with no public add/remove accessor.
+  `TimeStopZone` now freezes/resumes ticking by toggling
+  `BlockEntity#setRemoved()`/`clearRemoved()` directly, since the chunk's
+  ticker wrapper gates on `!isRemoved()` - this is the least-invasive option
+  available without reflection, but note `setRemoved()`/`clearRemoved()` each
+  call `invalidateCapabilities()`, so capability providers (hoppers, item/
+  energy pipes) will briefly see the frozen block entity as capability-less.
+- `net.minecraft.util.math.shapes.VoxelShapeSpliterator` (the 1.16.5 class
+  `CollisionManager`/`CollisionHelper` iterated collision shapes through, and
+  that `mixin/MixinVoxelShapeSpliterator.java` mixed into) no longer exists in
+  1.21.1 - vanilla's entity-collision code was restructured and no longer
+  routes through a dedicated Spliterator class. Added a small local
+  `common/util/collision/CollisionSpliterator` POJO (entity + query AABB) so
+  `CollisionManager`/`CollisionHelper` keep compiling with the same shape of
+  data the old mixin used to hand them; `MixinVoxelShapeSpliterator` itself is
+  unrelated to this file list and remains broken/inert (no real mixin target
+  exists for it anymore) - out of scope for this pass, needs a redesign of the
+  custom-collision hook for 1.21.1 (e.g. via a different vanilla extension
+  point) in a later session.
+- Misc renames worth remembering: `AABB#grow` -> `#inflate`; `Shapes#compare`
+  -> `#joinIsNotEmpty`; `Shapes#getAllowedOffset` -> `VoxelShape#collide`;
+  `Level#isOutsideBuildHeight` is now an instance method (needs a level/
+  `LevelHeightAccessor`); `BlockState#getMaterial()` is gone, use
+  `#blocksMotion()`/other direct predicates; `BlockState#get`/`getBlock get` ->
+  `#getValue`; `LivingEntity#isPotionActive`/`getActivePotionEffect` ->
+  `#hasEffect`/`#getEffect` (taking `Holder<MobEffect>`);
+  `EnchantmentHelper#getEfficiencyModifier`/`#hasAquaAffinity`/
+  `#getMaxEnchantmentLevel` are gone, use
+  `EnchantmentHelper#getEnchantmentLevel(Holder<Enchantment>, LivingEntity)`
+  with a `Holder<Enchantment>` looked up via
+  `level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.X)`;
+  `LevelAccessor#getEntitiesWithinAABB` -> `Level#getEntities(EntityTypeTest.forClass(...), AABB, Predicate)`;
+  `ChunkSource#isChunkLoaded(ChunkPos)` -> `#hasChunk(int x, int z)`;
+  `ClientLevel#getPlayerByUuid` -> `#getPlayerByUUID`; `ServerPlayer#teleport`
+  -> `#teleportTo`; `Player#canAttackPlayer` -> `#canHarmPlayer`;
+  `ServerPlayerGameMode#setLevel(pos)` (bogus remap of a break helper) ->
+  `#destroyBlock(pos)`; `BlockState#isCorrectToolForDrops(level,pos,player)`
+  -> `#canHarvestBlock(...)`; `BlockState#removedByPlayer` ->
+  `#onDestroyedByPlayer`; `ItemStack#onBlockDestroyed` -> `#mineBlock`;
+  `ItemStack#write`/`ItemStack.read` (NBT) -> `ItemStack#saveOptional(HolderLookup.Provider)`/
+  `ItemStack.parseOptional(HolderLookup.Provider, CompoundTag)` (ditto
+  `FluidStack#save`/`.parseOptional`); `Entity#areEyesInFluid` ->
+  `#isEyeInFluid`; `LivingEntity#animationSpeed`/`animationSpeedOld` are gone,
+  folded into the encapsulated `Entity#walkAnimation`
+  (`WalkAnimationState`); `Entity#swingProgress` -> `#attackAnim`.

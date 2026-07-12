@@ -64,18 +64,13 @@ public class WorldBlockPos extends BlockPos {
     }
 
     @Override
-    public WorldBlockPos add(int x, int y, int z) {
+    public WorldBlockPos offset(int x, int y, int z) {
         return wrapInternal(super.offset(x, y, z));
     }
 
     @Override
-    public WorldBlockPos add(double x, double y, double z) {
-        return wrapInternal(super.add(x, y, z));
-    }
-
-    @Override
-    public WorldBlockPos add(Vec3i vec) {
-        return wrapInternal(super.add(vec));
+    public WorldBlockPos offset(Vec3i vec) {
+        return wrapInternal(super.offset(vec));
     }
 
     @Nullable

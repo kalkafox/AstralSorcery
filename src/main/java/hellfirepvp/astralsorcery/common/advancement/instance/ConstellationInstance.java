@@ -8,23 +8,22 @@
 
 package hellfirepvp.astralsorcery.common.advancement.instance;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.constellation.IConstellation;
 import hellfirepvp.astralsorcery.common.constellation.IMajorConstellation;
 import hellfirepvp.astralsorcery.common.constellation.IMinorConstellation;
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
-import hellfirepvp.astralsorcery.common.lib.RegistriesAS;
-import net.minecraft.advancements.criterion.CriterionInstance;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.loot.ConditionArraySerializer;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,95 +32,51 @@ import java.util.Set;
  * Created by HellFirePvP
  * Date: 11.05.2020 / 20:26
  */
-public class ConstellationInstance extends AbstractCriterionTriggerInstance {
+public record ConstellationInstance(Optional<ContextAwarePredicate> player,
+                                    boolean constellationMajor,
+                                    boolean constellationWeak,
+                                    boolean constellationMinor,
+                                    List<ResourceLocation> constellations) implements SimpleCriterionTrigger.SimpleInstance {
 
-    private boolean constellationMajor = false;
-    private boolean constellationWeak = false;
-    private boolean constellationMinor = false;
-    private final Set<IConstellation> constellations = new HashSet<>();
+    public static final Codec<ConstellationInstance> CODEC = RecordCodecBuilder.create(inst -> inst.group(
+            EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(ConstellationInstance::player),
+            Codec.BOOL.optionalFieldOf("major", false).forGetter(ConstellationInstance::constellationMajor),
+            Codec.BOOL.optionalFieldOf("weak", false).forGetter(ConstellationInstance::constellationWeak),
+            Codec.BOOL.optionalFieldOf("minor", false).forGetter(ConstellationInstance::constellationMinor),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("constellations", List.of()).forGetter(ConstellationInstance::constellations)
+    ).apply(inst, ConstellationInstance::new));
 
-    private ConstellationInstance(ResourceLocation id) {
-        super(id, EntityPredicate.AndPredicate.ANY);
+    public static Criterion<ConstellationInstance> any(SimpleCriterionTrigger<ConstellationInstance> trigger) {
+        return trigger.createCriterion(new ConstellationInstance(Optional.empty(), false, false, false, List.of()));
     }
 
-    public static ConstellationInstance any(ResourceLocation type) {
-        return new ConstellationInstance(type);
+    public static Criterion<ConstellationInstance> anyMajor(SimpleCriterionTrigger<ConstellationInstance> trigger) {
+        return trigger.createCriterion(new ConstellationInstance(Optional.empty(), true, false, false, List.of()));
     }
 
-    public static ConstellationInstance anyMajor(ResourceLocation type) {
-        ConstellationInstance instance = new ConstellationInstance(type);
-        instance.constellationMajor = true;
-        return instance;
+    public static Criterion<ConstellationInstance> anyWeak(SimpleCriterionTrigger<ConstellationInstance> trigger) {
+        return trigger.createCriterion(new ConstellationInstance(Optional.empty(), false, true, false, List.of()));
     }
 
-    public static ConstellationInstance anyWeak(ResourceLocation type) {
-        ConstellationInstance instance = new ConstellationInstance(type);
-        instance.constellationWeak = true;
-        return instance;
+    public static Criterion<ConstellationInstance> anyMinor(SimpleCriterionTrigger<ConstellationInstance> trigger) {
+        return trigger.createCriterion(new ConstellationInstance(Optional.empty(), false, false, true, List.of()));
     }
 
-    public static ConstellationInstance anyMinor(ResourceLocation type) {
-        ConstellationInstance instance = new ConstellationInstance(type);
-        instance.constellationMinor = true;
-        return instance;
-    }
-
-    public static ConstellationInstance anyOf(ResourceLocation type, IConstellation... cst) {
-        ConstellationInstance instance = new ConstellationInstance(type);
-        instance.constellations.addAll(Arrays.asList(cst));
-        return instance;
-    }
-
-    @Override
-    public JsonObject serialize(SerializationContext conditions) {
-        JsonObject out = super.serialize(conditions);
-        if (this.constellationMajor) {
-            out.addProperty("major", true);
-        }
-        if (this.constellationWeak) {
-            out.addProperty("weak", true);
-        }
-        if (this.constellationMinor) {
-            out.addProperty("minor", true);
-        }
-        if (!this.constellations.isEmpty()) {
-            JsonArray names = new JsonArray();
-            for (IConstellation cst : this.constellations) {
-                names.add(cst.getRegistryName().toString());
-            }
-            out.add("constellations", names);
-        }
-        return out;
-    }
-
-    public static ConstellationInstance deserialize(ResourceLocation id, JsonObject json) {
-        ConstellationInstance instance = new ConstellationInstance(id);
-        instance.constellationMajor = GsonHelper.getAsBoolean(json, "major", false);
-        instance.constellationWeak  = GsonHelper.getAsBoolean(json, "weak", false);
-        instance.constellationMinor = GsonHelper.getAsBoolean(json, "minor", false);
-        JsonArray constellationNames = GsonHelper.getAsJsonArray(json, "constellations", new JsonArray());
-        for (int idx = 0; idx < constellationNames.size(); idx++) {
-            JsonElement value = constellationNames.get(idx);
-            String key = GsonHelper.getAsString(value, String.format("constellations[%s]", idx));
-            IConstellation cst = RegistriesAS.REGISTRY_CONSTELLATIONS.getValue(ResourceLocation.parse(key));
-            if (cst == null) {
-                throw new IllegalArgumentException(String.format("Unknown constellation: %s - at constellations[%s]", key, idx));
-            }
-            instance.constellations.add(cst);
-        }
-        return instance;
+    public static Criterion<ConstellationInstance> anyOf(SimpleCriterionTrigger<ConstellationInstance> trigger, IConstellation... cst) {
+        return trigger.createCriterion(new ConstellationInstance(Optional.empty(), false, false, false,
+                Arrays.stream(cst).map(IConstellation::getRegistryName).collect(Collectors.toList())));
     }
 
     public boolean test(IConstellation discovered) {
-        if (constellationMajor && !(discovered instanceof IMajorConstellation)) {
+        if (this.constellationMajor && !(discovered instanceof IMajorConstellation)) {
             return false;
         }
-        if (constellationWeak && (!(discovered instanceof IWeakConstellation) || discovered instanceof IMajorConstellation)) {
+        if (this.constellationWeak && (!(discovered instanceof IWeakConstellation) || discovered instanceof IMajorConstellation)) {
             return false;
         }
-        if (constellationMinor && !(discovered instanceof IMinorConstellation)) {
+        if (this.constellationMinor && !(discovered instanceof IMinorConstellation)) {
             return false;
         }
-        return constellations.isEmpty() || constellations.contains(discovered);
+        return this.constellations.isEmpty() || this.constellations.contains(discovered.getRegistryName());
     }
 }

@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
@@ -75,7 +76,7 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
 
     @Nonnull
     public TileInventory deserialize(CompoundTag tag) {
-        this.deserializeNBT(tag);
+        this.deserializeNBT(registryAccess(), tag);
         if (this.getSlots() != this.slotCountProvider.get()) {
             TileInventory newInv = makeNewInstance();
             for (int i = 0; i < Math.min(this.getSlots(), newInv.getSlots()); i++) {
@@ -90,7 +91,11 @@ public class TileInventory extends ItemStackHandler implements Iterable<ItemStac
 
     @Nonnull
     public CompoundTag serialize() {
-        return this.serializeNBT();
+        return this.serializeNBT(registryAccess());
+    }
+
+    private RegistryAccess registryAccess() {
+        return tile.getLevel() != null ? tile.getLevel().registryAccess() : RegistryAccess.EMPTY;
     }
 
     @Nonnull

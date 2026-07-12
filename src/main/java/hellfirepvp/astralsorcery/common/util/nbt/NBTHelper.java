@@ -12,6 +12,7 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
@@ -95,7 +96,7 @@ public class NBTHelper {
     }
 
     public static void deepMerge(CompoundTag dst, CompoundTag src, boolean uniqueArrayEntries) {
-        for (String s : src.keySet()) {
+        for (String s : src.getAllKeys()) {
             Tag nbtElement = src.get(s);
             if (nbtElement.getId() == Constants.NBT.TAG_COMPOUND) {
                 if (dst.contains(s, Constants.NBT.TAG_COMPOUND)) {
@@ -304,7 +305,7 @@ public class NBTHelper {
         for (Property property : state.getProperties()) {
             CompoundTag propTag = new CompoundTag();
             try {
-                propTag.putString("value", property.getName(state.get(property)));
+                propTag.putString("value", property.getName(state.getValue(property)));
             } catch (Exception exc) {
                 continue;
             }
@@ -393,20 +394,26 @@ public class NBTHelper {
         return null;
     }
 
+    // 1.21 port: ItemStack/FluidStack (de)serialization now goes through data component codecs that
+    // need a HolderLookup.Provider (registry access) rather than plain write(CompoundTag)/read(CompoundTag).
+    // None of the current callers of setStack/getStack/setFluid/getType have a Level in scope, so we fall
+    // back to RegistryAccess.EMPTY here - same fallback already used by TileInventory#registryAccess() in
+    // this codebase. This is lossy for components that reference dynamic registries (e.g. enchantments),
+    // consistent with the caveat already called out in DamageSourceUtil for other data-driven registries.
     public static void setStack(CompoundTag pattern, String tag, ItemStack stack) {
-        setAsSubTag(pattern, tag, stack::write);
+        pattern.put(tag, stack.saveOptional(RegistryAccess.EMPTY));
     }
 
     public static ItemStack getStack(CompoundTag pattern, String tag) {
-        return ObjectUtils.firstNonNull(readFromSubTag(pattern, tag, ItemStack::read), ItemStack.EMPTY);
+        return ObjectUtils.firstNonNull(readFromSubTag(pattern, tag, sub -> ItemStack.parseOptional(RegistryAccess.EMPTY, sub)), ItemStack.EMPTY);
     }
 
     public static void setFluid(CompoundTag pattern, String tag, FluidStack stack) {
-        setAsSubTag(pattern, tag, stack::save);
+        setAsSubTag(pattern, tag, sub -> stack.save(RegistryAccess.EMPTY, sub));
     }
 
     public static FluidStack getType(CompoundTag pattern, String tag) {
-        return ObjectUtils.firstNonNull(readFromSubTag(pattern, tag, FluidStack::loadFluidStackFromNBT), FluidStack.EMPTY);
+        return ObjectUtils.firstNonNull(readFromSubTag(pattern, tag, sub -> FluidStack.parseOptional(RegistryAccess.EMPTY, sub)), FluidStack.EMPTY);
     }
 
     public static void removeUUID(CompoundTag pattern, String key) {

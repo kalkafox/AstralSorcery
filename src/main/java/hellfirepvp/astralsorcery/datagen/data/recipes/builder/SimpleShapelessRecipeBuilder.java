@@ -9,21 +9,19 @@
 package hellfirepvp.astralsorcery.datagen.data.recipes.builder;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Consumer;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.ItemLike;
+
+import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -54,7 +52,7 @@ public class SimpleShapelessRecipeBuilder {
     }
 
     public SimpleShapelessRecipeBuilder addIngredient(TagKey<Item> tagIn) {
-        return this.addIngredient(Ingredient.fromTag(tagIn));
+        return this.addIngredient(Ingredient.of(tagIn));
     }
 
     public SimpleShapelessRecipeBuilder addIngredient(ItemLike itemIn) {
@@ -62,7 +60,7 @@ public class SimpleShapelessRecipeBuilder {
     }
     public SimpleShapelessRecipeBuilder addIngredient(ItemLike itemIn, int quantity) {
         for(int i = 0; i < quantity; ++i) {
-            this.addIngredient(Ingredient.valueFromJson(itemIn));
+            this.addIngredient(Ingredient.of(itemIn));
         }
 
         return this;
@@ -84,70 +82,19 @@ public class SimpleShapelessRecipeBuilder {
         return this;
     }
 
-    public void build(Consumer<FinishedRecipe> consumerIn) {
-        this.build(consumerIn, BuiltInRegistries.ITEM.getKey(this.result.getItem()));
+    public void build(RecipeOutput output) {
+        this.build(output, BuiltInRegistries.ITEM.getKey(this.result));
     }
 
-    public void build(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+    public void build(RecipeOutput output, ResourceLocation id) {
         String path = id.getPath();
         if (this.subDirectory != null && !this.subDirectory.isEmpty()) {
             path = this.subDirectory + "/" + path;
         }
         id = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "shapeless/" + path);
-        consumerIn.accept(new Result(id, this.result, this.count, this.ingredients));
-    }
 
-    public static class Result implements FinishedRecipe {
-
-        private final ResourceLocation key;
-        private final Item result;
-        private final int count;
-        private final List<Ingredient> ingredients;
-
-        public Result(ResourceLocation key, Item result, int resultCount, List<Ingredient> ingredients) {
-            this.key = key;
-            this.result = result;
-            this.count = resultCount;
-            this.ingredients = ingredients;
-        }
-
-        @Override
-        public void serialize(JsonObject json) {
-            JsonArray map = new JsonArray();
-            for (Ingredient ingredient : this.ingredients) {
-                map.add(ingredient.serialize());
-            }
-            json.add("ingredients", map);
-
-            JsonObject result = new JsonObject();
-            result.addProperty("item", Registry.ITEM.getKey(this.result).toString());
-            if (this.count > 1) {
-                result.addProperty("count", this.count);
-            }
-
-            json.add("result", result);
-        }
-
-        @Override
-        public RecipeSerializer<?> getSerializer() {
-            return RecipeSerializer.SHAPELESS_RECIPE;
-        }
-
-        @Override
-        public ResourceLocation getID() {
-            return this.key;
-        }
-
-        @Nullable
-        @Override
-        public JsonObject serializeAdvancement() {
-            return null;
-        }
-
-        @Nullable
-        @Override
-        public ResourceLocation getAdvancementID() {
-            return ResourceLocation.parse("");
-        }
+        NonNullList<Ingredient> recipeIngredients = NonNullList.createWithCapacity(this.ingredients.size());
+        recipeIngredients.addAll(this.ingredients);
+        output.accept(id, new ShapelessRecipe("", CraftingBookCategory.MISC, new ItemStack(this.result, this.count), recipeIngredients), null);
     }
 }

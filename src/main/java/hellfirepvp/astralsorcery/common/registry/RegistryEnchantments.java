@@ -32,8 +32,8 @@ public class RegistryEnchantments {
     /**
      * Enchantments are a datapack registry since 1.21: definitions are loaded
      * from data JSON instead of code registration. This bootstrap emits those
-     * JSONs through datagen (TODO 1.21: wire into a
-     * DatapackBuiltinEntriesProvider once datagen is ported).
+     * JSONs through datagen via the DatapackBuiltinEntriesProvider wired up in
+     * {@link hellfirepvp.astralsorcery.datagen.AstralDataGenerator}.
      * The in-game behavior stays code-driven; see
      * {@link hellfirepvp.astralsorcery.common.loot.global.LootModifierScorchingHeat}
      * and the night vision handling in EventHelperEnchantmentTick.

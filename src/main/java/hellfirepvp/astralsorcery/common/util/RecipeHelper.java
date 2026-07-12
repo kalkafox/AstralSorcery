@@ -27,8 +27,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.LogicalSide;
-import net.neoforged.fml.common.thread.EffectiveSide;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.apache.commons.lang3.ObjectUtils;
 
 import javax.annotation.Nonnull;
@@ -84,7 +83,7 @@ public class RecipeHelper {
 
     @Nullable
     public static RecipeManager getRecipeManager() {
-        if (EffectiveSide.get() == LogicalSide.CLIENT) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
             return getClientManager();
         } else {
             MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();

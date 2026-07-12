@@ -16,12 +16,11 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.altar.AltarRecipeTypeHan
 import hellfirepvp.astralsorcery.common.item.ItemResonator;
 import hellfirepvp.astralsorcery.common.lib.*;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.tags.ItemTags;
 import net.neoforged.neoforge.common.Tags;
 
-import java.util.function.Consumer;
 import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
@@ -33,11 +32,11 @@ import hellfirepvp.astralsorcery.common.util.RegistryHelper;
  */
 public class AttunementAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerAltarRecipes(RecipeOutput registrar) {
         registerRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
+    private static void registerRecipes(RecipeOutput registrar) {
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.ALTAR_UPGRADE_CONSTELLATION)
                 .createRecipe(BlocksAS.ALTAR_CONSTELLATION, AltarType.ATTUNEMENT)
                 .setStarlightRequirement(0.7F)
@@ -47,7 +46,7 @@ public class AttunementAltarRecipeProvider {
                         .patternLine(" MCM ")
                         .patternLine(" PIP ")
                         .patternLine("M   M")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('S', TagsAS.Items.DUSTS_STARDUST)
                         .key('I', TagsAS.Items.INGOTS_STARMETAL)
                         .key('A', ItemsAS.AQUAMARINE)
@@ -106,7 +105,7 @@ public class AttunementAltarRecipeProvider {
                         .key('S', TagsAS.Items.DUSTS_STARDUST)
                         .key('G', Tags.Items.INGOTS_GOLD)
                         .key('R', BlocksAS.MARBLE_RUNED)
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('L', ItemsAS.GLASS_LENS)
                         .key('N', ItemsAS.NOCTURNAL_POWDER)
                 )
@@ -123,7 +122,7 @@ public class AttunementAltarRecipeProvider {
                         .patternLine(" PLP ")
                         .patternLine(" RRR ")
                         .patternLine("P   P")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('L', FluidsAS.LIQUID_STARLIGHT_SOURCE)
                         .key('G', Tags.Items.INGOTS_GOLD)
                         .key('M', BlocksAS.MARBLE_CHISELED)
@@ -142,7 +141,7 @@ public class AttunementAltarRecipeProvider {
                         .patternLine(" LCL ")
                         .patternLine(" WGW ")
                         .patternLine("R   R")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('A', ItemsAS.AQUAMARINE)
                         .key('L', ItemsAS.GLASS_LENS)
                         .key('W', BlocksAS.INFUSED_WOOD_ENGRAVED)
@@ -161,7 +160,7 @@ public class AttunementAltarRecipeProvider {
                         .patternLine(" M M ")
                         .patternLine(" RSR ")
                         .patternLine("R   R")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('A', ItemsAS.AQUAMARINE)
                         .key('M', TagsAS.Items.INGOTS_STARMETAL)
                         .key('S', BlocksAS.SPECTRAL_RELAY)
@@ -281,7 +280,7 @@ public class AttunementAltarRecipeProvider {
                         .patternLine(" SCA ")
                         .patternLine(" LSS ")
                         .patternLine("L    ")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('S', Tags.Items.RODS_WOODEN)
                         .key('L', ItemTags.LOGS)
                         .key('A', ItemsAS.AQUAMARINE)

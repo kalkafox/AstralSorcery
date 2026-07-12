@@ -49,9 +49,9 @@ public class TreeDiscoverer {
         TreeMatch foundTreeType = new TreeMatch();
 
         Stack<BlockPos> discoverPositions = new Stack<>();
-        discoverPositions.pushPose(at);
+        discoverPositions.push(at);
         while (!discoverPositions.isEmpty()) {
-            BlockPos offset = discoverPositions.popPose();
+            BlockPos offset = discoverPositions.pop();
             if (level.isEmptyBlock(offset)) {
                 continue;
             }
@@ -60,13 +60,13 @@ public class TreeDiscoverer {
             Block foundBlock = foundState.getBlock();
             if (foundTreeType.matchLog == null) {
                 //Try find log
-                if (!BlockTags.LOGS.contains(foundBlock)) {
+                if (!foundState.is(BlockTags.LOGS)) {
                     return; //Couldn't find a log first thing. this is probably not a tree.
                 }
                 foundTreeType.matchLog = BlockPredicates.isBlock(foundBlock);
             } else if (foundTreeType.matchLeaf == null) {
                 //Test if this is a leaf here
-                if (BlockTags.LEAVES.contains(foundBlock)) {
+                if (foundState.is(BlockTags.LEAVES)) {
                     foundTreeType.matchLeaf = BlockPredicates.isBlock(foundBlock);
                 }
             }
@@ -87,16 +87,16 @@ public class TreeDiscoverer {
                             for (int zz = -1; zz <= 1; zz++) {
                                 BlockPos newPos = offset.offset(xx, yy, zz);
                                 if((xzLimitSq == -1 || flatDistanceSq(newPos, at) <= xzLimitSq) && !out.hasBlockAt(newPos)) {
-                                    discoverPositions.pushPose(newPos);
+                                    discoverPositions.push(newPos);
                                 }
                             }
                         }
                     }
                 } else {
                     for (Direction dir : Direction.values()) {
-                        BlockPos newPos = offset.offset(dir);
+                        BlockPos newPos = offset.relative(dir);
                         if((xzLimitSq == -1 || flatDistanceSq(newPos, at) <= xzLimitSq) && !out.hasBlockAt(newPos)) {
-                            discoverPositions.pushPose(newPos);
+                            discoverPositions.push(newPos);
                         }
                     }
                 }

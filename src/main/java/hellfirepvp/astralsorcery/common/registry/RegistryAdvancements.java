@@ -9,9 +9,9 @@
 package hellfirepvp.astralsorcery.common.registry;
 
 import hellfirepvp.astralsorcery.common.advancement.*;
+import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 
 import static hellfirepvp.astralsorcery.common.lib.AdvancementsAS.*;
-import static net.minecraft.advancements.CriteriaTriggers.register;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -23,11 +23,11 @@ import static net.minecraft.advancements.CriteriaTriggers.register;
 public class RegistryAdvancements {
 
     public static void init() {
-        register(DISCOVER_CONSTELLATION = new DiscoverConstellationTrigger());
-        register(ATTUNE_SELF = new AttuneSelfTrigger());
-        register(ATTUNE_CRYSTAL = new AttuneCrystalTrigger());
-        register(ALTAR_CRAFT = new AltarCraftTrigger());
-        register(PERK_LEVEL = new PerkLevelTrigger());
+        DISCOVER_CONSTELLATION = AstralRegistries.register(AstralRegistries.CRITERION_TRIGGERS, DiscoverConstellationTrigger.ID, new DiscoverConstellationTrigger());
+        ATTUNE_SELF = AstralRegistries.register(AstralRegistries.CRITERION_TRIGGERS, AttuneSelfTrigger.ID, new AttuneSelfTrigger());
+        ATTUNE_CRYSTAL = AstralRegistries.register(AstralRegistries.CRITERION_TRIGGERS, AttuneCrystalTrigger.ID, new AttuneCrystalTrigger());
+        ALTAR_CRAFT = AstralRegistries.register(AstralRegistries.CRITERION_TRIGGERS, AltarCraftTrigger.ID, new AltarCraftTrigger());
+        PERK_LEVEL = AstralRegistries.register(AstralRegistries.CRITERION_TRIGGERS, PerkLevelTrigger.ID, new PerkLevelTrigger());
     }
 
 }

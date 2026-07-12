@@ -26,6 +26,7 @@ import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
 import hellfirepvp.astralsorcery.common.structure.types.StructureType;
 import hellfirepvp.observerlib.api.ObserverProvider;
 import hellfirepvp.observerlib.common.registry.RegistryProviders;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -47,6 +48,7 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.neoforged.bus.api.IEventBus;
 import net.minecraft.world.item.ArmorMaterial;
 import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -80,6 +82,7 @@ public final class AstralRegistries {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = create(Registries.CREATIVE_MODE_TAB);
     public static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = create(Registries.COMMAND_ARGUMENT_TYPE);
     public static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTION_TYPES = create(Registries.LOOT_FUNCTION_TYPE);
+    public static final DeferredRegister<CriterionTrigger<?>> CRITERION_TRIGGERS = create(Registries.TRIGGER_TYPE);
     public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = create(Registries.ARMOR_MATERIAL);
 
     // NeoForge registries
@@ -87,6 +90,7 @@ public final class AstralRegistries {
     public static final DeferredRegister<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS = create(NeoForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS);
     public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> GLOBAL_LOOT_MODIFIER_SERIALIZERS = create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS);
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
+    public static final DeferredRegister<IngredientType<?>> INGREDIENT_TYPES = create(NeoForgeRegistries.Keys.INGREDIENT_TYPES);
 
     // ObserverLib's provider registry; Astral Sorcery registers its structure matchers into it.
     public static final DeferredRegister<ObserverProvider<?>> OBSERVER_PROVIDERS = create(RegistryProviders.REGISTRY_KEY);
@@ -141,12 +145,14 @@ public final class AstralRegistries {
         CREATIVE_MODE_TABS.register(modEventBus);
         COMMAND_ARGUMENT_TYPES.register(modEventBus);
         LOOT_FUNCTION_TYPES.register(modEventBus);
+        CRITERION_TRIGGERS.register(modEventBus);
         ARMOR_MATERIALS.register(modEventBus);
 
         FLUID_TYPES.register(modEventBus);
         ENTITY_DATA_SERIALIZERS.register(modEventBus);
         GLOBAL_LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
         ATTACHMENT_TYPES.register(modEventBus);
+        INGREDIENT_TYPES.register(modEventBus);
 
         OBSERVER_PROVIDERS.register(modEventBus);
 

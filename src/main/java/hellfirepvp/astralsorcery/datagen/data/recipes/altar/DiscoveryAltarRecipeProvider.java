@@ -18,13 +18,12 @@ import hellfirepvp.astralsorcery.common.item.ItemResonator;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.data.IFinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.tags.ItemTags;
 import net.neoforged.neoforge.common.Tags;
 
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -35,12 +34,12 @@ import java.util.function.Consumer;
  */
 public class DiscoveryAltarRecipeProvider {
 
-    public static void registerAltarRecipes(Consumer<FinishedRecipe> registrar) {
+    public static void registerAltarRecipes(RecipeOutput registrar) {
         registerRecipes(registrar);
         registerBuildingBlockRecipes(registrar);
     }
 
-    private static void registerRecipes(Consumer<FinishedRecipe> registrar) {
+    private static void registerRecipes(RecipeOutput registrar) {
         SimpleAltarRecipeBuilder.ofType(AltarRecipeTypeHandler.ALTAR_UPGRADE_ATTUNEMENT)
                 .createRecipe(BlocksAS.ALTAR_ATTUNEMENT, AltarType.DISCOVERY)
                 .setStarlightRequirement(0.7F)
@@ -48,7 +47,7 @@ public class DiscoveryAltarRecipeProvider {
                         .patternLine("PCP")
                         .patternLine("ELE")
                         .patternLine("P P")
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                         .key('L', FluidsAS.LIQUID_STARLIGHT_SOURCE)
                         .key('E', BlocksAS.MARBLE_CHISELED)
                         .key('P', BlocksAS.MARBLE_PILLAR)
@@ -168,7 +167,7 @@ public class DiscoveryAltarRecipeProvider {
                         .key('A', ItemsAS.AQUAMARINE)
                         .key('R', BlocksAS.MARBLE_RUNED)
                         .key('C', BlocksAS.MARBLE_CHISELED)
-                        .key('Z', new CrystalIngredient(false, false))
+                        .key('Z', new CrystalIngredient(false, false).toVanilla())
                 )
                 .addOutput(BlocksAS.WELL)
                 .build(registrar);
@@ -226,7 +225,7 @@ public class DiscoveryAltarRecipeProvider {
                         .patternLine("CS")
                         .patternLine(" S")
                         .key('S', Tags.Items.RODS_WOODEN)
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                 )
                 .addOutput(ItemsAS.CRYSTAL_AXE)
                 .build(registrar);
@@ -240,7 +239,7 @@ public class DiscoveryAltarRecipeProvider {
                         .patternLine(" S ")
                         .patternLine(" S ")
                         .key('S', Tags.Items.RODS_WOODEN)
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                 )
                 .addOutput(ItemsAS.CRYSTAL_PICKAXE)
                 .build(registrar);
@@ -254,7 +253,7 @@ public class DiscoveryAltarRecipeProvider {
                         .patternLine("S")
                         .patternLine("S")
                         .key('S', Tags.Items.RODS_WOODEN)
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                 )
                 .addOutput(ItemsAS.CRYSTAL_SHOVEL)
                 .build(registrar);
@@ -268,13 +267,13 @@ public class DiscoveryAltarRecipeProvider {
                         .patternLine("C")
                         .patternLine("S")
                         .key('S', Tags.Items.RODS_WOODEN)
-                        .key('C', new CrystalIngredient(false, false))
+                        .key('C', new CrystalIngredient(false, false).toVanilla())
                 )
                 .addOutput(ItemsAS.CRYSTAL_SWORD)
                 .build(registrar);
     }
 
-    private static void registerBuildingBlockRecipes(Consumer<FinishedRecipe> registrar) {
+    private static void registerBuildingBlockRecipes(RecipeOutput registrar) {
         /*****************************************************************************
          * Infused wood
          *****************************************************************************/

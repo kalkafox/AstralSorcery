@@ -26,7 +26,7 @@ import java.util.List;
 public class NBTComparator {
 
     public static boolean contains(@Nonnull CompoundTag thisCompound, @Nonnull CompoundTag otherCompound) {
-        for (String key : thisCompound.keySet()) {
+        for (String key : thisCompound.getAllKeys()) {
             if (!otherCompound.contains(key)) {
                 return false;
             }

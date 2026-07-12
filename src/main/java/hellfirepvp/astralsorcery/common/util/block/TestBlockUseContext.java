@@ -32,7 +32,7 @@ public class TestBlockUseContext extends BlockPlaceContext {
     private final Entity entity;
 
     private TestBlockUseContext(Level worldIn, @Nullable Entity usingEntity, InteractionHand hand, ItemStack stack, BlockPos at, Direction direction) {
-        super(worldIn, null, hand, stack, new BlockHitResult(Vec3.copyCentered(at), direction, at, false));
+        super(worldIn, null, hand, stack, new BlockHitResult(Vec3.atCenterOf(at), direction, at, false));
         this.entity = usingEntity;
     }
 
@@ -46,21 +46,21 @@ public class TestBlockUseContext extends BlockPlaceContext {
 
     @Override
     public Direction getHorizontalDirection() {
-        return this.entity == null ? Direction.NORTH : Direction.fromAngle(this.entity.getYRot());
+        return this.entity == null ? Direction.NORTH : Direction.fromYRot(this.entity.getYRot());
     }
 
     @Override
     public Direction getNearestLookingDirection() {
-        return Direction.getFacingDirections(this.entity)[0];
+        return Direction.orderedByNearest(this.entity)[0];
     }
 
     @Override
     public Direction[] getNearestLookingDirections() {
-        Direction[] adirection = Direction.getFacingDirections(this.entity);
+        Direction[] adirection = Direction.orderedByNearest(this.entity);
         if (this.replaceClicked) {
             return adirection;
         } else {
-            Direction direction = this.getFace();
+            Direction direction = this.getClickedFace();
 
             int i;
             i = 0;

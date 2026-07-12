@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.util;
 
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
@@ -90,7 +91,7 @@ public class PlayerReference {
 
     public void save(CompoundTag tag) {
         tag.putUUID("playerUUID", this.playerUUID);
-        tag.putString("playerName", Component.Serializer.getPos(this.playerName));
+        tag.putString("playerName", Component.Serializer.toJson(this.playerName, RegistryAccess.EMPTY));
     }
 
     public void write(FriendlyByteBuf buf) {
@@ -99,7 +100,7 @@ public class PlayerReference {
     }
 
     public static PlayerReference deserialize(CompoundTag tag) {
-        return new PlayerReference(tag.getUUID("playerUUID"), Component.Serializer.getComponentFromJson(tag.getString("playerName")));
+        return new PlayerReference(tag.getUUID("playerUUID"), Component.Serializer.fromJson(tag.getString("playerName"), RegistryAccess.EMPTY));
     }
 
     public static PlayerReference read(FriendlyByteBuf buf) {

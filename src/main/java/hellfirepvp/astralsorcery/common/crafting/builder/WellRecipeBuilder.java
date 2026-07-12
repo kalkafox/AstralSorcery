@@ -19,7 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.ForgeRegistryEntry;
+import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
@@ -47,8 +47,8 @@ public class WellRecipeBuilder extends CustomRecipeBuilder<WellLiquefaction> {
         this.id = id;
     }
 
-    public static WellRecipeBuilder builder(ForgeRegistryEntry<?> nameProvider) {
-        return new WellRecipeBuilder(AstralSorcery.key(nameProvider.getRegistryName().getPath()));
+    public static WellRecipeBuilder builder(Object nameProvider) {
+        return new WellRecipeBuilder(AstralSorcery.key(RegistryHelper.getKey(nameProvider).getPath()));
     }
 
     public static WellRecipeBuilder builder(ResourceLocation id) {

@@ -8,15 +8,14 @@
 
 package hellfirepvp.astralsorcery.common.crafting.helper.ingredient;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.lib.IngredientSerializersAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.neoforged.neoforge.common.crafting.IIngredientSerializer;
-import net.neoforged.neoforge.common.crafting.StackList;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,14 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 28.09.2019 / 10:03
  */
-public class CrystalIngredient extends Ingredient {
+public class CrystalIngredient implements ICustomIngredient {
+
+    public static final MapCodec<CrystalIngredient> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+            Codec.BOOL.optionalFieldOf("hasToBeAttuned", false).forGetter(CrystalIngredient::hasToBeAttuned),
+            Codec.BOOL.optionalFieldOf("hasToBeCelestial", false).forGetter(CrystalIngredient::hasToBeCelestial),
+            Codec.BOOL.optionalFieldOf("canBeAttuned", true).forGetter(CrystalIngredient::canBeAttuned),
+            Codec.BOOL.optionalFieldOf("canBeCelestialCrystal", true).forGetter(CrystalIngredient::canBeCelestialCrystal)
+    ).apply(inst, CrystalIngredient::new));
 
     private final boolean hasToBeAttuned, hasToBeCelestial, canBeAttuned, canBeCelestialCrystal;
 
@@ -38,24 +44,25 @@ public class CrystalIngredient extends Ingredient {
     }
 
     public CrystalIngredient(boolean hasToBeAttuned, boolean hasToBeCelestial, boolean canBeAttuned, boolean canBeCelestialCrystal) {
-        super(getItems(hasToBeAttuned, hasToBeCelestial, canBeAttuned, canBeCelestialCrystal));
         this.hasToBeAttuned = hasToBeAttuned;
         this.hasToBeCelestial = hasToBeCelestial;
         this.canBeAttuned = canBeAttuned;
         this.canBeCelestialCrystal = canBeCelestialCrystal;
     }
 
-    private static Stream<IItemList> getItems(boolean hasToBeAttuned, boolean hasToBeCelestial, boolean canBeAttuned, boolean canBeCelestialCrystal) {
-        if (hasToBeAttuned) {
+    private List<ItemStack> getMatchingStacks() {
+        boolean canBeAttuned = this.canBeAttuned;
+        boolean canBeCelestialCrystal = this.canBeCelestialCrystal;
+        if (this.hasToBeAttuned) {
             canBeAttuned = true;
         }
-        if (hasToBeCelestial) {
-             canBeCelestialCrystal = true;
+        if (this.hasToBeCelestial) {
+            canBeCelestialCrystal = true;
         }
 
         List<ItemStack> stacks = new ArrayList<>();
-        if (hasToBeAttuned) {
-            if (hasToBeCelestial) {
+        if (this.hasToBeAttuned) {
+            if (this.hasToBeCelestial) {
                 stacks.add(new ItemStack(ItemsAS.ATTUNED_CELESTIAL_CRYSTAL));
             } else {
                 stacks.add(new ItemStack(ItemsAS.ATTUNED_ROCK_CRYSTAL));
@@ -64,7 +71,7 @@ public class CrystalIngredient extends Ingredient {
                 }
             }
         } else {
-            if (hasToBeCelestial) {
+            if (this.hasToBeCelestial) {
                 stacks.add(new ItemStack(ItemsAS.CELESTIAL_CRYSTAL));
                 if (canBeAttuned) {
                     stacks.add(new ItemStack(ItemsAS.ATTUNED_CELESTIAL_CRYSTAL));
@@ -80,7 +87,30 @@ public class CrystalIngredient extends Ingredient {
                 }
             }
         }
-        return Stream.of(new StackList(stacks));
+        return stacks;
+    }
+
+    @Override
+    public Stream<ItemStack> getItems() {
+        return this.getMatchingStacks().stream();
+    }
+
+    @Override
+    public boolean test(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+        return this.getMatchingStacks().stream().anyMatch(match -> match.getItem() == stack.getItem());
+    }
+
+    @Override
+    public boolean isSimple() {
+        return true;
+    }
+
+    @Override
+    public IngredientType<?> getType() {
+        return IngredientSerializersAS.CRYSTAL_INGREDIENT_TYPE;
     }
 
     public boolean hasToBeAttuned() {
@@ -97,21 +127,5 @@ public class CrystalIngredient extends Ingredient {
 
     public boolean canBeCelestialCrystal() {
         return canBeCelestialCrystal;
-    }
-
-    @Override
-    public JsonElement serialize() {
-        JsonObject object = new JsonObject();
-        object.addProperty("type", CraftingHelper.getID(IngredientSerializersAS.CRYSTAL_SERIALIZER).toString());
-        object.addProperty("hasToBeAttuned", this.hasToBeAttuned());
-        object.addProperty("hasToBeCelestial", this.hasToBeCelestial());
-        object.addProperty("canBeAttuned", this.canBeAttuned());
-        object.addProperty("canBeCelestialCrystal", this.canBeCelestialCrystal());
-        return object;
-    }
-
-    @Override
-    public IIngredientSerializer<? extends Ingredient> getSerializer() {
-        return IngredientSerializersAS.CRYSTAL_SERIALIZER;
     }
 }
