@@ -24,20 +24,22 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.util.math.*;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.common.registry.IEntityAdditionalSpawnData;
-import net.neoforged.fml.network.NetworkHooks;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -50,10 +52,10 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 29.02.2020 / 18:17
  */
-public class EntityGrapplingHook extends ThrowableProjectile implements IEntityAdditionalSpawnData {
+public class EntityGrapplingHook extends ThrowableProjectile implements IEntityWithComplexSpawn {
 
-    private static final EntityDataAccessor<Integer> PULLING_ENTITY = SynchedEntityData.createKey(EntityGrapplingHook.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Boolean> PULLING = SynchedEntityData.createKey(EntityGrapplingHook.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> PULLING_ENTITY = SynchedEntityData.defineId(EntityGrapplingHook.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> PULLING = SynchedEntityData.defineId(EntityGrapplingHook.class, EntityDataSerializers.BOOLEAN);
 
     private boolean launchedThrower = false;
 
@@ -76,19 +78,19 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         this.throwingEntity = thrower;
     }
 
-    public static EntityType.IFactory<EntityGrapplingHook> factory() {
+    public static EntityType.EntityFactory<EntityGrapplingHook> factory() {
         return (spawnEntity, level) -> new EntityGrapplingHook(level);
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.register(PULLING, false);
-        this.entityData.register(PULLING_ENTITY, -1);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(PULLING, false);
+        builder.define(PULLING_ENTITY, -1);
     }
 
     public void setPulling(boolean pull, @Nullable LivingEntity hit) {
         this.entityData.set(PULLING, pull);
-        this.entityData.set(PULLING_ENTITY, hit == null ? -1 : hit.getEntityId());
+        this.entityData.set(PULLING_ENTITY, hit == null ? -1 : hit.getId());
     }
 
     public boolean isPulling() {
@@ -126,7 +128,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
     private void despawnTick() {
         despawning++;
         if (despawning > 10) {
-            remove();
+            remove(RemovalReason.DISCARDED);
         }
     }
 
@@ -137,8 +139,8 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
     }
 
     @Override
-    protected float getGravity() {
-        return this.isPulling() ? 0 : 0.03F;
+    protected double getDefaultGravity() {
+        return this.isPulling() ? 0 : 0.03D;
     }
 
     @Override
@@ -152,7 +154,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
             setDespawning();
         }
 
-        if (level.isClientSide()) {
+        if (level().isClientSide()) {
             if (!isPulling()) {
                 this.pullFactor += 0.02F;
             } else {
@@ -163,16 +165,16 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
         if (isDespawning()) {
             despawnTick();
 
-            if (level.isClientSide() && this.despawning == 3) {
+            if (level().isClientSide() && this.despawning == 3) {
                 this.playDespawnSparkles();
             }
         } else {
             Entity thrower = getOwner();
-            double dist = Math.max(0.01, thrower.getDistance(this));
+            double dist = Math.max(0.01, thrower.distanceTo(this));
             if (isAlive() && isPulling()) {
                 if (getPulling() != null) {
                     LivingEntity at = getPulling();
-                    this.setPosition(at.getX(), at.getY(), at.getZ());
+                    this.setPos(at.getX(), at.getY(), at.getZ());
                 }
 
                 if (((getPulling() != null && tickCount > 60 && dist < 2) || (getPulling() == null && tickCount > 15 && dist < 2)) || timeout > 15) {
@@ -202,7 +204,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
                     thrower.setDeltaMovement(motion);
 
                     if (thrower instanceof Player) {
-                        EventHelperDamageCancelling.markInvulnerableToNextDamage((Player) thrower, DamageSource.FALL);
+                        EventHelperDamageCancelling.markInvulnerableToNextDamage((Player) thrower, level().damageSources().fall());
                     }
 
                     int roughDst = (int) (dist / 2.5D);
@@ -242,20 +244,20 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
     }
 
     @Override
-    public void writeSpawnData(FriendlyByteBuf buffer) {
+    public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
         int id = -1;
         if(this.throwingEntity != null) {
-            id = this.throwingEntity.getEntityId();
+            id = this.throwingEntity.getId();
         }
         buffer.writeInt(id);
     }
 
     @Override
-    public void readSpawnData(FriendlyByteBuf additionalData) {
+    public void readSpawnData(RegistryFriendlyByteBuf additionalData) {
         int id = additionalData.readInt();
         try {
             if (id > 0) {
-                this.throwingEntity = (LivingEntity) level.getEntity(id);
+                this.throwingEntity = (LivingEntity) level().getEntity(id);
             }
         } catch (Exception ignored) {}
     }
@@ -273,7 +275,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        return BlockEntity.INFINITE_EXTENT_AABB;
+        return AABB.INFINITE;
     }
 
     public List<Vector3> buildLine(float partial) {
@@ -313,7 +315,7 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
 
     @Override
     protected void onHit(HitResult result) {
-        Vec3 hit = result.getHitVec();
+        Vec3 hit = result.getLocation();
         switch (result.getType()) {
             case BLOCK:
                 setPulling(true, null);
@@ -324,17 +326,12 @@ public class EntityGrapplingHook extends ThrowableProjectile implements IEntityA
                     return;
                 }
                 setPulling(true, (LivingEntity) ((EntityHitResult) result).getEntity());
-                hit = new Vec3(hit.x, hit.y + ((EntityHitResult) result).getEntity().getHeight() * 3 / 4, hit.z);
+                hit = new Vec3(hit.x, hit.y + ((EntityHitResult) result).getEntity().getBbHeight() * 3 / 4, hit.z);
                 break;
             default:
                 break;
         }
         this.setDeltaMovement(0, 0, 0);
-        this.setPosition(hit.x, hit.y, hit.z);
-    }
-
-    @Override
-    public Packet<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+        this.setPos(hit.x, hit.y, hit.z);
     }
 }

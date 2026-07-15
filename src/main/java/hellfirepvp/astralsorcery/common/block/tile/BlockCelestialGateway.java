@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesGlass;
 import hellfirepvp.astralsorcery.common.item.ItemAquamarine;
@@ -25,6 +27,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -50,7 +54,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ForgeHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -68,16 +71,16 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
 
     public BlockCelestialGateway() {
         super(PropertiesGlass.coatedGlass()
-                .isRedstoneConductor((state) -> 12)
-                .hardnessAndResistance(-1F, 3600000.0F)
+                .lightLevel((state) -> 12)
+                .strength(-1F, 3600000.0F)
 
 );
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip, flagIn);
 
         DyeColor color = getColor(stack);
         if (color != null) {
@@ -91,7 +94,7 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
         TileCelestialGateway gateway = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, true);
         if (gateway != null) {
             if (gateway.hasCustomName()) {
-                stack.setLastHealthTime(gateway.getDisplayName());
+                stack.set(DataComponents.CUSTOM_NAME, gateway.getDisplayName());
             }
             gateway.getColor().ifPresent(color -> setColor(stack, color));
         }
@@ -147,8 +150,8 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
 
         TileCelestialGateway gateway = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, true);
         if (gateway != null) {
-            if (stack.hasCustomHoverName()) {
-                gateway.setDisplayText(stack.getDisplayName());
+            if (stack.has(DataComponents.CUSTOM_NAME)) {
+                gateway.setDisplayText(stack.getHoverName());
             }
             DyeColor color = getColor(stack);
             if (color != null) {
@@ -162,7 +165,7 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
         TileCelestialGateway gateway = MiscUtils.getTileAt(level, pos, TileCelestialGateway.class, true);
         if (gateway != null) {
             if (!gateway.isLocked() || (gateway.getOwner() != null && gateway.getOwner().isAlwaysExperienceDropper(player))) {
-                int i = ForgeHooks.isCorrectToolForDrops(state, player, level, pos) ? 30 : 100;
+                int i = player.hasCorrectToolForDrops(state) ? 30 : 100;
                 return player.getDigSpeed(state, pos) / 2.5F / i;
             }
         }
@@ -207,7 +210,7 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
         if (gateway != null && gateway.isLocked()) {
             return true;
         }
-        return hasSolidSideOnTop(level, pos.below());
+        return canSupportRigidBlock(level, pos.below());
     }
 
     @Nullable
@@ -252,5 +255,10 @@ public class BlockCelestialGateway extends BaseEntityBlock implements CustomItem
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileCelestialGateway(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

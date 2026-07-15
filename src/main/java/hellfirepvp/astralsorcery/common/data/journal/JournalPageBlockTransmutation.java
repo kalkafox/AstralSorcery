@@ -43,9 +43,9 @@ public class JournalPageBlockTransmutation implements JournalPage {
                 throw new IllegalStateException("Not connected to a server, but calling GUI code?");
             }
 
-            return mgr.getRecipes(RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.getType()).values()
+            return mgr.getAllRecipesFor(RecipeTypesAS.TYPE_BLOCK_TRANSMUTATION.getType())
                     .stream()
-                    .map(r -> (BlockTransmutation) r)
+                    .map(holder -> (BlockTransmutation) holder.value())
                     .filter(r -> outputTest.test(r.getOutputDisplay()))
                     .findFirst()
                     .orElse(null);

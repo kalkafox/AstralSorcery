@@ -13,9 +13,7 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -34,21 +32,10 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
         super(block, itemProperties);
     }
 
-    @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-        if (isInGroup(group)) {
-            for (BlockGemCrystalCluster.GrowthStageType stage : BlockGemCrystalCluster.STAGE.getPossibleValues()) {
-                ItemStack cluster = new ItemStack(this);
-                this.setBaseDamage(cluster, stage.ordinal());
-                items.add(cluster);
-            }
-        }
-    }
-
     @Nullable
     @Override
-    protected BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockState toPlace = super.getStateForPlacement(context);
+    protected BlockState getPlacementState(BlockPlaceContext context) {
+        BlockState toPlace = super.getPlacementState(context);
         if (toPlace != null) {
             return toPlace.setValue(BlockGemCrystalCluster.STAGE, this.getGrowthStage(context.getItemInHand()));
         }
@@ -60,7 +47,7 @@ public class ItemBlockGemCrystalCluster extends ItemBlockCustom {
         if (stack.isEmpty() || !(stack.getItem() instanceof ItemBlockGemCrystalCluster)) {
             return BlockGemCrystalCluster.GrowthStageType.STAGE_0;
         }
-        return MiscUtils.getEnumEntry(BlockGemCrystalCluster.GrowthStageType.class, this.getDamage(stack));
+        return MiscUtils.getEnumEntry(BlockGemCrystalCluster.GrowthStageType.class, stack.getDamageValue());
     }
 
     @Override

@@ -362,7 +362,7 @@ public class TileAttunementAltar extends TileEntityTick {
         }
 
         Player player = Minecraft.getInstance().player;
-        if (player == null || player.getDistanceSq(Vec3.copyCentered(getBlockPos())) >= 256) {
+        if (player == null || player.distanceToSqr(Vec3.atCenterOf(getBlockPos())) >= 256) {
             return;
         }
         Tuple<InteractionHand, ItemStack> heldTpl = MiscUtils.getMainOrOffHand(player, stack -> stack.getItem() instanceof ItemConstellationPaper);
@@ -497,7 +497,7 @@ public class TileAttunementAltar extends TileEntityTick {
         for (StarLocation sl : cst.getStars()) {
             int x = sl.x / 2;
             int z = sl.y / 2;
-            offsetPositions.offset(new BlockPos(x - 7, 0, z - 7).add(getBlockPos()));
+            offsetPositions.add(new BlockPos(x - 7, 0, z - 7).offset(getBlockPos()));
         }
         return offsetPositions;
     }
@@ -519,11 +519,8 @@ public class TileAttunementAltar extends TileEntityTick {
         return offsetPositions;
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().expand(3.5, 2, 3.5);
-    }
+    // 1.21 port: the expanded render bounding box moved to the renderer
+    // (BlockEntityRenderer#getRenderBoundingBox) - see RenderAttunementAltar.
 
     @Override
     public void writeNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {

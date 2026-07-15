@@ -96,7 +96,7 @@ public class SimpleTransmissionNode implements ITransmissionNode {
         } else {
             this.nextReachable = oldRayState;
         }
-        this.dstToNextSq = pos.distSqr(Vec3.copy(thisPos), false);
+        this.dstToNextSq = pos.distSqr(thisPos);
     }
 
     @Override
@@ -104,9 +104,8 @@ public class SimpleTransmissionNode implements ITransmissionNode {
         if (nextPos == null) {
             return false;
         }
-        Vec3 bPosAt = Vec3.copy(at);
-        double dstStart = thisPos.distSqr(bPosAt, false);
-        double dstEnd = nextPos.distSqr(bPosAt, false);
+        double dstStart = thisPos.distSqr(at);
+        double dstEnd = nextPos.distSqr(at);
         if (dstStart > dstToNextSq || dstEnd > dstToNextSq) {
             return false; //out of range
         }

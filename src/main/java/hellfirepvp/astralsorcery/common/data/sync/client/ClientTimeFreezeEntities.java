@@ -15,7 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 import hellfirepvp.astralsorcery.common.util.Constants;
 
@@ -60,8 +60,8 @@ public class ClientTimeFreezeEntities extends ClientData<ClientTimeFreezeEntitie
 
         private void readEntityInformation(ClientTimeFreezeEntities data, CompoundTag pattern) {
             CompoundTag dimTypes = pattern.getCompound("dimTypes");
-            for (String key : dimTypes.keySet()) {
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(key));
+            for (String key : dimTypes.getAllKeys()) {
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(key));
 
                 ListTag list = dimTypes.getList(key, Constants.NBT.TAG_INT);
                 Set<Integer> entities = new HashSet<>();

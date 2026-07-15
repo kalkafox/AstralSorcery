@@ -129,7 +129,7 @@ public class IndependentCrystalSource implements IIndependentStarlightSource {
             if (other.equals(thisPos)) {
                 continue;
             }
-            double dstSq = thisPos.distSqr(Vec3.copy(other), false);
+            double dstSq = thisPos.distSqr(other);
             if (dstSq < minDstSq) {
                 minDstSq = dstSq;
                 closest = other;

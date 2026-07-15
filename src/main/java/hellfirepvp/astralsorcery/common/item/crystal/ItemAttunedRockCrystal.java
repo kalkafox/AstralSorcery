@@ -9,12 +9,7 @@
 package hellfirepvp.astralsorcery.common.item.crystal;
 
 import hellfirepvp.astralsorcery.common.CommonProxy;
-import hellfirepvp.astralsorcery.common.constellation.ConstellationRegistry;
-import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.NonNullList;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -28,17 +23,6 @@ public class ItemAttunedRockCrystal extends ItemAttunedCrystalBase {
     public ItemAttunedRockCrystal() {
         super(new Properties()
 );
-    }
-
-    @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            for (IWeakConstellation cst : ConstellationRegistry.getWeakConstellations()) {
-                ItemStack stack = new ItemStack(this);
-                setAttunedConstellation(stack, cst);
-                items.add(stack);
-            }
-        }
     }
 
     @Override

@@ -40,30 +40,12 @@ public abstract class ItemBlockCollectorCrystal extends ItemBlockCustom implemen
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> stacks) {
-        if (isInGroup(group)) {
-            for (IWeakConstellation cst : ConstellationRegistry.getWeakConstellations()) {
-                ItemStack stack = new ItemStack(this);
-                setAttunedConstellation(stack, cst);
-
-                CrystalProperty prop = CrystalPropertyRegistry.INSTANCE.getConstellationProperty(cst);
-                CrystalAttributes attr = this.getCreativeTemplateAttributes();
-                if (prop != null) {
-                    attr = attr.modifyLevel(prop, prop.getMaxTier());
-                }
-                attr.store(stack);
-
-                stacks.add(stack);
-            }
-        }
-    }
-    @Override
-    public Component getDisplayName(ItemStack stack) {
+    public Component getName(ItemStack stack) {
         IWeakConstellation cst = this.getAttunedConstellation(stack);
         if (cst != null) {
             return Component.translatable(super.getDescriptionId(stack) + ".typed", cst.getConstellationName());
         }
-        return super.getDisplayName(stack);
+        return super.getName(stack);
     }
 
     public abstract CollectorCrystalType getCollectorType();

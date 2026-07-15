@@ -123,19 +123,17 @@ public class TileSpectralRelay extends TileEntityTick {
         }
         this.setClosestRelayPos(null);
         BlockPos thisPos = this.getBlockPos();
-        Vec3 thisVPos = Vec3.copy(thisPos);
         foreachNearbyRelay(this.getLevel(), thisPos, relay -> {
             BlockPos relayPos = relay.getBlockPos();
             if (relayPos.equals(thisPos)) {
                 return;
             }
-            Vec3 relayVPos = Vec3.copy(relayPos);
 
             BlockPos otherClosestPos = relay.closestRelayPos;
-            if (otherClosestPos == null || thisPos.distSqr(relayVPos, false) < otherClosestPos.distSqr(relayVPos, false)) {
+            if (otherClosestPos == null || thisPos.distSqr(relayPos) < otherClosestPos.distSqr(relayPos)) {
                 relay.setClosestRelayPos(thisPos);
             }
-            if (this.closestRelayPos == null || relayPos.distSqr(thisVPos, false) < this.closestRelayPos.distSqr(thisVPos, false)) {
+            if (this.closestRelayPos == null || relayPos.distSqr(thisPos) < this.closestRelayPos.distSqr(thisPos)) {
                 this.setClosestRelayPos(relayPos);
             }
         });
@@ -244,10 +242,10 @@ public class TileSpectralRelay extends TileEntityTick {
     private void updateAltarPos() {
         Set<BlockPos> altarPositions = BlockDiscoverer.searchForTileEntitiesAround(getLevel(), getBlockPos(), 16, tile -> tile instanceof TileAltar);
 
-        Vec3 thisPos = Vec3.copy(getBlockPos());
+        BlockPos thisPos = getBlockPos();
         BlockPos closestAltar = null;
         for (BlockPos other : altarPositions) {
-            if (closestAltar == null || other.distSqr(thisPos, false) < closestAltar.distSqr(thisPos, false)) {
+            if (closestAltar == null || other.distSqr(thisPos) < closestAltar.distSqr(thisPos)) {
                 closestAltar = other;
             }
         }

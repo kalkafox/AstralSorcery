@@ -20,7 +20,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.fml.LogicalSide;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,7 +38,7 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 01.01.2022 / 10:06
  */
-@Mixin(ForgeHooks.class)
+@Mixin(CommonHooks.class)
 public class MixinForgeHooks {
 
     @Inject(

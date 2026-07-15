@@ -278,7 +278,7 @@ public class StarlightReceiverRitualPedestal extends SimpleTransmissionReceiver<
                 if (Math.toDegrees(toDir.angle(newDir)) <= 30) {
                     continue lblWhile;
                 }
-                if (from.distanceSquared(Vec3.copyCentered(p)) <= 3) {
+                if (from.distanceSquared(Vec3.atCenterOf(p)) <= 3) {
                     continue lblWhile;
                 }
             }

@@ -48,6 +48,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -116,7 +117,7 @@ public class TileChalice extends TileEntityTick {
     }
 
     private void tickChaliceInteractions() {
-        if (getLevel().hasNeighborSignal(pos) || getLevel().getBlockState(getBlockPos().below()).getBlock() instanceof BlockFountain) {
+        if (getLevel().hasNeighborSignal(getBlockPos()) || getLevel().getBlockState(getBlockPos().below()).getBlock() instanceof BlockFountain) {
             return;
         }
         FluidStack thisFluid = this.getTank().getType();
@@ -165,12 +166,12 @@ public class TileChalice extends TileEntityTick {
     }
 
     private boolean tickFountainDraw() {
-        if (getLevel().hasNeighborSignal(pos)) {
+        if (getLevel().hasNeighborSignal(getBlockPos())) {
             return false;
         }
 
         Vector3 thisVector = new Vector3(this).add(0.5, 1.5, 0.5);
-        List<BlockPos> fountains = BlockDiscoverer.searchForBlocksAround(level, pos, 16,
+        List<BlockPos> fountains = BlockDiscoverer.searchForBlocksAround(level, getBlockPos(), 16,
                 BlockPredicates.isBlock(BlocksAS.FOUNTAIN));
         fountains.removeIf(pos -> {
             Vector3 fountainVec = new Vector3(pos).add(0.5, 0.5, 0.5);
@@ -186,7 +187,7 @@ public class TileChalice extends TileEntityTick {
                 if (drained.getAmount() > 100) {
                     int maxFillable = this.getTank().fill(drained, IFluidHandler.FluidAction.SIMULATE);
                     if (maxFillable > 0) {
-                        FluidStack actual = fountain.getTank().drain(new FluidStack(drained, maxFillable), IFluidHandler.FluidAction.EXECUTE);
+                        FluidStack actual = fountain.getTank().drain(drained.copyWithAmount(maxFillable), IFluidHandler.FluidAction.EXECUTE);
                         this.getTank().fill(actual, IFluidHandler.FluidAction.EXECUTE);
 
                         Vector3 wellVec = new Vector3(wellPos).add(0.5, 0.5, 0.5);
@@ -206,7 +207,7 @@ public class TileChalice extends TileEntityTick {
     }
 
     private boolean tickLightwellDraw() {
-        if (getLevel().hasNeighborSignal(pos)) {
+        if (getLevel().hasNeighborSignal(getBlockPos())) {
             return false;
         }
         FluidStack thisFluid = this.getTank().getType();
@@ -215,7 +216,7 @@ public class TileChalice extends TileEntityTick {
         }
 
         Vector3 thisVector = new Vector3(this).add(0.5, 1.5, 0.5);
-        List<BlockPos> wellPositions = BlockDiscoverer.searchForBlocksAround(level, pos, 16,
+        List<BlockPos> wellPositions = BlockDiscoverer.searchForBlocksAround(level, getBlockPos(), 16,
                 BlockPredicates.isBlock(BlocksAS.WELL));
         wellPositions.removeIf(pos -> {
             Vector3 wellVec = new Vector3(pos).add(0.5, 0.5, 0.5);
@@ -231,7 +232,7 @@ public class TileChalice extends TileEntityTick {
                 if (drained.getFluid() instanceof FluidLiquidStarlight && drained.getAmount() > 100) {
                     int maxFillable = this.getTank().getMaxAddable(drained.getAmount());
                     if (maxFillable > 0) {
-                        FluidStack actual = well.getTank().drain(new FluidStack(drained, maxFillable), IFluidHandler.FluidAction.EXECUTE);
+                        FluidStack actual = well.getTank().drain(drained.copyWithAmount(maxFillable), IFluidHandler.FluidAction.EXECUTE);
                         this.getTank().fill(actual, IFluidHandler.FluidAction.EXECUTE);
 
                         Vector3 wellVec = new Vector3(wellPos).add(0.5, 0.5, 0.5);
@@ -279,7 +280,7 @@ public class TileChalice extends TileEntityTick {
 
     @OnlyIn(Dist.CLIENT)
     private static void playLineFluidParticles(Vector3 from, Vector3 to, float width, FluidStack fluid) {
-        Color c = new Color(fluid.getFluid().getAttributes().getColor(fluid));
+        Color c = new Color(IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor(fluid));
         playLineParticles(from, to, width, at -> EffectHelper.of(EffectTemplatesAS.CUBE_TRANSLUCENT_ATLAS)
                 .spawn(at)
                 .setTextureAtlasSprite(RenderingUtils.getParticleIcon(fluid))
@@ -303,7 +304,7 @@ public class TileChalice extends TileEntityTick {
 
     @Nonnull
     public IFluidHandler getTankAccess() {
-        return this.access.getCapability(Direction.DOWN).orElse(null);
+        return this.access.getFluidHandler(Direction.DOWN);
     }
 
     @Nonnull
@@ -327,7 +328,7 @@ public class TileChalice extends TileEntityTick {
     public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
         super.writeCustomNBT(pattern, registries);
 
-        pattern.put("tank", this.tank.fillDefaultJigsawNBT());
+        pattern.put("tank", this.tank.save());
     }
 
     @Nullable

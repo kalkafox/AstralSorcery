@@ -41,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.core.Direction;
@@ -52,7 +53,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 import hellfirepvp.astralsorcery.common.util.Constants;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -160,7 +161,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
 
         TileInfuser thisInfuser = MiscUtils.getTileAt(level, at, TileInfuser.class, false);
         if (thisInfuser != null) {
-            Recipe<?> recipe = level.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_INFUSION.getType()).get(recipeName);
+            Recipe<?> recipe = level.getRecipeManager().byKey(recipeName).map(RecipeHolder::value).orElse(null);
             if (recipe instanceof LiquidInfusion) {
                 FluidStack stack = new FluidStack(((LiquidInfusion) recipe).getLiquidInput(), FluidType.BUCKET_VOLUME);
                 Vector3 pos = new Vector3(at).add(0.5, 1, 0.5);
@@ -209,11 +210,11 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
     private void finishRecipe() {
         ResourceLocation recipeName = this.activeRecipe.getRecipeToCraft().getId();
 
-        ForgeHooks.setCraftingPlayer(this.activeRecipe.tryGetCraftingPlayerServer());
+        CommonHooks.setCraftingPlayer(this.activeRecipe.tryGetCraftingPlayerServer());
         this.activeRecipe.createItemOutputs(this, this::dropItemOnTop);
         this.activeRecipe.consumeInputs(this);
         this.activeRecipe.consumeFluidsInput(this);
-        ForgeHooks.setCraftingPlayer(null);
+        CommonHooks.setCraftingPlayer(null);
         this.abortCrafting();
 
         SoundHelper.playSoundAround(SoundsAS.INFUSER_CRAFT_FINISH, this.getLevel(), this.getBlockPos(), 1F, 1F);
@@ -323,7 +324,7 @@ public class TileInfuser extends TileEntityTick implements WandInteractable {
         super.readCustomNBT(pattern, registries);
 
         this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
-        this.knownRecipes = NBTHelper.readSet(pattern, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> ResourceLocation.parse(nbt.getString()));
+        this.knownRecipes = NBTHelper.readSet(pattern, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> ResourceLocation.parse(nbt.getAsString()));
 
         if (pattern.contains("activeRecipe", Constants.NBT.TAG_COMPOUND)) {
             this.activeRecipe = ActiveLiquidInfusionRecipe.deserialize(pattern.getCompound("activeRecipe"), this.activeRecipe);

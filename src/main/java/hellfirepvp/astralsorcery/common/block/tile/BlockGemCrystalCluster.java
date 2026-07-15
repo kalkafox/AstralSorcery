@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.tile.crystal.CollectorCrystalType;
 import hellfirepvp.astralsorcery.common.constellation.world.DayTimeHelper;
@@ -19,6 +21,7 @@ import hellfirepvp.astralsorcery.common.tile.TileGemCrystals;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.item.BlockItem;
@@ -60,12 +63,13 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
     public static final EnumProperty<GrowthStageType> STAGE = EnumProperty.create("stage", GrowthStageType.class);
 
     public BlockGemCrystalCluster() {
-        super(Properties.create(Material.GLASS, CollectorCrystalType.ROCK_CRYSTAL.getMaterialColor())
-                .hardnessAndResistance(3, 3)
+        super(Properties.of().mapColor(CollectorCrystalType.ROCK_CRYSTAL.getMaterialColor())
+                .strength(3, 3)
 
 
                 .sound(SoundType.GLASS)
-                .isRedstoneConductor((state) -> 6));
+                .lightLevel((state) -> 6)
+                .offsetType(BlockBehaviour.OffsetType.XZ));
     }
 
     @Override
@@ -82,7 +86,7 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         Vec3 offset = state.getOffset(level, pos);
         VoxelShape shape = Shapes.block();
-        switch (state.get(STAGE)) {
+        switch (state.getValue(STAGE)) {
             case STAGE_0:
                 shape = STAGE_0;
                 break;
@@ -99,12 +103,7 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
                 shape = STAGE_2_NIGHT;
                 break;
         }
-        return shape.offset(offset.x, offset.y, offset.z);
-    }
-
-    @Override
-    public OffsetType getOffsetType() {
-        return OffsetType.XZ;
+        return shape.move(offset.x, offset.y, offset.z);
     }
 
     /*
@@ -124,7 +123,7 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return hasSolidSideOnTop(level, pos.below());
+        return canSupportRigidBlock(level, pos.below());
     }
 
     @Override
@@ -135,7 +134,7 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
             PktPlayEffect effect = new PktPlayEffect(PktPlayEffect.Type.GEM_CRYSTAL_BREAK)
                     .addData(buf -> {
                         ByteBufUtils.writeVector(buf, new Vector3(pos).add(state.getOffset(level, pos)));
-                        buf.writeInt(state.get(STAGE).ordinal());
+                        buf.writeInt(state.getValue(STAGE).ordinal());
                     });
             PacketChannel.CHANNEL.sendToAllAround(effect, PacketChannel.pointFromPos(level, pos, 32));
         }
@@ -207,13 +206,18 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
         }
 
         @Override
-        public String getString() {
+        public String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
         }
 
         @Override
         public String toString() {
-            return this.getString();
+            return this.getSerializedName();
         }
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.entity.item;
 
+import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -22,10 +23,6 @@ public class EntityCustomItemReplacement extends ItemEntity {
 
     public EntityCustomItemReplacement(EntityType<? extends ItemEntity> type, Level level) {
         super(type, level);
-    }
-
-    public EntityCustomItemReplacement(Level worldIn, double x, double y, double z) {
-        super(worldIn, x, y, z);
     }
 
     public EntityCustomItemReplacement(Level worldIn, double x, double y, double z, ItemStack stack) {
@@ -49,9 +46,9 @@ public class EntityCustomItemReplacement extends ItemEntity {
         if (this.replacedEntity != null &&
                 this.tickCount < 5 &&
                 !this.replacedEntity.isAlive() &&
-                this.replacedEntity.pickupDelay == Short.MAX_VALUE &&
-                replacedEntity.age == getItem().getEntityLifespan(getCommandSenderWorld()) - 1) {
-            this.remove();
+                ReflectionHelper.getItemEntityPickupDelay(this.replacedEntity) == Short.MAX_VALUE &&
+                replacedEntity.getAge() == getItem().getEntityLifespan(getCommandSenderWorld()) - 1) {
+            this.remove(RemovalReason.DISCARDED);
         }
     }
 }

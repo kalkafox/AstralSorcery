@@ -50,7 +50,7 @@ public class BlockInfusedWoodColumn extends BlockInfusedWoodTemplate implements 
     private final VoxelShape middleShape, bottomShape, topShape;
 
     public BlockInfusedWoodColumn() {
-        this.registerDefaultState(this.getStateContainer().any().setValue(PILLAR_TYPE, PillarType.MIDDLE).setValue(WATERLOGGED, false));
+        this.registerDefaultState(this.getStateDefinition().any().setValue(PILLAR_TYPE, PillarType.MIDDLE).setValue(WATERLOGGED, false));
         this.middleShape = createPillarShape();
         this.topShape    = createPillarTopShape();
         this.bottomShape = createPillarBottomShape();
@@ -84,7 +84,7 @@ public class BlockInfusedWoodColumn extends BlockInfusedWoodTemplate implements 
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        switch (state.get(PILLAR_TYPE)) {
+        switch (state.getValue(PILLAR_TYPE)) {
             case TOP:
                 return this.topShape;
             case BOTTOM:
@@ -97,10 +97,10 @@ public class BlockInfusedWoodColumn extends BlockInfusedWoodTemplate implements 
 
     @Override
     public BlockState updateShape(BlockState thisState, Direction otherBlockFacing, BlockState otherBlockState, LevelAccessor level, BlockPos thisPos, BlockPos otherBlockPos) {
-        if (thisState.get(WATERLOGGED)) {
-            level.getLiquidTicks().scheduleTick(thisPos, Fluids.WATER, Fluids.WATER.getTickRate(level));
+        if (thisState.getValue(WATERLOGGED)) {
+            level.scheduleTick(thisPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
-        return this.getThisState(level, thisPos).setValue(WATERLOGGED, thisState.get(WATERLOGGED));
+        return this.getThisState(level, thisPos).setValue(WATERLOGGED, thisState.getValue(WATERLOGGED));
     }
 
     @Nullable
@@ -127,13 +127,13 @@ public class BlockInfusedWoodColumn extends BlockInfusedWoodTemplate implements 
     }
 
     public FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getOwnHeight(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 
     @Nullable
     @Override
-    public BlockPathTypes getAiPathNodeType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob entity) {
-        return BlockPathTypes.BLOCKED;
+    public PathType getBlockPathType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob entity) {
+        return PathType.BLOCKED;
     }
 
 
@@ -144,13 +144,13 @@ public class BlockInfusedWoodColumn extends BlockInfusedWoodTemplate implements 
         BOTTOM;
 
         @Override
-        public String getString() {
+        public String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
         }
 
         @Override
         public String toString() {
-            return this.getString();
+            return this.getSerializedName();
         }
     }
 }

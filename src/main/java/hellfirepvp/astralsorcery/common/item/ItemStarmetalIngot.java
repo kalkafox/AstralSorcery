@@ -43,7 +43,7 @@ public class ItemStarmetalIngot extends Item {
     @Override
     public Entity createEntity(Level level, Entity location, ItemStack itemstack) {
         EntityStarmetal res = new EntityStarmetal(EntityTypesAS.ITEM_STARMETAL_INGOT, level, location.getX(), location.getY(), location.getZ(), itemstack);
-        res.read(location.writeWithoutTypeId(new CompoundTag()));
+        res.load(location.saveWithoutId(new CompoundTag()));
         if (location instanceof ItemEntity) {
             res.setReplacedEntity((ItemEntity) location);
         }

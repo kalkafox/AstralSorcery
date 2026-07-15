@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.effect.function.VFXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.VFXColorFunction;
@@ -45,7 +47,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -61,7 +63,7 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
 
     public BlockRefractionTable() {
         super(PropertiesWood.defaultInfusedWood()
-                .notSolid());
+                .noOcclusion());
     }
 
     @Override
@@ -81,7 +83,8 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, Random random) {
+    @Override
+    public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, RandomSource random) {
         for (int i = 0; i < random.nextInt(3); i++) {
             Vector3 offset = new Vector3(-5.0 / 16.0, 1.505, -3.0 / 16.0);
             int colorIndex = random.nextInt(ColorsAS.REFRACTION_TABLE_COLORS.length);
@@ -190,5 +193,10 @@ public class BlockRefractionTable extends BaseEntityBlock implements CustomItemB
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileRefractionTable(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

@@ -79,7 +79,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
         tooltip.add(getBlinkMode(stack).getDisplay().withStyle(ChatFormatting.GOLD));
     }
 
@@ -94,7 +94,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             ItemStack held = player.getUseItem();
             if (!held.isEmpty() && held.getItem() instanceof ItemBlinkWand) {
                 int timeLeft = player.getUseItemRemainingTicks();
-                float power = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - timeLeft) / 50F) * 0.8F;
+                float power = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration(player) - timeLeft) / 50F) * 0.8F;
                 return COST_PER_DASH * power;
             }
         }
@@ -107,9 +107,9 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
         if (player.isShiftKeyDown()) {
             BlinkMode nextMode = getBlinkMode(held).next();
             setBlinkMode(held, nextMode);
-            player.move(nextMode.getDisplay(), true);
+            player.displayClientMessage(nextMode.getDisplay(), true);
         } else if (!player.getCooldowns().isOnCooldown(this)) {
-            player.setActiveHand(hand);
+            player.startUsingItem(hand);
         }
         return InteractionResultHolder.consume(held);
     }
@@ -120,7 +120,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 72_000;
     }
 
@@ -134,7 +134,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
         BlinkMode mode = getBlinkMode(stack);
         if (mode == BlinkMode.TELEPORT) {
             Vector3 origin = Vector3.atEntityCorner(player).addY(0.5F);
-            Vector3 forwards = new Vector3(player.getLook(1F)).normalize().mul(40F).add(origin);
+            Vector3 forwards = new Vector3(player.getViewVector(1F)).normalize().mul(40F).add(origin);
             List<BlockPos> blockLine = new ArrayList<>();
             RaytraceAssist rta = new RaytraceAssist(origin, forwards);
             rta.forEachBlockPos(pos -> {
@@ -148,10 +148,10 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             });
 
             if (!blockLine.isEmpty()) {
-                BlockPos at = Iterables.last(blockLine);
+                BlockPos at = Iterables.getLast(blockLine);
                 if (origin.distance(at) > 5) {
                     if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_BLINK, false)) {
-                        player.setPositionAndUpdate(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+                        player.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
                         if (!player.isCreative()) {
                             player.getCooldowns().addCooldown(stack.getItem(), 40);
                         }
@@ -163,11 +163,11 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             if (!entityLiving.isFallFlying()) {
                 multiplier = 2.4F;
             }
-            float power = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - timeLeft) / 50F) * multiplier;
+            float power = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration(player) - timeLeft) / 50F) * multiplier;
             if (power > 0.3F) {
                 float chargeCost = COST_PER_DASH * 0.8F;
                 if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, chargeCost, false)) {
-                    Vector3 motion = new Vector3(player.getLook(1F)).normalize().mul(power * 3F);
+                    Vector3 motion = new Vector3(player.getViewVector(1F)).normalize().mul(power * 3F);
                     if (motion.getY() > 0) {
                         motion.setY(Mth.clamp(motion.getY() + (0.2F * power), 0.2F * power, Float.MAX_VALUE));
                     }
@@ -181,10 +181,10 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
 
                     PktShootEntity pkt = new PktShootEntity(player.getId(), motion);
                     pkt.setEffectLength(power);
-                    PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(worldIn, player.position(), 64));
+                    PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(worldIn, player.blockPosition(), 64));
 
                     if (!player.isFallFlying()) {
-                        EventHelperDamageCancelling.markInvulnerableToNextDamage(player, DamageSource.FALL);
+                        EventHelperDamageCancelling.markInvulnerableToNextDamage(player, worldIn.damageSources().fall());
                     }
                 }
             }
@@ -192,9 +192,9 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
     }
 
     @Override
-    public void onUsingTick(ItemStack stack, LivingEntity entity, int count) {
+    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
         if (entity.getCommandSenderWorld().isClientSide()) {
-            float perc = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration() - count) / 50F) * 0.8F;
+            float perc = 0.2F + Math.min(1F, Math.min(50, stack.getUseDuration(entity) - count) / 50F) * 0.8F;
             playUseParticles(stack, entity, count, perc);
         }
     }
@@ -209,7 +209,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             return;
         }
         if (getBlinkMode(stack) == BlinkMode.LAUNCH) {
-            Vector3 forwards = new Vector3(entity.getLook(1F)).normalize().mul(20);
+            Vector3 forwards = new Vector3(entity.getViewVector(1F)).normalize().mul(20);
             Vector3 pos = Vector3.atEntityCorner(entity).addY(entity.getEyeHeight());
             Vector3 motion = forwards.clone().normalize().mul(-0.8F + random.nextFloat() * -0.5F);
             Vector3 perp = forwards.clone().perpendicular().normalize();
@@ -239,7 +239,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             }
         } else if (getBlinkMode(stack) == BlinkMode.TELEPORT) {
             Vector3 origin = Vector3.atEntityCorner(entity).addY(0.5F);
-            Vector3 forwards = new Vector3(entity.getLook(1F)).normalize().mul(40F).add(origin);
+            Vector3 forwards = new Vector3(entity.getViewVector(1F)).normalize().mul(40F).add(origin);
             List<Vector3> lineState = new ArrayList<>();
             RaytraceAssist rta = new RaytraceAssist(origin, forwards);
             boolean clearLine = rta.forEachStep(v -> {
@@ -254,7 +254,7 @@ public class ItemBlinkWand extends Item implements AlignmentChargeConsumer {
             });
 
             if (!lineState.isEmpty()) {
-                Vector3 last = Iterables.last(lineState);
+                Vector3 last = Iterables.getLast(lineState);
 
                 for (Vector3 v : lineState) {
                     if (v == last || random.nextInt(300) == 0) {

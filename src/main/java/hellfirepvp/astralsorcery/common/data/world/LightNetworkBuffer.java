@@ -8,8 +8,11 @@
 
 package hellfirepvp.astralsorcery.common.data.world;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.data.config.entry.LightNetworkConfig;
+import hellfirepvp.astralsorcery.common.lib.DataAS;
 import hellfirepvp.astralsorcery.common.starlight.IIndependentStarlightSource;
 import hellfirepvp.astralsorcery.common.starlight.IStarlightSource;
 import hellfirepvp.astralsorcery.common.starlight.IStarlightTransmission;
@@ -25,9 +28,14 @@ import hellfirepvp.astralsorcery.common.starlight.transmission.registry.Transmis
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.block.BlockStateHelper;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
+import hellfirepvp.observerlib.common.data.CachedWorldData;
 import hellfirepvp.observerlib.common.data.WorldCacheDomain;
 import hellfirepvp.observerlib.common.data.base.SectionWorldData;
 import hellfirepvp.observerlib.common.data.base.WorldSection;
+import hellfirepvp.observerlib.common.util.CodecUtil;
+import hellfirepvp.observerlib.common.util.tick.ITickHandler;
+import hellfirepvp.observerlib.common.util.tick.TickEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -49,15 +57,59 @@ import java.util.*;
  * Created by HellFirePvP
  * Date: 03.08.2016 / 00:10
  */
-public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.ChunkNetworkData> {
+public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer, LightNetworkBuffer.ChunkNetworkData> {
+
+    public static final Codec<LightNetworkBuffer> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+            WorldCacheDomain.SaveKey.CODEC.fieldOf("key").forGetter(CachedWorldData::getSaveKey),
+            CompoundTag.CODEC.fieldOf("data").forGetter(buffer -> {
+                CompoundTag tag = new CompoundTag();
+                buffer.writeSources(tag);
+                return tag;
+            })
+    ).apply(builder, (key, tag) -> {
+        LightNetworkBuffer buffer = new LightNetworkBuffer(CodecUtil.unwrap(key));
+        buffer.readSources(tag);
+        return buffer;
+    }));
+
+    //The world-cache framework no longer ticks its data; this handler is registered
+    //in CommonProxy.attachTickListeners to keep the per-world network upkeep running.
+    public static final ITickHandler NETWORK_TICK_HANDLER = new ITickHandler() {
+        @Override
+        public void tick(TickEvent.Type type, Object... context) {
+            Level level = (Level) context[0];
+            if (level.isClientSide() || !(level instanceof ServerLevel)) {
+                return;
+            }
+            LightNetworkBuffer buffer = DataAS.DOMAIN_AS.getDataIfLoaded(level, DataAS.KEY_STARLIGHT_NETWORK);
+            if (buffer != null) {
+                buffer.updateTick(level);
+            }
+        }
+
+        @Override
+        public EnumSet<TickEvent.Type> getHandledTypes() {
+            return EnumSet.of(TickEvent.Type.WORLD);
+        }
+
+        @Override
+        public boolean canFire(TickEvent.Phase currentPhase) {
+            return currentPhase == TickEvent.Phase.END;
+        }
+
+        @Override
+        public String getName() {
+            return "Starlight Network Upkeep";
+        }
+    };
 
     private final Map<BlockPos, IIndependentStarlightSource> starlightSources = new HashMap<>();
     private Collection<Tuple<BlockPos, IIndependentStarlightSource>> cachedSourceTuples = null;
 
     private final Set<BlockPos> queueRemoval = new HashSet<>();
 
-    public LightNetworkBuffer(WorldCacheDomain.SaveKey<?> key) {
-        super(key, PRECISION_CHUNK);
+    public LightNetworkBuffer(WorldCacheDomain.SaveKey<LightNetworkBuffer> key) {
+        super(key, ChunkNetworkData.CODEC, PRECISION_CHUNK);
     }
 
     public WorldNetworkHandler getNetworkHandler(Level level) {
@@ -69,7 +121,6 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         return new ChunkNetworkData(sectionX, sectionZ);
     }
 
-    @Override
     public void updateTick(Level level) {
         cleanupQueuedChunks();
 
@@ -96,7 +147,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
                     AstralSorcery.log.warn("Purging cache entry and removing erroneous block!");
                     AstralSorcery.log.warn("Block that gets purged: " + BlockStateHelper.serialize(actual));
                     iterator.remove();
-                    if (level.setBlock(pos, actual.getFluidState().getBlockState())) {
+                    if (level.setBlockAndUpdate(pos, actual.getFluidState().createLegacyBlock())) {
                         ChunkNetworkData data = getSection(pos);
                         if (data != null) {
                             data.removeSourceTile(pos);
@@ -190,8 +241,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         return cachedSourceTuples;
     }
 
-    @Override
-    public void readFromNBT(CompoundTag nbt) {
+    public void readSources(CompoundTag nbt) {
         starlightSources.clear();
         cachedSourceTuples = null;
 
@@ -215,8 +265,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
         }
     }
 
-    @Override
-    public void save(CompoundTag nbt) {
+    public void writeSources(CompoundTag nbt) {
         cleanupQueuedChunks();
 
         ListTag sourceList = new ListTag();
@@ -329,15 +378,28 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
 
     public static class ChunkNetworkData extends WorldSection {
 
+        public static final Codec<ChunkNetworkData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+                Codec.INT.fieldOf("sX").forGetter(WorldSection::x),
+                Codec.INT.fieldOf("sZ").forGetter(WorldSection::z),
+                CompoundTag.CODEC.fieldOf("sections").forGetter(data -> {
+                    CompoundTag tag = new CompoundTag();
+                    data.writeSections(tag);
+                    return tag;
+                })
+        ).apply(builder, (sX, sZ, tag) -> {
+            ChunkNetworkData data = new ChunkNetworkData(sX, sZ);
+            data.readSections(tag);
+            return data;
+        }));
+
         private final Map<Integer, ChunkSectionNetworkData> sections = new HashMap<>();
 
         ChunkNetworkData(int sX, int sZ) {
             super(sX, sZ);
         }
 
-        @Override
-        public void readFromNBT(CompoundTag tag) {
-            for (String key : tag.keySet()) {
+        public void readSections(CompoundTag tag) {
+            for (String key : tag.getAllKeys()) {
                 int yLevel;
                 try {
                     yLevel = Integer.parseInt(key);
@@ -350,8 +412,7 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer.Chun
             }
         }
 
-        @Override
-        public void save(CompoundTag data) {
+        public void writeSections(CompoundTag data) {
             for (Integer yLevel : sections.keySet()) {
                 ChunkSectionNetworkData sectionData = sections.get(yLevel);
                 ListTag sectionTag = new ListTag();

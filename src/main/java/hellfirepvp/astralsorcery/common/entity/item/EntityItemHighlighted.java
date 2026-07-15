@@ -33,7 +33,7 @@ import java.awt.*;
  */
 public class EntityItemHighlighted extends EntityCustomItemReplacement {
 
-    private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.createKey(EntityItemHighlighted.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(EntityItemHighlighted.class, EntityDataSerializers.INT);
     private static final int NO_COLOR = 0xFF000000;
 
     public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level level) {
@@ -44,7 +44,7 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
 
     public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z) {
         this(type, level);
-        this.setPosition(x, y, z);
+        this.setPos(x, y, z);
         this.setYRot(this.random.nextFloat() * 360.0F);
         this.setDeltaMovement(this.random.nextDouble() * 0.2D - 0.1D, 0.2D, this.random.nextDouble() * 0.2D - 0.1D);
     }
@@ -52,17 +52,17 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
     public EntityItemHighlighted(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z, ItemStack stack) {
         this(type, level, x, y, z);
         this.setItem(stack);
-        this.timeout = stack.isEmpty() ? 6000 : stack.getEntityLifespan(level);
+        this.lifespan = stack.isEmpty() ? 6000 : stack.getEntityLifespan(level);
     }
 
-    public static EntityType.IFactory<EntityItemHighlighted> factoryHighlighted() {
+    public static EntityType.EntityFactory<EntityItemHighlighted> factoryHighlighted() {
         return (spawnEntity, level) -> new EntityItemHighlighted(EntityTypesAS.ITEM_HIGHLIGHT, level);
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.getEntityData().register(DATA_COLOR, NO_COLOR);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_COLOR, NO_COLOR);
     }
 
     public void applyColor(@Nullable Color color) {
@@ -93,7 +93,7 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
 
     @Override
     public void setOnGround(boolean grounded) {
-        boolean updateSize = isOnGround() != grounded;
+        boolean updateSize = onGround() != grounded;
         super.setOnGround(grounded);
         if (updateSize) {
             refreshDimensions();
@@ -101,10 +101,10 @@ public class EntityItemHighlighted extends EntityCustomItemReplacement {
     }
 
     @Override
-    public EntityDimensions getSize(Pose poseIn) {
+    public EntityDimensions getDimensions(Pose poseIn) {
         if (!this.onGround()) {
-            return EntityType.ITEM.getSize();
+            return EntityType.ITEM.getDimensions();
         }
-        return this.getType().getSize();
+        return this.getType().getDimensions();
     }
 }

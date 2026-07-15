@@ -14,6 +14,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.level.Level;
 
 /**
@@ -37,12 +38,12 @@ public class EntityItemExplosionResistant extends EntityItemHighlighted {
         super(type, level, x, y, z, stack);
     }
 
-    public static EntityType.IFactory<EntityItemExplosionResistant> factoryExplosionResistant() {
+    public static EntityType.EntityFactory<EntityItemExplosionResistant> factoryExplosionResistant() {
         return (spawnEntity, level) -> new EntityItemExplosionResistant(EntityTypesAS.ITEM_EXPLOSION_RESISTANT, level);
     }
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        return !source.isExplosion() && super.hurt(source, amount);
+        return !source.is(DamageTypeTags.IS_EXPLOSION) && super.hurt(source, amount);
     }
 }

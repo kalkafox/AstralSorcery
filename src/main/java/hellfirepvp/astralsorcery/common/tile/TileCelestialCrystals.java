@@ -109,7 +109,7 @@ public class TileCelestialCrystals extends TileEntityTick implements CrystalAttr
             growPerTickProbability *= 0.6;
 
             if (random.nextInt(400) == 0) {
-                getLevel().setBlock(getBlockPos().below(), CraftingConfig.CONFIG.getStarmetalRevertBlockState());
+                getLevel().setBlockAndUpdate(getBlockPos().below(), CraftingConfig.CONFIG.getStarmetalRevertBlockState());
             }
         }
         float distribution = DayTimeHelper.getCurrentDaytimeDistribution(getLevel());
@@ -129,12 +129,12 @@ public class TileCelestialCrystals extends TileEntityTick implements CrystalAttr
 
     public int getGrowth() {
         BlockState current = getLevel().getBlockState(getBlockPos());
-        return current.get(BlockCelestialCrystalCluster.STAGE);
+        return current.getValue(BlockCelestialCrystalCluster.STAGE);
     }
 
     public void setGrowth(int stage) {
         BlockState next = BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.defaultBlockState().setValue(BlockCelestialCrystalCluster.STAGE, stage);
-        getLevel().setBlock(getBlockPos(), next);
+        getLevel().setBlockAndUpdate(getBlockPos(), next);
     }
 
     @Override

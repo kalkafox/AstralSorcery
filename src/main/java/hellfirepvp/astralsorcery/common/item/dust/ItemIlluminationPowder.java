@@ -20,7 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -34,15 +34,15 @@ public class ItemIlluminationPowder extends ItemUsableDust {
     @Override
     boolean dispense(BlockSource dispenser) {
         BlockPos at = dispenser.pos();
-        Direction face = dispenser.getBlockState().get(DispenserBlock.FACING);
+        Direction face = dispenser.state().getValue(DispenserBlock.FACING);
         EntityIlluminationSpark nocSpark = new EntityIlluminationSpark(at.getX(), at.getY(), at.getZ(), dispenser.level());
-        nocSpark.shoot(face.getXOffset(), face.getMyRidingOffset() + 0.1F, face.getZOffset(), 0.7F, 0.9F);
+        nocSpark.shoot(face.getStepX(), face.getStepY() + 0.1F, face.getStepZ(), 0.7F, 0.9F);
         return dispenser.level().addFreshEntity(nocSpark);
     }
 
     @Override
     boolean rightClickAir(Level level, Player player, ItemStack dust) {
-        return level.addEntity(new EntityIlluminationSpark(player, level));
+        return level.addFreshEntity(new EntityIlluminationSpark(player, level));
     }
 
     @Override
@@ -55,15 +55,15 @@ public class ItemIlluminationPowder extends ItemUsableDust {
         }
 
         if (!BlockUtils.isReplaceable(level, pos)) {
-            pos = pos.offset(ctx.getClickedFace());
+            pos = pos.relative(ctx.getClickedFace());
         }
 
         if (!BlockUtils.isReplaceable(level, pos)) {
             return false;
         }
 
-        if (player.mayUseItemAt(pos, ctx.getClickedFace(), ctx.getItemInHand()) && !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, pos), ctx.getClickedFace())) {
-            return level.setBlock(pos, BlocksAS.FLARE_LIGHT.defaultBlockState());
+        if (player.mayUseItemAt(pos, ctx.getClickedFace(), ctx.getItemInHand()) && !EventHooks.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, pos), ctx.getClickedFace())) {
+            return level.setBlockAndUpdate(pos, BlocksAS.FLARE_LIGHT.defaultBlockState());
         }
         return false;
     }

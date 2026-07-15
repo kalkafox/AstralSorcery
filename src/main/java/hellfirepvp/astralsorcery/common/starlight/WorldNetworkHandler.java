@@ -77,7 +77,7 @@ public class WorldNetworkHandler {
         for (Tuple<BlockPos, IIndependentStarlightSource> source : getAllSources()) {
             if (!source.getB().providesAutoLink()) continue;
 
-            if (source.getA().distSqr(Vec3.copy(at), false) <= 256) {
+            if (source.getA().distSqr(at) <= 256) {
                 IPrismTransmissionNode node = getTransmissionNode(source.getA());
                 if (node == null) {
                     AstralSorcery.log.warn("Didn't find a TransmissionNode at a position that's supposed to be a source!");
@@ -107,7 +107,7 @@ public class WorldNetworkHandler {
         for (Tuple<BlockPos, IIndependentStarlightSource> source : getAllSources()) {
             if (!source.getB().providesAutoLink()) continue;
 
-            if (source.getA().distSqr(Vec3.copy(at), false) <= 256) {
+            if (source.getA().distSqr(at) <= 256) {
                 IPrismTransmissionNode node = getTransmissionNode(source.getA());
                 if (node == null) {
                     AstralSorcery.log.warn("Didn't find a TransmissionNode at a position that's supposed to be a source!");
@@ -267,7 +267,7 @@ public class WorldNetworkHandler {
         for (int xx = -1; xx <= 1; xx++) {
             for (int zz = -1; zz <= 1; zz++) {
                 for (int yy = -1; yy <= 1; yy++) {
-                    BlockPos pos = central.asBlockPos();
+                    BlockPos pos = central.getWorldPosition();
                     pos = pos.offset(xx * 16, Mth.clamp(posYLevel + yy * 16, 0, 255), zz * 16);
                     queryData(pos, dataList);
                 }

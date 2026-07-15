@@ -50,7 +50,7 @@ public class DeferredStarlightStorage {
         this.starlightStorage.addLast(pattern.getInt("starlightStorage"));
     }
 
-    public void fillDefaultJigsawNBT(CompoundTag pattern) {
+    public void save(CompoundTag pattern) {
         pattern.putInt("starlightStorage", this.getStoredStarlight());
     }
 }

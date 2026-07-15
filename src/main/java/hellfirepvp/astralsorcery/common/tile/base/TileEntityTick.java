@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.util.log.LogCategory;
 import hellfirepvp.observerlib.api.ChangeSubscriber;
 import hellfirepvp.observerlib.api.ObserverHelper;
 import hellfirepvp.observerlib.common.change.ChangeObserverStructure;
+import hellfirepvp.observerlib.common.registry.RegistryProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -122,7 +123,7 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
         StructureType struct = this.getRequiredStructureType();
         if (this.structureMatch != null) {
             //Same registry name as the structure type.
-            ResourceLocation key = this.structureMatch.getObserver().getProviderRegistryName();
+            ResourceLocation key = RegistryProviders.getRegistry().getKey(this.structureMatch.getObserver().getProvider());
             if (struct == null || !key.equals(struct.getRegistryName())) {
                 ObserverHelper.getHelper().removeObserver(getLevel(), getBlockPos());
                 this.structureMatch = null;

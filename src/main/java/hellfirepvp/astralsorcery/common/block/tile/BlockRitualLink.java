@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesGlass;
 import hellfirepvp.astralsorcery.common.tile.TileRitualLink;
@@ -53,5 +55,10 @@ public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileRitualLink(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

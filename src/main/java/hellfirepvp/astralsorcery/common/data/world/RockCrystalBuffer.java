@@ -8,16 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.data.world;
 
-import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import hellfirepvp.observerlib.common.data.CachedWorldData;
 import hellfirepvp.observerlib.common.data.WorldCacheDomain;
 import hellfirepvp.observerlib.common.data.base.SectionWorldData;
 import hellfirepvp.observerlib.common.data.base.WorldSection;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import hellfirepvp.observerlib.common.util.CodecUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import hellfirepvp.astralsorcery.common.util.Constants;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,10 +30,14 @@ import java.util.Set;
  * Created by HellFirePvP
  * Date: 17.08.2019 / 22:42
  */
-public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer.BufferSection> {
+public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer, RockCrystalBuffer.BufferSection> {
 
-    public RockCrystalBuffer(WorldCacheDomain.SaveKey<?> key) {
-        super(key, 10);
+    public static final Codec<RockCrystalBuffer> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+            WorldCacheDomain.SaveKey.CODEC.fieldOf("key").forGetter(CachedWorldData::getSaveKey)
+    ).apply(builder, key -> new RockCrystalBuffer(CodecUtil.unwrap(key))));
+
+    public RockCrystalBuffer(WorldCacheDomain.SaveKey<RockCrystalBuffer> key) {
+        super(key, BufferSection.CODEC, 10);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer.Buffer
         for (int xx = -chunkRadius; xx <= chunkRadius; xx++) {
             for (int zz = -chunkRadius; zz <= chunkRadius; zz++) {
                 ChunkPos other = new ChunkPos(center.x + xx, center.z + zz);
-                BufferSection section = this.getSection(other.asBlockPos());
+                BufferSection section = this.getSection(other.getWorldPosition());
                 if (section != null) {
                     this.read(() -> out.addAll(section.crystalPositions));
                 }
@@ -70,40 +73,22 @@ public class RockCrystalBuffer extends SectionWorldData<RockCrystalBuffer.Buffer
         }
     }
 
-    @Override
-    public void save(CompoundTag nbt) {}
-
-    @Override
-    public void readFromNBT(CompoundTag nbt) {}
-
-    @Override
-    public void updateTick(Level level) {}
-
     public static class BufferSection extends WorldSection {
+
+        public static final Codec<BufferSection> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+                Codec.INT.fieldOf("sX").forGetter(WorldSection::x),
+                Codec.INT.fieldOf("sZ").forGetter(WorldSection::z),
+                BlockPos.CODEC.listOf().fieldOf("posList").forGetter(section -> List.copyOf(section.crystalPositions))
+        ).apply(builder, (sX, sZ, positions) -> {
+            BufferSection section = new BufferSection(sX, sZ);
+            section.crystalPositions.addAll(positions);
+            return section;
+        }));
 
         private final Set<BlockPos> crystalPositions = new HashSet<>();
 
         private BufferSection(int sX, int sZ) {
             super(sX, sZ);
-        }
-
-        @Override
-        public void save(CompoundTag tag) {
-            ListTag posList = new ListTag();
-            for (BlockPos exactPos : crystalPositions) {
-                posList.add(NBTHelper.writeBlockPosToNBT(exactPos, new CompoundTag()));
-            }
-            tag.put("posList", posList);
-        }
-
-        @Override
-        public void readFromNBT(CompoundTag tag) {
-            crystalPositions.clear();
-
-            ListTag entries = tag.getList("posList", Constants.NBT.TAG_COMPOUND);
-            for (int j = 0; j < entries.size(); j++) {
-                crystalPositions.add(NBTHelper.readBlockPosFromNBT(entries.getCompound(j)));
-            }
         }
     }
 

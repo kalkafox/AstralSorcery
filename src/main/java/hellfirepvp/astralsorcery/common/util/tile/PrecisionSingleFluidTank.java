@@ -198,7 +198,7 @@ public class PrecisionSingleFluidTank implements IFluidTank {
         return drain(resource.getAmount(), action);
     }
 
-    public CompoundTag fillDefaultJigsawNBT() {
+    public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putDouble("amt", this.amount);
         tag.putInt("capacity", this.maxCapacity);

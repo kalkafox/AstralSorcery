@@ -49,7 +49,7 @@ import java.util.function.BiFunction;
  */
 public class EntitySpectralTool extends FlyingMob {
 
-    private static final EntityDataAccessor<ItemStack> ITEM = SynchedEntityData.createKey(EntitySpectralTool.class, EntityDataSerializers.ITEM_STACK);
+    private static final EntityDataAccessor<ItemStack> ITEM = SynchedEntityData.defineId(EntitySpectralTool.class, EntityDataSerializers.ITEM_STACK);
 
     private LivingEntity owningEntity = null;
     private SpectralToolGoal task = null;
@@ -65,7 +65,7 @@ public class EntitySpectralTool extends FlyingMob {
 
     public EntitySpectralTool(Level worldIn, BlockPos spawnPos, LivingEntity owner, ToolTask task) {
         this(worldIn);
-        this.setPosition(spawnPos.getX() + 0.5, spawnPos.getY() + 0.5, spawnPos.getZ());
+        this.setPos(spawnPos.getX() + 0.5, spawnPos.getY() + 0.5, spawnPos.getZ());
         this.setItem(task.displayStack);
         this.startPosition = spawnPos;
         this.owningEntity = owner;
@@ -74,21 +74,21 @@ public class EntitySpectralTool extends FlyingMob {
         this.remainingTime = task.lifetime + random.nextInt(task.lifetime);
     }
 
-    public static EntityType.IFactory<EntitySpectralTool> factory() {
+    public static EntityType.EntityFactory<EntitySpectralTool> factory() {
         return (type, level) -> new EntitySpectralTool(level);
     }
 
-    public static AttributeSupplier.MutableAttribute createAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .createMutableAttribute(Attributes.MAX_HEALTH, 3)
-                .createMutableAttribute(Attributes.FLYING_SPEED, 0.85);
+                .add(Attributes.MAX_HEALTH, 3)
+                .add(Attributes.FLYING_SPEED, 0.85);
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
 
-        this.getEntityData().register(ITEM, ItemStack.EMPTY);
+        builder.define(ITEM, ItemStack.EMPTY);
     }
 
     @Override
@@ -102,11 +102,6 @@ public class EntitySpectralTool extends FlyingMob {
     }
 
     @Override
-    protected boolean isMovementNoisy() {
-        return false;
-    }
-
-    @Override
     public void tick() {
         super.tick();
 
@@ -114,14 +109,14 @@ public class EntitySpectralTool extends FlyingMob {
             this.tickClient();
         } else {
             if (this.startPosition == null) {
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
                 return;
             }
 
             if (!this.task.canUse()) {
                 this.idleTime++;
                 if (this.idleTime >= 30) {
-                    this.remove();
+                    this.remove(RemovalReason.DISCARDED);
                     return;
                 }
             } else {
@@ -140,7 +135,7 @@ public class EntitySpectralTool extends FlyingMob {
         if (random.nextFloat() < 0.2F) {
             Vector3 at = Vector3.atEntityCorner(this)
                     .add(random.nextFloat() * 0.3 * (random.nextBoolean() ? 1 : -1),
-                            random.nextFloat() * 0.3 * (random.nextBoolean() ? 1 : -1) + this.getHeight() / 2,
+                            random.nextFloat() * 0.3 * (random.nextBoolean() ? 1 : -1) + this.getBbHeight() / 2,
                             random.nextFloat() * 0.3 * (random.nextBoolean() ? 1 : -1));
 
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)

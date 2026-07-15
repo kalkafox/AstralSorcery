@@ -121,8 +121,8 @@ public class BlockWell extends BlockStarlightNetwork implements CustomItemBlock 
                         .ifPresent((handler) -> {
                             FluidActionResult far = FluidUtil.tryFillContainerAndStow(heldItem,
                                     handler, new InvWrapper(player.getInventory()), FluidType.BUCKET_VOLUME, player, true);
-                            if (far.shouldSwing()) {
-                                player.setItemInHand(hand, far.getObject());
+                            if (far.isSuccess()) {
+                                player.setItemInHand(hand, far.getResult());
                                 SoundHelper.playSoundAround(SoundEvents.BUCKET_FILL, level, pos, 1F, 1F);
                                 tw.markForUpdate();
                             }

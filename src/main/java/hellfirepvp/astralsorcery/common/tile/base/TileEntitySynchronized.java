@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.tile.base;
 import hellfirepvp.astralsorcery.common.util.block.ILocatable;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -113,7 +114,7 @@ public abstract class TileEntitySynchronized extends BlockEntity implements ILoc
     public void markForUpdate() {
         if (getLevel() != null) {
             BlockState thisState = this.getBlockState();
-            getLevel().findNearestBiome(getBlockPos(), thisState, thisState, 3);
+            getLevel().sendBlockUpdated(getBlockPos(), thisState, thisState, Block.UPDATE_ALL_IMMEDIATE);
         }
         setChanged();
     }
@@ -126,6 +127,6 @@ public abstract class TileEntitySynchronized extends BlockEntity implements ILoc
         if (this.getLevel().isClientSide()) {
             return false;
         }
-        return this.getLevel().setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState());
+        return this.getLevel().setBlock(this.getBlockPos(), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
     }
 }

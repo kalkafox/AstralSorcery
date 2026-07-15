@@ -62,7 +62,7 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
         IConstellation cst = this.getBaseConstellation();
         if (cst != null) {
             if (ResearchHelper.getClientProgress().hasConstellationDiscovered(cst)) {
@@ -75,12 +75,12 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-        playerIn.setActiveHand(handIn);
+        playerIn.startUsingItem(handIn);
         return super.use(worldIn, playerIn, handIn);
     }
 
     @Override
-    public ItemStack onItemUseFinish(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
+    public ItemStack finishUsingItem(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
         if (!worldIn.isClientSide() && entityLiving instanceof ServerPlayer) {
             ServerPlayer player = (ServerPlayer) entityLiving;
             IMajorConstellation cst = this.getBaseConstellation();
@@ -94,12 +94,12 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
                 if (ResearchManager.setAttunedConstellation(player, cst)) {
                     ResearchManager.setExp(player, Mth.lfloor(perkExp));
                     player.sendSystemMessage(Component.translatable("astralsorcery.progress.switch.attunement").withStyle(ChatFormatting.BLUE));
-                    SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, worldIn, entityLiving.position(), 1F, 1F);
+                    SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, worldIn, entityLiving.blockPosition(), 1F, 1F);
                     return ItemStack.EMPTY;
                 }
             } else if (ResearchManager.setAttunedConstellation(player, null)) {
                 player.sendSystemMessage(Component.translatable("astralsorcery.progress.remove.attunement").withStyle(ChatFormatting.BLUE));
-                SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, worldIn, entityLiving.position(), 1F, 1F);
+                SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, worldIn, entityLiving.blockPosition(), 1F, 1F);
                 return ItemStack.EMPTY;
             }
         }
@@ -107,9 +107,9 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
     }
 
     @Override
-    public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
+    public void onUseTick(Level level, LivingEntity player, ItemStack stack, int count) {
         if (player.getCommandSenderWorld().isClientSide()) {
-            this.playUseEffects(player, getUseDuration(stack) - count, getUseDuration(stack));
+            this.playUseEffects(player, getUseDuration(stack, player) - count, getUseDuration(stack, player));
         }
     }
 
@@ -154,7 +154,7 @@ public class ItemShiftingStar extends Item implements PerkExperienceRevealer {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return this.getBaseConstellation() == null ? 60 : 100;
     }
 

@@ -72,13 +72,13 @@ public class EntityFlare extends FlyingMob {
         super(EntityTypesAS.FLARE, worldIn);
     }
 
-    public static EntityType.IFactory<EntityFlare> factory() {
+    public static EntityType.EntityFactory<EntityFlare> factory() {
         return (type, level) -> new EntityFlare(level);
     }
 
-    public static AttributeSupplier.MutableAttribute createAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .createMutableAttribute(Attributes.MAX_HEALTH, 1);
+                .add(Attributes.MAX_HEALTH, 1);
     }
 
     public static void spawnAmbientFlare(Level level, BlockPos at) {
@@ -90,9 +90,9 @@ public class EntityFlare extends FlyingMob {
             MiscUtils.executeWithChunk(level, at, () -> {
                 if (level.isEmptyBlock(at)) {
                     EntityFlare flare = EntityTypesAS.FLARE.create(level);
-                    flare.setPosition(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
+                    flare.setPos(at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5);
                     flare.setAmbient(true);
-                    level.addEntity(flare);
+                    level.addFreshEntity(flare);
                 }
             });
         }
@@ -117,7 +117,7 @@ public class EntityFlare extends FlyingMob {
         if (this.followingEntityId == -1) {
             return null;
         }
-        Entity e = level.getEntity(this.followingEntityId);
+        Entity e = level().getEntity(this.followingEntityId);
         if (e == null || !e.isAlive() || !(e instanceof LivingEntity)) {
             return null;
         }
@@ -139,13 +139,13 @@ public class EntityFlare extends FlyingMob {
 
             if (this.isAlive()) {
                 if (EntityConfig.CONFIG.flareAttackBats.get() && random.nextInt(30) == 0) {
-                    Bat closest = EntityUtils.getNearestEntity(this.getCommandSenderWorld(), Bat.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
+                    Bat closest = EntityUtils.getNearestEntity(this.getCommandSenderWorld(), Bat.class, this.getBoundingBox().inflate(10), Vector3.atEntityCenter(this));
                     if (closest != null) {
                         this.doLightningAttack(closest, 100F);
                     }
                 }
                 if (EntityConfig.CONFIG.flareAttackPhantoms.get() && random.nextInt(30) == 0) {
-                    Phantom closest = EntityUtils.getNearestEntity(this.getCommandSenderWorld(), Phantom.class, this.getBoundingBox().grow(10), Vector3.atEntityCenter(this));
+                    Phantom closest = EntityUtils.getNearestEntity(this.getCommandSenderWorld(), Phantom.class, this.getBoundingBox().inflate(10), Vector3.atEntityCenter(this));
                     if (closest != null) {
                         this.doLightningAttack(closest, 100F);
                     }
@@ -157,10 +157,10 @@ public class EntityFlare extends FlyingMob {
                         this.currentMoveTarget = null;
                     }
                     if (this.currentMoveTarget == null && random.nextInt(150) == 0) {
-                        BlockPos newTarget = this.position()
+                        BlockPos newTarget = BlockPos.containing(this.position()
                                 .add(random.nextInt(RANDOM_WANDER_RANGE) * (random.nextBoolean() ? 1 : -1),
                                         random.nextInt(RANDOM_WANDER_RANGE) * (random.nextBoolean() ? 1 : -1),
-                                        random.nextInt(RANDOM_WANDER_RANGE) * (random.nextBoolean() ? 1 : -1));
+                                        random.nextInt(RANDOM_WANDER_RANGE) * (random.nextBoolean() ? 1 : -1)));
 
                         if (newTarget.getY() > 1 && newTarget.getY() < 254 && new Vector3(newTarget).distance(this) >= 5.0) {
                             MiscUtils.executeWithChunk(this.getCommandSenderWorld(), newTarget, () -> {
@@ -168,11 +168,11 @@ public class EntityFlare extends FlyingMob {
                             });
                         }
                     }
-                } else if (this.getAttackTarget() != null) {
-                    if (!this.getAttackTarget().isAlive() || (this.getFollowingTarget() != null && this.getFollowingTarget().getDistance(this) > 30.0F)) {
-                        this.setAttackTarget(null);
+                } else if (this.getTarget() != null) {
+                    if (!this.getTarget().isAlive() || (this.getFollowingTarget() != null && this.getFollowingTarget().distanceTo(this) > 30.0F)) {
+                        this.setTarget(null);
                     } else {
-                        Vector3 newTarget = Vector3.atEntityCenter(this.getAttackTarget()).addY(1.5F);
+                        Vector3 newTarget = Vector3.atEntityCenter(this.getTarget()).addY(1.5F);
 
                         if (newTarget.getY() > 1 && newTarget.getY() < 254 && newTarget.distance(this) >= 3.0) {
                             this.currentMoveTarget = newTarget;
@@ -191,10 +191,10 @@ public class EntityFlare extends FlyingMob {
                             return;
                         }
 
-                        if (this.getAttackTarget() != null && !this.getAttackTarget().isAlive()){
-                            this.setAttackTarget(null);
+                        if (this.getTarget() != null && !this.getTarget().isAlive()){
+                            this.setTarget(null);
                         }
-                        if(this.getAttackTarget() == null) {
+                        if(this.getTarget() == null) {
                             Vector3 newTarget = Vector3.atEntityCenter(following).addY(2.5F);
 
                             if (newTarget.distance(this) >= 2.0) {
@@ -209,8 +209,8 @@ public class EntityFlare extends FlyingMob {
                     return;
                 }
 
-                LivingEntity target = this.getAttackTarget();
-                if (target != null && target.isAlive() && target.getDistance(this) < 10 && random.nextInt(40) == 0) {
+                LivingEntity target = this.getTarget();
+                if (target != null && target.isAlive() && target.distanceTo(this) < 10 && random.nextInt(40) == 0) {
                     DamageUtil.shotgunAttack(target, e -> this.doLightningAttack(e, 2F + random.nextFloat() * 2F));
                 }
 
@@ -223,10 +223,10 @@ public class EntityFlare extends FlyingMob {
     private void tickClient() {
         if (this.texClientSprite == null) {
             this.texClientSprite = EffectHelper.of(EffectTemplatesAS.FACING_SPRITE)
-                    .spawn(Vector3.atEntityCorner(this).addY(this.getHeight() / 2))
+                    .spawn(Vector3.atEntityCorner(this).addY(this.getBbHeight() / 2))
                     .pickSprite(SpritesAS.SPR_ENTITY_FLARE)
                     .setScaleMultiplier(0.45F)
-                    .position((fx, position, motionToBeMoved) -> Vector3.atEntityCorner(this).addY(this.getHeight() / 2))
+                    .position((fx, position, motionToBeMoved) -> Vector3.atEntityCorner(this).addY(this.getBbHeight() / 2))
                     .scale((fx, scaleIn, pTicks) -> this.isAlive() ? scaleIn : 0)
                     .refresh(fx -> this.isAlive());
         } else if (this.isAlive()) {
@@ -237,7 +237,7 @@ public class EntityFlare extends FlyingMob {
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(Vector3.atEntityCorner(this)
                             .add(random.nextFloat() * 0.2 * (random.nextBoolean() ? 1 : -1),
-                                    this.getHeight() / 2 + random.nextFloat() * 0.2 * (random.nextBoolean() ? 1 : -1),
+                                    this.getBbHeight() / 2 + random.nextFloat() * 0.2 * (random.nextBoolean() ? 1 : -1),
                                     random.nextFloat() * 0.2 * (random.nextBoolean() ? 1 : -1)))
                     .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F);
@@ -251,21 +251,21 @@ public class EntityFlare extends FlyingMob {
         DamageUtil.hurt(target, CommonProxy.DAMAGE_SOURCE_STELLAR, damage, this);
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.LIGHTNING)
                 .addData(buf -> {
-                    ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(this).addY(getHeight() / 2F));
+                    ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(this).addY(getBbHeight() / 2F));
                     ByteBufUtils.writeVector(buf, Vector3.atEntityCorner(target).addY(target.getBbHeight() / 2F));
                     buf.writeInt(ColorsAS.EFFECT_LIGHTNING.getRGB());
                 });
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getCommandSenderWorld(), this.position(), 32));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(this.getCommandSenderWorld(), this.blockPosition(), 32));
     }
 
     private void doMovement() {
         if (this.currentMoveTarget != null) {
             Vec3 motion = this.getDeltaMovement();
-            double motionX = (Math.signum(this.currentMoveTarget.getX() - this.getX()) * 0.5D - motion.getX()) * (this.isAmbient() ? 0.01D : 0.025D);
-            double motionY = (Math.signum(this.currentMoveTarget.getY() - this.getY()) * 0.7D - motion.getY()) * (this.isAmbient() ? 0.01D : 0.025D);
-            double motionZ = (Math.signum(this.currentMoveTarget.getZ() - this.getZ()) * 0.5D - motion.getZ()) * (this.isAmbient() ? 0.01D : 0.025D);
+            double motionX = (Math.signum(this.currentMoveTarget.getX() - this.getX()) * 0.5D - motion.x) * (this.isAmbient() ? 0.01D : 0.025D);
+            double motionY = (Math.signum(this.currentMoveTarget.getY() - this.getY()) * 0.7D - motion.y) * (this.isAmbient() ? 0.01D : 0.025D);
+            double motionZ = (Math.signum(this.currentMoveTarget.getZ() - this.getZ()) * 0.5D - motion.z) * (this.isAmbient() ? 0.01D : 0.025D);
             this.setDeltaMovement(motion.add(motionX, motionY, motionZ));
-            this.moveForward = 0.2F;
+            this.setZza(0.2F);
         }
     }
 
@@ -290,7 +290,7 @@ public class EntityFlare extends FlyingMob {
     }
 
     @Override
-    public boolean checkBatSpawnRules(LevelAccessor worldIn, MobSpawnType spawnReasonIn) {
+    public boolean checkSpawnRules(LevelAccessor worldIn, MobSpawnType spawnReasonIn) {
         return false;
     }
 
@@ -308,7 +308,7 @@ public class EntityFlare extends FlyingMob {
 
     @Override
     protected void tickDeath() {
-        this.remove();
+        this.remove(RemovalReason.KILLED);
 
         if (this.getCommandSenderWorld().isClientSide()) {
             this.tickClientDeathEffects();
@@ -322,12 +322,12 @@ public class EntityFlare extends FlyingMob {
         }
 
         List<Vector3> posList = MiscUtils.getCirclePositions(
-                Vector3.atEntityCorner(this).addY(this.getHeight() / 2),
+                Vector3.atEntityCorner(this).addY(this.getBbHeight() / 2),
                 Vector3.positiveYRandom(),
                 0.3,
                 10);
         posList.addAll(MiscUtils.getCirclePositions(
-                Vector3.atEntityCorner(this).addY(this.getHeight() / 2),
+                Vector3.atEntityCorner(this).addY(this.getBbHeight() / 2),
                 Vector3.positiveYRandom(),
                 0.8,
                 20));
@@ -347,7 +347,7 @@ public class EntityFlare extends FlyingMob {
             FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(Vector3.atEntityCorner(this)
                             .add(random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1),
-                                    this.getHeight() / 2 + random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1),
+                                    this.getBbHeight() / 2 + random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1),
                                     random.nextFloat() * 0.15 * (random.nextBoolean() ? 1 : -1)))
                     .alpha1arg(VFXAlphaFunction.FADE_OUT)
                     .setDeltaMovement(Vector3.random().mul(0.05F))
@@ -360,16 +360,16 @@ public class EntityFlare extends FlyingMob {
     }
 
     @Override
-    public void writeAdditional(CompoundTag pattern) {
-        super.writeAdditional(pattern);
+    public void addAdditionalSaveData(CompoundTag pattern) {
+        super.addAdditionalSaveData(pattern);
 
         pattern.putInt("AS_entityAge", this.entityAge);
         pattern.putBoolean("AS_ambient", this.ambient);
     }
 
     @Override
-    public void readAdditional(CompoundTag pattern) {
-        super.readAdditional(pattern);
+    public void readAdditionalSaveData(CompoundTag pattern) {
+        super.readAdditionalSaveData(pattern);
 
         this.entityAge = pattern.getInt("AS_entityAge");
         this.ambient = pattern.getBoolean("AS_ambient");

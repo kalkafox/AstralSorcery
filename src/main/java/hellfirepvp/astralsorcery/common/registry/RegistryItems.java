@@ -17,8 +17,19 @@ import hellfirepvp.astralsorcery.common.block.tile.BlockCelestialCrystalCluster;
 import hellfirepvp.astralsorcery.common.block.tile.BlockGemCrystalCluster;
 import hellfirepvp.astralsorcery.common.item.*;
 import hellfirepvp.astralsorcery.common.item.armor.ItemMantle;
+import hellfirepvp.astralsorcery.common.item.block.ItemBlockCollectorCrystal;
+import hellfirepvp.astralsorcery.common.item.block.ItemBlockLens;
+import hellfirepvp.astralsorcery.common.item.block.ItemBlockPrism;
+import hellfirepvp.astralsorcery.common.block.tile.crystal.CollectorCrystalType;
+import hellfirepvp.astralsorcery.common.constellation.ConstellationRegistry;
+import hellfirepvp.astralsorcery.common.constellation.IConstellation;
+import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
+import hellfirepvp.astralsorcery.common.crystal.CrystalAttributes;
+import hellfirepvp.astralsorcery.common.crystal.CrystalProperty;
+import hellfirepvp.astralsorcery.common.crystal.CrystalPropertyRegistry;
 import hellfirepvp.astralsorcery.common.item.base.client.ItemDynamicColor;
 import hellfirepvp.astralsorcery.common.item.crystal.ItemAttunedCelestialCrystal;
+import hellfirepvp.astralsorcery.common.item.crystal.ItemAttunedCrystalBase;
 import hellfirepvp.astralsorcery.common.item.crystal.ItemAttunedRockCrystal;
 import hellfirepvp.astralsorcery.common.item.crystal.ItemCelestialCrystal;
 import hellfirepvp.astralsorcery.common.item.crystal.ItemRockCrystal;
@@ -32,6 +43,7 @@ import hellfirepvp.astralsorcery.common.item.tool.*;
 import hellfirepvp.astralsorcery.common.item.useables.*;
 import hellfirepvp.astralsorcery.common.item.wand.*;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
+import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.NameUtil;
@@ -42,12 +54,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.event.ColorHandlerEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.List;
 
@@ -137,34 +150,108 @@ public class RegistryItems {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void registerColors(ColorHandlerEvent.Item itemColorEvent) {
-        colorItems.forEach(item -> itemColorEvent.getItemColors().register(item::getColor, (Item) item));
+    public static void registerColors(RegisterColorHandlersEvent.Item itemColorEvent) {
+        colorItems.forEach(item -> itemColorEvent.register(item::getColor, (Item) item));
     }
 
     public static void registerDispenseBehaviors() {
-        DispenserBlock.registerDispenseBehavior(BUCKET_LIQUID_STARLIGHT, FluidContainerDispenseBehavior.getInstance());
+        DispenserBlock.registerBehavior(BUCKET_LIQUID_STARLIGHT, FluidContainerDispenseBehavior.getInstance());
     }
 
     public static void registerItemProperties() {
-        ItemProperties.registerProperty(INFUSED_GLASS, ResourceLocation.parse("engraved"), (stack, level, entity) -> {
+        ItemProperties.register(INFUSED_GLASS, ResourceLocation.parse("engraved"), (stack, level, entity, seed) -> {
             return ItemInfusedGlass.getEngraving(stack) != null ? 1 : 0;
         });
-        ItemProperties.registerProperty(KNOWLEDGE_SHARE, ResourceLocation.parse("written"), (stack, level, entity) -> {
+        ItemProperties.register(KNOWLEDGE_SHARE, ResourceLocation.parse("written"), (stack, level, entity, seed) -> {
             return ItemKnowledgeShare.isCreative(stack) || ItemKnowledgeShare.getKnowledge(stack) != null ? 1 : 0;
         });
-        ItemProperties.registerProperty(RESONATOR, ResourceLocation.parse("upgrade"), (stack, level, entity) -> {
+        ItemProperties.register(RESONATOR, ResourceLocation.parse("upgrade"), (stack, level, entity, seed) -> {
             if (!(entity instanceof Player)) {
                 return ItemResonator.ResonatorUpgrade.STARLIGHT.ordinal() / (float) ItemResonator.ResonatorUpgrade.values().length;
             }
             ItemResonator.ResonatorUpgrade current = ItemResonator.getCurrentUpgrade((Player) entity, stack);
             return current.ordinal() / (float) ItemResonator.ResonatorUpgrade.values().length;
         });
-        ItemProperties.registerProperty(Item.canBeHurtBy(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER), ResourceLocation.parse("stage"), (stack, level, entity) -> {
-            return ((float) stack.getDamage()) / BlockCelestialCrystalCluster.STAGE.getPossibleValues().size();
+        ItemProperties.register(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.asItem(), ResourceLocation.parse("stage"), (stack, level, entity, seed) -> {
+            return ((float) stack.getDamageValue()) / BlockCelestialCrystalCluster.STAGE.getPossibleValues().size();
         });
-        ItemProperties.registerProperty(Item.canBeHurtBy(BlocksAS.GEM_CRYSTAL_CLUSTER), ResourceLocation.parse("stage"), (stack, level, entity) -> {
-            return ((float) stack.getDamage()) / BlockGemCrystalCluster.STAGE.getPossibleValues().size();
+        ItemProperties.register(BlocksAS.GEM_CRYSTAL_CLUSTER.asItem(), ResourceLocation.parse("stage"), (stack, level, entity, seed) -> {
+            return ((float) stack.getDamageValue()) / BlockGemCrystalCluster.STAGE.getPossibleValues().size();
         });
+    }
+
+    public static void addCreativeVariants(CreativeModeTab.Output output) {
+        for (IConstellation constellation : ConstellationRegistry.getAllConstellations()) {
+            ItemStack paper = new ItemStack(CONSTELLATION_PAPER);
+            CONSTELLATION_PAPER.setConstellation(paper, constellation);
+            output.accept(paper);
+        }
+
+        ItemStack creativeKnowledge = new ItemStack(KNOWLEDGE_SHARE);
+        ItemKnowledgeShare.setCreative(creativeKnowledge);
+        output.accept(creativeKnowledge);
+
+        ItemStack baseResonator = new ItemStack(RESONATOR);
+        ItemResonator.setUpgradeUnlocked(baseResonator, ItemResonator.ResonatorUpgrade.STARLIGHT);
+        output.accept(baseResonator);
+        ItemStack upgradedResonator = new ItemStack(RESONATOR);
+        ItemResonator.setUpgradeUnlocked(upgradedResonator, ItemResonator.ResonatorUpgrade.values());
+        output.accept(upgradedResonator);
+
+        addAttunedCrystalVariants(output, ATTUNED_ROCK_CRYSTAL);
+        addAttunedCrystalVariants(output, ATTUNED_CELESTIAL_CRYSTAL);
+
+        for (IWeakConstellation constellation : ConstellationRegistry.getWeakConstellations()) {
+            ItemStack mantle = new ItemStack(MANTLE);
+            MANTLE.setConstellation(mantle, constellation);
+            output.accept(mantle);
+        }
+
+        addCollectorCrystalVariants(output, (ItemBlockCollectorCrystal) BlocksAS.ROCK_COLLECTOR_CRYSTAL.asItem());
+        addCollectorCrystalVariants(output, (ItemBlockCollectorCrystal) BlocksAS.CELESTIAL_COLLECTOR_CRYSTAL.asItem());
+
+        for (int stage : BlockCelestialCrystalCluster.STAGE.getPossibleValues()) {
+            ItemStack cluster = new ItemStack(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER);
+            cluster.setDamageValue(stage);
+            output.accept(cluster);
+        }
+        for (BlockGemCrystalCluster.GrowthStageType stage : BlockGemCrystalCluster.STAGE.getPossibleValues()) {
+            ItemStack cluster = new ItemStack(BlocksAS.GEM_CRYSTAL_CLUSTER);
+            cluster.setDamageValue(stage.ordinal());
+            output.accept(cluster);
+        }
+
+        ItemStack lens = new ItemStack(BlocksAS.LENS);
+        ((ItemBlockLens) lens.getItem())
+                .setAttributes(lens, CrystalPropertiesAS.LENS_PRISM_CREATIVE_ATTRIBUTES);
+        output.accept(lens);
+        ItemStack prism = new ItemStack(BlocksAS.PRISM);
+        ((ItemBlockPrism) prism.getItem())
+                .setAttributes(prism, CrystalPropertiesAS.LENS_PRISM_CREATIVE_ATTRIBUTES);
+        output.accept(prism);
+    }
+
+    private static void addAttunedCrystalVariants(CreativeModeTab.Output output,
+                                                    ItemAttunedCrystalBase item) {
+        for (IWeakConstellation constellation : ConstellationRegistry.getWeakConstellations()) {
+            ItemStack stack = new ItemStack(item);
+            item.setAttunedConstellation(stack, constellation);
+            output.accept(stack);
+        }
+    }
+
+    private static void addCollectorCrystalVariants(CreativeModeTab.Output output, ItemBlockCollectorCrystal item) {
+        CrystalAttributes template = item.getCollectorType() == CollectorCrystalType.ROCK_CRYSTAL
+                ? CrystalPropertiesAS.CREATIVE_ROCK_COLLECTOR_ATTRIBUTES
+                : CrystalPropertiesAS.CREATIVE_CELESTIAL_COLLECTOR_ATTRIBUTES;
+        for (IWeakConstellation constellation : ConstellationRegistry.getWeakConstellations()) {
+            ItemStack stack = new ItemStack(item);
+            item.setAttunedConstellation(stack, constellation);
+            CrystalProperty property = CrystalPropertyRegistry.INSTANCE.getConstellationProperty(constellation);
+            CrystalAttributes attributes = property == null ? template : template.modifyLevel(property, property.getMaxTier());
+            attributes.store(stack);
+            output.accept(stack);
+        }
     }
 
     private static void registerItemBlock(CustomItemBlock block) {

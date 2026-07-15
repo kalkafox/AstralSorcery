@@ -27,6 +27,7 @@ import hellfirepvp.astralsorcery.client.screen.journal.bookmark.BookmarkProvider
 import hellfirepvp.astralsorcery.client.util.AreaOfInfluencePreview;
 import hellfirepvp.astralsorcery.client.util.ColorizationHelper;
 import hellfirepvp.astralsorcery.client.util.MouseUtil;
+import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.client.util.camera.CameraEventHelper;
 import hellfirepvp.astralsorcery.client.util.camera.ClientCameraManager;
 import hellfirepvp.astralsorcery.client.util.draw.RenderInfo;
@@ -34,7 +35,10 @@ import hellfirepvp.astralsorcery.client.util.word.RandomWordGenerator;
 import hellfirepvp.astralsorcery.common.CommonProxy;
 import hellfirepvp.astralsorcery.common.GuiType;
 import hellfirepvp.astralsorcery.common.base.patreon.manager.PatreonManagerClient;
+import hellfirepvp.astralsorcery.common.block.tile.BlockStructural;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
+import hellfirepvp.astralsorcery.common.event.EventFlags;
+import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
 import hellfirepvp.astralsorcery.common.perk.AbstractPerk;
 import hellfirepvp.astralsorcery.common.perk.PerkTree;
@@ -56,6 +60,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
@@ -123,6 +134,57 @@ public class ClientProxy extends CommonProxy {
     }
 
     private void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        // Suppress vanilla break/hit particles for the invisible flare light.
+        event.registerBlock(new IClientBlockExtensions() {
+            @Override
+            public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
+                return true;
+            }
+
+            @Override
+            public boolean addHitEffects(BlockState state, Level level, HitResult target, ParticleEngine manager) {
+                return true;
+            }
+        }, BlocksAS.FLARE_LIGHT);
+
+        // Also play break particles for the telescope's structural top half.
+        event.registerBlock(new IClientBlockExtensions() {
+            @Override
+            public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
+                RenderingUtils.playBlockBreakParticles(pos.above(), BlocksAS.TELESCOPE.defaultBlockState(), BlocksAS.TELESCOPE.defaultBlockState());
+                return false;
+            }
+        }, BlocksAS.TELESCOPE);
+
+        // Redirect break/hit particles of structural dummies to the block they support.
+        event.registerBlock(new IClientBlockExtensions() {
+            @Override
+            public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
+                EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
+                    switch (state.getValue(BlockStructural.BLOCK_TYPE)) {
+                        case TELESCOPE:
+                            manager.destroy(pos.below(), BlocksAS.TELESCOPE.defaultBlockState());
+                            break;
+                    }
+                });
+                return true;
+            }
+
+            @Override
+            public boolean addHitEffects(BlockState state, Level level, HitResult target, ParticleEngine manager) {
+                if (target instanceof BlockHitResult blockHit) {
+                    EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
+                        switch (state.getValue(BlockStructural.BLOCK_TYPE)) {
+                            case TELESCOPE:
+                                manager.destroy(blockHit.getBlockPos().below(), BlocksAS.TELESCOPE.defaultBlockState());
+                                break;
+                        }
+                    });
+                }
+                return true;
+            }
+        }, BlocksAS.STRUCTURAL);
+
         event.registerFluidType(new IClientFluidTypeExtensions() {
             @Override
             public ResourceLocation getStillTexture() {

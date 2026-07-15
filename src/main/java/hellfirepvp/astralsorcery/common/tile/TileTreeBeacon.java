@@ -49,8 +49,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import hellfirepvp.astralsorcery.common.util.Constants;
-import net.neoforged.neoforge.event.level.SaplingGrowTreeEvent;
-import net.neoforged.bus.api.Event;
+import net.minecraft.core.HolderLookup;
+import net.neoforged.neoforge.event.level.BlockGrowFeatureEvent;
 import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nonnull;
@@ -74,8 +74,8 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
 
     private float starlight = 0F;
 
-    public TileTreeBeacon() {
-        super(TileEntityTypesAS.TREE_BEACON);
+    public TileTreeBeacon(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.TREE_BEACON, pos, state);
     }
 
     @Override
@@ -187,7 +187,7 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
                     return false;
                 }
 
-                boolean isLog = state.getBlock().isIn(BlockTags.LOGS);
+                boolean isLog = state.is(BlockTags.LOGS);
                 tfs.setFakedState(state);
                 tfs.setTreeBeaconPos(this.getBlockPos());
                 tfs.setOverlayColor(this.getColor(LogicalSide.SERVER));
@@ -335,8 +335,8 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
     }
 
     @Override
-    public void remove() {
-        super.remove();
+    public void setRemoved() {
+        super.setRemoved();
 
         TreeWatcher.WATCHERS.computeIfAbsent(this.dimension(), type -> new HashSet<>())
                 .remove(this.getBlockPos());
@@ -356,8 +356,8 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.treeComponents.clear();
         ListTag componentList = pattern.getList("components", Constants.NBT.TAG_COMPOUND);
@@ -372,8 +372,8 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         ListTag componentList = new ListTag();
         MapStream.forEach(this.treeComponents, (pos, weight) -> {
@@ -450,13 +450,13 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
             WATCHERS.clear();
         }
 
-        public static void onGrow(SaplingGrowTreeEvent event) {
+        public static void onGrow(BlockGrowFeatureEvent event) {
             if (event.getLevel().isClientSide() || !(event.getLevel() instanceof ServerLevel)) {
                 return;
             }
 
             ServerLevel level = (ServerLevel) event.getLevel();
-            BlockPos treePos = event.getBlockPos();
+            BlockPos treePos = event.getPos();
             TreeType type = TreeType.isTree(level, treePos);
             if (type == null) {
                 return;
@@ -475,9 +475,9 @@ public class TileTreeBeacon extends TileReceiverBase<StarlightReceiverTreeBeacon
                 return;
             }
 
-            event.setResult(Event.Result.DENY);
+            event.setCanceled(true);
 
-            Supplier<List<BlockPos>> generator = type.getTreeGenerator(level, treePos, event.getRand());
+            Supplier<List<BlockPos>> generator = type.getTreeGenerator(level, treePos, event.getRandom());
             ttb.captureTree(generator);
         }
     }

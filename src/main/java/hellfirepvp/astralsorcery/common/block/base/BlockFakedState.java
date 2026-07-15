@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.block.base;
 
+import com.mojang.serialization.MapCodec;
 import com.google.common.collect.Lists;
 import hellfirepvp.astralsorcery.client.effect.function.VFXAlphaFunction;
 import hellfirepvp.astralsorcery.client.effect.function.VFXColorFunction;
@@ -38,10 +39,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import net.minecraft.util.RandomSource;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Random;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -62,7 +64,7 @@ public abstract class BlockFakedState extends BaseEntityBlock {
     }
 
     @OnlyIn(Dist.CLIENT)
-    protected void showBreakingParticles(Level level, BlockPos pos, Random random) {
+    protected void showBreakingParticles(Level level, BlockPos pos, RandomSource random) {
         if (random.nextInt(8) == 0) {
             VFXColorFunction<?> colorFn = VFXColorFunction.WHITE;
             TileFakedState fakedState = MiscUtils.getTileAt(level, pos, TileFakedState.class, false);
@@ -182,5 +184,10 @@ public abstract class BlockFakedState extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.INVISIBLE;
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

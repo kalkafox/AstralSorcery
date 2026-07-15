@@ -197,7 +197,7 @@ public class SimpleSingleFluidTank implements IFluidTank {
         return new FluidStack(this.fluid, maxDrainable);
     }
 
-    public CompoundTag fillDefaultJigsawNBT() {
+    public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
         tag.putInt("amt", this.amount);
         tag.putInt("capacity", this.maxCapacity);

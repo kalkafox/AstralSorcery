@@ -99,7 +99,7 @@ public class BlockRitualPedestal extends BlockStarlightNetwork implements Custom
             if (player.getItemInHand(hand).isEmpty()) {
                 player.setItemInHand(hand, in);
             } else {
-                player.getInventory().hurtArmor(level, in);
+                player.getInventory().placeItemBackInInventory(in);
             }
         } else {
             player.setItemInHand(hand, pedestal.tryPlaceCrystalInPedestal(heldItem));
@@ -115,7 +115,7 @@ public class BlockRitualPedestal extends BlockStarlightNetwork implements Custom
         if (te != null && !level.isClientSide()) {
             BlockPos toCheck = pos.above();
             BlockState other = level.getBlockState(toCheck);
-            if (Block.fillItemCategory(other.getCollisionShape(level, pos), Direction.DOWN)) {
+            if (Block.isFaceFull(other.getCollisionShape(level, pos), Direction.DOWN)) {
                 ItemUtils.dropItem(level, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, te.getCurrentCrystal());
                 te.tryPlaceCrystalInPedestal(ItemStack.EMPTY);
             }

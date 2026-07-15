@@ -50,6 +50,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -92,8 +93,8 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
     private ConstellationEffect clientEffectInstance = null;
     private Object ritualHaloEffect = null;
 
-    public TileRitualPedestal() {
-        super(TileEntityTypesAS.RITUAL_PEDESTAL);
+    public TileRitualPedestal(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.RITUAL_PEDESTAL, pos, state);
 
         this.inventory = new TileInventoryFiltered(this, () -> 1, Direction.DOWN);
         this.inventory.canExtract((slot, amount, existing) -> !existing.isEmpty());
@@ -441,7 +442,7 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
         if (this.ownerUUID == null || this.level == null) {
             return null;
         }
-        return this.level.getPlayerByUuid(this.ownerUUID);
+        return this.level.getPlayerByUUID(this.ownerUUID);
     }
 
     @Nonnull
@@ -567,8 +568,8 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
         this.ownerUUID = NBTHelper.getUUID(pattern, "ownerUUID", null);
@@ -591,8 +592,8 @@ public class TileRitualPedestal extends TileReceiverBase<StarlightReceiverRitual
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
         pattern.put("inventory", this.inventory.serialize());
         if (this.ownerUUID != null) {

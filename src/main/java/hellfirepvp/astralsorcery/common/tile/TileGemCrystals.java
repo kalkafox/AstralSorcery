@@ -86,11 +86,11 @@ public class TileGemCrystals extends TileEntityTick {
 
     public BlockGemCrystalCluster.GrowthStageType getGrowth() {
         BlockState current = getLevel().getBlockState(getBlockPos());
-        return current.get(BlockGemCrystalCluster.STAGE);
+        return current.getValue(BlockGemCrystalCluster.STAGE);
     }
 
     public void setGrowth(BlockGemCrystalCluster.GrowthStageType stage) {
         BlockState next = BlocksAS.GEM_CRYSTAL_CLUSTER.defaultBlockState().setValue(BlockGemCrystalCluster.STAGE, stage);
-        getLevel().setBlock(getBlockPos(), next);
+        getLevel().setBlockAndUpdate(getBlockPos(), next);
     }
 }

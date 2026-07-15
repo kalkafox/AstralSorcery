@@ -213,7 +213,7 @@ public class BlockUtils {
         return playerMP.gameMode.destroyBlock(pos);
     }
 
-    //Copied from ForgeHooks.onBlockBreak & PlayerInteractionManager.tryHarvestBlock
+    //Copied from CommonHooks.onBlockBreak & PlayerInteractionManager.tryHarvestBlock
     //Duplicate break functionality without a active player.
     //Emulates a FakePlayer - attempts without a player as harvester in case a fakeplayer leads to issues.
     public static boolean breakBlockWithoutPlayer(ServerLevel level, BlockPos pos) {

@@ -35,9 +35,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.Level;
@@ -52,6 +51,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -80,22 +81,6 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            items.add(new ItemStack(this));
-            for (IConstellation cst : RegistriesAS.REGISTRY_CONSTELLATIONS.getValues()) {
-                if (!(cst instanceof IWeakConstellation)) {
-                    continue;
-                }
-
-                ItemStack stack = new ItemStack(this);
-                this.setConstellation(stack, cst);
-                items.add(stack);
-            }
-        }
-    }
-
-    @Override
     public boolean canElytraFly(ItemStack stack, LivingEntity entity) {
         if (!(entity instanceof Player)) {
             return false;
@@ -113,7 +98,7 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
         IConstellation cst = this.getConstellation(stack);
         if (cst instanceof IWeakConstellation) {
             tooltip.add(cst.getConstellationName().withStyle(ChatFormatting.BLUE));
@@ -142,20 +127,17 @@ public class ItemMantle extends ArmorItem implements ItemDynamicColor, Constella
     }
 
     @Override
-    @Nullable
-    @OnlyIn(Dist.CLIENT)
-    public <A extends HumanoidModel<?>> A getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, A _default) {
-        if (outerModel == null) {
-            outerModel = new ModelArmorMantle();
-        }
-        return (A) outerModel;
-    }
-
-    @Override
-    @Nullable
-    @OnlyIn(Dist.CLIENT)
-    public String getTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-        return AstralSorcery.key("textures/model/armor/mantle.png").toString();
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(new IClientItemExtensions() {
+            @Override
+            public HumanoidModel<?> getHumanoidArmorModel(LivingEntity entity, ItemStack stack,
+                                                          EquipmentSlot slot, HumanoidModel<?> original) {
+                if (outerModel == null) {
+                    outerModel = new ModelArmorMantle();
+                }
+                return (HumanoidModel<?>) outerModel;
+            }
+        });
     }
 
     @Nullable

@@ -21,6 +21,7 @@ import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.item.BlockItem;
@@ -59,12 +60,13 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     public static IntegerProperty STAGE = IntegerProperty.create("stage", 0, 4);
 
     public BlockCelestialCrystalCluster() {
-        super(Properties.create(Material.GLASS, CollectorCrystalType.CELESTIAL_CRYSTAL.getMaterialColor())
-                .hardnessAndResistance(3F, 3F)
+        super(Properties.of().mapColor(CollectorCrystalType.CELESTIAL_CRYSTAL.getMaterialColor())
+                .strength(3F, 3F)
 
 
                 .sound(SoundType.GLASS)
-                .isRedstoneConductor((state) -> 8));
+                .lightLevel((state) -> 8)
+                .offsetType(BlockBehaviour.OffsetType.XZ));
     }
 
     @Override
@@ -89,7 +91,7 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         Vec3 offset = state.getOffset(level, pos);
         VoxelShape shape;
-        switch (state.get(STAGE)) {
+        switch (state.getValue(STAGE)) {
             case 4:
                 shape = GROWTH_STAGE_4;
                 break;
@@ -106,12 +108,7 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
             default:
                 shape = GROWTH_STAGE_0;
         }
-        return shape.offset(offset.x, offset.y, offset.z);
-    }
-
-    @Override
-    public OffsetType getOffsetType() {
-        return OffsetType.XZ;
+        return shape.move(offset.x, offset.y, offset.z);
     }
 
     /*
@@ -131,7 +128,7 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return hasSolidSideOnTop(level, pos.below());
+        return canSupportRigidBlock(level, pos.below());
     }
 
     @Override

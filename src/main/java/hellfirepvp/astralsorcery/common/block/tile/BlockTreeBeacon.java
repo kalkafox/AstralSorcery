@@ -47,11 +47,11 @@ public class BlockTreeBeacon extends BlockStarlightNetwork implements CustomItem
 
     public BlockTreeBeacon() {
         super(PropertiesMisc.defaultPlant()
-                .hardnessAndResistance(1.5F, 6.0F)
+                .strength(1.5F, 6.0F)
 
 
-                .isRedstoneConductor(state -> 6)
-                .sound(SoundType.PLANT));
+                .lightLevel(state -> 6)
+                .sound(SoundType.GRASS));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class BlockTreeBeacon extends BlockStarlightNetwork implements CustomItem
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return hasSolidSideOnTop(level, pos.below());
+        return canSupportRigidBlock(level, pos.below());
     }
 
     @Override

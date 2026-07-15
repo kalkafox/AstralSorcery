@@ -34,7 +34,7 @@ public abstract class BlockFountainPrime extends Block implements CustomItemBloc
 
     public BlockFountainPrime() {
         super(PropertiesMarble.defaultMarble()
-                .notSolid());
+                .noOcclusion());
     }
 
     @Nonnull

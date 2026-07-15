@@ -16,7 +16,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 import hellfirepvp.astralsorcery.common.util.Constants;
 
@@ -53,15 +53,15 @@ public class ClientLightBlockEndpoints extends ClientData<ClientLightBlockEndpoi
         public void readFromIncomingFullSync(ClientLightBlockEndpoints data, CompoundTag pattern) {
             data.clientPositions.clear();
 
-            for (String dimKey : pattern.keySet()) {
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+            for (String dimKey : pattern.getAllKeys()) {
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
 
                 Set<BlockPos> positions = new HashSet<>();
                 ListTag list = pattern.getList(dimKey, Constants.NBT.TAG_COMPOUND);
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos pos = BlockPos.subtract(tag.getLong("pos"));
+                    BlockPos pos = BlockPos.of(tag.getLong("pos"));
                     positions.add(pos);
                 }
                 data.clientPositions.put(dim, positions);
@@ -72,18 +72,18 @@ public class ClientLightBlockEndpoints extends ClientData<ClientLightBlockEndpoi
         public void readFromIncomingDiff(ClientLightBlockEndpoints data, CompoundTag pattern) {
             Set<String> clearedDimensions = new HashSet<>();
             for (Tag dimKeyNBT : pattern.getList("clear", Constants.NBT.TAG_STRING)) {
-                String dimKey = dimKeyNBT.getString();
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+                String dimKey = dimKeyNBT.getAsString();
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
                 data.clientPositions.remove(dim);
 
                 clearedDimensions.add(dimKey);
             }
 
-            for (String dimKey : pattern.keySet()) {
+            for (String dimKey : pattern.getAllKeys()) {
                 if (clearedDimensions.contains(dimKey)) {
                     continue;
                 }
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
 
                 Set<BlockPos> positions = data.clientPositions.computeIfAbsent(dim, k -> new HashSet<>());
 
@@ -91,7 +91,7 @@ public class ClientLightBlockEndpoints extends ClientData<ClientLightBlockEndpoi
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos pos = BlockPos.subtract(tag.getLong("pos"));
+                    BlockPos pos = BlockPos.of(tag.getLong("pos"));
                     boolean addNew = tag.getBoolean("add");
 
                     if (addNew) {

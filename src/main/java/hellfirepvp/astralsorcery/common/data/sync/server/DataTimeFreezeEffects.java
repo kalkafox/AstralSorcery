@@ -18,7 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -123,7 +123,7 @@ public class DataTimeFreezeEffects extends AbstractData {
         public static ServerSyncAction deserializeNBT(CompoundTag cmp) {
             ActionType type = MiscUtils.getEnumEntry(ActionType.class, cmp.getInt("type"));
             String dimKey = cmp.getString("dimType");
-            ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+            ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
             TimeStopEffectHelper helper = null;
             switch (type) {
                 case ADD:

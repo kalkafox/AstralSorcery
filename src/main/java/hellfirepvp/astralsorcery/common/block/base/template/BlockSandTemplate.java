@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.base.template;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,5 +37,10 @@ public class BlockSandTemplate extends FallingBlock implements CustomItemBlock {
     @Override
     public int getDustColor(BlockState state, BlockGetter reader, BlockPos pos) {
         return 0xDBDEA0;
+    }
+
+    @Override
+    protected MapCodec<? extends FallingBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

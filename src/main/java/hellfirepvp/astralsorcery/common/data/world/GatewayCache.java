@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.data.world;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.auxiliary.gateway.CelestialGatewayHandler;
 import hellfirepvp.astralsorcery.common.tile.TileCelestialGateway;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
@@ -16,8 +18,11 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import hellfirepvp.astralsorcery.common.util.log.LogCategory;
 import hellfirepvp.astralsorcery.common.util.log.LogUtil;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
+import hellfirepvp.observerlib.common.data.CachedWorldData;
 import hellfirepvp.observerlib.common.data.WorldCacheDomain;
 import hellfirepvp.observerlib.common.data.base.GlobalWorldData;
+import hellfirepvp.observerlib.common.util.CodecUtil;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.nbt.CompoundTag;
@@ -43,11 +48,24 @@ import java.util.function.Consumer;
  * Created by HellFirePvP
  * Date: 30.05.2019 / 14:35
  */
-public class GatewayCache extends GlobalWorldData {
+public class GatewayCache extends GlobalWorldData<GatewayCache> {
+
+    public static final Codec<GatewayCache> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+            WorldCacheDomain.SaveKey.CODEC.fieldOf("key").forGetter(CachedWorldData::getSaveKey),
+            CompoundTag.CODEC.fieldOf("data").forGetter(cache -> {
+                CompoundTag tag = new CompoundTag();
+                cache.save(tag);
+                return tag;
+            })
+    ).apply(builder, (key, tag) -> {
+        GatewayCache cache = new GatewayCache(CodecUtil.unwrap(key));
+        cache.readFromNBT(tag);
+        return cache;
+    }));
 
     private final Set<GatewayNode> gatewayPositions = new HashSet<>();
 
-    public GatewayCache(WorldCacheDomain.SaveKey<?> key) {
+    public GatewayCache(WorldCacheDomain.SaveKey<GatewayCache> key) {
         super(key);
     }
 
@@ -104,9 +122,6 @@ public class GatewayCache extends GlobalWorldData {
     }
 
     @Override
-    public void updateTick(Level level) {}
-
-    @Override
     public void onLoad(Level level) {
         super.onLoad(level);
 
@@ -134,7 +149,6 @@ public class GatewayCache extends GlobalWorldData {
                         "ms! Collected and checked " + gatewayPositions.size() + " gateway nodes!");
     }
 
-    @Override
     public void save(CompoundTag pattern) {
         ListTag list = new ListTag();
         for (GatewayNode node : gatewayPositions) {
@@ -145,7 +159,6 @@ public class GatewayCache extends GlobalWorldData {
         pattern.put("posList", list);
     }
 
-    @Override
     public void readFromNBT(CompoundTag pattern) {
         ListTag list = pattern.getList("posList", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
@@ -211,7 +224,7 @@ public class GatewayCache extends GlobalWorldData {
         public void write(CompoundTag tag) {
             NBTHelper.writeBlockPosToNBT(this.getBlockPos(), tag);
             if (this.getDisplayName() != null) {
-                tag.putString("display", Component.Serializer.getPos(this.getDisplayName()));
+                tag.putString("display", Component.Serializer.toJson(this.getDisplayName(), RegistryAccess.EMPTY));
             }
             if (this.getColor() != null) {
                 NBTHelper.writeEnum(tag, "color", this.getColor());
@@ -239,7 +252,7 @@ public class GatewayCache extends GlobalWorldData {
         public static GatewayNode read(CompoundTag tag) {
             GatewayNode node = new GatewayNode(NBTHelper.readBlockPosFromNBT(tag));
             if (tag.contains("display")) {
-                node.display = Component.Serializer.getComponentFromJson(tag.getString("display"));
+                node.display = Component.Serializer.fromJson(tag.getString("display"), RegistryAccess.EMPTY);
             }
             if (tag.contains("color")) {
                 node.color = NBTHelper.readEnum(tag, "color", DyeColor.class);

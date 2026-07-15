@@ -53,7 +53,7 @@ public class PropertiesMisc {
                 .mapColor(MapColor.PLANT)
                 .noCollission()
                 .strength(0)
-                .sound(SoundType.PLANT);
+                .sound(SoundType.GRASS);
     }
 
     public static Block.Properties defaultTickingPlant() {
@@ -62,7 +62,7 @@ public class PropertiesMisc {
                 .noCollission()
                 .randomTicks()
                 .strength(0)
-                .sound(SoundType.PLANT);
+                .sound(SoundType.GRASS);
     }
 
     public static Block.Properties defaultGoldMachinery() {

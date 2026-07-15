@@ -11,7 +11,7 @@ package hellfirepvp.astralsorcery.common.starlight.network;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.neoforge.event.level.WorldEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.bus.api.IEventBus;
 
 /**
@@ -41,7 +41,7 @@ public class TransmissionChunkTracker {
         }
         TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((Level) iWorld);
         if (handle != null) {
-            handle.informChunkLoad(event.getChunk().getBlockPos());
+            handle.informChunkLoad(event.getChunk().getPos());
         }
     }
 
@@ -52,11 +52,11 @@ public class TransmissionChunkTracker {
         }
         TransmissionWorldHandler handle = StarlightTransmissionHandler.getInstance().getWorldHandler((Level) iWorld);
         if (handle != null) {
-            handle.informChunkUnload(event.getChunk().getBlockPos());
+            handle.informChunkUnload(event.getChunk().getPos());
         }
     }
 
-    private void onWorldLoad(WorldEvent.Load event) {
+    private void onWorldLoad(LevelEvent.Load event) {
         LevelAccessor iWorld = event.getLevel();
         if (iWorld.isClientSide() || !(iWorld instanceof Level)) {
             return;
@@ -64,7 +64,7 @@ public class TransmissionChunkTracker {
         StarlightUpdateHandler.getInstance().informWorldLoad((Level) iWorld);
     }
 
-    private void onWorldUnload(WorldEvent.Unload event) {
+    private void onWorldUnload(LevelEvent.Unload event) {
         LevelAccessor iWorld = event.getLevel();
         if (iWorld.isClientSide() || !(iWorld instanceof Level)) {
             return;

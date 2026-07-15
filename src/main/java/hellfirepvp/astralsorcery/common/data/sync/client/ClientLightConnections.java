@@ -16,7 +16,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 import hellfirepvp.astralsorcery.common.util.Constants;
 
@@ -58,16 +58,16 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
         public void readFromIncomingFullSync(ClientLightConnections cl, CompoundTag pattern) {
             cl.clientPosBuffer.clear();
 
-            for (String dimKey : pattern.keySet()) {
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+            for (String dimKey : pattern.getAllKeys()) {
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
 
                 Map<BlockPos, Set<BlockPos>> posMap = new HashMap<>();
                 ListTag list = pattern.getList(dimKey, Constants.NBT.TAG_COMPOUND);
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos start = BlockPos.subtract(tag.getLong("start"));
-                    BlockPos end   = BlockPos.subtract(tag.getLong("end"));
+                    BlockPos start = BlockPos.of(tag.getLong("start"));
+                    BlockPos end   = BlockPos.of(tag.getLong("end"));
                     posMap.computeIfAbsent(start, s -> new HashSet<>())
                             .add(end);
                 }
@@ -80,18 +80,18 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
         public void readFromIncomingDiff(ClientLightConnections cl, CompoundTag pattern) {
             Set<String> clearedDimensions = new HashSet<>();
             for (Tag dimKeyNBT : pattern.getList("clear", Constants.NBT.TAG_STRING)) {
-                String dimKey = dimKeyNBT.getString();
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+                String dimKey = dimKeyNBT.getAsString();
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
                 cl.clientPosBuffer.remove(dim);
 
                 clearedDimensions.add(dimKey);
             }
 
-            for (String dimKey : pattern.keySet()) {
+            for (String dimKey : pattern.getAllKeys()) {
                 if (clearedDimensions.contains(dimKey)) {
                     continue;
                 }
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
 
                 Map<BlockPos, Set<BlockPos>> posMap = cl.clientPosBuffer.computeIfAbsent(dim, d -> new HashMap<>());
 
@@ -99,8 +99,8 @@ public class ClientLightConnections extends ClientData<ClientLightConnections> {
                 for (Tag iTag : list) {
                     CompoundTag tag = (CompoundTag) iTag;
 
-                    BlockPos start = BlockPos.subtract(tag.getLong("start"));
-                    BlockPos end = BlockPos.subtract(tag.getLong("end"));
+                    BlockPos start = BlockPos.of(tag.getLong("start"));
+                    BlockPos end = BlockPos.of(tag.getLong("end"));
                     boolean newConnection = tag.getBoolean("connect");
 
                     if (newConnection) {

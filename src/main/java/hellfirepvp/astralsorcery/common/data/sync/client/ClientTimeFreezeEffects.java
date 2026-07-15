@@ -17,7 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 import hellfirepvp.astralsorcery.common.util.Constants;
 
@@ -82,8 +82,8 @@ public class ClientTimeFreezeEffects extends ClientData<ClientTimeFreezeEffects>
             data.clientActiveFreezeZones.clear();
 
             CompoundTag dimTag = pattern.getCompound("dimTypes");
-            for (String dimKey : dimTag.keySet()) {
-                ResourceKey<Level> dim = ResourceKey.create(Registry.DIMENSION_REGISTRY, ResourceLocation.parse(dimKey));
+            for (String dimKey : dimTag.getAllKeys()) {
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimKey));
 
                 List<TimeStopEffectHelper> effects = new LinkedList<>();
                 ListTag listEffects = dimTag.getList(dimKey, Constants.NBT.TAG_COMPOUND);

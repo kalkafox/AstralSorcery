@@ -63,7 +63,7 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
     public BlockLens() {
         super(PropertiesGlass.coatedGlass()
 );
-        registerDefaultState(this.getStateContainer().any().setValue(PLACED_AGAINST, Direction.DOWN));
+        registerDefaultState(this.getStateDefinition().any().setValue(PLACED_AGAINST, Direction.DOWN));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
     }
 
     @Override
-    public void onBlockHarvested(Level level, BlockPos pos, BlockState state, Player player) {
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         TileLens lens = MiscUtils.getTileAt(level, pos, TileLens.class, true);
         if (lens != null && !level.isClientSide() && !player.isCreative()) {
             if (lens.getColorType() != null) {
@@ -80,7 +80,7 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
                 ItemUtils.dropItemNaturally(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
             }
         }
-        super.onBlockHarvested(level, pos, state, player);
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
                 if (player.getItemInHand(hand).isEmpty()) {
                     player.setItemInHand(hand, drop);
                 } else {
-                    if (!player.getInventory().getArmor(drop)) {
+                    if (!player.getInventory().add(drop)) {
                         ItemUtils.dropItem(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
                     }
                 }
@@ -117,7 +117,7 @@ public class BlockLens extends BlockStarlightNetwork implements CustomItemBlock 
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        switch (state.get(PLACED_AGAINST)) {
+        switch (state.getValue(PLACED_AGAINST)) {
             case UP:
                 return LENS_UP;
             case NORTH:

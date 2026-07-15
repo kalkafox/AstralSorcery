@@ -52,7 +52,7 @@ public class TransmissionNetworkHelper {
             if (nextNode.getTo().equals(end)) return false;
         }
 
-        return tr.getTrPos().distSqr(new BlockPos(end), MAX_TRANSMISSION_DIST);
+        return tr.getTrPos().closerThan(end, MAX_TRANSMISSION_DIST);
     }
 
     public static boolean createTransmissionLink(IStarlightTransmission<?> tr, BlockPos next) {

@@ -50,7 +50,7 @@ public class SpectralToolBreakLogGoal extends SpectralToolGoal {
                     !state.isAir() &&
                     state.getDestroySpeed(level, pos) != -1 &&
                     state.getDestroySpeed(level, pos) <= 10 &&
-                    (state.isIn(BlockTags.LOGS) || state.isIn(BlockTags.LEAVES)) &&
+                    (state.is(BlockTags.LOGS) || state.is(BlockTags.LEAVES)) &&
                     BlockUtils.canToolBreakBlockWithoutPlayer(level, pos, state, new ItemStack(Items.DIAMOND_AXE));
         };
     }

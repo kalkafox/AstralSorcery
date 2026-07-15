@@ -14,9 +14,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.block.trees.Tree;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
@@ -25,7 +26,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -42,20 +42,20 @@ public class TreeType {
     private static final List<TreeType> TYPES = new ArrayList<>();
 
     private final BiPredicate<Level, BlockPos> treeTest;
-    private final TriFunction<ServerLevel, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator;
+    private final TriFunction<ServerLevel, BlockPos, RandomSource, Supplier<List<BlockPos>>> treeGenerator;
 
-    private TreeType(BiPredicate<Level, BlockPos> treeTest, TriFunction<ServerLevel, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator) {
+    private TreeType(BiPredicate<Level, BlockPos> treeTest, TriFunction<ServerLevel, BlockPos, RandomSource, Supplier<List<BlockPos>>> treeGenerator) {
         this.treeTest = treeTest;
         this.treeGenerator = treeGenerator;
     }
 
-    public static TreeType register(BiPredicate<Level, BlockPos> treeTest, TriFunction<ServerLevel, BlockPos, Random, Supplier<List<BlockPos>>> treeGenerator) {
+    public static TreeType register(BiPredicate<Level, BlockPos> treeTest, TriFunction<ServerLevel, BlockPos, RandomSource, Supplier<List<BlockPos>>> treeGenerator) {
         TreeType type = new TreeType(treeTest, treeGenerator);
         TYPES.add(type);
         return type;
     }
 
-    public Supplier<List<BlockPos>> getTreeGenerator(ServerLevel level, BlockPos pos, Random random) {
+    public Supplier<List<BlockPos>> getTreeGenerator(ServerLevel level, BlockPos pos, RandomSource random) {
         return this.treeGenerator.apply(level, pos, random);
     }
 
@@ -72,21 +72,21 @@ public class TreeType {
     static {
         register((level, pos) -> {
             BlockState state = level.getBlockState(pos);
-            return state.getBlock() instanceof SaplingBlock && ((SaplingBlock) state.getBlock()).treeGrower != null;
+            return state.getBlock() instanceof SaplingBlock;
         }, (level, pos, random) -> {
             BlockState state = level.getBlockState(pos);
-            if (state.getBlock() instanceof SaplingBlock) {
-                AbstractTreeGrower treeFeature = ((SaplingBlock) state.getBlock()).treeGrower;
+            if (state.getBlock() instanceof SaplingBlock sapling) {
+                TreeGrower treeFeature = sapling.treeGrower; //AT'd public
                 return () -> {
                     List<BlockSnapshot> blockSnapshots = MiscUtils.captureBlockChanges(level, () -> {
-                        treeFeature.growTree(level, level.getChunkSource().getChunkGenerator(), pos, state, random);
+                        treeFeature.growTree(level, level.getChunkSource().getGenerator(), pos, state, random);
                     });
                     return blockSnapshots.stream()
                             .filter(snapshot -> {
-                                Block b = snapshot.getCurrentBlock().getBlock();
-                                return b.isIn(BlockTags.LEAVES) || b.isIn(BlockTags.LOGS) || b instanceof VineBlock;
+                                BlockState current = snapshot.getCurrentState();
+                                return current.is(BlockTags.LEAVES) || current.is(BlockTags.LOGS) || current.getBlock() instanceof VineBlock;
                             })
-                            .map(BlockSnapshot::getBlockPos)
+                            .map(BlockSnapshot::getPos)
                             .collect(Collectors.toList());
                 };
             }

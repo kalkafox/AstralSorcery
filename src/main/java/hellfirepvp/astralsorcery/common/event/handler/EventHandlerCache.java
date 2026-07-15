@@ -121,7 +121,7 @@ public class EventHandlerCache {
 
         PlayerProgress progress = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (GeneralConfig.CONFIG.giveJournalOnJoin.get() && !progress.didReceiveTome()) {
-            if (player.getInventory().getArmor(new ItemStack(ItemsAS.TOME))) {
+            if (player.getInventory().add(new ItemStack(ItemsAS.TOME))) {
                 ResearchManager.setTomeReceived(player);
             }
         }

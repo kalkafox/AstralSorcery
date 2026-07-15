@@ -142,7 +142,7 @@ public class ResearchIOThread implements ServerLifecycleListener {
         try {
             CompoundTag cmp = new CompoundTag();
             progress.store(cmp);
-            NbtIo.write(cmp, playerFile);
+            NbtIo.write(cmp, playerFile.toPath());
         } catch (IOException ignored) {}
     }
 }

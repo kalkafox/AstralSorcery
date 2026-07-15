@@ -100,11 +100,11 @@ public class TileFountain extends TileEntityTick {
                     if (segment != nextSegment) {
                         effect.transition(this, ctx, LogicalSide.SERVER, segment, nextSegment);
                         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.FOUNTAIN_TRANSITION_SEGMENT).addData(buf -> {
-                            ByteBufUtils.writePos(buf, pos);
+                            ByteBufUtils.writePos(buf, getBlockPos());
                             ByteBufUtils.writeEnumValue(buf, segment);
                             ByteBufUtils.writeEnumValue(buf, nextSegment);
                         });
-                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 32));
+                        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, getBlockPos(), 32));
                     }
                     effect.tick(this, ctx, this.tickActiveFountainEffect, LogicalSide.SERVER, this.getSegment());
                 }
@@ -165,11 +165,11 @@ public class TileFountain extends TileEntityTick {
             this.tickDrawLiquidStarlight = 100;
 
             if (this.mbLiquidStarlight < (LIQUID_STARLIGHT_TANK_SIZE * 0.8F) && this.currentEffect != null) {
-                TileChalice chalice = MiscUtils.getTileAt(level, pos.above(), TileChalice.class, false);
+                TileChalice chalice = MiscUtils.getTileAt(level, getBlockPos().above(), TileChalice.class, false);
                 if (chalice != null) {
                     FluidStack fluid = chalice.getTank().drain(400, IFluidHandler.FluidAction.SIMULATE);
                     if (!fluid.isEmpty() && fluid.getFluid() instanceof FluidLiquidStarlight) {
-                        FluidStack drained = chalice.getTank().drain(new FluidStack(fluid, 400), IFluidHandler.FluidAction.EXECUTE);
+                        FluidStack drained = chalice.getTank().drain(fluid.copyWithAmount(400), IFluidHandler.FluidAction.EXECUTE);
                         this.mbLiquidStarlight += drained.getAmount();
                         this.markForUpdate();
                     }
@@ -182,7 +182,7 @@ public class TileFountain extends TileEntityTick {
         FountainEffect prevEffect = this.getCurrentEffect();
         FountainEffect.EffectContext prevContext = this.effectContext;
 
-        BlockState primeState = level.getBlockState(pos.below());
+        BlockState primeState = level.getBlockState(getBlockPos().below());
         if (primeState.getBlock() instanceof BlockFountainPrime) {
             if (this.setCurrentEffect(((BlockFountainPrime) primeState.getBlock()).provideEffect()) && prevEffect != null) {
                 this.replaceCurrentEffect(prevEffect, prevContext, this.getCurrentEffect());
@@ -197,8 +197,8 @@ public class TileFountain extends TileEntityTick {
     private void replaceCurrentEffect(FountainEffect prevEffect, FountainEffect.EffectContext prevContext, FountainEffect newEffect) {
         prevEffect.onReplace(this, prevContext, newEffect, LogicalSide.SERVER);
         PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.FOUNTAIN_REPLACE_EFFECT)
-                .addData(buf -> ByteBufUtils.writePos(buf, pos));
-        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 32));
+                .addData(buf -> ByteBufUtils.writePos(buf, getBlockPos()));
+        PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, getBlockPos(), 32));
 
     }
 
@@ -296,7 +296,7 @@ public class TileFountain extends TileEntityTick {
 
         pattern.putInt("tickActiveFountainEffect", this.tickActiveFountainEffect);
         pattern.putInt("mbLiquidStarlight", this.mbLiquidStarlight);
-        pattern.put("tank", this.tank.fillDefaultJigsawNBT());
+        pattern.put("tank", this.tank.save());
         if (this.currentEffect != null) {
             pattern.putString("currentEffect", this.currentEffect.getId().toString());
             if (this.effectContext != null) {

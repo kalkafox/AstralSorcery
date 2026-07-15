@@ -18,6 +18,7 @@ import hellfirepvp.astralsorcery.common.util.tile.NamedInventoryTile;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.state.BlockState;
@@ -74,7 +75,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
                 if (xx == 0 && zz == 0) {
                     continue;
                 }
-                BlockPos other = pos.add(xx, 0, zz);
+                BlockPos other = getBlockPos().offset(xx, 0, zz);
                 if (!MiscUtils.canSeeSky(this.getLevel(), other, false, true)) {
                     return false;
                 }
@@ -89,8 +90,8 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
 
         EntityObservatoryHelper helper = EntityTypesAS.OBSERVATORY_HELPER.create(this.getLevel());
         helper.setFixedObservatoryPos(this.getBlockPos());
-        helper.setPositionAndRotation(pos.getX() + 0.5, pos.getY() + 0.1, pos.getZ() + 0.5, 0,0);
-        this.getLevel().addEntity(helper);
+        helper.moveTo(getBlockPos().getX() + 0.5, getBlockPos().getY() + 0.1, getBlockPos().getZ() + 0.5, 0,0);
+        this.getLevel().addFreshEntity(helper);
 
         this.setEntityHelperRef(helper.getUUID());
         this.entityIdServerRef = helper.getId();
@@ -102,7 +103,7 @@ public class TileObservatory extends TileEntityTick implements NamedInventoryTil
         if (entityUUID == null) {
             return null;
         }
-        for (Entity e : level.getEntitiesWithinAABB(Entity.class, new AABB(pos.add(-3, -1, -3), pos.add(3, 2, 3)))) {
+        for (Entity e : level.getEntitiesOfClass(Entity.class, new AABB(Vec3.atLowerCornerOf(getBlockPos().offset(-3, -1, -3)), Vec3.atLowerCornerOf(getBlockPos().offset(3, 2, 3))))) {
             if (e.getUUID().equals(entityUUID)) {
                 this.entityIdServerRef = e.getId();
                 return e;

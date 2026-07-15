@@ -23,7 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
@@ -32,7 +32,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.util.BlockSnapshot;
-import net.neoforged.neoforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -56,18 +56,18 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
         this.shootFromRotation(thrower, thrower.getXRot(), thrower.getYRot(), 0F, 0.7F, 0.9F);
     }
 
-    public static EntityType.IFactory<EntityIlluminationSpark> factory() {
+    public static EntityType.EntityFactory<EntityIlluminationSpark> factory() {
         return (type, level) -> new EntityIlluminationSpark(level);
     }
 
     @Override
-    protected void defineSynchedData() {}
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {}
 
     @Override
     public void tick() {
         super.tick();
 
-        if (level.isClientSide()) {
+        if (level().isClientSide()) {
             spawnEffects();
         }
     }
@@ -93,7 +93,7 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
         randomizeColor(p);
 
         p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                .spawn(Vector3.atEntityCorner(this).add(getDeltaMovement().mul(0.5, 0.5, 0.5)));
+                .spawn(Vector3.atEntityCorner(this).add(getDeltaMovement().multiply(0.5, 0.5, 0.5)));
         p.setScaleMultiplier(0.6F);
         randomizeColor(p);
 
@@ -118,11 +118,11 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
 
     @Override
     protected void onHit(HitResult result) {
-        if (level.isClientSide()) {
+        if (level().isClientSide()) {
             return;
         }
         if (!(result instanceof BlockHitResult) || !(this.getOwner() instanceof Player)) {
-            remove();
+            remove(RemovalReason.DISCARDED);
             return;
         }
         Player player = (Player) this.getOwner();
@@ -130,14 +130,14 @@ public class EntityIlluminationSpark extends ThrowableProjectile {
 
         BlockPlaceContext bCtx = new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND, brtr));
 
-        BlockPos pos = bCtx.getBlockPos();
-        if (!BlockUtils.isReplaceable(level, pos)) {
-            pos = pos.offset(bCtx.getFace());
+        BlockPos pos = bCtx.getClickedPos();
+        if (!BlockUtils.isReplaceable(level(), pos)) {
+            pos = pos.relative(bCtx.getClickedFace());
         }
 
-        if (!ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(level.dimension(), level, pos), bCtx.getFace())) {
-            level.setBlock(pos, BlocksAS.FLARE_LIGHT.defaultBlockState());
+        if (!EventHooks.onBlockPlace(player, BlockSnapshot.create(level().dimension(), level(), pos), bCtx.getClickedFace())) {
+            level().setBlockAndUpdate(pos, BlocksAS.FLARE_LIGHT.defaultBlockState());
         }
-        remove();
+        remove(RemovalReason.DISCARDED);
     }
 }

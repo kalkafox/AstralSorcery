@@ -51,10 +51,10 @@ import java.util.function.Supplier;
 public class BlockLiquidStarlight extends LiquidBlock {
 
     public BlockLiquidStarlight(Supplier<? extends FlowingFluid> fluidSupplier) {
-        super(fluidSupplier, Block.Properties.create(Material.WATER)
+        super(fluidSupplier, Block.Properties.of()
                 .doesNotBlockMovement()
-                .isRedstoneConductor(state -> 15)
-                .hardnessAndResistance(100.0F)
+                .lightLevel(state -> 15)
+                .strength(100.0F)
                 .noDrops());
     }
 
@@ -62,7 +62,7 @@ public class BlockLiquidStarlight extends LiquidBlock {
     public void onEntityCollision(BlockState state, Level level, BlockPos pos, Entity entity) {
         super.onEntityCollision(state, level, pos, entity);
 
-        if (state.get(LEVEL) != 0) {
+        if (state.getValue(LEVEL) != 0) {
             return;
         }
 
@@ -79,13 +79,13 @@ public class BlockLiquidStarlight extends LiquidBlock {
 
     public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
-            worldIn.getLiquidTicks().scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
+            worldIn.scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
         }
     }
 
     public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
-            worldIn.getLiquidTicks().scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
+            worldIn.scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
         }
     }
 
@@ -127,7 +127,7 @@ public class BlockLiquidStarlight extends LiquidBlock {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
-        Integer level = state.get(LEVEL);
+        Integer level = state.getValue(LEVEL);
         double percHeight = 1D - (((double) level + 1) / 8D);
         playLiquidStarlightBlockEffect(random, new Vector3(pos).addY(percHeight * random.nextFloat()), 1F);
         playLiquidStarlightBlockEffect(random, new Vector3(pos).addY(percHeight * random.nextFloat()), 1F);

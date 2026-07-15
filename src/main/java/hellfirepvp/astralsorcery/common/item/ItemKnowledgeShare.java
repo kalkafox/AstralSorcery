@@ -25,13 +25,12 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.*;
-import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -61,19 +60,8 @@ public class ItemKnowledgeShare extends Item {
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            items.add(new ItemStack(this));
-
-            ItemStack creative = new ItemStack(this);
-            setCreative(creative);
-            items.add(creative);
-        }
-    }
-
-    @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         if (isCreative(stack)) {
             tooltip.add(Component.translatable("astralsorcery.misc.knowledge.inscribed.creative").withStyle(ChatFormatting.LIGHT_PURPLE));
             return;
@@ -162,7 +150,7 @@ public class ItemKnowledgeShare extends Item {
         if (!pattern.contains("knowledgeOwnerName")) {
             return null;
         }
-        return Component.Serializer.getComponentFromJson(pattern.getString("knowledgeOwnerName"));
+        return Component.Serializer.fromJson(pattern.getString("knowledgeOwnerName"), RegistryAccess.EMPTY);
     }
 
     @Nullable
@@ -200,7 +188,7 @@ public class ItemKnowledgeShare extends Item {
         CompoundTag knowledge = new CompoundTag();
         progress.storeKnowledge(knowledge);
         CompoundTag pattern = NBTHelper.getPersistentData(stack);
-        pattern.putString("knowledgeOwnerName", Component.Serializer.getPos(player.getDisplayName()));
+        pattern.putString("knowledgeOwnerName", Component.Serializer.toJson(player.getDisplayName(), RegistryAccess.EMPTY));
         pattern.putUUID("knowledgeOwnerUUID", player.getUUID());
         pattern.put("knowledgeTag", knowledge);
     }
@@ -213,7 +201,7 @@ public class ItemKnowledgeShare extends Item {
         return cmp.getBoolean("creativeKnowledge");
     }
 
-    private void setCreative(ItemStack stack) {
+    public static void setCreative(ItemStack stack) {
         NBTHelper.getPersistentData(stack).putBoolean("creativeKnowledge", true);
     }
 }

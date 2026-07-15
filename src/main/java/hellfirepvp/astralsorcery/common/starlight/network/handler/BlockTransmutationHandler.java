@@ -128,8 +128,8 @@ public class BlockTransmutationHandler implements StarlightNetworkRegistry.IStar
 
                 ItemStack stack = ItemUtils.createBlockStack(out);
                 if (!stack.isEmpty()) {
-                    level.getPlayers().stream()
-                            .filter(player -> player.getDistanceSq(pos.getX(), pos.getY(), pos.getZ()) <= 225)
+                    level.players().stream()
+                            .filter(player -> player.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) <= 225)
                             .forEach(player -> ResearchManager.informCrafted(player, stack));
                 }
                 return true;

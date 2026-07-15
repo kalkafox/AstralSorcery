@@ -72,8 +72,8 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip, flagIn);
 
         DyeColor color = getConfiguredColor(stack);
         tooltip.add(ColorUtils.getTranslation(color).withStyle(ColorUtils.textFormattingForDye(color)));
@@ -113,7 +113,7 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
             } else {
                 BlockEntity tile = MiscUtils.getTileAt(level, pos, BlockEntity.class, true);
                 if (tile == null &&
-                        !state.hasTileEntity() &&
+                        !state.hasBlockEntity() &&
                         player.mayUseItemAt(pos, dir, stack) &&
                         Shapes.block().equals(level.getBlockState(pos).getShape(level, pos))) {
                     if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_ILLUMINATION, false)) {
@@ -142,11 +142,11 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
             return InteractionResult.SUCCESS;
         }
 
-        CollisionContext selContext = CollisionContext.forEntity(player);
+        CollisionContext selContext = CollisionContext.of(player);
         BlockPos placePos = pos;
         BlockState placeState = getPlacingState(stack);
         if (!BlockUtils.isReplaceable(level, pos)) {
-            placePos = placePos.offset(dir);
+            placePos = placePos.relative(dir);
         }
 
         if (!BlockUtils.isReplaceable(level, placePos)) {
@@ -158,8 +158,8 @@ public class ItemIlluminationWand extends Item implements ItemDynamicColor, Alig
                 if (level.setBlock(placePos, Blocks.AIR.defaultBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
                     SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundSource.BLOCKS, level, pos, 0.6F, 1F);
                 }
-            } else if (placeState.isValidPosition(level, placePos) &&
-                    level.noBlockCollision(placeState, placePos, selContext)) {
+            } else if (placeState.canSurvive(level, placePos) &&
+                    level.isUnobstructed(placeState, placePos, selContext)) {
                 if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_FLARE, false)) {
                     if (level.setBlock(placePos, placeState, Constants.BlockFlags.DEFAULT_AND_RERENDER)) {
                         SoundHelper.playSoundAround(SoundsAS.ILLUMINATION_WAND_LIGHT, SoundSource.BLOCKS, level, pos, 0.6F, 1F);

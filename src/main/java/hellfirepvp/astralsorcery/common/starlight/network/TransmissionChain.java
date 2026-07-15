@@ -111,7 +111,7 @@ public class TransmissionChain {
 
         List<NodeConnection<IPrismTransmissionNode>> next = node.queryNext(handler);
         float nextLoss = nextHopLossPerc / ((float) next.size());
-        prevPath.pushPose(node.getLocationPos());
+        prevPath.push(node.getLocationPos());
 
         if (node.needsTransmissionUpdate()) {
             transmissionUpdateMap.put(node, transmissionPerc);
@@ -142,7 +142,7 @@ public class TransmissionChain {
             }
         }
 
-        prevPath.popPose();
+        prevPath.pop();
     }
 
     //After calculating everything...

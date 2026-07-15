@@ -19,9 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
@@ -59,31 +58,20 @@ public class ItemBlockCelestialCrystalCluster extends ItemBlockCustom implements
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-        super.appendHoverText(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
+        super.appendHoverText(stack, context, tooltip, flagIn);
         CrystalAttributes attr = getAttributes(stack);
         if (attr != null) {
             attr.addTooltip(tooltip);
         }
     }
 
-    @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-        if (isInGroup(group)) {
-            for (int stage : BlockCelestialCrystalCluster.STAGE.getPossibleValues()) {
-                ItemStack cluster = new ItemStack(this);
-                this.setBaseDamage(cluster, stage);
-                items.add(cluster);
-            }
-        }
-    }
-
     @Nullable
     @Override
-    protected BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockState toPlace = super.getStateForPlacement(context);
+    protected BlockState getPlacementState(BlockPlaceContext context) {
+        BlockState toPlace = super.getPlacementState(context);
         if (toPlace != null) {
-            return toPlace.setValue(BlockCelestialCrystalCluster.STAGE, this.getDamage(context.getItemInHand()));
+            return toPlace.setValue(BlockCelestialCrystalCluster.STAGE, context.getItemInHand().getDamageValue());
         }
         return null;
     }

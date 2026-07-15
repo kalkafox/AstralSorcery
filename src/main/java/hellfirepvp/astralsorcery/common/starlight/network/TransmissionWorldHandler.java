@@ -139,16 +139,16 @@ public class TransmissionWorldHandler {
 
         cachedSourceChain.put(source, chain);
         List<ChunkPos> activeChunks = new LinkedList<>();
-        for (ChunkPos pos : chain.getInvolvedChunks()) {
-            List<IIndependentStarlightSource> sources = involvedSourceMap.computeIfAbsent(pos, k -> new LinkedList<>());
+        for (ChunkPos chPos : chain.getInvolvedChunks()) {
+            List<IIndependentStarlightSource> sources = involvedSourceMap.computeIfAbsent(chPos, k -> new LinkedList<>());
             sources.add(source);
-            MiscUtils.executeWithChunk(level, pos, () -> activeChunks.add(pos));
+            MiscUtils.executeWithChunk(level, chPos, () -> activeChunks.add(chPos));
         }
         if (!activeChunks.isEmpty()) {
             activeChunkMap.put(source, activeChunks);
         }
-        for (BlockPos pos : chain.getLossMultipliers().keySet()) {
-            List<IIndependentStarlightSource> sources = posToSourceMap.computeIfAbsent(pos, k -> new LinkedList<>());
+        for (BlockPos lossPos : chain.getLossMultipliers().keySet()) {
+            List<IIndependentStarlightSource> sources = posToSourceMap.computeIfAbsent(lossPos, k -> new LinkedList<>());
             sources.add(source);
         }
         List<IIndependentStarlightSource> sources = posToSourceMap.computeIfAbsent(pos, k -> new LinkedList<>());

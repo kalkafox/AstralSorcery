@@ -102,7 +102,7 @@ public class ItemColoredLensFire extends ItemColoredLens {
                         current.shrink(1);
                         ((ItemEntity) entity).setItem(current);
                     } else {
-                        entity.remove();
+                        entity.remove(Entity.RemovalReason.DISCARDED);
                     }
                     return;
                 }
@@ -114,8 +114,8 @@ public class ItemColoredLensFire extends ItemColoredLens {
                         return;
                     }
                 }
-                entity.hurt(DamageSource.ON_FIRE, 0.5F);
-                entity.setFire(5);
+                entity.hurt(level.damageSources().onFire(), 0.5F);
+                entity.igniteForSeconds(5);
             }
         }
 

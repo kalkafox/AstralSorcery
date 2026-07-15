@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.block.base;
 
+import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.constellation.ConstellationItem;
 import hellfirepvp.astralsorcery.common.constellation.ConstellationTile;
 import hellfirepvp.astralsorcery.common.crystal.CrystalAttributeItem;
@@ -76,4 +77,9 @@ public abstract class BlockCrystalContainer extends BaseEntityBlock {
         }
     }
 
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
+    }
 }

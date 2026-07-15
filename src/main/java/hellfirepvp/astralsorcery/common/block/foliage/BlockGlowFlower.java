@@ -26,8 +26,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
-import net.neoforged.neoforge.common.IPlantable;
-import net.neoforged.neoforge.common.PlantType;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +36,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 21.07.2019 / 09:23
  */
-public class BlockGlowFlower extends BlockFlowerTemplate implements IPlantable {
+public class BlockGlowFlower extends BlockFlowerTemplate {
 
     private final VoxelShape shape;
 
@@ -55,7 +53,7 @@ public class BlockGlowFlower extends BlockFlowerTemplate implements IPlantable {
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
         Vec3 offset = state.getOffset(level, pos);
-        return this.shape.offset(offset.x, offset.y, offset.z);
+        return this.shape.move(offset.x, offset.y, offset.z);
     }
 
     @Override
@@ -68,14 +66,9 @@ public class BlockGlowFlower extends BlockFlowerTemplate implements IPlantable {
         int fortune = EnchantmentHelper.getItemEnchantmentLevel(
                 level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FORTUNE), tool);
         if (fortune > 0) {
-            return fortune * Mth.nextInt(RANDOM, 2, 5);
+            return fortune * Mth.nextInt(level.getRandom(), 2, 5);
         }
-        return Mth.nextInt(RANDOM, 1, 2);
-    }
-
-    @Override
-    public PlantType getPlantType(BlockGetter level, BlockPos pos) {
-        return PlantType.CAVE;
+        return Mth.nextInt(level.getRandom(), 1, 2);
     }
 
 }

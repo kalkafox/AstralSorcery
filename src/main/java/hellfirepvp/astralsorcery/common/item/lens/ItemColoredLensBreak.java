@@ -65,14 +65,14 @@ public class ItemColoredLensBreak extends ItemColoredLens {
                     if (hardness < 0) {
                         return null;
                     }
-                    return hardness * Math.max(1, state.getLevel());
+                    return hardness;
                 });
             });
             if (ranOnce) {
                 PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.BEAM_BREAK)
                         .addData((buf) -> {
                             ByteBufUtils.writePos(buf, pos);
-                            buf.writeInt(Block.getStateId(state));
+                            buf.writeInt(Block.BLOCK_STATE_REGISTRY.getId(state));
                         });
                 PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, pos, 16));
             }

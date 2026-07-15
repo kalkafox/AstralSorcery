@@ -30,14 +30,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.*;
-import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
@@ -64,21 +63,8 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            items.add(new ItemStack(this, 1));
-
-            for (IConstellation c : ConstellationRegistry.getAllConstellations()) {
-                ItemStack cPaper = new ItemStack(this, 1);
-                setConstellation(cPaper, c);
-                items.add(cPaper);
-            }
-        }
-    }
-
-    @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> toolTip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> toolTip, TooltipFlag flag) {
         IConstellation c = getConstellation(stack);
         if (c != null && c.canDiscover(Minecraft.getInstance().player, ResearchHelper.getClientProgress())) {
             toolTip.add(c.getConstellationName().withStyle(ChatFormatting.BLUE));
@@ -109,7 +95,7 @@ public class ItemConstellationPaper extends Item implements ItemDynamicColor, Co
     @Override
     public Entity createEntity(Level level, Entity location, ItemStack itemstack) {
         EntityItemExplosionResistant res = new EntityItemExplosionResistant(EntityTypesAS.ITEM_EXPLOSION_RESISTANT, level, location.getX(), location.getY(), location.getZ(), itemstack);
-        res.read(location.writeWithoutTypeId(new CompoundTag()));
+        res.load(location.saveWithoutId(new CompoundTag()));
         if (itemstack.getItem() instanceof ItemConstellationPaper) {
             IConstellation cst = getConstellation(itemstack);
             if (cst != null) {

@@ -44,7 +44,7 @@ import java.util.Random;
  */
 public class EntityShootingStar extends ThrowableProjectile {
 
-    private static final EntityDataAccessor<Long> EFFECT_SEED = SynchedEntityData.createKey(EntityShootingStar.class, ASDataSerializers.LONG);
+    private static final EntityDataAccessor<Long> EFFECT_SEED = SynchedEntityData.defineId(EntityShootingStar.class, ASDataSerializers.LONG);
 
     protected EntityShootingStar(Level worldIn) {
         super(EntityTypesAS.SHOOTING_STAR, worldIn);
@@ -53,16 +53,16 @@ public class EntityShootingStar extends ThrowableProjectile {
 
     protected EntityShootingStar(double x, double y, double z, Level worldIn) {
         this(worldIn);
-        this.setPosition(x, y, z);
+        this.setPos(x, y, z);
     }
 
-    public static EntityType.IFactory<EntityShootingStar> factory() {
+    public static EntityType.EntityFactory<EntityShootingStar> factory() {
         return (type, level) -> new EntityShootingStar(level);
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.register(EFFECT_SEED, 0L);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(EFFECT_SEED, 0L);
     }
 
     public long getEffectSeed() {
@@ -75,15 +75,15 @@ public class EntityShootingStar extends ThrowableProjectile {
 
         super.tick();
 
-        if (level.isClientSide()) {
+        if (level().isClientSide()) {
             spawnEffects();
         }
     }
 
     private void adjustMotion() {
         Vec3 motion = getDeltaMovement();
-        double y = Math.min(-0.7F, motion.getY());
-        setDeltaMovement(new Vec3(motion.getX(), y, motion.getZ()));
+        double y = Math.min(-0.7F, motion.y);
+        setDeltaMovement(new Vec3(motion.x, y, motion.z));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -153,17 +153,17 @@ public class EntityShootingStar extends ThrowableProjectile {
     }
 
     @Override
-    public void setPosition(double x, double y, double z) {
+    public void setPos(double x, double y, double z) {
         int chunkX = Mth.floor(this.getX() / 16.0D);
         int chunkZ = Mth.floor(this.getZ() / 16.0D);
         int newChunkX = Mth.floor(x / 16.0D);
         int newChunkZ = Mth.floor(z / 16.0D);
         if (chunkX != newChunkX || chunkZ != newChunkZ) {
             if (!this.getCommandSenderWorld().hasChunk(newChunkX, newChunkZ)) {
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
                 return;
             }
         }
-        super.setPosition(x, y, z);
+        super.setPos(x, y, z);
     }
 }

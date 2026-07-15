@@ -192,7 +192,7 @@ public class TileLens extends TileTransmissionBase<IPrismTransmissionNode> imple
         if (!(state.getBlock() instanceof BlockLens)) {
             return Direction.DOWN;
         }
-        return state.get(BlockLens.PLACED_AGAINST);
+        return state.getValue(BlockLens.PLACED_AGAINST);
     }
 
     @Override

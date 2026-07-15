@@ -17,6 +17,7 @@ import hellfirepvp.astralsorcery.common.tile.altar.TileAltar;
 import hellfirepvp.astralsorcery.common.tile.base.network.TileSourceBase;
 import hellfirepvp.astralsorcery.common.tile.base.network.TileTransmissionBase;
 import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 
 import javax.annotation.Nullable;
 import java.util.List;

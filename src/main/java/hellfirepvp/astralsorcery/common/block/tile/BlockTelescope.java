@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.GuiType;
@@ -53,12 +55,8 @@ public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
         super(PropertiesWood.defaultInfusedWood());
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
-        RenderingUtils.playBlockBreakParticles(pos.above(), BlocksAS.TELESCOPE.defaultBlockState(), BlocksAS.TELESCOPE.defaultBlockState());
-        return false;
-    }
+    // Break particles for the structural top half are handled by the
+    // IClientBlockExtensions registered in ClientProxy (the hook moved off Block in NeoForge).
 
     @Override
     public VoxelShape getShape(BlockState p_220053_1_, BlockGetter p_220053_2_, BlockPos p_220053_3_, CollisionContext p_220053_4_) {
@@ -75,7 +73,7 @@ public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        level.setBlock(pos.above(), BlocksAS.STRUCTURAL.defaultBlockState().setValue(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE));
+        level.setBlock(pos.above(), BlocksAS.STRUCTURAL.defaultBlockState().setValue(BlockStructural.BLOCK_TYPE, BlockStructural.BlockType.TELESCOPE), Block.UPDATE_ALL);
         super.setPlacedBy(level, pos, state, placer, stack);
     }
 
@@ -96,5 +94,10 @@ public class BlockTelescope extends BaseEntityBlock implements CustomItemBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileTelescope(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

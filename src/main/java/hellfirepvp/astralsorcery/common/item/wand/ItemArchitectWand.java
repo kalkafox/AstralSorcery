@@ -92,7 +92,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
         tooltip.add(getPlaceMode(stack).getDisplay().withStyle(ChatFormatting.GOLD));
     }
 
@@ -169,7 +169,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         if (player.isShiftKeyDown()) {
             PlaceMode nextMode = mode.next();
             setPlaceMode(held, nextMode);
-            player.move(nextMode.getDisplay(), true);
+            player.displayClientMessage(nextMode.getDisplay(), true);
             return InteractionResultHolder.success(held);
         }
         if (level.isClientSide()) {
@@ -212,7 +212,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
                     MiscUtils.canPlayerPlaceBlockPos(player, stateToPlace, placePos, Direction.UP) &&
                     (player.isCreative() || ItemUtils.consumeFromPlayerInventory(player, held, extractable, false)) &&
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_PLACEMENT, false) &&
-                    level.setBlock(placePos, stateToPlace)) {
+                    level.setBlockAndUpdate(placePos, stateToPlace)) {
                 PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.BLOCK_EFFECT)
                         .addData(buf -> {
                             ByteBufUtils.writePos(buf, placePos);
@@ -229,15 +229,15 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         PlaceMode mode = getPlaceMode(stack);
         Level level = player.getCommandSenderWorld();
 
-        BlockHitResult rtr = MiscUtils.rayTraceLookBlock(player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.ANY, 60F);
+        BlockHitResult rtr = MiscUtils.rayTraceLookBlock(player, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, 60F);
         if (rtr == null && mode.needsOffset()) {
             return new HashMap<>();
         }
 
         Map<BlockPos, BlockState> placeStates;
         if (rtr != null) {
-            Direction placingAgainst = rtr.getFace();
-            BlockPos at = rtr.getBlockPos().offset(rtr.getFace());
+            Direction placingAgainst = rtr.getDirection();
+            BlockPos at = rtr.getBlockPos().relative(rtr.getDirection());
             placeStates = getPlaceStates(player, level, at, placingAgainst, stack);
         } else {
             placeStates = getPlaceStates(player, level, null, null, stack);
@@ -344,7 +344,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
                 }
                 int length = (int) Math.min(20, Math.abs(cmpFrom + 0.5 - cmpTo));
                 for (int i = 0; i < length; i++) {
-                    BlockPos at = center.offset(placedAgainst, i);
+                    BlockPos at = center.relative(placedAgainst, i);
                     if (MiscUtils.executeWithChunk(level, at, () -> !BlockUtils.isReplaceable(level, at), true)) {
                         break;
                     }
@@ -356,13 +356,13 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         FROM_PLAYER("line", false) {
             @Override
             public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
-                BlockPos origin = player.position().below();
+                BlockPos origin = player.blockPosition().below();
                 HitResult result = player.pick(60F, 1F, false);
                 BlockPos hit;
                 if (result instanceof BlockHitResult) {
                     hit = ((BlockHitResult) result).getBlockPos();
                 } else {
-                    hit = new BlockPos(result.getHitVec());
+                    hit = BlockPos.containing(result.getLocation());
                 }
                 List<BlockPos> lineState = new ArrayList<>();
                 RaytraceAssist rta = new RaytraceAssist(origin, hit);
@@ -381,7 +381,7 @@ public class ItemArchitectWand extends Item implements ItemBlockStorage, ItemOve
         H_PLANE("plane", true) {
             @Override
             public List<BlockPos> generatePlacementPositions(Level level, Player player, Direction placedAgainst, BlockPos center) {
-                return MiscUtils.transformList(BlockGeometry.getPlane(Direction.UP, 5), at -> at.add(center));
+                return MiscUtils.transformList(BlockGeometry.getPlane(Direction.UP, 5), at -> at.offset(center));
             }
         },
         V_PLANE("wall", true) {

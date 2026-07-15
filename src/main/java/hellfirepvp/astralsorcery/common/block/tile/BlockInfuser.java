@@ -65,7 +65,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
                 ItemStack stored = ti.getItemInput();
                 if (!held.isEmpty()) {
                     if (!stored.isEmpty()) {
-                        player.getInventory().hurtArmor(level, stored);
+                        player.getInventory().placeItemBackInInventory(stored);
                         ti.setItemInput(ItemStack.EMPTY);
                         ti.markForUpdate();
                     }
@@ -82,7 +82,7 @@ public class BlockInfuser extends BlockInventory implements CustomItemBlock {
                     ti.markForUpdate();
                 } else {
                     if (!stored.isEmpty()) {
-                        player.getInventory().hurtArmor(level, stored);
+                        player.getInventory().placeItemBackInInventory(stored);
                         ti.setItemInput(ItemStack.EMPTY);
                         ti.markForUpdate();
                     }

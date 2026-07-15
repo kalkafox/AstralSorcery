@@ -17,7 +17,7 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
@@ -52,14 +52,14 @@ public class BlockFlareLight extends Block {
 
     public BlockFlareLight() {
         super(PropertiesMisc.defaultAir()
-                .isRedstoneConductor(state -> 15));
-        registerDefaultState(this.getStateContainer().any().setValue(COLOR, DyeColor.YELLOW));
+                .lightLevel(state -> 15));
+        registerDefaultState(this.getStateDefinition().any().setValue(COLOR, DyeColor.YELLOW));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
-        Color c = ColorUtils.flareColorFromDye(state.get(COLOR));
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        Color c = ColorUtils.flareColorFromDye(state.getValue(COLOR));
         for (int i = 0; i < 2; i++) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(new Vector3(pos)
@@ -87,17 +87,8 @@ public class BlockFlareLight extends Block {
         }
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
-        return true;
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean addHitEffects(BlockState state, Level worldObj, HitResult target, ParticleEngine manager) {
-        return true;
-    }
+    // Break/hit particle suppression is handled by the IClientBlockExtensions
+    // registered for this block in ClientProxy (the hooks moved off Block in NeoForge).
 
     @Override
     @OnlyIn(Dist.CLIENT)
@@ -114,21 +105,6 @@ public class BlockFlareLight extends Block {
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
         return SHAPE;
-    }
-
-    @Override
-    public boolean isAir(BlockState state, BlockGetter level, BlockPos pos) {
-        return false;
-    }
-
-    @Override
-    public boolean canBeReplacedByLogs(BlockState state, LevelReader level, BlockPos pos) {
-        return true;
-    }
-
-    @Override
-    public boolean canBeReplacedByLeaves(BlockState state, LevelReader level, BlockPos pos) {
-        return true;
     }
 
     @Override

@@ -39,7 +39,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.event.ColorHandlerEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
@@ -138,7 +138,7 @@ public class RegistryBlocks {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void registerColors(ColorHandlerEvent.Block blockColorEvent) {
+    public static void registerColors(RegisterColorHandlersEvent.Block blockColorEvent) {
         COLOR_BLOCKS.forEach(block -> blockColorEvent.getBlockColors().register(block::getColor, (Block) block));
     }
 

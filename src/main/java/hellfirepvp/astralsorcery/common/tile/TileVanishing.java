@@ -21,6 +21,7 @@ import hellfirepvp.astralsorcery.common.tile.base.TileEntityTick;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
@@ -50,7 +51,7 @@ public class TileVanishing extends TileEntityTick {
         if (!this.getLevel().isClientSide() && this.getTicksExisted() % 5 == 0) {
             boolean removeBlock = true;
 
-            List<Player> players = getLevel().getEntitiesWithinAABB(Player.class, SEARCH_BOX.offset(getBlockPos()));
+            List<Player> players = getLevel().getEntitiesOfClass(Player.class, SEARCH_BOX.move(Vec3.atLowerCornerOf(getBlockPos())));
             for (Player player : players) {
                 if (ItemMantle.getEffect(player, ConstellationsAS.aevitas) != null) {
                     double yDiff = player.getY() - this.getBlockPos().getY();
@@ -82,7 +83,7 @@ public class TileVanishing extends TileEntityTick {
     private void tickClient() {
         for (int i = 0; i < 3; i++) {
             if (random.nextFloat() < 0.07F) {
-                Vector3 at = new Vector3(pos).add(0.5F, 0.5F, 0.5F).add(Vector3.random());
+                Vector3 at = new Vector3(getBlockPos()).add(0.5F, 0.5F, 0.5F).add(Vector3.random());
                 FXFacingParticle p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                         .spawn(at)
                         .setScaleMultiplier(0.15F + random.nextFloat() * 0.1F)

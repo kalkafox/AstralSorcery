@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.base.LargeBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
@@ -49,8 +51,8 @@ public class BlockObservatory extends BaseEntityBlock implements LargeBlock, Cus
         super(PropertiesMisc.defaultGoldMachinery()
 
 
-                .notSolid()
-                .hardnessAndResistance(3F, 4F));
+                .noOcclusion()
+                .strength(3F, 4F));
     }
 
     @Override
@@ -90,5 +92,10 @@ public class BlockObservatory extends BaseEntityBlock implements LargeBlock, Cus
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileObservatory(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

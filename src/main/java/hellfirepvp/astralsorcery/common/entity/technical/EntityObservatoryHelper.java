@@ -27,6 +27,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.Explosion;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -40,19 +41,19 @@ import java.util.UUID;
  */
 public class EntityObservatoryHelper extends Entity {
 
-    private static final EntityDataAccessor<BlockPos> FIXED = SynchedEntityData.createKey(EntityObservatoryHelper.class, EntityDataSerializers.BLOCK_POS);
+    private static final EntityDataAccessor<BlockPos> FIXED = SynchedEntityData.defineId(EntityObservatoryHelper.class, EntityDataSerializers.BLOCK_POS);
 
     public EntityObservatoryHelper(Level worldIn) {
         super(EntityTypesAS.OBSERVATORY_HELPER, worldIn);
     }
 
-    public static EntityType.IFactory<EntityObservatoryHelper> factory() {
+    public static EntityType.EntityFactory<EntityObservatoryHelper> factory() {
         return (spawnEntity, level) -> new EntityObservatoryHelper(level);
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.register(FIXED, BlockPos.ZERO);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(FIXED, BlockPos.ZERO);
     }
 
     public void setFixedObservatoryPos(BlockPos pos) {
@@ -86,7 +87,7 @@ public class EntityObservatoryHelper extends Entity {
         TileObservatory observatory;
         if ((observatory = this.getAssociatedObservatory()) == null) {
             if (!this.level().isClientSide()) {
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
             }
             return;
         }
@@ -127,7 +128,8 @@ public class EntityObservatoryHelper extends Entity {
         double xComp = 0.5F + Math.sin(yawRad) * xOffset - Math.cos(yawRad) * zDist;
         double zComp = 0.5F + Math.cos(yawRad) * xOffset + Math.sin(yawRad) * zDist;
         Vector3 pos = new Vector3(to.getBlockPos()).add(xComp, 0.4F, zComp);
-        this.setPosAndOldPos(pos.getX(), pos.getY(), pos.getZ());
+        this.setPos(pos.getX(), pos.getY(), pos.getZ());
+        this.setOldPosAndRot();
     }
 
     @Override
@@ -150,7 +152,7 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    public boolean isGlowing() {
+    public boolean isCurrentlyGlowing() {
         return false;
     }
 
@@ -160,13 +162,8 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    public boolean ignoreExplosion() {
+    public boolean ignoreExplosion(Explosion explosion) {
         return true;
-    }
-
-    @Override
-    protected boolean isMovementNoisy() {
-        return false;
     }
 
     @Override
@@ -175,13 +172,13 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    public ItemStack getPickedResult(HitResult target) {
+    public ItemStack getPickResult() {
         return new ItemStack(BlocksAS.OBSERVATORY);
     }
 
     @Override
-    protected void readAdditional(CompoundTag pattern) {}
+    protected void readAdditionalSaveData(CompoundTag pattern) {}
 
     @Override
-    protected void writeAdditional(CompoundTag pattern) {}
+    protected void addAdditionalSaveData(CompoundTag pattern) {}
 }

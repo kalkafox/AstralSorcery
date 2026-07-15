@@ -37,12 +37,12 @@ public class SpectralToolMeleeAttackGoal extends SpectralToolGoal {
     }
 
     private LivingEntity findClosestAttackableEntity() {
-        List<LivingEntity> entities = this.getEntity().getCommandSenderWorld().getEntitiesWithinAABB(
+        List<LivingEntity> entities = this.getEntity().getCommandSenderWorld().getEntitiesOfClass(
                 LivingEntity.class,
-                new AABB(0, 0, 0, 0, 0, 0).grow(8).offset(this.getEntity().position()),
+                new AABB(0, 0, 0, 0, 0, 0).inflate(8).move(this.getEntity().position()),
                 e -> e != null && e.isAlive() && e.getType().getCategory() == MobCategory.MONSTER
         );
-        return EntityUtils.selectClosest(entities, entity -> (double) entity.getDistance(this.getEntity()));
+        return EntityUtils.selectClosest(entities, entity -> (double) entity.distanceTo(this.getEntity()));
     }
 
 

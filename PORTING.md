@@ -523,17 +523,267 @@ at the mod's base classes instead of rewriting every screen:
   compiling with the 3D structure slice rendering stubbed out (restored in a
   later client-rendering pass, same approach as `StructurePreview`).
 
+## Block classes (done)
+
+All of `common/block/**` (plus `BlockLiquidStarlight`) compiles against the
+1.21 block API:
+
+- `BaseEntityBlock` requires a `codec()` override; Astral Sorcery blocks are
+  never codec-constructed, so they all return the shared
+  `common/block/base/UnsupportedBlockCodec.unsupported()` placeholder (throws
+  if ever invoked).
+- Properties: `Properties.create(Material, ...)` -> `Properties.of()` +
+  `.mapColor(...)` (`Material` is gone; barrier-like blocks now set
+  `pushReaction(PushReaction.BLOCK)` / `isValidSpawn((s, l, p, t) -> false)`
+  explicitly). Two systematic bad remaps were corrected across the package:
+  `hardnessAndResistance` -> `strength`, and `isRedstoneConductor(state -> N)`
+  which was actually 1.16 `setLightLevel` -> `lightLevel(state -> N)`.
+- `Block#getOffsetType()` is no longer overridable ->
+  `Properties.offsetType(OffsetType.XZ)` (crystal clusters).
+- `animateTick` (and the mod's `showBreakingParticles` helper) take
+  `RandomSource`; the static `RANDOM` fields feeding `Mth.nextInt` were
+  replaced with `level.getRandom()`.
+- Client hooks `addDestroyEffects`/`addHitEffects` moved off `Block` onto
+  `IClientBlockExtensions`, registered per-block in
+  `ClientProxy.onRegisterClientExtensions`: flare light (suppress vanilla
+  particles), telescope (also play particles for the structural top half),
+  structural dummies (redirect particles to the supported block).
+- `getExpDrop` is now `(state, LevelAccessor, pos, blockEntity, breaker,
+  tool)`; fortune/silk-touch are read off the tool via
+  `EnchantmentHelper.getItemEnchantmentLevel` with registry `Holder`s.
+- `IPlantable`/`PlantType` are gone; `BlockFoliageTemplate` soil checks use
+  `BlockState#canSustainPlant` returning NeoForge's `TriState` (falling back
+  to the old material checks on `TriState.DEFAULT`).
+- `CommonHooks.isCorrectToolForDrops(state, player)` no longer exists ->
+  vanilla `player.hasCorrectToolForDrops(state)` (custom `getDestroyProgress`
+  overrides on the gateway/collector crystal).
+- Misc renames hit here: `getAiPathNodeType` -> `getBlockPathType` returning
+  `PathType`; `IStringSerializable.getString` -> `getSerializedName`;
+  `getStateContainer` -> `getStateDefinition`; `state.get` -> `getValue`;
+  waterlogging via `level.scheduleTick(...)` + `Fluids.WATER.getSource(false)`;
+  `hasSolidSideOnTop` -> `canSupportRigidBlock`; `Block.fillItemCategory`
+  (bogus remap) -> `Block.isFaceFull`; 2-arg `Level.setBlock` gained
+  `Block.UPDATE_ALL`; `FluidActionResult.shouldSwing/getObject` ->
+  `isSuccess/getResult`; `Inventory.add` restored where the member remap
+  garbled it into `hurtArmor`/`getArmor`; collision-context entity access
+  needs an `EntityCollisionContext` instanceof-check; `SoundType.PLANT` ->
+  `SoundType.GRASS`.
+- The blocks' `newBlockEntity(pos, state)` overrides construct their tiles
+  directly, so `TileAltar`, `TileInfuser`, `TileWell`, `TileTreeBeacon`, and
+  `TileRitualPedestal` were given `(BlockPos, BlockState)` constructors
+  (their base classes already had the `(type, pos, state)` shape). The rest
+  of the tile subsystem is still unported.
+
+## Tile subsystem (done)
+
+`common/tile/**` compiles clean. The base classes (`TileEntitySynchronized`,
+`TileEntityTick`, `TileReceiverBase`) were already on the 1.21 shapes
+(`(BlockEntityType, BlockPos, BlockState)` constructors,
+`loadAdditional`/`saveAdditional` bridging to the mod's
+`readCustomNBT`/`writeCustomNBT(CompoundTag, HolderLookup.Provider)`); this
+pass caught the remaining subclasses up:
+
+- `readCustomNBT`/`writeCustomNBT` overrides gained the
+  `HolderLookup.Provider` parameter; `TileWell`/`TileTreeBeacon`/
+  `TileRitualPedestal` got `(BlockPos, BlockState)` constructors.
+- Bare `pos` field accesses (the 1.16 `TileEntity.pos`) -> `getBlockPos()`;
+  `BlockEntity#remove()` -> `setRemoved()`.
+- `markForUpdate`'s garbled `Level.findNearestBiome` call (bad remap of
+  `sendBlockUpdated`) restored, ditto in `TilePrism.onDataReceived`. Other
+  remap garbage fixed: `Set.add` mangled into `Set.offset`
+  (`TileAltar.nearbyRelays`, `TileAttunementAltar.getConstellationPositions`),
+  a local `colorIndex` int named `random` shadowing the RNG field
+  (`TileRefractionTable.playEngravingEffects`), `Component.Serializer.getPos`
+  (= `toJson`) in `TileCelestialGateway`, and the fluid tanks'
+  `fillDefaultJigsawNBT` (vanilla jigsaw name clobbered the tank's NBT writer)
+  renamed to `save()`.
+- `RecipeManager.getRecipes(type).get(id)` (via a 1.16 AT) ->
+  `byKey(id).map(RecipeHolder::value).orElse(null)` in `TileAltar`/`TileInfuser`
+  client craft-finish handlers.
+- `Level.setBlock(pos, state)` -> `setBlockAndUpdate` (or explicit
+  `Block.UPDATE_ALL` flags); `BlockPos.add` -> `offset`;
+  `BlockPos.offset(dir, n)` -> `relative(dir, n)`; `distSqr(Vec3, false)` ->
+  plain `distSqr(Vec3i)`; `Vec3.copy/copyCentered` ->
+  `atLowerCornerOf`/`atCenterOf`; `AABB(BlockPos, BlockPos)` ctor is gone ->
+  `AABB(Vec3, Vec3)`; `AABB.offset(BlockPos)` -> `move`;
+  `getEntitiesWithinAABB` -> `getEntitiesOfClass`; `Level.addEntity` ->
+  `addFreshEntity`; `Entity.setPositionAndRotation` -> `moveTo`;
+  `Level.getLight` -> `getMaxLocalRawBrightness`; `getLightFor` ->
+  `getBrightness`; `Tag.getString()` -> `getAsString()`;
+  `new FluidStack(stack, amount)` -> `stack.copyWithAmount(amount)`;
+  `FluidAttributes.getColor` -> `IClientFluidTypeExtensions.getTintColor`;
+  `ItemStack.attemptDamageItem` -> `hurtAndBreak(dmg, ServerLevel, player,
+  onBreak)` (break callback replaces the boolean return).
+- `TileEntityTick.refreshMatcher` resolves the observer provider's registry
+  name via `RegistryProviders.getRegistry().getKey(...)` (ObserverLib's
+  provider no longer self-reports it).
+- **Tree beacon**: `SaplingGrowTreeEvent` -> NeoForge's
+  `BlockGrowFeatureEvent` (`getPos`/`getRandom`; `Event.Result.DENY` ->
+  `setCanceled(true)`). `TreeType` is ported with it: generators take
+  `RandomSource`, `SaplingBlock.treeGrower` is exposed through a new
+  1.21-format AT entry (the old SRG-named AT entries are inert - the whole
+  `accesstransformer.cfg` needs a re-audit, tracked separately), and
+  `BlockSnapshot` uses `getCurrentState()`/`getPos()`.
+- **Render bounding boxes moved off the tile**: NeoForge 21.1 replaced
+  `IForgeTileEntity.getRenderBoundingBox` with
+  `BlockEntityRenderer#getRenderBoundingBox(T)`;
+  `TileAttunementAltar`'s expanded culling box now lives in
+  `RenderAttunementAltar`.
+
+## Starlight network and world data (done)
+
+`common/starlight/**`, `common/data/**`, and the AS side of ObserverLib's
+world-cache framework compile clean:
+
+- **World-cache framework**: the vendored ObserverLib framework was already
+  redesigned around Codecs (`SectionWorldData<T, S extends WorldSection>`
+  with a per-section `Codec<S>`, instance data through
+  `SaveKey.getInstanceCodec()`, extra files via
+  `writeAdditionalData`/`readAdditionalData`). The four AS data classes now
+  follow `StructureMatchingBuffer`'s pattern: a `CODEC` built from
+  `SaveKey.CODEC` plus a `CompoundTag.CODEC` field bridging to the classes'
+  existing hand-written NBT I/O (kept as plain `save`/`readFromNBT`-style
+  methods rather than rewritten as codec combinators). `RegistryData` passes
+  the codecs to `createSaveKey`. `GlobalWorldData` gained default no-op
+  additional-data hooks. **On-disk format/layout changed with the framework;
+  1.16 world data is not migrated.**
+- **The framework no longer ticks its data.** `updateTick` survives only on
+  `LightNetworkBuffer` (queued chunk cleanup + source-refresh upkeep),
+  driven by a new `NETWORK_TICK_HANDLER` (`ITickHandler`, WORLD/END)
+  registered in `CommonProxy.attachTickListeners`; it only runs when the
+  buffer is already loaded (new `WorldCacheDomain#getDataIfLoaded`). The
+  empty `updateTick`s on the other three were deleted.
+- `GatewayCache`/`TileCelestialGateway` display names serialize via
+  `Component.Serializer.toJson/fromJson(..., RegistryAccess.EMPTY)`.
+- `WorldEvent.Load/Unload` -> `LevelEvent.Load/Unload`;
+  `ChunkEvent#getChunk().getPos()` (was garbled to `getBlockPos`).
+- Remap garbage fixed: `Deque.push/pop` mangled to `pushPose/popPose`
+  (`TransmissionChain`), `File.delete` to `deleteText` (`ResearchHelper`),
+  shadowed loop variables re-separated (`TransmissionWorldHandler` - javac
+  rejects what 1.16's remap collapsed into duplicate `pos` locals),
+  `BlockPos.of(long)` garbled to `BlockPos.subtract` (sync/client).
+- Misc: `NbtIo.read/write` take `Path` now; `CompoundTag.keySet` ->
+  `getAllKeys`; `Tag.getString` -> `getAsString`;
+  `Registry.DIMENSION_REGISTRY` -> `Registries.DIMENSION`;
+  `ChunkPos.asBlockPos` -> `getWorldPosition`; corner-distance
+  `distSqr(Vec3, false)` -> `distSqr(Vec3i)`; `withinDistance` ->
+  `closerThan`; `Level.getPlayers` -> `players()`;
+  `PlayerList.getPlayerByUsername` -> `getPlayerByName`;
+  `CommandSource.sendMessage(c, uuid)` -> `sendSystemMessage(c)`;
+  `Entity.writeWithoutTypeId/read/removeEntity` ->
+  `saveWithoutId/load/discard`; journal pages use
+  `getAllRecipesFor` + `RecipeHolder.value()`.
+
+## Entities (done)
+
+`common/entity/**` compiles clean. Highlights, since this pack of changes is
+large and easy to re-derive incorrectly from memory of the 1.16 API:
+
+- **Synced data changed shape.** `Entity#defineSynchedData()` is now
+  `defineSynchedData(SynchedEntityData.Builder builder)`; register keys via
+  `builder.define(ACCESSOR, default)` instead of
+  `this.entityData.register(...)`, and always call
+  `super.defineSynchedData(builder)` first when overriding a non-`Entity`
+  base. `SynchedEntityData.createKey` -> `defineId`.
+- **`EntityType.IFactory` -> `EntityType.EntityFactory`.**
+- **Positioning**: `setPosition(x,y,z)` -> `setPos(x,y,z)`; no combined
+  "set position and mark old position" helper exists anymore -> call
+  `setPos(...)` then `setOldPosAndRot()` explicitly
+  (`EntityObservatoryHelper`). `Entity#level` field is private -> `level()`.
+- **Removal**: `remove()` takes an `Entity.RemovalReason` argument now
+  (`KILLED`/`DISCARDED` covers everything ported here).
+- **Targeting**: `Mob#getAttackTarget`/`setAttackTarget` -> `getTarget`/
+  `setTarget`. `getDistance(Entity)` -> `distanceTo(Entity)`.
+- **Gravity**: `Entity#getGravity()` is `final` now; override
+  `getDefaultGravity()` instead (`EntityGrapplingHook`'s pull-mode gravity
+  toggle).
+- **`Vec3` has no `getX/getY/getZ()` getters** - its `x`/`y`/`z` fields are
+  public final; use those directly. `Vec3#mul` was renamed `multiply`.
+  `Vector3` (the mod's own vector helper class) keeps its `getX()`-style
+  getters and is unaffected - don't conflate the two when porting motion
+  math.
+- **`AABB#grow` -> `inflate`; `AABB#offset(Vec3i)` -> `move`.**
+  `getEntitiesWithinAABB` -> `getEntitiesOfClass`. `Direction` no longer
+  implements `Vec3i`, so `BlockPos#offset(Direction)` doesn't resolve
+  anymore - use `BlockPos#relative(Direction)`.
+- **`ItemEntity`**: no bare `(Level, x, y, z)` constructor remains (only the
+  `ItemStack`-carrying overloads); the 1.16 `timeout` field was actually a
+  bad member-remap of `lifespan` (restored across
+  `EntityItemHighlighted`/`EntityStarmetal`/`EntityCrystal`/
+  `EntityDazzlingGem`). `age`/`pickupDelay` became private with only a
+  getter (`getAge()`) or boolean check (`hasPickUpDelay()`) exposed - reading
+  the exact `pickupDelay` value (to detect ItemEntity's "fake item" marker,
+  `Short.MAX_VALUE`) and writing `age` now go through two small reflection
+  helpers added to `ReflectionHelper`
+  (`getItemEntityPickupDelay`/`setItemEntityAge`, the latter already existed).
+  `getSize(Pose)` -> `getDimensions(Pose)`; `isOnGround()` -> `onGround()`.
+- **Damage**: `DamageSource.FALL` and other static constants are gone
+  (damage sources are data-driven) - build them via
+  `level().damageSources().fall()` etc. `DamageSource#isExplosion()` ->
+  `source.is(DamageTypeTags.IS_EXPLOSION)`. `ItemStack#damageItem(amount,
+  LivingEntity, Consumer<LivingEntity>)` -> `hurtAndBreak(amount,
+  LivingEntity, EquipmentSlot)`. `EnchantmentHelper.getEnchantmentLevel(Enchantment,
+  ItemStack)` -> `getItemEnchantmentLevel(Holder<Enchantment>, ItemStack)`,
+  the `Holder` resolved via
+  `level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(...)`.
+- **Removed without a direct replacement**: `Entity#isMovementNoisy()` -
+  deleted the two dead overrides (`EntitySpectralTool`,
+  `EntityObservatoryHelper`) rather than guess at a new hook.
+  `Entity#isGlowing()` -> `isCurrentlyGlowing()`.
+- **Spawn-data interface**: NeoForge's `IEntityAdditionalSpawnData` ->
+  `IEntityWithComplexSpawn`, using `RegistryFriendlyByteBuf` instead of
+  `FriendlyByteBuf`; the manual `getAddEntityPacket()` ->
+  `NetworkHooks.getEntitySpawningPacket(this)` override is deleted (1.21's
+  default entity spawn packet handles it, consistent with the networking
+  pass's caveat in the Networking section above).
+- **`BlockPlaceContext`/`UseOnContext`**: `getBlockPos()`/`getFace()` ->
+  `getClickedPos()`/`getClickedFace()`.
+- **`MiscUtils`** gained `RandomSource` overloads of `getRandomEntry`/
+  `applyRandomOffset` alongside the existing `java.util.Random` ones, since
+  `Entity#random` is `RandomSource` and isn't assignment-compatible with
+  `java.util.Random`.
+
+## Item classes (done)
+
+All of `common/item/**` now compiles against the 1.21 item API. The adjacent
+item-side portions of `RegistryItems` (color registration, dispenser behavior,
+item model predicates, and creative variants) were ported with it:
+
+- Tooltip hooks take `Item.TooltipContext`; item display names use `getName`;
+  use animations use `startUsingItem`, `finishUsingItem`, `onUseTick`, and the
+  entity-aware `getUseDuration` overload. Old `fillItemCategory` hooks are gone.
+- The main creative tab now adds the configured stacks those hooks used to
+  produce: constellation papers, knowledge share, both resonator tiers,
+  attuned crystals, constellation mantles, collector crystals, cluster growth
+  stages, and creative lens/prism attributes. The papers/crystals tab split is
+  still awaiting the broader creative-tab re-curation already tracked in
+  `CommonProxy`.
+- Block-item placement uses `getPlacementState`; stack damage reads/writes use
+  `getDamageValue`/`setDamageValue`. Custom item entities copy data through
+  `saveWithoutId`/`load`, and entity removal/damage/fire calls use the new
+  removal reasons and level damage sources.
+- Wand and dust interactions were moved to the current hit-result, position,
+  teleport, swing, block-update, dispenser, and `EventHooks` APIs. Colored
+  lenses now use `RandomSource`, `Block.BLOCK_STATE_REGISTRY`, data-driven fire
+  damage, and `igniteForSeconds`.
+- `ItemMantle` supplies its custom model through `IClientItemExtensions`.
+  Item/block tint handlers use `RegisterColorHandlersEvent`; model predicates
+  use `ItemProperties.register`; dispenser behaviors use
+  `DispenserBlock.registerBehavior`.
+
 ## Current compile boundary
 
 The registration mechanism, the recipe/serializer subsystem, rendering
-infrastructure, models, renderers, and screens now compile clean. `gradlew
-compileJava` (configured with `-Xmaxerrs 10000`) stops at structural
-1.16 -> 1.21 API changes rather than naming: the custom-ingredient
-(`ICustomIngredient`) port, fluid attributes/`ForgeFlowingFluid`, world
-generation, loot/datagen packages, and
-`.normal(Matrix3f, ...)` chain calls that now take a `PoseStack.Pose`.
-2,705 errors across 456 files remain, measured off a full
-`gradlew compileJava` run.
+infrastructure, models, renderers, screens, the block classes, the tile
+subsystem, the starlight network, the world-data layer, entities, and item
+classes now
+compile clean. `gradlew compileJava` (configured with `-Xmaxerrs 10000`)
+stops at structural 1.16 -> 1.21 API changes rather than naming; the biggest
+remaining clusters are perks (`common/perk/**`), `client/util`, world
+generation (`RegistryWorldGeneration` +
+`common/world/**`), constellation effects/mantle effects, the remaining
+`common/registry` content classes, and `crafting/nojson`. 912 compiler errors
+remain, measured off a full `gradlew compileJava` run.
 
 ### `common/util/**` leaf helpers (done)
 

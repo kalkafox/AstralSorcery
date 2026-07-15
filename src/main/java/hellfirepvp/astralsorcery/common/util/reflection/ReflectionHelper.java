@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,6 +32,7 @@ public class ReflectionHelper {
     private static BiConsumer<ItemEntity, Boolean> itemEntitySkipPhysicRenderer;
     private static BiConsumer<ItemEntity, Integer> itemEntityAge;
     private static BiConsumer<ItemEntity, Float> itemEntityBobOffset;
+    private static ToIntFunction<ItemEntity> itemEntityPickupDelayGetter;
 
     public static void setSkipItemPhysicsRender(ItemEntity entity) {
         if (itemEntitySkipPhysicRenderer == null) {
@@ -54,6 +56,21 @@ public class ReflectionHelper {
         }
 
         itemEntityBobOffset.accept(entity, bobOffset);
+    }
+
+    public static int getItemEntityPickupDelay(ItemEntity entity) {
+        if (itemEntityPickupDelayGetter == null) {
+            Field field = findField(ItemEntity.class, "pickupDelay");
+            itemEntityPickupDelayGetter = field == null ? e -> 0 : e -> {
+                try {
+                    return field.getInt(e);
+                } catch (Exception exc) {
+                    return 0;
+                }
+            };
+        }
+
+        return itemEntityPickupDelayGetter.applyAsInt(entity);
     }
 
     private static <T, V> BiConsumer<T, V> getFieldSetter(Class<T> owningClass, String fieldName, FieldSetter<T, V> fieldSetter) {

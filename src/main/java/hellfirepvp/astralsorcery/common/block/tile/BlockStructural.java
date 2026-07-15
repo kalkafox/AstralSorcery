@@ -15,14 +15,18 @@ import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LevelWriter;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.InteractionResult;
@@ -57,7 +61,9 @@ public class BlockStructural extends Block {
     private static final VoxelShape STRUCT_TELESCOPE = Shapes.create(1D / 16D, -16D / 16D, 1D / 16D, 15D / 16D, 16D / 16D, 15D / 16D);
 
     public BlockStructural() {
-        super(Block.Properties.create(Material.BARRIER, MapColor.NONE)
+        super(Block.Properties.of()
+                .mapColor(MapColor.NONE)
+                .pushReaction(PushReaction.BLOCK)
                 .sound(SoundType.GLASS));
 
         this.registerDefaultState(this.defaultBlockState().setValue(BLOCK_TYPE, BlockType.TELESCOPE));
@@ -70,7 +76,7 @@ public class BlockStructural extends Block {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 return STRUCT_TELESCOPE;
         }
@@ -79,44 +85,20 @@ public class BlockStructural extends Block {
 
     @Override
     public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 return SoundType.WOOD;
         }
         return super.getSoundType(state, level, pos, entity);
     }
 
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean addDestroyEffects(BlockState state, Level level, BlockPos pos, ParticleEngine manager) {
-        EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
-            switch (state.get(BLOCK_TYPE)) {
-                case TELESCOPE:
-                    manager.addBlockDestroyEffects(pos.below(), BlocksAS.TELESCOPE.defaultBlockState());
-                    break;
-            }
-        });
-        return true;
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public boolean addHitEffects(BlockState state, Level level, HitResult target, ParticleEngine manager) {
-        if (target instanceof BlockHitResult) {
-            EventFlags.PLAY_BLOCK_BREAK_EFFECTS.executeWithFlag(() -> {
-                switch (state.get(BLOCK_TYPE)) {
-                    case TELESCOPE:
-                        manager.addBlockDestroyEffects(((BlockHitResult) target).getBlockPos().below(), BlocksAS.TELESCOPE.defaultBlockState());
-                        break;
-                }
-            });
-        }
-        return true;
-    }
+    // Break/hit particles are redirected to the supported block through the
+    // IClientBlockExtensions registered for this block in ClientProxy (the
+    // hooks moved off Block in NeoForge).
 
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player entity, BlockHitResult hitResult) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 if (level.isClientSide()) {
                     AstralSorcery.getProxy().openGui(entity, GuiType.TELESCOPE, pos.below());
@@ -127,9 +109,9 @@ public class BlockStructural extends Block {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         List<ItemStack> drops = Lists.newArrayList();
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().getDrops(builder);
         }
@@ -139,7 +121,7 @@ public class BlockStructural extends Block {
     /*
     TODO custom states via state container
     private static float getBlockHardness(BlockState state, BlockGetter world, BlockPos pos) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().getBlockHardness(world, pos.down());
         }
@@ -147,7 +129,7 @@ public class BlockStructural extends Block {
     }
 
     private static boolean isOpaque(BlockState state, BlockGetter world, BlockPos pos) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().isNormalCube(world, pos.down());
         }
@@ -156,7 +138,7 @@ public class BlockStructural extends Block {
 
     @Override
     public float getExplosionResistance(BlockState state, LevelReader world, BlockPos pos, @Nullable Entity exploder, Explosion explosion) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().getExplosionResistance(world, pos.down(), exploder, explosion);
         }
@@ -165,7 +147,7 @@ public class BlockStructural extends Block {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 return BlockType.TELESCOPE.getSupportedState().getCloneItemStack(target, level, pos.below(), player);
         }
@@ -174,7 +156,7 @@ public class BlockStructural extends Block {
 
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 if (level.isEmptyBlock(pos.below())) {
                     level.removeBlock(pos, isMoving);
@@ -189,7 +171,7 @@ public class BlockStructural extends Block {
         if (!(level instanceof LevelWriter)) {
             return;
         }
-        switch (state.get(BLOCK_TYPE)) {
+        switch (state.getValue(BLOCK_TYPE)) {
             case TELESCOPE:
                 if (level.isEmptyBlock(pos.below())) {
                     ((LevelWriter) level).removeBlock(pos, false);
@@ -218,13 +200,13 @@ public class BlockStructural extends Block {
         }
 
         @Override
-        public String getString() {
+        public String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
         }
 
         @Override
         public String toString() {
-            return this.getString();
+            return this.getSerializedName();
         }
     }
 }

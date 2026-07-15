@@ -54,7 +54,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
 
     public BlockSpectralRelay() {
         super(PropertiesGlass.coatedGlass()
-                .isRedstoneConductor(state -> 4));
+                .lightLevel(state -> 4));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
                 if (!held.isEmpty()) {
                     if (!inv.getStackInSlot(0).isEmpty()) {
                         ItemStack stack = inv.getStackInSlot(0);
-                        player.getInventory().hurtArmor(level, stack);
+                        player.getInventory().placeItemBackInInventory(stack);
                         inv.setStackInSlot(0, ItemStack.EMPTY);
                         tar.markForUpdate();
                         TileSpectralRelay.cascadeRelayProximityUpdates(level, pos);
@@ -92,7 +92,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
                 } else {
                     if (!inv.getStackInSlot(0).isEmpty()) {
                         ItemStack stack = inv.getStackInSlot(0);
-                        player.getInventory().hurtArmor(level, stack);
+                        player.getInventory().placeItemBackInInventory(stack);
                         inv.setStackInSlot(0, ItemStack.EMPTY);
                         TileSpectralRelay.cascadeRelayProximityUpdates(level, pos);
                         tar.markForUpdate();
@@ -121,7 +121,7 @@ public class BlockSpectralRelay extends BlockStarlightNetwork implements CustomI
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return hasSolidSideOnTop(level, pos.below());
+        return canSupportRigidBlock(level, pos.below());
     }
 
     @Override

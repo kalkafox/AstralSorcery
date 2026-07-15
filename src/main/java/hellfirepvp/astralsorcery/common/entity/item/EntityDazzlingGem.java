@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.entity.item;
 
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
+import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +36,7 @@ public class EntityDazzlingGem extends EntityItemExplosionResistant {
         super(type, level, x, y, z, stack);
     }
 
-    public static EntityType.IFactory<EntityDazzlingGem> factoryGem() {
+    public static EntityType.EntityFactory<EntityDazzlingGem> factoryGem() {
         return (spawnEntity, level) -> new EntityDazzlingGem(EntityTypesAS.ITEM_CRYSTAL, level);
     }
 
@@ -43,8 +44,8 @@ public class EntityDazzlingGem extends EntityItemExplosionResistant {
     public void tick() {
         super.tick();
 
-        if (!level.isClientSide() && this.age + 10 >= this.timeout) {
-            this.age = 0;
+        if (!level().isClientSide() && this.getAge() + 10 >= this.lifespan) {
+            ReflectionHelper.setItemEntityAge(this, 0);
         }
     }
 }

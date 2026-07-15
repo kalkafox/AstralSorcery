@@ -165,7 +165,7 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
         }
 
         if (distance < 5.5) {
-            Minecraft.getInstance().options.setPointOfView(CameraType.FIRST_PERSON);
+            Minecraft.getInstance().options.setCameraType(CameraType.FIRST_PERSON);
         }
         if (distance < 2.5) {
             GatewayUIRenderHandler.getInstance().getOrCreateUI(this.getLevel(), this.getBlockPos(), at);
@@ -395,7 +395,7 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
         super.readCustomNBT(pattern, registries);
 
         this.networkRegistered = pattern.getBoolean("networkRegistered");
-        this.chatComponent = pattern.contains("displayText") ? Component.Serializer.getComponentFromJson(pattern.getString("displayText")) : null;
+        this.chatComponent = pattern.contains("displayText") ? Component.Serializer.fromJson(pattern.getString("displayText"), registries) : null;
         this.color = pattern.contains("color") ? NBTHelper.readEnum(pattern, "color", DyeColor.class) : null;
 
         this.locked = pattern.getBoolean("locked");
@@ -413,7 +413,7 @@ public class TileCelestialGateway extends TileEntityTick implements Nameable, Ti
 
         pattern.putBoolean("networkRegistered", this.networkRegistered);
         if (this.chatComponent != null) {
-            pattern.putString("displayText", Component.Serializer.getPos(this.chatComponent));
+            pattern.putString("displayText", Component.Serializer.toJson(this.chatComponent, registries));
         }
         if (this.color != null) {
             NBTHelper.writeEnum(pattern, "color", this.color);

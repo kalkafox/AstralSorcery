@@ -37,7 +37,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
@@ -45,7 +44,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
@@ -85,21 +83,8 @@ public class ItemResonator extends Item implements OverrideInteractItem {
     }
 
     @Override
-    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            ItemStack resonator = new ItemStack(this);
-            setUpgradeUnlocked(resonator, ResonatorUpgrade.STARLIGHT);
-            items.add(resonator);
-
-            ItemStack upgradedResonator = new ItemStack(this);
-            setUpgradeUnlocked(upgradedResonator, ResonatorUpgrade.values());
-            items.add(upgradedResonator);
-        }
-    }
-
-    @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag extended) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag extended) {
         ResonatorUpgrade current = getCurrentUpgrade(Minecraft.getInstance().player, stack);
         for (ResonatorUpgrade upgrade : getUpgrades(stack)) {
             ChatFormatting color = upgrade.equals(current) ? ChatFormatting.GOLD : ChatFormatting.BLUE;
@@ -125,9 +110,9 @@ public class ItemResonator extends Item implements OverrideInteractItem {
                         int offsetX = random.nextInt(30) * (random.nextBoolean() ? 1 : -1);
                         int offsetZ = random.nextInt(30) * (random.nextBoolean() ? 1 : -1);
 
-                        BlockPos pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
-                                new BlockPos(entity.getPosition()).offset(offsetX, 0, offsetZ));
-                        if (pos.distSqr(entity.position()) > 5625) { // 75 blocks away
+                        BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                                entity.blockPosition().offset(offsetX, 0, offsetZ));
+                        if (pos.distSqr(entity.blockPosition()) > 5625) { // 75 blocks away
                             return;
                         }
 
@@ -167,15 +152,17 @@ public class ItemResonator extends Item implements OverrideInteractItem {
             if (distribution <= 1E-4) {
                 return;
             }
-            BlockPos center = player.position();
+            BlockPos center = player.blockPosition();
             int offsetX = center.getX();
             int offsetZ = center.getZ();
-            BlockPos.Mutable mPos = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos mPos = new BlockPos.MutableBlockPos();
             int minY = RenderingConfig.CONFIG.minYFosicDisplay.get();
 
             for (int xx = -48; xx <= 48; xx++) {
                 for (int zz = -48; zz <= 48; zz++) {
-                    mPos.setPos(level.getHeight(Heightmap.Type.WORLD_SURFACE, mPos.setPos(offsetX + xx, 0, offsetZ + zz)));
+                    int x = offsetX + xx;
+                    int z = offsetZ + zz;
+                    mPos.set(x, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z), z);
                     mPos.setY(Math.max(mPos.getY(), minY));
 
                     float perc = SkyCollectionHelper.getSkyNoiseDistributionClient(level.dimension(), mPos).get();

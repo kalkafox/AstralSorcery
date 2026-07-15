@@ -67,15 +67,15 @@ public class EntityTransmutationRegistry extends ConfigDataAdapter<EntityTransmu
         EntityType<?> transmute = getEntityTransmuteTo(entity.getType());
         if (transmute != null) {
             CompoundTag tag = new CompoundTag();
-            entity.writeWithoutTypeId(tag);
-            level.removeEntity(entity);
+            entity.saveWithoutId(tag);
+            entity.discard();
             NBTHelper.removeUUID(tag, "UUID");
             try {
                 Entity e = transmute.create(level);
                 if (!(e instanceof LivingEntity)) {
                     return null;
                 }
-                e.read(tag);
+                e.load(tag);
                 return (LivingEntity) e;
             } catch (Exception exc) {
                 return null;

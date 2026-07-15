@@ -124,6 +124,15 @@ public class MiscUtils {
     }
 
     @Nullable
+    public static <T> T getRandomEntry(Collection<T> HELPER, RandomSource random) {
+        if (HELPER == null || HELPER.isEmpty()) {
+            return null;
+        }
+        int index = random.nextInt(HELPER.size());
+        return Iterables.get(HELPER, index);
+    }
+
+    @Nullable
     public static <T> T getRandomEntry(T[] array, Random random) {
         if (array == null || array.length <= 0) {
             return null;
@@ -553,6 +562,16 @@ public class MiscUtils {
     }
 
     public static void applyRandomOffset(Vector3 target, Random random, float multiplier) {
+        target.addX(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
+        target.addY(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
+        target.addZ(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
+    }
+
+    public static void applyRandomOffset(Vector3 target, RandomSource random) {
+        applyRandomOffset(target, random, 1F);
+    }
+
+    public static void applyRandomOffset(Vector3 target, RandomSource random, float multiplier) {
         target.addX(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
         target.addY(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));
         target.addZ(random.nextFloat() * multiplier * (random.nextBoolean() ? 1 : -1));

@@ -126,12 +126,12 @@ public class TileIlluminator extends TileEntityTick {
         while (Math.abs(currentPos.getX() - x) <= SEARCH_RADIUS &&
                 Math.abs(currentPos.getY() - y) <= SEARCH_RADIUS &&
                 Math.abs(currentPos.getZ() - zPos) <= SEARCH_RADIUS) {
-            currentPos = currentPos.offset(dir, STEP_WIDTH);
+            currentPos = currentPos.relative(dir, STEP_WIDTH);
             if (!positions.contains(currentPos)) {
                 positions.add(currentPos);
             }
             Direction tryDirNext = dir.getClockWise();
-            if (!positions.contains(currentPos.offset(tryDirNext, STEP_WIDTH))) {
+            if (!positions.contains(currentPos.relative(tryDirNext, STEP_WIDTH))) {
                 dir = tryDirNext;
             }
         }
@@ -188,7 +188,7 @@ public class TileIlluminator extends TileEntityTick {
                 if (this.doesSeeSky() && TileIlluminator.ILLUMINATOR_CHECK.test(level, pos, level.getBlockState(pos))) {
                     DyeColor color = this.getColor();
                     BlockState toPlace = BlocksAS.FLARE_LIGHT.defaultBlockState().setValue(BlockFlareLight.COLOR, color);
-                    if (level.setBlock(pos, toPlace)) {
+                    if (level.setBlockAndUpdate(pos, toPlace)) {
                         EntityFlare.spawnAmbientFlare(level, this.getBlockPos());
                     }
                 }
@@ -244,8 +244,8 @@ public class TileIlluminator extends TileEntityTick {
         public boolean test(Level level, BlockPos pos, BlockState state) {
             return level.isEmptyBlock(pos) &&
                     !MiscUtils.canSeeSky(level, pos, false, false) &&
-                    level.getLight(pos) < 8 &&
-                    level.getLightFor(LightLayer.SKY, pos) < 4;
+                    level.getMaxLocalRawBrightness(pos) < 8 &&
+                    level.getBrightness(LightLayer.SKY, pos) < 4;
         }
 
     }

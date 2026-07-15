@@ -48,7 +48,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ForgeHooks;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -67,12 +66,12 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
     private static final float PLAYER_HARVEST_HARDNESS = 4F;
 
     public BlockCollectorCrystal(CollectorCrystalType type) {
-        super(Properties.create(Material.GLASS, type.getMaterialColor())
-                .hardnessAndResistance(-1F, 3600000.0F)
+        super(Properties.of().mapColor(type.getMaterialColor())
+                .strength(-1F, 3600000.0F)
 
 
                 .sound(SoundType.GLASS)
-                .isRedstoneConductor(state -> 11));
+                .lightLevel(state -> 11));
     }
 
     @Override
@@ -80,8 +79,8 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter level, List<Component> toolTip, TooltipFlag flag) {
-        super.appendHoverText(stack, level, toolTip, flag);
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> toolTip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, toolTip, flag);
 
         CrystalAttributes attr = CrystalAttributes.getCrystalAttributes(stack);
         CrystalAttributes.TooltipResult result = null;
@@ -133,7 +132,7 @@ public abstract class BlockCollectorCrystal extends BlockStarlightNetwork implem
     public float getDestroyProgress(BlockState state, Player player, BlockGetter level, BlockPos pos) {
         TileCollectorCrystal crystal = MiscUtils.getTileAt(level, pos, TileCollectorCrystal.class, false);
         if (crystal != null && crystal.isPlayerMade()) {
-            int i = ForgeHooks.isCorrectToolForDrops(state, player, level, pos) ? 30 : 100;
+            int i = player.hasCorrectToolForDrops(state) ? 30 : 100;
             return player.getDigSpeed(state, pos) / PLAYER_HARVEST_HARDNESS / i;
         }
         return super.getDestroyProgress(state, player, level, pos);

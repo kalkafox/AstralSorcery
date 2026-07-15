@@ -43,9 +43,9 @@ public class JournalPageLiquidInfusion implements JournalPage {
                 throw new IllegalStateException("Not connected to a server, but calling GUI code?");
             }
 
-            return mgr.getRecipes(RecipeTypesAS.TYPE_INFUSION.getType()).values()
+            return mgr.getAllRecipesFor(RecipeTypesAS.TYPE_INFUSION.getType())
                     .stream()
-                    .map(r -> (LiquidInfusion) r)
+                    .map(holder -> (LiquidInfusion) holder.value())
                     .filter(r -> outputTest.test(r.getOutput(ItemStack.EMPTY)))
                     .findFirst()
                     .orElse(null);

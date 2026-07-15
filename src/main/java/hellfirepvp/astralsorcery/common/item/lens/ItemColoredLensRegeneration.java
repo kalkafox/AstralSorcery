@@ -60,7 +60,7 @@ public class ItemColoredLensRegeneration extends ItemColoredLens {
             }
             LivingEntity le = (LivingEntity) entity;
             executor.executeAll(() -> {
-                if (random.nextInt(8) != 0) {
+                if (level.getRandom().nextInt(8) != 0) {
                     return;
                 }
                 if (le.isInvertedHealAndHarm()) {

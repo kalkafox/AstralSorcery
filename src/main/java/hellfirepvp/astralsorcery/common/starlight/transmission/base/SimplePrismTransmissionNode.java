@@ -185,13 +185,12 @@ public class SimplePrismTransmissionNode implements IPrismTransmissionNode {
             } else {
                 this.reachable = oldRayState;
             }
-            this.distAtCreation = end.distSqr(Vec3.copy(start), false);
+            this.distAtCreation = end.distSqr(start);
         }
 
         private boolean notifyBlockPlace(Level level, BlockPos connect, BlockPos at) {
-            Vec3 bPosAt = Vec3.copy(at);
-            double dstStart = connect.distSqr(bPosAt, false);
-            double dstEnd = pos.distSqr(bPosAt, false);
+            double dstStart = connect.distSqr(at);
+            double dstEnd = pos.distSqr(at);
             if (dstStart > distAtCreation || dstEnd > distAtCreation) return false;
             boolean oldState = this.reachable;
             this.reachable = parent.ignoreBlockCollision || rayAssist.isClear(level);

@@ -43,6 +43,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.core.Direction;
@@ -57,7 +58,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 import hellfirepvp.astralsorcery.common.util.Constants;
 import net.neoforged.fml.LogicalSide;
 
@@ -186,7 +187,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
 
         TileAltar thisAltar = MiscUtils.getTileAt(level, at, TileAltar.class, false);
         if (thisAltar != null) {
-            Recipe<?> recipe = level.getRecipeManager().getRecipes(RecipeTypesAS.TYPE_ALTAR.getType()).get(recipeName);
+            Recipe<?> recipe = level.getRecipeManager().byKey(recipeName).map(RecipeHolder::value).orElse(null);
             if (recipe instanceof SimpleAltarRecipe) {
                 ((SimpleAltarRecipe) recipe).getCraftingEffects().forEach(effect -> {
                     effect.onCraftingFinish(thisAltar, isChaining);
@@ -219,10 +220,10 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     private void finishRecipe() {
         ActiveSimpleAltarRecipe finishedRecipe = this.activeRecipe;
 
-        ForgeHooks.setCraftingPlayer(finishedRecipe.tryGetCraftingPlayerServer());
+        CommonHooks.setCraftingPlayer(finishedRecipe.tryGetCraftingPlayerServer());
         finishedRecipe.createItemOutputs(this, this::dropItemOnTop);
         finishedRecipe.consumeInputs(this);
-        ForgeHooks.setCraftingPlayer(null);
+        CommonHooks.setCraftingPlayer(null);
 
         boolean isChaining;
         ResourceLocation recipeName = finishedRecipe.getRecipeToCraft().getId();
@@ -309,7 +310,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
 
             if (posDistribution == -1) {
                 if (level instanceof WorldGenLevel) {
-                    posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) level, pos);
+                    posDistribution = SkyCollectionHelper.getSkyNoiseDistribution((WorldGenLevel) level, getBlockPos());
                 } else {
                     posDistribution = 0.3F;
                 }
@@ -350,7 +351,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
                 BlockPos offset = new BlockPos(xx, 0, zz);
                 TileSpectralRelay tar = MiscUtils.getTileAt(getLevel(), getBlockPos().offset(offset), TileSpectralRelay.class, true);
                 if (tar != null) {
-                    eligableRelayOffsets.offset(getBlockPos().add(offset));
+                    eligableRelayOffsets.add(getBlockPos().offset(offset));
                 }
             }
         }
@@ -474,7 +475,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
     public void writeNetNBT(CompoundTag pattern, HolderLookup.Provider registries) {
         super.writeNetNBT(pattern, registries);
 
-        this.starlightStorage.fillDefaultJigsawNBT(pattern);
+        this.starlightStorage.save(pattern);
     }
 
     @Override
@@ -484,7 +485,7 @@ public class TileAltar extends TileReceiverBase<StarlightReceiverAltar> implemen
         this.altarType = AltarType.values()[pattern.getInt("altarType")];
         this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
         this.focusItem = NBTHelper.getStack(pattern, "focusItem");
-        this.knownRecipes = NBTHelper.readSet(pattern, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> ResourceLocation.parse(nbt.getString()));
+        this.knownRecipes = NBTHelper.readSet(pattern, "knownRecipes", Constants.NBT.TAG_STRING, nbt -> ResourceLocation.parse(nbt.getAsString()));
 
         if (pattern.contains("activeRecipe", Constants.NBT.TAG_COMPOUND)) {
             this.activeRecipe = ActiveSimpleAltarRecipe.deserialize(pattern.getCompound("activeRecipe"), this.activeRecipe);

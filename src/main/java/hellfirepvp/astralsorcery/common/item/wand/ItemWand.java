@@ -73,7 +73,7 @@ public class ItemWand extends Item implements OverrideInteractItem {
                 if (entity instanceof ServerPlayer) {
                     RockCrystalBuffer buf = DataAS.DOMAIN_AS.getData(level, DataAS.KEY_ROCK_CRYSTAL_BUFFER);
 
-                    ChunkPos pos = new ChunkPos(entity.position());
+                    ChunkPos pos = new ChunkPos(entity.blockPosition());
                     for (BlockPos rPos : buf.collectPositions(pos, 6)) {
                         MiscUtils.executeWithChunk(level, rPos, () -> {
                             BlockState state = level.getBlockState(rPos);
@@ -129,7 +129,7 @@ public class ItemWand extends Item implements OverrideInteractItem {
                 } else if (player.isCrouching() && player.isCreative()) {
                     BlockArray structure = mbTe.getRequiredStructureType().getFeature();
                     structure.getContents().forEach((offset, rState) -> {
-                        level.setBlock(pos.offset(offset), rState.getDescriptiveState(0));
+                        level.setBlockAndUpdate(pos.offset(offset), rState.getDescriptiveState(0));
                     });
                 }
                 return true;
@@ -193,7 +193,7 @@ public class ItemWand extends Item implements OverrideInteractItem {
         }
 
         BlockPos at = pos.toBlockPos();
-        BlockPos top = level.getHeight(Heightmap.Type.WORLD_SURFACE, at);
+        BlockPos top = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, at);
 
         Vector3 columnDisplay = new Vector3(top);
         MiscUtils.applyRandomOffset(columnDisplay, random, 2F);

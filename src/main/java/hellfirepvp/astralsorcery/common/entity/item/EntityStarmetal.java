@@ -17,9 +17,11 @@ import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -47,7 +49,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
 
     public EntityStarmetal(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z) {
         this(type, level);
-        this.setPosition(x, y, z);
+        this.setPos(x, y, z);
         this.setYRot(this.random.nextFloat() * 360.0F);
         this.setDeltaMovement(this.random.nextDouble() * 0.2D - 0.1D, 0.2D, this.random.nextDouble() * 0.2D - 0.1D);
     }
@@ -55,10 +57,10 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
     public EntityStarmetal(EntityType<? extends ItemEntity> type, Level level, double x, double y, double z, ItemStack stack) {
         this(type, level, x, y, z);
         this.setItem(stack);
-        this.timeout = stack.isEmpty() ? 6000 : stack.getEntityLifespan(level);
+        this.lifespan = stack.isEmpty() ? 6000 : stack.getEntityLifespan(level);
     }
 
-    public static EntityType.IFactory<EntityStarmetal> factoryStarmetalIngot() {
+    public static EntityType.EntityFactory<EntityStarmetal> factoryStarmetalIngot() {
         return (spawnEntity, level) -> new EntityStarmetal(EntityTypesAS.ITEM_STARMETAL_INGOT, level);
     }
 
@@ -83,11 +85,12 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
 
                     boolean doDamage = false;
                     if (random.nextFloat() < 0.4F) {
-                        int fortuneLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, held);
+                        int fortuneLevel = EnchantmentHelper.getItemEnchantmentLevel(
+                                level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FORTUNE), held);
                         doDamage = this.createStardust(fortuneLevel);
                     }
                     if (doDamage || random.nextFloat() < 0.35F) {
-                        held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(InteractionHand.MAIN_HAND));
+                        held.hurtAndBreak(1, (Player) entity, EquipmentSlot.MAINHAND);
                     }
                 }
             }
@@ -120,7 +123,7 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
 
     @Override
     public void setOnGround(boolean grounded) {
-        boolean updateSize = isOnGround() != grounded;
+        boolean updateSize = onGround() != grounded;
         super.setOnGround(grounded);
         if (updateSize) {
             refreshDimensions();
@@ -128,10 +131,10 @@ public class EntityStarmetal extends EntityCustomItemReplacement implements Inte
     }
 
     @Override
-    public EntityDimensions getSize(Pose poseIn) {
+    public EntityDimensions getDimensions(Pose poseIn) {
         if (!this.onGround()) {
-            return EntityType.ITEM.getSize();
+            return EntityType.ITEM.getDimensions();
         }
-        return this.getType().getSize();
+        return this.getType().getDimensions();
     }
 }

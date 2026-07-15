@@ -51,6 +51,7 @@ import hellfirepvp.astralsorcery.common.perk.source.ModifierManager;
 import hellfirepvp.astralsorcery.common.perk.tick.PerkTickHelper;
 import hellfirepvp.astralsorcery.common.registry.*;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
+import hellfirepvp.astralsorcery.common.data.world.LightNetworkBuffer;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.SourceClassRegistry;
 import hellfirepvp.astralsorcery.common.starlight.transmission.registry.TransmissionClassRegistry;
 import hellfirepvp.astralsorcery.common.starlight.network.StarlightNetworkRegistry;
@@ -126,8 +127,10 @@ public class CommonProxy {
             AstralSorcery.MODID, () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + AstralSorcery.MODID))
                     .icon(() -> new ItemStack(TOME))
-                    .displayItems((params, out) ->
-                            AstralRegistries.CREATIVE_NAMES.getEntries().forEach(holder -> out.accept(holder.get())))
+                    .displayItems((params, out) -> {
+                        AstralRegistries.CREATIVE_NAMES.getEntries().forEach(holder -> out.accept(holder.get()));
+                        RegistryItems.addCreativeVariants(out);
+                    })
                     .build());
     public static final Supplier<CreativeModeTab> ITEM_GROUP_AS_PAPERS = AstralRegistries.CREATIVE_MODE_TABS.register(
             AstralSorcery.MODID + "_papers", () -> CreativeModeTab.builder()
@@ -291,6 +294,7 @@ public class CommonProxy {
         registrar.accept(this.commonScheduler);
         registrar.accept(StarlightTransmissionHandler.getInstance());
         registrar.accept(StarlightUpdateHandler.getInstance());
+        registrar.accept(LightNetworkBuffer.NETWORK_TICK_HANDLER);
         registrar.accept(SyncDataHolder.getTickInstance());
         registrar.accept(LinkHandler.getInstance());
         registrar.accept(SkyHandler.getInstance());

@@ -38,6 +38,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -90,11 +91,10 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
                     if (runTick > RUN_TIME) {
                         this.setInputStack(starMap.applyEffects(this.getInputStack()));
                         ItemStack glassStack = this.getGlassStack();
-                        if (glassStack.attemptDamageItem(1, random, null)) {
-                            glassStack.shrink(1);
+                        glassStack.hurtAndBreak(1, (ServerLevel) this.getLevel(), null, item -> {
                             this.setGlassStack(glassStack);
                             SoundHelper.playSoundAround(SoundEvents.GLASS_BREAK, SoundSource.BLOCKS, this.getLevel(), this.getBlockPos(), random.nextFloat() * 0.5F + 1F, random.nextFloat() * 0.2F + 0.8F);
-                        }
+                        });
                         this.resetWorkTick();
                     }
                     markForUpdate();
@@ -129,13 +129,13 @@ public class TileRefractionTable extends TileEntityTick implements NamedInventor
         }
 
         Vector3 offset = new Vector3(-5.0 / 16.0, 1.505, -3.0 / 16.0);
-        int random = random.nextInt(ColorsAS.REFRACTION_TABLE_COLORS.length);
-        if (random >= ColorsAS.REFRACTION_TABLE_COLORS.length / 2) { //0-5 is left, 6-11 is right
+        int colorIndex = random.nextInt(ColorsAS.REFRACTION_TABLE_COLORS.length);
+        if (colorIndex >= ColorsAS.REFRACTION_TABLE_COLORS.length / 2) { //0-5 is left, 6-11 is right
             offset.addX(24.0 / 16.0);
         }
-        offset.addZ((random % (ColorsAS.REFRACTION_TABLE_COLORS.length / 2)) * (4.0 / 16.0));
-        offset.add(random.nextFloat() * 0.1, 0, random.nextFloat() * 0.1).add(pos);
-        Color color = ColorsAS.REFRACTION_TABLE_COLORS[random];
+        offset.addZ((colorIndex % (ColorsAS.REFRACTION_TABLE_COLORS.length / 2)) * (4.0 / 16.0));
+        offset.add(random.nextFloat() * 0.1, 0, random.nextFloat() * 0.1).add(getBlockPos());
+        Color color = ColorsAS.REFRACTION_TABLE_COLORS[colorIndex];
 
         EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                 .spawn(offset)

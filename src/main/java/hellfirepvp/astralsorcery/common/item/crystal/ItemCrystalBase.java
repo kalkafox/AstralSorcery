@@ -56,7 +56,7 @@ public abstract class ItemCrystalBase extends Item implements CrystalAttributeGe
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> toolTip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> toolTip, TooltipFlag flag) {
         this.addCrystalPropertyToolTip(stack, toolTip);
     }
 
@@ -93,7 +93,7 @@ public abstract class ItemCrystalBase extends Item implements CrystalAttributeGe
     @Override
     public Entity createEntity(Level level, Entity location, ItemStack itemstack) {
         EntityCrystal res = new EntityCrystal(EntityTypesAS.ITEM_CRYSTAL, level, location.getX(), location.getY(), location.getZ(), itemstack);
-        res.read(location.writeWithoutTypeId(new CompoundTag()));
+        res.load(location.saveWithoutId(new CompoundTag()));
         res.applyColor(this.getItemEntityColor(itemstack));
         if (location instanceof ItemEntity) {
             res.setReplacedEntity((ItemEntity) location);

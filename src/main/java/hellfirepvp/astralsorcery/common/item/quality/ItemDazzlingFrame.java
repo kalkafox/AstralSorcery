@@ -41,12 +41,12 @@ public class ItemDazzlingFrame extends Item {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         getQuality(stack).ifPresent(quality -> tooltip.add(quality.getDisplayName()));
     }
 
     public static boolean setQuality(ItemStack stack, GemQuality quality) {
-        if (stack.isEmpty() || !(stack.getItem() instanceof ItemDazzlingGem)) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof ItemDazzlingFrame)) {
             return false;
         }
         CompoundTag tag = NBTHelper.getPersistentData(stack);
@@ -55,7 +55,7 @@ public class ItemDazzlingFrame extends Item {
     }
 
     public static Optional<GemQuality> getQuality(ItemStack stack) {
-        if (stack.isEmpty() || !(stack.getItem() instanceof ItemDazzlingGem)) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof ItemDazzlingFrame)) {
             return Optional.empty();
         }
         CompoundTag tag = NBTHelper.getPersistentData(stack);

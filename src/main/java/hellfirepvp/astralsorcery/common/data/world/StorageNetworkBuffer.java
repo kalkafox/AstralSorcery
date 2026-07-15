@@ -10,7 +10,11 @@ package hellfirepvp.astralsorcery.common.data.world;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import hellfirepvp.astralsorcery.common.storage.StorageNetwork;
+import hellfirepvp.observerlib.common.data.CachedWorldData;
+import hellfirepvp.observerlib.common.util.CodecUtil;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.observerlib.common.data.WorldCacheDomain;
@@ -34,14 +38,27 @@ import java.util.Map;
  * Created by HellFirePvP
  * Date: 30.05.2019 / 14:59
  */
-public class StorageNetworkBuffer extends GlobalWorldData {
+public class StorageNetworkBuffer extends GlobalWorldData<StorageNetworkBuffer> {
+
+    public static final Codec<StorageNetworkBuffer> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+            WorldCacheDomain.SaveKey.CODEC.fieldOf("key").forGetter(CachedWorldData::getSaveKey),
+            CompoundTag.CODEC.fieldOf("data").forGetter(buffer -> {
+                CompoundTag tag = new CompoundTag();
+                buffer.save(tag);
+                return tag;
+            })
+    ).apply(builder, (key, tag) -> {
+        StorageNetworkBuffer buffer = new StorageNetworkBuffer(CodecUtil.unwrap(key));
+        buffer.readFromNBT(tag);
+        return buffer;
+    }));
 
     private static final java.util.Random random = new java.util.Random();
 
     private final Map<BlockPos, StorageNetwork> rawNetworks = Maps.newHashMap();
     private final Map<ChunkPos, List<StorageNetwork>> availableNetworks = Maps.newHashMap();
 
-    public StorageNetworkBuffer(WorldCacheDomain.SaveKey<?> key) {
+    public StorageNetworkBuffer(WorldCacheDomain.SaveKey<StorageNetworkBuffer> key) {
         super(key);
     }
 
@@ -70,7 +87,6 @@ public class StorageNetworkBuffer extends GlobalWorldData {
         }
     }
 
-    @Override
     public void save(CompoundTag pattern) {
         ListTag networks = new ListTag();
         for (StorageNetwork network : this.rawNetworks.values()) {
@@ -81,7 +97,6 @@ public class StorageNetworkBuffer extends GlobalWorldData {
         pattern.put("networks", networks);
     }
 
-    @Override
     public void readFromNBT(CompoundTag pattern) {
         this.rawNetworks.clear();
 
@@ -102,8 +117,5 @@ public class StorageNetworkBuffer extends GlobalWorldData {
 
         this.rebuildAccessContext();
     }
-
-    @Override
-    public void updateTick(Level level) {}
 
 }

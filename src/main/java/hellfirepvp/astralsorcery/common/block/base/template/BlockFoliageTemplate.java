@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.neoforged.neoforge.common.IPlantable;
+import net.neoforged.neoforge.common.util.TriState;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -26,7 +26,7 @@ import net.neoforged.neoforge.common.IPlantable;
  * Created by HellFirePvP
  * Date: 21.07.2019 / 09:21
  */
-public abstract class BlockFoliageTemplate extends Block implements CustomItemBlock, IPlantable {
+public abstract class BlockFoliageTemplate extends Block implements CustomItemBlock {
 
     public BlockFoliageTemplate(Block.Properties properties) {
         super(properties);
@@ -46,7 +46,10 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         BlockPos blockpos = pos.below();
         if (state.getBlock() == this) {
-            return level.getBlockState(blockpos).canSustainPlant(level, blockpos, Direction.UP, this);
+            TriState soilDecision = level.getBlockState(blockpos).canSustainPlant(level, blockpos, Direction.UP, state);
+            if (!soilDecision.isDefault()) {
+                return soilDecision.isTrue();
+            }
         }
         return this.mayPlaceOn(level.getBlockState(blockpos), level, blockpos);
     }
@@ -54,14 +57,5 @@ public abstract class BlockFoliageTemplate extends Block implements CustomItemBl
     @Override
     public boolean propagatesSkylightDown(BlockState p_200123_1_, BlockGetter p_200123_2_, BlockPos p_200123_3_) {
         return true;
-    }
-
-    @Override
-    public BlockState getPlant(BlockGetter level, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
-        if (state.getBlock() != this) {
-            return this.defaultBlockState();
-        }
-        return state;
     }
 }

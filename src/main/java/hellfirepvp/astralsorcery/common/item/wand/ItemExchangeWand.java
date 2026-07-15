@@ -58,6 +58,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -91,7 +92,7 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flagIn) {
         tooltip.add(getSizeMode(stack).getDisplay().withStyle(ChatFormatting.GOLD));
     }
 
@@ -104,18 +105,13 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
     // below already grants full harvest capability.
 
     @Override
-    public boolean isCorrectToolForDrops(BlockState blockIn) {
-        return true;
-    }
-
-    @Override
     public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
         return true;
     }
 
     @Override
     public float getAlignmentChargeCost(Player player, ItemStack stack) {
-        BlockHitResult location = MiscUtils.rayTraceLookBlock(player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.NONE);
+        BlockHitResult location = MiscUtils.rayTraceLookBlock(player, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE);
         if (location == null) {
             return 0F;
         }
@@ -125,7 +121,7 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
     @Override
     @OnlyIn(Dist.CLIENT)
     public boolean renderInHand(ItemStack stack, PoseStack renderStack, float pTicks) {
-        BlockHitResult location = MiscUtils.rayTraceLookBlock(Minecraft.getInstance().player, ClipContext.BlockMode.OUTLINE, ClipContext.FluidMode.NONE);
+        BlockHitResult location = MiscUtils.rayTraceLookBlock(Minecraft.getInstance().player, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE);
         if (location == null) {
             return true;
         }
@@ -211,10 +207,10 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
             BlockState prevState = level.getBlockState(placePos);
             if ((player.isCreative() || ItemUtils.consumeFromPlayerInventory(player, stack, extractable, true)) &&
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, COST_PER_EXCHANGE, false) &&
-                    ((ServerPlayer) player).gameMode.setLevel(placePos) &&
+                    ((ServerPlayer) player).gameMode.destroyBlock(placePos) &&
                     MiscUtils.canPlayerPlaceBlockPos(player, stateToPlace, placePos, Direction.UP) &&
                     (player.isCreative() || ItemUtils.consumeFromPlayerInventory(player, stack, extractable, false)) &&
-                    level.setBlock(placePos, stateToPlace)) {
+                    level.setBlockAndUpdate(placePos, stateToPlace)) {
                 PktPlayEffect ev = new PktPlayEffect(PktPlayEffect.Type.BLOCK_EFFECT)
                         .addData(buf -> {
                             ByteBufUtils.writePos(buf, placePos);
@@ -233,7 +229,7 @@ public class ItemExchangeWand extends Item implements ItemBlockStorage, ItemOver
         if (playerIn.isShiftKeyDown()) {
             SizeMode nextMode = getSizeMode(held).next();
             setSizeMode(held, nextMode);
-            playerIn.move(nextMode.getDisplay(), true);
+            playerIn.displayClientMessage(nextMode.getDisplay(), true);
         }
         return InteractionResultHolder.success(held);
     }

@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.base.LargeBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMarble;
@@ -41,7 +43,7 @@ public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemB
 
     public BlockAttunementAltar() {
         super(PropertiesMarble.defaultMarble()
-                .isRedstoneConductor((state) -> 4)
+                .lightLevel((state) -> 4)
 
 );
     }
@@ -76,5 +78,10 @@ public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemB
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileAttunementAltar(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

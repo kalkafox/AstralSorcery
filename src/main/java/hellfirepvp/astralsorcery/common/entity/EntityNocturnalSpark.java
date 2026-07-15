@@ -52,9 +52,9 @@ import java.util.List;
  */
 public class EntityNocturnalSpark extends ThrowableProjectile {
 
-    private static final AABB NO_DUPE_BOX = new AABB(0, 0, 0, 1, 1, 1).grow(15);
+    private static final AABB NO_DUPE_BOX = new AABB(0, 0, 0, 1, 1, 1).inflate(15);
 
-    private static final EntityDataAccessor<Boolean> SPAWNING = SynchedEntityData.createKey(EntityNocturnalSpark.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SPAWNING = SynchedEntityData.defineId(EntityNocturnalSpark.class, EntityDataSerializers.BOOLEAN);
     private int ticksSpawning = 0;
 
     public EntityNocturnalSpark(Level level) {
@@ -70,13 +70,13 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
         this.shootFromRotation(thrower, thrower.getXRot(), thrower.getYRot(), 0F, 0.7F, 0.9F);
     }
 
-    public static EntityType.IFactory<EntityNocturnalSpark> factory() {
+    public static EntityType.EntityFactory<EntityNocturnalSpark> factory() {
         return (type, level) -> new EntityNocturnalSpark(level);
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.register(SPAWNING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        builder.define(SPAWNING, false);
     }
 
     public void setSpawning() {
@@ -96,7 +96,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             return;
         }
 
-        if (!level.isClientSide()) {
+        if (!level().isClientSide()) {
             removeLights();
             if (isSpawning()) {
                 ticksSpawning++;
@@ -104,7 +104,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
                 removeDuplicates();
 
                 if (ticksSpawning > 200) {
-                    remove();
+                    remove(RemovalReason.DISCARDED);
                 }
             }
         } else {
@@ -117,7 +117,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             ServerLevel sWorld = (ServerLevel) this.getCommandSenderWorld();
             if (this.tickCount % 5 == 0) {
                 List<BlockPos> lights = BlockDiscoverer.searchForBlocksAround(
-                        sWorld, this.position(), 8,
+                        sWorld, this.blockPosition(), 8,
                         (level, pos, state) -> !(state.getBlock() instanceof AirBlock) && state.getDestroySpeed(level, pos) != -1 && state.getLightEmission(level, pos) > 3);
                 for (BlockPos light : lights) {
                     if (!BlockUtils.breakBlockWithoutPlayer(sWorld, light, sWorld.getBlockState(light), ItemStack.EMPTY, true, true)) {
@@ -129,7 +129,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
     }
 
     private void removeDuplicates() {
-        List<EntityNocturnalSpark> sparks = level.getEntitiesWithinAABB(EntityNocturnalSpark.class, NO_DUPE_BOX.offset(getPosition()));
+        List<EntityNocturnalSpark> sparks = level().getEntitiesOfClass(EntityNocturnalSpark.class, NO_DUPE_BOX.move(position()));
         for (EntityNocturnalSpark spark : sparks) {
             if (this.equals(spark)) {
                 continue;
@@ -137,7 +137,7 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             if (!spark.isAlive() || !spark.isSpawning()) {
                 continue;
             }
-            spark.remove();
+            spark.remove(RemovalReason.DISCARDED);
         }
     }
 
@@ -188,22 +188,22 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
             randomizeColor(p);
 
             p = EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
-                    .spawn(Vector3.atEntityCorner(this).add(getDeltaMovement().mul(0.5, 0.5, 0.5)));
+                    .spawn(Vector3.atEntityCorner(this).add(getDeltaMovement().multiply(0.5, 0.5, 0.5)));
             p.setScaleMultiplier(0.6F);
             randomizeColor(p);
         }
     }
 
     private void spawnCycle() {
-        if (random.nextInt(12) == 0 && level instanceof ServerLevel) {
-            BlockPos pos = getPosition();
+        if (random.nextInt(12) == 0 && level() instanceof ServerLevel) {
+            BlockPos pos = blockPosition();
             pos.offset(random.nextInt(2) - random.nextInt(2), 1, random.nextInt(2) - random.nextInt(2));
-            pos = BlockUtils.firstSolidDown(level, pos).above();
+            pos = BlockUtils.firstSolidDown(level(), pos).above();
 
-            if (pos.distSqr(this.position()) >= 16) {
+            if (pos.distSqr(this.blockPosition()) >= 16) {
                 return;
             }
-            EntityUtils.performWorldSpawningAt((ServerLevel) level, pos, MobCategory.MONSTER, MobSpawnType.SPAWNER, true,
+            EntityUtils.performWorldSpawningAt((ServerLevel) level(), pos, MobCategory.MONSTER, MobSpawnType.SPAWNER, true,
                     EntityUtils.SpawnConditionFlags.IGNORE_SPAWN_CONDITIONS | EntityUtils.SpawnConditionFlags.IGNORE_ENTITY_COLLISION);
         }
     }
@@ -230,8 +230,8 @@ public class EntityNocturnalSpark extends ThrowableProjectile {
         if (HitResult.Type.ENTITY.equals(result.getType())) {
             return;
         }
-        Vec3 hit = result.getHitVec();
+        Vec3 hit = result.getLocation();
         this.setSpawning();
-        this.setPosition(hit.x, hit.y, hit.z);
+        this.setPos(hit.x, hit.y, hit.z);
     }
 }

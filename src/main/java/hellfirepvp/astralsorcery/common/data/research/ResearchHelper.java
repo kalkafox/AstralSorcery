@@ -132,8 +132,8 @@ public class ResearchHelper {
                     AstralSorcery.log.warn("I've had enough. I can't even access or open the files apparently. I'm giving up.");
                     e2.printStackTrace();
                 }
-                plOriginal.deleteText();
-                plBackup.deleteText();
+                plOriginal.delete();
+                plBackup.delete();
 
                 informPlayersAboutProgressionLoss(pUUID);
 
@@ -144,7 +144,7 @@ public class ResearchHelper {
     }
 
     private static void load_unsafe(UUID pUUID, File playerFile) throws Exception {
-        CompoundTag pattern = NbtIo.read(playerFile); //IO-Exc thrown only here.
+        CompoundTag pattern = NbtIo.read(playerFile.toPath()); //IO-Exc thrown only here.
         load_unsafeFromNBT(pUUID, pattern);
     }
 
@@ -167,7 +167,7 @@ public class ResearchHelper {
             }
             String resolvedName = player != null ? player.getGameProfile().getName() : pUUID.toString() + " (Not online)";
             for (String opName : server.getPlayerList().getOpNames()) {
-                Player pl = server.getPlayerList().getPlayerByUsername(opName);
+                Player pl = server.getPlayerList().getPlayerByName(opName);
                 if (pl != null) {
                     pl.sendSystemMessage(Component.literal("AstralSorcery: The progression of " + resolvedName + " could not be loaded and can't be recovered from backup. Error files might be created from the unloadable progression files, check the console for additional information!").withStyle(ChatFormatting.RED));
                 }
@@ -176,23 +176,20 @@ public class ResearchHelper {
     }
 
     public static void sendConstellationDiscoveryMessage(CommandSource src, IConstellation cst) {
-        src.sendMessage(Component.translatable("astralsorcery.progress.constellation.discover.chat",
+        src.sendSystemMessage(Component.translatable("astralsorcery.progress.constellation.discover.chat",
                         cst.getConstellationName().withStyle(ChatFormatting.GRAY))
-                        .withStyle(ChatFormatting.BLUE),
-                Util.NIL_UUID);
+                        .withStyle(ChatFormatting.BLUE));
     }
 
     public static void sendConstellationMemorizationMessage(CommandSource src, PlayerProgress progress, IConstellation cst) {
-        src.sendMessage(
+        src.sendSystemMessage(
                 Component.translatable("astralsorcery.progress.constellation.seen.chat",
                         cst.getConstellationName().withStyle(ChatFormatting.GRAY))
-                        .withStyle(ChatFormatting.BLUE),
-                Util.NIL_UUID);
+                        .withStyle(ChatFormatting.BLUE));
         if (progress.getSeenConstellations().size() == 1) {
-            src.sendMessage(
+            src.sendSystemMessage(
                     Component.translatable("astralsorcery.progress.constellation.seen.track")
-                            .withStyle(ChatFormatting.BLUE),
-                    Util.NIL_UUID);
+                            .withStyle(ChatFormatting.BLUE));
         }
     }
 
@@ -220,7 +217,7 @@ public class ResearchHelper {
     }
 
     private static void wipeFile(ServerPlayer player) {
-        getPlayerFile(player).deleteText();
+        getPlayerFile(player).delete();
         ResearchIOThread.cancelSave(player.getUUID());
     }
 
@@ -252,7 +249,7 @@ public class ResearchHelper {
         File f = new File(getPlayerDirectory(), pUUID.toString() + ".astral");
         if (!f.exists()) {
             try {
-                NbtIo.write(new CompoundTag(), f);
+                NbtIo.write(new CompoundTag(), f.toPath());
             } catch (IOException ignored) {} //Will be created later anyway... just as fail-safe.
         }
         return f;
@@ -270,7 +267,7 @@ public class ResearchHelper {
         File f = new File(getPlayerDirectory(), pUUID.toString() + ".astralback");
         if (!f.exists()) {
             try {
-                NbtIo.write(new CompoundTag(), f);
+                NbtIo.write(new CompoundTag(), f.toPath());
             } catch (IOException ignored) {} //Will be created later anyway... just as fail-safe.
         }
         return f;

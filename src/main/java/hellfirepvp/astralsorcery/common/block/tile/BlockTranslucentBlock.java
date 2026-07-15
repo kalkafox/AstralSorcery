@@ -20,8 +20,9 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import net.minecraft.util.RandomSource;
+
 import javax.annotation.Nullable;
-import java.util.Random;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,14 +34,14 @@ import java.util.Random;
 public class BlockTranslucentBlock extends BlockFakedState {
 
     public BlockTranslucentBlock() {
-        super(Properties.create(Material.BARRIER, MapColor.NONE)
-                .hardnessAndResistance(-1.0F, 6_000_000.0F)
-                .isRedstoneConductor(state -> 12));
+        super(Properties.of().mapColor(MapColor.NONE)
+                .strength(-1.0F, 6_000_000.0F)
+                .lightLevel(state -> 12));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
         this.showBreakingParticles(level, pos, random);
     }
 

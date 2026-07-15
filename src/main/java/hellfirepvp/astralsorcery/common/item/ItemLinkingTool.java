@@ -63,7 +63,7 @@ public class ItemLinkingTool extends Item implements IItemLinkingTool {
                 LinkHandler.processInteraction(result, player, level, pos);
             }
         } else {
-            player.swingArm(hand);
+            player.swing(hand);
         }
         return true;
     }
@@ -84,7 +84,7 @@ public class ItemLinkingTool extends Item implements IItemLinkingTool {
                 }
             }
         } else {
-            player.swingArm(hand);
+            player.swing(hand);
         }
         return true;
     }

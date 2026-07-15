@@ -39,6 +39,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.WorldGenLevel;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -71,8 +73,8 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
     private double starlightBuffer = 0;
     private float posDistribution = -1;
 
-    public TileWell() {
-        super(TileEntityTypesAS.WELL);
+    public TileWell(BlockPos pos, BlockState state) {
+        super(TileEntityTypesAS.WELL, pos, state);
 
         this.tank = new PrecisionSingleFluidTank(TANK_SIZE);
         this.tank.setAllowInput(false);
@@ -259,18 +261,18 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
     }
 
     @Override
-    public void readCustomNBT(CompoundTag pattern) {
-        super.readCustomNBT(pattern);
+    public void readCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.readCustomNBT(pattern, registries);
 
         this.tank.load(pattern.getCompound("tank"));
         this.inventory = this.inventory.deserialize(pattern.getCompound("inventory"));
     }
 
     @Override
-    public void writeCustomNBT(CompoundTag pattern) {
-        super.writeCustomNBT(pattern);
+    public void writeCustomNBT(CompoundTag pattern, HolderLookup.Provider registries) {
+        super.writeCustomNBT(pattern, registries);
 
-        pattern.put("tank", this.tank.fillDefaultJigsawNBT());
+        pattern.put("tank", this.tank.save());
         pattern.put("inventory", this.inventory.serialize());
     }
 

@@ -16,10 +16,13 @@ import hellfirepvp.astralsorcery.common.item.crystal.ItemCrystalBase;
 import hellfirepvp.astralsorcery.common.lib.EntityTypesAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
+import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,7 +53,7 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
         super(type, level, x, y, z, stack);
     }
 
-    public static EntityType.IFactory<EntityCrystal> factoryCrystal() {
+    public static EntityType.EntityFactory<EntityCrystal> factoryCrystal() {
         return (spawnEntity, level) -> new EntityCrystal(EntityTypesAS.ITEM_CRYSTAL, level);
     }
 
@@ -79,11 +82,12 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
                         //TODO chipping sound ?
                         boolean doDamage = false;
                         if (random.nextFloat() < 0.35F) {
-                            int fortuneLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, held);
+                            int fortuneLevel = EnchantmentHelper.getItemEnchantmentLevel(
+                                    level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FORTUNE), held);
                             doDamage = this.splitCrystal(thisAttributes, fortuneLevel);
                         }
                         if (doDamage || random.nextFloat() < 0.35F) {
-                            held.damageItem(1, (Player) entity, (player) -> player.sendBreakAnimation(InteractionHand.MAIN_HAND));
+                            held.hurtAndBreak(1, (Player) entity, EquipmentSlot.MAINHAND);
                         }
                     }
                 }
@@ -139,8 +143,8 @@ public class EntityCrystal extends EntityItemExplosionResistant implements Inter
     public void tick() {
         super.tick();
 
-        if (!level.isClientSide() && this.age + 10 >= this.timeout) {
-            this.age = 0;
+        if (!level().isClientSide() && this.getAge() + 10 >= this.lifespan) {
+            ReflectionHelper.setItemEntityAge(this, 0);
         }
     }
 }

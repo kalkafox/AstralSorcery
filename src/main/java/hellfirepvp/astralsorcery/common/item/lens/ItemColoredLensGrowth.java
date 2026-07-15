@@ -60,8 +60,8 @@ public class ItemColoredLensGrowth extends ItemColoredLens {
             CropHelper.GrowablePlant plant = CropHelper.wrapPlant(level, pos);
             if (plant != null) {
                 executor.executeAll(() -> {
-                    if (random.nextInt(18) == 0) {
-                        plant.tryGrow(level, random);
+                    if (level.getRandom().nextInt(18) == 0) {
+                        plant.tryGrow(level, new java.util.Random(level.getRandom().nextLong()));
                         PktPlayEffect packet = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
                                 .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(pos)));
                         PacketChannel.CHANNEL.sendToAllAround(packet, PacketChannel.pointFromPos(level, pos, 16));

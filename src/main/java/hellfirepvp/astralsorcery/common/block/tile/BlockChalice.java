@@ -8,6 +8,8 @@
 
 package hellfirepvp.astralsorcery.common.block.tile;
 
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
 import hellfirepvp.astralsorcery.common.tile.TileChalice;
@@ -72,21 +74,21 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
                     if (st.isEmpty()) {
                         //Fill the stack from the tile?
                         FluidActionResult far = FluidUtil.tryFillContainer(interact, tc.getTankAccess(), FluidType.BUCKET_VOLUME, player, true);
-                        if (far.shouldSwing()) {
+                        if (far.isSuccess()) {
                             if (!player.isCreative()) {
                                 interact.shrink(1);
                                 player.setItemInHand(hand, interact);
-                                player.getInventory().hurtArmor(level, far.getObject());
+                                player.getInventory().placeItemBackInInventory(far.getResult());
                             }
                         }
                     } else {
                         //Drain from stack into tile?
                         FluidActionResult far = FluidUtil.tryEmptyContainer(interact, tc.getTankAccess(), FluidType.BUCKET_VOLUME, player, true);
-                        if (far.shouldSwing()) {
+                        if (far.isSuccess()) {
                             if (!player.isCreative()) {
                                 interact.shrink(1);
                                 player.setItemInHand(hand, interact);
-                                player.getInventory().hurtArmor(level, far.getObject());
+                                player.getInventory().placeItemBackInInventory(far.getResult());
                             }
                         }
                     }
@@ -125,5 +127,10 @@ public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new TileChalice(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return UnsupportedBlockCodec.unsupported();
     }
 }

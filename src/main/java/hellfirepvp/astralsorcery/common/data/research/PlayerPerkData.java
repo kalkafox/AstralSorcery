@@ -277,7 +277,7 @@ public class PlayerPerkData {
 
         //TODO Remove .replace("-", "_") in 1.17
         this.freePointTokens.addAll(NBTHelper.readList(tag, "tokens", Constants.NBT.TAG_STRING,
-                nbt -> ResourceLocation.parse(nbt.getString().replace("-", "_"))));
+                nbt -> ResourceLocation.parse(nbt.getAsString().replace("-", "_"))));
 
         ListTag list = tag.getList("perks", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {

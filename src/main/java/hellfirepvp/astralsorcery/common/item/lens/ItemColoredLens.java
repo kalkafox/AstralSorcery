@@ -62,7 +62,7 @@ public abstract class ItemColoredLens extends Item implements ItemDynamicColor {
 
                 SoundHelper.playSoundAround(SoundsAS.BLOCK_COLOREDLENS_ATTACH, level, ctx.getClickedPos(), 0.8F, 1.5F);
                 if (oldType != null) {
-                    player.getInventory().hurtArmor(level, oldType.getStack());
+                    player.getInventory().placeItemBackInInventory(oldType.getStack());
                 }
             }
         }

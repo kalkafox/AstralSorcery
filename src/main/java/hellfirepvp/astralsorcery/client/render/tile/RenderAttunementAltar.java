@@ -16,6 +16,7 @@ import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.joml.Vector3f;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.util.Mth;
 import com.mojang.math.Axis;
 
@@ -32,6 +33,11 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
 
     public RenderAttunementAltar(BlockEntityRendererProvider.Context context) {
         super(context);
+    }
+
+    @Override
+    public AABB getRenderBoundingBox(TileAttunementAltar tile) {
+        return super.getRenderBoundingBox(tile).inflate(3.5, 2, 3.5);
     }
 
     @Override
