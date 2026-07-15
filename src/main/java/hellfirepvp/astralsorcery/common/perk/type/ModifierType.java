@@ -8,7 +8,6 @@
 
 package hellfirepvp.astralsorcery.common.perk.type;
 
-import hellfirepvp.astralsorcery.common.util.MiscUtils;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 import java.text.DecimalFormat;
@@ -30,11 +29,19 @@ public enum ModifierType {
     private static final DecimalFormat DISPLAY_NUMBER_FORMAT = new DecimalFormat("0.##");
 
     public static ModifierType fromVanillaAttributeOperation(AttributeModifier.Operation op) {
-        return MiscUtils.getEnumEntry(ModifierType.class, op.getId());
+        return switch (op) {
+            case ADD_VALUE -> ADDITION;
+            case ADD_MULTIPLIED_BASE -> ADDED_MULTIPLY;
+            case ADD_MULTIPLIED_TOTAL -> STACKING_MULTIPLY;
+        };
     }
 
     public AttributeModifier.Operation getVanillaAttributeOperation() {
-        return AttributeModifier.Operation.values()[ordinal()];
+        return switch (this) {
+            case ADDITION -> AttributeModifier.Operation.ADD_VALUE;
+            case ADDED_MULTIPLY -> AttributeModifier.Operation.ADD_MULTIPLIED_BASE;
+            case STACKING_MULTIPLY -> AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
+        };
     }
 
     // We don't need the explicit + addition to positive percentages

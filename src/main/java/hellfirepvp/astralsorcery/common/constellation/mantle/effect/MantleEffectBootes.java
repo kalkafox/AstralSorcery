@@ -23,13 +23,11 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import hellfirepvp.astralsorcery.common.util.Constants;
-import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -59,7 +57,6 @@ public class MantleEffectBootes extends MantleEffect {
     protected void attachEventListeners(IEventBus bus) {
         super.attachEventListeners(bus);
         bus.addListener(EventPriority.LOW, this::onHurt);
-        bus.addListener(EventPriority.LOW, this::onAttacked);
     }
 
     @Override
@@ -77,9 +74,9 @@ public class MantleEffectBootes extends MantleEffect {
             if (player.tickCount % 80 == 0) {
                 if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFlare.get()) && random.nextInt(4) == 0) {
                     EntityFlare flare = EntityTypesAS.FLARE.create(player.getCommandSenderWorld());
-                    flare.setPosition(player.getX(), player.getY(), player.getZ());
+                    flare.setPos(player.getX(), player.getY(), player.getZ());
                     flare.setFollowingTarget(player);
-                    if (level.addEntity(flare)) {
+                    if (level.addFreshEntity(flare)) {
                         flares.add(flare);
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFlare.get(), false);
                     }
@@ -88,11 +85,11 @@ public class MantleEffectBootes extends MantleEffect {
         }
 
         for (EntityFlare flare : flares) {
-            if (flare.getFollowingTarget() != null && (flare.getAttackTarget() == null ? player.getDistance(flare) >= 12 : player.getDistance(flare) >= 35)) {
-                flare.setPositionAndRotation(player.getX(), player.getY(), player.getZ(), 0, 0);
+            if (flare.getFollowingTarget() != null && (flare.getTarget() == null ? player.distanceTo(flare) >= 12 : player.distanceTo(flare) >= 35)) {
+                flare.moveTo(player.getX(), player.getY(), player.getZ(), 0, 0);
             }
         }
-        setEntityIds(mantle, flares.stream().map(Entity::getEntityId).collect(Collectors.toList()));
+        setEntityIds(mantle, flares.stream().map(Entity::getId).collect(Collectors.toList()));
     }
 
     @Override
@@ -103,26 +100,16 @@ public class MantleEffectBootes extends MantleEffect {
         this.playCapeSparkles(player, 0.15F);
     }
 
-    private void onAttacked(LivingAttackEvent event) {
-        LivingEntity attacked = event.getEntity();
-        DamageSource src = event.getSource();
-        if (!attacked.getCommandSenderWorld().isClientSide() && src.getEntity() instanceof LivingEntity) {
-            LivingEntity attacker = (LivingEntity) src.getEntity();
-            if (ItemMantle.getEffect(attacker, ConstellationsAS.bootes) != null && attacked.isAlive()) {
-                if (attacked instanceof Player && !MiscUtils.canPlayerAttackServer(attacker, attacked)) {
-                    return;
-                }
-                this.forEachFlare(attacker, flare -> flare.setAttackTarget(attacked));
-            }
-        }
-    }
-
     private void onHurt(LivingIncomingDamageEvent event) {
         LivingEntity hurt = event.getEntity();
-        if (!hurt.getCommandSenderWorld().isClientSide() && ItemMantle.getEffect(hurt, ConstellationsAS.bootes) != null) {
-            Entity source = event.getSource().getEntity();
-            if (source instanceof LivingEntity) {
-                this.forEachFlare(hurt, flare -> flare.setAttackTarget((LivingEntity) source));
+        Entity source = event.getSource().getEntity();
+        if (!hurt.getCommandSenderWorld().isClientSide() && source instanceof LivingEntity attacker) {
+            if (ItemMantle.getEffect(attacker, ConstellationsAS.bootes) != null && hurt.isAlive() &&
+                    (!(hurt instanceof Player) || MiscUtils.canPlayerAttackServer(attacker, hurt))) {
+                this.forEachFlare(attacker, flare -> flare.setTarget(hurt));
+            }
+            if (ItemMantle.getEffect(hurt, ConstellationsAS.bootes) != null) {
+                this.forEachFlare(hurt, flare -> flare.setTarget(attacker));
             }
         }
     }

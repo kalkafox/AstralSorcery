@@ -28,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.server.level.ServerLevel;
@@ -58,7 +59,7 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
             if (!(level instanceof ServerLevel)) {
                 return false;
             }
-            pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).above();
+            pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos).above();
             return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) level, pos, MobSpawnType.SPAWNER) != null;
         });
     }
@@ -75,7 +76,7 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
         if (!(level instanceof ServerLevel)) {
             return null;
         }
-        pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).above();
+        pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos).above();
         return ListEntries.EntitySpawnEntry.createEntry((ServerLevel) level, pos, MobSpawnType.SPAWNER);
     }
 
@@ -102,15 +103,15 @@ public class CEffectPelotrio extends CEffectAbstractList<ListEntries.EntitySpawn
 
         boolean update = false;
 
-        List<LivingEntity> nearbyEntities = level.getEntitiesWithinAABB(LivingEntity.class, PROXIMITY_BOX.offset(pos).grow(properties.getSize()));
+        List<LivingEntity> nearbyEntities = level.getEntitiesOfClass(LivingEntity.class, PROXIMITY_BOX.move(pos).inflate(properties.getSize()));
 
         if (properties.isCorrupted()) {
             for (LivingEntity entity : nearbyEntities) {
                 if (entity != null && entity.isAlive() && random.nextInt(300) == 0) {
                     LivingEntity transmuted = EntityTransmutationRegistry.INSTANCE.transmuteEntity((ServerLevel) level, entity);
                     if (transmuted != null) {
-                        transmuted.addEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, Integer.MAX_VALUE, 1));
-                        AstralSorcery.getProxy().scheduleDelayed(() -> level.addEntity(transmuted));
+                        transmuted.addEffect(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_DROP_MODIFIER), Integer.MAX_VALUE, 1));
+                        AstralSorcery.getProxy().scheduleDelayed(() -> level.addFreshEntity(transmuted));
                         update = true;
                     }
                 }

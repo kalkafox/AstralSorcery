@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.perk.type.vanilla;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.player.Player;
 
@@ -23,7 +24,7 @@ import javax.annotation.Nonnull;
 public interface VanillaPerkAttributeType {
 
     @Nonnull
-    Attribute getAttribute();
+    Holder<Attribute> getAttribute();
 
     void refreshAttribute(Player player);
 

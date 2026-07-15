@@ -94,7 +94,7 @@ public class CEffectDiscidia extends ConstellationEffectEntityCollect<LivingEnti
             if (random.nextInt(6) != 0) {
                 continue;
             }
-            if (properties.isCorrupted() && entity instanceof Mob && entity.getCategory(false) == MobCategory.MONSTER) {
+            if (properties.isCorrupted() && entity instanceof Mob && entity.getType().getCategory() == MobCategory.MONSTER) {
                 entity.heal(damage);
                 entity.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, 1));
             } else {

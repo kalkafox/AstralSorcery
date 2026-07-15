@@ -119,19 +119,19 @@ public class CEffectMineralis extends CEffectAbstractList<ListEntries.PosEntry> 
                     if (generateOre) {
                         Block ore = OreBlockRarityRegistry.MINERALIS_RITUAL.getRandomBlock(random);
                         if (ore != null) {
-                            return level.setBlock(at, ore.defaultBlockState());
+                            return level.setBlockAndUpdate(at, ore.defaultBlockState());
                         } else {
-                            return level.setBlock(at, Blocks.STONE.defaultBlockState());
+                            return level.setBlockAndUpdate(at, Blocks.STONE.defaultBlockState());
                         }
                     } else {
-                        return level.setBlock(at, Blocks.STONE.defaultBlockState());
+                        return level.setBlockAndUpdate(at, Blocks.STONE.defaultBlockState());
                     }
                 }
             } else {
                 if (CONFIG.replaceableStates.test(atState)) {
                     Block ore = OreBlockRarityRegistry.MINERALIS_RITUAL.getRandomBlock(random);
                     if (ore != null) {
-                        return level.setBlock(at, ore.defaultBlockState());
+                        return level.setBlockAndUpdate(at, ore.defaultBlockState());
                     } else {
                         sendConstellationPing(level, new Vector3(at).add(0.5, 0.5, 0.5));
                     }

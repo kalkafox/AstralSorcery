@@ -10,6 +10,7 @@ package hellfirepvp.astralsorcery.common.perk.type;
 
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.type.vanilla.VanillaAttributeType;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
@@ -35,7 +36,7 @@ public class AttributeTypeMovementSpeed extends VanillaAttributeType {
 
     @Nonnull
     @Override
-    public Attribute getAttribute() {
+    public Holder<Attribute> getAttribute() {
         return Attributes.MOVEMENT_SPEED;
     }
 

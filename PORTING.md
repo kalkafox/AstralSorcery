@@ -785,9 +785,72 @@ compile clean. `gradlew compileJava` (configured with `-Xmaxerrs 10000`)
 stops at structural 1.16 -> 1.21 API changes rather than naming; the biggest
 remaining clusters are perks (`common/perk/**`), `client/util`, world
 generation (`RegistryWorldGeneration` +
-`common/world/**`), constellation effects/mantle effects, the remaining
-`common/registry` content classes, and `crafting/nojson`. 750 compiler errors
+`common/world/**`), the remaining
+`common/registry` content classes, and `crafting/nojson`. 632 compiler errors
 remain, measured off a full `gradlew compileJava` run.
+
+### Vanilla-backed perk attributes (done)
+
+The shared vanilla attribute type now targets holder-backed attributes and
+uses resource-location modifier IDs plus the current transient-modifier API.
+Because `AttributeModifier` is now a final record, perk amounts are
+recalculated and the static transient modifiers replaced whenever the perk
+map changes. Vanilla and NeoForge swim/reach attributes and modifier
+operations use their 1.21 forms.
+
+### Remaining mantle effects (done)
+
+Aevitas, Armara, Discidia, Fornax, Horologium, Lucerna, Mineralis, and Vicio
+now use the current food, damage-tag/event, player damage-source, block
+position, AABB/entity-query, block-entity level, and flight-ability APIs. The
+entire `common/constellation/mantle/effect` package now compiles clean.
+
+### Octans and Pelotrio mantle effects (done)
+
+Octans uses current eye-fluid and air-supply APIs and resolves Aqua Affinity
+through the enchantment registry for its temporary helmet calculation.
+Pelotrio listens to incoming damage, reads block breakers from `BreakEvent`,
+and inserts spectral tools at block positions with `addFreshEntity`.
+
+### Bootes mantle effect (done)
+
+`MantleEffectBootes` uses current flare position, target, entity-id, distance,
+and insertion APIs. The removed attack event is folded into the incoming
+damage handler, which preserves both attacker-owned and defender-owned flare
+target selection and the existing PvP guard.
+
+### Remaining non-mantle constellation effects (done)
+
+The shared entity collector uses current AABB and typed entity queries.
+Discidia reads mob categories from the entity type, and Mineralis performs ore
+and stone replacement with block update notifications.
+
+### Octans constellation effect (done)
+
+`CEffectOctans` uses heightmap positions and fluid-state source checks for
+water targets. Corrupted block placement uses update notifications. Fishing
+drops now build `LootParams`, resolve the fishing loot-table key through the
+server's reloadable registries, and generate items with the level's
+`RandomSource`; Luck of the Sea is applied through the enchantment registry.
+
+### Bootes and Pelotrio constellation effects (done)
+
+Bootes now passes block positions into chunk-safe execution and wraps its
+custom drop modifier as a holder. Pelotrio uses current heightmap positions,
+entity queries, holder-backed effects, and `addFreshEntity` for delayed
+transmuted spawns.
+
+### Armara constellation effect (done)
+
+`CEffectArmara` uses current entity queries, AABB transforms, knockback, and
+effect names. Astral Sorcery's drop modifier is wrapped in a mob-effect holder
+before constructing its effect instance.
+
+### Vicio constellation effect (done)
+
+`CEffectVicio` uses current AABB/entity queries, game-mode access,
+`Abilities.mayfly`, and the movement-slowdown effect holder while preserving
+temporary-flight synchronization for affected players.
 
 ### Active player attunement recipe (done)
 

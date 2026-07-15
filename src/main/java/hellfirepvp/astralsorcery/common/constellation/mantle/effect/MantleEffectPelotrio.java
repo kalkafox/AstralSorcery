@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -53,7 +53,7 @@ public class MantleEffectPelotrio extends MantleEffect {
         bus.addListener(this::onBreak);
     }
 
-    private void onHurt(LivingAttackEvent event) {
+    private void onHurt(LivingIncomingDamageEvent event) {
         Level level = event.getEntity().getCommandSenderWorld();
         if (level.isClientSide()) {
             return;
@@ -69,7 +69,7 @@ public class MantleEffectPelotrio extends MantleEffect {
 
             if (ItemMantle.getEffect(player, ConstellationsAS.pelotrio) != null && random.nextFloat() < CONFIG.chanceSpawnSword.get()) {
                 if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerSword.get())) {
-                    if (level.addEntity(new EntitySpectralTool(level, player.position().above(), player, EntitySpectralTool.ToolTask.createAttackTask()))) {
+                    if (level.addFreshEntity(new EntitySpectralTool(level, player.blockPosition().above(), player, EntitySpectralTool.ToolTask.createAttackTask()))) {
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerSword.get(), false);
                     }
                 }
@@ -83,7 +83,7 @@ public class MantleEffectPelotrio extends MantleEffect {
             return;
         }
 
-        Player player = event.getEntity();
+        Player player = event.getPlayer();
         if ((!(player instanceof ServerPlayer) || !MiscUtils.isPlayerFakeMP((ServerPlayer) player)) &&
                 ItemMantle.getEffect(player, ConstellationsAS.pelotrio) != null) {
 
@@ -96,7 +96,7 @@ public class MantleEffectPelotrio extends MantleEffect {
 
                 if (random.nextFloat() < CONFIG.chanceSpawnAxe.get()) {
                     if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerAxe.get())) {
-                        if (level.addEntity(new EntitySpectralTool((Level) level, player.position(), player, EntitySpectralTool.ToolTask.createLogTask()))) {
+                        if (((Level) level).addFreshEntity(new EntitySpectralTool((Level) level, player.blockPosition(), player, EntitySpectralTool.ToolTask.createLogTask()))) {
                             AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerAxe.get(), false);
                         }
                     }
@@ -109,7 +109,7 @@ public class MantleEffectPelotrio extends MantleEffect {
 
                 if (random.nextFloat() < CONFIG.chanceSpawnPickaxe.get()) {
                     if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerPickaxe.get())) {
-                        if (level.addEntity(new EntitySpectralTool((Level) level, player.position(), player, EntitySpectralTool.ToolTask.createPickaxeTask()))) {
+                        if (((Level) level).addFreshEntity(new EntitySpectralTool((Level) level, player.blockPosition(), player, EntitySpectralTool.ToolTask.createPickaxeTask()))) {
                             AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerPickaxe.get(), false);
                         }
                     }

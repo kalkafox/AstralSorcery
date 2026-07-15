@@ -13,6 +13,7 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierSource;
 import hellfirepvp.astralsorcery.common.perk.type.ModifierType;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -54,64 +55,52 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
     public void onModeApply(Player player, ModifierType mode, LogicalSide direction) {
         super.onModeApply(player, mode, direction);
 
-        AttributeInstance attr = player.getAttributes().createInstanceIfAbsent(getAttribute());
+        AttributeInstance attr = player.getAttribute(getAttribute());
         if (attr == null) {
             return;
         }
 
-        //The attributes don't get written/read from bytebuffer on local connection, but ARE in dedicated connections.
-        //Remove minecraft's dummy instances in case we're on a dedicated server.
-        if (direction.isClient()) {
-            AttributeModifier modifier;
-            if ((modifier = attr.getAttributeInstance(getID(mode))) != null) {
-                if (!(modifier instanceof DynamicAttributeModifier)) {
-                    attr.removeModifier(getID(mode));
-                } else {
-                    return;
-                }
-            }
-        }
-
-        switch (mode) {
-            case ADDITION:
-                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Add", this, mode, player, direction));
-                break;
-            case ADDED_MULTIPLY:
-                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Multiply Add", this, mode, player, direction));
-                break;
-            case STACKING_MULTIPLY:
-                attr.applyNonPersistentModifier(new DynamicAttributeModifier(getID(mode), getDescription() + " Stack Add", this, mode, player, direction));
-                break;
-            default:
-                break;
-        }
+        ResourceLocation modifierId = getModifierId(mode);
+        attr.removeModifier(modifierId);
+        attr.addTransientModifier(createModifier(modifierId, mode, player, direction));
     }
 
     @Override
     public void onModeRemove(Player player, ModifierType mode, LogicalSide direction, boolean removedCompletely) {
         super.onModeRemove(player, mode, direction, removedCompletely);
 
-        AttributeInstance attr = player.getAttributes().createInstanceIfAbsent(getAttribute());
+        AttributeInstance attr = player.getAttribute(getAttribute());
         if (attr == null) {
             return;
         }
 
-        attr.removeModifier(getID(mode));
+        attr.removeModifier(getModifierId(mode));
     }
 
     public void refreshAttribute(Player player) {
-        AttributeInstance attr = player.getAttributes().createInstanceIfAbsent(getAttribute());
+        AttributeInstance attr = player.getAttribute(getAttribute());
         if (attr == null) {
             return;
         }
 
-        double base = attr.getBaseValue();
-        if (base == 0) {
-            attr.setBaseValue(1);
-        } else {
-            attr.setBaseValue(0);
+        LogicalSide direction = player.level().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
+        for (ModifierType mode : ModifierType.values()) {
+            ResourceLocation modifierId = getModifierId(mode);
+            if (attr.hasModifier(modifierId)) {
+                attr.removeModifier(modifierId);
+                attr.addTransientModifier(createModifier(modifierId, mode, player, direction));
+            }
         }
-        attr.setBaseValue(base);
+    }
+
+    private ResourceLocation getModifierId(ModifierType mode) {
+        return ResourceLocation.fromNamespaceAndPath("astralsorcery", getID(mode).toString());
+    }
+
+    private AttributeModifier createModifier(ResourceLocation id, ModifierType mode, Player player, LogicalSide direction) {
+        double amount = PerkAttributeHelper.getOrCreateMap(player, direction)
+                .getAttributeInstance(player, ResearchHelper.getProgress(player, direction), this, mode) - 1;
+        return new AttributeModifier(id, amount, mode.getVanillaAttributeOperation());
     }
 
     public abstract UUID getID(ModifierType mode);
@@ -119,32 +108,6 @@ public abstract class VanillaAttributeType extends PerkAttributeType implements 
     public abstract String getDescription();
 
     @Nonnull
-    public abstract Attribute getAttribute();
-
-    static class DynamicAttributeModifier extends AttributeModifier {
-
-        private Player player;
-        private LogicalSide direction;
-        private PerkAttributeType type;
-
-        public DynamicAttributeModifier(UUID idIn, String nameIn, PerkAttributeType type, ModifierType mode, Player player, LogicalSide direction) {
-            this(idIn, nameIn, type, mode.getVanillaAttributeOperation(), player, direction);
-        }
-
-        public DynamicAttributeModifier(UUID idIn, String nameIn, PerkAttributeType type, Operation operationIn, Player player, LogicalSide direction) {
-            super(idIn, nameIn, operationIn == Operation.MULTIPLY_TOTAL ? 1 : 0, operationIn);
-            this.player = player;
-            this.direction = direction;
-            this.type = type;
-        }
-
-        @Override
-        public double getAmount() {
-            ModifierType mode = ModifierType.fromVanillaAttributeOperation(getOperation());
-            return PerkAttributeHelper.getOrCreateMap(player, direction)
-                    .getAttributeInstance(player, ResearchHelper.getProgress(player, direction), type, mode) - 1;
-        }
-
-    }
+    public abstract Holder<Attribute> getAttribute();
 
 }

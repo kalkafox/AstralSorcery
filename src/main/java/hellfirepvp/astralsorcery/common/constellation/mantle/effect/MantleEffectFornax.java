@@ -12,6 +12,7 @@ import hellfirepvp.astralsorcery.common.constellation.mantle.MantleEffect;
 import hellfirepvp.astralsorcery.common.item.armor.ItemMantle;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -62,7 +63,7 @@ public class MantleEffectFornax extends MantleEffect {
             }
         }
 
-        if (event.getSource().isFire() && ItemMantle.getEffect(attacked, ConstellationsAS.fornax) != null) {
+        if (event.getSource().is(DamageTypeTags.IS_FIRE) && ItemMantle.getEffect(attacked, ConstellationsAS.fornax) != null) {
             if (CONFIG.healPercentFromFireDamage.get() > 0) {
                 attacked.heal((float) (event.getAmount() * CONFIG.healPercentFromFireDamage.get()));
             }

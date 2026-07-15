@@ -15,6 +15,7 @@ import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
 import hellfirepvp.astralsorcery.common.util.time.TimeStopController;
 import hellfirepvp.astralsorcery.common.util.time.TimeStopZone;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -65,7 +66,7 @@ public class MantleEffectHorologium extends MantleEffect {
         if (ItemMantle.getEffect(event.getEntity(), ConstellationsAS.horologium) != null &&
                 event.getEntity() instanceof Player &&
                 !event.getEntity().getCommandSenderWorld().isClientSide() &&
-                !event.getSource().isFire()) {
+                !event.getSource().is(DamageTypeTags.IS_FIRE)) {
             Player player = (Player) event.getEntity();
 
             if (!player.getCooldowns().isOnCooldown(ItemsAS.MANTLE) &&
@@ -73,7 +74,7 @@ public class MantleEffectHorologium extends MantleEffect {
                 TimeStopController.freezeWorldAt(
                         TimeStopZone.EntityTargetController.allExcept(player),
                         player.getCommandSenderWorld(),
-                        player.position(),
+                        player.blockPosition(),
                         CONFIG.effectRange.get().floatValue(),
                         CONFIG.effectDuration.get());
                 player.getCooldowns().addCooldown(ItemsAS.MANTLE, CONFIG.cooldown.get());

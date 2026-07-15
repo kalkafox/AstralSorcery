@@ -19,6 +19,7 @@ import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.ConstellationsAS;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
@@ -154,7 +155,7 @@ public class MantleEffectArmara extends MantleEffect {
     }
 
     private boolean shouldPreventDamage(LivingEntity hurt, DamageSource source, boolean simulate) {
-        if (source.isBypassInvul()) {
+        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return false;
         }
         int stacks = getCurrentImmunityStacks(hurt);

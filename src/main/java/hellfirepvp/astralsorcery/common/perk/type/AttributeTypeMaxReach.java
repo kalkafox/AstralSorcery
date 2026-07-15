@@ -10,8 +10,9 @@ package hellfirepvp.astralsorcery.common.perk.type;
 
 import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.type.vanilla.VanillaAttributeType;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.neoforged.neoforge.common.ForgeMod;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
@@ -40,8 +41,8 @@ public class AttributeTypeMaxReach extends VanillaAttributeType {
 
     @Nonnull
     @Override
-    public Attribute getAttribute() {
-        return ForgeMod.REACH_DISTANCE.get();
+    public Holder<Attribute> getAttribute() {
+        return Attributes.BLOCK_INTERACTION_RANGE;
     }
 
     @Override

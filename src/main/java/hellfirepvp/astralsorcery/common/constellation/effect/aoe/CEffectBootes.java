@@ -32,6 +32,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -103,7 +104,7 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
 
             if (properties.isCorrupted()) {
                 entity.invulnerableTime = 0;
-                entity.addEffect(new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 1000, 5));
+                entity.addEffect(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_DROP_MODIFIER), 1000, 5));
                 if (DamageUtil.hurt(entity, CommonProxy.DAMAGE_SOURCE_STELLAR, 5_000)) {
                     didEffect = true;
                 }
@@ -111,7 +112,7 @@ public class CEffectBootes extends ConstellationEffectEntityCollect<LivingEntity
             }
 
             if (random.nextFloat() < CONFIG.herdingChance.get()) {
-                didEffect = MiscUtils.executeWithChunk(level, entity.position(), didEffect, (didEffectFlag) -> {
+                didEffect = MiscUtils.executeWithChunk(level, entity.blockPosition(), didEffect, (didEffectFlag) -> {
 
                     List<ItemStack> rawDrops = EntityUtils.generateLoot(entity, random, CommonProxy.DAMAGE_SOURCE_STELLAR, null);
                     List<ItemStack> drops = new ArrayList<>();

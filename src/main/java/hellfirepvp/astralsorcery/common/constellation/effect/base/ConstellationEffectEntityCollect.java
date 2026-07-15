@@ -40,7 +40,7 @@ public abstract class ConstellationEffectEntityCollect<T extends Entity> extends
 
     @Nonnull
     protected List<T> collectEntities(Level level, BlockPos center, ConstellationEffectProperties properties) {
-        return level.getEntitiesWithinAABB(this.entityClazz, BOX.grow(properties.getSize()).offset(center), this.filter);
+        return level.getEntitiesOfClass(this.entityClazz, BOX.inflate(properties.getSize()).move(center), this.filter);
     }
 
 }

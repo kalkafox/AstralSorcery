@@ -62,14 +62,14 @@ public class MantleEffectLucerna extends MantleEffect {
             this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_SPAWNER, (entity) -> entity instanceof SpawnerBlockEntity);
         }
         if (CONFIG.findChests.get() && random.nextInt(10) == 0) {
-            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (entity) -> entity.level().getCapability(Capabilities.ItemHandler.BLOCK, entity.getBlockPos(), null) != null);
+            this.playBlockHighlight(player, ColorsAS.MANTLE_LUCERNA_INVENTORY, (entity) -> entity.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, entity.getBlockPos(), null) != null);
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     private void playBlockHighlight(Player player, Color highlightColor, Predicate<BlockEntity> test) {
         float chance = 0.9F;
-        Set<BlockPos> positions = BlockDiscoverer.searchForTileEntitiesAround(player.getCommandSenderWorld(), player.position(), CONFIG.range.get(), test);
+        Set<BlockPos> positions = BlockDiscoverer.searchForTileEntitiesAround(player.getCommandSenderWorld(), player.blockPosition(), CONFIG.range.get(), test);
         for (BlockPos pos : positions) {
             if (random.nextFloat() > chance) {
                 continue;
@@ -104,9 +104,9 @@ public class MantleEffectLucerna extends MantleEffect {
     @OnlyIn(Dist.CLIENT)
     private void playEntityHighlight(Player player) {
         AABB box = new AABB(0, 0, 0, 0, 0, 0)
-                .grow(CONFIG.range.get())
-                .offset(player.position());
-        List<LivingEntity> entities = player.getCommandSenderWorld().getEntitiesWithinAABB(LivingEntity.class, box);
+                .inflate(CONFIG.range.get())
+                .move(player.position());
+        List<LivingEntity> entities = player.getCommandSenderWorld().getEntitiesOfClass(LivingEntity.class, box);
         for (LivingEntity entity : entities) {
             if (!entity.isAlive() || entity.equals(player) || random.nextInt(8) != 0) {
                 continue;

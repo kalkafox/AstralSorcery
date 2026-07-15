@@ -87,13 +87,12 @@ public class CEffectVicio extends ConstellationEffect implements ConstellationEf
         boolean foundPlayer = false;
         double range = isDirty.getSize();
         if (isDirty.isCorrupted()) {
-            List<LivingEntity> entities = level.getEntitiesWithinAABB(LivingEntity.class, BOX.offset(pos).grow(range));
+            List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, BOX.move(pos).inflate(range));
             for (LivingEntity entity : entities) {
-                if (entity instanceof ServerPlayer) {
-                    ServerPlayer pl = (ServerPlayer) entity;
-                    if (pl.gameMode.getGameType().isSurvival()) {
-                        boolean prev = pl.getAbilities().allowFlying;
-                        pl.getAbilities().allowFlying = false;
+                if (entity instanceof ServerPlayer pl) {
+                    if (pl.gameMode.getGameModeForPlayer().isSurvival()) {
+                        boolean prev = pl.getAbilities().mayfly;
+                        pl.getAbilities().mayfly = false;
                         pl.getAbilities().flying = false;
                         if (prev) {
                             pl.onUpdateAbilities();
@@ -102,15 +101,15 @@ public class CEffectVicio extends ConstellationEffect implements ConstellationEf
                     markPlayerAffected(pl);
                 }
                 foundPlayer = true;
-                entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 9));
+                entity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, 9));
                 entity.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 200, 9));
             }
         } else {
-            List<ServerPlayer> entities = level.getEntitiesWithinAABB(ServerPlayer.class, BOX.offset(pos).grow(range));
+            List<ServerPlayer> entities = level.getEntitiesOfClass(ServerPlayer.class, BOX.move(pos).inflate(range));
             for (ServerPlayer pl : entities) {
                 if (EventHelperTemporaryFlight.allowFlight(pl)) {
-                    boolean prev = pl.getAbilities().allowFlying;
-                    pl.getAbilities().allowFlying = true;
+                    boolean prev = pl.getAbilities().mayfly;
+                    pl.getAbilities().mayfly = true;
                     foundPlayer = true;
                     if (!prev) {
                         pl.onUpdateAbilities();

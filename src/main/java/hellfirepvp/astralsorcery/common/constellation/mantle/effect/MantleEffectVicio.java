@@ -52,8 +52,8 @@ public class MantleEffectVicio extends MantleEffect {
         PlayerProgress prog = ResearchHelper.getProgress(player, LogicalSide.SERVER);
         if (prog.getPerkData().hasPerkEffect(p -> p instanceof KeyMantleFlight) &&
                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), true)) {
-            boolean prev = player.getAbilities().allowFlying;
-            player.getAbilities().allowFlying = true;
+            boolean prev = player.getAbilities().mayfly;
+            player.getAbilities().mayfly = true;
             if (!prev) {
                 player.onUpdateAbilities();
             }
@@ -88,7 +88,7 @@ public class MantleEffectVicio extends MantleEffect {
     @OnlyIn(Dist.CLIENT)
     protected FXFacingParticle spawnFacingParticle(Player player, Vector3 at) {
         if (player.isFallFlying() || (!(player.isCreative() || player.isSpectator()) && player.getAbilities().flying)) {
-            at.subtract(player.getDeltaMovement().mul(1.5, 1.5, 1.5));
+            at.subtract(player.getDeltaMovement().scale(1.5));
         }
         return super.spawnFacingParticle(player, at);
     }

@@ -74,7 +74,7 @@ public class MantleEffectAevitas extends MantleEffect {
             FoodData stats = player.getFoodData();
             if (stats.getFoodLevel() < 20 || stats.getSaturationLevel() < 5) {
                 if (AlignmentChargeHandler.INSTANCE.hasCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFood.get())) {
-                    stats.addStats(CONFIG.foodPerCycle.get().getCommandResult(), 0.5F);
+                    stats.eat(CONFIG.foodPerCycle.get().intValue(), 0.5F);
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCostPerFood.get(), false);
                 }
             }
@@ -125,7 +125,7 @@ public class MantleEffectAevitas extends MantleEffect {
     public static boolean isStandingOnAir(Entity entity) {
         if (entity.onGround()) {
             Level level = entity.getCommandSenderWorld();
-            BlockPos at = entity.position().below();
+            BlockPos at = entity.blockPosition().below();
             return level.getBlockState(at).isAir();
         }
         return false;
@@ -210,7 +210,7 @@ public class MantleEffectAevitas extends MantleEffect {
             if (entity.getPose() == Pose.CROUCHING && isStandingOnAir(entity)) {
                 yOffset = 2;
             }
-            additionalCollision.add(FULL_BOX.offset(entity.getX(), Math.floor(entity.getY()) - yOffset, entity.getZ()));
+            additionalCollision.add(FULL_BOX.move(entity.getX(), Math.floor(entity.getY()) - yOffset, entity.getZ()));
         }
     }
 }

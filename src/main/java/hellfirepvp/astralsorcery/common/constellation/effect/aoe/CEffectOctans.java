@@ -29,15 +29,19 @@ import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BubbleColumnBlock;
-import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.loot.*;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
@@ -68,13 +72,11 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
     public CEffectOctans(@Nonnull ILocatable origin) {
         super(origin, ConstellationsAS.octans, CONFIG.maxAmount.get(), (level, pos, state) -> {
             if (!corruptedSkipWaterCheck) {
-                pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).below();
+                pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos).below();
             }
             return corruptedSkipWaterCheck || (
                     level.isEmptyBlock(pos.above()) &&
-                            (state.getBlock() instanceof LiquidBlock &&
-                                    state.getMaterial() == Material.WATER &&
-                                    state.get(LiquidBlock.LEVEL) == 0) ||
+                            (state.getFluidState().is(Fluids.WATER) && state.getFluidState().isSource()) ||
                             state.getBlock() instanceof BubbleColumnBlock
                     );
         });
@@ -90,7 +92,7 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
     @Nullable
     @Override
     public ListEntries.CounterMaxEntry createElement(Level level, BlockPos pos) {
-        pos = level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos).below();
+        pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos).below();
         return new ListEntries.CounterMaxEntry(pos, 1);
     }
 
@@ -134,7 +136,7 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
                 if (level.isEmptyBlock(entry.getBlockPos()) &&
                         (this.isLinkedRitual || Math.abs(offset.getX()) > 5 || Math.abs(offset.getZ()) > 5 || offset.getY() < 0)) {
                     if (!level.dimensionType().ultraWarm()) {
-                        if (level.setBlock(entry.getBlockPos(), Blocks.WATER.defaultBlockState())) {
+                        if (level.setBlockAndUpdate(entry.getBlockPos(), Blocks.WATER.defaultBlockState())) {
                             for (int i = 0; i < 3; i++) {
                                 spawnFishingDropsAt((ServerLevel) level, entry.getBlockPos());
                             }
@@ -147,7 +149,7 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
                             spawnFishingDropsAt((ServerLevel) level, entry.getBlockPos());
                         }
                     } else {
-                        level.setBlock(entry.getBlockPos(), Blocks.SAND.defaultBlockState());
+                        level.setBlockAndUpdate(entry.getBlockPos(), Blocks.SAND.defaultBlockState());
                     }
                 } else if (state.getBlock() instanceof BubbleColumnBlock) {
                     if (random.nextInt(70) == 0) {
@@ -185,7 +187,7 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
         }
 
         if (findNewPosition(level, pos, properties)
-                .ifRight(attemptedPos -> sendConstellationPing(level, new Vector3(level.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, attemptedPos).below()).add(0.5, 0.5, 0.5)))
+                .ifRight(attemptedPos -> sendConstellationPing(level, new Vector3(level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, attemptedPos).below()).add(0.5, 0.5, 0.5)))
                 .left().isPresent()) {
             update = true;
         }
@@ -195,20 +197,20 @@ public class CEffectOctans extends CEffectAbstractList<ListEntries.CounterMaxEnt
     private void spawnFishingDropsAt(ServerLevel level, BlockPos pos) {
         Vector3 dropLoc = new Vector3(pos).add(0.5, 0.85, 0.5);
         ItemStack tool = new ItemStack(Items.FISHING_ROD);
-        tool.fillItemCategory(Enchantments.LUCK_OF_THE_SEA, 2);
+        tool.enchant(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LUCK_OF_THE_SEA), 2);
 
-        ResourceLocation fromTable = BuiltInLootTables.FISHING_FISH;
+        ResourceKey<LootTable> fromTable = BuiltInLootTables.FISHING_FISH;
         if (random.nextFloat() < 0.1F) {
             fromTable = BuiltInLootTables.FISHING_TREASURE;
         }
 
-        LootContext.Builder builder = new LootContext.Builder(level);
-        builder.withLuck(random.nextInt(2) * random.nextFloat());
-        builder.create(random);
-        builder.withParameter(LootContextParams.TOOL, tool);
-        builder.withParameter(LootContextParams.ORIGIN, Vec3.copyCentered(pos));
-        LootTable lootTable = level.getServer().getLootTables().serialize(fromTable);
-        for (ItemStack loot : lootTable.place(builder.build(LootContextParamSets.FISHING))) {
+        LootParams params = new LootParams.Builder(level)
+                .withLuck(random.nextInt(2) * random.nextFloat())
+                .withParameter(LootContextParams.TOOL, tool)
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+                .create(LootContextParamSets.FISHING);
+        LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(fromTable);
+        for (ItemStack loot : lootTable.getRandomItems(params, level.random)) {
             ItemEntity ei = ItemUtils.dropItemNaturally(level, dropLoc.getX(), dropLoc.getY(), dropLoc.getZ(), loot);
             Vector3 motion = new Vector3(ei.getDeltaMovement());
             motion.setY(Math.abs(motion.getY()));

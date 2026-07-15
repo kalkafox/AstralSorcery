@@ -21,6 +21,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -56,9 +57,9 @@ public class MantleEffectOctans extends MantleEffect {
     protected void tickServer(Player player) {
         super.tickServer(player);
 
-        if (player.areEyesInFluid(FluidTags.WATER)) {
+        if (player.isEyeInFluid(FluidTags.WATER)) {
             if (player.getAirSupply() < (player.getMaxAirSupply() - 20)) {
-                player.air(player.getMaxAirSupply());
+                player.setAirSupply(player.getMaxAirSupply());
             }
 
             player.heal(CONFIG.healPerTick.get().floatValue());
@@ -71,7 +72,7 @@ public class MantleEffectOctans extends MantleEffect {
         super.tickClient(player);
 
         float chance = 0.1F;
-        if (player.areEyesInFluid(FluidTags.WATER)) {
+        if (player.isEyeInFluid(FluidTags.WATER)) {
             chance = 0.3F;
         }
         this.playCapeSparkles(player, chance);
@@ -79,7 +80,8 @@ public class MantleEffectOctans extends MantleEffect {
 
     private void handleUnderwaterBreakSpeed(PlayerEvent.BreakSpeed event) {
         Player player = event.getEntity();
-        if (player.areEyesInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(player)) {
+        var aquaAffinity = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.AQUA_AFFINITY);
+        if (player.isEyeInFluid(FluidTags.WATER) && EnchantmentHelper.getEnchantmentLevel(aquaAffinity, player) == 0) {
             LogicalSide direction = player.getCommandSenderWorld().isClientSide() ? LogicalSide.CLIENT : LogicalSide.SERVER;
             MantleEffectOctans octans = ItemMantle.getEffect(player, ConstellationsAS.octans);
             if (octans != null && AlignmentChargeHandler.INSTANCE.hasCharge(player, direction, CONFIG.chargeCostPerBreakSpeed.get())) {
@@ -88,7 +90,7 @@ public class MantleEffectOctans extends MantleEffect {
 
                 //Set aqua affinity
                 ItemStack st = new ItemStack(Items.LEATHER_HELMET);
-                st.fillItemCategory(Enchantments.AQUA_AFFINITY, 1);
+                st.enchant(aquaAffinity, 1);
                 player.getInventory().armor.set(EquipmentSlot.HEAD.getIndex(), st);
 
                 //Recalc breakspeed
@@ -104,7 +106,7 @@ public class MantleEffectOctans extends MantleEffect {
     }
 
     private void handleUnderwaterUnwavering(LivingKnockBackEvent event) {
-        if (event.getEntity().areEyesInFluid(FluidTags.WATER)) {
+        if (event.getEntity().isEyeInFluid(FluidTags.WATER)) {
             MantleEffectOctans octans = ItemMantle.getEffect(event.getEntity(), ConstellationsAS.octans);
             if (octans != null) {
                 event.setCanceled(true);

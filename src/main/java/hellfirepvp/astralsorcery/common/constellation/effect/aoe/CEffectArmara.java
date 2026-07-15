@@ -35,7 +35,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -86,20 +86,20 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
             }
         }
 
-        List<Entity> projectiles = level.getEntitiesWithinAABB(Entity.class, BOX.offset(pos).grow(prop.getSize()));
+        List<Entity> projectiles = level.getEntitiesOfClass(Entity.class, BOX.move(pos).inflate(prop.getSize()));
         if (!projectiles.isEmpty()) {
             for (Entity e : projectiles) {
                 if (e.isAlive() && TechnicalEntityRegistry.INSTANCE.canAffect(e)) {
                     if (e instanceof Projectile) {
                         double xRatio = (pos.getX() + 0.5) - e.getX();
                         double zRatio = (pos.getZ() + 0.5) - e.getZ();
-                        float f = Mth.sqrt(xRatio * xRatio + zRatio * zRatio);
+                        float f = (float) Math.sqrt(xRatio * xRatio + zRatio * zRatio);
                         Vector3 motion = new Vector3(e.getDeltaMovement());
                         motion.mul(new Vector3(0.5, 1, 0.5));
                         motion.subtract(xRatio / f * 0.4, 0, zRatio / f * 0.4);
                         ((Projectile) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
                     } else if (e instanceof Mob) {
-                        ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getX(), (pos.getZ() + 0.5) - e.getZ());
+                        ((LivingEntity) e).knockback(0.4F, (pos.getX() + 0.5) - e.getX(), (pos.getZ() + 0.5) - e.getZ());
                     }
                 }
             }
@@ -122,20 +122,20 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
         }
 
         if (!properties.isCorrupted()) {
-            List<Entity> projectiles = level.getEntitiesWithinAABB(Entity.class, BOX.offset(pos).grow(properties.getSize()));
+            List<Entity> projectiles = level.getEntitiesOfClass(Entity.class, BOX.move(pos).inflate(properties.getSize()));
             if (!projectiles.isEmpty()) {
                 for (Entity e : projectiles) {
                     if (e.isAlive() && TechnicalEntityRegistry.INSTANCE.canAffect(e)) {
                         if (e instanceof Projectile) {
                             double xRatio = (pos.getX() + 0.5) - e.getX();
                             double zRatio = (pos.getZ() + 0.5) - e.getZ();
-                            float f = Mth.sqrt(xRatio * xRatio + zRatio * zRatio);
+                            float f = (float) Math.sqrt(xRatio * xRatio + zRatio * zRatio);
                             Vector3 motion = new Vector3(e.getDeltaMovement());
                             motion.mul(new Vector3(0.5, 1, 0.5));
                             motion.subtract(xRatio / f * 0.4, 0, zRatio / f * 0.4);
                             ((Projectile) e).shoot(motion.getX(), motion.getY(), motion.getZ(), 1.5F, 0F);
                         } else if (e instanceof Mob) {
-                            ((LivingEntity) e).applyKnockback(0.4F, (pos.getX() + 0.5) - e.getX(), (pos.getZ() + 0.5) - e.getZ());
+                            ((LivingEntity) e).knockback(0.4F, (pos.getX() + 0.5) - e.getX(), (pos.getZ() + 0.5) - e.getZ());
                         }
                     }
                 }
@@ -154,10 +154,10 @@ public class CEffectArmara extends ConstellationEffectEntityCollect<LivingEntity
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100, potionAmplifier + 4));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.REGENERATION, 100, potionAmplifier + 4));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, potionAmplifier + 2));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.STRENGTH, 100, potionAmplifier + 4));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DAMAGE_BOOST, 100, potionAmplifier + 4));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.WATER_BREATHING, 100, potionAmplifier + 4));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DIG_SPEED, 100, potionAmplifier + 4));
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(EffectsAS.EFFECT_DROP_MODIFIER, 100, 5));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_DROP_MODIFIER), 100, 5));
                 } else {
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 30, Math.min(potionAmplifier, 3), true, true));
                     if (entity instanceof Player) {

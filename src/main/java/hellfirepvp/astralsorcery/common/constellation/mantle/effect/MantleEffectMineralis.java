@@ -91,7 +91,7 @@ public class MantleEffectMineralis extends MantleEffect {
         BlockState fState = state;
 
         BlockPredicate search = (level, pos, foundState) -> foundState == fState;
-        List<BlockPos> positions = BlockDiscoverer.searchForBlocksAround(player.getCommandSenderWorld(), player.position(), CONFIG.highlightRange.get(), search);
+        List<BlockPos> positions = BlockDiscoverer.searchForBlocksAround(player.getCommandSenderWorld(), player.blockPosition(), CONFIG.highlightRange.get(), search);
         if (positions.isEmpty()) {
             return;
         }
