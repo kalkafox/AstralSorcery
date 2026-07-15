@@ -20,9 +20,6 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.registries.BuiltInRegistries;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 
 /**
@@ -62,18 +59,14 @@ public class ListEntries {
         }
 
         public static EntitySpawnEntry createEntry(ServerLevel level, BlockPos pos, MobSpawnType reason) {
-            Biome b = level.getBiome(pos);
-            List<MobSpawnSettings.Spawners> applicable = new LinkedList<>();
-            if (DayTimeHelper.isNight(level)) {
-                applicable.addAll(b.getMobSettings().getSpawners(MobCategory.MONSTER));
-            } else {
-                applicable.addAll(b.getMobSettings().getSpawners(MobCategory.CREATURE));
-            }
-            if (applicable.isEmpty()) {
+            Biome biome = level.getBiome(pos).value();
+            MobCategory category = DayTimeHelper.isNight(level) ? MobCategory.MONSTER : MobCategory.CREATURE;
+            MobSpawnSettings.SpawnerData entry = biome.getMobSettings().getMobs(category)
+                    .getRandom(level.random)
+                    .orElse(null);
+            if (entry == null) {
                 return null; //Duh.
             }
-            Collections.shuffle(applicable);
-            MobSpawnSettings.Spawners entry = applicable.get(level.random.nextInt(applicable.size()));
             EntityType<?> type = entry.type;
             if (type != null && EntityUtils.canEntitySpawnHere(level, pos, type, reason, EntityUtils.SpawnConditionFlags.IGNORE_SPAWN_CONDITIONS,
                     (e) -> e.addTag(ConstellationEffectRegistry.ENTITY_TAG_LUCERNA_SKIP_ENTITY))) {
@@ -97,16 +90,16 @@ public class ListEntries {
                         at.getY() + 0.5,
                         at.getZ() + 0.5,
                         level.random.nextFloat() * 360.0F, 0.0F);
-                if (e instanceof Mob) {
-                    ((Mob) e).finalizeSpawn(level, level.getCurrentDifficultyAt(at), reason, null, null);
-                    if (!((Mob) e).isNotColliding(level)) {
-                        e.remove();
+                if (e instanceof Mob mob) {
+                    mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), reason, null);
+                    if (!mob.checkSpawnObstruction(level)) {
+                        e.discard();
                         return;
                     }
                 }
-                level.addEntity(e);
-                level.levelEvent(2004, e.position(), 0);
-                level.levelEvent(2004, e.position(), 0);
+                level.addFreshEntity(e);
+                level.levelEvent(2004, e.blockPosition(), 0);
+                level.levelEvent(2004, e.blockPosition(), 0);
             }
         }
     }

@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.fml.LogicalSide;
@@ -64,7 +65,7 @@ public class KeyGrowables extends KeyPerk implements PlayerTickPerk {
                     .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.radius.get());
             int rRadius = Math.max(Mth.floor(fRadius), 1);
 
-            BlockPos pos = player.position().add(
+            BlockPos pos = player.blockPosition().offset(
                     random.nextInt(rRadius * 2) + 1 - rRadius,
                     random.nextInt(rRadius * 2) + 1 - rRadius,
                     random.nextInt(rRadius * 2) + 1 - rRadius);
@@ -72,7 +73,7 @@ public class KeyGrowables extends KeyPerk implements PlayerTickPerk {
             CropHelper.GrowablePlant plant = CropHelper.wrapPlant(w, pos);
             PktPlayEffect pkt = null;
             if (plant != null) {
-                if (plant.tryGrow(w, random)) {
+                if (plant.tryGrow(w, RandomSource.create(random.nextLong()))) {
                     AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                     pkt = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
                         .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(pos)));
@@ -80,7 +81,7 @@ public class KeyGrowables extends KeyPerk implements PlayerTickPerk {
             } else {
                 BlockState at = w.getBlockState(pos);
                 if (at.getBlock().equals(Blocks.DIRT) && w.isEmptyBlock(pos.above())) {
-                    if (w.setBlock(pos, Blocks.GRASS_BLOCK.defaultBlockState())) {
+                    if (w.setBlockAndUpdate(pos, Blocks.GRASS_BLOCK.defaultBlockState())) {
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                         pkt = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
                                 .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(pos)));

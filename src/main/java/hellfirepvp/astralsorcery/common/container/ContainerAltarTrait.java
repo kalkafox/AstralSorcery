@@ -65,11 +65,12 @@ public class ContainerAltarTrait extends ContainerAltarBase {
     Optional<ItemStack> handleCustomTransfer(Player player, int index) {
         Slot slot = this.slots.get(index);
         if (slot != null && slot.hasItem()) {
-            ItemStack slotStack = slot.getStack();
+            ItemStack slotStack = slot.getItem();
             if (index < 36 &&
                     slotStack.getItem() instanceof IConstellationFocus &&
                     ((IConstellationFocus) slotStack.getItem()).getFocusConstellation(slotStack) != null) {
-                if (this.mergeItemStack(slotStack, this.focusSlot.index, this.focusSlot.index + 1, false)) {
+                int focusIndex = ((Slot) this.focusSlot).index;
+                if (this.moveItemStackTo(slotStack, focusIndex, focusIndex + 1, false)) {
                     return Optional.of(slotStack);
                 }
             }

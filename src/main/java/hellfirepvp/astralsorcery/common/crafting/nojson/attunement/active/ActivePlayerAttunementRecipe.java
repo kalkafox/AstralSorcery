@@ -85,16 +85,16 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
             return false;
         }
         Player player;
-        return (player = altar.getLevel().getPlayerByUuid(this.playerUUID)) != null && player.isAlive();
+        return (player = altar.getLevel().getPlayerByUUID(this.playerUUID)) != null && player.isAlive();
     }
 
     @Override
     public void startCrafting(TileAttunementAltar altar) {
-        Player player = altar.getLevel().getPlayerByUuid(this.playerUUID);
+        Player player = altar.getLevel().getPlayerByUUID(this.playerUUID);
         if (player != null && player.isAlive()) {
             Vector3 offset = new Vector3(altar).add(0.5F, 1.2F, 0.5F);
-            player.setPositionAndRotation(offset.getX(), offset.getY(), offset.getZ(), 0F, 0F);
-            player.setPositionAndRotation(offset.getX(), offset.getY(), offset.getZ(), 0F, 0F);
+            player.moveTo(offset.getX(), offset.getY(), offset.getZ(), 0F, 0F);
+            player.moveTo(offset.getX(), offset.getY(), offset.getZ(), 0F, 0F);
         }
     }
 
@@ -105,7 +105,7 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
 
     @Override
     public void finishRecipe(TileAttunementAltar altar) {
-        Player player = altar.getLevel().getPlayerByUuid(this.playerUUID);
+        Player player = altar.getLevel().getPlayerByUUID(this.playerUUID);
         if (player != null) {
             ResearchManager.setAttunedConstellation(player, this.constellation);
         }
@@ -114,7 +114,7 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
     @Override
     public void doTick(LogicalSide direction, TileAttunementAltar altar) {
         if (direction.isServer()) {
-            Player player = altar.getLevel().getPlayerByUuid(this.playerUUID);
+            Player player = altar.getLevel().getPlayerByUUID(this.playerUUID);
             if (player != null) {
                 EventHelperInvulnerability.makeInvulnerable(player);
             }
@@ -361,8 +361,8 @@ public class ActivePlayerAttunementRecipe extends AttunementRecipe.Active<Attune
             float floatTick = (ClientScheduler.getClientTick() % 40) / 40F;
             float sin = Mth.sin((float) (floatTick * 2 * Math.PI)) / 2F + 0.5F;
             focusedEntity.setCustomNameVisible(false);
-            focusedEntity.setPositionAndRotation(offset.getX(), offset.getY() + sin * 0.2D, offset.getZ(), 0F, 0F);
-            focusedEntity.setPositionAndRotation(offset.getX(), offset.getY() + sin * 0.2D, offset.getZ(), 0F, 0F);
+            focusedEntity.moveTo(offset.getX(), offset.getY() + sin * 0.2D, offset.getZ(), 0F, 0F);
+            focusedEntity.moveTo(offset.getX(), offset.getY() + sin * 0.2D, offset.getZ(), 0F, 0F);
             focusedEntity.yHeadRot = 0;
             focusedEntity.yHeadRotO = 0;
             focusedEntity.yBodyRot = 0;

@@ -16,6 +16,7 @@ import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.network.IContainerFactory;
 
@@ -58,7 +59,7 @@ public class ContainerAltarDiscoveryProvider extends CustomContainerProvider<Con
     public static class Factory implements IContainerFactory<ContainerAltarDiscovery> {
 
         @Override
-        public ContainerAltarDiscovery create(int containerId, Inventory inv, FriendlyByteBuf data) {
+        public ContainerAltarDiscovery create(int containerId, Inventory inv, RegistryFriendlyByteBuf data) {
             return ContainerAltarDiscoveryProvider.createFromPacket(containerId, inv, data);
         }
     }

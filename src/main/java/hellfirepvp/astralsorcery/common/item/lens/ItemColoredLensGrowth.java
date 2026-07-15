@@ -61,7 +61,7 @@ public class ItemColoredLensGrowth extends ItemColoredLens {
             if (plant != null) {
                 executor.executeAll(() -> {
                     if (level.getRandom().nextInt(18) == 0) {
-                        plant.tryGrow(level, new java.util.Random(level.getRandom().nextLong()));
+                        plant.tryGrow(level, level.getRandom());
                         PktPlayEffect packet = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
                                 .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(pos)));
                         PacketChannel.CHANNEL.sendToAllAround(packet, PacketChannel.pointFromPos(level, pos, 16));

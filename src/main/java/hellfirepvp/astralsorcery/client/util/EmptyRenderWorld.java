@@ -8,16 +8,15 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
-import hellfirepvp.observerlib.api.client.StructureRenderLightManager;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.LightChunk;
+import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -39,6 +38,17 @@ import java.util.function.Supplier;
 public class EmptyRenderWorld implements BlockAndTintGetter {
 
     private final Biome biome;
+    private final LevelLightEngine lightEngine = new LevelLightEngine(new LightChunkGetter() {
+        @Override
+        public LightChunk getChunkForLighting(int chunkX, int chunkZ) {
+            throw new UnsupportedOperationException("Empty render world has no chunks");
+        }
+
+        @Override
+        public EmptyRenderWorld getLevel() {
+            return EmptyRenderWorld.this;
+        }
+    }, false, false);
 
     public EmptyRenderWorld(Supplier<Biome> biomeSupplier) {
         this.biome = biomeSupplier.get();
@@ -46,28 +56,33 @@ public class EmptyRenderWorld implements BlockAndTintGetter {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public float func_230487_a_(Direction direction, boolean b) {
+    public float getShade(Direction direction, boolean shade) {
         return 1.0F;
     }
 
     @Override
     public LevelLightEngine getLightEngine() {
-        return new StructureRenderLightManager(this.getMaxLightLevel());
+        return lightEngine;
     }
 
     @Override
-    public int hasChunksAt(BlockPos blockPosIn, ColorResolver colorResolverIn) {
+    public int getBlockTint(BlockPos blockPosIn, ColorResolver colorResolverIn) {
         return colorResolverIn.getColor(biome, blockPosIn.getX(), blockPosIn.getZ());
     }
 
     @Override
-    public int getLightFor(LightLayer lightType, BlockPos blockPos) {
+    public int getBrightness(LightLayer lightType, BlockPos blockPos) {
+        return this.getMaxLightLevel();
+    }
+
+    @Override
+    public int getRawBrightness(BlockPos blockPos, int skyDarken) {
         return this.getMaxLightLevel();
     }
 
     @Nullable
     @Override
-    public BlockEntity getTileEntity(BlockPos blockPos) {
+    public BlockEntity getBlockEntity(BlockPos blockPos) {
         return null;
     }
 
@@ -78,6 +93,16 @@ public class EmptyRenderWorld implements BlockAndTintGetter {
 
     @Override
     public FluidState getFluidState(BlockPos blockPos) {
-        return Fluids.EMPTY.defaultBlockState();
+        return Fluids.EMPTY.defaultFluidState();
+    }
+
+    @Override
+    public int getHeight() {
+        return 384;
+    }
+
+    @Override
+    public int getMinBuildHeight() {
+        return -64;
     }
 }

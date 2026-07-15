@@ -193,7 +193,7 @@ public class TileWell extends TileReceiverBase<StarlightReceiverWell> {
             }
         }
         if (tank.getFluidAmount() > 0 && tank.getType().getFluid() instanceof FluidLiquidStarlight) {
-            BlockLiquidStarlight.playLiquidStarlightBlockEffect(random,
+            BlockLiquidStarlight.playLiquidStarlightBlockEffect(getLevel().random,
                     new Vector3(this).add(0, 0.4 + tank.getPercentageFilled() * 0.5, 0),
                     0.7F);
         }

@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.neoforge.network.IContainerFactory;
 
 import javax.annotation.Nonnull;
@@ -58,7 +59,7 @@ public class ContainerTomeProvider extends CustomContainerProvider<ContainerTome
     public static class Factory implements IContainerFactory<ContainerTome> {
 
         @Override
-        public ContainerTome create(int containerId, Inventory inv, FriendlyByteBuf data) {
+        public ContainerTome create(int containerId, Inventory inv, RegistryFriendlyByteBuf data) {
             return ContainerTomeProvider.createFromPacket(containerId, inv, data);
         }
     }

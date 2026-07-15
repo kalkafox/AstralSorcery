@@ -35,8 +35,8 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
     public void onStartTransforming(float pTicks) {
         Minecraft mc = Minecraft.getInstance();
 
-        this.bobView = mc.options.bobView;
-        this.hideGui = mc.options.hideGUI;
+        this.bobView = mc.options.bobView().get();
+        this.hideGui = mc.options.hideGui;
         this.thirdPersonView = mc.options.getCameraType();
         Player player = mc.player;
         this.isFlying = player.getAbilities().flying;
@@ -51,12 +51,12 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
     public void onStopTransforming(float pTicks) {
         if (active) {
             Options settings = Minecraft.getInstance().options;
-            settings.bobView = bobView;
-            settings.hideGUI = hideGui;
-            settings.setPointOfView(thirdPersonView);
+            settings.bobView().set(bobView);
+            settings.hideGui = hideGui;
+            settings.setCameraType(thirdPersonView);
             Player player = Minecraft.getInstance().player;
             player.getAbilities().flying = isFlying;
-            player.setPositionAndRotation(startPosition.getX(), startPosition.getY(), startPosition.getZ(), startYaw, startPitch);
+            player.moveTo(startPosition.getX(), startPosition.getY(), startPosition.getZ(), startYaw, startPitch);
             player.lerpMotion(0, 0, 0);
             this.active = false;
         }
@@ -69,9 +69,9 @@ public abstract class CameraTransformerSettingsCache implements ICameraTransform
         }
 
         Options settings = Minecraft.getInstance().options;
-        settings.hideGUI = true;
-        settings.bobView = false;
-        settings.setPointOfView(CameraType.THIRD_PERSON_BACK);
+        settings.hideGui = true;
+        settings.bobView().set(false);
+        settings.setCameraType(CameraType.THIRD_PERSON_BACK);
         Minecraft.getInstance().player.getAbilities().flying = true;
         Minecraft.getInstance().player.lerpMotion(0, 0, 0);
     }

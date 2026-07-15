@@ -37,8 +37,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -108,7 +110,7 @@ public class CEffectAevitas extends CEffectAbstractList<CropHelper.GrowablePlant
                         removeElement(plant.getBlockPos());
                         changedFlag = true;
                     } else {
-                        if (plant.tryGrow(level, random)) {
+                        if (plant.tryGrow(level, RandomSource.create(random.nextLong()))) {
                             PktPlayEffect pkt = new PktPlayEffect(PktPlayEffect.Type.CROP_GROWTH)
                                     .addData(buf -> ByteBufUtils.writeVector(buf, new Vector3(plant.getBlockPos())));
                             PacketChannel.CHANNEL.sendToAllAround(pkt, PacketChannel.pointFromPos(level, plant.getBlockPos(), 16));
@@ -128,11 +130,11 @@ public class CEffectAevitas extends CEffectAbstractList<CropHelper.GrowablePlant
                 .left().isPresent()) changed = true;
 
         int amplifier = CONFIG.potionAmplifier.get();
-        List<LivingEntity> entities = level.getEntitiesWithinAABB(LivingEntity.class, BOX.offset(pos).grow(properties.getSize()));
+        List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, BOX.move(pos).inflate(properties.getSize()));
         for (LivingEntity entity : entities) {
             if (entity.isAlive()) {
                 if (properties.isCorrupted()) {
-                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(EffectsAS.EFFECT_BLEED, 120, amplifier * 2));
+                    EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_BLEED), 120, amplifier * 2));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.WEAKNESS, 120, amplifier * 3));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.HUNGER, 120, amplifier * 4));
                     EntityUtils.applyPotionEffectAtHalf(entity, new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 120, amplifier * 2));

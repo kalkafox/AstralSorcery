@@ -40,7 +40,7 @@ public class SlotConstellationFocus extends SlotItemHandler {
     }
 
     @Override
-    public ItemStack getStack() {
+    public ItemStack getItem() {
         return this.altar.getFocusItem();
     }
 
@@ -55,13 +55,13 @@ public class SlotConstellationFocus extends SlotItemHandler {
     }
 
     @Override
-    public ItemStack onTake(Player thePlayer, ItemStack stack) {
+    public void onTake(Player thePlayer, ItemStack stack) {
         this.altar.markForUpdate();
-        return super.onTake(thePlayer, stack);
+        super.onTake(thePlayer, stack);
     }
 
     @Override
-    public ItemStack decrStackSize(int amount) {
+    public ItemStack remove(int amount) {
         ItemStack focus = this.altar.getFocusItem();
         this.altar.setFocusItem(ItemStack.EMPTY);
         return focus;

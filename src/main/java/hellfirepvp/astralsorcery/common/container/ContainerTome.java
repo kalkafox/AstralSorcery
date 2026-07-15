@@ -21,7 +21,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.common.thread.EffectiveSide;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
@@ -84,26 +83,26 @@ public class ContainerTome extends AbstractContainerMenu {
         Slot slot = this.slots.get(index);
 
         if (slot != null && slot.hasItem()) {
-            ItemStack itemstack1 = slot.getStack();
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
 
             if (!itemstack1.isEmpty() && itemstack1.getItem() instanceof ItemConstellationPaper && ((ItemConstellationPaper) itemstack1.getItem()).getConstellation(itemstack1) != null) {
                 if (index >= 0 && index < 36) {
-                    if (!this.mergeItemStack(itemstack1, 36, 63, false)) {
+                    if (!this.moveItemStackTo(itemstack1, 36, 63, false)) {
                         return ItemStack.EMPTY;
                     }
                 }
             }
 
             if (index >= 0 && index < 27) {
-                if (!this.mergeItemStack(itemstack1, 27, 36, false)) {
+                if (!this.moveItemStackTo(itemstack1, 27, 36, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (index >= 27 && index < 36) {
-                if (!this.mergeItemStack(itemstack1, 0, 27, false)) {
+                if (!this.moveItemStackTo(itemstack1, 0, 27, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, 36, false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 0, 36, false)) {
                 return ItemStack.EMPTY;
             }
 
@@ -129,10 +128,10 @@ public class ContainerTome extends AbstractContainerMenu {
     }
 
     public void slotChanged() {
-        if (EffectiveSide.get().isServer()) {
+        if (!this.owningPlayer.level().isClientSide()) {
             LinkedList<IConstellation> saveConstellations = new LinkedList<>();
             for (int i = 36; i < 63; i++) {
-                ItemStack in = slots.get(i).getStack();
+                ItemStack in = slots.get(i).getItem();
                 if (in.isEmpty()) {
                     continue;
                 }

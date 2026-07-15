@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -36,10 +36,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.event.ForgeEventFactory;
-
-import java.util.Random;
-import java.util.function.Supplier;
+import net.neoforged.neoforge.event.EventHooks;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -50,17 +47,17 @@ import java.util.function.Supplier;
  */
 public class BlockLiquidStarlight extends LiquidBlock {
 
-    public BlockLiquidStarlight(Supplier<? extends FlowingFluid> fluidSupplier) {
-        super(fluidSupplier, Block.Properties.of()
-                .doesNotBlockMovement()
+    public BlockLiquidStarlight(FlowingFluid fluid) {
+        super(fluid, Block.Properties.of()
+                .noCollission()
                 .lightLevel(state -> 15)
                 .strength(100.0F)
-                .noDrops());
+                .noLootTable());
     }
 
     @Override
-    public void onEntityCollision(BlockState state, Level level, BlockPos pos, Entity entity) {
-        super.onEntityCollision(state, level, pos, entity);
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+        super.entityInside(state, level, pos, entity);
 
         if (state.getValue(LEVEL) != 0) {
             return;
@@ -72,36 +69,39 @@ public class BlockLiquidStarlight extends LiquidBlock {
             LiquidStarlightCraftingRegistry.tryCraft((ItemEntity) entity, pos);
 
             if (!level.isClientSide() &&((ItemEntity) entity).getItem().isEmpty()) {
-                entity.remove();
+                entity.discard();
             }
         }
     }
 
-    public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
+    protected void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
-            worldIn.scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
+            Fluid fluid = state.getFluidState().getType();
+            worldIn.scheduleTick(pos, fluid, fluid.getTickDelay(worldIn));
         }
     }
 
-    public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    protected void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         if (this.reactWithNeighbors(worldIn, pos, state)) {
-            worldIn.scheduleTick(pos, state.getFluidState().getType(), this.getType().getTickRate(worldIn));
+            Fluid fluid = state.getFluidState().getType();
+            worldIn.scheduleTick(pos, fluid, fluid.getTickDelay(worldIn));
         }
     }
 
     private boolean reactWithNeighbors(Level level, BlockPos pos, BlockState state) {
         for (Direction dir : Direction.values()) {
-            FluidState otherState = level.getFluidState(pos.offset(dir));
+            BlockPos neighborPos = pos.relative(dir);
+            FluidState otherState = level.getFluidState(neighborPos);
             Fluid otherFluid = otherState.getType();
             if (otherFluid instanceof FlowingFluid) {
                 otherFluid = ((FlowingFluid) otherFluid).getSource();
             }
-            if (otherFluid instanceof EmptyFluid || otherFluid.equals(this.getType())) {
+            if (otherFluid instanceof EmptyFluid || otherFluid.equals(this.fluid.getSource())) {
                 continue;
             }
 
             BlockState generate;
-            boolean isHot = otherFluid.getAttributes().getTemperature(level, pos.offset(dir)) > 600;
+            boolean isHot = otherState.getFluidType().getTemperature(otherState, level, neighborPos) > 600;
             if (isHot) {
                 if (CraftingConfig.CONFIG.liquidStarlightInteractionSand.get()) {
                     generate = Blocks.SAND.defaultBlockState();
@@ -119,22 +119,22 @@ public class BlockLiquidStarlight extends LiquidBlock {
                 }
             }
 
-            level.setBlock(pos, ForgeEventFactory.fireFluidPlaceBlockEvent(level, pos, pos, generate));
+            level.setBlockAndUpdate(pos, EventHooks.fireFluidPlaceBlockEvent(level, pos, pos, generate));
         }
         return true;
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
-        Integer level = state.getValue(LEVEL);
-        double percHeight = 1D - (((double) level + 1) / 8D);
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        int fluidLevel = state.getValue(LEVEL);
+        double percHeight = 1D - (((double) fluidLevel + 1) / 8D);
         playLiquidStarlightBlockEffect(random, new Vector3(pos).addY(percHeight * random.nextFloat()), 1F);
         playLiquidStarlightBlockEffect(random, new Vector3(pos).addY(percHeight * random.nextFloat()), 1F);
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static void playLiquidStarlightBlockEffect(Random random, Vector3 at, float blockSize) {
+    public static void playLiquidStarlightBlockEffect(RandomSource random, Vector3 at, float blockSize) {
         if (random.nextInt(3) == 0) {
             EffectHelper.of(EffectTemplatesAS.GENERIC_PARTICLE)
                     .spawn(at.clone().add(

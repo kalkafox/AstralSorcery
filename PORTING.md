@@ -742,6 +742,10 @@ large and easy to re-derive incorrectly from memory of the 1.16 API:
   `applyRandomOffset` alongside the existing `java.util.Random` ones, since
   `Entity#random` is `RandomSource` and isn't assignment-compatible with
   `java.util.Random`.
+- **Entity registration** now uses `EntityType.Builder.of`/`sized`; the old
+  Forge custom-client factories were removed because the registered entity
+  factories are used on both sides, and attribute builders finish with
+  `build()`.
 
 ## Item classes (done)
 
@@ -782,8 +786,96 @@ stops at structural 1.16 -> 1.21 API changes rather than naming; the biggest
 remaining clusters are perks (`common/perk/**`), `client/util`, world
 generation (`RegistryWorldGeneration` +
 `common/world/**`), constellation effects/mantle effects, the remaining
-`common/registry` content classes, and `crafting/nojson`. 912 compiler errors
+`common/registry` content classes, and `crafting/nojson`. 750 compiler errors
 remain, measured off a full `gradlew compileJava` run.
+
+### Active player attunement recipe (done)
+
+`ActivePlayerAttunementRecipe` uses the current UUID player lookup and entity
+`moveTo` APIs for the altar participant and its client-side camera
+replacement.
+
+### Camera settings cache (done)
+
+`CameraTransformerSettingsCache` reads and restores view bobbing through its
+`OptionInstance`, uses the current `hideGui` field and camera-type setter, and
+restores the player transform with `moveTo`.
+
+### Remaining containers and slots (done)
+
+The altar base/trait menus use current slot, transfer, and player-distance
+APIs. `SlotConstellationFocus` implements `getItem`, `remove`, and the void
+`onTake` hook; focus transfers target the menu slot index rather than the
+handler's deliberately synthetic index. The slotless observatory menu now
+returns an empty stack for quick moves.
+
+### Container factories (done)
+
+The tome, observatory, and four altar menu factories implement NeoForge's
+current `IContainerFactory` entrypoint with `RegistryFriendlyByteBuf`. Their
+shared provider payload format remains unchanged.
+
+### Tome container (done)
+
+`ContainerTome` uses `Slot#getItem`, `moveItemStackTo`, and the owning player's
+level to gate server-side constellation-paper persistence. Its inventory and
+tome slot boundaries are unchanged.
+
+### Constellation entity spawn entries (done)
+
+`ListEntries.EntitySpawnEntry` resolves biome holders, selects from the
+current weighted mob lists, and uses the 1.21 spawn finalization, obstruction,
+discard, and `addFreshEntity` APIs. Spawn particles now receive block
+positions.
+
+### Empty render world (done)
+
+`EmptyRenderWorld` implements the current `BlockAndTintGetter` and height
+contracts, uses an inert no-chunk `LevelLightEngine`, and continues to report
+full brightness for model previews. The removed ObserverLib
+`StructureRenderLightManager` dependency is gone.
+
+### Mining-size perk attribute (done)
+
+`AttributeTypeMiningSize` uses the 1.21 clip/hit types, block-position offsets,
+tool checks, and `ServerPlayerGameMode#destroyBlock`. The removed numeric
+harvest-level comparison was dropped; additional blocks remain bounded by the
+original block's destroy speed and are checked against the player's current
+tool before destruction.
+
+### Colorization helper (done)
+
+`ColorizationHelper` reads sprite identity and frame dimensions through
+`TextureAtlasSprite#contents`, samples the sprite's unique animation frames,
+and clears its item/fluid color caches on every resource reload. The removed
+selective-reload compatibility layer is no longer referenced.
+
+### Liquid starlight block (done)
+
+`BlockLiquidStarlight` now uses the 1.21 liquid/block contracts: a concrete
+`FlowingFluid` constructor, `entityInside`, `RandomSource`, `noLootTable`,
+`BlockPos.relative`, `Fluid#getTickDelay`, and `FluidState#getFluidType` for
+temperature. Fluid replacement is passed through `EventHooks` and item
+entities consumed by liquid crafting are discarded explicitly. The well's
+client effect call now supplies the level's `RandomSource`.
+
+### Crop helper (done)
+
+`common/auxiliary/CropHelper` and its immediate growth consumers now compile
+against the 1.21 plant API:
+
+- Removed Forge's deleted `IPlantable`; generic harvestable plants are now
+  identified through vanilla `BushBlock` and replanted with their default
+  state.
+- `BonemealableBlock.canGrow/grow` moved to
+  `isValidBonemealTarget`/`isBonemealSuccess`/`performBonemeal`, and growth
+  randomness now uses `RandomSource` end-to-end.
+- Crop age uses `CropBlock#getAge`/`isMaxAge`; block-state properties use
+  `getValue`; air checks use `isAir`; stem fruit detection handles the vanilla
+  pumpkin/melon stems without accessing the now-private fruit field.
+- Updated `CEffectAevitas`, `KeyGrowables`, and the growth lens to the new
+  random/position/block-update shapes. The latter two consumer classes also
+  had their remaining local 1.21 compile errors cleared.
 
 ### `common/util/**` leaf helpers (done)
 

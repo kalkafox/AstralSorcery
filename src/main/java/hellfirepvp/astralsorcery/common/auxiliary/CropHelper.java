@@ -21,7 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
-import net.neoforged.neoforge.common.IPlantable;
+import net.minecraft.util.RandomSource;
 import hellfirepvp.astralsorcery.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -108,7 +108,7 @@ public class CropHelper {
         if (block instanceof NetherWartBlock && growable instanceof GrowableNetherwartWrapper) {
             return (GrowableNetherwartWrapper) growable;
         }
-        if (block instanceof IPlantable) {
+        if (block instanceof BushBlock) {
             return new HarvestableWrapper(pos);
         }
         return null;
@@ -130,7 +130,7 @@ public class CropHelper {
 
         public boolean canGrow(LevelAccessor level);
 
-        public boolean tryGrow(LevelAccessor level, Random random);
+        public boolean tryGrow(LevelAccessor level, RandomSource random);
 
         @Override
         default void readFromNBT(CompoundTag nbt) {}
@@ -162,7 +162,7 @@ public class CropHelper {
             BlockState at = level.getBlockState(pos);
             if (!(at.getBlock() instanceof BonemealableBlock)) return false;
             if (at.getBlock() instanceof StemBlock) return false;
-            return !((BonemealableBlock) at.getBlock()).canGrow(level, pos, at, false);
+            return !((BonemealableBlock) at.getBlock()).isValidBonemealTarget(level, pos, at);
         }
 
         @Override
@@ -171,9 +171,9 @@ public class CropHelper {
             if (canHarvest(level)) {
                 BlockPos pos = getBlockPos();
                 BlockState at = level.getBlockState(getBlockPos());
-                if (at.getBlock() instanceof IPlantable) {
+                if (at.getBlock() instanceof BushBlock) {
                     drops.addAll(BlockUtils.getDrops(level, pos, harvestFortune, random));
-                    level.setBlock(pos, ((IPlantable) at.getBlock()).getPlant(level, pos));
+                    level.setBlock(pos, at.getBlock().defaultBlockState(), Constants.BlockFlags.DEFAULT);
                 }
             }
             return drops;
@@ -198,7 +198,7 @@ public class CropHelper {
         public boolean canGrow(LevelAccessor level) {
             BlockState at = level.getBlockState(pos);
             if (at.getBlock() instanceof BonemealableBlock) {
-                if (((BonemealableBlock) at.getBlock()).canGrow(level, pos, at, false)) {
+                if (((BonemealableBlock) at.getBlock()).isValidBonemealTarget(level, pos, at)) {
                     return true;
                 }
                 if (at.getBlock() instanceof StemBlock) {
@@ -209,18 +209,18 @@ public class CropHelper {
         }
 
         @Override
-        public boolean tryGrow(LevelAccessor level, Random random) {
-            if (!(level instanceof ServerLevel)) {
+        public boolean tryGrow(LevelAccessor level, RandomSource random) {
+            if (!(level instanceof ServerLevel serverLevel)) {
                 return false;
             }
             BlockState at = level.getBlockState(pos);
-            if (at.getBlock() instanceof BonemealableBlock) {
-                if (((BonemealableBlock) at.getBlock()).canGrow(level, pos, at, false)) {
-                    ((BonemealableBlock) at.getBlock()).grow((ServerLevel) level, random, pos, at);
+            if (at.getBlock() instanceof BonemealableBlock growable) {
+                if (growable.isValidBonemealTarget(level, pos, at)) {
+                    growable.performBonemeal(serverLevel, random, pos, at);
                     return true;
                 }
                 if (at.getBlock() instanceof StemBlock && random.nextInt(4) == 0) {
-                    at.randomTick((ServerLevel) level, pos, random);
+                    at.randomTick(serverLevel, pos, random);
                 }
             }
             return false;
@@ -244,14 +244,14 @@ public class CropHelper {
         @Override
         public boolean canGrow(LevelAccessor level) {
             BlockState at = level.getBlockState(pos);
-            return at.getBlock() instanceof NetherWartBlock && at.get(NetherWartBlock.AGE) < 3;
+            return at.getBlock() instanceof NetherWartBlock && at.getValue(NetherWartBlock.AGE) < 3;
         }
 
         @Override
-        public boolean tryGrow(LevelAccessor level, Random random) {
+        public boolean tryGrow(LevelAccessor level, RandomSource random) {
             if (random.nextBoolean()) {
                 BlockState current = level.getBlockState(pos);
-                return level.setBlock(pos, current.setValue(NetherWartBlock.AGE, (Math.min(3, current.get(NetherWartBlock.AGE) + 1))), Constants.BlockFlags.DEFAULT);
+                return level.setBlock(pos, current.setValue(NetherWartBlock.AGE, Math.min(3, current.getValue(NetherWartBlock.AGE) + 1)), Constants.BlockFlags.DEFAULT);
             }
             return false;
         }
@@ -259,7 +259,7 @@ public class CropHelper {
         @Override
         public boolean canHarvest(LevelAccessor level) {
             BlockState current = level.getBlockState(pos);
-            return current.getBlock() instanceof NetherWartBlock && current.get(NetherWartBlock.AGE) >= 3;
+            return current.getBlock() instanceof NetherWartBlock && current.getValue(NetherWartBlock.AGE) >= 3;
         }
 
         @Override
@@ -320,7 +320,7 @@ public class CropHelper {
             for (int i = 1; i < 3; i++) {
                 cache = cache.above();
                 BlockState upState = level.getBlockState(cache);
-                if (upState.isAir(level, cache)) {
+                if (upState.isAir()) {
                     return true;
                 } else if (!(upState.getBlock() instanceof CactusBlock)) {
                     return false;
@@ -330,12 +330,12 @@ public class CropHelper {
         }
 
         @Override
-        public boolean tryGrow(LevelAccessor level, Random random) {
+        public boolean tryGrow(LevelAccessor level, RandomSource random) {
             BlockPos cache = pos;
             for (int i = 1; i < 3; i++) {
                 cache = cache.above();
                 BlockState upState = level.getBlockState(cache);
-                if (upState.isAir(level, cache)) {
+                if (upState.isAir()) {
                     if (random.nextBoolean()) {
                         return level.setBlock(cache, Blocks.CACTUS.defaultBlockState(), Constants.BlockFlags.DEFAULT);
                     } else {
@@ -397,7 +397,7 @@ public class CropHelper {
             for (int i = 1; i < 3; i++) {
                 cache = cache.above();
                 BlockState upState = level.getBlockState(cache);
-                if (upState.isAir(level, cache)) {
+                if (upState.isAir()) {
                     return true;
                 } else if (!(upState.getBlock() instanceof SugarCaneBlock)) {
                     return false;
@@ -407,12 +407,12 @@ public class CropHelper {
         }
 
         @Override
-        public boolean tryGrow(LevelAccessor level, Random random) {
+        public boolean tryGrow(LevelAccessor level, RandomSource random) {
             BlockPos cache = pos;
             for (int i = 1; i < 3; i++) {
                 cache = cache.above();
                 BlockState upState = level.getBlockState(cache);
-                if (upState.isAir(level, cache)) {
+                if (upState.isAir()) {
                     if (random.nextBoolean()) {
                         return level.setBlock(cache, Blocks.SUGAR_CANE.defaultBlockState(), Constants.BlockFlags.DEFAULT);
                     } else {
@@ -454,18 +454,18 @@ public class CropHelper {
         public boolean canGrow(LevelAccessor level) {
             BlockState state = level.getBlockState(this.pos);
             if (state.getBlock() instanceof CropBlock) {
-                return ((CropBlock) state.getBlock()).canGrow(level, pos, state, false);
+                return !((CropBlock) state.getBlock()).isMaxAge(state);
             }
             return false;
         }
 
         @Override
-        public boolean tryGrow(LevelAccessor level, Random random) {
+        public boolean tryGrow(LevelAccessor level, RandomSource random) {
             BlockState state = level.getBlockState(this.pos);
             if (state.getBlock() instanceof CropBlock) {
                 CropBlock block = (CropBlock) state.getBlock();
-                if (block.canGrow(level, pos, state, false)) {
-                    int age = state.get(block.getAgeProperty());
+                if (!block.isMaxAge(state)) {
+                    int age = block.getAge(state);
                     int next = Math.min(age + 1, block.getMaxAge());
                     return level.setBlock(pos, block.getStateForAge(next), Constants.BlockFlags.DEFAULT);
                 }
@@ -477,7 +477,7 @@ public class CropHelper {
         public boolean canHarvest(LevelAccessor level) {
             BlockState state = level.getBlockState(this.pos);
             if (state.getBlock() instanceof CropBlock) {
-                return !((CropBlock) state.getBlock()).canGrow(level, pos, state, false);
+                return ((CropBlock) state.getBlock()).isMaxAge(state);
             }
             return false;
         }
@@ -490,8 +490,7 @@ public class CropHelper {
                 CropBlock block = (CropBlock) state.getBlock();
 
                 drops.addAll(BlockUtils.getDrops(level, pos, harvestFortune, random));
-                int startingAge = MiscUtils.getMinEntry(block.getAgeProperty().getPossibleValues());
-                level.setBlock(pos, block.getStateForAge(startingAge));
+                level.setBlock(pos, block.getStateForAge(0), Constants.BlockFlags.DEFAULT);
             }
             return drops;
         }
@@ -533,15 +532,30 @@ public class CropHelper {
         @Override
         public boolean canGrow(LevelAccessor level) {
             BlockState at = level.getBlockState(pos);
-            return at.getBlock() instanceof BonemealableBlock && (
-                    ((BonemealableBlock) at.getBlock()).canGrow(level, pos, at, false) ||
-                            (at.getBlock() instanceof StemBlock && !stemHasCrop(level, ((StemBlock) at.getBlock()).getFruit()))
-            );
+            if (!(at.getBlock() instanceof BonemealableBlock growable)) {
+                return false;
+            }
+            if (growable.isValidBonemealTarget(level, pos, at)) {
+                return true;
+            }
+            Block fruit = getStemFruit(at.getBlock());
+            return fruit != null && !stemHasCrop(level, fruit);
+        }
+
+        @Nullable
+        private Block getStemFruit(Block stem) {
+            if (stem == Blocks.PUMPKIN_STEM) {
+                return Blocks.PUMPKIN;
+            }
+            if (stem == Blocks.MELON_STEM) {
+                return Blocks.MELON;
+            }
+            return null;
         }
 
         private boolean stemHasCrop(LevelAccessor level, Block stemGrownBlock) {
             for (Direction enumfacing : Direction.Plane.HORIZONTAL) {
-                Block offset = level.getBlockState(pos.offset(enumfacing)).getBlock();
+                Block offset = level.getBlockState(pos.relative(enumfacing)).getBlock();
                 if (offset.equals(stemGrownBlock)) {
                     return true;
                 }
@@ -550,20 +564,20 @@ public class CropHelper {
         }
 
         @Override
-        public boolean tryGrow(LevelAccessor level, Random random) {
+        public boolean tryGrow(LevelAccessor level, RandomSource random) {
             BlockState at = level.getBlockState(pos);
-            if (at.getBlock() instanceof BonemealableBlock && level instanceof ServerLevel) {
-                if (((BonemealableBlock) at.getBlock()).canGrow(level, pos, at, false)) {
-                    if (!((BonemealableBlock) at.getBlock()).performBonemeal((Level) level, random, pos, at)) {
+            if (at.getBlock() instanceof BonemealableBlock growable && level instanceof ServerLevel serverLevel) {
+                if (growable.isValidBonemealTarget(level, pos, at)) {
+                    if (!growable.isBonemealSuccess(serverLevel, random, pos, at)) {
                         if (random.nextInt(20) != 0) {
                             return true; //Returning true to say it could've been potentially grown - So this doesn't invalidate caches.
                         }
                     }
-                    ((BonemealableBlock) at.getBlock()).grow((ServerLevel) level, random, pos, at);
+                    growable.performBonemeal(serverLevel, random, pos, at);
                     return true;
                 }
                 if (at.getBlock() instanceof StemBlock) {
-                    at.randomTick((ServerLevel) level, pos, random);
+                    at.randomTick(serverLevel, pos, random);
                     return true;
                 }
             }

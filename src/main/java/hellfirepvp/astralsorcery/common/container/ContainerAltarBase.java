@@ -58,7 +58,7 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
         Slot slot = this.slots.get(index);
 
         if (slot != null && slot.hasItem()) {
-            ItemStack slotStack = slot.getStack();
+            ItemStack slotStack = slot.getItem();
             itemstack = slotStack.copy();
 
             Optional<ItemStack> stackOpt = this.handleCustomTransfer(playerIn, index);
@@ -67,14 +67,14 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
             }
 
             if (index >= 0 && index < 27) {
-                if (!this.mergeItemStack(slotStack, 27, 36, false)) {
+                if (!this.moveItemStackTo(slotStack, 27, 36, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (index >= 27 && index < 36) {
-                if (!this.mergeItemStack(slotStack, 0, 27, false)) {
+                if (!this.moveItemStackTo(slotStack, 0, 27, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(slotStack, 0, 36, false)) {
+            } else if (!this.moveItemStackTo(slotStack, 0, 36, false)) {
                 return ItemStack.EMPTY;
             }
 
@@ -100,7 +100,7 @@ public abstract class ContainerAltarBase extends ContainerTileEntity<TileAltar> 
         if (MiscUtils.getTileAt(this.getTileEntity().getLevel(), pos, BlockEntity.class, false) != this.getTileEntity()) {
             return false;
         } else {
-            return player.getDistanceSq(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D;
+            return player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D;
         }
     }
 }

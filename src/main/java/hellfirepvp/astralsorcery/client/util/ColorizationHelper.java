@@ -18,8 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.util.Unit;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.resource.SelectiveReloadStateHandler;
-import net.neoforged.neoforge.resource.VanillaResourceType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -89,7 +87,7 @@ public class ColorizationHelper {
             int color = (dominantColor[0] & 0xFF) << 16 | (dominantColor[1] & 0xFF) << 8 | (dominantColor[2] & 0xFF);
             return Optional.of(new Color(color));
         } catch (Exception exc) {
-            AstralSorcery.log.error("Item Colorization Helper: Ignoring non-resolvable image " + tas.getName().toString());
+            AstralSorcery.log.error("Item Colorization Helper: Ignoring non-resolvable image " + tas.contents().name());
             exc.printStackTrace();
         }
         return Optional.empty();
@@ -97,20 +95,21 @@ public class ColorizationHelper {
 
     @Nullable
     private static BufferedImage extractImage(TextureAtlasSprite tas) {
-        int w = tas.getWidth();
-        int h = tas.getHeight();
-        int count = tas.getFrameCount();
+        int w = tas.contents().width();
+        int h = tas.contents().height();
+        int[] frames = tas.contents().getUniqueFrames().toArray();
+        int count = frames.length;
         if (w <= 0 || h <= 0 || count <= 0) {
             return null;
         }
 
         BufferedImage bufferedImage = new BufferedImage(w, h * count, BufferedImage.TYPE_4BYTE_ABGR);
         for (int i = 0; i < count; i++) {
-            int[] pxArray = new int[tas.getWidth() * tas.getHeight()];
-            for (int xx = 0; xx < tas.getWidth(); xx++) {
-                for (int zz = 0; zz < tas.getHeight(); zz++) {
-                    int argb = tas.getPixelRGBA(0, xx, zz + (i * tas.getHeight()));
-                    pxArray[zz * tas.getWidth() + xx] = argb & 0xFF00FF00 | ((argb & 0x00FF0000) >> 16) | ((argb & 0x000000FF) << 16);
+            int[] pxArray = new int[w * h];
+            for (int xx = 0; xx < w; xx++) {
+                for (int zz = 0; zz < h; zz++) {
+                    int argb = tas.getPixelRGBA(frames[i], xx, zz);
+                    pxArray[zz * w + xx] = argb & 0xFF00FF00 | ((argb & 0x00FF0000) >> 16) | ((argb & 0x000000FF) << 16);
                 }
             }
             bufferedImage.setRGB(0, i * h, w, h, pxArray, 0, w);
@@ -121,10 +120,6 @@ public class ColorizationHelper {
     public static PreparableReloadListener onReload() {
         return (stage, resourceManager, preparationsProfiler, reloadProfiler, executor, gameExecutor) ->
                 stage.wait(Unit.INSTANCE).thenRunAsync(() -> {
-                    if (!SelectiveReloadStateHandler.INSTANCE.get().test(VanillaResourceType.TEXTURES)) {
-                        return;
-                    }
-
                     itemColors.clear();
                     fluidColors.clear();
                 });
