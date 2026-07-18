@@ -41,7 +41,7 @@ public class ASMHookEndpoint {
     public static double getOverriddenCreativeEntityReach(double defaultExtendedReach) {
         PlayerProgress prog = ResearchHelper.getProgress(Minecraft.getInstance().player, LogicalSide.CLIENT);
         if (prog.isValid() && prog.getPerkData().hasPerkEffect(perk -> perk instanceof KeyEntityReach)) {
-            return Math.max(defaultExtendedReach, Minecraft.getInstance().gameMode.getPickRange());
+            return Math.max(defaultExtendedReach, Minecraft.getInstance().player.blockInteractionRange());
         }
         return defaultExtendedReach;
     }

@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AttributeInstance.class)
 public class MixinModifiableAttributeInstance {
 
-    @Inject(method = "computeValue", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "calculateValue", at = @At("RETURN"), cancellable = true)
     public void postProcessAtrributeValue(CallbackInfoReturnable<Double> cir) {
         AttributeInstance attributeInstance = (AttributeInstance)(Object) this;
         cir.setReturnValue(AttributeEvent.postProcessVanilla(cir.getReturnValue(), attributeInstance));

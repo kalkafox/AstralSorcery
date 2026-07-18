@@ -10,9 +10,7 @@ package hellfirepvp.astralsorcery.mixin;
 
 import hellfirepvp.astralsorcery.common.util.collision.CollisionHelper;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.util.ReuseableStream;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
@@ -20,6 +18,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -31,8 +31,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Entity.class)
 public class MixinEntity {
 
-    @Inject(method = "collideBoundingBoxHeuristically", at = @At(value = "RETURN", index = 1), cancellable = true)
-    private static void addCustomCollision(Entity entity, Vec3 vec, AABB collisionBoxRenderer, Level level, CollisionContext context, RewindableStream<VoxelShape> potentialHits, CallbackInfoReturnable<Vec3> cir) {
+    @Inject(method = "collideBoundingBox", at = @At("RETURN"), cancellable = true)
+    private static void addCustomCollision(Entity entity, Vec3 vec, AABB collisionBox, Level level, List<VoxelShape> potentialHits, CallbackInfoReturnable<Vec3> cir) {
         if (entity == null) {
             return;
         }

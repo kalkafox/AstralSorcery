@@ -65,11 +65,11 @@ public class SimpleAltarRecipeBuilder<T extends SimpleAltarRecipe> extends Custo
     }
 
     public SimpleAltarRecipeBuilder<T> addRelayInput(TagKey<Item> tag) {
-        return this.addRelayInput(Ingredient.fromTag(tag));
+        return this.addRelayInput(Ingredient.of(tag));
     }
 
     public SimpleAltarRecipeBuilder<T> addRelayInput(ItemLike item) {
-        return this.addRelayInput(Ingredient.valueFromJson(item));
+        return this.addRelayInput(Ingredient.of(item));
     }
 
     public SimpleAltarRecipeBuilder<T> addRelayInput(Ingredient ingredient) {

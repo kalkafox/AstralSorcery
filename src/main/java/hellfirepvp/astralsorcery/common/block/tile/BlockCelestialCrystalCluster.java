@@ -66,6 +66,7 @@ public class BlockCelestialCrystalCluster extends BlockCrystalContainer implemen
 
                 .sound(SoundType.GLASS)
                 .lightLevel((state) -> 8)
+                .dynamicShape()
                 .offsetType(BlockBehaviour.OffsetType.XZ));
     }
 

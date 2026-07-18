@@ -33,7 +33,7 @@ public class KeyReducedFood extends KeyPerk implements PlayerTickPerk {
         if (direction.isServer() && random.nextFloat() < 0.01) {
             FoodData stats = player.getFoodData();
             if (stats.getFoodLevel() < 20 || stats.getSaturationLevel() < 5) {
-                stats.addStats(1, 0.3F);
+                stats.eat(1, 0.3F);
             }
         }
     }

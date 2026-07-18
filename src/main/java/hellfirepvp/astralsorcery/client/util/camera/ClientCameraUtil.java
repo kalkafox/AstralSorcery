@@ -33,9 +33,9 @@ public class ClientCameraUtil {
         float iPitch = Mth.lerp(pTicks, (float) pitchPrev, (float) pitch);
 
         Minecraft mc = Minecraft.getInstance();
-        Entity rv = mc.getRenderViewEntity();
+        Entity rv = mc.getCameraEntity();
         if (rv == null || !rv.equals(renderView)) {
-            mc.setRenderViewEntity(renderView);
+            mc.setCameraEntity(renderView);
             rv = renderView;
         }
         Player render = (Player) rv;
@@ -52,7 +52,7 @@ public class ClientCameraUtil {
         render.yRotO =     iYaw;
         render.yHeadRot =     iYaw;
         render.yHeadRotO = iYaw;
-        render.cameraYaw =           iYaw;
+        render.bob =           iYaw;
         render.oBob =       iYaw;
         render.yBodyRot =     iYaw;
         render.yBodyRotO = iYaw;
@@ -73,7 +73,7 @@ public class ClientCameraUtil {
         render.yRotO =     iYaw;
         render.yHeadRot =     iYaw;
         render.yHeadRotO = iYaw;
-        render.cameraYaw =           iYaw;
+        render.bob =           iYaw;
         render.oBob =       iYaw;
         render.yBodyRot =     iYaw;
         render.yBodyRotO = iYaw;
@@ -85,7 +85,7 @@ public class ClientCameraUtil {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
             Player player = mc.player;
-            mc.setRenderViewEntity(player);
+            mc.setCameraEntity(player);
             //double x = player.getPosX();
             //double y = player.getPosY();
             //double z = player.getPosZ();

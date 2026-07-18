@@ -12,7 +12,7 @@ import hellfirepvp.astralsorcery.client.effect.handler.EffectHandler;
 import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.ChatFormatting;
-import net.neoforged.neoforge.client.event.RenderGameOverlayEvent;
+import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 
@@ -45,7 +45,7 @@ public class EffectRenderEventHandler {
         registrar.accept(GatewayUIRenderHandler.getInstance());
     }
 
-    private void onDebugText(RenderGameOverlayEvent.Text event) {
+    private void onDebugText(CustomizeGuiOverlayEvent.DebugText event) {
         if (Minecraft.getInstance().getDebugOverlay().showDebugScreen()) {
             event.getLeft().add("");
             //event.getLeft().add(TextFormatting.BLUE + "[AstralSorcery]" + TextFormatting.RESET + " Use Local persistent data: " + PersistentDataManager.INSTANCE.usePersistent());

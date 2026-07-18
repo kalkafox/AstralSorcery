@@ -107,7 +107,7 @@ public class CameraPath extends EntityCameraRenderView implements ICameraPersist
                 acc = accumulator;
             }
         }
-        return pathPoints.last().dstPoint; //Doesn't happen since the list isn't empty.
+        return pathPoints.getLast().dstPoint; //Doesn't happen since the list isn't empty.
     }
 
     @Override

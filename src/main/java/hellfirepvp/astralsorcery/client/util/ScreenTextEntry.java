@@ -33,8 +33,8 @@ public class ScreenTextEntry {
         inputUtil = new TextFieldHelper(
                 this::getText,
                 this::setText,
-                TextFieldHelper.getClipboardTextSupplier(Minecraft.getInstance()),
-                TextFieldHelper.getClipboardTextSetter(Minecraft.getInstance()),
+                TextFieldHelper.createClipboardGetter(Minecraft.getInstance()),
+                TextFieldHelper.createClipboardSetter(Minecraft.getInstance()),
                 (text) -> text.length() < 256);
     }
 
@@ -72,10 +72,10 @@ public class ScreenTextEntry {
         if (key >= GLFW.GLFW_KEY_RIGHT && key <= GLFW.GLFW_KEY_UP) {
             return false;
         }
-        return this.inputUtil.specialKeyPressed(key);
+        return this.inputUtil.keyPressed(key);
     }
 
     public boolean charTyped(char charCode) {
-        return this.inputUtil.putChar(charCode);
+        return this.inputUtil.charTyped(charCode);
     }
 }

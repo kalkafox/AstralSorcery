@@ -147,7 +147,7 @@ public class GatewayInteractionHandler {
         focusingEntry = entry;
         focusTicks++;
 
-        Vector3 dir = focusingEntry.getRelativePos().clone().add(ui.getRenderCenter()).subtract(player.getWantedY(1F));
+        Vector3 dir = focusingEntry.getRelativePos().clone().add(ui.getRenderCenter()).subtract(player.getEyePosition(1F));
         Vector3 mov = dir.clone().normalize().mul(0.25F).negate();
         Vector3 pos = focusingEntry.getRelativePos().clone().add(ui.getRenderCenter());
 
@@ -209,7 +209,6 @@ public class GatewayInteractionHandler {
         }
 
         if (focusTicks > 95) {
-            Minecraft.getInstance().player.getZ(false);
             PktRequestTeleport pkt = new PktRequestTeleport(focusingEntry.getNodeDimension(), focusingEntry.getNode().getBlockPos());
             PacketChannel.CHANNEL.sendToServer(pkt);
             focusingEntry = null;
@@ -223,7 +222,7 @@ public class GatewayInteractionHandler {
             return;
         }
 
-        fovPre = Minecraft.getInstance().options.fov;
+        fovPre = Minecraft.getInstance().options.fov().get();
         if(focusTicks < 80) {
             return;
         }
@@ -232,12 +231,12 @@ public class GatewayInteractionHandler {
         percDone = (float) Math.pow(percDone, 2.4F);
         float targetFov = 10F;
         double diff = fovPre - targetFov;
-        Minecraft.getInstance().options.fov = Math.max(targetFov, targetFov + diff * percDone);
+        Minecraft.getInstance().options.fov().set((int) Math.max(targetFov, targetFov + diff * percDone));
     }
 
     private static void renderTickPost(RenderFrameEvent.Post event) {
         if (GatewayUIRenderHandler.getInstance().getCurrentUI() != null) {
-            Minecraft.getInstance().options.fov = fovPre;
+            Minecraft.getInstance().options.fov().set((int) fovPre);
         }
     }
 }

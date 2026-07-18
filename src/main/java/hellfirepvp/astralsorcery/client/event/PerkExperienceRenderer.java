@@ -30,7 +30,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionHand;
-import net.neoforged.neoforge.client.event.RenderGameOverlayEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import hellfirepvp.observerlib.common.util.tick.TickEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -62,10 +62,7 @@ public class PerkExperienceRenderer implements ITickHandler {
         bus.addListener(EventPriority.HIGH, this::onRenderOverlay);
     }
 
-    private void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
+    private void onRenderOverlay(RenderGuiEvent.Post event) {
         if (this.visibilityReveal <= 0) {
             return;
         }
@@ -73,7 +70,7 @@ public class PerkExperienceRenderer implements ITickHandler {
             return;
         }
 
-        PoseStack renderStack = event.getPoseStack();
+        PoseStack renderStack = event.getGuiGraphics().pose();
         Player player = Minecraft.getInstance().player;
         float frameHeight  = 128F;
         float frameWidth   =  32F;

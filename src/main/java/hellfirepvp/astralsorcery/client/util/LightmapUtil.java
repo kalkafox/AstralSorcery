@@ -34,6 +34,6 @@ public class LightmapUtil {
     }
 
     public static int getPackedLightCoords(BlockAndTintGetter level, BlockPos at) {
-        return LevelRenderer.getCombinedLight(level, at);
+        return LevelRenderer.getLightColor(level, at);
     }
 }

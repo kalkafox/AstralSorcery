@@ -129,7 +129,7 @@ public class AlignmentChargeHandler implements ITickHandler {
 
         float regenPerTick = max / (6F * 20F);
 
-        boolean underground = player.getCommandSenderWorld().getHeight(Heightmap.Type.WORLD_SURFACE, player.position()).getY() > player.position().getY() + 1;
+        boolean underground = player.getCommandSenderWorld().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, player.blockPosition()).getY() > player.getY() + 1;
 
         float dayMultiplier = underground ? 0.85F : 0.3F + 0.7F * DayTimeHelper.getCurrentDaytimeDistribution(player.getCommandSenderWorld());
         float caveMultiplier = underground ? 0.25F : 1F;

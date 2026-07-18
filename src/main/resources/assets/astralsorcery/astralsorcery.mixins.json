@@ -15,7 +15,6 @@
         "MixinLivingEntity",
         "MixinModifiableAttributeInstance",
         "MixinServerPlayNetHandler",
-        "MixinVoxelShapeSpliterator",
         "MixinWorld"
     ],
     "client": [

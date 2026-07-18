@@ -40,7 +40,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.level.WorldEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.LogicalSide;
@@ -62,7 +62,7 @@ public class EventHandlerCache {
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void onClientDisconnect(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+    public static void onClientDisconnect(ClientPlayerNetworkEvent.LoggingOut event) {
         AreaOfInfluencePreview.INSTANCE.clearClient();
         EffectHandler.cleanUp();
         ScreenJournalProgression.resetJournal();
@@ -103,7 +103,7 @@ public class EventHandlerCache {
     }
 
     @SubscribeEvent
-    public static void onUnload(WorldEvent.Unload event) {
+    public static void onUnload(LevelEvent.Unload event) {
         LevelAccessor w = event.getLevel();
         if (w instanceof Level) {
             Level level = (Level) w;

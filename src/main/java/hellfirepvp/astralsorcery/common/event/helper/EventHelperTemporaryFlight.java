@@ -26,8 +26,8 @@ import java.util.function.Consumer;
 public class EventHelperTemporaryFlight {
 
     private static final TimeoutList<Player> temporaryFlight = new TimeoutList<>(player -> {
-        if (player instanceof ServerPlayer && ((ServerPlayer) player).gameMode.getGameType().isSurvival()) {
-            player.getAbilities().allowFlying = false;
+        if (player instanceof ServerPlayer && ((ServerPlayer) player).gameMode.getGameModeForPlayer().isSurvival()) {
+            player.getAbilities().mayfly = false;
             player.getAbilities().flying = false;
             player.onUpdateAbilities();
         }

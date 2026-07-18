@@ -15,17 +15,20 @@ import hellfirepvp.astralsorcery.common.lib.CrystalPropertiesAS;
 import hellfirepvp.astralsorcery.common.lib.LootAS;
 import hellfirepvp.astralsorcery.common.tile.TileCollectorCrystal;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.storage.loot.LootTable;
 import hellfirepvp.astralsorcery.common.util.Constants;
-
-import java.util.Random;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -36,7 +39,7 @@ import java.util.Random;
  */
 public class MarkerManagerAS {
 
-    public static void handleMarker(String marker, BlockPos pos, LevelAccessor genWorld, Random random, BoundingBox box) {
+    public static void handleMarker(String marker, BlockPos pos, LevelAccessor genWorld, RandomSource random, BoundingBox box) {
         switch (marker) {
             case "brick_shrine_chest":
                 if (random.nextBoolean()) {
@@ -54,7 +57,7 @@ public class MarkerManagerAS {
                 break;
             case "random_top_block":
                 if (random.nextFloat() < 0.7F) {
-                    genWorld.setBlock(pos, genWorld.getBiome(pos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), Constants.BlockFlags.BLOCK_UPDATE);
+                    genWorld.setBlock(pos, sampleSurfaceBlock(genWorld, pos), Constants.BlockFlags.BLOCK_UPDATE);
                 } else {
                     genWorld.setBlock(pos, Blocks.AIR.defaultBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
                 }
@@ -65,7 +68,19 @@ public class MarkerManagerAS {
         }
     }
 
-    private static void makeCollectorCrystal(LevelAccessor level, BlockPos pos, Random random, BoundingBox box) {
+    // Surface builders (and their top-material accessor) are gone since 1.18;
+    // approximate the biome's top material by sampling the terrain surface at
+    // this column, falling back to grass if the sample is unusable.
+    private static BlockState sampleSurfaceBlock(LevelAccessor level, BlockPos pos) {
+        int surfaceY = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, pos.getX(), pos.getZ()) - 1;
+        BlockState state = level.getBlockState(new BlockPos(pos.getX(), surfaceY, pos.getZ()));
+        if (state.isAir() || state.liquid()) {
+            return Blocks.GRASS_BLOCK.defaultBlockState();
+        }
+        return state;
+    }
+
+    private static void makeCollectorCrystal(LevelAccessor level, BlockPos pos, RandomSource random, BoundingBox box) {
         if (box.isInside(pos) && level.getBlockState(pos).getBlock() != BlocksAS.ROCK_COLLECTOR_CRYSTAL) {
             level.setBlock(pos, BlocksAS.ROCK_COLLECTOR_CRYSTAL.defaultBlockState(), Constants.BlockFlags.BLOCK_UPDATE);
 
@@ -78,13 +93,14 @@ public class MarkerManagerAS {
         }
     }
 
-    private static void makeChest(LevelAccessor level, BlockPos pos, ResourceLocation tableName, Random random, BoundingBox box) {
+    private static void makeChest(LevelAccessor level, BlockPos pos, ResourceLocation tableName, RandomSource random, BoundingBox box) {
         if (box.isInside(pos) && level.getBlockState(pos).getBlock() != Blocks.CHEST) {
-            BlockState chest = StructurePiece.correctFacing(level, pos, Blocks.CHEST.defaultBlockState());
+            BlockState chest = StructurePiece.reorient(level, pos, Blocks.CHEST.defaultBlockState());
 
             level.setBlock(pos, chest, Constants.BlockFlags.BLOCK_UPDATE);
             // Static setLootTable used instead of manual tile fetch -> member setLootTable to provide compatibility with Lootr.
-            RandomizableContainerBlockEntity.setLootTable(level, random, pos, tableName);
+            ResourceKey<LootTable> table = ResourceKey.create(Registries.LOOT_TABLE, tableName);
+            RandomizableContainer.setBlockEntityLootTable(level, random, pos, table);
         }
     }
 }

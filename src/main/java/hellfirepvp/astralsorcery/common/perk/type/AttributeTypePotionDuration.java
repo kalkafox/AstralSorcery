@@ -16,7 +16,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.event.entity.living.PotionEvent;
+import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 
@@ -39,15 +40,15 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
         eventBus.addListener(this::onEffect);
     }
 
-    private void onEffect(PotionEvent.PotionAddedEvent event) {
+    private void onEffect(MobEffectEvent.Added event) {
         if (event.getEntity() instanceof Player) {
-            if (event.getOldPotionEffect() == null) {
+            if (event.getOldEffectInstance() == null) {
                 //New effect
-                modifyPotionDuration((Player) event.getEntity(), event.getPotionEffect(), event.getPotionEffect());
+                modifyPotionDuration((Player) event.getEntity(), event.getEffectInstance(), event.getEffectInstance());
             } else {
                 //Existing effect
-                if (new MobEffectInstance(event.getOldPotionEffect()).combine(event.getPotionEffect())) {
-                    modifyPotionDuration((Player) event.getEntity(), event.getPotionEffect(), event.getOldPotionEffect());
+                if (new MobEffectInstance(event.getOldEffectInstance()).update(event.getEffectInstance())) {
+                    modifyPotionDuration((Player) event.getEntity(), event.getEffectInstance(), event.getOldEffectInstance());
                 }
             }
         }
@@ -55,7 +56,7 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
 
     private void modifyPotionDuration(Player player, MobEffectInstance newSetEffect, MobEffectInstance existingEffect) {
         if (player.getCommandSenderWorld().isClientSide() ||
-                newSetEffect.getEffect().getCategory().equals(EffectType.HARMFUL) ||
+                newSetEffect.getEffect().value().getCategory().equals(MobEffectCategory.HARMFUL) ||
                 existingEffect.getAmplifier() < newSetEffect.getAmplifier()) {
             return;
         }
@@ -66,7 +67,7 @@ public class AttributeTypePotionDuration extends PerkAttributeType {
         newDuration = AttributeEvent.postProcessModded(player, this, newDuration);
 
         if (newSetEffect.getDuration() < newDuration) {
-            newSetEffect.duration = Mth.floor(newDuration);
+            ReflectionHelper.setMobEffectDuration(newSetEffect, Mth.floor(newDuration));
         }
     }
 

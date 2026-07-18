@@ -44,11 +44,11 @@ public class CommandReset implements Command<CommandSourceStack> {
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        ServerPlayer player = (ServerPlayer) context.getArgument("player", EntitySelector.class).selectOne(context.getSource());
+        ServerPlayer player = (ServerPlayer) context.getArgument("player", EntitySelector.class).findSinglePlayer(context.getSource());
         ResearchHelper.wipeKnowledge(player);
 
         String name = player.getGameProfile().getName();
-        context.getSource().customSuggestion(Component.literal("Wiped " + name + "'s data!").withStyle(ChatFormatting.GREEN), true);
+        context.getSource().sendSuccess(() -> Component.literal("Wiped " + name + "'s data!").withStyle(ChatFormatting.GREEN), true);
         return 0;
     }
 }

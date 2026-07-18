@@ -81,13 +81,13 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
         Vector3 vortexAt = at.clone().addY(-4);
 
         AABB captureBox = new AABB(0, 0, 0, 1, 1, 1)
-                .offset(fountain.getBlockPos().below(4))
-                .grow(2);
-        AABB pullBox = captureBox.grow(14);
+                .move(fountain.getBlockPos().below(4))
+                .inflate(2);
+        AABB pullBox = captureBox.inflate(14);
 
         float boxCapacity = 5 * 5 * 5;
         float density = 0;
-        List<LivingEntity> captured = fountain.getLevel().getEntitiesWithinAABB(LivingEntity.class, captureBox);
+        List<LivingEntity> captured = fountain.getLevel().getEntitiesOfClass(LivingEntity.class, captureBox);
         for (LivingEntity le : captured) {
             if (le == null || !le.isAlive() || le instanceof Player || !TechnicalEntityRegistry.INSTANCE.canAffect(le)) {
                 continue;
@@ -98,15 +98,15 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
             if (entitySize > boxCapacity) {
                 Vector3 heldPos = vortexAt.clone().addY(-1);
                 if (heldPos.distanceSquared(le) >= 0.4F) {
-                    le.setPositionAndRotation(heldPos.getX(), heldPos.getY(), heldPos.getZ(), le.getYRot(), le.getXRot());
+                    le.absMoveTo(heldPos.getX(), heldPos.getY(), heldPos.getZ(), le.getYRot(), le.getXRot());
                 }
 
                 if (le instanceof EnderDragon) {
                     GameRules rules = fountain.getLevel().getGameRules();
                     boolean prev = rules.getBoolean(GameRules.RULE_MOBGRIEFING);
-                    rules.get(GameRules.RULE_MOBGRIEFING).set(false, null);
+                    rules.getRule(GameRules.RULE_MOBGRIEFING).set(false, null);
                     le.aiStep();
-                    rules.get(GameRules.RULE_MOBGRIEFING).set(prev, null);
+                    rules.getRule(GameRules.RULE_MOBGRIEFING).set(prev, null);
                 }
             } else {
                 le.setDeltaMovement(Vec3.ZERO);
@@ -119,7 +119,7 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
         fountain.consumeLiquidStarlight(Mth.ceil(upkeep / 3F));
 
 
-        List<LivingEntity> pulling = fountain.getLevel().getEntitiesWithinAABB(LivingEntity.class, pullBox);
+        List<LivingEntity> pulling = fountain.getLevel().getEntitiesOfClass(LivingEntity.class, pullBox);
         pulling.removeAll(captured);
         for (LivingEntity le : pulling) {
             if (le == null || !le.isAlive() || le instanceof Player || !TechnicalEntityRegistry.INSTANCE.canAffect(le)) {
@@ -131,9 +131,9 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
                 if (le instanceof EnderDragon) {
                     Vector3 nextPos = Vector3.atEntityCorner(le).add(v);
                     if (le.isEffectiveAi()) {
-                        le.setPositionAndUpdate(nextPos.getX(), nextPos.getY(), nextPos.getZ());
+                        le.teleportTo(nextPos.getX(), nextPos.getY(), nextPos.getZ());
                     } else {
-                        le.setPositionAndRotation(nextPos.getX(), nextPos.getY(), nextPos.getZ(), le.getYRot(), le.getXRot());
+                        le.absMoveTo(nextPos.getX(), nextPos.getY(), nextPos.getZ(), le.getYRot(), le.getXRot());
                     }
                     le.setDeltaMovement(Vec3.ZERO);
                 } else {
@@ -144,16 +144,16 @@ public class FountainEffectVortex extends FountainEffect<VortexContext> {
 
             if (vortexAt.distanceSquared(le) <= 16) {
                 Vector3 randomRanges = new Vector3(
-                        Math.max(0, (captureBox.getXSize() - le.getBbWidth()) / 2),
-                        Math.max(0, (captureBox.getYSize() - le.getBbHeight()) / 2),
-                        Math.max(0, (captureBox.getZSize() - le.getBbWidth()) / 2)
+                        Math.max(0, (captureBox.getXsize() - le.getBbWidth()) / 2),
+                        Math.max(0, (captureBox.getYsize() - le.getBbHeight()) / 2),
+                        Math.max(0, (captureBox.getZsize() - le.getBbWidth()) / 2)
                 );
                 Vector3 randomPos = vortexAt.clone().add(
                         randomRanges.getX() * random.nextFloat() * (random.nextBoolean() ? 1 : -1),
                         randomRanges.getY() * random.nextFloat() * (random.nextBoolean() ? 1 : -1),
                         randomRanges.getZ() * random.nextFloat() * (random.nextBoolean() ? 1 : -1)
                 );
-                le.setPositionAndRotation(randomPos.getX(), randomPos.getY(), randomPos.getZ(), le.getYRot(), le.getXRot());
+                le.absMoveTo(randomPos.getX(), randomPos.getY(), randomPos.getZ(), le.getYRot(), le.getXRot());
             }
         }
     }

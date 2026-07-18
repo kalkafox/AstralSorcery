@@ -88,7 +88,7 @@ public class PerkTreeLoader extends SimpleJsonResourceReloadListener {
                 JsonArray connectionArray = GsonHelper.getAsJsonArray(serializedPerkData, "connection");
                 for (int i = 0; i < connectionArray.size(); i++) {
                     JsonElement connection = connectionArray.get(i);
-                    String connectedPerkKey = GsonHelper.getAsString(connection, String.format("connection[%s]", i));
+                    String connectedPerkKey = GsonHelper.convertToString(connection, String.format("connection[%s]", i));
                     connector.addConnection(ResourceLocation.parse(connectedPerkKey));
                 }
             }

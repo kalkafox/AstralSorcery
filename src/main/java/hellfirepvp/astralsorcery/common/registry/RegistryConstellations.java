@@ -17,6 +17,7 @@ import hellfirepvp.astralsorcery.common.constellation.effect.ConstellationEffect
 import hellfirepvp.astralsorcery.common.constellation.star.StarLocation;
 import hellfirepvp.astralsorcery.common.constellation.world.WorldContext;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
+import net.minecraft.world.item.crafting.Ingredient;
 import hellfirepvp.astralsorcery.common.lib.TagsAS;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import net.minecraft.world.level.block.Blocks;
@@ -55,7 +56,7 @@ public class RegistryConstellations {
         discidia.addSignatureItem(Tags.Items.DUSTS_REDSTONE);
 
         armara.addSignatureItem(Tags.Items.INGOTS_IRON);
-        armara.addSignatureItem(Tags.Items.LEATHER);
+        armara.addSignatureItem(Tags.Items.LEATHERS);
         armara.addSignatureItem(Items.CLAY_BALL);
         armara.addSignatureItem(Tags.Items.DUSTS_GLOWSTONE);
 
@@ -64,9 +65,9 @@ public class RegistryConstellations {
         vicio.addSignatureItem(Items.STRING);
         vicio.addSignatureItem(ItemTags.FISHES);
 
-        evorsio.addSignatureItem(Tags.Items.COBBLESTONE);
+        evorsio.addSignatureItem(Tags.Items.COBBLESTONES);
         evorsio.addSignatureItem(Items.FLINT);
-        evorsio.addSignatureItem(Tags.Items.GUNPOWDER);
+        evorsio.addSignatureItem(Tags.Items.GUNPOWDERS);
         evorsio.addSignatureItem(Blocks.TNT);
 
 
@@ -93,12 +94,12 @@ public class RegistryConstellations {
         bootes.addSignatureItem(Tags.Items.CROPS_WHEAT);
         bootes.addSignatureItem(Tags.Items.BONES);
         bootes.addSignatureItem(Items.APPLE);
-        bootes.addSignatureItem(Tags.Items.LEATHER);
+        bootes.addSignatureItem(Tags.Items.LEATHERS);
 
         fornax.addSignatureItem(Items.COAL);
         fornax.addSignatureItem(Tags.Items.DUSTS_REDSTONE);
         fornax.addSignatureItem(Tags.Items.INGOTS_IRON);
-        fornax.addSignatureItem(Tags.Items.GUNPOWDER);
+        fornax.addSignatureItem(Tags.Items.GUNPOWDERS);
 
         pelotrio.addSignatureItem(Items.ROTTEN_FLESH);
         pelotrio.addSignatureItem(Items.BLAZE_POWDER);
@@ -112,7 +113,7 @@ public class RegistryConstellations {
         gelu.addSignatureItem(Tags.Items.FEATHERS);
 
         ulteria.addSignatureItem(TagsAS.Items.INGOTS_STARMETAL);
-        ulteria.addSignatureItem(Tags.Items.LEATHER);
+        ulteria.addSignatureItem(Tags.Items.LEATHERS);
         ulteria.addSignatureItem(Tags.Items.GEMS_DIAMOND);
         ulteria.addSignatureItem(Tags.Items.RODS_BLAZE);
 
@@ -122,8 +123,9 @@ public class RegistryConstellations {
         alcara.addSignatureItem(ItemTags.COALS);
 
         vorux.addSignatureItem(Items.BLAZE_POWDER);
-        vorux.addSignatureItem(ItemsAS.NOCTURNAL_POWDER);
-        vorux.addSignatureItem(Tags.Items.GUNPOWDER);
+        // Lazy: this runs during mod construction, before the item instances exist.
+        vorux.addSignatureItem(() -> Ingredient.of(ItemsAS.NOCTURNAL_POWDER));
+        vorux.addSignatureItem(Tags.Items.GUNPOWDERS);
         vorux.addSignatureItem(Items.NETHER_BRICK);
     }
 

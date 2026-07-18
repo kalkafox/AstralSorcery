@@ -147,12 +147,12 @@ public class RegistryBlocks {
     }
 
     private static BlockSlabTemplate makeSlab(BlockState base, String name) {
-        BlockSlabTemplate slabs = new BlockSlabTemplate(base, Block.Properties.from(base.getBlock()));
+        BlockSlabTemplate slabs = new BlockSlabTemplate(base, Block.Properties.ofFullCopy(base.getBlock()));
         return registerBlock(slabs, AstralSorcery.key(name));
     }
 
     private static BlockStairsTemplate makeStairs(BlockState base, String name) {
-        BlockStairsTemplate stairs = new BlockStairsTemplate(base, Block.Properties.from(base.getBlock()));
+        BlockStairsTemplate stairs = new BlockStairsTemplate(base, Block.Properties.ofFullCopy(base.getBlock()));
         return registerBlock(stairs, AstralSorcery.key(name));
     }
 

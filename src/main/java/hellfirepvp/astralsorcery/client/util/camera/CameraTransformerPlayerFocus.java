@@ -37,8 +37,8 @@ public class CameraTransformerPlayerFocus extends CameraTransformerSettingsCache
         super.onStartTransforming(pTicks);
 
         EntityClientReplacement repl = new EntityClientReplacement();
-        repl.read(Minecraft.getInstance().player.writeWithoutTypeId(new CompoundTag()));
-        Minecraft.getInstance().level.updatePlayer(repl.getId(), repl);
+        repl.load(Minecraft.getInstance().player.saveWithoutId(new CompoundTag()));
+        Minecraft.getInstance().level.addEntity(repl);
         this.clientEntity = repl;
 
         entity.setAsRenderViewEntity();
@@ -50,12 +50,12 @@ public class CameraTransformerPlayerFocus extends CameraTransformerSettingsCache
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null) {
-            mc.level.removeEntityFromWorld(this.clientEntity.getId());
+            mc.level.removeEntity(this.clientEntity.getId(), net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
         }
 
         if (mc.player != null) {
             Player player = mc.player;
-            player.setPositionAndRotation(this.clientEntity.getX(), this.clientEntity.getY(), this.clientEntity.getZ(), this.clientEntity.getYRot(), this.clientEntity.getXRot());
+            player.moveTo(this.clientEntity.getX(), this.clientEntity.getY(), this.clientEntity.getZ(), this.clientEntity.getYRot(), this.clientEntity.getXRot());
             player.lerpMotion(0, 0, 0);
         }
 

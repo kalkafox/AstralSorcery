@@ -53,7 +53,7 @@ public class KeyCleanseBadPotions extends KeyPerk {
             Player player = (Player) entity;
             List<MobEffectInstance> badEffects = player.getActiveEffects()
                     .stream()
-                    .filter(p -> p.getEffect().getCategory() == EffectType.HARMFUL)
+                    .filter(p -> p.getEffect().value().getCategory() == MobEffectCategory.HARMFUL)
                     .collect(Collectors.toList());
             if (badEffects.isEmpty()) {
                 return;
@@ -66,7 +66,7 @@ public class KeyCleanseBadPotions extends KeyPerk {
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, inclChance);
                 float chance = getChance(event.getAmount()) * inclChance;
                 if (random.nextFloat() < chance) {
-                    player.removePotionEffect(effect.getEffect());
+                    player.removeEffect(effect.getEffect());
                 }
             }
         }

@@ -63,7 +63,7 @@ public class ReaderPercentageAttribute extends PerkAttributeReader {
         if (PerkAttributeLimiter.hasLimit(this.getType())) {
             Pair<Double, Double> limits = PerkAttributeLimiter.getMaxResults(this.getType());
             limit = limits.getRight();
-            limitStr = I18n.format("perk.reader.astralsorcery.limit.percent", Mth.floor(limit * 100));
+            limitStr = I18n.get("perk.reader.astralsorcery.limit.percent", Mth.floor(limit * 100));
         }
         double value = statMap.modifyValue(player, ResearchHelper.getProgress(player, LogicalSide.CLIENT),
                 this.getType(), (float) getDefaultValue(statMap, player, LogicalSide.CLIENT));
@@ -73,7 +73,7 @@ public class ReaderPercentageAttribute extends PerkAttributeReader {
         if (Math.abs(value - postValue) > 1E-4 &&
                 (limit == null || Math.abs(postValue - limit) > 1E-4)) {
             if (Math.abs(postValue) >= 1E-4) {
-                postProcess = I18n.format("perk.reader.astralsorcery.postprocess.default", formatForDisplay(postValue));
+                postProcess = I18n.get("perk.reader.astralsorcery.postprocess.default", formatForDisplay(postValue));
             }
             value = postValue;
         }

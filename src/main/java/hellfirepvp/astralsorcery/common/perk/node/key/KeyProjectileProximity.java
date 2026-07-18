@@ -16,6 +16,7 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -49,7 +50,7 @@ public class KeyProjectileProximity extends KeyPerk {
     }
 
     private void onProjDamage(LivingIncomingDamageEvent event) {
-        if (event.getSource().isProjectile()) {
+        if (event.getSource().is(DamageTypeTags.IS_PROJECTILE)) {
             DamageSource source = event.getSource();
             if (source.getEntity() != null && source.getEntity() instanceof Player) {
                 Player player = (Player) source.getEntity();
@@ -60,7 +61,7 @@ public class KeyProjectileProximity extends KeyPerk {
                     added *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);
 
                     float capDstSq = CONFIG.capDistance.get().floatValue();
-                    float dst = -(((float) (player.getDistanceSq(event.getEntity()))) - capDstSq);
+                    float dst = -(((float) (player.distanceToSqr(event.getEntity()))) - capDstSq);
                     dst /= capDstSq;
                     if (dst < 0) {
                         dst /= 10; //To make it drop a bit slower though... like. that damage reduction is... not fun :P

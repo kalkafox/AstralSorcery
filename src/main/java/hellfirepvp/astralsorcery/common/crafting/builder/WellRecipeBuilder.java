@@ -56,12 +56,12 @@ public class WellRecipeBuilder extends CustomRecipeBuilder<WellLiquefaction> {
     }
 
     public WellRecipeBuilder setItemInput(ItemLike item) {
-        this.from = Ingredient.valueFromJson(item);
+        this.from = Ingredient.of(item);
         return this;
     }
 
     public WellRecipeBuilder setItemInput(TagKey<Item> tag) {
-        this.from = Ingredient.fromTag(tag);
+        this.from = Ingredient.of(tag);
         return this;
     }
 

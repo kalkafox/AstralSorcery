@@ -16,7 +16,7 @@ import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.client.util.RenderingGuiUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
-import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.world.effect.MobEffect;
@@ -52,7 +52,9 @@ public abstract class EffectCustomTexture extends MobEffect {
 
     public abstract SpriteQuery getSpriteQuery();
 
-    @Override
+    // 1.21 port: custom effect icon rendering moved off MobEffect onto
+    // IClientMobEffectExtensions; these two methods need to be wired through a
+    // RegisterClientExtensionsEvent extension when the client HUD pass is done.
     @OnlyIn(Dist.CLIENT)
     public void renderInventoryEffect(MobEffectInstance effect, EffectRenderingInventoryScreen<?> gui, PoseStack renderStack, int x, int y, float z) {
         float wh = 18;
@@ -74,9 +76,8 @@ public abstract class EffectCustomTexture extends MobEffect {
         });
     }
 
-    @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderHUDEffect(MobEffectInstance effect, GuiComponent gui, PoseStack renderStack, int x, int y, float z, float alpha) {
+    public void renderHUDEffect(MobEffectInstance effect, GuiGraphics gui, PoseStack renderStack, int x, int y, float z, float alpha) {
         float wh = 18;
         float offsetX = x + 3;
         float offsetY = y + 3;

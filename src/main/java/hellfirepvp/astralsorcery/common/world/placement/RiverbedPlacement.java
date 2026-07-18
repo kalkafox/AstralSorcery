@@ -8,20 +8,20 @@
 
 package hellfirepvp.astralsorcery.common.world.placement;
 
-import hellfirepvp.astralsorcery.common.util.MiscUtils;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
+import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.lib.WorldGenerationAS;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.gen.feature.WorldDecoratingHelper;
-import net.minecraft.world.gen.placement.NoPlacementConfig;
-import net.minecraft.world.gen.placement.Placement;
+import net.minecraft.world.level.levelgen.placement.PlacementContext;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 
-import java.util.Random;
 import java.util.stream.Stream;
 
 /**
@@ -31,18 +31,17 @@ import java.util.stream.Stream;
  * Created by HellFirePvP
  * Date: 20.11.2020 / 17:10
  */
-public class RiverbedPlacement extends FeatureDecorator<NoneDecoratorConfiguration> {
+public class RiverbedPlacement extends PlacementModifier {
 
-    public RiverbedPlacement() {
-        super(NoneDecoratorConfiguration.CODEC);
-    }
+    public static final MapCodec<RiverbedPlacement> CODEC = MapCodec.unit(RiverbedPlacement::new);
 
     @Override
-    public Stream<BlockPos> getPositions(DecorationContext helper, Random random, NoneDecoratorConfiguration config, BlockPos pos) {
+    public Stream<BlockPos> getPositions(PlacementContext context, RandomSource random, BlockPos pos) {
+        WorldGenLevel level = context.getLevel();
         int x = random.nextInt(16) + pos.getX();
         int z = random.nextInt(16) + pos.getZ();
-        int y = helper.getHeight(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
-        if (y <= 0) {
+        int y = context.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+        if (y <= level.getMinBuildHeight()) {
             return Stream.of();
         }
 
@@ -50,19 +49,22 @@ public class RiverbedPlacement extends FeatureDecorator<NoneDecoratorConfigurati
 
         boolean foundWater = false;
         for (int yy = 0; yy < 5; yy++) {
-            BlockPos check = floor.offset(Direction.UP, yy);
-            BlockState state = helper.getBlockState(check);
-            Block block = state.getBlock();
-            Fluid f;
-            if ((f = MiscUtils.tryGetFuild(state)) != null && f.isIn(FluidTags.WATER) || block.isIn(BlockTags.ICE)) {
+            BlockPos check = floor.relative(Direction.UP, yy);
+            BlockState state = level.getBlockState(check);
+            if (state.getFluidState().is(FluidTags.WATER) || state.is(BlockTags.ICE)) {
                 foundWater = true;
                 floor = check.below();
                 break;
             }
         }
-        if (foundWater && BlockTags.SAND.contains(helper.getBlockState(floor).getBlock())) {
+        if (foundWater && level.getBlockState(floor).is(BlockTags.SAND)) {
             return Stream.of(floor);
         }
         return Stream.of();
+    }
+
+    @Override
+    public PlacementModifierType<?> type() {
+        return WorldGenerationAS.Placements.RIVERBED;
     }
 }

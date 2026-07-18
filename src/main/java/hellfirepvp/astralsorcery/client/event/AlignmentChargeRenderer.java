@@ -29,7 +29,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.client.event.RenderGameOverlayEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import hellfirepvp.observerlib.common.util.tick.TickEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -62,10 +62,7 @@ public class AlignmentChargeRenderer implements ITickHandler {
         bus.addListener(EventPriority.HIGH, this::onRenderOverlay);
     }
 
-    private void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
+    private void onRenderOverlay(RenderGuiEvent.Post event) {
         if (Minecraft.getInstance().gameMode != null &&
                 Minecraft.getInstance().gameMode.getPlayerMode() == GameType.SPECTATOR) {
             return;
@@ -74,8 +71,8 @@ public class AlignmentChargeRenderer implements ITickHandler {
             return;
         }
 
-        PoseStack renderStack = event.getPoseStack();
-        Window window = event.getWindow();
+        PoseStack renderStack = event.getGuiGraphics().pose();
+        Window window = Minecraft.getInstance().getWindow();
         int screenWidth = window.getGuiScaledWidth();
         int screenHeight = window.getGuiScaledHeight();
         int barWidth = 194;

@@ -30,7 +30,7 @@ import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
-import net.neoforged.neoforge.client.event.RenderWorldLastEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
@@ -89,7 +89,10 @@ public class TypeBlockRing extends PatreonEffect {
 
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
-    public void onRenderLast(RenderWorldLastEvent event) {
+    public void onRenderLast(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) {
+            return;
+        }
         Player pl = Minecraft.getInstance().player;
         if (Minecraft.getInstance().options.getCameraType().isFirstPerson() && //First person
                 pl != null && pl.getUUID().equals(playerUUID)) {
@@ -107,7 +110,7 @@ public class TypeBlockRing extends PatreonEffect {
             renderStack.pushPose();
             renderStack.translate(0, -0.5, 0);
             renderStack.scale(0.5F, 0.5F, 0.5F);
-            renderRingAt(renderStack, pl, alpha, event.advanceTime());
+            renderRingAt(renderStack, pl, alpha, event.getPartialTick().getGameTimeDeltaPartialTick(true));
             renderStack.popPose();
         }
     }
@@ -120,7 +123,7 @@ public class TypeBlockRing extends PatreonEffect {
             return;
         }
 
-        renderRingAt(ev.getPoseStack(), player, 88, ev.getPartialRenderTick());
+        renderRingAt(ev.getPoseStack(), player, 88, ev.getPartialTick());
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -161,7 +164,7 @@ public class TypeBlockRing extends PatreonEffect {
                     RenderingDrawUtils.renderTexturedCubeCentralColorLighted(buf, renderStack,
                             tas.getU0(), tas.getV0(),
                             tas.getU1() - tas.getU0(), tas.getV1() - tas.getV0(),
-                            255, 255, 255, alphaMultiplier, LightmapUtil.getPackedLightCoords(player.getCommandSenderWorld(), player.position()));
+                            255, 255, 255, alphaMultiplier, LightmapUtil.getPackedLightCoords(player.getCommandSenderWorld(), player.blockPosition()));
                 });
                 renderStack.popPose();
             }

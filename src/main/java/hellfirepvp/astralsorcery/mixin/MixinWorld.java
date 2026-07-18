@@ -29,7 +29,7 @@ public class MixinWorld {
 
     @Shadow private int skyDarken;
 
-    @Inject(method = "calculateInitialSkylight", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "updateSkyBrightness", at = @At("RETURN"), cancellable = true)
     public void solarEclipseSunBrightnessServer(CallbackInfo ci) {
         Level level = (Level)(Object) this;
 

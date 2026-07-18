@@ -60,7 +60,7 @@ public class AttributeEvent {
         }
 
         public Attribute getAttribute() {
-            return instance.getAttribute();
+            return instance.getAttribute().value();
         }
 
         @Nullable

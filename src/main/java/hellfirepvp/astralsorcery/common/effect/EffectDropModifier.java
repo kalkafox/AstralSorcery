@@ -13,10 +13,15 @@ import hellfirepvp.astralsorcery.client.resource.query.SpriteQuery;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
 import hellfirepvp.astralsorcery.common.lib.EffectsAS;
 import hellfirepvp.astralsorcery.common.util.entity.EntityUtils;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.server.level.ServerLevel;
@@ -24,8 +29,10 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 
-import java.util.ArrayList;
+import net.neoforged.neoforge.common.EffectCure;
+
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -37,12 +44,12 @@ import java.util.List;
 public class EffectDropModifier extends EffectCustomTexture {
 
     public EffectDropModifier() {
-        super(EffectType.BENEFICIAL, ColorsAS.EFFECT_DROP_MODIFIER);
+        super(MobEffectCategory.BENEFICIAL, ColorsAS.EFFECT_DROP_MODIFIER);
     }
 
     @Override
-    public List<ItemStack> getCurativeItems() {
-        return new ArrayList<>(0);
+    public void fillEffectCures(Set<EffectCure> cures, MobEffectInstance effectInstance) {
+        //Not curable
     }
 
     @Override
@@ -60,10 +67,12 @@ public class EffectDropModifier extends EffectCustomTexture {
             return;
         }
 
-        if (le.isPotionActive(EffectsAS.EFFECT_DROP_MODIFIER)) {
+        Holder<MobEffect> dropModifier = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_DROP_MODIFIER);
+        if (le.hasEffect(dropModifier)) {
             DamageSource src = event.getSource();
 
-            int amplifier = le.removeActivePotionEffect(EffectsAS.EFFECT_DROP_MODIFIER).getAmplifier();
+            int amplifier = le.getEffect(dropModifier).getAmplifier();
+            le.removeEffect(dropModifier);
             if (amplifier == 0) {
                 event.getDrops().clear(); //Special case to void all items
             } else {
@@ -73,7 +82,10 @@ public class EffectDropModifier extends EffectCustomTexture {
                         if (stack.isEmpty()) {
                             continue;
                         }
-                        event.getDrops().add(le.thunderHit(stack));
+                        ItemEntity dropped = le.spawnAtLocation(stack);
+                        if (dropped != null) {
+                            event.getDrops().add(dropped);
+                        }
                     }
                 }
             }

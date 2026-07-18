@@ -777,17 +777,98 @@ item model predicates, and creative variants) were ported with it:
 
 ## Current compile boundary
 
-The registration mechanism, the recipe/serializer subsystem, rendering
-infrastructure, models, renderers, screens, the block classes, the tile
-subsystem, the starlight network, the world-data layer, entities, and item
-classes now
-compile clean. `gradlew compileJava` (configured with `-Xmaxerrs 10000`)
-stops at structural 1.16 -> 1.21 API changes rather than naming; the biggest
-remaining clusters are perks (`common/perk/**`), `client/util`, world
-generation (`RegistryWorldGeneration` +
-`common/world/**`), the remaining
-`common/registry` content classes, and `crafting/nojson`. 632 compiler errors
-remain, measured off a full `gradlew compileJava` run.
+**`gradlew compileJava` is clean — 0 errors — and `gradlew runData` runs the
+full mod-loading + datagen pipeline successfully.** The next boundary is
+`runClient`/`runServer` bring-up (untested).
+
+### Registry construction phases (done)
+
+The old "everything eager at mod construction" scheme broke at runtime:
+blocks, items, fluids and entity types create intrusive holders in their
+constructors, which the built-in registries only permit inside NeoForge's
+RegisterEvent window (registries are frozen during mod construction).
+`CommonProxy` now builds content in three phases:
+
+1. `buildRegistryContent()` — still eager at mod construction, for everything
+   that doesn't touch intrusive holders or block/item instances.
+2. `buildIntrusiveRegistryContent(RegisterEvent)` — HIGHEST priority on the
+   first RegisterEvent (the window is open, no deferred register has added
+   entries yet): fluids, blocks, items, item blocks, tiles, entities.
+3. `buildItemDependentRegistryContent(RegisterEvent)` — LOWEST priority on
+   the item RegisterEvent: `RegistryStructures` + `RegistryResearch`.
+   These call `Block.asItem()`, which permanently caches air if invoked
+   before the item registry is populated — they must run after phase 2's
+   entries actually registered.
+
+Runtime fixes found while bringing datagen up:
+
+- `RegistryLoot.init()` and `RegistryWorldGeneration.init()` were never
+  invoked; both are wired into `buildRegistryContent()`.
+- `RegistryHelper.getKey` probed registries with `Registry.getKey`, which on
+  defaulted registries (block/item/fluid) answers `minecraft:air` for values
+  they don't contain — `Mods.owns(...)` was false for everything. Now uses
+  `getResourceKey`.
+- `NameUtil.fromClass` used `Class.getName()` (remap damage) instead of
+  `getSimpleName()`, producing invalid registry paths for fluids.
+- `ItemPerkSeal`/`ItemCrystalBase` dropped `durability(0)` (now a real
+  component that conflicts with `stacksTo`), the crystal cluster blocks are
+  `dynamicShape()` (required with an offset type since 1.19), and the vorux
+  signature item is captured lazily (items don't exist at constellation-build
+  time).
+- `processResources` uses `DuplicatesStrategy.EXCLUDE` — datagen re-emits
+  some assets that are handwritten in `src/main/resources`; the handwritten
+  copy wins.
+
+### Mixins fixed while at it
+
+`MixinWorld` -> `updateSkyBrightness`, `client.MixinClientWorld` ->
+`getSkyDarken`, `MixinModifiableAttributeInstance` -> `calculateValue`,
+ObserverLib `MixinLevelChunk` -> `@Local(ordinal = 1)` for the previous
+block state. All mixins now apply cleanly during `runData`.
+
+### World generation (done, datagen output pending)
+
+`RegistryWorldGeneration` + `common/world/**` + `WorldGenerationAS` are ported
+to the 1.21 datapack-driven model:
+
+- Runtime registration is only the codec carriers, via `AstralRegistries`:
+  the two custom `Feature`s, the three `PlacementModifierType`s
+  (chance / riverbed / world-filter), the three shrine
+  `StructurePieceType`s, and the three shrine `StructureType`s.
+  `RegistryWorldGeneration.init()` runs from
+  `CommonProxy.buildRegistryContent()`.
+- Configured features, placed features, structures, structure sets, and
+  NeoForge biome modifiers are `BootstrapContext` bootstraps on
+  `RegistryWorldGeneration`, wired into the `DatapackBuiltinEntriesProvider`
+  in `AstralDataGenerator`. 1.16 decorator chains were translated to
+  placement modifier lists (`CountPlacement`/`InSquarePlacement`/
+  `HeightRangePlacement`/`PlacementUtils.HEIGHTMAP` plus the mod's own
+  modifiers). The shrines use `TerrainAdjustment.BEARD_THIN` (they were
+  noise-affecting in 1.16) and spacing/separation/salt from
+  `StructureGenerationConfig` baked into the structure-set JSONs.
+- Biome selection is tag-driven: `WorldGenerationAS.Tags` biome tags are
+  populated by the new `AstralBiomeTagsProvider` from the closest 1.21
+  equivalents of the old `Biome.Category` TOML defaults (ancient shrine /
+  glow flower: snowy+mountain, desert shrine: badlands+desert+savanna,
+  small shrine: forest+plains, ores: `minecraft:is_overworld`).
+- The TOML "enabled"/dimension gates survive at runtime via
+  `WorldFilteredPlacement` (features) and `TemplateStructureFeature`
+  (structures); biome lists are no longer TOML-configurable.
+- `MarkerManagerAS` uses `RandomSource`, `RandomizableContainer.
+  setBlockEntityLootTable` with a `ResourceKey<LootTable>`, and
+  `StructurePiece.reorient` (AT'd public). The 1.16 surface-builder
+  top-material lookup for `random_top_block` is approximated by sampling the
+  `WORLD_SURFACE_WG` heightmap column.
+- The old `BiomeLoadingEvent` hook and `registerStructureGeneration`
+  reflection hack are gone from `CommonProxy`.
+
+### Mixins (partially re-targeted)
+
+`MixinWorld` (`updateSkyBrightness`), `client.MixinClientWorld`
+(`getSkyDarken`), and ObserverLib's `MixinLevelChunk` (`@Local(ordinal = 1)`
+for the previous block state in `setBlockState`) now apply cleanly at
+runtime. The remaining mixins passed mixin application during `runData` but
+have not been functionally verified.
 
 ### Vanilla-backed perk attributes (done)
 
@@ -1009,3 +1090,66 @@ API-shape changes hit in this pass, for the next session's reference:
   `#isEyeInFluid`; `LivingEntity#animationSpeed`/`animationSpeedOld` are gone,
   folded into the encapsulated `Entity#walkAnimation`
   (`WalkAnimationState`); `Entity#swingProgress` -> `#attackAnim`.
+
+### Perk subsystem (done)
+
+`common/perk/**` compiles clean:
+
+- Readers/modifiers: `I18n.format` -> `I18n.get`; GsonHelper garbles restored
+  (`convertToInt`-as-boolean -> `json.has`, JsonElement-keyed `getAsString` ->
+  `convertToString`/`convertToJsonObject`).
+- Events: `EntityJoinWorldEvent` -> `EntityJoinLevelEvent`;
+  `PotionEvent.PotionAddedEvent` -> `MobEffectEvent.Added`; cancellable damage
+  listeners -> `LivingIncomingDamageEvent`; post-damage reactions (life leech,
+  culling, damage effects, Discidia exp) -> `LivingDamageEvent.Post`
+  (`getNewDamage()`); `CriticalHitEvent` uses `isCriticalHit`/`setCriticalHit`/
+  `get-/setDamageMultiplier`.
+- Mob effect holders via `BuiltInRegistries.MOB_EFFECT.wrapAsHolder(...)`;
+  `MobEffects.SLOWNESS`/`STRENGTH` -> `MOVEMENT_SLOWDOWN`/`DAMAGE_BOOST`.
+- Step assist now drives the `Attributes.STEP_HEIGHT` base value (the
+  `maxUpStep` field is gone); `MobEffectInstance.duration` and
+  `AreaEffectCloud.potionContents` are reached via a new `ReflectionHelper`
+  setter and 1.21-format AT entries (`CombatTracker.inCombat` too).
+- `FoodData.addStats` -> `eat`; `Inventory.add` restored where garbled
+  (`getArmor`); armor damage via `hurtAndBreak(amount, entity, slot)`.
+
+### Effects, event handlers, enchantment helpers (done)
+
+`common/effect`, `common/event/**`, `common/enchantment` compile clean:
+`MobEffect.applyEffectTick` returns boolean (`shouldApplyEffectTickThisTick`),
+curative items became `fillEffectCures` no-ops, custom effect icon rendering
+kept as plain methods pending `IClientMobEffectExtensions` wiring. Custom
+events implement `ICancellableEvent` instead of `@Cancelable`.
+`FinalizeSpawnEvent` replaces `LivingSpawnEvent.CheckSpawn`,
+`LivingChangeTargetEvent` replaces `LivingSetAttackTargetEvent`,
+`EntityTickEvent.Pre` replaces cancelling `LivingUpdateEvent`,
+`CanPlayerSleepEvent` replaces `PlayerSleepInBedEvent`, and
+`ClientPlayerNetworkEvent.LoggingOut`/`LevelEvent` replace their 1.16 names.
+
+### Commands, patreon effects, auxiliary helpers (done)
+
+`customSuggestion` garble -> `sendSuccess(() -> ...)`, `selectOne` ->
+`findSinglePlayer`, `Style.applyFormat`/`withHoverEvent`/`withClickEvent`.
+Patreon render types listen to `RenderLevelStageEvent` (AFTER_WEATHER) with
+`getPartialTick().getGameTimeDeltaPartialTick(true)`; `RenderPlayerEvent`
+partial ticks via `getPartialTick()`. `NbtIo` File -> Path, dimension keys via
+`Registries.DIMENSION`, heightmap probe via `getHeightmapPos`.
+
+### Client HUD/overlay + camera + obj models (done)
+
+- HUD overlays moved from `RenderGameOverlayEvent.Post` (ElementType.ALL) to
+  `RenderGuiEvent.Post` (`getGuiGraphics().pose()`); debug text to
+  `CustomizeGuiOverlayEvent.DebugText`; `GuiOpenEvent` -> `ScreenEvent.Opening`;
+  key bindings register through `RegisterKeyMappingsEvent` (mod bus, replaces
+  `ClientRegistry.registerKeyBinding`; `InputEvent.Key`).
+- Camera system: `get/setCameraEntity`, `getAbilities()`, `turn` (was
+  `rotateTowards`), `isModelPartShown`, client entity swap via
+  `ClientLevel.addEntity`/`removeEntity(id, DISCARDED)`, fov through the
+  `options.fov()` `OptionInstance`.
+- `WavefrontObject` batching rebuilt on `Tesselator.begin` -> `MeshData` ->
+  `VertexBuffer(Usage.STATIC)`, draw mode is a `VertexFormat.Mode`, callers
+  pass a `VertexConsumer` decorator (ObserverLib `BufferDecoratorBuilder` is
+  already VertexConsumer-based); `ObjModelRender`/`ClientMiscEventHandler` draw
+  VBOs with `drawWithShader` + `RenderingUtils.shaderFor`. `renderCrystal`
+  transforms positions by the pose via a position decorator instead of the
+  removed `RenderSystem` matrix stack.

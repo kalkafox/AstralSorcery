@@ -22,7 +22,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.event.level.WorldEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.fml.LogicalSide;
 
 import javax.annotation.Nullable;
@@ -123,7 +123,7 @@ public class CelestialGatewayHandler {
         this.cache.setData(LogicalSide.SERVER, null);
     }
 
-    public void onWorldInit(WorldEvent.Load event) {
+    public void onWorldInit(LevelEvent.Load event) {
         if (this.startUp) {
             return; //We're already loading up there.
         }

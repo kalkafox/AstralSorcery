@@ -60,7 +60,7 @@ public class ResultSpawnEntity extends InteractionResult {
             return;
         }
         e.moveTo(at.getX(), at.getY(), at.getZ(), level.random.nextFloat() * 360.0F, 0.0F);
-        level.addEntity(e);
+        level.addFreshEntity(e);
     }
 
     @Override

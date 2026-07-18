@@ -64,7 +64,7 @@ public abstract class LiquidStarlightRecipe extends CustomRecipe {
     public abstract void doClientEffectTick(ItemEntity trigger, Level level, BlockPos at);
 
     protected final List<Entity> getEntitiesInBlock(LevelAccessor level, BlockPos pos) {
-        return level.getEntitiesWithinAABB(Entity.class, new AABB(pos));
+        return level.getEntitiesOfClass(Entity.class, new AABB(pos));
     }
 
     @Nullable

@@ -55,14 +55,14 @@ public class KeySpawnLights extends KeyPerk implements PlayerTickPerk {
                 int attempts = 4;
                 while (attempts > 0) {
                     int radius = CONFIG.lightSpawnRadius.get();
-                    BlockPos pos = player.position().add(
+                    BlockPos pos = player.blockPosition().offset(
                             random.nextInt(radius) * (random.nextBoolean() ? 1 : -1),
                             random.nextInt(radius) * (random.nextBoolean() ? 1 : -1),
                             random.nextInt(radius) * (random.nextBoolean() ? 1 : -1));
                     if (MiscUtils.executeWithChunk(player.getCommandSenderWorld(), pos, () -> {
                         if (TileIlluminator.ILLUMINATOR_CHECK.test(player.getCommandSenderWorld(), pos, player.getCommandSenderWorld().getBlockState(pos)) &&
                                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), true)) {
-                            if (player.getCommandSenderWorld().setBlock(pos, BlocksAS.FLARE_LIGHT.defaultBlockState())) {
+                            if (player.getCommandSenderWorld().setBlockAndUpdate(pos, BlocksAS.FLARE_LIGHT.defaultBlockState())) {
                                 AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false);
                                 return true;
                             }

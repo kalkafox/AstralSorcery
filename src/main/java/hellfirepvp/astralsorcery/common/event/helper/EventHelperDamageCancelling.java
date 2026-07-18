@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.event.helper;
 
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -45,7 +46,7 @@ public class EventHelperDamageCancelling {
         Player player = event.getEntity();
         if (!player.level().isClientSide() && player.onGround()) {
             Set<DamageSource> sources = invulnerableTypes.getOrDefault(player.getUUID(), Collections.emptySet());
-            sources.remove(DamageSource.FALL);
+            sources.removeIf(src -> src.is(DamageTypeTags.IS_FALL));
         }
     }
 

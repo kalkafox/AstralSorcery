@@ -31,7 +31,7 @@ public enum MoonPhase {
     NEW, WAXING_1_4, WAXING_1_2, WAXING_3_4;
 
     public static MoonPhase fromWorld(LevelAccessor level) {
-        return MiscUtils.getEnumEntry(MoonPhase.class, level.dimensionType().getMoonPhase(level.dayTime()));
+        return MiscUtils.getEnumEntry(MoonPhase.class, level.dimensionType().moonPhase(level.dayTime()));
     }
 
     @OnlyIn(Dist.CLIENT)

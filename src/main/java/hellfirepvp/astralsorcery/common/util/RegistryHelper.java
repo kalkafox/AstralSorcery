@@ -66,6 +66,11 @@ public final class RegistryHelper {
     @Nullable
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static ResourceLocation getKey(Registry registry, Object value) {
-        return registry.getKey(value);
+        // getResourceKey instead of getKey: defaulted registries (block, item,
+        // fluid, ...) answer getKey with their default key (minecraft:air) for
+        // values they don't contain, which breaks the registry probing above.
+        return (ResourceLocation) registry.getResourceKey(value)
+                .map(key -> ((net.minecraft.resources.ResourceKey<?>) key).location())
+                .orElse(null);
     }
 }

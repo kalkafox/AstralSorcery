@@ -30,7 +30,7 @@ public class EventHandlerAutoLink implements BlockChangeNotifier.Listener {
 
     @Override
     public void onChange(Level level, LevelChunk chunk, BlockPos pos, BlockState oldState, BlockState newState) {
-        if (level.isClientSide() || !chunk.getStatus().isOrAfter(ChunkStatus.FULL)) {
+        if (level.isClientSide() || !chunk.getPersistedStatus().isOrAfter(ChunkStatus.FULL)) {
             return;
         }
 

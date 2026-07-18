@@ -116,6 +116,6 @@ public class RegistryBlockRenderTypes {
 
     private static void setRenderLayer(Fluid fluid, RenderType... types) {
         List<RenderType> typeList = Arrays.asList(types);
-        ItemBlockRenderTypes.setRenderLayer(fluid, typeList::contains);
+        ItemBlockRenderTypes.setRenderLayer(fluid, typeList.get(0));
     }
 }

@@ -29,7 +29,6 @@ public class ItemPerkSeal extends Item {
 
     public ItemPerkSeal() {
         super(new Properties()
-                .durability(0)
                 .stacksTo(16)
 );
     }

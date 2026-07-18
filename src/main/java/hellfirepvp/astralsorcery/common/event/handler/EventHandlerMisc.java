@@ -25,10 +25,11 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.neoforged.neoforge.event.entity.EntityJoinWorldEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerSleepInBedEvent;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.bus.api.IEventBus;
 import java.util.Optional;
@@ -53,9 +54,9 @@ public class EventHandlerMisc {
 
     private static void onCrystalToss(ItemTossEvent event) {
         if (!event.getPlayer().getCommandSenderWorld().isClientSide()) {
-            ItemStack thrown = event.getEntityItem().getItem();
+            ItemStack thrown = event.getEntity().getItem();
             if (thrown.getItem() instanceof ItemCrystalBase) {
-                event.getEntityItem().setThrower(event.getPlayer().getUUID());
+                event.getEntity().setThrower(event.getPlayer());
             }
         }
     }
@@ -82,31 +83,35 @@ public class EventHandlerMisc {
                     LevelAccessor w = event.getLevel();
                     if (w instanceof WorldGenLevel) {
                         long seed = ((WorldGenLevel) w).getSeed();
-                        long chX = event.getChunk().getBlockPos().x;
-                        long chZ = event.getChunk().getBlockPos().z;
+                        long chX = event.getChunk().getPos().x;
+                        long chZ = event.getChunk().getPos().z;
                         seed ^= chX << 32;
                         seed ^= chZ;
                         entry.place(seed);
-                        ((LevelChunk) ch).setChanged();
+                        ((LevelChunk) ch).setUnsaved(true);
                     }
                 }
             });
         }
     }
 
-    private static void onPlayerSleepEclipse(PlayerSleepInBedEvent event) {
+    private static void onPlayerSleepEclipse(CanPlayerSleepEvent event) {
         WorldContext ctx = SkyHandler.getContext(event.getEntity().getCommandSenderWorld());
         if (ctx != null && ctx.getCelestialEventHandler().getSolarEclipse().isActiveNow()) {
-            if (event.getResultStatus() == null) {
-                event.setResult(Player.SleepResult.NOT_POSSIBLE_NOW);
+            if (event.getProblem() == null) {
+                event.setProblem(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
             }
         }
     }
 
-    private static void onSpawnEffectCloud(EntityJoinWorldEvent event) {
-        if (event.getEntity() instanceof AreaEffectCloud &&
-                MiscUtils.contains(((AreaEffectCloud) event.getEntity()).effects, effect -> effect.getEffect() instanceof EffectDropModifier)) {
-            event.setCanceled(true);
+    private static void onSpawnEffectCloud(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof AreaEffectCloud cloud) {
+            for (MobEffectInstance effect : cloud.potionContents.getAllEffects()) {
+                if (effect.getEffect().value() instanceof EffectDropModifier) {
+                    event.setCanceled(true);
+                    return;
+                }
+            }
         }
     }
 }

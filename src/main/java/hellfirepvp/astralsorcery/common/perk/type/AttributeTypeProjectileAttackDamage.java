@@ -14,6 +14,7 @@ import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -39,7 +40,7 @@ public class AttributeTypeProjectileAttackDamage extends PerkAttributeType {
     }
 
     private void onProjectileDamage(LivingIncomingDamageEvent event) {
-        if (event.getSource().isProjectile()) {
+        if (event.getSource().is(DamageTypeTags.IS_PROJECTILE)) {
             DamageSource source = event.getSource();
             if (source.getEntity() != null && source.getEntity() instanceof Player) {
                 Player player = (Player) source.getEntity();

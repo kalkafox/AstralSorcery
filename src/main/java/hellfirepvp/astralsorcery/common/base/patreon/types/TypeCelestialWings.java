@@ -131,7 +131,7 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
         return player.getUUID().equals(playerUUID) &&
                 !player.isPassenger() &&
                 !player.isFallFlying() &&
-                !player.isPotionActive(MobEffects.INVISIBILITY);
+                !player.hasEffect(MobEffects.INVISIBILITY);
     }
 
     @SubscribeEvent
@@ -141,7 +141,7 @@ public class TypeCelestialWings extends PatreonEffect implements ITickHandler {
         if (!shouldDoEffect(player)) {
             return;
         }
-        this.renderWings(player, event.getPoseStack(), event.getPartialRenderTick());
+        this.renderWings(player, event.getPoseStack(), event.getPartialTick());
     }
 
     @OnlyIn(Dist.CLIENT)

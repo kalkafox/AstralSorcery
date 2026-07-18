@@ -56,7 +56,7 @@ public class RootDiscidia extends RootPerk {
         bus.addListener(EventPriority.LOWEST, this::onDamage);
     }
 
-    private void onDamage(LivingDamageEvent event) {
+    private void onDamage(LivingDamageEvent.Post event) {
         DamageSource ds = event.getSource();
         Player player = null;
         if (ds.getDirectEntity() != null &&
@@ -89,7 +89,7 @@ public class RootDiscidia extends RootPerk {
             }
         }
 
-        float expGain = Math.min(event.getAmount() * mul, 100F);
+        float expGain = Math.min(event.getNewDamage() * mul, 100F);
         expGain *= this.getExpMultiplier();
         expGain *= this.getDiminishingReturns(player);
         expGain *= PerkAttributeHelper.getOrCreateMap(player, direction).getAttributeInstance(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT);

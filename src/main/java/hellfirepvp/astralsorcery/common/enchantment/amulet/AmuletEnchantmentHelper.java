@@ -25,7 +25,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.util.LogicalSidedProvider;
-import net.neoforged.fml.common.thread.EffectiveSide;
+import net.neoforged.fml.util.thread.EffectiveSide;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import javax.annotation.Nonnull;
@@ -46,7 +46,7 @@ public class AmuletEnchantmentHelper {
     public static final String KEY_AS_OWNER = "AS_Amulet_Holder";
 
     public static void removeAmuletTagsAndCleanup(Player player, boolean keepEquipped) {
-        Inventory inv = player.getItems();
+        Inventory inv = player.getInventory();
         for (int i = 0; i < inv.items.size(); i++) {
             if (i == inv.selected && keepEquipped) {
                 continue;
@@ -55,8 +55,8 @@ public class AmuletEnchantmentHelper {
         }
         removeAmuletOwner(player.containerMenu.getCarried());
         if (!keepEquipped) {
-            for (int i = 0; i < inv.itemStack.size(); i++) {
-                removeAmuletOwner(inv.itemStack.get(i));
+            for (int i = 0; i < inv.armor.size(); i++) {
+                removeAmuletOwner(inv.armor.get(i));
             }
             for (int i = 0; i < inv.offhand.size(); i++) {
                 removeAmuletOwner(inv.offhand.get(i));

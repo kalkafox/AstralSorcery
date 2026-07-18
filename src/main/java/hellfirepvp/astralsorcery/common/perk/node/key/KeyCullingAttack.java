@@ -50,7 +50,7 @@ public class KeyCullingAttack extends KeyPerk {
         bus.addListener(EventPriority.LOW, this::onDamage);
     }
 
-    private void onDamage(LivingDamageEvent event) {
+    private void onDamage(LivingDamageEvent.Post event) {
         DamageSource source = event.getSource();
         if (source.getEntity() != null && source.getEntity() instanceof Player) {
             Player player = (Player) source.getEntity();
@@ -62,8 +62,7 @@ public class KeyCullingAttack extends KeyPerk {
                         .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_INC_PERK_EFFECT, CONFIG.cullHealth.get().floatValue());
                 float lifePerc = attacked.getHealth() / attacked.getMaxHealth();
                 if (lifePerc < actCull && AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false)) {
-                    attacked.setHealth(0); // Try faithfully...
-                    attacked.getEntityData().set(LivingEntity.HEALTH, 0F); // ... then set just it forcefully.
+                    attacked.setHealth(0);
                 }
             }
         }

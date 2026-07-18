@@ -36,12 +36,12 @@ public interface IDrawRenderTypeBuffer extends MultiBufferSource {
         return new IDrawRenderTypeBuffer() {
             @Override
             public void draw() {
-                drawBuffer.finish();
+                drawBuffer.endBatch();
             }
 
             @Override
             public void draw(RenderType type) {
-                drawBuffer.finish(type);
+                drawBuffer.endBatch(type);
             }
 
             @Override

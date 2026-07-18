@@ -9,17 +9,17 @@
 package hellfirepvp.astralsorcery.common.world;
 
 import hellfirepvp.astralsorcery.common.data.config.base.ConfigEntry;
-import hellfirepvp.astralsorcery.common.world.placement.config.WorldFilterConfig;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -31,14 +31,17 @@ import java.util.stream.Collectors;
  */
 public class FeatureGenerationConfig extends ConfigEntry {
 
-    private List<Biome.Category> categories = new ArrayList<>();
+    // 1.21 port: worldgen placement is datapack-driven now, so the runtime
+    // world/enabled gates are looked up by feature name from the mod's own
+    // placement filter (WorldFilteredPlacement). Biome selection moved into
+    // biome tags / biome modifier JSONs and is no longer TOML-configurable.
+    private static final Map<String, FeatureGenerationConfig> CONFIGS_BY_NAME = new HashMap<>();
+
     private List<ResourceKey<Level>> levels = new ArrayList<>();
-    private boolean defaultEveryBiome = false, defaultEveryWorld = false;
+    private boolean defaultEveryWorld = false;
 
     private ModConfigSpec.BooleanValue enabled;
-    private ModConfigSpec.BooleanValue everyBiome;
     private ModConfigSpec.BooleanValue everyWorld;
-    private ModConfigSpec.ConfigValue<List<String>> biomeCategoryNames;
     private ModConfigSpec.ConfigValue<List<String>> worldNames;
 
     public FeatureGenerationConfig(ResourceLocation featureName) {
@@ -47,20 +50,16 @@ public class FeatureGenerationConfig extends ConfigEntry {
 
     public FeatureGenerationConfig(String featureName) {
         super(featureName);
+        CONFIGS_BY_NAME.put(featureName, this);
     }
 
-    public <T extends FeatureGenerationConfig> T generatesInBiomes(List<Biome.Category> biomeCategories) {
-        this.categories = biomeCategories;
-        return (T) this;
+    @Nullable
+    public static FeatureGenerationConfig byName(String featureName) {
+        return CONFIGS_BY_NAME.get(featureName);
     }
 
     public <T extends FeatureGenerationConfig> T generatesInWorlds(List<ResourceKey<Level>> levels) {
         this.levels = levels;
-        return (T) this;
-    }
-
-    public <T extends FeatureGenerationConfig> T setGenerateEveryBiome() {
-        this.defaultEveryBiome = true;
         return (T) this;
     }
 
@@ -75,27 +74,11 @@ public class FeatureGenerationConfig extends ConfigEntry {
                 .comment("Set this to false to disable this worldgen feature.")
                 .translation(translationKey("enabled"))
                 .define("enabled", true);
-        this.everyBiome = cfgBuilder
-                .comment("Set this to true to let this feature generate in any biome.")
-                .translation(translationKey("everyBiome"))
-                .define("everyBiome", this.defaultEveryBiome);
         this.everyWorld = cfgBuilder
                 .comment("Set this to true to let this feature generate in any world. (Does NOT work for structures!)")
                 .translation(translationKey("everyWorld"))
                 .define("everyWorld", this.defaultEveryWorld);
 
-        String allCategories = Arrays.stream(Biome.Category.values())
-                .map(Biome.Category::getString)
-                .collect(Collectors.joining(","));
-        List<String> defaultCategories = categories.stream()
-                .map(Biome.Category::getString)
-                .collect(Collectors.toList());
-        this.biomeCategoryNames = cfgBuilder
-                .comment("Sets the categories to generate this feature in. Available categories: " + allCategories)
-                .translation(translationKey("biomeCategoryNames"))
-                .define("biomeCategoryNames", defaultCategories);
-
-        //TODO Structures..
         List<String> defaultWorlds = levels.stream()
                 .map(ResourceKey::location)
                 .map(ResourceLocation::getPath)
@@ -107,22 +90,19 @@ public class FeatureGenerationConfig extends ConfigEntry {
     }
 
     public boolean isEnabled() {
-        return this.enabled.get();
+        return this.enabled == null || this.enabled.get();
     }
 
-    public boolean canGenerateIn(Biome.Category category) {
-        if (this.everyBiome.get()) {
+    public boolean generatesIn(ResourceKey<Level> dimension) {
+        if (this.everyWorld != null && this.everyWorld.get()) {
             return true;
         }
-        return this.biomeCategoryNames.get().contains(category.getString());
-    }
-
-    public WorldFilterConfig worldFilterConfig() {
-        return new WorldFilterConfig(this.everyWorld::get, () -> {
-            return this.worldNames.get().stream()
-                    .map(ResourceLocation::new)
-                    .map(key -> ResourceKey.create(Registry.DIMENSION_REGISTRY, key))
-                    .collect(Collectors.toList());
-        });
+        if (this.worldNames == null) {
+            return true;
+        }
+        return this.worldNames.get().stream()
+                .map(ResourceLocation::parse)
+                .map(key -> ResourceKey.create(Registries.DIMENSION, key))
+                .anyMatch(dimension::equals);
     }
 }

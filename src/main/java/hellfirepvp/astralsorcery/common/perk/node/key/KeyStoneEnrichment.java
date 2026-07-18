@@ -66,7 +66,7 @@ public class KeyStoneEnrichment extends KeyPerk implements PlayerTickPerk {
                         (random.nextFloat() * radius * 2) - radius);
                 Level level = player.getCommandSenderWorld();
                 BlockPos pos = vec.toBlockPos();
-                if (BlockTags.BASE_STONE_OVERWORLD.contains(level.getBlockState(pos).getBlock())) {
+                if (level.getBlockState(pos).is(BlockTags.BASE_STONE_OVERWORLD)) {
                     Block block = OreBlockRarityRegistry.STONE_ENRICHMENT.getRandomBlock(random);
                     if (block != null) {
                         if (level.setBlock(pos, block.defaultBlockState(), Constants.BlockFlags.DEFAULT_AND_RERENDER)) {

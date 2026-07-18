@@ -128,7 +128,7 @@ public class RenderingConstellationUtils {
     public static void renderConstellationIntoWorldFlat(Color color, IConstellation c, PoseStack renderStack, Vector3 offset, double scale, double lineState, float brightness) {
         MultiBufferSource.BufferSource drawBuffers = MultiBufferSource.immediate(new ByteBufferBuilder(256));
         renderConstellationIntoWorldFlat(color, c, renderStack, drawBuffers, offset, scale, lineState, brightness);
-        drawBuffers.finish();
+        drawBuffers.endBatch();
     }
 
     public static void renderConstellationIntoWorldFlat(Color color, IConstellation c, PoseStack renderStack, MultiBufferSource buffer, Vector3 offset, double scale, double lineState, float brightness) {

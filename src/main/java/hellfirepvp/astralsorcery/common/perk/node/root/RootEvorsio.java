@@ -73,7 +73,7 @@ public class RootEvorsio extends RootPerk {
         LevelAccessor level = event.getLevel();
         float gainedExp;
         try {
-            gainedExp = broken.getDestroySpeed(level, event.getBlockPos());
+            gainedExp = broken.getDestroySpeed(level, event.getPos());
         } catch (Exception exc) {
             gainedExp = 0.5F;
         }

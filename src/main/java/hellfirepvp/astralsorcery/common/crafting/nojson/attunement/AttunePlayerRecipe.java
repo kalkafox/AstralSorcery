@@ -79,10 +79,10 @@ public class AttunePlayerRecipe extends AttunementRecipe<ActivePlayerAttunementR
         if (!(altar.getActiveConstellation() instanceof IMajorConstellation)) {
             return null;
         }
-        AABB boxAt = BOX.offset(altar.getBlockPos().above()).grow(1);
+        AABB boxAt = BOX.move(altar.getBlockPos().above()).inflate(1);
 
         Vector3 thisVec = new Vector3(altar).add(0.5, 1.5, 0.5);
-        List<ServerPlayer> players = altar.getLevel().getEntitiesWithinAABB(ServerPlayer.class, boxAt);
+        List<ServerPlayer> players = altar.getLevel().getEntitiesOfClass(ServerPlayer.class, boxAt);
         if (!players.isEmpty()) {
             ServerPlayer pl = EntityUtils.selectClosest(players, (player) -> thisVec.distanceSquared(player.position()));
             if (isEligablePlayer(pl, altar.getActiveConstellation())) {

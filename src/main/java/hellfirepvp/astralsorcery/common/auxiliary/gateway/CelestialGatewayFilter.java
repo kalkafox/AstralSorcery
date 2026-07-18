@@ -15,7 +15,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
 import hellfirepvp.astralsorcery.common.util.Constants;
 
@@ -72,12 +72,12 @@ public class CelestialGatewayFilter {
 
     private void loadCache() {
         try {
-            CompoundTag tag = NbtIo.read(this.gatewayFilter);
+            CompoundTag tag = NbtIo.read(this.gatewayFilter.toPath());
             ListTag list = tag.getList("list", Constants.NBT.TAG_STRING);
             this.cache = new HashSet<>();
             for (int i = 0; i < list.size(); i++) {
                 ResourceLocation location = ResourceLocation.parse(list.getString(i));
-                this.cache.add(ResourceKey.create(Registry.DIMENSION_REGISTRY, location));
+                this.cache.add(ResourceKey.create(Registries.DIMENSION, location));
             }
         } catch (IOException ignored) {
             this.cache = new HashSet<>();
@@ -92,7 +92,7 @@ public class CelestialGatewayFilter {
             }
             CompoundTag cmp = new CompoundTag();
             cmp.put("list", list);
-            NbtIo.write(cmp, this.gatewayFilter);
+            NbtIo.write(cmp, this.gatewayFilter.toPath());
         } catch (IOException ignored) {}
     }
 }

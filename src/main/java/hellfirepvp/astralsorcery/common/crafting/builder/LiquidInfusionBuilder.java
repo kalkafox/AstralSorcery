@@ -63,12 +63,12 @@ public class LiquidInfusionBuilder extends CustomRecipeBuilder<LiquidInfusion> {
     }
 
     public LiquidInfusionBuilder setItemInput(ItemLike item) {
-        this.itemInput = Ingredient.valueFromJson(item);
+        this.itemInput = Ingredient.of(item);
         return this;
     }
 
     public LiquidInfusionBuilder setItemInput(TagKey<Item> tag) {
-        this.itemInput = Ingredient.fromTag(tag);
+        this.itemInput = Ingredient.of(tag);
         return this;
     }
 

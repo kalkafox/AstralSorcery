@@ -14,7 +14,9 @@ import hellfirepvp.astralsorcery.common.lib.PerkAttributeTypesAS;
 import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -62,7 +64,7 @@ public class AttributeTypeAllElementalResist extends PerkAttributeType {
 
     private boolean isMaybeElementalDamage(DamageSource source) {
         // "Magic" is often used for any kinds of damages... poison for example
-        if (source.isFire() || source.isMagic()) {
+        if (source.is(DamageTypeTags.IS_FIRE) || source.is(Tags.DamageTypes.IS_MAGIC)) {
             return true;
         }
         String key = source.getMsgId();

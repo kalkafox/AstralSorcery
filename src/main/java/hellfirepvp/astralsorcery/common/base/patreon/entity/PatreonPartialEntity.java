@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
@@ -148,13 +148,13 @@ public class PatreonPartialEntity {
 
     @Nullable
     public Player findOwner(LevelAccessor level) {
-        return level.getPlayerByUuid(this.ownerUUID);
+        return level.getPlayerByUUID(this.ownerUUID);
     }
 
     public void readFromNBT(CompoundTag cmp) {
         if (cmp.contains("lastTickedDimension")) {
             ResourceLocation worldKey = ResourceLocation.parse(cmp.getString("lastTickedDimension"));
-            this.lastTickedDimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, worldKey);
+            this.lastTickedDimension = ResourceKey.create(Registries.DIMENSION, worldKey);
         } else {
             this.lastTickedDimension = null;
         }

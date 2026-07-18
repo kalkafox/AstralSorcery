@@ -56,7 +56,7 @@ public class ReaderBreakSpeed extends ReaderFlatAttribute {
         if (PerkAttributeLimiter.hasLimit(this.getType())) {
             Pair<Double, Double> limits = PerkAttributeLimiter.getMaxResults(this.getType());
             limit = limits.getRight();
-            limitStr = I18n.format("perk.reader.astralsorcery.limit.percent", Mth.floor(limit * 100));
+            limitStr = I18n.get("perk.reader.astralsorcery.limit.percent", Mth.floor(limit * 100));
         }
 
         double value = player.getDigSpeed(Blocks.COBBLESTONE.defaultBlockState(), BlockPos.ZERO);
@@ -66,7 +66,7 @@ public class ReaderBreakSpeed extends ReaderFlatAttribute {
         if (Math.abs(value - post) > 1E-4 &&
                 (limit == null || Math.abs(post - limit) > 1E-4)) {
             if (Math.abs(post) >= 1E-4) {
-                postProcess = I18n.format("perk.reader.astralsorcery.postprocess.default",
+                postProcess = I18n.get("perk.reader.astralsorcery.postprocess.default",
                         (post >= 0 ? "+" : "") + formatDecimal(post));
             }
             value = post;

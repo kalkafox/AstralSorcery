@@ -177,7 +177,7 @@ public class KeyLightningArc extends KeyPerk {
                     if (last != null) {
                         Vector3 from = Vector3.atEntityCenter(entity);
                         Vector3 to = Vector3.atEntityCenter(last);
-                        PacketChannel.TargetPoint target = PacketChannel.pointFromPos(level, entity.position(), 16);
+                        PacketChannel.TargetPoint target = PacketChannel.pointFromPos(level, entity.blockPosition(), 16);
                         PacketChannel.CHANNEL.sendToAllAround(new PktPlayEffect(PktPlayEffect.Type.LIGHTNING)
                                 .addData(buf -> {
                                     ByteBufUtils.writeVector(buf, from);
@@ -191,7 +191,7 @@ public class KeyLightningArc extends KeyPerk {
                                     buf.writeInt(ColorsAS.EFFECT_LIGHTNING.getRGB());
                                 }), target);
                     }
-                    List<LivingEntity> entities = entity.getCommandSenderWorld().getEntitiesWithinAABB(LivingEntity.class, box.offset(entity.position()), EntityUtils.selectEntities(LivingEntity.class));
+                    List<LivingEntity> entities = entity.getCommandSenderWorld().getEntitiesOfClass(LivingEntity.class, box.move(entity.position()), EntityUtils.selectEntities(LivingEntity.class));
                     entities.remove(entity);
                     if (last != null) {
                         entities.remove(last);
@@ -204,7 +204,7 @@ public class KeyLightningArc extends KeyPerk {
 
                     if (!entities.isEmpty()) {
                         LivingEntity tmpEntity = entity; //Final for lambda
-                        LivingEntity closest = EntityUtils.selectClosest(entities, (e) -> (double) e.getDistance(tmpEntity));
+                        LivingEntity closest = EntityUtils.selectClosest(entities, (e) -> (double) e.distanceTo(tmpEntity));
                         if (closest != null && closest.isAlive()) {
                             last = entity;
                             entity = closest;

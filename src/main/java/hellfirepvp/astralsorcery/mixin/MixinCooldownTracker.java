@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(ItemCooldowns.class)
 public class MixinCooldownTracker {
 
-    @ModifyVariable(method = "setCooldown", at = @At("HEAD"), index = 0, argsOnly = true)
+    @ModifyVariable(method = "addCooldown", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     public int fireCooldownEvent(int cooldownTicks) {
         ItemCooldowns progressListener = (ItemCooldowns)(Object) this;
         if (progressListener instanceof ServerItemCooldowns) {

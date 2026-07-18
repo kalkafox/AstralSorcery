@@ -24,6 +24,7 @@ import hellfirepvp.astralsorcery.client.resource.SpriteSheetResource;
 import hellfirepvp.astralsorcery.client.util.draw.RenderInfo;
 import hellfirepvp.astralsorcery.common.util.MapStream;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.*;
@@ -404,9 +405,9 @@ public class RenderingDrawUtils {
             float cAngleSq = cAngle * cAngle;
 
             Vector3 vAngle = new Vector3(
-                    Mth.sin(angle * 0.5F) * forwards.getX(),
-                    Mth.sin(angle * 0.5F) * forwards.getY(),
-                    Mth.sin(angle * 0.5F) * forwards.getZ());
+                    Mth.sin(angle * 0.5F) * forwards.x(),
+                    Mth.sin(angle * 0.5F) * forwards.y(),
+                    Mth.sin(angle * 0.5F) * forwards.z());
 
             v1 = vAngle.clone()
                     .mul(2 * v1.dot(vAngle))
@@ -477,35 +478,35 @@ public class RenderingDrawUtils {
                                                             Matrix3f normalMatr) {
 
         Matrix4f offset = renderStack.last().pose();
-        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(0, 0, 0);
 
-        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(0, 0, 0);
 
-        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(0, 0, 0);
 
-        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(0, 0, 0);
 
-        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F, -0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(0, 0, 0);
 
-        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(normalMatr, 0, 0, 0);
-        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(normalMatr, 0, 0, 0);
+        vb.addVertex(offset, -0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F, -0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v).setNormal(0, 0, 0);
+        vb.addVertex(offset,  0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u + uLength, v + vLength).setNormal(0, 0, 0);
+        vb.addVertex(offset, -0.5F,  0.5F,  0.5F).setColor(r, g, b, a).setUv(u, v + vLength).setNormal(0, 0, 0);
     }
 
     public static void renderAngleRotatedTexturedRectVB(VertexConsumer vb, PoseStack renderStack, Vector3 renderOffset, Vector3 axis, float angleRad, float scale, float u, float v, float uLength, float vLength, int r, int g, int b, int a) {

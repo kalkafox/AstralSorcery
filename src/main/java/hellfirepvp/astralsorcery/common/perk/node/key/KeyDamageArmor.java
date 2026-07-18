@@ -74,8 +74,14 @@ public class KeyDamageArmor extends KeyPerk {
                 event.setAmount(Math.max(event.getAmount() - dmg, 0));
 
                 int armorDmg = Mth.ceil(dmg * 1.3F);
-                for (ItemStack stack : player.getArmorSlots()) {
-                    stack.damageItem(armorDmg, player, (pl) -> pl.sendBreakAnimation(EquipmentSlot.MAINHAND));
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR) {
+                        continue;
+                    }
+                    ItemStack stack = player.getItemBySlot(slot);
+                    if (!stack.isEmpty()) {
+                        stack.hurtAndBreak(armorDmg, player, slot);
+                    }
                 }
             }
         }

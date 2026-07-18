@@ -23,10 +23,19 @@ sourceSets.main.resources {
     exclude 'src/generated/**/.cache'
 }
 
+// Datagen (runData) re-emits some assets that are also handwritten in
+// src/main/resources; keep the handwritten copy (first source dir wins).
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 sourceSets.main.java {
     // 1.21 port: optional-mod integrations (JEI, CraftTweaker, Curios, Botania) are
     // excluded until the mod itself compiles and their 1.21 APIs are brought back.
     exclude 'hellfirepvp/astralsorcery/common/integration/**'
+    // 1.21 port: JEI-facing interaction handlers depend on mezz.jei classes; restored
+    // together with the JEI integration above.
+    exclude 'hellfirepvp/astralsorcery/common/crafting/recipe/interaction/jei/**'
 }
 
 repositories {

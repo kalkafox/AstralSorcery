@@ -17,7 +17,7 @@ import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
-import net.neoforged.neoforge.event.entity.EntityJoinWorldEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 
@@ -40,7 +40,7 @@ public class AttributeTypeArrowSpeed extends PerkAttributeType {
         eventBus.addListener(this::onArrowFire);
     }
 
-    private void onArrowFire(EntityJoinWorldEvent event) {
+    private void onArrowFire(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof Arrow) {
             Arrow arrow = (Arrow) event.getEntity();
             Entity shooter = arrow.getOwner();

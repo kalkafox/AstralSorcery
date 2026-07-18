@@ -14,6 +14,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +30,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,14 +62,15 @@ public class WavefrontObject {
     public ArrayList<GroupObject> groupObjects = new ArrayList<GroupObject>();
     private GroupObject currentGroupObject;
     private String fileName;
-    private int gLDrawingMode;
+    private VertexFormat.Mode gLDrawingMode;
 
     public WavefrontObject(ResourceLocation resource) throws ModelFormatException {
         this.fileName = resource.toString();
 
         try {
-            Resource res = Minecraft.getInstance().getResourceManager().getResource(resource);
-            loadObjModel(res.getInputStream());
+            Resource res = Minecraft.getInstance().getResourceManager().getResource(resource)
+                    .orElseThrow(() -> new ModelFormatException("Missing model resource: " + resource));
+            loadObjModel(res.open());
         } catch (IOException e) {
             throw new ModelFormatException("IO Exception reading model format", e);
         }
@@ -80,7 +85,7 @@ public class WavefrontObject {
         return new WavefrontObject(modelLoc);
     }
 
-    public int getGLDrawingMode() {
+    public VertexFormat.Mode getGLDrawingMode() {
         return gLDrawingMode;
     }
 
@@ -141,41 +146,34 @@ public class WavefrontObject {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public VertexBuffer batch(BufferBuilder buf) {
-        VertexBuffer vbo = new VertexBuffer(RenderTypesAS.POSITION_COLOR_TEX_NORMAL);
-        if (this.getGLDrawingMode() == 0) {
-            return vbo;
-        }
-        buf.begin(this.getGLDrawingMode(), RenderTypesAS.POSITION_COLOR_TEX_NORMAL);
-        this.render(buf);
-        buf.end();
-        vbo.upload(buf);
-        return vbo;
+    public VertexBuffer batch(UnaryOperator<VertexConsumer> decorator) {
+        return this.batchInternal(decorator, buf -> this.render(buf));
     }
 
     @OnlyIn(Dist.CLIENT)
-    public VertexBuffer batchOnly(BufferBuilder buf, String... groups) {
-        VertexBuffer vbo = new VertexBuffer(RenderTypesAS.POSITION_COLOR_TEX_NORMAL);
-        if (this.getGLDrawingMode() == 0) {
-            return vbo;
-        }
-        buf.begin(this.getGLDrawingMode(), RenderTypesAS.POSITION_COLOR_TEX_NORMAL);
-        this.renderOnly(buf, groups);
-        buf.end();
-        vbo.upload(buf);
-        return vbo;
+    public VertexBuffer batchOnly(UnaryOperator<VertexConsumer> decorator, String... groups) {
+        return this.batchInternal(decorator, buf -> this.renderOnly(buf, groups));
     }
 
     @OnlyIn(Dist.CLIENT)
-    public VertexBuffer batchExcept(BufferBuilder buf, String... excludedGroupNames) {
-        VertexBuffer vbo = new VertexBuffer(RenderTypesAS.POSITION_COLOR_TEX_NORMAL);
-        if (this.getGLDrawingMode() == 0) {
+    public VertexBuffer batchExcept(UnaryOperator<VertexConsumer> decorator, String... excludedGroupNames) {
+        return this.batchInternal(decorator, buf -> this.renderExcept(buf, excludedGroupNames));
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    private VertexBuffer batchInternal(UnaryOperator<VertexConsumer> decorator, Consumer<VertexConsumer> renderFn) {
+        VertexBuffer vbo = new VertexBuffer(VertexBuffer.Usage.STATIC);
+        if (this.getGLDrawingMode() == null) {
             return vbo;
         }
-        buf.begin(this.getGLDrawingMode(), RenderTypesAS.POSITION_COLOR_TEX_NORMAL);
-        this.renderExcept(buf, excludedGroupNames);
-        buf.end();
-        vbo.upload(buf);
+        BufferBuilder buf = Tesselator.getInstance().begin(this.getGLDrawingMode(), RenderTypesAS.POSITION_COLOR_TEX_NORMAL);
+        renderFn.accept(decorator.apply(buf));
+        MeshData data = buf.build();
+        if (data != null) {
+            vbo.bind();
+            vbo.upload(data);
+            VertexBuffer.unbind();
+        }
         return vbo;
     }
 
@@ -187,7 +185,7 @@ public class WavefrontObject {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void renderOnly(BufferBuilder vb, String... groups) {
+    public void renderOnly(VertexConsumer vb, String... groups) {
         List<String> groupList = Arrays.asList(groups);
         for (GroupObject groupObject : groupObjects) {
             if (groupList.contains(groupObject.name)) {
@@ -197,7 +195,7 @@ public class WavefrontObject {
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void renderExcept(BufferBuilder vb, String... excludedGroupNames) {
+    public void renderExcept(VertexConsumer vb, String... excludedGroupNames) {
         boolean exclude;
         for (GroupObject groupObject : groupObjects) {
             exclude = false;
@@ -277,13 +275,13 @@ public class WavefrontObject {
             String[] subTokens = null;
 
             if (tokens.length == 3) {
-                if (this.gLDrawingMode == 0) {
+                if (this.gLDrawingMode == null) {
                     this.gLDrawingMode = VertexFormat.Mode.TRIANGLES;
                 } else if (this.gLDrawingMode != VertexFormat.Mode.TRIANGLES) {
                     throw new ModelFormatException("Error parsing entry ('" + lineState + "'" + ", line " + lineCount + ") in file '" + fileName + "' - Invalid number of points for face (expected 4, found " + tokens.length + ")");
                 }
             } else if (tokens.length == 4) {
-                if (this.gLDrawingMode == 0) {
+                if (this.gLDrawingMode == null) {
                     this.gLDrawingMode = VertexFormat.Mode.QUADS;
                 } else if (this.gLDrawingMode != VertexFormat.Mode.QUADS) {
                     throw new ModelFormatException("Error parsing entry ('" + lineState + "'" + ", line " + lineCount + ") in file '" + fileName + "' - Invalid number of points for face (expected 3, found " + tokens.length + ")");

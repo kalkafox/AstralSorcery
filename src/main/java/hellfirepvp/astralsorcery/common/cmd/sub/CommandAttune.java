@@ -48,15 +48,15 @@ public class CommandAttune implements Command<CommandSourceStack> {
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Player player = (Player) context.getArgument("player", EntitySelector.class).selectOne(context.getSource());
+        Player player = (Player) context.getArgument("player", EntitySelector.class).findSinglePlayer(context.getSource());
         IMajorConstellation cst = (IMajorConstellation) context.getArgument("constellation", IConstellation.class);
 
         if (ResearchManager.setAttunedConstellation(player, cst)) {
-            context.getSource().customSuggestion(
+            context.getSource().sendSuccess(() -> 
                     Component.literal("Success! Player has been attuned to ").append(cst.getConstellationName().withStyle(ChatFormatting.BLUE))
                             .withStyle(ChatFormatting.GREEN), true);
         } else {
-            context.getSource().customSuggestion(
+            context.getSource().sendSuccess(() -> 
                     Component.literal("Failed! Player specified doesn't seem to have the research progress necessary!").withStyle(ChatFormatting.RED), true);
         }
         return 0;

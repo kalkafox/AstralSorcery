@@ -56,7 +56,7 @@ public class BlockFreezingRecipe extends WorldFreezingRecipe {
     }
 
     public static BlockFreezingRecipe of(TagKey<Block> blockTagIn, BlockState stateOut) {
-        return new BlockFreezingRecipe(AstralSorcery.key(String.format("tag_%s", blockTagIn.getName().getPath())),
+        return new BlockFreezingRecipe(AstralSorcery.key(String.format("tag_%s", blockTagIn.location().getPath())),
                 BlockPredicates.isInTag(blockTagIn), stateOut);
     }
 

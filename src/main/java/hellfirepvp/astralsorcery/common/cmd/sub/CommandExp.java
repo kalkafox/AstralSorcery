@@ -46,14 +46,14 @@ public class CommandExp implements Command<CommandSourceStack> {
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Player player = (Player) context.getArgument("player", EntitySelector.class).selectOne(context.getSource());
+        Player player = (Player) context.getArgument("player", EntitySelector.class).findSinglePlayer(context.getSource());
         long futureXp = LongArgumentType.getLong(context, "exp");
 
         if (ResearchManager.setExp(player, futureXp)) {
-            context.getSource().customSuggestion(
+            context.getSource().sendSuccess(() -> 
                     Component.literal("Success! Player exp has been set to " + futureXp).withStyle(ChatFormatting.GREEN), true);
         } else {
-            context.getSource().customSuggestion(
+            context.getSource().sendSuccess(() -> 
                     Component.literal("Failed! Player specified doesn't seem to have a research progress!").withStyle(ChatFormatting.RED), true);
         }
         return 0;

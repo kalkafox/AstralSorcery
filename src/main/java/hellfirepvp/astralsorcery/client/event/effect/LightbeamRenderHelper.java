@@ -68,7 +68,7 @@ public class LightbeamRenderHelper implements ITickHandler {
                     for (Map.Entry<BlockPos, Set<BlockPos>> entry : data.getClientConnections(dimKey).entrySet()) {
 
                         BlockPos at = entry.getKey();
-                        if (renderView.getDistanceSq(at.getX(), at.getY(), at.getZ()) <= RenderingConfig.CONFIG.getMaxEffectRenderDistanceSq()) {
+                        if (renderView.distanceToSqr(at.getX(), at.getY(), at.getZ()) <= RenderingConfig.CONFIG.getMaxEffectRenderDistanceSq()) {
                             Vector3 source = new Vector3(at).add(0.5, 0.5, 0.5);
                             Color overlay = null;
                             TileLens lens = MiscUtils.getTileAt(renderView.getCommandSenderWorld(), at, TileLens.class, true);

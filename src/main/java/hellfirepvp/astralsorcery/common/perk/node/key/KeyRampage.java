@@ -70,7 +70,7 @@ public class KeyRampage extends KeyPerk {
                     if (dur > 0) {
                         player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, dur, 1, false, false, true));
                         player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, dur, 1, false, false, true));
-                        player.addEffect(new MobEffectInstance(MobEffects.STRENGTH, dur, 1, false, false, true));
+                        player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, dur, 1, false, false, true));
                     }
                 }
             }

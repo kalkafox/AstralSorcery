@@ -238,7 +238,7 @@ public class ActiveLiquidInfusionRecipe {
         ItemStack inputStack = infuser.getItemInput();
         Consumer<ItemStack> handleCrafted = informer.andThen(output);
         if (this.recipeToCraft.doesCopyNBTToOutputs()) {
-            handleCrafted = ((Consumer<ItemStack>) stack -> stack.setRepairCost(inputStack.getTag())).andThen(handleCrafted);
+            handleCrafted = ((Consumer<ItemStack>) stack -> stack.applyComponents(inputStack.getComponentsPatch())).andThen(handleCrafted);
         }
         handleCrafted.accept(this.getRecipeToCraft().getOutput(inputStack));
         this.getRecipeToCraft().onRecipeCompletion(infuser);
@@ -336,7 +336,7 @@ public class ActiveLiquidInfusionRecipe {
         }
 
         ResourceLocation recipeKey = ResourceLocation.parse(pattern.getString("recipeToCraft"));
-        Optional<?> recipe = mgr.getRecipe(recipeKey);
+        Optional<?> recipe = mgr.byKey(recipeKey);
         if (!recipe.isPresent() || !(recipe.get() instanceof LiquidInfusion)) {
             AstralSorcery.log.info("Recipe with unknown/invalid name found: " + recipeKey);
             return null;

@@ -67,7 +67,7 @@ public class FXLightning extends EntityVisualFX {
         double dstLength = to.clone().subtract(this.getPosition()).length();
         float perc = 1F;
         if (dstLength > optimalLightningLength) {
-            perc = Mth.sqrt(dstLength / optimalLightningLength);
+            perc = Mth.sqrt((float) (dstLength / optimalLightningLength));
         } else if (dstLength < optimalLightningLength) {
             perc = (float) Math.pow(dstLength / optimalLightningLength, 2);
         }

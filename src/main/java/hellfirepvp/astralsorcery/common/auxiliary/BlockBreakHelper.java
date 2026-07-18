@@ -77,7 +77,7 @@ public class BlockBreakHelper {
     public static void blockBreakAnimation(PktPlayEffect pktPlayEffect) {
         BlockPos pos = ByteBufUtils.readPos(pktPlayEffect.getExtraData());
         int id = pktPlayEffect.getExtraData().readInt();
-        BlockState state = Block.getStateById(id);
+        BlockState state = Block.stateById(id);
 
         RenderingUtils.playBlockBreakParticles(pos, state, state);
     }
@@ -135,14 +135,14 @@ public class BlockBreakHelper {
         public void readFromNBT(CompoundTag nbt) {
             this.breakProgress = nbt.getFloat("breakProgress");
             this.pos = NBTHelper.readBlockPosFromNBT(nbt);
-            this.expected = Block.getStateById(nbt.getInt("expectedStateId"));
+            this.expected = Block.stateById(nbt.getInt("expectedStateId"));
         }
 
         @Override
         public void save(CompoundTag nbt) {
             nbt.putFloat("breakProgress", this.breakProgress);
             NBTHelper.writeBlockPosToNBT(this.pos, nbt);
-            nbt.putInt("expectedStateId", Block.getStateId(this.expected));
+            nbt.putInt("expectedStateId", Block.getId(this.expected));
         }
 
     }

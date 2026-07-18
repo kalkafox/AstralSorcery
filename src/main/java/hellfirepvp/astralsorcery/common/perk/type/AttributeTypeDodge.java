@@ -18,7 +18,7 @@ import hellfirepvp.astralsorcery.common.perk.modifier.AttributeModifierDodge;
 import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
@@ -52,7 +52,7 @@ public class AttributeTypeDodge extends PerkAttributeType {
         return new AttributeModifierDodge(this, mode, modifier);
     }
 
-    private void onDamageTaken(LivingDamageEvent event) {
+    private void onDamageTaken(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof Player)) {
             return;
         }

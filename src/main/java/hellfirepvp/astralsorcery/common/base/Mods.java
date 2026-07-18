@@ -13,7 +13,6 @@ import hellfirepvp.astralsorcery.common.util.RegistryHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.InterModComms;
 import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.versions.forge.ForgeVersion;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,7 +28,7 @@ import java.util.function.Supplier;
 public enum Mods {
 
     MINECRAFT("minecraft", true),
-    FORGE(ForgeVersion.MOD_ID, true),
+    FORGE("neoforge", true),
     ASTRAL_SORCERY(AstralSorcery.MODID, true),
     DRACONIC_EVOLUTION("draconicevolution"),
     CURIOS("curios"),

@@ -19,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -70,14 +71,14 @@ public class KeyBleed extends KeyPerk {
                             .modifyValue(player, prog, PerkAttributeTypesAS.ATTR_TYPE_BLEED_DURATION, duration));
 
                     int setAmplifier = 0;
-                    if (target.isPotionActive(EffectsAS.EFFECT_BLEED)) {
-                        MobEffectInstance pe = target.getActivePotionEffect(EffectsAS.EFFECT_BLEED);
+                    if (target.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_BLEED))) {
+                        MobEffectInstance pe = target.getEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_BLEED));
                         if (pe != null) {
                             setAmplifier = Math.min(pe.getAmplifier() + 1, stackCap - 1);
                         }
                     }
 
-                    target.addEffect(new MobEffectInstance(EffectsAS.EFFECT_BLEED, duration, setAmplifier, false, true));
+                    target.addEffect(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_BLEED), duration, setAmplifier, false, true));
                 }
             }
         }

@@ -33,7 +33,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.event.RenderWorldLastEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import hellfirepvp.observerlib.common.util.tick.TickEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL11C;
@@ -96,11 +96,14 @@ public class GatewayUIRenderHandler implements ITickHandler {
         return this.currentUI == null;
     }
 
-    void render(RenderWorldLastEvent event) {
+    void render(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) {
+            return;
+        }
         if (this.validate()) {
             return;
         }
-        float pTicks = event.advanceTime();
+        float pTicks = event.getPartialTick().getGameTimeDeltaPartialTick(true);
         PoseStack renderStack = event.getPoseStack();
         Vector3 renderOffset = this.currentUI.getRenderCenter();
 

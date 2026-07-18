@@ -56,12 +56,12 @@ public class CommandSerialize {
         String serialized = JsonHelper.serializeItemStack(held).toString();
 
         MutableComponent msg = Component.literal(serialized);
-        Style s = Style.EMPTY.setFormatting(ChatFormatting.GREEN)
-                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
-                .setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
+        Style s = Style.EMPTY.applyFormat(ChatFormatting.GREEN)
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
         msg.setStyle(s);
 
-        context.getSource().customSuggestion(msg, true);
+        context.getSource().sendSuccess(() -> msg, true);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -72,12 +72,12 @@ public class CommandSerialize {
         String serialized = BlockStateHelper.serialize(state);
 
         MutableComponent msg = Component.literal(serialized);
-        Style s = Style.EMPTY.setFormatting(ChatFormatting.GREEN)
-                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
-                .setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
+        Style s = Style.EMPTY.applyFormat(ChatFormatting.GREEN)
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy")))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, serialized));
         msg.setStyle(s);
 
-        context.getSource().customSuggestion(msg, true);
+        context.getSource().sendSuccess(() -> msg, true);
         return Command.SINGLE_SUCCESS;
     }
 }

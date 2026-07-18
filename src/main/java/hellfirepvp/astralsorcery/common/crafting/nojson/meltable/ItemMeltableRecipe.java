@@ -51,7 +51,7 @@ public class ItemMeltableRecipe extends WorldMeltableRecipe {
     }
 
     public static ItemMeltableRecipe of(TagKey<Block> blockTagIn, ItemStack itemOut) {
-        return new ItemMeltableRecipe(AstralSorcery.key(String.format("tag_%s", blockTagIn.getName().getPath())),
+        return new ItemMeltableRecipe(AstralSorcery.key(String.format("tag_%s", blockTagIn.location().getPath())),
                 BlockPredicates.isInTag(blockTagIn), itemOut);
     }
 

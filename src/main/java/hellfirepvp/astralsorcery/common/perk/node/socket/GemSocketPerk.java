@@ -135,7 +135,7 @@ public interface GemSocketPerk {
 
         ItemStack contained = getContainedItem(player, LogicalSide.SERVER, data);
         if (!contained.isEmpty()) {
-            if (!player.getArmor(contained)) {
+            if (!player.getInventory().add(contained)) {
                 ItemUtils.dropItem(player.getCommandSenderWorld(), player.getX(), player.getY(), player.getZ(), contained);
             }
         }

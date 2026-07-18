@@ -61,7 +61,7 @@ public class ClientMiscEventHandler {
             attemptLoad = true;
             ResourceLocation mod = ResourceLocation.parse(AstralSorcery.MODID + ":models/obj/modelassec.obj");
             try {
-                obj = new WavefrontObject("astralSorcery:wingsrender", new GZIPInputStream(Minecraft.getInstance().getResourceManager().getResource(mod).getInputStream()));
+                obj = new WavefrontObject("astralSorcery:wingsrender", new GZIPInputStream(Minecraft.getInstance().getResourceManager().getResource(mod).orElseThrow().open()));
             } catch (Exception exc) {}
         }
         if (attemptLoad && obj == null) {
@@ -76,11 +76,11 @@ public class ClientMiscEventHandler {
         float ma = f ? 15 : 5;
         float r = (ma * (Math.abs((ClientScheduler.getClientTick() % 80) - 40) / 40F)) +
                 ((65 - ma) * Math.max(0, Math.min(1, (float) new Vector3(motion.x, 0, motion.z).length())));
-        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, event.getPartialRenderTick());
+        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, event.getPartialTick());
 
         PoseStack renderStack = event.getPoseStack();
         renderStack.pushPose();
-        float swimAngle = player.getSwimAnimation(event.getPartialRenderTick());
+        float swimAngle = player.getSwimAmount(event.getPartialTick());
         if (swimAngle > 0) {
             float waterPitch = player.isInWater() ? -90.0F - player.getXRot() : -90.0F;
             float bodySwimAngle = Mth.lerp(swimAngle, 0.0F, waterPitch);
@@ -97,37 +97,40 @@ public class ClientMiscEventHandler {
         renderStack.translate(0, 5.5, 0.7 - ((r / ma) * (f ? 0.5D : 0.2D)));
 
         if (vboR == null) {
-            vboR = obj.batchOnly(Tesselator.getInstance().getBuffer(), "wR");
+            vboR = obj.batchOnly(buf -> buf, "wR");
         }
         if (vboL == null) {
-            vboL = obj.batchOnly(Tesselator.getInstance().getBuffer(), "wL");
+            vboL = obj.batchOnly(buf -> buf, "wL");
         }
 
 
         RenderTypesAS.MODEL_DEMON_WINGS.setupRenderState();
-        Minecraft.getInstance().getTextureManager().bindTexture(tex);
+        RenderSystem.setShaderTexture(0, tex);
 
         renderStack.pushPose();
         renderStack.mulPose(Axis.YN.rotationDegrees(20 + r));
-        vboR.bindBuffer();
-        RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
-        vboR.draw(renderStack.last().pose(), VertexFormat.Mode.QUADS);
-        RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
-        VertexBuffer.unbind();
+        drawWingVbo(vboR, renderStack);
         renderStack.popPose();
 
         renderStack.pushPose();
         renderStack.mulPose(Axis.YP.rotationDegrees(20 + r));
-        vboL.bindBuffer();
-        RenderTypesAS.POSITION_COLOR_TEX_NORMAL.setupBufferState(0);
-        vboL.draw(renderStack.last().pose(), VertexFormat.Mode.QUADS);
-        RenderTypesAS.POSITION_COLOR_TEX_NORMAL.clearBufferState();
-        VertexBuffer.unbind();
+        drawWingVbo(vboL, renderStack);
         renderStack.popPose();
 
         BlockAtlasTexture.getInstance().bindTexture();
         RenderTypesAS.MODEL_DEMON_WINGS.clearRenderState();
 
         renderStack.popPose();
+    }
+
+    private static void drawWingVbo(VertexBuffer vbo, PoseStack renderStack) {
+        if (vbo == null) {
+            return;
+        }
+        org.joml.Matrix4f modelView = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(renderStack.last().pose());
+        vbo.bind();
+        vbo.drawWithShader(modelView, RenderSystem.getProjectionMatrix(),
+                hellfirepvp.astralsorcery.client.util.RenderingUtils.shaderFor(RenderTypesAS.POSITION_COLOR_TEX_NORMAL).get());
+        VertexBuffer.unbind();
     }
 }

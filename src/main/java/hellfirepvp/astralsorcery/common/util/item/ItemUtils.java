@@ -116,7 +116,7 @@ public class ItemUtils {
 
     public static boolean isEquippableArmor(Entity entity, ItemStack stack) {
         for (EquipmentSlot type : EquipmentSlot.values()) {
-            if (type.getType() == EquipmentSlot.Group.ARMOR) {
+            if (type.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
                 if (entity instanceof net.minecraft.world.entity.LivingEntity living && stack.canEquip(type, living)) {
                     return true;
                 }

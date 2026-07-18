@@ -52,9 +52,9 @@ public class NameUtil {
     }
 
     public static ResourceLocation fromClass(Class<?> clazz, @Nullable String cutPrefix, @Nullable String cutSuffix) {
-        String name = clazz.getName();
+        String name = clazz.getSimpleName();
         if (clazz.getEnclosingClass() != null) {
-            name = clazz.getEnclosingClass().getName() + name;
+            name = clazz.getEnclosingClass().getSimpleName() + name;
         }
         if (cutPrefix != null && name.startsWith(cutPrefix)) {
             name = name.substring(cutPrefix.length());

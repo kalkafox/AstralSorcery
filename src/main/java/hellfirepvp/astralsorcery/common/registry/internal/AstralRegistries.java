@@ -43,6 +43,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.neoforged.bus.api.IEventBus;
@@ -84,6 +87,12 @@ public final class AstralRegistries {
     public static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTION_TYPES = create(Registries.LOOT_FUNCTION_TYPE);
     public static final DeferredRegister<CriterionTrigger<?>> CRITERION_TRIGGERS = create(Registries.TRIGGER_TYPE);
     public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = create(Registries.ARMOR_MATERIAL);
+    public static final DeferredRegister<Feature<?>> FEATURES = create(Registries.FEATURE);
+    public static final DeferredRegister<PlacementModifierType<?>> PLACEMENT_MODIFIER_TYPES = create(Registries.PLACEMENT_MODIFIER_TYPE);
+    public static final DeferredRegister<StructurePieceType> STRUCTURE_PIECE_TYPES = create(Registries.STRUCTURE_PIECE);
+    // Vanilla's worldgen structure-type registry; distinct from the mod's own
+    // ObserverLib-style STRUCTURE_TYPES registry below.
+    public static final DeferredRegister<net.minecraft.world.level.levelgen.structure.StructureType<?>> WORLDGEN_STRUCTURE_TYPES = create(Registries.STRUCTURE_TYPE);
 
     // NeoForge registries
     public static final DeferredRegister<FluidType> FLUID_TYPES = create(NeoForgeRegistries.Keys.FLUID_TYPES);
@@ -147,6 +156,10 @@ public final class AstralRegistries {
         LOOT_FUNCTION_TYPES.register(modEventBus);
         CRITERION_TRIGGERS.register(modEventBus);
         ARMOR_MATERIALS.register(modEventBus);
+        FEATURES.register(modEventBus);
+        PLACEMENT_MODIFIER_TYPES.register(modEventBus);
+        STRUCTURE_PIECE_TYPES.register(modEventBus);
+        WORLDGEN_STRUCTURE_TYPES.register(modEventBus);
 
         FLUID_TYPES.register(modEventBus);
         ENTITY_DATA_SERIALIZERS.register(modEventBus);

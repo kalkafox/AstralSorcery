@@ -33,9 +33,9 @@ public class WorldMeltableRegistry extends CustomRecipeRegistry<WorldMeltableRec
     @Override
     public void init() {
         this.register(BlockMeltableRecipe.of(BlockTags.ICE, Blocks.WATER.defaultBlockState()));
-        this.register(BlockMeltableRecipe.of(Tags.Blocks.STONE, Blocks.LAVA.defaultBlockState()));
-        this.register(BlockMeltableRecipe.of(Tags.Blocks.NETHERRACK, Blocks.LAVA.defaultBlockState()));
-        this.register(BlockMeltableRecipe.of(Tags.Blocks.OBSIDIAN, Blocks.LAVA.defaultBlockState()));
+        this.register(BlockMeltableRecipe.of(Tags.Blocks.STONES, Blocks.LAVA.defaultBlockState()));
+        this.register(BlockMeltableRecipe.of(Tags.Blocks.NETHERRACKS, Blocks.LAVA.defaultBlockState()));
+        this.register(BlockMeltableRecipe.of(Tags.Blocks.OBSIDIANS, Blocks.LAVA.defaultBlockState()));
         this.register(BlockMeltableRecipe.of(Blocks.MAGMA_BLOCK.defaultBlockState(), Blocks.LAVA.defaultBlockState()));
 
         this.register(new FurnaceMeltableRecipe());

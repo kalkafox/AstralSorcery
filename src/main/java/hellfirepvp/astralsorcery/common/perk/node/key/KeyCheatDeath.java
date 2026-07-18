@@ -18,6 +18,7 @@ import hellfirepvp.astralsorcery.common.perk.PerkCooldownHelper;
 import hellfirepvp.astralsorcery.common.perk.node.KeyPerk;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -60,7 +61,7 @@ public class KeyCheatDeath extends KeyPerk implements CooldownPerk {
                 if (!PerkCooldownHelper.isCooldownActiveForPlayer(player, this) &&
                         AlignmentChargeHandler.INSTANCE.drainCharge(player, direction, CONFIG.chargeCost.get(), false)) {
                     PerkCooldownHelper.setCooldownActiveForPlayer(player, this, CONFIG.cooldownPotionApplication.get());
-                    player.addEffect(new MobEffectInstance(EffectsAS.EFFECT_CHEAT_DEATH,
+                    player.addEffect(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(EffectsAS.EFFECT_CHEAT_DEATH),
                             CONFIG.potionDuration.get(),
                             CONFIG.potionAmplifier.get(),
                             true, false, true));

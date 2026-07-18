@@ -17,8 +17,8 @@ import hellfirepvp.observerlib.common.util.tick.ITickHandler;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.LivingEntity;
 import hellfirepvp.observerlib.common.util.tick.TickEvent;
-import net.neoforged.neoforge.event.entity.living.LivingSpawnEvent;
-import net.neoforged.bus.api.Event;
+import net.minecraft.world.entity.MobSpawnType;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.bus.api.IEventBus;
 
 import java.util.Map;
@@ -47,10 +47,9 @@ public class EventHelperSpawnDeny {
         eventBus.addListener(EventHelperSpawnDeny::onSpawn);
     }
 
-    private static void onSpawn(LivingSpawnEvent.CheckSpawn event) {
-        if (event.getObject() == Event.Result.DENY ||
-                event.getLevel().isClientSide() ||
-                event.getSpawner() != null) {
+    private static void onSpawn(FinalizeSpawnEvent event) {
+        if (event.getLevel().isClientSide() ||
+                event.getSpawnType() == MobSpawnType.SPAWNER) {
             return;
         }
 
@@ -59,7 +58,7 @@ public class EventHelperSpawnDeny {
             return;
         }
 
-        if (GeneralConfig.CONFIG.mobSpawningDenyAllTypes.get() || entity.getCategory(false) == MobCategory.MONSTER) {
+        if (GeneralConfig.CONFIG.mobSpawningDenyAllTypes.get() || entity.getType().getCategory() == MobCategory.MONSTER) {
             Vector3 entityPos = Vector3.atEntityCorner(entity);
             for (Map.Entry<WorldBlockPos, TickTokenMap.SimpleTickToken<Double>> entry : spawnDenyRegions.entrySet()) {
                 if (!entry.getKey().getWorldKey().equals(entity.getCommandSenderWorld().dimension())) {
@@ -67,7 +66,7 @@ public class EventHelperSpawnDeny {
                 }
 
                 if (entityPos.distance(entry.getKey()) <= entry.getValue().getValue()) {
-                    event.setResult(Event.Result.DENY);
+                    event.setCanceled(true);
                     return;
                 }
             }

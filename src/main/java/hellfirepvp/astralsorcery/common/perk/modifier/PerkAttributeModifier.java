@@ -164,12 +164,12 @@ public class PerkAttributeModifier extends AbstractAstralRegistryEntry<PerkAttri
 
     @OnlyIn(Dist.CLIENT)
     public String getLocalizedModifierName() {
-        return I18n.format(getMode().getUnlocalizedModifierName(getValueForDisplay(Minecraft.getInstance().player, ResearchHelper.getClientProgress())));
+        return I18n.get(getMode().getUnlocalizedModifierName(getValueForDisplay(Minecraft.getInstance().player, ResearchHelper.getClientProgress())));
     }
 
     @OnlyIn(Dist.CLIENT)
     public String getAttributeDisplayFormat() {
-        return I18n.format("perk.modifier.astralsorcery.format");
+        return I18n.get("perk.modifier.astralsorcery.format");
     }
 
     @Nullable
@@ -181,7 +181,7 @@ public class PerkAttributeModifier extends AbstractAstralRegistryEntry<PerkAttri
         return String.format(getAttributeDisplayFormat(),
                 getLocalizedAttributeValue(),
                 getLocalizedModifierName(),
-                I18n.format(getUnlocalizedAttributeName()));
+                I18n.get(getUnlocalizedAttributeName()));
     }
 
     @Override

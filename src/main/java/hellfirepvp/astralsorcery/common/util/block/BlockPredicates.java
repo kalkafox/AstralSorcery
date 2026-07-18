@@ -61,7 +61,7 @@ public class BlockPredicates {
                     //If the intent was to NOT load the world, but the world isn't there, we assume the tile still exists.
                     return !loadTileWorldAndChunk;
                 }
-                if (!loadTileWorldAndChunk && !foundWorld.getChunkSource().isChunkLoaded(new ChunkPos(pos))) {
+                if (!loadTileWorldAndChunk && !foundWorld.getChunkSource().hasChunk(pos.getX() >> 4, pos.getZ() >> 4)) {
                     return true;
                 }
                 BlockEntity te = MiscUtils.getTileAt(foundWorld, pos, BlockEntity.class, true);

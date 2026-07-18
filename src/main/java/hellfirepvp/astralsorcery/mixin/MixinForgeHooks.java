@@ -13,6 +13,7 @@ import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
 import hellfirepvp.astralsorcery.common.perk.node.key.KeyMagnetDrops;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.loot.LootUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -26,8 +27,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
 import java.util.List;
 
@@ -42,18 +41,18 @@ import java.util.List;
 public class MixinForgeHooks {
 
     @Inject(
-            method = "modifyLoot(Lnet/minecraft/util/ResourceLocation;Ljava/util/List;Lnet/minecraft/loot/LootContext;)Ljava/util/List;",
+            method = "modifyLoot(Lnet/minecraft/resources/ResourceLocation;Lit/unimi/dsi/fastutil/objects/ObjectArrayList;Lnet/minecraft/world/level/storage/loot/LootContext;)Lit/unimi/dsi/fastutil/objects/ObjectArrayList;",
             at = @At("RETURN"),
             cancellable = true,
             remap = false
     )
-    private static void runLootTeleportation(ResourceLocation lootTableId, List<ItemStack> lootTable, LootContext context, CallbackInfoReturnable<List<ItemStack>> cir) {
+    private static void runLootTeleportation(ResourceLocation lootTableId, ObjectArrayList<ItemStack> lootTable, LootContext context, CallbackInfoReturnable<ObjectArrayList<ItemStack>> cir) {
         List<ItemStack> loot = cir.getReturnValue();
 
         if (!LootUtil.doesContextFulfillSet(context, LootContextParamSets.BLOCK)) {
             return;
         }
-        Entity e = context.get(LootContextParams.THIS_ENTITY);
+        Entity e = context.getParamOrNull(LootContextParams.THIS_ENTITY);
         if (!(e instanceof Player)) {
             return;
         }
@@ -63,17 +62,9 @@ public class MixinForgeHooks {
             return;
         }
 
-        //Means we're in the 2nd run of loot manipulation, re-run by top.theillusivec4.curios.common.objects.FortuneBonusMultiplier
-        ItemStack tool = context.get(LootContextParams.TOOL);
-        if (tool != null && tool.hasTag() && tool.getTag().contains("HasCuriosFortuneBonus")) {
-            loot.removeIf(result -> ItemUtils.dropItemToPlayer(player, result).isEmpty());
-        }
-        int curiosFortuneBonus = CuriosApi.getCuriosHelper().getCuriosHandler(player)
-                .map(ICuriosItemHandler::getFortuneBonus)
-                .orElse(0);
-        if (curiosFortuneBonus > 0) {
-            return; //Do not modify loot, loot modification gets re-run by curios later
-        }
+        // 1.21 port: the Curios fortune-bonus double-run special casing was removed here - the
+        // Curios integration is excluded from this build (see PORTING.md); restore the
+        // "HasCuriosFortuneBonus" re-run handling when Curios is wired back in.
         loot.removeIf(result -> ItemUtils.dropItemToPlayer(player, result).isEmpty());
     }
 }

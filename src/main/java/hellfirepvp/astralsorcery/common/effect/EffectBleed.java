@@ -31,23 +31,24 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 public class EffectBleed extends EffectCustomTexture {
 
     public EffectBleed() {
-        super(EffectType.HARMFUL, ColorsAS.EFFECT_BLEED);
+        super(MobEffectCategory.HARMFUL, ColorsAS.EFFECT_BLEED);
     }
 
     @Override
-    public boolean isDurationEffectTick(int duration, int amplifier) {
+    public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
         return duration % 20 == 0;
     }
 
     @Override
-    public void performEffect(LivingEntity entity, int amplifier) {
+    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
         if (entity instanceof Player &&
                 !entity.getCommandSenderWorld().isClientSide() &&
                 entity.getCommandSenderWorld() instanceof ServerLevel &&
                 !((MinecraftServer) ServerLifecycleHooks.getCurrentServer()).isPvpAllowed()) {
-            return;
+            return true;
         }
         DamageUtil.shotgunAttack(entity, e -> DamageUtil.hurt(e, CommonProxy.DAMAGE_SOURCE_BLEED, 0.5F * (amplifier + 1)));
+        return true;
     }
 
     @Override

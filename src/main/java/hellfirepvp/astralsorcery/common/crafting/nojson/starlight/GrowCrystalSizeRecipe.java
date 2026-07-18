@@ -84,7 +84,7 @@ public class GrowCrystalSizeRecipe extends LiquidStarlightRecipe {
         if (!level.isClientSide() && getAndIncrementCraftingTick(trigger) > 80 + r.nextInt(40)) {
             ItemStack stack = trigger.getItem();
             CrystalAttributes attr = ((ItemCrystalBase) stack.getItem()).getAttributes(stack);
-            if (attr != null && level.setBlock(at, Blocks.AIR.defaultBlockState())) {
+            if (attr != null && level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState())) {
                 if (attr.getTotalTierLevel() >= ((ItemCrystalBase) stack.getItem()).getMaxPropertyTiers()) {
                     return;
                 }

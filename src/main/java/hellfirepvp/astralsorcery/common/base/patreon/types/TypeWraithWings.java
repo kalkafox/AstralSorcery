@@ -54,7 +54,7 @@ public class TypeWraithWings extends PatreonEffect {
         return player.getUUID().equals(playerUUID) &&
                 !player.isPassenger() &&
                 !player.isFallFlying() &&
-                !player.isPotionActive(MobEffects.INVISIBILITY);
+                !player.hasEffect(MobEffects.INVISIBILITY);
     }
 
     @SubscribeEvent
@@ -66,7 +66,7 @@ public class TypeWraithWings extends PatreonEffect {
         }
         PoseStack renderStack = event.getPoseStack();
 
-        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, event.getPartialRenderTick());
+        float rot = RenderingVectorUtils.interpolateRotation(player.yBodyRotO, player.yBodyRot, event.getPartialTick());
 
         float yOffset = 1.2F;
         if (player.isShiftKeyDown() && !player.getAbilities().flying) {
@@ -75,7 +75,7 @@ public class TypeWraithWings extends PatreonEffect {
 
         renderStack.pushPose();
 
-        float swimAngle = player.getSwimAnimation(event.getPartialRenderTick());
+        float swimAngle = player.getSwimAmount(event.getPartialTick());
         if (swimAngle > 0) {
             float waterPitch = player.isInWater() ? -90.0F - player.getXRot() : -90.0F;
             float bodySwimAngle = Mth.lerp(swimAngle, 0.0F, waterPitch);

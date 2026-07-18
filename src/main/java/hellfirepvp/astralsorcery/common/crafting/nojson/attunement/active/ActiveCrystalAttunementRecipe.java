@@ -112,9 +112,9 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         if (crystal != null) {
             ItemStack stack = crystal.getItem();
             if (!(stack.getItem() instanceof ConstellationItem) && stack.getItem() instanceof ItemCrystalBase) {
-                CompoundTag tag = stack.getTag();
+                ItemStack previous = stack;
                 stack = new ItemStack(((ItemCrystalBase) stack.getItem()).getTunedItemVariant(), stack.getCount());
-                stack.setRepairCost(tag);
+                stack.applyComponents(previous.getComponentsPatch());
             }
             if (stack.getItem() instanceof ConstellationItem) {
                 IWeakConstellation attuned = ((ConstellationItem) stack.getItem()).getAttunedConstellation(stack);
@@ -130,9 +130,9 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
                 }
                 crystal.setItem(stack);
 
-                UUID throwerUUID = crystal.getThrower();
-                if (throwerUUID != null) {
-                    Player thrower = altar.getLevel().getPlayerByUuid(throwerUUID);
+                Entity throwerEntity = crystal.getOwner();
+                if (throwerEntity != null) {
+                    Player thrower = altar.getLevel().getPlayerByUUID(throwerEntity.getUUID());
                     if (thrower instanceof ServerPlayer) {
                         AdvancementsAS.ATTUNE_CRYSTAL.trigger((ServerPlayer) thrower, altar.getActiveConstellation());
                     }
@@ -149,7 +149,7 @@ public class ActiveCrystalAttunementRecipe extends AttunementRecipe.Active<Attun
         }
 
         Vector3 crystalHoverPos = new Vector3(altar).add(0.5, 1.4, 0.5);
-        crystal.setPosition(crystalHoverPos.getX(), crystalHoverPos.getY(), crystalHoverPos.getZ());
+        crystal.setPos(crystalHoverPos.getX(), crystalHoverPos.getY(), crystalHoverPos.getZ());
         crystal.xo = crystalHoverPos.getX();
         crystal.yo = crystalHoverPos.getY();
         crystal.zo = crystalHoverPos.getZ();

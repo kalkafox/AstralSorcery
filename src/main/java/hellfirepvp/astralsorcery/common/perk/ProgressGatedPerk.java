@@ -117,11 +117,11 @@ public class ProgressGatedPerk extends AbstractPerk {
         this.neededResearch.clear();
         this.neededProgression.clear();
 
-        if (GsonHelper.convertToInt(perkData, "neededConstellations")) {
+        if (perkData.has("neededConstellations")) {
             JsonArray array = GsonHelper.getAsJsonArray(perkData, "neededConstellations");
             for (int i = 0; i < array.size(); i++) {
                 JsonElement el = array.get(i);
-                String key = GsonHelper.getAsString(el, String.format("neededConstellations[%s]", i));
+                String key = GsonHelper.convertToString(el, String.format("neededConstellations[%s]", i));
                 IConstellation cst = ConstellationRegistry.getConstellation(ResourceLocation.parse(key));
                 if (cst == null) {
                     throw new JsonParseException("Unknown constellation: " + key);
@@ -130,11 +130,11 @@ public class ProgressGatedPerk extends AbstractPerk {
             }
         }
 
-        if (GsonHelper.convertToInt(perkData, "neededResearch")) {
+        if (perkData.has("neededResearch")) {
             JsonArray array = GsonHelper.getAsJsonArray(perkData, "neededResearch");
             for (int i = 0; i < array.size(); i++) {
                 JsonElement el = array.get(i);
-                String key = GsonHelper.getAsString(el, String.format("neededResearch[%s]", i));
+                String key = GsonHelper.convertToString(el, String.format("neededResearch[%s]", i));
                 try {
                     this.addRequireProgress(ResearchProgression.valueOf(key));
                 } catch (Exception exc) {
@@ -143,11 +143,11 @@ public class ProgressGatedPerk extends AbstractPerk {
             }
         }
 
-        if (GsonHelper.convertToInt(perkData, "neededProgression")) {
+        if (perkData.has("neededProgression")) {
             JsonArray array = GsonHelper.getAsJsonArray(perkData, "neededProgression");
             for (int i = 0; i < array.size(); i++) {
                 JsonElement el = array.get(i);
-                String key = GsonHelper.getAsString(el, String.format("neededProgression[%s]", i));
+                String key = GsonHelper.convertToString(el, String.format("neededProgression[%s]", i));
                 try {
                     this.addRequireTier(ProgressionTier.valueOf(key));
                 } catch (Exception exc) {

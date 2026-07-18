@@ -40,8 +40,8 @@ public class CommandMaximizeAll implements Command<CommandSourceStack> {
                 .requires(cs -> cs.hasPermission(2))
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(ctx -> {
-                            Player target = (Player) ctx.getArgument("player", EntitySelector.class).selectOne(ctx.getSource());
-                            ctx.getSource().customSuggestion(Component.literal("Success!").withStyle(ChatFormatting.GREEN), true);
+                            Player target = (Player) ctx.getArgument("player", EntitySelector.class).findSinglePlayer(ctx.getSource());
+                            ctx.getSource().sendSuccess(() -> Component.literal("Success!").withStyle(ChatFormatting.GREEN), true);
                             maximizeAll(target);
                             return 0;
                         }))
@@ -51,7 +51,7 @@ public class CommandMaximizeAll implements Command<CommandSourceStack> {
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         maximizeAll(context.getSource().getPlayerOrException());
-        context.getSource().customSuggestion(Component.literal("Success!").withStyle(ChatFormatting.GREEN), true);
+        context.getSource().sendSuccess(() -> Component.literal("Success!").withStyle(ChatFormatting.GREEN), true);
         return 0;
     }
 

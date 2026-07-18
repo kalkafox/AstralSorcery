@@ -50,9 +50,9 @@ public class KeyMending extends KeyPerk implements PlayerTickPerk {
                 if (random.nextInt(repairChance) != 0) {
                     continue;
                 }
-                if (!itemStack.isEmpty() && itemStack.isDamageable() && itemStack.isDamaged()) {
+                if (!itemStack.isEmpty() && itemStack.isDamageableItem() && itemStack.isDamaged()) {
                     if (AlignmentChargeHandler.INSTANCE.drainCharge(player, LogicalSide.SERVER, CONFIG.chargeCost.get(), false)) {
-                        itemStack.setBaseDamage(itemStack.getDamage() - 1);
+                        itemStack.setDamageValue(itemStack.getDamageValue() - 1);
                     }
                 }
             }

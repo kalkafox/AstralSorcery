@@ -73,10 +73,10 @@ public class AttuneCrystalRecipe extends AttunementRecipe<ActiveCrystalAttunemen
             return null;
         }
 
-        AABB boxAt = BOX.offset(altar.getBlockPos().above()).grow(1);
+        AABB boxAt = BOX.move(altar.getBlockPos().above()).inflate(1);
 
         Vector3 thisVec = new Vector3(altar).add(0.5, 1.5, 0.5);
-        List<ItemEntity> items = altar.getLevel().getEntitiesWithinAABB(ItemEntity.class, boxAt);
+        List<ItemEntity> items = altar.getLevel().getEntitiesOfClass(ItemEntity.class, boxAt);
         if (!items.isEmpty()) {
             ItemEntity item = EntityUtils.selectClosest(items, (iEntity) -> thisVec.distanceSquared(iEntity.position()));
             if (isApplicableCrystal(item, cst)) {

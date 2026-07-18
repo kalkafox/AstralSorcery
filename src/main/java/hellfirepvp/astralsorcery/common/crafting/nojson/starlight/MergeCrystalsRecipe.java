@@ -50,7 +50,7 @@ public class MergeCrystalsRecipe extends LiquidStarlightRecipe {
 
     @Override
     public List<Ingredient> getInputForRender() {
-        return Arrays.asList(new CrystalIngredient(false, false),
+        return Arrays.asList(new CrystalIngredient(false, false).toVanilla(),
                 new CrystalIngredient(false, false).toVanilla());
     }
 

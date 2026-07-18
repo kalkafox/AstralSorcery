@@ -8,16 +8,13 @@
 
 package hellfirepvp.astralsorcery.common.world.feature;
 
-import hellfirepvp.astralsorcery.common.world.feature.config.ReplaceBlockConfig;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import hellfirepvp.astralsorcery.common.util.Constants;
-
-import java.util.Random;
+import hellfirepvp.astralsorcery.common.world.feature.config.ReplaceBlockConfig;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -33,9 +30,11 @@ public class ReplaceBlockFeature extends Feature<ReplaceBlockConfig> {
     }
 
     @Override
-    public boolean place(WorldGenLevel reader, ChunkGenerator generator, Random random, BlockPos pos, ReplaceBlockConfig config) {
-        if (config.target.test(reader.getBlockState(pos), random)) {
-            return setBlock(reader, pos, config.state);
+    public boolean place(FeaturePlaceContext<ReplaceBlockConfig> context) {
+        ReplaceBlockConfig config = context.config();
+        BlockPos pos = context.origin();
+        if (config.target.test(context.level().getBlockState(pos), context.random())) {
+            return setBlock(context.level(), pos, config.state);
         }
         return true;
     }

@@ -17,6 +17,7 @@ import hellfirepvp.astralsorcery.common.constellation.world.DayTimeHelper;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.awt.*;
@@ -57,7 +58,7 @@ public class FXSourceLiquidFountain extends FXSource<FXCube, BatchRenderContext<
                 .setAlphaMultiplier(DayTimeHelper.getCurrentDaytimeDistribution(Minecraft.getInstance().level))
                 .setScaleMultiplier(0.1F + random.nextFloat() * 0.05F)
                 .setDeltaMovement(motion)
-                .color((fx, pTicks) -> new Color(fluid.getFluid().getAttributes().getColor(fluid)))
+                .color((fx, pTicks) -> new Color(IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor(fluid), false))
                 .setGravityStrength(0.003F)
                 .setMaxAge(40 + random.nextInt(40));
     }

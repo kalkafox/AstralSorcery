@@ -41,9 +41,9 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
                 false,
                 false);
 
-        abilities.allowFlying = true;
-        abilities.flying = true;
-        abilities.invulnerable = true;
+        getAbilities().mayfly = true;
+        getAbilities().flying = true;
+        getAbilities().invulnerable = true;
     }
 
     @Nullable
@@ -56,7 +56,7 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
     }
 
     public void setAsRenderViewEntity() {
-        Minecraft.getInstance().setRenderViewEntity(this);
+        Minecraft.getInstance().setCameraEntity(this);
     }
 
     public void transformToFocusOnPoint(Vector3 toFocus, float pTicks, boolean propagate) {
@@ -74,7 +74,7 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void rotateTowards(double yRot, double pitch) {}
+    public void turn(double yRot, double pitch) {}
 
     public abstract void moveEntityTick(EntityCameraRenderView entity, EntityClientReplacement replacementEntity, int tickCount);
 
@@ -102,7 +102,7 @@ public abstract class EntityCameraRenderView extends LocalPlayer {
     }
 
     @Override
-    public void thunderHit(EquipmentSlot slotIn, @Nullable ItemStack stack) {}
+    public void setItemSlot(EquipmentSlot slotIn, ItemStack stack) {}
 
     @Override
     public HumanoidArm getMainArm() {

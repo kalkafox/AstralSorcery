@@ -29,7 +29,7 @@ public class EntityClientReplacement extends AbstractClientPlayer {
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public boolean isWearing(PlayerModelPart part) {
-        return Minecraft.getInstance().player != null && Minecraft.getInstance().player.isWearing(part);
+    public boolean isModelPartShown(PlayerModelPart part) {
+        return Minecraft.getInstance().player != null && Minecraft.getInstance().player.isModelPartShown(part);
     }
 }

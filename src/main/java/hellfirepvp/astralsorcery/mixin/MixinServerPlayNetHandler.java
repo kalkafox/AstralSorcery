@@ -9,7 +9,9 @@
 package hellfirepvp.astralsorcery.mixin;
 
 import hellfirepvp.astralsorcery.common.entity.InteractableEntity;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
@@ -45,16 +47,31 @@ public class MixinServerPlayNetHandler {
         return distance;
     }*/
 
+    // 1.21 port: the "invalid entity attacked" disconnect moved into the anonymous
+    // ServerboundInteractPacket.Handler inside handleInteract, so it can no longer be injected at
+    // directly. Instead, take over the packet dispatch (main thread, range checks already done)
+    // for entities marked as InteractableEntity and perform the attack ourselves.
     @Inject(
-            method = "processUseEntity",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerGamePacketListenerImpl;disconnect(Lnet/minecraft/util/text/ITextComponent;)V"),
+            method = "handleInteract",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundInteractPacket;dispatch(Lnet/minecraft/network/protocol/game/ServerboundInteractPacket$Handler;)V"),
             cancellable = true
     )
     public void allowInteractableEntity(ServerboundInteractPacket packet, CallbackInfo ci) {
         ServerLevel level = this.player.serverLevel();
-        Entity interacted = packet.getEntityFromWorld(level);
+        Entity interacted = packet.getTarget(level);
         if (interacted instanceof InteractableEntity) {
-            this.player.attack(interacted);
+            packet.dispatch(new ServerboundInteractPacket.Handler() {
+                @Override
+                public void onInteraction(InteractionHand hand) {}
+
+                @Override
+                public void onInteraction(InteractionHand hand, Vec3 interactionLocation) {}
+
+                @Override
+                public void onAttack() {
+                    MixinServerPlayNetHandler.this.player.attack(interacted);
+                }
+            });
             ci.cancel();
         }
     }

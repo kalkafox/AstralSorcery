@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientLevel.class)
 public class MixinClientWorld {
 
-    @Inject(method = "getSunBrightness", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getSkyDarken", at = @At("RETURN"), cancellable = true)
     public void solarEclipseSunBrightness(float a, CallbackInfoReturnable<Float> cir) {
         Level level = (Level)(Object) this;
 

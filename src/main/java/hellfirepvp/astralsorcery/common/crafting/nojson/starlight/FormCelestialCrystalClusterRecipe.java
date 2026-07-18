@@ -54,14 +54,14 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getInputForRender() {
-        return Arrays.asList(Ingredient.fromStacks(new ItemStack(ItemsAS.STARDUST)),
+        return Arrays.asList(Ingredient.of(new ItemStack(ItemsAS.STARDUST)),
                 new CrystalIngredient(false, false).toVanilla());
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getOutputForRender() {
-        return Collections.singletonList(Ingredient.fromStacks(new ItemStack(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER)));
+        return Collections.singletonList(Ingredient.of(new ItemStack(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER)));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
 
     @Override
     public boolean matches(ItemEntity trigger, Level level, BlockPos at) {
-        if (!level.getBlockState(at.below()).isTopSolid(level, at.below(), trigger, Direction.UP)) {
+        if (!level.getBlockState(at.below()).isFaceSturdy(level, at.below(), Direction.UP)) {
             return false;
         }
         List<Entity> otherEntities = getEntitiesInBlock(level, at);
@@ -94,7 +94,7 @@ public class FormCelestialCrystalClusterRecipe extends LiquidStarlightRecipe {
             if (consumeItemEntityInBlock(level, at, ItemsAS.STARDUST) != null &&
                     (crystalFound = consumeItemEntityInBlock(level, at, 1, stack -> stack.getItem() instanceof ItemCrystalBase)) != null) {
 
-                if (level.setBlock(at, BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.defaultBlockState())) {
+                if (level.setBlockAndUpdate(at, BlocksAS.CELESTIAL_CRYSTAL_CLUSTER.defaultBlockState())) {
                     TileCelestialCrystals cluster = MiscUtils.getTileAt(level, at, TileCelestialCrystals.class, true);
                     if (cluster != null) {
                         CrystalAttributes attr = ((CrystalAttributeItem) crystalFound.getItem()).getAttributes(crystalFound);

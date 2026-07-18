@@ -10,10 +10,10 @@ package hellfirepvp.astralsorcery.common.world.structure;
 
 import hellfirepvp.astralsorcery.common.lib.WorldGenerationAS;
 import hellfirepvp.astralsorcery.common.world.TemplateStructure;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -24,12 +24,12 @@ import net.minecraft.world.level.StructureManager;
  */
 public class AncientShrineStructure extends TemplateStructure {
 
-    public AncientShrineStructure(StructureManager mgr, BlockPos templatePosition) {
-        super(WorldGenerationAS.Structures.ANCIENT_SHRINE_PIECE, mgr, templatePosition);
+    public AncientShrineStructure(StructureTemplateManager mgr, BlockPos templatePosition) {
+        super(WorldGenerationAS.Structures.ANCIENT_SHRINE_PIECE, mgr, WorldGenerationAS.Structures.KEY_ANCIENT_SHRINE, templatePosition);
         this.setYOffset(-7);
     }
 
-    public AncientShrineStructure(StructureManager mgr, CompoundTag nbt) {
+    public AncientShrineStructure(StructureTemplateManager mgr, CompoundTag nbt) {
         super(WorldGenerationAS.Structures.ANCIENT_SHRINE_PIECE, mgr, nbt);
         this.setYOffset(-7);
     }

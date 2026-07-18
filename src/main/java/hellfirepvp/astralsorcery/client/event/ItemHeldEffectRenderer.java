@@ -14,7 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.event.RenderWorldLastEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 
@@ -35,8 +35,11 @@ public class ItemHeldEffectRenderer {
         bus.addListener(EventPriority.LOWEST, this::onHeldRender);
     }
 
-    private void onHeldRender(RenderWorldLastEvent event) {
-        float pTicks = event.advanceTime();
+    private void onHeldRender(RenderLevelStageEvent event) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) {
+            return;
+        }
+        float pTicks = event.getPartialTick().getGameTimeDeltaPartialTick(true);
         PoseStack renderStack = event.getPoseStack();
 
         if (Minecraft.getInstance().player == null || Minecraft.getInstance().level == null) {

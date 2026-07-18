@@ -50,7 +50,7 @@ public class KeyDamageEffects extends KeyPerk {
         bus.addListener(EventPriority.LOWEST, this::onDamageResult);
     }
 
-    private void onDamageResult(LivingDamageEvent event) {
+    private void onDamageResult(LivingDamageEvent.Post event) {
         DamageSource source = event.getSource();
         if (source.getEntity() != null && source.getEntity() instanceof Player) {
             Player player = (Player) source.getEntity();
@@ -69,7 +69,7 @@ public class KeyDamageEffects extends KeyPerk {
                             attacked.addEffect(new MobEffectInstance(MobEffects.POISON, 200, 1, false, false, true));
                             break;
                         case 2:
-                            attacked.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 1, false, false, true));
+                            attacked.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, 1, false, false, true));
                             attacked.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, 1, false, false, true));
                             break;
                         default:

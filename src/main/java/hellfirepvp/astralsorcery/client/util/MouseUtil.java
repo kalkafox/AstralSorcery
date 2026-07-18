@@ -9,7 +9,7 @@
 package hellfirepvp.astralsorcery.client.util;
 
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.client.event.GuiOpenEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 
@@ -37,7 +37,7 @@ public class MouseUtil {
         Minecraft.getInstance().mouseHandler.grabMouse();
     }
 
-    private static void onGuiOpen(GuiOpenEvent event) {
+    private static void onGuiOpen(ScreenEvent.Opening event) {
         if (preventGuiChange) {
             preventGuiChange = false;
             event.setCanceled(true);

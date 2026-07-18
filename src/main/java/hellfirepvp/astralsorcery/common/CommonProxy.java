@@ -85,7 +85,9 @@ import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.InterModEnqueueEvent;
@@ -142,14 +144,18 @@ public class CommonProxy {
                     .title(Component.translatable("itemGroup." + AstralSorcery.MODID + ".crystals"))
                     .icon(() -> new ItemStack(ROCK_CRYSTAL))
                     .build());
-    public static final Rarity RARITY_CELESTIAL = Rarity.create("AS_CELESTIAL", ChatFormatting.BLUE);
-    public static final Rarity RARITY_ARTIFACT = Rarity.create("AS_ARTIFACT", ChatFormatting.GOLD);
-    public static final Rarity RARITY_VESTIGE = Rarity.create("AS_VESTIGE", ChatFormatting.RED);
+    // 1.21 port: Rarity.create is gone (enum extension is JSON-driven now);
+    // mapped to nearest vanilla rarities until enumextensions.json is added.
+    public static final Rarity RARITY_CELESTIAL = Rarity.RARE;
+    public static final Rarity RARITY_ARTIFACT = Rarity.EPIC;
+    public static final Rarity RARITY_VESTIGE = Rarity.EPIC;
 
     public static final ArmorMaterial ARMOR_MATERIAL_IMBUED_LEATHER = AstralRegistries.register(
             AstralRegistries.ARMOR_MATERIALS, AstralSorcery.key("imbued_leather"), ArmorMaterialImbuedLeather.create());
 
     private boolean registryContentBuilt = false;
+    private boolean intrusiveContentBuilt = false;
+    private boolean itemDependentContentBuilt = false;
     private CommonScheduler commonScheduler;
     private TickManager tickManager;
     private final List<ServerLifecycleListener> serverLifecycleListeners = Lists.newArrayList();
@@ -206,18 +212,24 @@ public class CommonProxy {
         modEventBus.addListener(RegistryCapabilities::attachCapabilities);
 
         this.buildRegistryContent();
+        modEventBus.addListener(EventPriority.HIGHEST, this::buildIntrusiveRegistryContent);
+        modEventBus.addListener(EventPriority.LOWEST, this::buildItemDependentRegistryContent);
         AstralRegistries.subscribe(modEventBus);
     }
 
     /**
-     * Eagerly builds the mod's registry content in dependency order, queueing
-     * everything on the deferred registers before their RegisterEvents fire.
+     * Blocks, items, fluids and entity types create intrusive holders in
+     * their constructors, which the built-in registries only permit while
+     * NeoForge has them unfrozen - i.e. inside the RegisterEvent window, not
+     * during mod construction. This builds that content on the first
+     * RegisterEvent at HIGHEST priority, so the values exist (and their
+     * suppliers are queued) before the deferred registers add their entries.
      */
-    protected void buildRegistryContent() {
-        if (registryContentBuilt) {
+    protected void buildIntrusiveRegistryContent(RegisterEvent event) {
+        if (intrusiveContentBuilt) {
             return;
         }
-        registryContentBuilt = true;
+        intrusiveContentBuilt = true;
 
         RegistryFluids.registerFluids();
         RegistryBlocks.registerBlocks();
@@ -228,6 +240,37 @@ public class CommonProxy {
 
         RegistryTileEntities.registerTiles();
         RegistryEntities.init();
+    }
+
+    /**
+     * Content that dereferences the registered block/item instances - notably
+     * anything calling {@code Block.asItem()}, which permanently caches the
+     * air item if invoked before the item registry is populated. Runs at
+     * LOWEST priority on the item RegisterEvent, i.e. right after the item
+     * entries were added; the custom-registry events this queues content for
+     * all fire later.
+     */
+    protected void buildItemDependentRegistryContent(RegisterEvent event) {
+        if (!Registries.ITEM.equals(event.getRegistryKey()) || itemDependentContentBuilt) {
+            return;
+        }
+        itemDependentContentBuilt = true;
+
+        RegistryStructures.init();
+        RegistryResearch.init();
+    }
+
+    /**
+     * Eagerly builds the (non-intrusive-holder) registry content in
+     * dependency order, queueing everything on the deferred registers before
+     * their RegisterEvents fire.
+     */
+    protected void buildRegistryContent() {
+        if (registryContentBuilt) {
+            return;
+        }
+        registryContentBuilt = true;
+
         RegistryEffects.init();
         RegistryContainerTypes.init();
         RegistrySounds.init();
@@ -235,14 +278,14 @@ public class CommonProxy {
         RegistryConstellationEffects.init();
         RegistryMantleEffects.init();
         RegistryEngravingEffects.init();
-        RegistryStructures.init();
+        RegistryWorldGeneration.init();
+        RegistryLoot.init();
         RegistryCrystalPropertyUsages.init();
         RegistryCrystalProperties.init();
         RegistryCrystalProperties.initDefaultAttributes();
         RegistryRecipeTypes.init();
         RegistryRecipeTypes.initAltarEffects();
         RegistryRecipeSerializers.init();
-        RegistryResearch.init();
 
         TransmissionClassRegistry.setupRegistry();
         SourceClassRegistry.setupRegistry();
@@ -273,7 +316,8 @@ public class CommonProxy {
         EventHelperDamageCancelling.attachListeners(eventBus);
         PerkAttributeLimiter.attachListeners(eventBus);
 
-        eventBus.addListener(RegistryWorldGeneration::loadBiomeFeatures);
+        // 1.21 port: worldgen biome injection is datapack-driven (biome modifier
+        // JSONs emitted by datagen); the old BiomeLoadingEvent hook is gone.
 
         eventBus.addListener(PlayerAmuletHandler::onEnchantmentAdd);
         eventBus.addListener(DynamicEnchantmentHelper::onGetEnchantmentLevel);
@@ -365,7 +409,7 @@ public class CommonProxy {
             return null;
         }
 
-        File asDataDir = server.func_240776_a_(new LevelResource(AstralSorcery.MODID)).toFile();
+        File asDataDir = server.getWorldPath(new LevelResource(AstralSorcery.MODID)).toFile();
         if (!asDataDir.exists()) {
             asDataDir.mkdirs();
         }
@@ -408,8 +452,6 @@ public class CommonProxy {
         CollisionManager.init();
 
         PatreonDataManager.loadPatreonEffects();
-
-        event.enqueueWork(RegistryWorldGeneration::registerStructureGeneration);
     }
 
     private void onRegisterCommands(RegisterCommandsEvent event) {

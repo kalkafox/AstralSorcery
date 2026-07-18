@@ -17,7 +17,7 @@ import hellfirepvp.astralsorcery.common.perk.modifier.PerkAttributeModifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
-import net.neoforged.neoforge.event.entity.EntityJoinWorldEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
@@ -52,7 +52,7 @@ public class AttributeTypeCritChance extends PerkAttributeType {
         return new AttributeModifierCritChance(this, mode, modifier);
     }
 
-    private void onArrowCrit(EntityJoinWorldEvent event) {
+    private void onArrowCrit(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof Arrow) {
             Arrow arrow = (Arrow) event.getEntity();
             Entity shooter = arrow.getOwner();
@@ -74,7 +74,7 @@ public class AttributeTypeCritChance extends PerkAttributeType {
     }
 
     private void onHitCrit(CriticalHitEvent event) {
-        if (event.isVanillaCritical() || event.getObject() == Event.Result.ALLOW) {
+        if (event.isVanillaCritical() || event.isCriticalHit()) {
             return;
         }
         Player player = event.getEntity();
@@ -88,7 +88,7 @@ public class AttributeTypeCritChance extends PerkAttributeType {
         critChance = AttributeEvent.postProcessModded(player, this, critChance);
         critChance /= 100.0F;
         if (critChance >= random.nextFloat()) {
-            event.setResult(Event.Result.ALLOW);
+            event.setCriticalHit(true);
         }
     }
 }

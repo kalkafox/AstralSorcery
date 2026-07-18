@@ -64,7 +64,7 @@ public class PatreonManagerClient implements ITickHandler {
         });
 
         SyncDataHolder.executeClient(SyncDataHolder.DATA_PATREON_FLARES, ClientPatreonFlares.class, data -> {
-            for (Player player : clWorld.getPlayers()) {
+            for (Player player : clWorld.players()) {
                 for (PatreonEffect effect : PatreonEffectHelper.getPatreonEffects(LogicalSide.CLIENT, player.getUUID())) {
                     effect.doClientEffect(player);
                 }

@@ -114,7 +114,7 @@ public class StorageNetwork {
         }
 
         public AABB getRealBox() {
-            return offsetBox.offset(getBlockPos());
+            return offsetBox.move(getBlockPos());
         }
     }
 

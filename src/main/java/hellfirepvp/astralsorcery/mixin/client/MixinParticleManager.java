@@ -14,9 +14,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.client.effect.handler.EffectHandler;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.culling.Frustum;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,18 +31,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinParticleManager {
 
     @Inject(
-            method = "renderParticles(Lcom/mojang/blaze3d/matrix/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$Impl;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/renderer/Camera;FLnet/minecraft/client/renderer/culling/Frustum;)V",
-            at = @At("RETURN"),
-            remap = false
+            method = "render(Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/client/Camera;F)V",
+            at = @At("RETURN")
     )
-    public void render(PoseStack matrixStack, MultiBufferSource.BufferSource buffer, LightTexture lightTexture, Camera ari, float pTicks, Frustum clippingHelper, CallbackInfo ci) {
-        EffectHandler.getInstance().render(matrixStack, pTicks);
+    public void render(LightTexture lightTexture, Camera camera, float pTicks, CallbackInfo ci) {
+        // 1.21 port: ParticleEngine.render no longer takes a PoseStack (particles render in
+        // camera-relative space); hand the effect handler an identity stack like vanilla does.
+        EffectHandler.getInstance().render(new PoseStack(), pTicks);
 
         //Setup GL states again
         //Seriously, keep a clean GL state for once mojang.
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
                 GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.enableDepthTest();
-        GlStateManager.enableTexture();
+        RenderSystem.enableDepthTest();
     }
 }

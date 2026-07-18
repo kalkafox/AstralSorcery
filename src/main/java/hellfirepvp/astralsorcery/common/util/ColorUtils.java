@@ -109,7 +109,7 @@ public class ColorUtils {
 
     @Nonnull
     public static MutableComponent getTranslation(DyeColor color) {
-        return Component.translatable(String.format("color.minecraft.%s", color.getDescriptionId()));
+        return Component.translatable(String.format("color.minecraft.%s", color.getName()));
     }
 
     @Nonnull

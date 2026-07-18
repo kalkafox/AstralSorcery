@@ -45,7 +45,7 @@ public class ProviderHelmetRender implements PatreonEffectProvider<TypeHelmetRen
         ItemStack stack = new ItemStack(item);
         if (itemInfo.length > 1) {
             int data = Integer.parseInt(itemInfo[1]);
-            stack.setBaseDamage(data);
+            stack.setDamageValue(data);
         }
         FlareColor flColor = effectParameters.size() > 2 ?
                 FlareColor.valueOf(effectParameters.get(2)) : null;

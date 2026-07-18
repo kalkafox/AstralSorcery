@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.util.reflection;
 
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
@@ -33,6 +34,7 @@ public class ReflectionHelper {
     private static BiConsumer<ItemEntity, Integer> itemEntityAge;
     private static BiConsumer<ItemEntity, Float> itemEntityBobOffset;
     private static ToIntFunction<ItemEntity> itemEntityPickupDelayGetter;
+    private static BiConsumer<MobEffectInstance, Integer> mobEffectDuration;
 
     public static void setSkipItemPhysicsRender(ItemEntity entity) {
         if (itemEntitySkipPhysicRenderer == null) {
@@ -56,6 +58,14 @@ public class ReflectionHelper {
         }
 
         itemEntityBobOffset.accept(entity, bobOffset);
+    }
+
+    public static void setMobEffectDuration(MobEffectInstance effect, int duration) {
+        if (mobEffectDuration == null) {
+            mobEffectDuration = getFieldSetter(MobEffectInstance.class, "duration", Field::setInt);
+        }
+
+        mobEffectDuration.accept(effect, duration);
     }
 
     public static int getItemEntityPickupDelay(ItemEntity entity) {

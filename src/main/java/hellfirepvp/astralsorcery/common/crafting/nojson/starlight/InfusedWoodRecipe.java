@@ -47,13 +47,13 @@ public class InfusedWoodRecipe extends LiquidStarlightRecipe {
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getInputForRender() {
-        return Collections.singletonList(Ingredient.fromTag(ItemTags.LOGS));
+        return Collections.singletonList(Ingredient.of(ItemTags.LOGS));
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getOutputForRender() {
-        return Collections.singletonList(Ingredient.valueFromJson(BlocksAS.INFUSED_WOOD));
+        return Collections.singletonList(Ingredient.of(BlocksAS.INFUSED_WOOD));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class InfusedWoodRecipe extends LiquidStarlightRecipe {
         if (!CraftingConfig.CONFIG.liquidStarlightDropInfusedWood.get()) {
             return false;
         }
-        return item.getItem().isIn(ItemTags.LOGS);
+        return item.is(ItemTags.LOGS);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class InfusedWoodRecipe extends LiquidStarlightRecipe {
     @Override
     public void doServerCraftTick(ItemEntity trigger, Level level, BlockPos at) {
         if (getAndIncrementCraftingTick(trigger) > 5) {
-            if (consumeItemEntityInBlock(level, at, 1, (ItemStack stack) -> !stack.isEmpty() && stack.getItem().isIn(ItemTags.LOGS)) != null) {
+            if (consumeItemEntityInBlock(level, at, 1, (ItemStack stack) -> !stack.isEmpty() && stack.is(ItemTags.LOGS)) != null) {
                 ItemUtils.dropItemNaturally(level, trigger.getX(), trigger.getY(), trigger.getZ(), new ItemStack(BlocksAS.INFUSED_WOOD));
             }
         }

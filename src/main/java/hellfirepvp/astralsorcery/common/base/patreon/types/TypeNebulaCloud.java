@@ -112,7 +112,7 @@ public class TypeNebulaCloud extends PatreonEffect implements ITickHandler {
     private boolean shouldDoEffect(Player player) {
         return player.getUUID().equals(playerUUID) &&
                 (player.getPose() == Pose.STANDING || player.getPose() == Pose.CROUCHING) &&
-                !player.isPotionActive(MobEffects.INVISIBILITY);
+                !player.hasEffect(MobEffects.INVISIBILITY);
     }
 
     @Override

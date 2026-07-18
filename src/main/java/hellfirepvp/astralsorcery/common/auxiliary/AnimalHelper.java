@@ -84,7 +84,7 @@ public class AnimalHelper {
 
         @Override
         public boolean handles(@Nonnull LivingEntity entity) {
-            return entity instanceof Squid;
+            return entity instanceof net.minecraft.world.entity.animal.Squid;
         }
     }
 }

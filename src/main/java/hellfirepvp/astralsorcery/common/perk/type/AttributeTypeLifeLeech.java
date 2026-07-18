@@ -48,7 +48,7 @@ public class AttributeTypeLifeLeech extends PerkAttributeType {
         return new AttributeModifierLifeLeech(this, mode, modifier);
     }
 
-    private void onLeech(LivingDamageEvent event) {
+    private void onLeech(LivingDamageEvent.Post event) {
         DamageSource source = event.getSource();
         if (source.getEntity() != null && source.getEntity() instanceof Player) {
             Player player = (Player) source.getEntity();
@@ -60,7 +60,7 @@ public class AttributeTypeLifeLeech extends PerkAttributeType {
                 leechPerc /= 100.0F;
                 leechPerc = AttributeEvent.postProcessModded(player, this, leechPerc);
                 if (leechPerc > 0) {
-                    float leech = event.getAmount() * leechPerc;
+                    float leech = event.getNewDamage() * leechPerc;
                     if (leech > 0) {
                         player.heal(leech);
                     }

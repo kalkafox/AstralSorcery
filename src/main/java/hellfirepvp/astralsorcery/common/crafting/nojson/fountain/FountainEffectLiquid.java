@@ -122,7 +122,7 @@ public class FountainEffectLiquid extends FountainEffect<LiquidContext> {
                 MiscUtils.executeWithChunk(level, pos, () -> {
                     BlockState state = level.getBlockState(pos);
                     if (!state.isAir() &&
-                            level.getTileEntity(pos) == null &&
+                            level.getBlockEntity(pos) == null &&
                             state.getDestroySpeed(level, pos) >= 0 &&
                             !BlockUtils.isFluidBlock(state)) {
                         BlockUtils.breakBlockWithoutPlayer(level, pos, state, ItemStack.EMPTY, true, true, false);

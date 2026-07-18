@@ -95,10 +95,10 @@ public class AttributeModifierPerk extends AttributeConverterPerk implements Att
 
         this.modifiers.clear();
 
-        if (GsonHelper.convertToInt(perkData, "modifiers")) {
+        if (perkData.has("modifiers")) {
             JsonArray array = GsonHelper.getAsJsonArray(perkData, "modifiers");
             for (int i = 0; i < array.size(); i++) {
-                JsonObject serializedModifier = GsonHelper.getAsJsonObject(array.get(i), "modifiers[%s]");
+                JsonObject serializedModifier = GsonHelper.convertToJsonObject(array.get(i), String.format("modifiers[%s]", i));
 
                 if (serializedModifier.has("custom")) {
                     String customKey = GsonHelper.getAsString(serializedModifier, "custom");

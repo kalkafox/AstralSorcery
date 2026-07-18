@@ -39,7 +39,7 @@ import java.util.List;
 public abstract class ItemCrystalBase extends Item implements CrystalAttributeGenItem {
 
     public ItemCrystalBase(Properties prop) {
-        super(prop.durability(0));
+        super(prop);
     }
 
     @Override

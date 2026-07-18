@@ -12,6 +12,7 @@ import hellfirepvp.astralsorcery.common.util.item.ItemComparator;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -76,14 +77,14 @@ public class StoredItemStack {
     @Nonnull
     public CompoundTag serialize() {
         CompoundTag tag = new CompoundTag();
-        tag.put("item", stack.serializeNBT());
+        tag.put("item", stack.save(ServerLifecycleHooks.getCurrentServer().registryAccess()));
         tag.putInt("amount", amount);
         return tag;
     }
 
     @Nullable
     public static StoredItemStack deserialize(CompoundTag cmp) {
-        ItemStack stack = ItemStack.read(cmp.getCompound("item"));
+        ItemStack stack = ItemStack.parseOptional(ServerLifecycleHooks.getCurrentServer().registryAccess(), cmp.getCompound("item"));
         if (stack.isEmpty()) {
             return null;
         }

@@ -278,7 +278,7 @@ public class RegistryResearch {
                 .register(ResearchProgression.CONSTELLATION);
 
         ItemStack celestialCrystalCluster = new ItemStack(BlocksAS.CELESTIAL_CRYSTAL_CLUSTER);
-        celestialCrystalCluster.setBaseDamage(4); //Growth stage 4
+        celestialCrystalCluster.setDamageValue(4); //Growth stage 4
         ResearchNode resCelestialCrystalCluster = new ResearchNode(celestialCrystalCluster, "CEL_CRYSTAL_GROW", 6.25F, 4)
                 .addPage(text("CEL_CRYSTAL_GROW.1"))
                 .addPage(text("CEL_CRYSTAL_GROW.2"))

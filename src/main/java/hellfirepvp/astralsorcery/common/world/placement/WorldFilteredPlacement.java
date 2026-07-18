@@ -8,45 +8,55 @@
 
 package hellfirepvp.astralsorcery.common.world.placement;
 
-import hellfirepvp.astralsorcery.common.world.placement.config.WorldFilterConfig;
-import net.minecraft.resources.ResourceKey;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import hellfirepvp.astralsorcery.common.lib.WorldGenerationAS;
+import hellfirepvp.astralsorcery.common.world.FeatureGenerationConfig;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.gen.feature.WorldDecoratingHelper;
-import net.minecraft.world.gen.placement.ConfiguredPlacement;
-import net.minecraft.world.gen.placement.Placement;
-
-import java.util.List;
-import java.util.Random;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.placement.PlacementContext;
+import net.minecraft.world.level.levelgen.placement.PlacementFilter;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
 
 /**
+ * Runtime gate for datapack-driven placed features: looks up the mod's TOML
+ * worldgen config by feature name and filters on the enabled flag and the
+ * configured dimension whitelist.
+ *
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on github.
  * Class: WorldFilteredPlacement
  * Created by HellFirePvP
  * Date: 20.11.2020 / 15:52
  */
-public class WorldFilteredPlacement extends FeatureDecorator<WorldFilterConfig> {
+public class WorldFilteredPlacement extends PlacementFilter {
 
-    public WorldFilteredPlacement() {
-        super(WorldFilterConfig.CODEC);
+    public static final MapCodec<WorldFilteredPlacement> CODEC = RecordCodecBuilder.mapCodec(codecInstance -> codecInstance
+            .group(Codec.STRING.fieldOf("config").forGetter(placement -> placement.configName))
+            .apply(codecInstance, WorldFilteredPlacement::new));
+
+    private final String configName;
+
+    public WorldFilteredPlacement(String configName) {
+        this.configName = configName;
     }
 
-    public ConfiguredDecorator<WorldFilterConfig> inWorlds(boolean ignoreFilter, List<ResourceKey<Level>> levels) {
-        return inWorlds(() -> ignoreFilter, () -> levels);
-    }
-
-    public ConfiguredDecorator<WorldFilterConfig> inWorlds(Supplier<Boolean> ignoreFilter, Supplier<List<ResourceKey<Level>>> levels) {
-        return this.configured(new WorldFilterConfig(ignoreFilter, levels));
+    public static WorldFilteredPlacement forConfig(FeatureGenerationConfig config) {
+        return new WorldFilteredPlacement(config.getPath());
     }
 
     @Override
-    public Stream<BlockPos> getPositions(DecorationContext helper, Random random, WorldFilterConfig config, BlockPos pos) {
-        if (config.generatesIn(helper.level)) {
-            return Stream.of(pos);
+    protected boolean shouldPlace(PlacementContext context, RandomSource random, BlockPos pos) {
+        FeatureGenerationConfig config = FeatureGenerationConfig.byName(this.configName);
+        if (config == null) {
+            return true;
         }
-        return Stream.empty();
+        return config.isEnabled() && config.generatesIn(context.getLevel().getLevel().dimension());
+    }
+
+    @Override
+    public PlacementModifierType<?> type() {
+        return WorldGenerationAS.Placements.WORLD_FILTER;
     }
 }

@@ -50,14 +50,14 @@ public class FormGemCrystalClusterRecipe extends LiquidStarlightRecipe {
 
     @Override
     public List<Ingredient> getInputForRender() {
-        return Arrays.asList(Ingredient.fromStacks(new ItemStack(ItemsAS.ILLUMINATION_POWDER)),
+        return Arrays.asList(Ingredient.of(new ItemStack(ItemsAS.ILLUMINATION_POWDER)),
                 new CrystalIngredient(false, false).toVanilla());
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     public List<Ingredient> getOutputForRender() {
-        return Collections.singletonList(Ingredient.fromStacks(new ItemStack(BlocksAS.GEM_CRYSTAL_CLUSTER)));
+        return Collections.singletonList(Ingredient.of(new ItemStack(BlocksAS.GEM_CRYSTAL_CLUSTER)));
     }
 
     @Override
@@ -70,7 +70,7 @@ public class FormGemCrystalClusterRecipe extends LiquidStarlightRecipe {
 
     @Override
     public boolean matches(ItemEntity trigger, Level level, BlockPos at) {
-        if (!level.getBlockState(at.below()).isTopSolid(level, at.below(), trigger, Direction.UP)) {
+        if (!level.getBlockState(at.below()).isFaceSturdy(level, at.below(), Direction.UP)) {
             return false;
         }
         List<Entity> otherEntities = getEntitiesInBlock(level, at);
@@ -89,7 +89,7 @@ public class FormGemCrystalClusterRecipe extends LiquidStarlightRecipe {
             if (consumeItemEntityInBlock(level, at, ItemsAS.ILLUMINATION_POWDER) != null &&
                     consumeItemEntityInBlock(level, at, 1, stack -> stack.getItem() instanceof ItemCrystalBase) != null) {
 
-                level.setBlock(at, BlocksAS.GEM_CRYSTAL_CLUSTER.defaultBlockState());
+                level.setBlockAndUpdate(at, BlocksAS.GEM_CRYSTAL_CLUSTER.defaultBlockState());
             }
         }
     }

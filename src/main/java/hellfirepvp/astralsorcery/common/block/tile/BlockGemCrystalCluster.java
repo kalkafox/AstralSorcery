@@ -69,6 +69,7 @@ public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomIte
 
                 .sound(SoundType.GLASS)
                 .lightLevel((state) -> 6)
+                .dynamicShape()
                 .offsetType(BlockBehaviour.OffsetType.XZ));
     }
 

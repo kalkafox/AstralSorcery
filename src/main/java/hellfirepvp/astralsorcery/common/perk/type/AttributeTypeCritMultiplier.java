@@ -15,7 +15,7 @@ import hellfirepvp.astralsorcery.common.perk.PerkAttributeHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
-import net.neoforged.neoforge.event.entity.EntityJoinWorldEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
@@ -42,7 +42,7 @@ public class AttributeTypeCritMultiplier extends PerkAttributeType {
         eventBus.addListener(EventPriority.LOWEST, this::onHitCrit);
     }
 
-    private void onArrowCrit(EntityJoinWorldEvent event) {
+    private void onArrowCrit(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof Arrow) {
             Arrow arrow = (Arrow) event.getEntity();
             if (!arrow.isCritArrow()) {
@@ -59,13 +59,13 @@ public class AttributeTypeCritMultiplier extends PerkAttributeType {
                 float dmgMod = PerkAttributeHelper.getOrCreateMap(player, direction)
                         .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 1F);
                 dmgMod = AttributeEvent.postProcessModded(player, this, dmgMod);
-                arrow.setBaseDamage(arrow.getDamage() * dmgMod);
+                arrow.setBaseDamage(arrow.getBaseDamage() * dmgMod);
             }
         }
     }
 
     private void onHitCrit(CriticalHitEvent event) {
-        if (!event.isVanillaCritical() && event.getObject() != Event.Result.ALLOW) {
+        if (!event.isCriticalHit()) {
             return; //No crit
         }
 
@@ -78,6 +78,6 @@ public class AttributeTypeCritMultiplier extends PerkAttributeType {
         float dmgMod = PerkAttributeHelper.getOrCreateMap(player, direction)
                 .modifyValue(player, ResearchHelper.getProgress(player, direction), this, 1F);
         dmgMod = AttributeEvent.postProcessModded(player, this, dmgMod);
-        event.setDamageModifier(event.getDamageModifier() * dmgMod);
+        event.setDamageMultiplier(event.getDamageMultiplier() * dmgMod);
     }
 }
