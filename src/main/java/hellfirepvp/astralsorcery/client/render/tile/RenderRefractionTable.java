@@ -60,14 +60,12 @@ public class RenderRefractionTable extends CustomTileEntityRenderer<TileRefracti
         VertexConsumer vb = renderTypeBuffer.getBuffer(type);
         MODEL_REFRACTION_TABLE.renderFrame(renderStack, vb,
                 combinedLight, combinedOverlay, 1F, 1F, 1F, 1F, tile.hasParchment());
-        RenderingUtils.refreshDrawing(vb, type);
 
         if (!tile.getGlassStack().isEmpty()) {
             type = RenderTypesAS.MODEL_REFRACTION_TABLE_GLASS;
             vb = renderTypeBuffer.getBuffer(type);
             MODEL_REFRACTION_TABLE.renderGlass(renderStack, vb,
                     combinedLight, combinedOverlay, 1F, 1F, 1F, 1F);
-            RenderingUtils.refreshDrawing(vb, type);
         }
 
         renderStack.popPose();

@@ -9,7 +9,6 @@
 package hellfirepvp.astralsorcery.client.render.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.entity.EntitySpectralTool;
 import hellfirepvp.astralsorcery.common.lib.ColorsAS;
@@ -50,7 +49,7 @@ public class RenderEntitySpectralTool extends EntityRenderer<EntitySpectralTool>
             renderStack.mulPose(Axis.ZP.rotationDegrees(270));
         }
 
-        RenderingUtils.renderTranslucentItemStackModelGround(stack, renderStack, ColorsAS.SPECTRAL_TOOL, Blending.CONSTANT_ALPHA, 63);
+        RenderingUtils.renderTranslucentItemStackModelGround(stack, renderStack, buffer, ColorsAS.SPECTRAL_TOOL, 63);
 
         renderStack.popPose();
     }

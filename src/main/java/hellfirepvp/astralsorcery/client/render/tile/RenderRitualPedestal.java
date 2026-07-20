@@ -9,7 +9,6 @@
 package hellfirepvp.astralsorcery.client.render.tile;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import hellfirepvp.astralsorcery.client.util.Blending;
 import hellfirepvp.astralsorcery.client.util.RenderingDrawUtils;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.common.constellation.IWeakConstellation;
@@ -54,7 +53,7 @@ public class RenderRitualPedestal extends CustomTileEntityRenderer<TileRitualPed
         renderStack.pushPose();
         renderStack.translate(0.5F, 0.9F, 0.5F);
         renderStack.scale(2F, 2F, 2F);
-        RenderingUtils.renderTranslucentItemStackModelGround(display, renderStack, Color.WHITE, Blending.DEFAULT, 255);
+        RenderingUtils.renderTranslucentItemStackModelGround(display, renderStack, renderTypeBuffer, Color.WHITE, 255);
         renderStack.popPose();
 
         IWeakConstellation ritualConstellation = tile.getRitualConstellation();

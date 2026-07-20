@@ -65,7 +65,7 @@ public class CrystalPrismTransmissionNode extends SimplePrismTransmissionNode {
 
     @Override
     public CrystalAttributes getTransmissionProperties() {
-        return attributes;
+        return attributes != null ? attributes : EMPTY;
     }
 
     @Override

@@ -367,8 +367,6 @@ public class RenderingDrawUtils {
             renderStack.popPose();
         }
         renderStack.popPose();
-
-        RenderingUtils.refreshDrawing(vb, RenderTypesAS.EFFECT_LIGHTRAY_FAN);
     }
 
     public static void renderFacingFullQuadVB(VertexConsumer vb, PoseStack renderStack, double px, double py, double pz, float scale, float angle, int r, int g, int b, int alpha) {

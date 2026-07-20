@@ -338,7 +338,10 @@ public class RegistryRenderTypes {
     }
 
     private static RenderType createType(String name, VertexFormat format, RenderStateBuilder stateBuilder) {
-        return createType(name, format, VertexFormat.Mode.QUADS, 32768, stateBuilder);
+        // sortOnUpload replaces the manual BufferBuilder.sortVertexData(camera) the 1.16
+        // BatchRenderContext did per draw; without it overlapping translucent quads blend in
+        // spawn order and soft particles wash out into blobs.
+        return createType(name, format, VertexFormat.Mode.QUADS, 32768, false, true, stateBuilder);
     }
 
     private static RenderType createType(String name, VertexFormat format, VertexFormat.Mode drawMode, int bufferSize, RenderStateBuilder stateBuilder) {

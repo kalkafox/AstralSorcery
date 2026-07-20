@@ -66,7 +66,7 @@ public class CrystalTransmissionNode extends SimpleTransmissionNode {
 
     @Override
     public CrystalAttributes getTransmissionProperties() {
-        return attributes;
+        return attributes != null ? attributes : EMPTY;
     }
 
     @Override

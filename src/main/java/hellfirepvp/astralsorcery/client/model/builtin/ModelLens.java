@@ -11,7 +11,6 @@ package hellfirepvp.astralsorcery.client.model.builtin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.lib.RenderTypesAS;
-import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -69,7 +68,6 @@ public class ModelLens extends CustomModel {
         this.base.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, color);
         this.frame1.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, color);
         this.frame2.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, color);
-        RenderingUtils.refreshDrawing(vb, RenderTypesAS.MODEL_LENS_SOLID);
     }
 
     public void renderGlass(PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
@@ -77,7 +75,6 @@ public class ModelLens extends CustomModel {
         this.lens.render(matrixStackIn, vb, packedLightIn, packedOverlayIn, packColor(red, green, blue, alpha));
 
         this.lens.xRot = 0;
-        RenderingUtils.refreshDrawing(vb, RenderTypesAS.MODEL_LENS_GLASS);
     }
 
     @Override

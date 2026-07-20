@@ -13,6 +13,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.UUID;
+
 /**
  * This class is part of the Astral Sorcery Mod
  * The complete source code for this mod can be found on github.
@@ -38,6 +40,10 @@ public class CameraTransformerPlayerFocus extends CameraTransformerSettingsCache
 
         EntityClientReplacement repl = new EntityClientReplacement();
         repl.load(Minecraft.getInstance().player.saveWithoutId(new CompoundTag()));
+        // The entity lookup rejects (only warns about) additions whose UUID is already
+        // present, and load() copied the real player's UUID - re-roll it so the
+        // replacement actually enters the world and renders.
+        repl.setUUID(UUID.randomUUID());
         Minecraft.getInstance().level.addEntity(repl);
         this.clientEntity = repl;
 

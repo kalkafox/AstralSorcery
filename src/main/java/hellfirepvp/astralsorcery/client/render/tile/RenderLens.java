@@ -225,7 +225,6 @@ public class RenderLens extends CustomTileEntityRenderer<TileLens> {
 
         VertexConsumer vb = buffer.getBuffer(RenderTypesAS.MODEL_LENS_COLORED_GLASS);
         MODEL_LENS_COLORED.renderGlass(renderStack, vb, combinedLight, combinedOverlay, c.getRed() / 255F, c.getGreen() / 255F, c.getBlue() / 255F, 1F);
-        RenderingUtils.refreshDrawing(vb, RenderTypesAS.MODEL_LENS_COLORED_GLASS);
         MODEL_LENS_COLORED.render(renderStack, buffer, combinedLight, combinedOverlay);
     }
 

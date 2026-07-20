@@ -22,10 +22,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import hellfirepvp.astralsorcery.client.ClientScheduler;
 import hellfirepvp.astralsorcery.client.data.config.entry.RenderingConfig;
 import hellfirepvp.astralsorcery.client.effect.EntityComplexFX;
+import hellfirepvp.astralsorcery.client.lib.ShadersAS;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import hellfirepvp.astralsorcery.common.util.reflection.ReflectionHelper;
 import hellfirepvp.observerlib.client.util.BufferDecoratorBuilder;
-import hellfirepvp.observerlib.client.util.RenderTypeDecorator;
 import hellfirepvp.observerlib.common.util.RegistryLookup;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -232,7 +232,8 @@ public class RenderingUtils {
         } else if (format == DefaultVertexFormat.POSITION_TEX) {
             return GameRenderer::getPositionTexShader;
         } else if (format == DefaultVertexFormat.POSITION_TEX_COLOR || format == DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL) {
-            return GameRenderer::getPositionTexColorShader;
+            // Own shader: no alpha-0.1 discard, keeps soft texture falloff (see ShadersAS).
+            return () -> ShadersAS.EFFECT_TEX_COLOR;
         } else if (format == DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP) {
             return GameRenderer::getPositionColorTexLightmapShader;
         } else if (format == DefaultVertexFormat.POSITION_COLOR_LIGHTMAP) {
@@ -278,19 +279,6 @@ public class RenderingUtils {
                 BufferUploader.drawWithShader(data);
             }
         }
-    }
-
-    // 1.21 port: BufferBuilders are single-use now; flushing returns a fresh builder that callers
-    // must switch to. Callers still on the old void-style usage need reworking when they're ported.
-    public static VertexConsumer refreshDrawing(VertexConsumer vb, RenderType type) {
-        if (vb instanceof BufferBuilder buf) {
-            MeshData data = buf.build();
-            if (data != null) {
-                type.draw(data);
-            }
-            return Tesselator.getInstance().begin(type.mode(), type.format());
-        }
-        return vb;
     }
 
     public static int renderInWorldText(FormattedText text, Color color, Vector3 at, PoseStack renderStack, float pTicks, boolean facePlayer) {
@@ -346,11 +334,14 @@ public class RenderingUtils {
         renderStack.popPose();
     }
 
-    public static void renderTranslucentItemStack(ItemStack stack, PoseStack renderStack, float pTicks) {
-        renderTranslucentItemStack(stack, renderStack, pTicks, Color.WHITE, 25);
+    public static void renderTranslucentItemStack(ItemStack stack, PoseStack renderStack, MultiBufferSource buffers, float pTicks) {
+        // 1.21 port: alpha raised from the 1.16-era 25 - the ghost now draws with standard
+        // SRC_ALPHA blending instead of the old premultiplied PREALPHA, which reads much dimmer
+        // at the same vertex alpha.
+        renderTranslucentItemStack(stack, renderStack, buffers, pTicks, Color.WHITE, 96);
     }
 
-    public static void renderTranslucentItemStack(ItemStack stack, PoseStack renderStack, float pTicks, Color overlayColor, int alpha) {
+    public static void renderTranslucentItemStack(ItemStack stack, PoseStack renderStack, MultiBufferSource buffers, float pTicks, Color overlayColor, int alpha) {
         renderStack.pushPose();
 
         // EntityItemRenderer entity bobbing
@@ -359,31 +350,19 @@ public class RenderingUtils {
         float ageRotate = ((ClientScheduler.getClientTick() + pTicks) / 20.0F);
         renderStack.mulPose(Axis.YP.rotation(ageRotate));
 
-        renderTranslucentItemStackModelGround(stack, renderStack, overlayColor, Blending.PREALPHA, alpha);
+        renderTranslucentItemStackModelGround(stack, renderStack, buffers, overlayColor, alpha);
 
         renderStack.popPose();
     }
 
-    public static void renderTranslucentItemStackModelGround(ItemStack stack, PoseStack renderStack, Color overlayColor, Blending blendMode, int alpha) {
-        BakedModel bakedModel = getModel(stack);
-        ClientHooks.handleCameraTransforms(renderStack, bakedModel, ItemDisplayContext.GROUND, false);
-        TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-
-        RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-        textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-
-        MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        renderItemModelWithColor(stack, ItemDisplayContext.GROUND, bakedModel, renderStack, (renderType) -> {
-            RenderTypeDecorator decorated = RenderTypeDecorator.wrapSetup(renderType, () -> {
-                RenderSystem.enableBlend();
-                blendMode.apply();
-            }, () -> {
-                Blending.DEFAULT.apply();
-                RenderSystem.disableBlend();
-            });
-            return buffer.getBuffer(decorated);
-        }, LightmapUtil.getPackedFullbrightCoords(), OverlayTexture.NO_OVERLAY, overlayColor, alpha);
-        buffer.endBatch();
+    // 1.21 port: renders into the pass's own MultiBufferSource. The old implementation drew
+    // through the shared renderBuffers() source and force-flushed it mid-BER/entity-pass
+    // (same batch-corruption class as the lens render crash); translucency now comes from the
+    // translucent item render type + vertex alpha instead of global RenderSystem blend state.
+    public static void renderTranslucentItemStackModelGround(ItemStack stack, PoseStack renderStack, MultiBufferSource buffers, Color overlayColor, int alpha) {
+        BakedModel bakedModel = ClientHooks.handleCameraTransforms(renderStack, getModel(stack), ItemDisplayContext.GROUND, false);
+        renderItemModelWithColor(stack, ItemDisplayContext.GROUND, bakedModel, renderStack, buffers,
+                LightmapUtil.getPackedFullbrightCoords(), OverlayTexture.NO_OVERLAY, overlayColor, alpha);
     }
 
     public static void renderTranslucentItemStackModelGUI(ItemStack stack, PoseStack renderStack, Color overlayColor, Blending blendMode, int alpha) {
