@@ -12,7 +12,9 @@ import hellfirepvp.astralsorcery.common.constellation.IMajorConstellation;
 import hellfirepvp.astralsorcery.common.data.research.*;
 import hellfirepvp.astralsorcery.common.network.base.ASPacket;
 import hellfirepvp.astralsorcery.common.util.data.ByteBufUtils;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
@@ -47,6 +49,9 @@ public class PktSyncKnowledge extends ASPacket<PktSyncKnowledge> {
     public int progressTier = 0;
     public boolean doPerkAbilities = true;
     public PlayerPerkData perkData = null;
+    // Serialized on the sending (server) thread by load(); encoding happens on the Netty IO
+    // thread, and writing the live PlayerPerkData there races progress mutations (CME).
+    private byte[] perkDataSnapshot = null;
 
     public PktSyncKnowledge() {}
 
@@ -55,15 +60,26 @@ public class PktSyncKnowledge extends ASPacket<PktSyncKnowledge> {
     }
 
     public void load(PlayerProgress progress) {
-        this.knownConstellations = progress.getKnownConstellations();
-        this.seenConstellations = progress.getSeenConstellations();
-        this.storedConstellationPapers = progress.getStoredConstellationPapers();
-        this.researchProgression = progress.getResearchProgression();
+        // Copy everything here (server thread) — the encoder runs on the Netty IO thread and
+        // must not touch the live progress collections.
+        this.knownConstellations = new ArrayList<>(progress.getKnownConstellations());
+        this.seenConstellations = new ArrayList<>(progress.getSeenConstellations());
+        this.storedConstellationPapers = new ArrayList<>(progress.getStoredConstellationPapers());
+        this.researchProgression = new ArrayList<>(progress.getResearchProgression());
         this.progressTier = progress.getTierReached().ordinal();
         this.attunedConstellation = progress.getAttunedConstellation();
         this.perkData = progress.getPerkData();
         this.wasOnceAttuned = progress.wasOnceAttuned();
         this.doPerkAbilities = progress.doPerkAbilities();
+
+        FriendlyByteBuf tmp = new FriendlyByteBuf(Unpooled.buffer());
+        try {
+            this.perkData.write(tmp);
+            this.perkDataSnapshot = new byte[tmp.readableBytes()];
+            tmp.readBytes(this.perkDataSnapshot);
+        } finally {
+            tmp.release();
+        }
     }
 
     @Nonnull
@@ -72,7 +88,7 @@ public class PktSyncKnowledge extends ASPacket<PktSyncKnowledge> {
         return (packet, buffer) -> {
             buffer.writeByte(packet.state);
 
-            ByteBufUtils.writeOptional(buffer, packet.perkData, (buf, perkData) -> perkData.write(buf));
+            ByteBufUtils.writeOptional(buffer, packet.perkDataSnapshot, (buf, bytes) -> buf.writeBytes(bytes));
             ByteBufUtils.writeCollection(buffer, packet.knownConstellations, ByteBufUtils::writeResourceLocation);
             ByteBufUtils.writeCollection(buffer, packet.seenConstellations, ByteBufUtils::writeResourceLocation);
             ByteBufUtils.writeCollection(buffer, packet.storedConstellationPapers, ByteBufUtils::writeResourceLocation);

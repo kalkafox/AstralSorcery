@@ -20,7 +20,8 @@ java {
 sourceSets.main.resources {
     srcDir 'src/generated/resources'
     exclude '**/*.bbmodel'
-    exclude 'src/generated/**/.cache'
+    // Datagen bookkeeping; pattern is relative to each source root.
+    exclude '.cache/**'
 }
 
 // Datagen (runData) re-emits some assets that are also handwritten in
@@ -28,14 +29,17 @@ sourceSets.main.resources {
 tasks.named('processResources') {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+tasks.named('sourcesJar') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 sourceSets.main.java {
-    // 1.21 port: optional-mod integrations (JEI, CraftTweaker, Curios, Botania) are
-    // excluded until the mod itself compiles and their 1.21 APIs are brought back.
-    exclude 'hellfirepvp/astralsorcery/common/integration/**'
-    // 1.21 port: JEI-facing interaction handlers depend on mezz.jei classes; restored
-    // together with the JEI integration above.
-    exclude 'hellfirepvp/astralsorcery/common/crafting/recipe/interaction/jei/**'
+    // 1.21 port: remaining optional-mod integrations (CraftTweaker, Curios, Botania) are
+    // excluded until their 1.21 APIs are brought back. JEI is integrated again.
+    exclude 'hellfirepvp/astralsorcery/common/integration/crt/**'
+    exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationBotania.java'
+    exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationCraftTweaker.java'
+    exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationCurios.java'
 }
 
 repositories {
@@ -54,6 +58,17 @@ repositories {
         name = 'JEI'
         url = 'https://maven.blamejared.com/'
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = 'Modrinth'
+                url = 'https://api.modrinth.com/maven'
+            }
+        }
+        filter {
+            includeGroup 'maven.modrinth'
+        }
+    }
 }
 
 neoForge {
@@ -70,6 +85,7 @@ neoForge {
         client {
             client()
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+            programArguments.addAll('--quickPlaySingleplayer', 'New World')
         }
 
         server {
@@ -120,8 +136,17 @@ dependencies {
     // via `gradlew publishToMavenLocal`.
     implementation "hellfirepvp.observerlib:observerlib:${observerlib_version}"
 
+    compileOnly "mezz.jei:jei-1.21.1-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
+    localRuntime "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+
     // Optional integrations are reintroduced subsystem-by-subsystem during the port.
     // Keeping their repositories here makes each integration an isolated build change.
+
+    // Dev-run-only mods (never ship). MDG loads mods from localRuntime; the per-run
+    // additionalRuntimeClasspath treats jars as plain libraries, not mods.
+    // Customizable Player Models 1.21.1 NeoForge (Modrinth project h1E7sQNL).
+    localRuntime 'maven.modrinth:h1E7sQNL:YXfPij2E'
 }
 
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {

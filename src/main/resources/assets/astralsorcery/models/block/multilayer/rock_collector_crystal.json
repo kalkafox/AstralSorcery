@@ -1,12 +1,14 @@
 {
   "parent": "block/block",
-  "loader": "forge:multi-layer",
-  "layers": {
+  "loader": "neoforge:composite",
+  "children": {
     "solid": {
-      "parent": "astralsorcery:block/rock_collector_crystal_solid"
+      "parent": "astralsorcery:block/rock_collector_crystal_solid",
+      "render_type": "minecraft:solid"
     },
     "translucent": {
-      "parent": "astralsorcery:block/rock_collector_crystal_translucent"
+      "parent": "astralsorcery:block/rock_collector_crystal_translucent",
+      "render_type": "minecraft:translucent"
     }
   },
   "textures": {

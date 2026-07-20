@@ -552,6 +552,8 @@
 
   "fluid.astralsorcery.liquid_starlight": "Liquid Starlight",
   "fluid.astralsorcery.liquid_starlight_flowing": "Liquid Starlight",
+  "fluid_type.astralsorcery.liquid_starlight": "Liquid Starlight",
+  "block.astralsorcery.liquid_starlight": "Liquid Starlight",
 
   "item.astralsorcery.liquid_starlight_bucket": "Liquid Starlight Bucket",
 

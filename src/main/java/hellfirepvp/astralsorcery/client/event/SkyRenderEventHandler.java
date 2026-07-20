@@ -49,7 +49,11 @@ public class SkyRenderEventHandler {
             return;
         }
 
-        PoseStack renderStack = event.getPoseStack();
+        // At AFTER_SKY the event PoseStack is empty and RenderSystem's model-view is identity;
+        // the camera transform only exists in the event's model-view matrix. Seed the pose with
+        // it, otherwise the sky renders in view space (screen-fixed).
+        PoseStack renderStack = new PoseStack();
+        renderStack.mulPose(event.getModelViewMatrix());
         float pTicks = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 
         EventFlags.SKY_RENDERING.executeWithFlag(() -> {
@@ -69,7 +73,8 @@ public class SkyRenderEventHandler {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alphaSubRain);
 
         renderStack.pushPose();
-        renderStack.mulPose(Axis.XP.rotationDegrees(180));
+        renderStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+        renderStack.mulPose(Axis.XP.rotationDegrees(level.getTimeOfDay(pTicks) * 360.0F));
         AstralSkyRenderer.renderConstellationsSky(level, renderStack, pTicks);
         renderStack.popPose();
 

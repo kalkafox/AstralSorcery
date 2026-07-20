@@ -133,8 +133,8 @@ public class EntityObservatoryHelper extends Entity {
     }
 
     @Override
-    protected boolean canRide(Entity entityIn) {
-        if (!super.canRide(entityIn)) {
+    protected boolean canAddPassenger(Entity passenger) {
+        if (!super.canAddPassenger(passenger)) {
             return false;
         }
         TileObservatory observatory = this.getAssociatedObservatory();

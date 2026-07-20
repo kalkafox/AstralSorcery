@@ -1,21 +1,23 @@
 {
   "parent": "block/block",
-  "loader": "forge:multi-layer",
-  "layers": {
+  "loader": "neoforge:composite",
+  "children": {
     "solid": {
       "parent": "block/cube_all",
       "textures": {
-        "all": "block/stone"
-      }
+        "all": "block/deepslate"
+      },
+      "render_type": "minecraft:solid"
     },
     "translucent": {
       "parent": "block/cube_all",
       "textures": {
         "all": "astralsorcery:block/ore_rockcrystal"
-      }
+      },
+      "render_type": "minecraft:translucent"
     }
   },
   "textures": {
-    "particle": "block/stone"
+    "particle": "block/deepslate"
   }
 }

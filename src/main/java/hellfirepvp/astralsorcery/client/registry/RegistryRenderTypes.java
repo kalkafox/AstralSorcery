@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.client.registry;
 import com.mojang.blaze3d.systems.RenderSystem;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.client.constellation.ConstellationRenderInfos;
+import hellfirepvp.astralsorcery.client.lib.ShadersAS;
 import hellfirepvp.astralsorcery.client.lib.TexturesAS;
 import hellfirepvp.astralsorcery.client.render.RenderStateBuilder;
 import hellfirepvp.astralsorcery.client.resource.AbstractRenderableTexture;
@@ -364,7 +365,9 @@ public class RegistryRenderTypes {
         } else if (format == DefaultVertexFormat.POSITION_TEX) {
             return new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader);
         } else if (format == DefaultVertexFormat.POSITION_TEX_COLOR || format == DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL) {
-            return new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexColorShader);
+            // Own shader: vanilla position_tex_color discards below alpha 0.1, which hard-cuts
+            // the smooth falloff on soft particle textures (1.16 disabled alpha test here).
+            return new RenderStateShard.ShaderStateShard(() -> ShadersAS.EFFECT_TEX_COLOR);
         } else if (format == DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP) {
             return new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorTexLightmapShader);
         } else if (format == DefaultVertexFormat.BLOCK) {

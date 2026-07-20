@@ -8,16 +8,15 @@
 
 package hellfirepvp.astralsorcery.common.integration.jei;
 
-import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
+import hellfirepvp.astralsorcery.common.crafting.helper.CustomMatcherRecipe;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -27,45 +26,30 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 05.09.2020 / 12:38
  */
-public abstract class JEICategory<T extends Recipe<?>> implements IRecipeCategory<T> {
+public abstract class JEICategory<T extends CustomMatcherRecipe> implements IRecipeCategory<T> {
 
-    private final String locTitle;
-    private final ResourceLocation uid;
+    private final RecipeType<T> recipeType;
+    private final Component title;
 
-    public JEICategory(ResourceLocation categoryId) {
-        this(category(categoryId), categoryId);
-    }
-
-    public JEICategory(String unlocTitle, ResourceLocation uid) {
-        this.locTitle = I18n.format(unlocTitle);
-        this.uid = uid;
-    }
-
-    protected static String category(ResourceLocation categoryId) {
-        return String.format("jei.category.%s.%s", categoryId.getNamespace(), categoryId.getPath());
+    public JEICategory(RecipeType<T> recipeType) {
+        this.recipeType = recipeType;
+        ResourceLocation uid = recipeType.getUid();
+        this.title = Component.translatable(String.format("jei.category.%s.%s", uid.getNamespace(), uid.getPath()));
     }
 
     protected static List<ItemStack> ingredientStacks(Ingredient ingredient) {
         return Arrays.asList(ingredient.getItems());
     }
 
-    protected static void initFluidInput(IGuiFluidStackGroup group, int index, int x, int y) {
-        group.init(index, true, x + 1, y + 1, 16, 16, 1000, false, null);
-    }
-
-    protected static void initFluidOutput(IGuiFluidStackGroup group, int index, int x, int y) {
-        group.init(index, false, x + 1, y + 1, 16, 16, 1000, false, null);
-    }
-
     public abstract List<T> getRecipes();
 
     @Override
-    public ResourceLocation getUid() {
-        return uid;
+    public RecipeType<T> getRecipeType() {
+        return this.recipeType;
     }
 
     @Override
-    public String getTitle() {
-        return locTitle;
+    public Component getTitle() {
+        return this.title;
     }
 }

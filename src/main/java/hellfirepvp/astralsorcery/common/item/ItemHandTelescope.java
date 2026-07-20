@@ -40,7 +40,10 @@ public class ItemHandTelescope extends Item {
             return InteractionResultHolder.success(held);
         }
         if (level.isClientSide()) {
-            AstralSorcery.getProxy().openGui(player, GuiType.HAND_TELESCOPE);
+            // Item use is still being processed when this method returns. Opening synchronously
+            // lets that same right-click reach the new screen and close it immediately.
+            AstralSorcery.getProxy().scheduleClientside(
+                    () -> AstralSorcery.getProxy().openGui(player, GuiType.HAND_TELESCOPE), 1);
         }
         return InteractionResultHolder.success(held);
     }

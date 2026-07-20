@@ -111,8 +111,13 @@ public abstract class TileNetwork<T extends IPrismTransmissionNode> extends Tile
         if (this.getLevel() == null || this.getLevel().isClientSide()) {
             return;
         }
-        TransmissionNetworkHelper.informNetworkTileRemoval(this);
+        // setRemoved can be called more than once (and is also used by chunk/tick lifecycle
+        // code). Do not attempt to remove a node that this tile has already torn down.
+        if (this.isNetworkInformed || TransmissionNetworkHelper.isTileInNetwork(this)) {
+            TransmissionNetworkHelper.informNetworkTileRemoval(this);
+        }
         this.isNetworkInformed = false;
+        this.cachedNetworkNode = null;
     }
 
     @Override

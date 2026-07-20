@@ -409,6 +409,10 @@ public class NBTHelper {
     }
 
     public static void setFluid(CompoundTag pattern, String tag, FluidStack stack) {
+        if (stack.isEmpty()) {
+            pattern.remove(tag);
+            return;
+        }
         setAsSubTag(pattern, tag, sub -> stack.save(RegistryAccess.EMPTY, sub));
     }
 

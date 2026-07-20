@@ -145,9 +145,11 @@ public class AstralSkyRenderer {
 
         renderStack.popPose();
 
-        //Constellations
+        //Constellations - rotate with the sky like the stars do (XP(180) == the star
+        //rotation at midnight, so the layout matches the old fixed orientation then)
         renderStack.pushPose();
-        renderStack.mulPose(Axis.XP.rotationDegrees(180));
+        renderStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+        renderStack.mulPose(Axis.XP.rotationDegrees(level.getTimeOfDay(pTicks) * 360.0F));
 
         renderConstellationsSky(level, renderStack, pTicks);
 

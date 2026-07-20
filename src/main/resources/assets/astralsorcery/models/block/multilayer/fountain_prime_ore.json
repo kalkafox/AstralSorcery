@@ -1,15 +1,17 @@
 {
-    "parent": "block/block",
-    "loader": "forge:multi-layer",
-    "layers": {
-        "solid": {
-            "parent": "astralsorcery:block/fountain_prime_ore_solid"
-        },
-        "translucent": {
-            "parent": "astralsorcery:block/fountain_prime_ore_translucent"
-        }
+  "parent": "block/block",
+  "loader": "neoforge:composite",
+  "children": {
+    "solid": {
+      "parent": "astralsorcery:block/fountain_prime_ore_solid",
+      "render_type": "minecraft:solid"
     },
-    "textures": {
-        "particle": "astralsorcery:block/fountain_prime_base"
+    "translucent": {
+      "parent": "astralsorcery:block/fountain_prime_ore_translucent",
+      "render_type": "minecraft:translucent"
     }
+  },
+  "textures": {
+    "particle": "astralsorcery:block/fountain_prime_base"
+  }
 }

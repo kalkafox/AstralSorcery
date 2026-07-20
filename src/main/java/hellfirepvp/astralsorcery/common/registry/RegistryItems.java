@@ -180,13 +180,20 @@ public class RegistryItems {
         });
     }
 
-    public static void addCreativeVariants(CreativeModeTab.Output output) {
+    public static void addConstellationPapers(CreativeModeTab.Output output) {
         for (IConstellation constellation : ConstellationRegistry.getAllConstellations()) {
             ItemStack paper = new ItemStack(CONSTELLATION_PAPER);
             CONSTELLATION_PAPER.setConstellation(paper, constellation);
             output.accept(paper);
         }
+    }
 
+    public static void addAttunedCrystals(CreativeModeTab.Output output) {
+        addAttunedCrystalVariants(output, ATTUNED_ROCK_CRYSTAL);
+        addAttunedCrystalVariants(output, ATTUNED_CELESTIAL_CRYSTAL);
+    }
+
+    public static void addCreativeVariants(CreativeModeTab.Output output) {
         ItemStack creativeKnowledge = new ItemStack(KNOWLEDGE_SHARE);
         ItemKnowledgeShare.setCreative(creativeKnowledge);
         output.accept(creativeKnowledge);
@@ -197,9 +204,6 @@ public class RegistryItems {
         ItemStack upgradedResonator = new ItemStack(RESONATOR);
         ItemResonator.setUpgradeUnlocked(upgradedResonator, ItemResonator.ResonatorUpgrade.values());
         output.accept(upgradedResonator);
-
-        addAttunedCrystalVariants(output, ATTUNED_ROCK_CRYSTAL);
-        addAttunedCrystalVariants(output, ATTUNED_CELESTIAL_CRYSTAL);
 
         for (IWeakConstellation constellation : ConstellationRegistry.getWeakConstellations()) {
             ItemStack mantle = new ItemStack(MANTLE);

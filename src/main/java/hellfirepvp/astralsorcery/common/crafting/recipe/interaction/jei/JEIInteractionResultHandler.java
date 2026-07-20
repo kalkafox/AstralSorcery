@@ -8,10 +8,9 @@
 
 package hellfirepvp.astralsorcery.common.crafting.recipe.interaction.jei;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
-import mezz.jei.api.gui.IRecipeLayout;
-import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import net.minecraft.client.gui.GuiGraphics;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -25,12 +24,9 @@ import net.neoforged.api.distmarker.OnlyIn;
 public abstract class JEIInteractionResultHandler {
 
     @OnlyIn(Dist.CLIENT)
-    public abstract void addToRecipeLayout(IRecipeLayout recipeLayout, LiquidInteraction recipe, IIngredients ingredients);
+    public abstract void addToRecipeLayout(IRecipeLayoutBuilder builder, LiquidInteraction recipe);
 
     @OnlyIn(Dist.CLIENT)
-    public abstract void addToRecipeIngredients(LiquidInteraction recipe, IIngredients ingredients);
-
-    @OnlyIn(Dist.CLIENT)
-    public abstract void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double xpos, double ypos);
+    public abstract void drawRecipe(LiquidInteraction recipe, GuiGraphics guiGraphics, double mouseX, double mouseY);
 
 }

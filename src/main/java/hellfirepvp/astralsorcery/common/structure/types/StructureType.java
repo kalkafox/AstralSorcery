@@ -11,10 +11,10 @@ package hellfirepvp.astralsorcery.common.structure.types;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistryEntry;
 import hellfirepvp.observerlib.api.ChangeSubscriber;
 import hellfirepvp.observerlib.api.ObserverHelper;
-import hellfirepvp.observerlib.api.structure.MatchableStructure;
 import hellfirepvp.observerlib.api.util.BlockArray;
 import hellfirepvp.observerlib.common.change.ChangeObserverStructure;
 import hellfirepvp.observerlib.common.change.ObserverProviderStructure;
+import hellfirepvp.observerlib.common.registry.RegistryProviders;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -49,7 +49,11 @@ public class StructureType implements AstralRegistryEntry<StructureType> {
     }
 
     public ChangeSubscriber<ChangeObserverStructure> observe(Level level, BlockPos pos) {
-        return ObserverHelper.getHelper().observeArea(level, pos, new ObserverProviderStructure((MatchableStructure) this.getFeature()));
+        Object provider = RegistryProviders.getProvider(this.name);
+        if (!(provider instanceof ObserverProviderStructure structureProvider)) {
+            throw new IllegalStateException("Missing registered structure observer provider: " + this.name);
+        }
+        return ObserverHelper.getHelper().observeArea(level, pos, structureProvider);
     }
 
     @Override

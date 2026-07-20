@@ -8,10 +8,6 @@
 
 package hellfirepvp.astralsorcery.common.integration.jei;
 
-import net.minecraft.network.chat.Component;
-
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteractionContext;
@@ -19,24 +15,24 @@ import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.jei.JEIInter
 import hellfirepvp.astralsorcery.common.integration.IntegrationJEI;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
-import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.neoforged.neoforge.fluids.FluidAttributes;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 
 import java.text.DecimalFormat;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import net.neoforged.neoforge.fluids.FluidType;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -52,19 +48,24 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
     private final IDrawable background, icon;
 
     public CategoryLiquidInteraction(IGuiHelper guiHelper) {
-        super(IntegrationJEI.CATEGORY_LIQUID_INTERACTION);
+        super(IntegrationJEI.TYPE_LIQUID_INTERACTION);
         this.background = guiHelper.createDrawable(AstralSorcery.key("textures/gui/jei/interaction.png"), 0, 0, 112, 54);
-        this.icon = guiHelper.createDrawableIngredient(new ItemStack(BlocksAS.CHALICE));
+        this.icon = guiHelper.createDrawableItemStack(new ItemStack(BlocksAS.CHALICE));
     }
 
     @Override
-    public Class<? extends LiquidInteraction> getRecipeClass() {
-        return LiquidInteraction.class;
-    }
-
-    @Override
-    public IDrawable getNoItemIcon() {
+    public IDrawable getBackground() {
         return this.background;
+    }
+
+    @Override
+    public int getWidth() {
+        return this.background.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return this.background.getHeight();
     }
 
     @Override
@@ -78,15 +79,15 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
     }
 
     @Override
-    public void draw(LiquidInteraction recipe, PoseStack renderStack, double xpos, double ypos) {
-        this.icon.draw(renderStack, 3, 36);
-        this.icon.draw(renderStack, 93, 36);
+    public void draw(LiquidInteraction recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+        this.icon.draw(guiGraphics, 3, 36);
+        this.icon.draw(guiGraphics, 93, 36);
 
         JEIInteractionResultRegistry.get(recipe.getObject().getId())
-                .ifPresent(handler -> handler.drawRecipe(recipe, renderStack, xpos, ypos));
+                .ifPresent(handler -> handler.drawRecipe(recipe, guiGraphics, mouseX, mouseY));
 
-        FluidStack testMatch1 = new FluidStack(recipe.getReactant1(), FluidType.BUCKET_VOLUME);
-        FluidStack testMatch2 = new FluidStack(recipe.getReactant2(), FluidType.BUCKET_VOLUME);
+        FluidStack testMatch1 = new FluidStack(recipe.getReactant1().getFluid(), FluidType.BUCKET_VOLUME);
+        FluidStack testMatch2 = new FluidStack(recipe.getReactant2().getFluid(), FluidType.BUCKET_VOLUME);
         LiquidInteractionContext ctx = new LiquidInteractionContext(testMatch1, testMatch2);
         Collection<LiquidInteraction> sameInteractions = RecipeTypesAS.TYPE_LIQUID_INTERACTION.findMatchingRecipes(ctx);
         if (!sameInteractions.isEmpty()) {
@@ -96,33 +97,20 @@ public class CategoryLiquidInteraction extends JEICategory<LiquidInteraction> {
             Font fr = Minecraft.getInstance().font;
             MutableComponent txt = Component.translatable("jei.astralsorcery.tip.chance", FORMAT_CHANCE.format(perc));
             int width = fr.width(txt);
-            fr.draw(renderStack, txt, 74 - width, 44, 0x333333);
+            guiGraphics.drawString(fr, txt, 74 - width, 44, 0x333333, false);
         }
     }
 
     @Override
-    public void setIngredients(LiquidInteraction recipe, IIngredients ingredients) {
-        ImmutableList.Builder<List<FluidStack>> fluidInputs = ImmutableList.builder();
-
-        fluidInputs.add(Collections.singletonList(recipe.getReactant1()));
-        fluidInputs.add(Collections.singletonList(recipe.getReactant2()));
-
-        ingredients.setInputLists(VanillaTypes.FLUID, fluidInputs.build());
-
-        JEIInteractionResultRegistry.get(recipe.getObject().getId())
-                .ifPresent(handler -> handler.addToRecipeIngredients(recipe, ingredients));
-    }
-
-    @Override
-    public void setRecipe(IRecipeLayout recipeLayout, LiquidInteraction recipe, IIngredients ingredients) {
-        IGuiFluidStackGroup fluidStacks = recipeLayout.getFluidStacks();
-
-        fluidStacks.init(0, true, 2 + 1, 18 + 1, 16, 16, recipe.getReactant1().getAmount(), false, null);
-        fluidStacks.init(1, true, 92 + 1, 18 + 1, 16, 16,  recipe.getReactant2().getAmount(), false, null);
-
-        fluidStacks.set(ingredients);
+    public void setRecipe(IRecipeLayoutBuilder builder, LiquidInteraction recipe, IFocusGroup focuses) {
+        builder.addSlot(RecipeIngredientRole.INPUT, 3, 19)
+                .setFluidRenderer(recipe.getReactant1().getAmount(), false, 16, 16)
+                .addFluidStack(recipe.getReactant1().getFluid(), recipe.getReactant1().getAmount());
+        builder.addSlot(RecipeIngredientRole.INPUT, 93, 19)
+                .setFluidRenderer(recipe.getReactant2().getAmount(), false, 16, 16)
+                .addFluidStack(recipe.getReactant2().getFluid(), recipe.getReactant2().getAmount());
 
         JEIInteractionResultRegistry.get(recipe.getObject().getId())
-                .ifPresent(handler -> handler.addToRecipeLayout(recipeLayout, recipe, ingredients));
+                .ifPresent(handler -> handler.addToRecipeLayout(builder, recipe));
     }
 }

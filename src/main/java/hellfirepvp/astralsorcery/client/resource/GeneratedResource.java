@@ -50,11 +50,9 @@ public class GeneratedResource extends BindableResource implements ReloadableRes
         if (AssetLibrary.isReloading()) {
             return null;
         }
+        // 1.21 port: see BindableResource.allocateGlId — getTexture(id) auto-registers, so always
+        // register the in-memory texture explicitly instead of probing.
         TextureManager mgr = Minecraft.getInstance().getTextureManager();
-        AbstractTexture resource = mgr.getTexture(this.getKey());
-        if (resource != null) {
-            return resource;
-        }
         InMemoryTexture texture = new InMemoryTexture(this.imageGen, this.blur, this.clamp);
         mgr.register(this.getKey(), texture);
         return mgr.getTexture(this.getKey());

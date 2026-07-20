@@ -129,8 +129,8 @@ public class CommonProxy {
     public static DamageSource DAMAGE_SOURCE_STELLAR = DamageSourceUtil.newType("astralsorcery.stellar");
     public static DamageSource DAMAGE_SOURCE_REFLECT = DamageSourceUtil.newType("thorns");
 
-    // 1.21 port: tab contents show every registered item in the main tab for now;
-    // the old per-item group assignments (papers/crystals) still need re-curation.
+    // 1.21 port: the main tab shows every registered item plus creative-only variants;
+    // constellation papers and attuned crystals live in their own tabs below.
     public static final Supplier<CreativeModeTab> ITEM_GROUP_AS = AstralRegistries.CREATIVE_MODE_TABS.register(
             AstralSorcery.MODID, () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + AstralSorcery.MODID))
@@ -144,11 +144,13 @@ public class CommonProxy {
             AstralSorcery.MODID + "_papers", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + AstralSorcery.MODID + ".papers"))
                     .icon(() -> new ItemStack(CONSTELLATION_PAPER))
+                    .displayItems((params, out) -> RegistryItems.addConstellationPapers(out))
                     .build());
     public static final Supplier<CreativeModeTab> ITEM_GROUP_AS_CRYSTALS = AstralRegistries.CREATIVE_MODE_TABS.register(
             AstralSorcery.MODID + "_crystals", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup." + AstralSorcery.MODID + ".crystals"))
                     .icon(() -> new ItemStack(ROCK_CRYSTAL))
+                    .displayItems((params, out) -> RegistryItems.addAttunedCrystals(out))
                     .build());
     // 1.21 port: Rarity.create is gone (enum extension is JSON-driven now);
     // mapped to nearest vanilla rarities until enumextensions.json is added.

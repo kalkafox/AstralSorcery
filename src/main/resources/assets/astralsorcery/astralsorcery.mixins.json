@@ -19,9 +19,7 @@
     ],
     "client": [
         "client.MixinClientWorld",
-        "client.MixinGameRenderer",
-        "client.MixinItemStack",
-        "client.MixinParticleManager"
+        "client.MixinItemStack"
     ],
     "server": [],
     "injectors": {

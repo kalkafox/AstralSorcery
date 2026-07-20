@@ -8,21 +8,14 @@
 
 package hellfirepvp.astralsorcery.common.crafting.recipe.interaction.jei;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import hellfirepvp.astralsorcery.common.crafting.recipe.LiquidInteraction;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.InteractionResult;
 import hellfirepvp.astralsorcery.common.crafting.recipe.interaction.ResultDropItem;
-import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.gui.IRecipeLayout;
-import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
-import mezz.jei.api.ingredients.IIngredients;
-import net.minecraft.world.item.ItemStack;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import net.minecraft.client.gui.GuiGraphics;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-
-import java.util.List;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -32,31 +25,19 @@ import java.util.List;
  * Date: 31.10.2020 / 14:50
  */
 public class JEIHandlerDropItem extends JEIInteractionResultHandler {
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void addToRecipeLayout(IRecipeLayout recipeLayout, LiquidInteraction recipe, IIngredients ingredients) {
-        IGuiItemStackGroup items = recipeLayout.getItems();
-
-        items.init(2, false, 47, 18);
-
-        items.set(ingredients);
-    }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void addToRecipeIngredients(LiquidInteraction recipe, IIngredients ingredients) {
-        ImmutableList.Builder<List<ItemStack>> itemOutputs = ImmutableList.builder();
-
+    public void addToRecipeLayout(IRecipeLayoutBuilder builder, LiquidInteraction recipe) {
         InteractionResult result = recipe.getObject();
-        if (result instanceof ResultDropItem) {
-            itemOutputs.add(Lists.newArrayList(((ResultDropItem) result).getOutput()));
+        if (result instanceof ResultDropItem dropItem) {
+            builder.addSlot(RecipeIngredientRole.OUTPUT, 48, 19)
+                    .addItemStack(dropItem.getOutput());
         }
-
-        ingredients.setOutputLists(VanillaTypes.ITEM, itemOutputs.build());
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void drawRecipe(LiquidInteraction recipe, PoseStack renderStack, double xpos, double ypos) {
+    public void drawRecipe(LiquidInteraction recipe, GuiGraphics guiGraphics, double mouseX, double mouseY) {
     }
 }

@@ -1,18 +1,20 @@
 {
   "parent": "block/block",
-  "loader": "forge:multi-layer",
-  "layers": {
+  "loader": "neoforge:composite",
+  "children": {
     "solid": {
       "parent": "block/cube_all",
       "textures": {
         "all": "block/sand"
-      }
+      },
+      "render_type": "minecraft:solid"
     },
     "translucent": {
       "parent": "block/cube_all",
       "textures": {
         "all": "astralsorcery:block/ore_aquamarine"
-      }
+      },
+      "render_type": "minecraft:translucent"
     }
   },
   "textures": {

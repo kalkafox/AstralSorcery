@@ -1,12 +1,14 @@
 {
   "parent": "block/block",
-  "loader": "forge:multi-layer",
-  "layers": {
+  "loader": "neoforge:composite",
+  "children": {
     "solid": {
-      "parent": "astralsorcery:block/spectral_relay_solid"
+      "parent": "astralsorcery:block/spectral_relay_solid",
+      "render_type": "minecraft:solid"
     },
     "translucent": {
-      "parent": "astralsorcery:block/spectral_relay_translucent"
+      "parent": "astralsorcery:block/spectral_relay_translucent",
+      "render_type": "minecraft:translucent"
     }
   },
   "textures": {

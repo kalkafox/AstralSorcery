@@ -1,12 +1,14 @@
 {
   "parent": "block/block",
-  "loader": "forge:multi-layer",
-  "layers": {
+  "loader": "neoforge:composite",
+  "children": {
     "solid": {
-      "parent": "astralsorcery:block/prism_colored_solid"
+      "parent": "astralsorcery:block/prism_colored_solid",
+      "render_type": "minecraft:solid"
     },
     "translucent": {
-      "parent": "astralsorcery:block/prism_colored_translucent"
+      "parent": "astralsorcery:block/prism_colored_translucent",
+      "render_type": "minecraft:translucent"
     }
   },
   "textures": {

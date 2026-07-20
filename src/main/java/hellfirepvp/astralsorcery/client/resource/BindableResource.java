@@ -59,11 +59,10 @@ public class BindableResource extends AbstractRenderableTexture.Full implements 
         if (AssetLibrary.isReloading()) {
             return null;
         }
+        // 1.21 port: TextureManager.getTexture(id) auto-registers a SimpleTexture for the id when
+        // absent, so it can't be used to probe for an existing texture — register unconditionally
+        // with the real asset path (register() replaces and closes any previous texture).
         TextureManager mgr = Minecraft.getInstance().getTextureManager();
-        AbstractTexture resource = mgr.getTexture(this.getKey());
-        if (resource != null) {
-            return resource;
-        }
         mgr.register(this.getKey(), new SimpleTexture(ResourceLocation.parse(this.getPath())));
         return mgr.getTexture(this.getKey());
     }
