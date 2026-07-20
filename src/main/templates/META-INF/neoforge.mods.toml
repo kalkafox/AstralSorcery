@@ -46,3 +46,10 @@ type="optional"
 versionRange="[9,)"
 ordering="AFTER"
 side="BOTH"
+
+[[dependencies.astralsorcery]]
+modId="ponder"
+type="optional"
+versionRange="[1,)"
+ordering="AFTER"
+side="CLIENT"

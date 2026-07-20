@@ -36,6 +36,7 @@ import hellfirepvp.astralsorcery.common.enchantment.amulet.AmuletRandomizeHelper
 import hellfirepvp.astralsorcery.common.enchantment.amulet.PlayerAmuletHandler;
 import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentHelper;
 import hellfirepvp.astralsorcery.common.event.PlayerAffectionFlags;
+import hellfirepvp.astralsorcery.common.integration.IntegrationCurios;
 import hellfirepvp.astralsorcery.common.event.handler.*;
 import hellfirepvp.astralsorcery.common.event.helper.*;
 import hellfirepvp.astralsorcery.common.item.armor.ArmorMaterialImbuedLeather;
@@ -467,8 +468,7 @@ public class CommonProxy {
     }
 
     private void onEnqueueIMC(InterModEnqueueEvent event) {
-        // 1.21 port: Curios integration is excluded from the build for now.
-        //Mods.CURIOS.executeIfPresent(() -> IntegrationCurios::initIMC);
+        Mods.CURIOS.executeIfPresent(() -> IntegrationCurios::initIMC);
     }
 
     // Generic events

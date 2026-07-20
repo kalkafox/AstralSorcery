@@ -34,12 +34,11 @@ tasks.named('sourcesJar') {
 }
 
 sourceSets.main.java {
-    // 1.21 port: remaining optional-mod integrations (CraftTweaker, Curios, Botania) are
-    // excluded until their 1.21 APIs are brought back. JEI is integrated again.
+    // 1.21 port: remaining optional-mod integrations (CraftTweaker, Botania) are
+    // excluded until their 1.21 APIs are brought back. JEI and Curios are integrated again.
     exclude 'hellfirepvp/astralsorcery/common/integration/crt/**'
     exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationBotania.java'
     exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationCraftTweaker.java'
-    exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationCurios.java'
 }
 
 repositories {
@@ -57,6 +56,10 @@ repositories {
     maven {
         name = 'JEI'
         url = 'https://maven.blamejared.com/'
+    }
+    maven {
+        name = 'CreateMod'
+        url = 'https://maven.createmod.net'
     }
     exclusiveContent {
         forRepository {
@@ -140,8 +143,15 @@ dependencies {
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
     localRuntime "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
 
-    // Optional integrations are reintroduced subsystem-by-subsystem during the port.
-    // Keeping their repositories here makes each integration an isolated build change.
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+
+    compileOnly "net.createmod.ponder:ponder-neoforge:${ponder_version}"
+    localRuntime "net.createmod.ponder:ponder-neoforge:${ponder_version}"
+
+    // Remaining optional integrations (CraftTweaker, Botania) are reintroduced
+    // subsystem-by-subsystem during the port. Keeping their repositories here makes
+    // each integration an isolated build change.
 
     // Dev-run-only mods (never ship). MDG loads mods from localRuntime; the per-run
     // additionalRuntimeClasspath treats jars as plain libraries, not mods.

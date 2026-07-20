@@ -110,14 +110,24 @@ Registry-related follow-ups tracked for later milestones:
 
 ## Optional-mod integrations (excluded from the build)
 
-`hellfirepvp/astralsorcery/common/integration/**` (JEI, CraftTweaker,
-Curios, Botania) is excluded from `sourceSets.main` in `build.gradle` until
-the mod itself compiles and their 1.21 APIs are brought back. The call
-sites are stubbed: `CommonProxy` no longer attaches the CraftTweaker/Curios
-hooks, `AmuletEnchantmentHelper.getWornAmulet` returns `null` (amulet
-lookup is Curios-driven), and `ItemUtils`' Botania flower special-casing is
-commented out. Search for "1.21 port:" comments to find the stubs when
-re-enabling.
+`hellfirepvp/astralsorcery/common/integration/**` (JEI, Curios integrated;
+CraftTweaker, Botania still excluded) is trimmed from `sourceSets.main` in
+`build.gradle` until the remaining mods' 1.21 APIs are brought back.
+`ItemUtils`' Botania flower special-casing is commented out. Search for
+"1.21 port:" comments to find the remaining stubs when re-enabling.
+
+Curios is back on `curios_version` (`gradle.properties`, currently
+`9.5.1+1.21.1`, the latest release for MC 1.21.1) via `curios-neoforge`
+compile/runtime deps and the `Curios` maven repo in `build.gradle`.
+`CommonProxy.onEnqueueIMC` sends the slot-type IMC again,
+`AmuletEnchantmentHelper.getWornAmulet` looks up the worn amulet through
+`IntegrationCurios.getCurio`, and `MixinForgeHooks` restores the
+`HasCuriosFortuneBonus` double-run special case (now checked via the
+`CustomData` data component instead of the old `ItemStack#getTag()`). The
+Curios API calls used (`findEquippedCurio`, `getCuriosHandler`,
+`getFortuneBonus`, `SlotTypeMessage`/`SlotTypePreset`) are flagged
+`[removal]`-deprecated in 9.5.1 but still functional; revisit if/when
+Curios drops them.
 
 ## Mechanical API-residue sweep (done)
 

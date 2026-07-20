@@ -33,6 +33,7 @@ public enum Mods {
     DRACONIC_EVOLUTION("draconicevolution"),
     CURIOS("curios"),
     JEI("jei"),
+    PONDER("ponder"),
     BOTANIA("botania"),
     CRAFTTWEAKER("crafttweaker");
 

@@ -223,8 +223,10 @@ public class ScreenHandTelescope extends ConstellationDiscoveryScreen<Constellat
         int width = guiWidth - 12, height = guiHeight - 12;
 
         Minecraft mc = Minecraft.getInstance();
-        double xDiff = mc.mouseHandler.xpos() - (x / ((double) mc.getWindow().getGuiScaledWidth()  / mc.getWindow().getWidth()));
-        double yDiff = mc.mouseHandler.ypos() - (y / ((double) mc.getWindow().getGuiScaledHeight() / mc.getWindow().getHeight()));
+        double scaleX = (double) mc.getWindow().getGuiScaledWidth()  / mc.getWindow().getScreenWidth();
+        double scaleY = (double) mc.getWindow().getGuiScaledHeight() / mc.getWindow().getScreenHeight();
+        double xDiff = -mc.mouseHandler.getXVelocity() * scaleX;
+        double yDiff = -mc.mouseHandler.getYVelocity() * scaleY;
         if (Minecraft.getInstance().player != null &&
                 Minecraft.getInstance().player.getViewXRot(1.0F) <= -89.99F && yDiff > 0) {
             yDiff = 0;

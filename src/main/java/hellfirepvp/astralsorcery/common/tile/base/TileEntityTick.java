@@ -39,6 +39,16 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     private ChangeSubscriber<ChangeObserverStructure> structureMatch;
     private boolean hasMultiblock = false;
 
+    // Ponder-only: the real sky/structure detection below is server-only and thus
+    // unreachable in Ponder's client-only sandboxed scenes (see TileEntityTick#tick's
+    // isClientSide() branch). Storyboards that need a tile to visually behave as
+    // "active" call this instead of relying on a detection pass that can never run there.
+    private boolean forcedActiveForPonder = false;
+
+    public void forceActiveForPonder() {
+        this.forcedActiveForPonder = true;
+    }
+
     protected int tickCount = 0;
 
     protected TileEntityTick(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
@@ -73,6 +83,10 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     }
 
     public boolean doesSeeSky() {
+        if (forcedActiveForPonder) {
+            return true;
+        }
+
         if (getLevel().isClientSide()) {
             return this.doesSeeSky;
         }
@@ -92,6 +106,10 @@ public abstract class TileEntityTick extends TileEntitySynchronized implements T
     }
 
     public boolean hasMultiblock() {
+        if (forcedActiveForPonder) {
+            return true;
+        }
+
         if (getLevel().isClientSide()) {
             return this.hasMultiblock;
         }

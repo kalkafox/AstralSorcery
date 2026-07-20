@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.enchantment.amulet;
 
 import hellfirepvp.astralsorcery.common.enchantment.dynamic.DynamicEnchantmentHelper;
+import hellfirepvp.astralsorcery.common.integration.IntegrationCurios;
 import hellfirepvp.astralsorcery.common.item.ItemEnchantmentAmulet;
 import hellfirepvp.astralsorcery.common.util.item.ItemComparator;
 import hellfirepvp.astralsorcery.common.util.nbt.NBTHelper;
@@ -134,11 +135,9 @@ public class AmuletEnchantmentHelper {
         Player player = getPlayerHavingTool(anyTool);
         if (player == null) return null;
 
-        // 1.21 port: Curios integration is excluded from the build for now.
-        //Optional<ImmutableTriple<String, Integer, ItemStack>> curios =
-        //        IntegrationCurios.getCurio(player, (stack) -> stack.getItem() instanceof ItemEnchantmentAmulet);
-        //return curios.map(trpl -> new Tuple<>(trpl.right, player)).orElse(null);
-        return null;
+        Optional<ImmutableTriple<String, Integer, ItemStack>> curios =
+                IntegrationCurios.getCurio(player, (stack) -> stack.getItem() instanceof ItemEnchantmentAmulet);
+        return curios.map(trpl -> new Tuple<>(trpl.right, player)).orElse(null);
     }
 
     @OnlyIn(Dist.CLIENT)

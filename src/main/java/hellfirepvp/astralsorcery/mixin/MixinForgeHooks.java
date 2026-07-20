@@ -14,9 +14,11 @@ import hellfirepvp.astralsorcery.common.perk.node.key.KeyMagnetDrops;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
 import hellfirepvp.astralsorcery.common.util.loot.LootUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -27,6 +29,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
 import java.util.List;
 
@@ -62,9 +66,18 @@ public class MixinForgeHooks {
             return;
         }
 
-        // 1.21 port: the Curios fortune-bonus double-run special casing was removed here - the
-        // Curios integration is excluded from this build (see PORTING.md); restore the
-        // "HasCuriosFortuneBonus" re-run handling when Curios is wired back in.
+        //Means we're in the 2nd run of loot manipulation, re-run by top.theillusivec4.curios.common.objects.FortuneBonusMultiplier
+        ItemStack tool = context.getParamOrNull(LootContextParams.TOOL);
+        CustomData toolData = tool == null ? null : tool.get(DataComponents.CUSTOM_DATA);
+        if (toolData != null && toolData.getUnsafe().contains("HasCuriosFortuneBonus")) {
+            loot.removeIf(result -> ItemUtils.dropItemToPlayer(player, result).isEmpty());
+        }
+        int curiosFortuneBonus = CuriosApi.getCuriosHelper().getCuriosHandler(player)
+                .map(ICuriosItemHandler::getFortuneBonus)
+                .orElse(0);
+        if (curiosFortuneBonus > 0) {
+            return; //Do not modify loot, loot modification gets re-run by curios later
+        }
         loot.removeIf(result -> ItemUtils.dropItemToPlayer(player, result).isEmpty());
     }
 }

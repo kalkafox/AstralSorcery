@@ -12,6 +12,7 @@ import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
@@ -35,7 +36,7 @@ public class BlockRockCrystalOre extends Block implements CustomItemBlock {
 
     public BlockRockCrystalOre() {
         super(PropertiesMisc.defaultRock()
-
+                .sound(SoundType.DEEPSLATE)
 );
     }
 

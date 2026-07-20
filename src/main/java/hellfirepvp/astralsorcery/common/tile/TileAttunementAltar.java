@@ -80,6 +80,16 @@ public class TileAttunementAltar extends TileEntityTick {
     private IConstellation activeConstellation = null;
     private AttunementRecipe.Active<?> currentRecipe = null;
 
+    // Ponder-only: see TileEntityTick#forceActiveForPonder. Also makes
+    // canPlayConstellationActiveEffects() skip the real night/moon-phase/WorldContext
+    // gating, which is likewise unreachable outside a real world.
+    private boolean forcedActiveConstellationForPonder = false;
+
+    public void forceActiveConstellationForPonder(IConstellation constellation) {
+        this.activeConstellation = constellation;
+        this.forcedActiveConstellationForPonder = true;
+    }
+
     //Client Misc visuals
     private Map<BlockPos, Object> activeStarSprites = new HashMap<>();
 
@@ -324,6 +334,10 @@ public class TileAttunementAltar extends TileEntityTick {
 
     @OnlyIn(Dist.CLIENT)
     public boolean canPlayConstellationActiveEffects() {
+        if (this.forcedActiveConstellationForPonder) {
+            return this.hasMultiblock() && this.doesSeeSky() && this.getActiveConstellation() != null;
+        }
+
         WorldContext ctx = SkyHandler.getContext(getLevel(), LogicalSide.CLIENT);
 
         return ctx != null &&
