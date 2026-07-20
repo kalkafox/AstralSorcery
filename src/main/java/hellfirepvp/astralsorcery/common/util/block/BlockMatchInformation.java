@@ -37,7 +37,7 @@ import net.minecraft.tags.TagKey;
  */
 public class BlockMatchInformation implements Predicate<BlockState> {
 
-    private final ItemStack display;
+    private ItemStack display;
 
     private BlockState matchState;
     private boolean matchExact;
@@ -46,17 +46,15 @@ public class BlockMatchInformation implements Predicate<BlockState> {
     private ResourceLocation matchTagKey;
 
     public BlockMatchInformation(TagKey<Block> matchTag) {
-        this(matchTag, createDisplayStack(matchTag));
+        this(matchTag, ItemStack.EMPTY);
     }
 
+    // An empty display is allowed for tag matches: recipes are parsed before tags are
+    // bound, so the stack is resolved lazily in getDisplayStack().
     public BlockMatchInformation(TagKey<Block> matchTag, ItemStack display) {
         this.matchTag = matchTag;
         this.matchTagKey = matchTag.location();
         this.display = display;
-
-        if (this.display.isEmpty()) {
-            throw new IllegalArgumentException("No display ItemStack passed, and unable to create valid itemstack from block tag " + this.matchTagKey.toString() + "!");
-        }
     }
 
     public BlockMatchInformation(BlockState matchState, boolean matchExact) {
@@ -90,6 +88,9 @@ public class BlockMatchInformation implements Predicate<BlockState> {
 
     @Nonnull
     public ItemStack getDisplayStack() {
+        if (this.display.isEmpty() && this.matchTag != null) {
+            this.display = createDisplayStack(this.matchTag);
+        }
         return this.display.copy();
     }
 
@@ -154,7 +155,7 @@ public class BlockMatchInformation implements Predicate<BlockState> {
     public void serialize(FriendlyByteBuf buf) {
         int type = this.matchState != null ? 0 /*state*/ : 1 /*type*/;
         buf.writeInt(type);
-        ByteBufUtils.writeItemStack(buf, this.display);
+        ByteBufUtils.writeItemStack(buf, this.getDisplayStack());
 
         switch (type) {
             case 0:

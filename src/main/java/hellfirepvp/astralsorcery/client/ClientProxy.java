@@ -26,7 +26,6 @@ import hellfirepvp.astralsorcery.client.screen.journal.ScreenJournalProgression;
 import hellfirepvp.astralsorcery.client.screen.journal.bookmark.BookmarkProvider;
 import hellfirepvp.astralsorcery.client.util.AreaOfInfluencePreview;
 import hellfirepvp.astralsorcery.client.util.ColorizationHelper;
-import hellfirepvp.astralsorcery.client.util.MouseUtil;
 import hellfirepvp.astralsorcery.client.util.RenderingUtils;
 import hellfirepvp.astralsorcery.client.util.camera.CameraEventHelper;
 import hellfirepvp.astralsorcery.client.util.camera.ClientCameraManager;
@@ -37,6 +36,7 @@ import hellfirepvp.astralsorcery.common.GuiType;
 import hellfirepvp.astralsorcery.common.base.patreon.manager.PatreonManagerClient;
 import hellfirepvp.astralsorcery.common.block.tile.BlockStructural;
 import hellfirepvp.astralsorcery.common.data.research.ResearchHelper;
+import hellfirepvp.astralsorcery.common.util.RecipeHelper;
 import hellfirepvp.astralsorcery.common.event.EventFlags;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
 import hellfirepvp.astralsorcery.common.lib.FluidsAS;
@@ -59,7 +59,12 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import hellfirepvp.astralsorcery.client.lib.ShadersAS;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -130,8 +135,21 @@ public class ClientProxy extends CommonProxy {
         modEventBus.addListener(this::onRegisterRenderers);
         modEventBus.addListener(this::onAddLayers);
         modEventBus.addListener(this::onRegisterClientExtensions);
+        modEventBus.addListener(this::onRegisterShaders);
         modEventBus.addListener(RegistryContainerTypes::initClient);
         modEventBus.addListener(RegistryKeyBindings::init);
+    }
+
+    private void onRegisterShaders(RegisterShadersEvent event) {
+        try {
+            event.registerShader(new ShaderInstance(
+                            event.getResourceProvider(),
+                            AstralSorcery.key("effect_tex_color"),
+                            DefaultVertexFormat.POSITION_TEX_COLOR),
+                    shader -> ShadersAS.EFFECT_TEX_COLOR = shader);
+        } catch (java.io.IOException exc) {
+            throw new RuntimeException("Failed to load Astral Sorcery core shaders", exc);
+        }
     }
 
     private void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
@@ -210,11 +228,13 @@ public class ClientProxy extends CommonProxy {
         OverlayRenderer.INSTANCE.attachEventListeners(eventBus);
 
         CameraEventHelper.attachEventListeners(eventBus);
-        MouseUtil.attachEventListeners(eventBus);
         GatewayInteractionHandler.attachEventListeners(eventBus);
 
         eventBus.addListener(EventPriority.LOWEST, SkyRenderEventHandler::onRender);
         eventBus.addListener(EventPriority.LOWEST, SkyRenderEventHandler::onFog);
+
+        eventBus.addListener((RecipesUpdatedEvent event) ->
+                RecipeHelper.rebindDynamicIds(event.getRecipeManager()));
     }
 
     @Override

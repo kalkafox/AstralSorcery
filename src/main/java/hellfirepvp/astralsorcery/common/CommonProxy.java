@@ -60,7 +60,9 @@ import hellfirepvp.astralsorcery.common.starlight.network.StarlightUpdateHandler
 import hellfirepvp.astralsorcery.common.starlight.network.TransmissionChunkTracker;
 import hellfirepvp.astralsorcery.common.tile.TileTreeBeacon;
 import hellfirepvp.astralsorcery.common.util.BlockDropCaptureAssist;
+import hellfirepvp.astralsorcery.common.lib.DamageTypesAS;
 import hellfirepvp.astralsorcery.common.util.DamageSourceUtil;
+import hellfirepvp.astralsorcery.common.util.RecipeHelper;
 import hellfirepvp.astralsorcery.common.util.ServerLifecycleListener;
 import hellfirepvp.astralsorcery.common.util.collision.CollisionManager;
 import hellfirepvp.astralsorcery.common.util.time.TimeStopController;
@@ -76,13 +78,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.core.Registry;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.minecraft.core.registries.Registries;
@@ -116,9 +121,10 @@ public class CommonProxy {
 
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("b0c3097f-8391-4b4b-a89a-553ef730b13a");
 
-    // 1.21 port: bypassArmor/setMagic/bypassMagic were per-instance DamageSource flags in 1.16;
-    // that behavior is now driven by DamageType datapack tags, which DamageSourceUtil.newType's
-    // unregistered Holder can't participate in - see DamageSourceUtil's class javadoc caveat.
+    // Direct-holder placeholders until a server registry is available; rebound to the real
+    // data-driven damage types in onServerStarting. Damage is only ever dealt server-side,
+    // so the placeholders never reach a damage_event packet (whose encoder requires a
+    // registered holder - direct holders have no network id and kick the client).
     public static DamageSource DAMAGE_SOURCE_BLEED   = DamageSourceUtil.newType("astralsorcery.bleed");
     public static DamageSource DAMAGE_SOURCE_STELLAR = DamageSourceUtil.newType("astralsorcery.stellar");
     public static DamageSource DAMAGE_SOURCE_REFLECT = DamageSourceUtil.newType("thorns");
@@ -467,6 +473,10 @@ public class CommonProxy {
 
     private void onRegisterReloadListeners(AddReloadListenerEvent event) {
         event.addListener(PerkTreeLoader.INSTANCE);
+        // Mod reload listeners run after vanilla's (incl. RecipeManager), so the freshly
+        // decoded recipes exist by the time this rebinds their ids to holder ids.
+        event.addListener((ResourceManagerReloadListener) manager ->
+                RecipeHelper.rebindDynamicIds(event.getServerResources().getRecipeManager()));
     }
 
     private void onServerStarted(ServerStartedEvent event) {
@@ -474,7 +484,10 @@ public class CommonProxy {
     }
 
     private void onServerStarting(ServerStartingEvent event) {
-
+        Registry<DamageType> damageTypes = event.getServer().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
+        DAMAGE_SOURCE_BLEED   = new DamageSource(damageTypes.getHolderOrThrow(DamageTypesAS.BLEED));
+        DAMAGE_SOURCE_STELLAR = new DamageSource(damageTypes.getHolderOrThrow(DamageTypesAS.STELLAR));
+        DAMAGE_SOURCE_REFLECT = new DamageSource(damageTypes.getHolderOrThrow(DamageTypesAS.REFLECT));
     }
 
     private void onServerStopping(ServerStoppingEvent event) {

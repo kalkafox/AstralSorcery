@@ -12,6 +12,7 @@ import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
 import hellfirepvp.astralsorcery.common.block.base.LargeBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMarble;
 import hellfirepvp.astralsorcery.common.tile.TileAttunementAltar;
 import net.minecraft.world.level.block.Block;
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 17.11.2019 / 07:43
  */
-public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemBlock, LargeBlock {
+public class BlockAttunementAltar extends BaseEntityBlock implements CustomItemBlock, LargeBlock, TickingEntityBlock {
 
     private static final AABB PLACEMENT_BOX = new AABB(-1, 0, -1, 1, 1, 1);
     private static final VoxelShape ATTUNEMENT_ALTAR = Block.box(-2, 0, -2, 18, 6, 18);

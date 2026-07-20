@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.tile.crystal.CollectorCrystalType;
 import hellfirepvp.astralsorcery.common.constellation.world.DayTimeHelper;
 import hellfirepvp.astralsorcery.common.item.block.ItemBlockGemCrystalCluster;
@@ -52,7 +53,7 @@ import java.util.Locale;
  * Created by HellFirePvP
  * Date: 16.11.2019 / 10:06
  */
-public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomItemBlock {
+public class BlockGemCrystalCluster extends BaseEntityBlock implements CustomItemBlock, TickingEntityBlock {
 
     private static final VoxelShape STAGE_0       = Block.box(4, 0, 4, 12,  6, 12);
     private static final VoxelShape STAGE_1       = Block.box(4, 0, 4, 12,  8, 12);

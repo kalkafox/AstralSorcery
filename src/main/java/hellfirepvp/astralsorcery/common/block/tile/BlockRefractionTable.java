@@ -17,6 +17,7 @@ import hellfirepvp.astralsorcery.client.effect.handler.EffectHelper;
 import hellfirepvp.astralsorcery.client.lib.EffectTemplatesAS;
 import hellfirepvp.astralsorcery.common.GuiType;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.base.LargeBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesWood;
 import hellfirepvp.astralsorcery.common.item.ItemParchment;
@@ -56,7 +57,7 @@ import net.minecraft.util.RandomSource;
  * Created by HellFirePvP
  * Date: 26.04.2020 / 20:17
  */
-public class BlockRefractionTable extends BaseEntityBlock implements CustomItemBlock, LargeBlock {
+public class BlockRefractionTable extends BaseEntityBlock implements CustomItemBlock, LargeBlock, TickingEntityBlock {
 
     private static final VoxelShape REFRACTION_TABLE = Block.box(-6, 0, -4, 22, 24, 20);
     private static final AABB PLACEMENT_BOX = new AABB(-1, 0, -1, 1, 1, 1);

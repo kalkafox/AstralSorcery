@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 30.09.2019 / 18:02
  */
-public abstract class BlockCrystalContainer extends BaseEntityBlock {
+public abstract class BlockCrystalContainer extends BaseEntityBlock implements TickingEntityBlock {
 
     protected BlockCrystalContainer(Properties builder) {
         super(builder);

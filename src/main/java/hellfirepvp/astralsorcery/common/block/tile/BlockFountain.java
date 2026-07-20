@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesWood;
 import hellfirepvp.astralsorcery.common.tile.TileFountain;
 import hellfirepvp.astralsorcery.common.util.VoxelUtils;
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 29.10.2020 / 19:54
  */
-public class BlockFountain extends BaseEntityBlock implements CustomItemBlock {
+public class BlockFountain extends BaseEntityBlock implements CustomItemBlock, TickingEntityBlock {
 
     private final VoxelShape shape;
 

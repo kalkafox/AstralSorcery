@@ -25,6 +25,10 @@ import hellfirepvp.astralsorcery.common.event.helper.EventHelperInvulnerability;
 import hellfirepvp.astralsorcery.common.event.helper.EventHelperSpawnDeny;
 import hellfirepvp.astralsorcery.common.event.helper.EventHelperTemporaryFlight;
 import hellfirepvp.astralsorcery.common.lib.ItemsAS;
+import hellfirepvp.astralsorcery.common.network.PacketChannel;
+import hellfirepvp.astralsorcery.common.network.login.server.PktLoginSyncDataHolder;
+import hellfirepvp.astralsorcery.common.network.login.server.PktLoginSyncGateway;
+import hellfirepvp.astralsorcery.common.network.login.server.PktLoginSyncPerkInformation;
 import hellfirepvp.astralsorcery.common.perk.*;
 import hellfirepvp.astralsorcery.common.perk.source.ModifierManager;
 import hellfirepvp.astralsorcery.common.perk.type.PerkAttributeType;
@@ -125,6 +129,13 @@ public class EventHandlerCache {
                 ResearchManager.setTomeReceived(player);
             }
         }
+
+        // The 1.16 login-phase handshake is gone; its full-sync packets are sent here instead,
+        // before the knowledge sync below, so the client has the perk tree, gateways, and data
+        // holders by the time later packets reference them.
+        PacketChannel.CHANNEL.sendToPlayer(player, PktLoginSyncDataHolder.makeLogin());
+        PacketChannel.CHANNEL.sendToPlayer(player, PktLoginSyncGateway.makeLogin());
+        PacketChannel.CHANNEL.sendToPlayer(player, PktLoginSyncPerkInformation.makeLogin());
 
         ResearchSyncHelper.pushProgressToClientUnsafe(progress, player);
         PerkEffectHelper.onPlayerConnectEvent(player);

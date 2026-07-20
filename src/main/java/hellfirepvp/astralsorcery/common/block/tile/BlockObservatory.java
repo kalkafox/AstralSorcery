@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.base.LargeBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
 import hellfirepvp.astralsorcery.common.container.factory.ContainerObservatoryProvider;
@@ -43,7 +44,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 16.02.2020 / 08:11
  */
-public class BlockObservatory extends BaseEntityBlock implements LargeBlock, CustomItemBlock {
+public class BlockObservatory extends BaseEntityBlock implements LargeBlock, CustomItemBlock, TickingEntityBlock {
 
     private static final AABB PLACEMENT_BOX = new AABB(-1, 0, -1, 1, 3, 1);
 
@@ -73,10 +74,9 @@ public class BlockObservatory extends BaseEntityBlock implements LargeBlock, Cus
             if (observatory != null && observatory.isFlyEnabled() && !player.isShiftKeyDown()) {
                 Entity entity = observatory.findRideableObservatoryEntity();
                 if (entity != null) {
-                    if (player.getVehicle() != entity) {
-                        player.startRiding(entity);
+                    if (player.getVehicle() == entity || player.startRiding(entity)) {
+                        new ContainerObservatoryProvider(observatory).openFor((ServerPlayer) player);
                     }
-                    new ContainerObservatoryProvider(observatory).openFor((ServerPlayer) player);
                 }
             }
         }

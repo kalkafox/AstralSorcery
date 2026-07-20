@@ -450,27 +450,35 @@ public class LightNetworkBuffer extends SectionWorldData<LightNetworkBuffer, Lig
         }
 
         private void removeSourceTile(BlockPos pos) {
-            int yLevel = (pos.getY() & 255) >> 4;
+            // 1.21 port: no 0..255 world-height mask - Y ranges -64..320 now; must match
+            // getSectionData's pos.getY() >> 4 keying or nodes outside 0..255 vanish on lookup.
+            int yLevel = pos.getY() >> 4;
             ChunkSectionNetworkData section = getSection(yLevel);
             if (section == null) return; //Uhm
             section.removeSourceTile(pos);
         }
 
         private void removeTransmissionTile(BlockPos pos) {
-            int yLevel = (pos.getY() & 255) >> 4;
+            // 1.21 port: no 0..255 world-height mask - Y ranges -64..320 now; must match
+            // getSectionData's pos.getY() >> 4 keying or nodes outside 0..255 vanish on lookup.
+            int yLevel = pos.getY() >> 4;
             ChunkSectionNetworkData section = getSection(yLevel);
             if (section == null) return; //Guess we don't remove anything then?
             section.removeTransmissionTile(pos);
         }
 
         private void addSourceTile(BlockPos pos, IStarlightSource<?> source) {
-            int yLevel = (pos.getY() & 255) >> 4;
+            // 1.21 port: no 0..255 world-height mask - Y ranges -64..320 now; must match
+            // getSectionData's pos.getY() >> 4 keying or nodes outside 0..255 vanish on lookup.
+            int yLevel = pos.getY() >> 4;
             ChunkSectionNetworkData section = getOrCreateSection(yLevel);
             section.addSourceTile(pos, source);
         }
 
         private void addTransmissionTile(BlockPos pos, IStarlightTransmission<?> transmission) {
-            int yLevel = (pos.getY() & 255) >> 4;
+            // 1.21 port: no 0..255 world-height mask - Y ranges -64..320 now; must match
+            // getSectionData's pos.getY() >> 4 keying or nodes outside 0..255 vanish on lookup.
+            int yLevel = pos.getY() >> 4;
             ChunkSectionNetworkData section = getOrCreateSection(yLevel);
             section.addTransmissionTile(pos, transmission);
         }

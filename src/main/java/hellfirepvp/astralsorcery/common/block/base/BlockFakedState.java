@@ -52,7 +52,7 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 04.09.2020 / 19:19
  */
-public abstract class BlockFakedState extends BaseEntityBlock {
+public abstract class BlockFakedState extends BaseEntityBlock implements TickingEntityBlock {
 
     protected BlockFakedState(Properties builder) {
         super(builder);

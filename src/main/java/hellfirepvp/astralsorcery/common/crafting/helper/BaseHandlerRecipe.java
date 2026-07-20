@@ -22,11 +22,20 @@ import java.util.Objects;
  */
 public abstract class BaseHandlerRecipe<I extends IItemHandler> implements IHandlerRecipe<I> {
 
-    private final ResourceLocation recipeId;
+    private ResourceLocation recipeId;
     private String group = "";
 
     protected BaseHandlerRecipe(ResourceLocation recipeId) {
         this.recipeId = recipeId;
+    }
+
+    /**
+     * Rebinds the synthesized decode-time id to the RecipeManager holder id once recipes are
+     * loaded/synced (see RecipeHelper#rebindDynamicIds). The holder id is stable across
+     * server/client and across reloads, so ids serialized into tiles or packets resolve again.
+     */
+    public final void bindId(ResourceLocation holderId) {
+        this.recipeId = holderId;
     }
 
     public void group(String group) {
@@ -46,10 +55,10 @@ public abstract class BaseHandlerRecipe<I extends IItemHandler> implements IHand
     /**
      * {@link Recipe#getId()} no longer exists in 1.21 - recipes don't self-report their own id
      * anymore, {@link net.minecraft.world.item.crafting.RecipeManager} attaches it externally via
-     * {@link net.minecraft.world.item.crafting.RecipeHolder} when loading recipe JSON. This id is
-     * kept purely as this object's own internal identity (equals/hashCode, NBT round-tripping of
-     * in-progress crafts) - see {@link hellfirepvp.astralsorcery.common.crafting.helper.CustomRecipeSerializer}
-     * for how it's synthesized for JSON/network-decoded recipes.
+     * {@link net.minecraft.world.item.crafting.RecipeHolder} when loading recipe JSON. Decode
+     * synthesizes a throwaway id ({@link CustomRecipeSerializer#generateDynamicId()}), which is
+     * rebound to the holder id right after recipes load/sync via {@link #bindId(ResourceLocation)},
+     * so this matches the holder id during gameplay.
      */
     public final ResourceLocation getId() {
         return this.recipeId;

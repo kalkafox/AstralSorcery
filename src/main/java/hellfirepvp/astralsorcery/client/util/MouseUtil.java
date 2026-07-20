@@ -8,10 +8,11 @@
 
 package hellfirepvp.astralsorcery.client.util;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
+import net.minecraft.client.MouseHandler;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -22,26 +23,33 @@ import net.neoforged.bus.api.IEventBus;
  */
 public class MouseUtil {
 
-    private static boolean preventGuiChange = false;
-
-    public static void attachEventListeners(IEventBus eventBus) {
-        eventBus.addListener(EventPriority.HIGHEST, MouseUtil::onGuiOpen);
-    }
-
     public static void ungrab() {
         Minecraft.getInstance().mouseHandler.releaseMouse();
     }
 
+    /**
+     * Grab the mouse while keeping the current screen open.
+     *
+     * Vanilla's {@link MouseHandler#grabMouse()} always calls {@code setScreen(null)}. On 1.16 that
+     * screen close could be intercepted by cancelling {@code GuiOpenEvent}; on NeoForge 1.21
+     * {@code ScreenEvent.Opening} no longer fires for {@code setScreen(null)} and
+     * {@code ScreenEvent.Closing} is not cancellable, so the grab is replicated here without the
+     * screen change (fields opened via accesstransformer.cfg).
+     */
     public static void grab() {
-        preventGuiChange = true;
-        Minecraft.getInstance().mouseHandler.grabMouse();
-    }
-
-    private static void onGuiOpen(ScreenEvent.Opening event) {
-        if (preventGuiChange) {
-            preventGuiChange = false;
-            event.setCanceled(true);
+        Minecraft mc = Minecraft.getInstance();
+        MouseHandler mouse = mc.mouseHandler;
+        if (!mc.isWindowActive() || mouse.isMouseGrabbed()) {
+            return;
         }
+        if (!Minecraft.ON_OSX) {
+            KeyMapping.setAll();
+        }
+        mouse.mouseGrabbed = true;
+        mouse.xpos = mc.getWindow().getScreenWidth() / 2.0D;
+        mouse.ypos = mc.getWindow().getScreenHeight() / 2.0D;
+        InputConstants.grabOrReleaseMouse(mc.getWindow().getWindow(), GLFW.GLFW_CURSOR_DISABLED, mouse.xpos, mouse.ypos);
+        mouse.ignoreFirstMove = true;
     }
 
 }

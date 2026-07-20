@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesGlass;
 import hellfirepvp.astralsorcery.common.item.ItemAquamarine;
 import hellfirepvp.astralsorcery.common.lib.BlocksAS;
@@ -65,7 +66,7 @@ import java.util.List;
  * Created by HellFirePvP
  * Date: 10.09.2020 / 16:46
  */
-public class BlockCelestialGateway extends BaseEntityBlock implements CustomItemBlock, BlockStructureObserver {
+public class BlockCelestialGateway extends BaseEntityBlock implements CustomItemBlock, BlockStructureObserver, TickingEntityBlock {
 
     private static final VoxelShape SHAPE = Shapes.create(1D / 16D, 0D / 16D, 1D / 16D, 15D / 16D, 1D / 16D, 15D / 16D);
 

@@ -8,6 +8,7 @@
 
 package hellfirepvp.astralsorcery.common.util;
 
+import hellfirepvp.astralsorcery.common.crafting.helper.BaseHandlerRecipe;
 import hellfirepvp.astralsorcery.common.crafting.recipe.SimpleAltarRecipe;
 import hellfirepvp.astralsorcery.common.lib.RecipeTypesAS;
 import hellfirepvp.astralsorcery.common.util.item.ItemUtils;
@@ -45,6 +46,21 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
  * Date: 11.10.2019 / 22:30
  */
 public class RecipeHelper {
+
+    /**
+     * Rebinds the synthesized decode-time ids of this mod's recipes to their RecipeManager
+     * holder ids. Codecs no longer see the datapack id during decode, so ids serialized into
+     * tiles/packets (active altar crafts, finish effects, known-recipe sets) would otherwise
+     * never resolve on the other side. Runs after every server datapack (re)load and client
+     * recipe sync.
+     */
+    public static void rebindDynamicIds(RecipeManager mgr) {
+        for (RecipeHolder<?> holder : mgr.getRecipes()) {
+            if (holder.value() instanceof BaseHandlerRecipe<?> recipe && !holder.id().equals(recipe.getId())) {
+                recipe.bindId(holder.id());
+            }
+        }
+    }
 
     @Nullable
     public static SimpleAltarRecipe findAltarRecipeResult(Predicate<ItemStack> match) {

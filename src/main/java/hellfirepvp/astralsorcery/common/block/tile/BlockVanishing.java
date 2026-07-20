@@ -9,6 +9,7 @@
 package hellfirepvp.astralsorcery.common.block.tile;
 
 import com.mojang.serialization.MapCodec;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.tile.TileVanishing;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,7 +40,7 @@ import java.util.Random;
  * Created by HellFirePvP
  * Date: 11.03.2020 / 21:15
  */
-public class BlockVanishing extends BaseEntityBlock {
+public class BlockVanishing extends BaseEntityBlock implements TickingEntityBlock {
 
     public BlockVanishing() {
         super(Properties.of().mapColor(MapColor.NONE)

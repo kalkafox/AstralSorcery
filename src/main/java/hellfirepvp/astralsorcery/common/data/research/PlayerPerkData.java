@@ -45,6 +45,7 @@ public class PlayerPerkData {
 
     private Set<ResourceLocation> freePointTokens = new HashSet<>();
     private Map<AbstractPerk, AppliedPerk> perks = new HashMap<>();
+    private List<PendingPerk> pendingSyncPerks = new ArrayList<>();
     private double perkExp = 0;
 
     public Collection<AbstractPerk> getSealedPerks() {
@@ -313,21 +314,14 @@ public class PlayerPerkData {
         });
     }
 
+    // Runs on the network thread; the client's perk tree may not have been applied yet
+    // (it arrives in a separate sync packet handled on the main thread), so perks are
+    // kept unresolved here and looked up in receive().
     public static PlayerPerkData read(FriendlyByteBuf buf, LogicalSide direction) {
         PlayerPerkData data = new PlayerPerkData();
         data.perkExp = buf.readDouble();
         data.freePointTokens = ByteBufUtils.readSet(buf, ByteBufUtils::readResourceLocation);
-        Set<AppliedPerk> appliedPerks = ByteBufUtils.readSet(buf, buffer -> {
-            ResourceLocation key = ByteBufUtils.readResourceLocation(buffer);
-            return PerkTree.PERK_TREE.getPerk(direction, key)
-                    .map(AppliedPerk::new)
-                    .map(perk -> {
-                        perk.read(buffer);
-                        return perk;
-                    })
-                    .orElseThrow(() -> new IllegalArgumentException("Unknown perk: " + key));
-        });
-        appliedPerks.forEach(appliedPerk -> data.perks.put(appliedPerk.getPerk(), appliedPerk));
+        data.pendingSyncPerks = ByteBufUtils.readList(buf, PendingPerk::read);
         return data;
     }
 
@@ -337,7 +331,15 @@ public class PlayerPerkData {
 
         this.perkExp = copyFrom.perkExp;
         this.freePointTokens = copyFrom.freePointTokens;
-        this.perks = copyFrom.perks;
+        this.perks = new HashMap<>();
+        for (PendingPerk pending : copyFrom.pendingSyncPerks) {
+            AppliedPerk applied = pending.resolve(LogicalSide.CLIENT);
+            if (applied != null) {
+                this.perks.put(applied.getPerk(), applied);
+            } else {
+                AstralSorcery.log.warn("Dropping unknown perk during knowledge sync: {}", pending.key);
+            }
+        }
     }
 
     private boolean isLegacyData(CompoundTag tag) {
@@ -599,12 +601,6 @@ public class PlayerPerkData {
             ByteBufUtils.writeCollection(buf, this.applicationTypes, ByteBufUtils::writeEnumValue);
         }
 
-        private void read(FriendlyByteBuf buf) {
-            this.perkData = ByteBufUtils.readNBTTag(buf);
-            this.applicationData = ByteBufUtils.readNBTTag(buf);
-            this.applicationTypes = ByteBufUtils.readSet(buf, buffer -> ByteBufUtils.readEnumValue(buffer, PerkAllocationType.class));
-        }
-
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -616,6 +612,44 @@ public class PlayerPerkData {
         @Override
         public int hashCode() {
             return Objects.hash(perk.getRegistryName());
+        }
+    }
+
+    // A perk read off the network whose AbstractPerk hasn't been looked up yet; mirrors
+    // AppliedPerk.write's wire format.
+    private static final class PendingPerk {
+
+        private final ResourceLocation key;
+        private final CompoundTag perkData;
+        private final CompoundTag applicationData;
+        private final Set<PerkAllocationType> applicationTypes;
+
+        private PendingPerk(ResourceLocation key, CompoundTag perkData, CompoundTag applicationData, Set<PerkAllocationType> applicationTypes) {
+            this.key = key;
+            this.perkData = perkData;
+            this.applicationData = applicationData;
+            this.applicationTypes = applicationTypes;
+        }
+
+        private static PendingPerk read(FriendlyByteBuf buf) {
+            ResourceLocation key = ByteBufUtils.readResourceLocation(buf);
+            CompoundTag perkData = ByteBufUtils.readNBTTag(buf);
+            CompoundTag applicationData = ByteBufUtils.readNBTTag(buf);
+            Set<PerkAllocationType> types = ByteBufUtils.readSet(buf, buffer -> ByteBufUtils.readEnumValue(buffer, PerkAllocationType.class));
+            return new PendingPerk(key, perkData, applicationData, types);
+        }
+
+        @Nullable
+        private AppliedPerk resolve(LogicalSide side) {
+            return PerkTree.PERK_TREE.getPerk(side, this.key)
+                    .map(perk -> {
+                        AppliedPerk applied = new AppliedPerk(perk);
+                        applied.perkData = this.perkData;
+                        applied.applicationData = this.applicationData;
+                        applied.applicationTypes = new HashSet<>(this.applicationTypes);
+                        return applied;
+                    })
+                    .orElse(null);
         }
     }
 }

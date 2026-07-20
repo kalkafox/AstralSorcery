@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesGlass;
 import hellfirepvp.astralsorcery.common.tile.TileRitualLink;
 import net.minecraft.world.level.block.RenderShape;
@@ -32,7 +33,7 @@ import javax.annotation.Nullable;
  * Created by HellFirePvP
  * Date: 10.07.2019 / 21:01
  */
-public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock {
+public class BlockRitualLink extends BaseEntityBlock implements CustomItemBlock, TickingEntityBlock {
 
     private static final VoxelShape RITUAL_LINK = Shapes.create(6D / 16D, 2D / 16D, 6D / 16D, 10D / 16D, 14D / 16D, 10D / 16D);
 

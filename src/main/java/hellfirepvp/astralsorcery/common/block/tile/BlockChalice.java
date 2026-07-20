@@ -11,6 +11,7 @@ package hellfirepvp.astralsorcery.common.block.tile;
 import com.mojang.serialization.MapCodec;
 import hellfirepvp.astralsorcery.common.block.base.UnsupportedBlockCodec;
 import hellfirepvp.astralsorcery.common.block.base.CustomItemBlock;
+import hellfirepvp.astralsorcery.common.block.base.TickingEntityBlock;
 import hellfirepvp.astralsorcery.common.block.properties.PropertiesMisc;
 import hellfirepvp.astralsorcery.common.tile.TileChalice;
 import hellfirepvp.astralsorcery.common.util.MiscUtils;
@@ -48,7 +49,7 @@ import net.neoforged.neoforge.fluids.FluidType;
  * Created by HellFirePvP
  * Date: 09.11.2019 / 19:18
  */
-public class BlockChalice extends BaseEntityBlock implements CustomItemBlock {
+public class BlockChalice extends BaseEntityBlock implements CustomItemBlock, TickingEntityBlock {
 
     private static final VoxelShape CHALICE = Shapes.create(2D / 16D, 0D / 16D, 2D / 16D, 14D / 16D, 14D / 16D, 14D / 16D);
 
