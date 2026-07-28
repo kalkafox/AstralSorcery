@@ -27,35 +27,12 @@ public class CollisionManager {
 
     private static final List<CustomCollisionHandler> customHandlers = new ArrayList<>();
 
-    private static final int maxCache = 20;
-    private static final LinkedList<CollisionSpliterator> accessList = new LinkedList<>();
-    private static final Map<CollisionSpliterator, List<AABB>> instanceFlags = new HashMap<>();
-
     public static void init() {
         register(new MantleEffectAevitas.PlayerWalkableAir());
     }
 
     public static void register(CustomCollisionHandler handler) {
         customHandlers.add(handler);
-    }
-
-    @Nullable
-    public static AABB getIteratorBoundingBoxes(CollisionSpliterator iterator, @Nullable Entity entity) {
-        if (!instanceFlags.containsKey(iterator)) {
-            List<AABB> additionalBoundingBoxes = getAdditionalBoundingBoxes(entity);
-            if (additionalBoundingBoxes.isEmpty()) {
-                return null;
-            }
-            removeOldestEntry();
-            instanceFlags.put(iterator, additionalBoundingBoxes);
-            accessList.addFirst(iterator);
-        }
-        List<AABB> boxes = instanceFlags.get(iterator);
-        if (boxes == null || boxes.isEmpty()) {
-            return null;
-        }
-        markActive(iterator);
-        return boxes.remove(0);
     }
 
     public static boolean needsCustomCollision(@Nullable Entity entity) {
@@ -74,33 +51,5 @@ public class CollisionManager {
                 .filter(handler -> handler.shouldAddCollisionFor(entity))
                 .forEach(handler -> handler.addCollision(entity, entityBox, additionalCollision));
         return additionalCollision;
-    }
-
-    private static void removeOldestEntry() {
-        if (accessList.size() >= maxCache) {
-            CollisionSpliterator oldest;
-            //Apparently the list can be both >= 20 elements in size AND empty at the same time.
-            try {
-                oldest = accessList.removeLast();
-            } catch (NoSuchElementException exc) {
-                if (accessList.isEmpty()) {
-                    return;
-                }
-                try {
-                    oldest = accessList.get(accessList.size() - 1);
-                } catch (Exception e) {
-                    return;
-                }
-            }
-            if (oldest != null) {
-                instanceFlags.remove(oldest);
-            }
-        }
-    }
-
-    private static void markActive(CollisionSpliterator it) {
-        if (accessList.remove(it)) {
-            accessList.addFirst(it);
-        }
     }
 }

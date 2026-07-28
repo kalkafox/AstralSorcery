@@ -12,7 +12,6 @@ import hellfirepvp.astralsorcery.common.util.collision.CollisionHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,14 +30,22 @@ import java.util.List;
 @Mixin(Entity.class)
 public class MixinEntity {
 
-    @Inject(method = "collideBoundingBox", at = @At("RETURN"), cancellable = true)
-    private static void addCustomCollision(Entity entity, Vec3 vec, AABB collisionBox, Level level, List<VoxelShape> potentialHits, CallbackInfoReturnable<Vec3> cir) {
+    // 1.21 port: 1.16 hooked VoxelShapeSpliterator, which no longer exists. Entity#collectColliders is
+    // the single place where the world border, entity collisions and block collisions get merged into
+    // the shape list that both Entity#collide and Entity#collideBoundingBox run the movement math on,
+    // so appending here keeps vanilla collision (walls, step-up) fully intact.
+    @Inject(method = "collectColliders", at = @At("RETURN"), cancellable = true)
+    private static void addCustomCollision(Entity entity, Level level, List<VoxelShape> collisions, AABB boundingBox,
+                                           CallbackInfoReturnable<List<VoxelShape>> cir) {
         if (entity == null) {
             return;
         }
-        Vec3 allowedMovement = CollisionHelper.onEntityCollision(vec, entity);
-        if (allowedMovement != null) {
-            cir.setReturnValue(allowedMovement);
+        List<VoxelShape> additional = CollisionHelper.getCustomCollisionShapes(entity, boundingBox);
+        if (additional.isEmpty()) {
+            return;
         }
+        List<VoxelShape> merged = new java.util.ArrayList<>(cir.getReturnValue());
+        merged.addAll(additional);
+        cir.setReturnValue(merged);
     }
 }

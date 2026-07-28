@@ -130,7 +130,10 @@ public class RenderStateBuilder {
     }
 
     public RenderStateBuilder particleShaderTarget() {
-        this.builder.setOutputState(RenderStateAccess.PARTICLES_TARGET_STATE);
+        // Deliberately a no-op. Effects render into whatever target is bound by
+        // EffectRenderEventHandler: the main target in Fancy/Fast, and in Fabulous the main target
+        // again, after the transparency chain has composited and rebound it. Binding vanilla's
+        // particle target here would put Fabulous draws into a buffer that has already been consumed.
         return this;
     }
 
@@ -149,8 +152,6 @@ public class RenderStateBuilder {
     private static class RenderStateAccess extends RenderStateShard {
 
         private static final EmptyTextureStateShard NO_TEXTURE_STATE = NO_TEXTURE;
-        private static final OutputStateShard PARTICLES_TARGET_STATE = PARTICLES_TARGET;
-
         private RenderStateAccess(String name, Runnable setup, Runnable clear) {
             super(name, setup, clear);
         }

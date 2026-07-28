@@ -34,7 +34,7 @@ public class RenderEntityItemHighlighted extends ItemEntityRenderer {
         if (entity instanceof EntityItemHighlighted && ((EntityItemHighlighted) entity).hasCustomColor()) {
             renderStack.pushPose();
             renderStack.translate(0, 0.35F, 0);
-            RenderingDrawUtils.renderLightRayFan(renderStack, buffer,
+            RenderingDrawUtils.queueLightRayFan(renderStack,
                     ((EntityItemHighlighted) entity).getHighlightColor(), 160420L + entity.getId(),
                     16, 12, 15);
             renderStack.popPose();

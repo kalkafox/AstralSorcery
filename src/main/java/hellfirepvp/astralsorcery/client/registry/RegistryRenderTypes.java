@@ -179,7 +179,8 @@ public class RegistryRenderTypes {
                         .blend(Blending.ADDITIVE_ALPHA)
                         .smoothShade()
                         .disableDepthMask()
-                        .enableDiffuseLighting());
+                        .enableDiffuseLighting()
+                        .particleShaderTarget());
 
         CONSTELLATION_WORLD_STAR = createType("effect_render_cst_star", DefaultVertexFormat.POSITION_TEX_COLOR,
                 RenderStateBuilder.builder()

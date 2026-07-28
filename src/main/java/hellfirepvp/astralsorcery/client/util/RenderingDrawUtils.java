@@ -57,6 +57,7 @@ import com.mojang.math.Axis;
 public class RenderingDrawUtils {
 
     private static final Random random = new Random();
+    private static final List<LightRayFanRender> queuedLightRayFans = new ArrayList<>();
     private static final PoseStack EMPTY = new PoseStack();
 
     public static void renderStringCentered(@Nullable Font fr, PoseStack renderStack, FormattedText text, int x, int y, float scale, int color) {
@@ -325,6 +326,37 @@ public class RenderingDrawUtils {
         });
 
     }
+
+    /**
+     * Queues a world-space ray fan for the late effect pass instead of drawing it now. Block entity
+     * renderers flush long before vanilla draws clouds, so fans drawn inline get painted over by any
+     * cloud in front of them. The pose is captured as-is: block entity renderers and the AFTER_WEATHER
+     * stage share the same space (camera-relative translation, camera rotation still on the
+     * RenderSystem modelview stack), so the matrix stays valid until the flush.
+     * Only for world renderers - screens must keep calling {@link #renderLightRayFan} directly.
+     */
+    public static void queueLightRayFan(PoseStack renderStack, Color color, long seed, int minScale, float scale, int count) {
+        queuedLightRayFans.add(new LightRayFanRender(
+                new Matrix4f(renderStack.last().pose()), color, seed, minScale, scale, count));
+    }
+
+    public static void renderQueuedLightRayFans() {
+        if (queuedLightRayFans.isEmpty()) {
+            return;
+        }
+
+        MultiBufferSource.BufferSource buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        for (LightRayFanRender queued : queuedLightRayFans) {
+            PoseStack renderStack = new PoseStack();
+            renderStack.mulPose(queued.pose());
+            renderLightRayFan(renderStack, buffer, queued.color(), queued.seed(),
+                    queued.minScale(), queued.scale(), queued.count());
+        }
+        buffer.endBatch(RenderTypesAS.EFFECT_LIGHTRAY_FAN);
+        queuedLightRayFans.clear();
+    }
+
+    private record LightRayFanRender(Matrix4f pose, Color color, long seed, int minScale, float scale, int count) {}
 
     public static void renderLightRayFan(PoseStack renderStack, MultiBufferSource buffer, Color color, long seed, int minScale, float scale, int count) {
         random.setSeed(seed);

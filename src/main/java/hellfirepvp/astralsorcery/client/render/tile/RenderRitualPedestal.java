@@ -65,7 +65,7 @@ public class RenderRitualPedestal extends CustomTileEntityRenderer<TileRitualPed
             renderStack.pushPose();
             renderStack.translate(0.5F, 1.2F, 0.5F);
 
-            RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, ritualConstellation.getConstellationColor(), seed, scales, scales, count);
+            RenderingDrawUtils.queueLightRayFan(renderStack, ritualConstellation.getConstellationColor(), seed, scales, scales, count);
 
             renderStack.popPose();
         }

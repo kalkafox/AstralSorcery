@@ -9,16 +9,15 @@
 package hellfirepvp.astralsorcery.common.util.collision;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * This class is part of the Astral Sorcery Mod
@@ -29,35 +28,22 @@ import java.util.function.Consumer;
  */
 public class CollisionHelper {
 
-    public static boolean onCollision(CollisionSpliterator iterator, Consumer<? super VoxelShape> action) {
-        if (!CollisionManager.needsCustomCollision(iterator.entity)) {
-            return false;
-        }
-        AABB box = CollisionManager.getIteratorBoundingBoxes(iterator, iterator.entity);
-        if (box == null) {
-            return false;
-        }
-
-        VoxelShape floor = Shapes.create(box);
-        if (Shapes.joinIsNotEmpty(floor, Shapes.create(iterator.aabb.inflate(1.0E-7D)), BooleanOp.AND)) {
-            action.accept(floor);
-            return true;
-        }
-        return false;
-    }
-
-    @Nullable
-    public static Vec3 onEntityCollision(Vec3 allowedMovement, Entity entity) {
+    /**
+     * Collects the mod-added collision shapes intersecting the given query box, ready to be merged into
+     * the shape list vanilla's movement math runs on.
+     */
+    public static List<VoxelShape> getCustomCollisionShapes(@Nullable Entity entity, AABB queryBox) {
         if (!CollisionManager.needsCustomCollision(entity)) {
-            return null;
+            return Collections.emptyList();
         }
-        List<AABB> additionalBoxes = CollisionManager.getAdditionalBoundingBoxes(entity);
-        AABB entityBox = entity.getBoundingBox().inflate(1.0E-7D);
-        for (AABB box : additionalBoxes) {
-            double newYMovement = Shapes.create(box).collide(Direction.Axis.Y, entityBox, allowedMovement.y);
-            allowedMovement = new Vec3(allowedMovement.x, newYMovement, allowedMovement.z);
+        VoxelShape query = Shapes.create(queryBox.inflate(1.0E-7D));
+        List<VoxelShape> shapes = new ArrayList<>();
+        for (AABB box : CollisionManager.getAdditionalBoundingBoxes(entity)) {
+            VoxelShape shape = Shapes.create(box);
+            if (Shapes.joinIsNotEmpty(shape, query, BooleanOp.AND)) {
+                shapes.add(shape);
+            }
         }
-
-        return allowedMovement;
+        return shapes;
     }
 }

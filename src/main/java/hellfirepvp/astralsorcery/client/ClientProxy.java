@@ -16,6 +16,7 @@ import hellfirepvp.astralsorcery.client.event.*;
 import hellfirepvp.astralsorcery.client.event.effect.EffectRenderEventHandler;
 import hellfirepvp.astralsorcery.client.event.effect.LightbeamRenderHelper;
 import hellfirepvp.astralsorcery.client.integration.ponder.AstralSorceryPonderPlugin;
+import hellfirepvp.astralsorcery.client.integration.jei.ConstellationPaperPreview;
 import hellfirepvp.astralsorcery.client.registry.RegistryKeyBindings;
 import hellfirepvp.astralsorcery.client.render.entity.layer.StarryLayerRenderer;
 import hellfirepvp.astralsorcery.client.resource.AssetLibrary;
@@ -231,6 +232,12 @@ public class ClientProxy extends CommonProxy {
 
         CameraEventHelper.attachEventListeners(eventBus);
         GatewayInteractionHandler.attachEventListeners(eventBus);
+
+        if (Mods.EMI.isPresent()) {
+            hellfirepvp.astralsorcery.client.integration.emi.ConstellationPaperPreview.attachEventListeners(eventBus);
+        } else {
+            Mods.JEI.executeIfPresent(() -> () -> ConstellationPaperPreview.attachEventListeners(eventBus));
+        }
 
         eventBus.addListener(EventPriority.LOWEST, SkyRenderEventHandler::onRender);
         eventBus.addListener(EventPriority.LOWEST, SkyRenderEventHandler::onFog);

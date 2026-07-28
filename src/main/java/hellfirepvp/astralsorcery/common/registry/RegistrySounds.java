@@ -12,6 +12,7 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.registry.internal.AstralRegistries;
 import hellfirepvp.astralsorcery.common.util.sound.CategorizedSoundEvent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvent;
 
@@ -60,7 +61,10 @@ public class RegistrySounds {
         ILLUMINATION_WAND_LIGHT = registerSound("illumination_wand_light", SoundSource.BLOCKS);
 
         GUI_JOURNAL_CLOSE = registerSound("gui_journal_close", SoundSource.MASTER);
-        GUI_JOURNAL_PAGE = registerSound("gui_journal_page", SoundSource.MASTER);
+        // Keep the mod sound registered for save/network compatibility, but use vanilla's
+        // known-good UI page sound until the legacy OGG event works reliably on 1.21's engine.
+        registerSound("gui_journal_page");
+        GUI_JOURNAL_PAGE = new CategorizedSoundEvent(SoundEvents.BOOK_PAGE_TURN, SoundSource.MASTER);
     }
 
     private static CategorizedSoundEvent registerSound(String jsonName, SoundSource predefinedCategory) {

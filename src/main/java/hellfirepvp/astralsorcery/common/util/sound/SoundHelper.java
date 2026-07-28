@@ -13,7 +13,7 @@ import hellfirepvp.astralsorcery.client.util.sound.FadeSound;
 import hellfirepvp.astralsorcery.client.util.sound.PositionedLoopSound;
 import hellfirepvp.astralsorcery.common.util.data.Vector3;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.core.BlockPos;
@@ -122,10 +122,7 @@ public class SoundHelper {
 
     @OnlyIn(Dist.CLIENT)
     public static void playSoundClient(SoundEvent sound, float volume, float pitch) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null) {
-            player.playSound(sound, volume, pitch);
-        }
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(sound, pitch, volume));
     }
 
     @OnlyIn(Dist.CLIENT)

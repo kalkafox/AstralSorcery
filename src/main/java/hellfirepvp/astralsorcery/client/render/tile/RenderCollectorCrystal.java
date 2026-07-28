@@ -41,14 +41,14 @@ public class RenderCollectorCrystal extends CustomTileEntityRenderer<TileCollect
         renderStack.pushPose();
         renderStack.translate(0.5F, 0.5F, 0.5F);
 
-        RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, color, seed, 24, 24, 12);
+        RenderingDrawUtils.queueLightRayFan(renderStack, color, seed, 24, 24, 12);
 
         seed ^= 0x54FF129A4B11C382L;
         if (tile.isEnhanced() && tile.getAttunedConstellation() != null) {
             color = tile.getAttunedConstellation().getConstellationColor();
         }
 
-        RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, color, seed, 24, 24, 12);
+        RenderingDrawUtils.queueLightRayFan(renderStack, color, seed, 24, 24, 12);
         renderStack.popPose();
     }
 }

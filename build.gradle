@@ -35,7 +35,7 @@ tasks.named('sourcesJar') {
 
 sourceSets.main.java {
     // 1.21 port: remaining optional-mod integrations (CraftTweaker, Botania) are
-    // excluded until their 1.21 APIs are brought back. JEI and Curios are integrated again.
+    // excluded until their 1.21 APIs are brought back. JEI, EMI, and Curios are integrated again.
     exclude 'hellfirepvp/astralsorcery/common/integration/crt/**'
     exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationBotania.java'
     exclude 'hellfirepvp/astralsorcery/common/integration/IntegrationCraftTweaker.java'
@@ -56,6 +56,10 @@ repositories {
     maven {
         name = 'JEI'
         url = 'https://maven.blamejared.com/'
+    }
+    maven {
+        name = 'Sleeping Town'
+        url = 'https://repo.sleeping.town/'
     }
     maven {
         name = 'CreateMod'
@@ -142,6 +146,9 @@ dependencies {
     compileOnly "mezz.jei:jei-1.21.1-common-api:${jei_version}"
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:${jei_version}"
     localRuntime "mezz.jei:jei-1.21.1-neoforge:${jei_version}"
+
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+    localRuntime "dev.emi:emi-neoforge:${emi_version}"
 
     runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"

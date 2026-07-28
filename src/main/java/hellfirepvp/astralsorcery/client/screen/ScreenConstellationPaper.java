@@ -140,4 +140,57 @@ public class ScreenConstellationPaper extends WidthHeightScreen {
             }
         }
     }
+
+    public static void renderPreview(PoseStack renderStack, IConstellation constellation,
+                                     float x, float y, float z, float scale) {
+        Minecraft minecraft = Minecraft.getInstance();
+        renderStack.pushPose();
+        renderStack.translate(x, y, z);
+        renderStack.scale(scale, scale, 1F);
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        TexturesAS.TEX_GUI_CONSTELLATION_PAPER.bindTexture();
+        RenderingGuiUtils.drawRect(renderStack, 0, 0, 0, 275, 344);
+
+        MutableComponent name = constellation.getConstellationName();
+        float nameWidth = minecraft.font.width(name) * 1.8F;
+        renderStack.pushPose();
+        renderStack.translate((275F - nameWidth) / 2F + 2F, 45F, 1F);
+        renderStack.scale(1.8F, 1.8F, 1F);
+        RenderingDrawUtils.renderStringAt(name, renderStack, minecraft.font, 0xAA4D4D4D, false);
+        renderStack.popPose();
+
+        Blending.DEFAULT.apply();
+        RenderingConstellationUtils.renderConstellationIntoGUI(ColorsAS.CONSTELLATION_TYPE_BLANK,
+                constellation, renderStack, 65F, 84F, 1F,
+                145, 145, 2F, () -> 0.5F, true, false);
+        RenderSystem.disableBlend();
+
+        WorldContext context = minecraft.level == null ? null :
+                SkyHandler.getContext(minecraft.level, LogicalSide.CLIENT);
+        List<MoonPhase> activePhases = new ArrayList<>();
+        if (context != null) {
+            for (MoonPhase phase : MoonPhase.values()) {
+                if (context.getConstellationHandler().isActiveInPhase(constellation, phase)) {
+                    activePhases.add(phase);
+                }
+            }
+        }
+        if (activePhases.isEmpty()) {
+            RenderingDrawUtils.renderStringCentered(minecraft.font, renderStack,
+                    Component.translatable("astralsorcery.journal.constellation.unknown"),
+                    163, 239, 1.8F, 0xAA4D4D4D);
+        } else {
+            int phaseX = (275 - activePhases.size() * 18) / 2;
+            for (int i = 0; i < activePhases.size(); i++) {
+                activePhases.get(i).getTexture().bindTexture();
+                RenderSystem.enableBlend();
+                Blending.DEFAULT.apply();
+                RenderingGuiUtils.drawRect(renderStack, phaseX + i * 18, 237, 1F, 16, 16);
+                RenderSystem.disableBlend();
+            }
+        }
+        renderStack.popPose();
+    }
 }

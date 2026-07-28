@@ -53,10 +53,11 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
 
         float startY = -1.2F;
         float endY   = -0.5F;
-        float tickPartY = (endY - startY) / spinStart;
-        float yo = endY + (tile.prevActivationTick * tickPartY);
-        float posY     = endY + (tile.activationTick     * tickPartY);
-        float framePosY = RenderingVectorUtils.interpolate(yo, posY, pTicks);
+        float activationProgress = RenderingVectorUtils.interpolate(
+                tile.prevActivationTick / spinStart,
+                tile.activationTick / spinStart,
+                pTicks);
+        float framePosY = endY + (endY - startY) * easeOutQuart(activationProgress);
 
         double generalAnimationTick = (ClientScheduler.getClientTick() + pTicks) / 4D;
         if (tile.animate) {
@@ -94,5 +95,9 @@ public class RenderAttunementAltar extends CustomTileEntityRenderer<TileAttuneme
             MODEL_ATTUNEMENT_ALTAR.renderHovering(renderStack, renderTypeBuffer.getBuffer(MODEL_ATTUNEMENT_ALTAR.getGeneralType()), combinedLight, combinedOverlay, 1F, 1F, 1F, 1F, xOffset, zDist, rotation);
             renderStack.popPose();
         }
+    }
+
+    private static float easeOutQuart(float x) {
+        return 1F - (float) Math.pow(1F - x, 4);
     }
 }

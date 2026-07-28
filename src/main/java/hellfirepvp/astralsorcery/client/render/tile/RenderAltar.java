@@ -83,16 +83,16 @@ public class RenderAltar extends CustomTileEntityRenderer<TileAltar> {
                         ItemStack traitInput = ingredient.getRandomMatchingStack(ClientScheduler.getClientTick());
                         Color color = ColorizationHelper.getColor(traitInput).orElse(ColorsAS.CELESTIAL_CRYSTAL);
 
-                        RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, color, 0x1231943167156902L | id | (i * 0x5151L), 20, 2F, amount);
+                        RenderingDrawUtils.queueLightRayFan(renderStack, color, 0x1231943167156902L | id | (i * 0x5151L), 20, 2F, amount);
                     }
                 } else {
-                    RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, Color.WHITE, id * 31L, 15, 1.5F, 35);
-                    RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, ColorsAS.CELESTIAL_CRYSTAL, id * 16L, 10, 1F, 25);
+                    RenderingDrawUtils.queueLightRayFan(renderStack, Color.WHITE, id * 31L, 15, 1.5F, 35);
+                    RenderingDrawUtils.queueLightRayFan(renderStack, ColorsAS.CELESTIAL_CRYSTAL, id * 16L, 10, 1F, 25);
                 }
-                RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, Color.WHITE, id * 31L, 10, 1F, 10);
+                RenderingDrawUtils.queueLightRayFan(renderStack, Color.WHITE, id * 31L, 10, 1F, 10);
             } else {
-                RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, Color.WHITE, id * 31L, 15, 1.5F, 35);
-                RenderingDrawUtils.renderLightRayFan(renderStack, renderTypeBuffer, ColorsAS.CELESTIAL_CRYSTAL, id * 16L, 10, 1F, 25);
+                RenderingDrawUtils.queueLightRayFan(renderStack, Color.WHITE, id * 31L, 15, 1.5F, 35);
+                RenderingDrawUtils.queueLightRayFan(renderStack, ColorsAS.CELESTIAL_CRYSTAL, id * 16L, 10, 1F, 25);
             }
 
             renderStack.popPose();
