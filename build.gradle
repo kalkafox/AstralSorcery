@@ -61,10 +61,6 @@ repositories {
         name = 'Sleeping Town'
         url = 'https://repo.sleeping.town/'
     }
-    maven {
-        name = 'CreateMod'
-        url = 'https://maven.createmod.net'
-    }
     exclusiveContent {
         forRepository {
             maven {
@@ -152,9 +148,6 @@ dependencies {
 
     runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
-
-    compileOnly "net.createmod.ponder:ponder-neoforge:${ponder_version}"
-    localRuntime "net.createmod.ponder:ponder-neoforge:${ponder_version}"
 
     // Remaining optional integrations (CraftTweaker, Botania) are reintroduced
     // subsystem-by-subsystem during the port. Keeping their repositories here makes

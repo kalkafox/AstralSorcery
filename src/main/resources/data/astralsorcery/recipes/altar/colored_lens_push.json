@@ -12,13 +12,13 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:dusts/glowstone"
+      "tag": "c:dusts/glowstone"
     },
     "B": {
       "item": "astralsorcery:aquamarine"
     },
     "C": {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     "D": {
       "item": "astralsorcery:glass_lens"

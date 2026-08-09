@@ -15,10 +15,10 @@
       "item": "astralsorcery:marble_runed"
     },
     "B": {
-      "tag": "forge:gems/diamond"
+      "tag": "c:gems/diamond"
     },
     "C": {
-      "tag": "forge:ender_pearls"
+      "tag": "c:ender_pearls"
     },
     "D": {
       "tag": "astralsorcery:stardust"

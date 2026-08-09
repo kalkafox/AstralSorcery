@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:sand"
+    "tag": "c:sands"
   },
   "output": {
     "item": "minecraft:clay",

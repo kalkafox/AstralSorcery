@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:nuggets/gold"
+      "tag": "c:nuggets/gold"
     },
     "B": {
       "item": "astralsorcery:glass_lens"

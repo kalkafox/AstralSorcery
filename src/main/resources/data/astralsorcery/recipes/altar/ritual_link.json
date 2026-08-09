@@ -12,10 +12,10 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:nuggets/gold"
+      "tag": "c:nuggets/gold"
     },
     "B": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "C": {
       "item": "astralsorcery:glass_lens"
@@ -24,7 +24,7 @@
       "item": "astralsorcery:resonating_gem"
     },
     "E": {
-      "tag": "forge:glass_panes"
+      "tag": "c:glass_panes"
     },
     "F": {
       "tag": "astralsorcery:stardust"

@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:crops/wheat"
+      "tag": "c:crops/wheat"
     },
     "B": {
       "tag": "astralsorcery:stardust"
@@ -39,16 +39,16 @@
   "focus_constellation": "astralsorcery:bootes",
   "relay_inputs": [
     {
-      "tag": "forge:crops/wheat"
+      "tag": "c:crops/wheat"
     },
     {
-      "tag": "forge:bones"
+      "tag": "c:bones"
     },
     {
       "item": "minecraft:apple"
     },
     {
-      "tag": "forge:leather"
+      "tag": "c:leathers"
     }
   ],
   "effects": [

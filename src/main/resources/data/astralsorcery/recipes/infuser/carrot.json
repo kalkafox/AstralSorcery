@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:crops/carrot"
+    "tag": "c:crops/carrot"
   },
   "output": {
     "item": "minecraft:golden_carrot",

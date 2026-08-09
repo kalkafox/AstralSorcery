@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:ender_pearls"
+    "tag": "c:ender_pearls"
   },
   "output": {
     "item": "minecraft:ender_eye",

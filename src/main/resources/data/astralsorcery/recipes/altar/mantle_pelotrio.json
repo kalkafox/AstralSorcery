@@ -48,7 +48,7 @@
       "item": "minecraft:apple"
     },
     {
-      "tag": "forge:eggs"
+      "tag": "c:eggs"
     }
   ],
   "effects": [

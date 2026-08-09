@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:nuggets/gold"
+      "tag": "c:nuggets/gold"
     },
     "B": {
       "item": "astralsorcery:marble_runed"
@@ -24,7 +24,7 @@
       "item": "astralsorcery:infused_glass"
     },
     "E": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     }
   },
   "output": [

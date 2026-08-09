@@ -15,13 +15,13 @@
       "tag": "minecraft:planks"
     },
     "B": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:rods/wooden"
     },
     "C": {
       "item": "astralsorcery:glass_lens"
     },
     "D": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     }
   },
   "output": [

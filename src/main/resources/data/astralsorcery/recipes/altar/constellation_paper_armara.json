@@ -12,13 +12,13 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:dyes/black"
+      "tag": "c:dyes/black"
     },
     "B": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     "C": {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     "D": {
       "tag": "astralsorcery:stardust"
@@ -39,16 +39,16 @@
   },
   "relay_inputs": [
     {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     {
-      "tag": "forge:leather"
+      "tag": "c:leathers"
     },
     {
       "item": "minecraft:clay_ball"
     },
     {
-      "tag": "forge:dusts/glowstone"
+      "tag": "c:dusts/glowstone"
     }
   ],
   "effects": [

@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:dyes"
+      "tag": "c:dyes"
     },
     "B": {
       "item": "astralsorcery:infused_wood_column"

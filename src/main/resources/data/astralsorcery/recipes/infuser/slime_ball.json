@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:slimeballs"
+    "tag": "c:slimeballs"
   },
   "output": {
     "item": "minecraft:magma_cream",

@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:cobblestone"
+      "tag": "c:cobblestones"
     },
     "B": {
       "tag": "astralsorcery:stardust"
@@ -39,13 +39,13 @@
   "focus_constellation": "astralsorcery:evorsio",
   "relay_inputs": [
     {
-      "tag": "forge:cobblestone"
+      "tag": "c:cobblestones"
     },
     {
       "item": "minecraft:flint"
     },
     {
-      "tag": "forge:gunpowder"
+      "tag": "c:gunpowders"
     },
     {
       "item": "minecraft:tnt"

@@ -15,7 +15,7 @@
       "tag": "minecraft:logs"
     },
     "B": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:rods/wooden"
     },
     "C": {
       "item": "astralsorcery:aquamarine"

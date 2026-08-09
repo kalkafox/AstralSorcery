@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:ores/emerald"
+    "tag": "c:ores/emerald"
   },
   "output": {
     "item": "minecraft:emerald",

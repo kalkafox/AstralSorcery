@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:dusts/glowstone"
+      "tag": "c:dusts/glowstone"
     },
     "B": {
       "tag": "astralsorcery:stardust"
@@ -39,13 +39,13 @@
   "focus_constellation": "astralsorcery:lucerna",
   "relay_inputs": [
     {
-      "tag": "forge:dusts/glowstone"
+      "tag": "c:dusts/glowstone"
     },
     {
       "item": "minecraft:torch"
     },
     {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     {
       "tag": "minecraft:coals"

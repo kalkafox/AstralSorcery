@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "B": {
       "item": "astralsorcery:black_marble_raw"

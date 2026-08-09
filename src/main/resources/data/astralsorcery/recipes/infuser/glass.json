@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:glass"
+    "tag": "c:glass_blocks"
   },
   "output": {
     "item": "minecraft:ice",

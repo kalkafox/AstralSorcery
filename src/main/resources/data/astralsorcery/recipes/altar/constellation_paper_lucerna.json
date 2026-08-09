@@ -12,13 +12,13 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:dyes/black"
+      "tag": "c:dyes/black"
     },
     "B": {
-      "tag": "forge:dusts/glowstone"
+      "tag": "c:dusts/glowstone"
     },
     "C": {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     "D": {
       "tag": "astralsorcery:stardust"
@@ -39,13 +39,13 @@
   },
   "relay_inputs": [
     {
-      "tag": "forge:dusts/glowstone"
+      "tag": "c:dusts/glowstone"
     },
     {
       "item": "minecraft:torch"
     },
     {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     {
       "tag": "minecraft:coals"

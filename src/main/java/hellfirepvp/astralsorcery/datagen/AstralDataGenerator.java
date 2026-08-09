@@ -12,8 +12,6 @@ import hellfirepvp.astralsorcery.AstralSorcery;
 import hellfirepvp.astralsorcery.common.registry.RegistryEnchantments;
 import hellfirepvp.astralsorcery.common.registry.RegistryWorldGeneration;
 import hellfirepvp.astralsorcery.datagen.assets.AstralBlockStateMappingProvider;
-import hellfirepvp.astralsorcery.datagen.assets.PonderAttunementAltarStructureProvider;
-import hellfirepvp.astralsorcery.datagen.assets.PonderAttuningStructureProvider;
 import hellfirepvp.astralsorcery.datagen.data.advancements.AstralAdvancementProvider;
 import hellfirepvp.astralsorcery.datagen.data.loot.AstralLootTableProvider;
 import hellfirepvp.astralsorcery.datagen.data.perks.AstralPerkTreeProvider;
@@ -83,7 +81,5 @@ public class AstralDataGenerator {
         gen.addProvider(event.includeServer(), new AstralPerkTreeProvider(output));
 
         gen.addProvider(event.includeClient(), new AstralBlockStateMappingProvider(output, fileHelper));
-        gen.addProvider(event.includeClient(), new PonderAttunementAltarStructureProvider(output));
-        gen.addProvider(event.includeClient(), new PonderAttuningStructureProvider(output));
     }
 }

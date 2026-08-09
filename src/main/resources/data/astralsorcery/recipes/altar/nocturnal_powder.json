@@ -12,10 +12,10 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:dyes/blue"
+      "tag": "c:dyes/blue"
     },
     "B": {
-      "tag": "forge:dyes/black"
+      "tag": "c:dyes/black"
     },
     "C": {
       "tag": "minecraft:coals"

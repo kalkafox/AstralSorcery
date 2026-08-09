@@ -15,10 +15,10 @@
       "item": "astralsorcery:resonating_gem"
     },
     "B": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "C": {
-      "tag": "forge:glass_panes"
+      "tag": "c:glass_panes"
     },
     "D": {
       "tag": "astralsorcery:stardust"

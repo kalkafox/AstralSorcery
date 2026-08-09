@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     "B": {
       "tag": "astralsorcery:stardust"
@@ -33,7 +33,7 @@
   "focus_constellation": "astralsorcery:vicio",
   "relay_inputs": [
     {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     {
       "item": "astralsorcery:illumination_powder"
@@ -42,7 +42,7 @@
       "tag": "astralsorcery:stardust"
     },
     {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     {
       "item": "astralsorcery:illumination_powder"

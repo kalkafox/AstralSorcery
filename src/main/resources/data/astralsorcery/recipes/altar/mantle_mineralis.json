@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:ores/iron"
+      "tag": "c:ores/iron"
     },
     "B": {
       "tag": "astralsorcery:stardust"
@@ -39,16 +39,16 @@
   "focus_constellation": "astralsorcery:mineralis",
   "relay_inputs": [
     {
-      "tag": "forge:ores/iron"
+      "tag": "c:ores/iron"
     },
     {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     }
   ],
   "effects": [

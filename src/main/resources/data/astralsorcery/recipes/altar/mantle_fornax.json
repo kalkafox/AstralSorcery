@@ -42,13 +42,13 @@
       "item": "minecraft:coal"
     },
     {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     {
-      "tag": "forge:gunpowder"
+      "tag": "c:gunpowders"
     }
   ],
   "effects": [

@@ -18,10 +18,10 @@
       "item": "astralsorcery:aquamarine"
     },
     "C": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     "D": {
-      "tag": "forge:gems/diamond"
+      "tag": "c:gems/diamond"
     },
     "E": {
       "item": "astralsorcery:glass_lens"

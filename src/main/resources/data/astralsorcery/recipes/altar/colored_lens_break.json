@@ -18,10 +18,10 @@
       "item": "minecraft:iron_pickaxe"
     },
     "C": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "D": {
-      "tag": "forge:gems/diamond"
+      "tag": "c:gems/diamond"
     },
     "E": {
       "item": "astralsorcery:glass_lens"

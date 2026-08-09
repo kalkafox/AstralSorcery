@@ -7,19 +7,6 @@
 
   "astralsorcery.command.argument.constellation.notfound": "Constellation not found.",
 
-  "astralsorcery.ponder.altar_attunement.header": "Building the Attunement Altar",
-  "astralsorcery.ponder.altar_attunement.text_0": "A 15x15 platform of Black Marble anchors the altar",
-  "astralsorcery.ponder.altar_attunement.text_1": "Marble Arch frames the platform on all four sides",
-  "astralsorcery.ponder.altar_attunement.text_2": "Loose Arch pieces wrap each corner",
-  "astralsorcery.ponder.altar_attunement.text_3": "Four Marble Pillars rise from Runed bases, capped with Chiseled Marble",
-  "astralsorcery.ponder.altar_attunement.text_4": "The Attunement Altar itself sits at the center",
-
-  "astralsorcery.ponder.altar_attunement_attuning.header": "Attuning the Altar",
-  "astralsorcery.ponder.altar_attunement_attuning.text_0": "Once built, the Attunement Altar can be attuned to a constellation",
-  "astralsorcery.ponder.altar_attunement_attuning.text_1": "Spectral Relays placed around it mark out a constellation's star pattern - here, Octans",
-  "astralsorcery.ponder.altar_attunement_attuning.text_2": "This relay layout matches Octans' star pattern exactly",
-  "astralsorcery.ponder.altar_attunement_attuning.text_3": "Recognizing Octans, the Attunement Altar activates and begins attuning",
-
   "death.attack.astralsorcery.stellar": "%1$s disintegrated into dust",
   "death.attack.astralsorcery.bleed": "%1$s bled to death",
 

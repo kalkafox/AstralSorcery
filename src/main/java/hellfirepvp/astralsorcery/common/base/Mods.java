@@ -28,13 +28,13 @@ import java.util.function.Supplier;
 public enum Mods {
 
     MINECRAFT("minecraft", true),
-    FORGE("neoforge", true),
+    NEOFORGE("neoforge", true),
+    COMMON("c", true),
     ASTRAL_SORCERY(AstralSorcery.MODID, true),
     DRACONIC_EVOLUTION("draconicevolution"),
     CURIOS("curios"),
     JEI("jei"),
     EMI("emi"),
-    PONDER("ponder"),
     BOTANIA("botania"),
     CRAFTTWEAKER("crafttweaker");
 

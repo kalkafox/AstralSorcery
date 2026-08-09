@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:dusts/redstone"
+    "tag": "c:dusts/redstone"
   },
   "output": {
     "item": "minecraft:gunpowder",

@@ -42,13 +42,13 @@
       "item": "minecraft:flint"
     },
     {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     },
     {
       "tag": "minecraft:arrows"
     },
     {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     }
   ],
   "effects": [

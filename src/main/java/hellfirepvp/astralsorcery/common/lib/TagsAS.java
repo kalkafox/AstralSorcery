@@ -48,7 +48,7 @@ public class TagsAS {
     }
 
     private static TagKey<Block> blockTagForge(String name) {
-        return blockTag(Mods.FORGE, name);
+        return blockTag(Mods.COMMON, name);
     }
 
     private static TagKey<Block> blockTag(Mods mod, String name) {
@@ -56,7 +56,7 @@ public class TagsAS {
     }
 
     private static TagKey<Item> itemTagForge(String name) {
-        return itemTag(Mods.FORGE, name);
+        return itemTag(Mods.COMMON, name);
     }
 
     private static TagKey<Item> itemTag(Mods mod, String name) {

@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:rods/blaze"
+    "tag": "c:rods/blaze"
   },
   "output": {
     "item": "minecraft:blaze_powder",

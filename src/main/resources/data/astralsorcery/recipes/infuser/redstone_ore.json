@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:ores/redstone"
+    "tag": "c:ores/redstone"
   },
   "output": {
     "item": "minecraft:redstone_block",

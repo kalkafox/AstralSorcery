@@ -12,13 +12,13 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:rods/wooden"
     },
     "B": {
       "item": "astralsorcery:hand_telescope"
     },
     "C": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "D": {
       "tag": "minecraft:planks"

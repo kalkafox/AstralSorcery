@@ -2,7 +2,7 @@
   "type": "astralsorcery:infuser",
   "fluidInput": "astralsorcery:liquid_starlight",
   "input": {
-    "tag": "forge:ores/lapis"
+    "tag": "c:ores/lapis"
   },
   "output": {
     "item": "minecraft:lapis_block",

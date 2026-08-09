@@ -12,7 +12,7 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:rods/wooden"
     },
     "B": {
       "type": "astralsorcery:crystal",

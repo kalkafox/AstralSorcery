@@ -45,7 +45,7 @@
       "item": "minecraft:fishing_rod"
     },
     {
-      "tag": "forge:dyes/blue"
+      "tag": "c:dyes/blue"
     },
     {
       "item": "minecraft:clay_ball"

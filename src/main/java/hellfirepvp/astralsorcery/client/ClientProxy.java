@@ -15,7 +15,6 @@ import hellfirepvp.astralsorcery.client.effect.handler.EffectUpdater;
 import hellfirepvp.astralsorcery.client.event.*;
 import hellfirepvp.astralsorcery.client.event.effect.EffectRenderEventHandler;
 import hellfirepvp.astralsorcery.client.event.effect.LightbeamRenderHelper;
-import hellfirepvp.astralsorcery.client.integration.ponder.AstralSorceryPonderPlugin;
 import hellfirepvp.astralsorcery.client.integration.jei.ConstellationPaperPreview;
 import hellfirepvp.astralsorcery.client.registry.RegistryKeyBindings;
 import hellfirepvp.astralsorcery.client.render.entity.layer.StarryLayerRenderer;
@@ -229,6 +228,7 @@ public class ClientProxy extends CommonProxy {
         PerkExperienceRenderer.INSTANCE.attachEventListeners(eventBus);
         ItemHeldEffectRenderer.INSTANCE.attachEventListeners(eventBus);
         OverlayRenderer.INSTANCE.attachEventListeners(eventBus);
+        TooltipSparkleRenderer.INSTANCE.attachEventListeners(eventBus);
 
         CameraEventHelper.attachEventListeners(eventBus);
         GatewayInteractionHandler.attachEventListeners(eventBus);
@@ -290,8 +290,6 @@ public class ClientProxy extends CommonProxy {
         RegistryBlockRenderTypes.initBlocks();
         RegistryBlockRenderTypes.initFluids();
         RegistryItems.registerItemProperties();
-
-        Mods.PONDER.executeIfPresent(() -> AstralSorceryPonderPlugin::register);
     }
 
     private void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

@@ -18,10 +18,10 @@
       "tag": "astralsorcery:stardust"
     },
     "C": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "D": {
-      "tag": "forge:string"
+      "tag": "c:strings"
     },
     "E": {
       "item": "astralsorcery:shifting_star"

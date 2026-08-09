@@ -12,13 +12,13 @@
   ],
   "key": {
     "A": {
-      "tag": "forge:dyes/black"
+      "tag": "c:dyes/black"
     },
     "B": {
-      "tag": "forge:crops/wheat"
+      "tag": "c:crops/wheat"
     },
     "C": {
-      "tag": "forge:feathers"
+      "tag": "c:feathers"
     },
     "D": {
       "tag": "astralsorcery:stardust"
@@ -39,16 +39,16 @@
   },
   "relay_inputs": [
     {
-      "tag": "forge:crops/wheat"
+      "tag": "c:crops/wheat"
     },
     {
-      "tag": "forge:bones"
+      "tag": "c:bones"
     },
     {
       "item": "minecraft:apple"
     },
     {
-      "tag": "forge:leather"
+      "tag": "c:leathers"
     }
   ],
   "effects": [

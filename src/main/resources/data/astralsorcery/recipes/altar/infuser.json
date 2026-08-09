@@ -21,7 +21,7 @@
       "tag": "astralsorcery:starmetal"
     },
     "D": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "E": {
       "type": "astralsorcery:fluid",

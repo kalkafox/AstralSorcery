@@ -2,7 +2,7 @@
   "type": "astralsorcery:block_transmutation",
   "input": [
     {
-      "tag": "forge:ores/iron"
+      "tag": "c:ores/iron"
     }
   ],
   "output": {
